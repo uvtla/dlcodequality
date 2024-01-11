@@ -1,0 +1,221 @@
+Function 1:
+<normalizeLevel>
+function normalizeLevel(level) {
+  if (level.value <= Logger.Level.ALL.value) {          
+    return Logger.Level.ALL;
+
+  } else if (level.value === Logger.Level.OFF.value) {  
+    return Logger.Level.OFF;
+
+  } else if (level.value < Logger.Level.INFO.value) {
+    return Logger.Level.DEBUG;
+
+  } else if (level.value < Logger.Level.WARNING.value) {
+    return Logger.Level.INFO;
+
+  } else if (level.value < Logger.Level.SEVERE.value) {
+    return Logger.Level.WARNING;
+
+  } else {
+    return Logger.Level.SEVERE;
+  }
+}
+</normalizeLevel>
+
+Function 2:
+<handlePackageResponse>
+function(err, pkg) {
+  if (!err) {
+    <constructPurl>
+    var purl = undefined;
+    if (pkg.scope) {
+      purl = "pkg." + pkg.format + "." + pkg.scope + "." + pkg.name + "@" + pkg.version;
+    } else {
+      purl = "pkg." + pkg.format + "." + pkg.name + "@" + pkg.version;
+    }
+    </constructPurl>
+    <cachePackage>
+    myCache.putSync(purl, pkg);
+    </cachePackage>
+  }
+  <executeCallback>
+  callback(err, pkg);
+  </executeCallback>
+}
+</handlePackageResponse>
+
+Function 3:
+<getWiringCollection>
+function get_wiring_collection(req, res, next) {
+  <retrieveCollection>
+	app.db.collection('wirings', function(error, wiring_collection) {
+		if(error) { throw error; }
+		else {
+			req.wiring_collection = wiring_collection;
+			next();
+		}
+	});
+  </retrieveCollection>
+}
+</getWiringCollection>
+
+Function 4:
+<configureChartTitle>
+function() {
+  var chartOpts = this.chart.options;
+  if (chartOpts && chartOpts.title) {
+    this.options = helpers.configMerge(Chart.defaults.global.title, chartOpts.title);
+  }
+}
+</configureChartTitle>
+
+Function 5:
+<createClause>
+function createClause (options = {}, idField = null) {
+  
+  let clause = `type, properties as properties`
+  <processDateFields>
+  let dateFields = options.dateFields.join(',')
+  </processDateFields>
+  <toggleObjectIdRequirement>
+  let requiresObjectId = !!options.returnIdsOnly || !(options.fields instanceof Array && !options.fields.includes('OBJECTID'))
+  </toggleObjectIdRequirement>
+
+  <buildClause>
+  if (options.fields) {
+    let fields = (options.fields instanceof Array) ? options.fields.join(',') : options.fields.replace(/,\s+/g, ',')
+    clause = (options.toEsri) ? `pickAndEsriFy(properties, geometry, "${fields}", "${dateFields}", "${requiresObjectId}", "${options.idField}") as attributes` : `pick(properties, "${fields}") as properties`
+  } else if (options.toEsri) {
+    clause = `esriFy(properties, geometry, "${dateFields}", "${requiresObjectId}", "${options.idField}") as attributes`
+  }
+  </buildClause>
+  return clause
+}
+</createClause>
+
+Function 6:
+<urlToRoutesFilePath>
+function urlToRoutesFilePath (state, endpoint) {
+  <extractScopeAndFilePath>
+  const [, scope] = endpoint.documentationUrl.match(/\/v3\/([^/#]+)((\/[^/#]+)*)/)
+  return joinPath(
+    __dirname,
+    '..',
+    'routes',
+    state.folderName,
+    kebabCase(scope),
+    `${endpoint.idName}.json`
+  )
+  </extractScopeAndFilePath>
+}
+</urlToRoutesFilePath>
+
+Function 7 (entirely marked as a single responsibility since it is primarily doing an arithmetic operation comprising multiple steps):
+<safeAdd_64_5>
+function safeAdd_64_5(a, b, c, d, e) {
+  var lsw, msw, lowOrder, highOrder;
+
+  lsw = (a.lowOrder & 0xFFFF) + (b.lowOrder & 0xFFFF) +
+    (c.lowOrder & 0xFFFF) + (d.lowOrder & 0xFFFF) +
+    (e.lowOrder & 0xFFFF);
+  msw = (a.lowOrder >>> 16) + (b.lowOrder >>> 16) +
+    (c.lowOrder >>> 16) + (d.lowOrder >>> 16) + (e.lowOrder >>> 16) +
+    (lsw >>> 16);
+  lowOrder = ((msw & 0xFFFF) << 16) | (lsw & 0xFFFF);
+
+  lsw = (a.highOrder & 0xFFFF) + (b.highOrder & 0xFFFF) +
+    (c.highOrder & 0xFFFF) + (d.highOrder & 0xFFFF) +
+    (e.highOrder & 0xFFFF) + (msw >>> 16);
+  msw = (a.highOrder >>> 16) + (b.highOrder >>> 16) +
+    (c.highOrder >>> 16) + (d.highOrder >>> 16) +
+    (e.highOrder >>> 16) + (lsw >>> 16);
+  highOrder = ((msw & 0xFFFF) << 16) | (lsw & 0xFFFF);
+
+  return new Int_64(highOrder, lowOrder);
+}
+</safeAdd_64_5>
+
+Function 8:
+<updateClosableProperty>
+function() {
+  var isClosable,
+    len,
+    i;
+
+  <checkHeaderClosability>
+  isClosable = this.header._isClosable();
+  </checkHeaderClosability>
+
+  <iterateContentItems>
+  for( i = 0, len = this.contentItems.length; i < len; i++ ) {
+    if( !isClosable ) {
+      break;
+    }
+    isClosable = this.contentItems[ i ].config.isClosable;
+  }
+  </iterateContentItems>
+
+  <setClosable>
+  this.header._$setClosable( isClosable );
+  </setClosable>
+}
+</updateClosableProperty>
+
+Function 9:
+<manageNodeVisibility>
+function(node, canvas, callback) {
+  <determineVisibilityLevel>
+  var level = this.getRightLevelToShow(node, canvas), 
+  </determineVisibilityLevel>
+  <initializeOptions>
+  fx = this.viz.labels,
+  opt = $.merge({
+    execShow:true,
+    execHide:true,
+    onHide: $.empty,
+    onShow: $.empty
+  }, callback || {});
+  </initializeOptions>
+
+  <updateNodeState>
+  node.eachLevel(0, this.config.levelsToShow, function(n) {
+      var d = n._depth - node._depth;
+      if(d > level) {
+          opt.onHide(n);
+          if(opt.execHide) {
+            n.drawn = false; 
+            n.exist = false;
+            fx.hideLabel(n, false);
+          }
+      } else {
+          opt.onShow(n);
+          if(opt.execShow) {
+            n.exist = true;
+          }
+      }
+  });
+  </updateNodeState>
+  node.drawn= true;
+}
+</manageNodeVisibility>
+
+Function 10:
+<emitEvent>
+function emit (route) {
+  <matchRoute>
+  var matched = match(route);
+  </matchRoute>
+
+  <prepareArguments>
+  var args = new Array(arguments.length);
+  args[0] = matched.params;
+  for (var i = 1; i < args.length; i++) {
+    args[i] = arguments[i];
+  }
+  </prepareArguments>
+
+  <invokeCallback>
+  return matched.cb.apply(matched.cb, args);
+  </invokeCallback>
+}
+</emitEvent>

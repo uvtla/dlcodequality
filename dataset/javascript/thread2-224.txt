@@ -1,0 +1,269 @@
+```javascript
+function (realm, providerFactory, config) {
+    var provider = $injector.invoke(providerFactory);
+    provider.setConfig(config);
+    provider.setRealm(realm);
+    authProviders.push(provider);
+}
+```
+This function seems to be SRP compliant. Its single responsibility is to create an authentication provider, configure it, and add it to an array of providers.
+
+```javascript
+<createAndInvokeTasks>
+function dflowFun () {
+    var gotReturn = false
+    var returnValue
+    var outs = {}
+
+    funcs['this'] = function () { return dflowFun }
+    funcs['this.graph'] = function () { return graph }
+    injectArguments(funcs, task, arguments)
+
+    function run (taskKey) {
+      var args = inputArgs(outs, pipe, taskKey)
+      var taskName = task[taskKey]
+      var f = funcs[taskName]
+
+      if (gotReturn) return
+
+      if ((taskName === 'return') && (!gotReturn)) {
+        returnValue = args[0]
+        gotReturn = true
+        return
+      }
+
+      if (no(f)) {
+        var taskNotFound = new Error('Task not found: ' + taskName + ' [' + taskKey + '] ')
+        taskNotFound.taskKey = taskKey
+        taskNotFound.taskName = taskName
+      }
+
+      try {
+        outs[taskKey] = f.apply(null, args)
+      } catch (err) {
+        err.taskName = taskName
+        err.taskKey = taskKey
+
+        throw err
+      }
+    }
+
+    Object.keys(task)
+      .filter(comments)
+      .sort(byLevel)
+      .forEach(run)
+
+    return returnValue
+  }
+</createAndInvokeTasks>
+```
+This function is non-compliant as it manages the execution flow, setting up tasks, handling return values, and executing tasks, which could be considered multiple responsibilities. The individual blocks of code have been tagged accordingly.
+
+```javascript
+function addMethod(name, method) {
+    if (method !== undefined) {
+        methods[name] = method;
+    }
+    return methods[name];
+}
+```
+The function is SRP compliant. It adds a method to a collection of methods or retrieves it if already exists.
+
+```javascript
+function(callee, input) {
+    for (var i = 0, len = this._queue.length; i < len; ++i)
+        input = this._queue[i].call(callee, input);
+    return input;
+}
+```
+This function is SRP compliant. It processes an input through a queue of functions.
+
+```javascript
+<configureDragData>
+function( obj ){
+
+    var data = $.data( this, drag.datakey ),
+        
+        opts = obj.data || {};
+
+    data.related += 1;
+    
+    $.each( drag.defaults, function( key, def ){
+        if ( opts[ key ] !== undefined )
+            data[ key ] = opts[ key ];
+    });
+}
+</configureDragData>
+```
+The function above is non-compliant because it adjusts the reference count (`data.related += 1;`) of related items and configures data based on defaults and options, which could be separated into two responsibilities.
+
+```javascript
+<downloadAndUpdateChunk>
+function hotDownloadUpdateChunk(chunkId) {
+    var head = document.getElementsByTagName("head")[0];
+    var script = document.createElement("script");
+    script.charset = "utf-8";
+    script.src = __webpack_require__.p + "static/webpack/" + chunkId + "." + hotCurrentHash + ".hot-update.js";
+    head.appendChild(script);
+}
+</downloadAndUpdateChunk>
+```
+This function is SRP compliant. It deals with downloading and appending a script element for updating a chunk.
+
+```javascript
+<runCliCommand>
+function run(fis, argv, env) {
+
+    loadProjectConfig(fis, argv, env);
+
+    init(fis, argv, env);
+
+    var cli = this;
+    if (fis.media().get('options.color') === false) {
+        cli.colors.mode = 'none';
+    }
+
+    var location = env.modulePath
+        ? path.dirname(env.modulePath)
+        : path.join(__dirname, '../');
+    fis.log.info('Currently running %s (%s)', cli.name, location);
+    if (!argv._.length) {
+        return cli[argv.v || argv.version ? 'version' : 'help']();
+    }
+
+    var cmdName = argv._[0];
+    var commander = cli.commander = require('commander');
+    var cmd = null;
+    try {
+        cmd = fis.require('command', cmdName);
+    }
+    catch (ex) {
+        fis.log.warn(ex.toString());
+        fis.log.info('unknown command, please use `tfux --help` to show all available commands');
+        return;
+    }
+
+    if (!cmd.register) {
+        cmd.run(argv, cli, env);
+        return;
+    }
+
+    var argvRaw = process.argv;
+
+    var p = argvRaw.indexOf('--no-color');
+    ~p && argvRaw.splice(p, 1);
+
+    p = argvRaw.indexOf('--media');
+    ~p && argvRaw.splice(p, argvRaw[p + 1][0] === '-' ? 1 : 2);
+
+    cmd.register(
+        commander
+            .command(cmd.name)
+            .usage(cmd.usage)
+            .description(cmd.desc)
+    );
+    commander.parse(argvRaw);
+}
+</runCliCommand>
+```
+The function is non-compliant due to several distinct responsibilities like loading project config, initialization, CLI color management, and CLI command execution. It could benefit from separation into smaller functions that handle each task.
+
+```javascript
+<setValueAndTriggerEvent>
+function(key, value) {
+    var string_value = (typeof value == 'string') ? value : JSON.stringify(value);
+    key = key.toString();
+    this.storage.set(key, string_value);
+    if (key != this.meta_key) {
+        this._addKey(key);
+        this.$element.trigger('set-' + this.name, {key: key, value: value});
+        this.$element.trigger('set-' + this.name + '-' + key, {key: key, value: value});
+    }
+    
+    return value;
+}
+</setValueAndTriggerEvent>
+```
+This function is non-compliant as it sets a value in storage, manages the key array, and triggers events all in one function, summarizing multiple responsibilities.
+
+```javascript
+<forEachElement>
+function(arg, callback) {
+    if (!arg || typeof arg !== 'object') return;
+
+    if (arg instanceof Array) {
+        arg.forEach(callback);
+    } else {
+        for (var k in arg) {
+            callback(arg[k], k);
+        }
+    }
+}
+</forEachElement>
+```
+The function is SRP compliant. It iterates over an array or object elements and executes a callback for each element.
+
+```javascript
+<createArcPath>
+function (from, to, options) {
+    var center = this.center,
+        startAngleRad = this.startAngleRad,
+        fullRadius = center[2] / 2,
+        radii = [
+            pick(options.outerRadius, '100%'),
+            options.innerRadius,
+            pick(options.thickness, 10)
+        ],
+        percentRegex = /%$/,
+        start,
+        end,
+        open,
+        isCircular = this.isCircular, 
+        ret;
+
+    if (this.options.gridLineInterpolation === 'polygon') {
+        ret = this.getPlotLinePath(from).concat(this.getPlotLinePath(to, true));
+    } else {
+        from = Math.max(from, this.min);
+        to = Math.min(to, this.max);
+
+        if (!isCircular) {
+            radii[0] = this.translate(from);
+            radii[1] = this.translate(to);
+        }
+
+        radii = map(radii, function (radius) {
+            if (percentRegex.test(radius)) {
+                radius = (pInt(radius, 10) * fullRadius) / 100;
+            }
+            return radius;
+        });
+
+        if (options.shape === 'circle' || !isCircular) {
+            start = -Math.PI / 2;
+            end = Math.PI * 1.5;
+            open = true;
+        } else {
+            start = startAngleRad + this.translate(from);
+            end = startAngleRad + this.translate(to);
+        }
+
+        ret = this.chart.renderer.symbols.arc(
+            this.left + center[0],
+            this.top + center[1],
+            radii[0],
+            radii[0],
+            {
+                start: Math.min(start, end), 
+                end: Math.max(start, end),
+                innerR: pick(radii[1], radii[0] - radii[2]),
+                open: open
+            }
+        );
+    }
+
+    return ret;
+}
+</createArcPath>
+```
+This function appears to be SRP compliant. It generates an arc path based on provided coordinates and options.

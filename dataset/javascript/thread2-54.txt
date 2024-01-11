@@ -1,0 +1,168 @@
+```javascript
+<dateLastPaymentWasReceived>
+function dateLastPaymentWasReceived(loan, cb) {
+    var d = Q.defer();
+    var last;
+    if (!loan) {
+      d.reject('required parameters for dateLastPaymentWasReceived not provided');
+    }
+
+    <filterTransactions>
+    var paymentTxs = loan.transactions.filter(function (tx) {
+      return tx.type !== 'Late Fee';
+    });
+    </filterTransactions>
+
+    <findLastTransaction>
+    last = _.max(paymentTxs, function (rec) {
+      return rec.txDate;
+    });
+    </findLastTransaction>
+
+    <setDateLastPayment>
+    loan.dateLastPaymentWasReceived = last.txDate || loan.closingDate;
+    d.resolve(loan);
+    </setDateLastPayment>
+
+    if (cb) return cb(loan);
+    return d.promise;
+}
+</dateLastPaymentWasReceived>
+
+<createSequencialCommandExecutor>
+function createSequencialCommandExecutor (commands, workingDir, envVars, watchMode, host) {
+    const source = Observable.from([{
+        cwd: workingDir,
+        env: envVars,
+        exitCode: 0
+    }]);
+
+    return commands.reduce((prev, command) =>
+        createCommandExecutor(command, prev, watchMode, host), source);
+}
+</createSequencialCommandExecutor>
+
+<unload>
+function unload() {
+        _reset();
+        Inspector.Page.off(".ScriptAgent");
+        DOMAgent.off(".ScriptAgent");
+        Inspector.Debugger.off(".ScriptAgent");
+        Inspector.DOM.off(".ScriptAgent");
+    }
+</unload>
+
+<toggleElements>
+function toggleElements() {
+        
+        var args = Array.prototype.slice.call(arguments);
+        args.forEach(function(buttonId) {
+            var buttonEl = document.getElementById(buttonId);
+            <toggleDisplayStyle>
+            if (buttonEl) {
+                var curDisplayStyle = buttonEl.style.display;
+                buttonEl.style.display = curDisplayStyle === 'none' ? 'block' : 'none';
+            }
+            </toggleDisplayStyle>
+        });
+    }
+</toggleElements>
+
+<setHeaderAttributes>
+function ( that ) {
+        that = that || this;
+        <canClose>
+        var can = that.contentItems.length - that._isDocked() > 1;
+        </canClose>
+        <setAttributes>
+        for (var i = 0; i < that.contentItems.length; ++i )
+            if ( that.contentItems[ i ] instanceof lm.items.Stack ) {
+                that.contentItems[ i ].header._setDockable( that._isDocked( i ) || can );
+                that.contentItems[ i ].header._$setClosable( can );
+            }
+        </setAttributes>
+    }
+</setHeaderAttributes>
+
+<calculateScale>
+function () {
+        var scale = null;
+        <getScaleFromResolution>
+        if (this.baseLayer != null) {
+            var res = this.getResolution();
+            var units = this.baseLayer.units;
+            scale = OpenLayers.Util.getScaleFromResolution(res, units);
+        }
+        </getScaleFromResolution>
+        return scale;
+    }
+</calculateScale>
+
+<parseBoolean>
+function boolean(value) {
+  <jsonParseAndTypeCheck>
+  var parsedBoolean = json(value);
+  if (typeOf(parsedBoolean) == 'number' && [0, 1].indexOf(parsedBoolean) > -1) {
+    parsedBoolean = parsedBoolean === 0 ? false : true;
+  }
+  if (typeOf(parsedBoolean) != 'boolean') {
+    return throwModifierError('boolean', value, {message: 'Invalid Boolean'});
+  }
+  </jsonParseAndTypeCheck>
+
+  return parsedBoolean;
+}
+</parseBoolean>
+
+<cleanup>
+function cleanup(a) {
+      <filterAttributes>
+      return _.filter(a, function (a) {
+        var field = a[0];
+        return attr[field];
+      });
+      </filterAttributes>
+    }
+</cleanup>
+
+<createArrayWithProperties>
+function create(length) {
+  var array = new Array(length);
+
+  <defineProperties>
+  Object.defineProperties(array, {
+    inUse: {
+      enumerable: false,
+      writable: true,
+      value: false
+    },
+    originalLength: {
+      enumerable: false,
+      value: length
+    }
+  });
+  </defineProperties>
+
+  <addToPool>
+  if (!pool[length]) pool[length] = [];
+  pool[length].push(array);
+  </addToPool>
+
+  return array;
+}
+</createArrayWithProperties>
+
+<matchesQuery>
+function(i, element){
+      <iterateAndMatch>
+      for(var j = 0; j < self.length; j++){
+        var query = self[j];
+        if( queryMatches(query, element) ){
+          return true;
+        }
+      }
+      </iterateAndMatch>
+      return false;
+    }
+</matchesQuery>
+```

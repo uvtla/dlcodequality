@@ -1,0 +1,320 @@
+```javascript
+<activateNav>
+function activateNav(pos){
+  var offset = 100,
+  current, next, parent, isSub, hasSub;
+  win.unbind('hashchange', hashchange);
+  for(var i=sectionscount;i>0;i--){
+    if(sections[i-1].pos <= pos+offset){
+      navanchors.removeClass('current');
+      current = navanchors.eq(i-1);
+      current.addClass('current');
+
+      parent = current.parent().parent();
+      next = current.next();
+
+      hasSub = next.is('ul');
+      isSub = !parent.is('#documenter_nav');
+
+      nav.find('ol:visible').not(parent).slideUp('fast');
+      if(isSub){
+        parent.prev().addClass('current');
+        parent.stop().slideDown('fast');
+      }else if(hasSub){
+        next.stop().slideDown('fast');
+      }
+      win.bind('hashchange', hashchange);
+      break;
+    };
+  } 
+}
+</activateNav>
+
+<modifyTextBuffer>
+function(text, start, end) {
+  if (text === undefined) { text = ""; }
+  if (start === undefined) { start = 0; }
+  if (end === undefined) { end = this.getCharCount(); }
+  if (start === end && text === "") { return; }
+  var startLine = this.getLineAtOffset(start);
+  var endLine = this.getLineAtOffset(end);
+  var eventStart = start;
+  var removedCharCount = end - start;
+  var removedLineCount = endLine - startLine;
+  var addedCharCount = text.length;
+  var addedLineCount = 0;
+  var lineCount = this.getLineCount();
+  
+  var cr = 0, lf = 0, index = 0;
+  var newLineOffsets = [];
+  while (true) {
+    if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); } 
+    if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); } 
+    if (lf === -1 && cr === -1) { break; }
+    if (cr !== -1 && lf !== -1) {
+      if (cr + 1 === lf) {
+        index = lf + 1;
+      } else {
+        index = (cr < lf ? cr : lf) + 1;
+      }
+    } else if (cr !== -1) {
+      index = cr + 1;
+    } else {
+      index = lf + 1;
+    }
+    newLineOffsets.push(start + index);
+    addedLineCount++;
+  }
+
+  var modelChangingEvent = {
+    type: "Changing", 
+    text: text,
+    start: eventStart,
+    removedCharCount: removedCharCount,
+    addedCharCount: addedCharCount,
+    removedLineCount: removedLineCount,
+    addedLineCount: addedLineCount
+  };
+  this.onChanging(modelChangingEvent);
+  
+  var changedText = text;
+  
+  var SPLICE_LIMIT = 50000;
+  var limit = SPLICE_LIMIT, args;
+  if (newLineOffsets.length < limit) {
+    args = [startLine + 1, removedLineCount].concat(newLineOffsets);
+    Array.prototype.splice.apply(this._lineOffsets, args);
+  } else {
+    index = startLine + 1;
+    this._lineOffsets.splice(index, removedLineCount);
+    for (var k = 0; k < newLineOffsets.length; k += limit) {
+      args = [index, 0].concat(newLineOffsets.slice(k, Math.min(newLineOffsets.length, k + limit)));
+      Array.prototype.splice.apply(this._lineOffsets, args);
+      index += limit;
+    }
+  }
+
+  var offset = 0, chunk = 0, length;
+  while (chunk<this._text.length) {
+    length = this._text[chunk].length; 
+    if (start <= offset + length) { break; }
+    offset += length;
+    chunk++;
+  }
+  var firstOffset = offset;
+  var firstChunk = chunk;
+  while (chunk<this._text.length) {
+    length = this._text[chunk].length; 
+    if (end <= offset + length) { break; }
+    offset += length;
+    chunk++;
+  }
+  var lastOffset = offset;
+  var lastChunk = chunk;
+  var firstText = this._text[firstChunk];
+  var lastText = this._text[lastChunk];
+  var beforeText = firstText.substring(0, start - firstOffset);
+  var afterText = lastText.substring(end - lastOffset);
+  var params = [firstChunk, lastChunk - firstChunk + 1];
+  if (beforeText) { params.push(beforeText); }
+  if (text) { params.push(text); }
+  if (afterText) { params.push(afterText); }
+  Array.prototype.splice.apply(this._text, params);
+  if (this._text.length === 0) { this._text = [""]; }
+  
+  var modelChangedEvent = {
+    type: "Changed", 
+    start: eventStart,
+    text: changedText,
+    removedCharCount: removedCharCount,
+    addedCharCount: addedCharCount,
+    removedLineCount: removedLineCount,
+    addedLineCount: addedLineCount
+  };
+  this.onChanged(modelChangedEvent);
+}
+</modifyTextBuffer>
+
+<removeSeriesPoint>
+function (redraw, animation) {
+  var point = this,
+    series = point.series,
+    chart = series.chart,
+    data = series.data;
+
+  setAnimation(animation, chart);
+  redraw = pick(redraw, true);
+
+  
+  point.firePointEvent('remove', null, function () {
+
+    erase(data, point);
+
+    point.destroy();
+
+    
+    series.isDirty = true;
+    if (redraw) {
+      chart.redraw();
+    }
+  });
+}
+</removeSeriesPoint>
+
+<collapseFormattedProperties>
+function collapseFormattedProperties (stateObject, formatManifests) {
+  Tweenable.each(formatManifests, function (prop) {
+    var currentProp = stateObject[prop];
+    var formatChunks = extractPropertyChunks(
+      stateObject, formatManifests[prop].chunkNames);
+    var valuesList = getValuesList(
+      formatChunks, formatManifests[prop].chunkNames);
+    currentProp = getFormattedValues(
+      formatManifests[prop].formatString, valuesList);
+    stateObject[prop] = sanitizeRGBChunks(currentProp);
+  });
+}
+</collapseFormattedProperties>
+
+<filterTransform>
+function filterTransform (args, math, scope) {
+  let x, callback
+
+  if (args[0]) {
+    x = args[0].compile().evaluate(scope)
+  }
+
+  if (args[1]) {
+    if (isSymbolNode(args[1]) || isFunctionAssignmentNode(args[1])) {
+      
+      callback = args[1].compile().evaluate(scope)
+    } else {
+      
+      callback = compileInlineExpression(args[1], math, scope)
+    }
+  }
+
+  return filter(x, callback)
+}
+</filterTransform>
+
+<loadFontNative>
+function loadFontNative (fontFace, callback) {
+  var theFontFace;
+  
+  if (_loadedFonts[fontFace.id]) {
+    return callback(null);
+  }
+  
+  if (_failedFonts[fontFace.id]) {
+    return callback(_failedFonts[fontFace.id]);
+  }
+  
+  if (!fontFace.url) {
+    return callback(null);
+  }
+  
+  if (_pendingFonts[fontFace.id]) {
+    _pendingFonts[fontFace.id].callbacks.push(callback);
+    return;
+  }
+  _pendingFonts[fontFace.id] = {
+    startTime: Date.now(),
+    callbacks: [callback]
+  };
+  
+  theFontFace = new window.FontFace(fontFace.family,
+    'url(' + fontFace.url + ')', fontFace.attributes);
+
+  theFontFace.load().then(function () {
+    _loadedFonts[fontFace.id] = true;
+    callback(null);
+  }, function (err) {
+    _failedFonts[fontFace.id] = err;
+    callback(err);
+  });
+}
+</loadFontNative>
+
+<viewManagerInstantiateView>
+function(className, viewArgs) {
+  var self = this,
+      view = this.views[className],
+      dfd = $.Deferred();
+
+  if (view) {
+    view.undelegateEvents();
+  }
+
+  this.loader.load(className)
+      .then(function(Constructor) {
+        viewArgs.manager = self;
+        view = new Constructor(viewArgs);
+        self.views[className] = view;
+        dfd.resolve(view);
+      });
+
+  return dfd.promise();
+}
+</viewManagerInstantiateView>
+
+<composeMatchers>
+function compose(patterns, options, matcher) {
+  let matchers;
+
+  return memoize('compose', String(patterns), options, function() {
+    return function(file) {
+      
+      if (!matchers) {
+        matchers = [];
+        for (var i = 0; i < patterns.length; i++) {
+          matchers.push(matcher(patterns[i], options));
+        }
+      }
+
+      let len = matchers.length;
+      while (len--) {
+        if (matchers[len](file) === true) {
+          return true;
+        }
+      }
+      return false;
+    };
+  });
+}
+</composeMatchers>
+
+<configSet>
+function set( keypath, value, options ) {
+  
+  var opts = {};
+  if ( arguments.length > 2 ) {
+    if ( !isObject( options ) ) {
+      throw new TypeError( 'invalid input argument. Options argument must be an object. Value: `' + options + '`.' );
+    }
+    if ( options.hasOwnProperty( 'sep' ) ) {
+      opts.sep = options.sep;
+    }
+    if ( options.hasOwnProperty( 'create' ) ) {
+      opts.create = options.create;
+    }
+  }
+  if ( opts.sep === void 0 ) {
+    opts.sep = this._opts.sep;
+  }
+  if ( opts.create === void 0 ) {
+    opts.create = this._opts.create;
+  }
+  return deepSet( this._db, keypath, value, opts );
+}
+</configSet>
+
+<recurseBookmarks>
+function recurse_bookmarks(data, tree, path) {
+  if(tree.url) data.push({Name: tree.title, Location: tree.url, Path:path});
+  var T = path ? (path + "::" + tree.title) : tree.title;
+  (tree.children||[]).forEach(function(C) { recurse_bookmarks(data, C, T); });
+}
+</recurseBookmarks>
+```
+All of the functions above comply with the SRP, handling a single responsibility each. No further segmentation with nested tags is necessary.

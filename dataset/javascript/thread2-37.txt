@@ -1,0 +1,264 @@
+```jsx
+<_isValidCoreURI>
+function _isValidCoreURI(coreURI) {
+  <validateCoreURI>
+  if (_isEmpty(coreURI) || !_isString(coreURI)) return false
+
+  try {
+    return isURL(coreURI, {
+      protocols: ['https'],
+      require_protocol: true,
+      host_whitelist: [/^[a-z]\.chainpoint\.org$/]
+    })
+  } catch (error) {
+    return false
+  }
+  </validateCoreURI>
+}
+</_isValidCoreURI>
+
+<noMarkdown>
+function noMarkdown(value, config) {
+  <processConfig>
+  var allow
+
+  if (Array.isArray(config)) {
+    allow = config
+  } else if (config) {
+    allow = config.allow
+  }
+  </processConfig>
+  
+  <applyNoMarkdown>
+  return core(value, makeText(config).use(filter, {allow: allow}))
+  </applyNoMarkdown>
+}
+</noMarkdown>
+
+<calculateContentHeight>
+function calculateContentHeight(jqElement) {
+  <measureElementHeight>
+   jqElement.css('visibility', 'hidden');
+   jqElement.css('overflow', 'visible');
+   jqElement.css('height', 'auto');
+   const height = jqElement.outerHeight(true);
+   jqElement.css('height', '0px');
+   jqElement.css('overflow', '');
+   jqElement.css('visibility', '');
+
+   return height;
+   </measureElementHeight>
+}
+</calculateContentHeight>
+
+<loadModels>
+function loadModels(mongoose, modelPath) {
+  <checkMongooseInstance>
+    if (mongoose === undefined) {
+        throw new Error('expect a mongoose handle to be passed');
+    }
+  </checkMongooseInstance>
+
+  <loadModelHandle>
+    return getMongoHandle(mongoose).then((modelHandle) => {
+        debuglog(`got a mongo handle for ${modelPath}`);
+        return _loadModelsFull(modelHandle, modelPath);
+    });
+  </loadModelHandle>
+}
+</loadModels>
+
+<createMatch>
+function createMatch(m, data) {
+  <ensureNonZeroLengthMatch>
+        if (!m[0]) {
+          throw 'findAndReplaceDOMText cannot handle zero-length matches';
+        }
+  </ensureNonZeroLengthMatch>
+
+  <createMatchObject>
+        return {
+          start: m.index,
+          end: m.index + m[0].length,
+          text: m[0],
+          data: data
+        };
+  </createMatchObject>
+}
+</createMatch>
+
+<persistPnode>
+function persistPnode(pnode, validated) {
+  <checkAndPersistNode>
+        if (pnode.exists) return pnode
+        if (!validated && !validPath(pnode.path)) throw error('INVALIDPATH', 'invalid path: ' + pnode.path)
+        Object.defineProperty(pnode, 'path', {enumerable:true, configurable: false, writable: false, value:pnode.path})
+        data[pnode.path] = pnode
+  </checkAndPersistNode>
+
+  <updateNodeTree>
+        if (pnode.parent) {
+            persistPnode(pnode.parent, true)
+            addChild(pnode.parent, pnode)
+        }
+  </updateNodeTree>
+
+  <incrementTrackers>
+        incTransaction()
+        incPnodeVersion(pnode)
+  </incrementTrackers>
+  
+  <notifyCreation>
+        feed('create', pnode)
+  </notifyCreation>
+
+        return pnode
+}
+</persistPnode>
+
+<clearDOMChildren>
+function() {
+        var child;
+        var root = this.vectorRoot;
+        <removeVectorRootChildren>
+        if (root) {
+            while (child = root.firstChild) {
+                root.removeChild(child);
+            }
+        }
+        </removeVectorRootChildren>
+        
+        <removeTextRootChildren>
+        root = this.textRoot;
+        if (root) {
+            while (child = root.firstChild) {
+                root.removeChild(child);
+            }
+        }
+        </removeTextRootChildren>
+        
+        <clearIndexer>
+        if (this.indexer) {
+            this.indexer.clear();
+        }
+        </clearIndexer>
+}
+</clearDOMChildren>
+
+<_createTagInfo>
+function _createTagInfo(token, tokenType, offset, exclusionList, tagName, attrName, shouldReplace) {
+  <createTagInformation>
+        return {
+            token: token || null,
+            tokenType: tokenType || null,
+            offset: offset || 0,
+            exclusionList: exclusionList || [],
+            tagName: tagName || "",
+            attrName: attrName || "",
+            shouldReplace: shouldReplace || false
+        };
+  </createTagInformation>
+}
+</_createTagInfo>
+
+<jobServerWorkflow>
+function () {
+        const self = this;
+
+        let _restartCount = 0;
+
+        <startListening>
+        self.startListening = (cronTasks) => {
+            var self = this;
+            self.cronTasks = cronTasks;
+            return JobManagementDbConnector.registerNewServer(Shared.getCurrentHostId(), _restartCount++)
+                .then(result => Q(result._id)).then(serverId => self.initializeJob(serverId));
+        };
+        </startListening>
+
+        <initialize>
+        self.initialize = () => {
+            const promises = [];
+            Shared.cronModules(self.cronTasks).forEach(cronModule => {
+                if (cronModule.identity !== self.identity) {
+                    promises.push(cronModule.initializeJob(self.getUniqueServerId()));
+                }
+            });
+
+            return Q.allSettled(promises).then(() => Q());
+        };
+        </initialize>
+
+        <onServerDeletedHandler>
+        self.onServerDeletedHandler = err => {
+            
+            return Q();
+        };
+        </onServerDeletedHandler>
+
+        <cleanServers>
+        const _cleanServers = () => {
+            const initialServerUniqueId = self.getUniqueServerId();
+            return JobManagementDbConnector.doHeartbeat(initialServerUniqueId).catch(err => {
+                Logger.error("Cron heartbeat for server id " + initialServerUniqueId + " failed", err);
+                return JobManagementDbConnector.registerNewServer(Shared.getCurrentHostId(), _restartCount);
+            }).then(newServerInfo => {
+                const newServerUniqueId = newServerInfo._id;
+                if (newServerUniqueId && !newServerUniqueId.equals(initialServerUniqueId)) {
+                    ++_restartCount;
+                    Logger.info("This server was assigned a new unique id " + newServerUniqueId);
+
+                    
+                    self.setUniqueServerId(newServerUniqueId);
+                    Shared.cronModules(self.cronTasks).forEach(cronModule => {
+                        if (cronModule.identity !== self.identity) {
+                            cronModule.setUniqueServerId(newServerUniqueId);
+                        }
+                    });
+                }
+                return Q();
+            }).then(() => {
+                return JobManagementDbConnector.cleanJobsOfDeadServers(_deathInterval).then(deadServersCount => {
+                    if (deadServersCount > 0) {
+                        Logger.info("Killed all jobs on " + deadServersCount + " server(s) without heartbeat");
+                    }
+                    return Q();
+                });
+            });
+        };
+        </cleanServers>
+
+        <updateJobConfigs>
+        const _updateJobConfigs = () => {
+            var promises = [];
+            Shared.cronModules(self.cronTasks).forEach(cronModule => {
+                if (cronModule.identity != self.identity) {
+                    promises.push(cronModule.updateJob());
+                }
+            });
+            
+            promises.push(self.updateJob());
+            return Q.allSettled(promises).then(() => Q());
+        };
+        </updateJobConfigs>
+
+        <worker>
+        self.worker = () => {
+            return Q.allSettled([
+                _cleanServers(),
+                _updateJobConfigs()
+            ]);
+        };
+        </worker>
+}
+</jobServerWorkflow>
+
+<simulateEvent>
+function(event) {
+	<simulateDOMEvent>
+	jQuery.event.simulate(fix, event.target, jQuery.event.fix(event));
+	</simulateDOMEvent>
+}
+</simulateEvent>
+```
+Note: The `simulateEvent` function is so small that it only has a single responsibility which is compliant with the SRP.

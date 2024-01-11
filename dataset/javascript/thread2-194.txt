@@ -1,0 +1,217 @@
+<capture>
+function capture(previousExpr, detection) {
+  var capturing = !!detection[CAPTURING_INDEX];
+
+  if (!capturing)
+    return previousExpr;
+
+  return lazyIntersection(previousExpr, head);
+}
+</capture>
+
+<Doc>
+function Doc(runner, options) {
+  Base.call(this, runner, options);
+
+  var indents = 2;
+
+  function indent() {
+    return Array(indents).join('  ');
+  }
+
+  runner.on(EVENT_SUITE_BEGIN, function(suite) {
+    if (suite.root) {
+      return;
+    }
+    ++indents;
+    console.log('%s<section class="suite">', indent());
+    ++indents;
+    console.log('%s<h1>%s</h1>', indent(), utils.escape(suite.title));
+    console.log('%s<dl>', indent());
+  });
+
+  runner.on(EVENT_SUITE_END, function(suite) {
+    if (suite.root) {
+      return;
+    }
+    console.log('%s</dl>', indent());
+    --indents;
+    console.log('%s</section>', indent());
+    --indents;
+  });
+
+  runner.on(EVENT_TEST_PASS, function(test) {
+    console.log('%s  <dt>%s</dt>', indent(), utils.escape(test.title));
+    var code = utils.escape(utils.clean(test.body));
+    console.log('%s  <dd><pre><code>%s</code></pre></dd>', indent(), code);
+  });
+
+  runner.on(EVENT_TEST_FAIL, function(test, err) {
+    console.log(
+      '%s  <dt class="error">%s</dt>',
+      indent(),
+      utils.escape(test.title)
+    );
+    var code = utils.escape(utils.clean(test.body));
+    console.log(
+      '%s  <dd class="error"><pre><code>%s</code></pre></dd>',
+      indent(),
+      code
+    );
+    console.log('%s  <dd class="error">%s</dd>', indent(), utils.escape(err));
+  });
+}
+</Doc>
+
+<svg2ttf_conversion>
+function () {
+  $.ajax({
+    url: './test/fonteditor.svg',
+    dataType: 'text'
+  }).done(function(data) {
+    var ttfObject = svg2ttfobject(data);
+    var writer = new TTFWriter();
+
+    var ttfBuffer = writer.write(ttfObject);
+    var base64str = ttf2base64(ttfBuffer);
+
+    var saveBtn = $('.saveas');
+    saveBtn.attr('href', base64str);
+    saveBtn.attr('download', 'save.ttf');
+
+    console.log(ttfObject);
+  });
+}
+</svg2ttf_conversion>
+
+<validateAndReturnEmptyObject>
+function(year, month, day) {
+  this._validate(year, month, day, _exports.local.invalidDate || _exports.regionalOptions[''].invalidDate);
+  return {};
+}
+</validateAndReturnEmptyObject>
+
+<gatherSnapWrap>
+function gatherSnapWrap() {
+  var element;
+  var value;
+  for (element = $element; element.length; element = element.parent()) {
+    value = element.attr('md-autocomplete-snap');
+    if (angular.isDefined(value)) break;
+  }
+
+  if (element.length) {
+    return {
+      snap: element[0],
+      wrap: (value.toLowerCase() === 'width') ? element[0] : $element.find('md-autocomplete-wrap')[0]
+    };
+  }
+
+  var wrap = $element.find('md-autocomplete-wrap')[0];
+  return {
+    snap: wrap,
+    wrap: wrap
+  };
+}
+</gatherSnapWrap>
+
+<recoverEthereumPrivateKey>
+function(ethereumAddress, ethereumDataDir, ethereumAccountPassword, cb = null){
+  if(isFunction(cb)){
+    try {
+      keythereum.importFromFile(ethereumAddress, ethereumDataDir, function(keyObject){
+        keythereum.recover(ethereumAccountPassword, keyObject, function(privateKey){
+          return cb(null, privateKey)
+        })
+      })
+    } catch (err){
+      return cb(err)
+    }
+  } else {
+    try {
+      var keyObject = keythereum.importFromFile(ethereumAddress, ethereumDataDir)
+      return keythereum.recover(ethereumAccountPassword, keyObject)
+    } catch (err){
+      return err
+    }
+  }
+}
+</recoverEthereumPrivateKey>
+
+<selectAndExecuteStrategy>
+function(driverOptions, method, methodOptions, cb){
+  getStrategy(driverOptions, (error, strategy) => {
+    utils.checkError(error, 518, cb, () => {
+      if(!methodOptions.technology && driverOptions.technology) {
+        methodOptions.technology = driverOptions.technology;
+      }
+      checkIfSupported({strategy: strategy, function: method }, (error) => {
+        if(error && error.code === 519){
+          strategy.executeDriver(method, methodOptions, cb);
+        }
+        else if(strategy && strategy[method]){
+          strategy[method](methodOptions, cb);
+        }
+        else{
+          return cb({
+            "source": "driver",
+            "error": "error",
+            "code": 500,
+            "msg": errorFile[500]
+          })
+        }
+      });
+    });
+  });
+}
+</selectAndExecuteStrategy>
+
+<getCachedBinary>
+function getCachedBinary() {
+  var i,
+    cachePath,
+    cacheBinary,
+    cachePathCandidates = getCachePathCandidates(),
+    binaryName = getBinaryName();
+
+  for (i = 0; i < cachePathCandidates.length; i++) {
+    cachePath = path.join(cachePathCandidates[i], pkg.name, pkg.version);
+    cacheBinary = path.join(cachePath, binaryName);
+
+    if (fs.existsSync(cacheBinary)) {
+      return cacheBinary;
+    }
+  }
+
+  return '';
+}
+</getCachedBinary>
+
+<repetition>
+function repetition() {
+  var ret = this.seq(this.mightf(repeat), element);
+  if (ret[1]) {
+    return new ast.Repetition(ret[1], ret[2]);
+  }
+  return ret[2];
+}
+</repetition>
+
+<initializeTextareaField>
+function() {
+  
+  this.wrapEl = inputEx.cn('div', {className: 'inputEx-StringField-wrapper'});
+  
+  var attributes = {};
+  attributes.id = this.divEl.id?this.divEl.id+'-field':YAHOO.util.Dom.generateId();
+  attributes.rows = this.options.rows;
+  attributes.cols = this.options.cols;
+  if(this.options.name) attributes.name = this.options.name;
+  if(this.options.readonly) attributes.readonly = 'readonly';
+  
+  this.el = inputEx.cn('textarea', attributes, null, this.options.value);
+  
+  this.wrapEl.appendChild(this.el);
+  this.fieldContainer.appendChild(this.wrapEl);
+}
+</initializeTextareaField>

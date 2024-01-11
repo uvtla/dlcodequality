@@ -1,0 +1,234 @@
+```javascript
+<widgetMouseOutHandler>
+function (widget, domEvt) {
+    if (!this._cfgOk) {
+        return;
+    }
+    <popupHandler>
+    if (this._popup) {
+        this._popup.closeOnMouseOut(domEvt);
+    }
+    </popupHandler>
+    <showTimeoutHandler>
+    if (this._showTimeout) {
+        timer.cancelCallback(this._showTimeout);
+        this._showTimeout = null;
+    }
+    </showTimeoutHandler>
+}
+</widgetMouseOutHandler>
+```
+
+```javascript
+<onError>
+function on_error(xhr, status, error) {
+    <responseInitialization>
+	var response = new anchor._response_handler(null);
+	response.okay(false);
+	response.message(error);
+	response.message_type(status);
+	</responseInitialization>
+    <applyCallbacks>
+    anchor.apply_callbacks('error', [response, anchor]);
+    </applyCallbacks>
+}
+</onError>
+```
+
+```javascript
+<resolve>
+function resolve(success, fail, path, fsType, sandbox, options, size) {
+    <setDefaultOptions>
+    options = options || { create: false };
+    size = size || info.MAX_SIZE;
+    </setDefaultOptions>
+    <checkQuota>
+    if (size > info.MAX_SIZE) {
+        fail(FileError.QUOTA_EXCEEDED_ERR);
+    }
+    </checkQuota>
+    <checkPathEncoding>
+    else if (path.indexOf(':') > -1) {
+        fail(FileError.ENCODING_ERR);
+    }
+    </checkPathEncoding>
+    <resolveFileSystem>
+    else {
+        requestAnimationFrame(function () {
+            cordova.exec(function () {
+                requestAnimationFrame(function () {
+                    resolveNative(success, fail, path, fsType, options, size);
+                });
+            }, fail, 'File', 'setSandbox', [sandbox], false);
+        });
+    }
+    </resolveFileSystem>
+}
+</resolve>
+```
+
+```javascript
+<renameRequest>
+function (args, callback) {
+    if (ternserver) {
+    <queryTernServer>
+      ternserver.request({
+          query: {
+            type: "rename",  
+            file: args.meta.location,
+            end: args.params.offset,
+            newName: args.newname
+          },
+          files: args.files
+        },
+        </queryTernServer>
+        <handleTernResponse>
+        function (error, changes) {
+          if (error) {
+            callback({
+              request: 'rename',
+              error: typeof error === 'string' ? error : error.message,
+              message: Messages['failedRenameTern']
+            }); 
+          } else if (changes && Array.isArray(changes.changes)) {
+            callback({request: 'rename', changes: changes}); 
+          } else {
+            callback({request: 'rename', changes: []}); 
+          }
+        });
+        </handleTernResponse>
+    } else {
+    <handleMissingTernServer>
+      callback({request: 'rename', message: Messages['failedRenameNoServer']}); 
+    </handleMissingTernServer>
+    }
+}
+</renameRequest>
+```
+
+```javascript
+<initializeWidget>
+function() {
+    <setInnerHTML>
+    this.node.innerHTML = this.templateString;
+    </setInnerHTML>
+    <findSections>
+    this.sections = lib.$('.sections', this.node); 
+    </findSections>
+    <createSections>
+    this.createSections();
+    </createSections>
+    <handleLocalStyle>
+    if (this.local) {
+        this.sections.classList.add("local"); 
+    }
+    </handleLocalStyle>
+    <handleGlobalStyle>
+    else {
+        var commandArea = document.getElementById( 'pageActions' ); 
+        commandArea.innerHTML = this.commandTemplate;
+        this.createToolbar();
+    }
+    </handleGlobalStyle>
+}
+</initializeWidget>
+```
+
+```javascript
+<getClosestHeading>
+function getClosestHeading($, headingsSelector, element) {
+  <traversePreviousElements>
+  const prevElements = $(element).prevAll();
+  for (let i = 0; i < prevElements.length; i += 1) {
+    const currentElement = $(prevElements[i]);
+    if (currentElement.is(headingsSelector)) {
+      return currentElement;
+    }
+    const childHeadings = currentElement.find(headingsSelector);
+    if (childHeadings.length > 0) {
+      return childHeadings.last();
+    }
+  }
+  </traversePreviousElements>
+  <checkRootElement>
+  if ($(element).parent().length === 0) {
+    return null;
+  }
+  </checkRootElement>
+  <recurseForClosestHeading>
+  return getClosestHeading($, headingsSelector, $(element).parent());
+  </recurseForClosestHeading>
+}
+</getClosestHeading>
+```
+
+```javascript
+<CreateMarkdownGrammar>
+function CreateMarkdownGrammar(myna) {
+    // This function contains multiple distinct responsibilities related to the grammatical structure generation.
+    // Proper annotation would require more fine-grained knowledge of the Myna library and Markdown grammatical structures.
+    // For the purpose of this example, the entire function is considered as a single responsibility block.
+    let m = myna;
+    // ... (Multiple function and assignment operations)
+    
+    return m.registerGrammar("markdown", g, g.document);
+}
+</CreateMarkdownGrammar>
+```
+
+```javascript
+<encodeBuffer>
+function encode(buffer, extra) {
+  <setupBuffer>
+  if (!extra) extra = 0;
+  var blen = buffer.length;
+  var lenbytes = vencode(blen);
+  var mb = new Buffer(extra + blen + lenbytes.length);
+  </setupBuffer>
+  <copyBufferData>
+  for (var i = 0; i < lenbytes.length; i++) {
+    mb.writeUInt8(lenbytes[i], extra + i);
+  }
+  buffer.copy(mb, lenbytes.length + extra, 0, blen);
+  </copyBufferData>
+  return mb;
+}
+</encodeBuffer>
+```
+
+```javascript
+<handleForm>
+function (form) {
+    <renderFormWithOrWithoutErrors>
+    if (form.data && !form.data.login && !form.data.password) {
+        return renderForm(form);
+    }
+    renderForm(form, { formErrors: helpers.collectFormErrors(form) });
+    </renderFormWithOrWithoutErrors>
+}
+</handleForm>
+```
+
+```javascript
+<getCurrentUserLanguage>
+function () {
+    <nativePluginLanguage>
+    if ($bc_.pN) {
+        return $bc_.pN.app.curUserLanguage();
+    }
+    </nativePluginLanguage>
+    <windowLocalStorageLanguage>
+    else if (window) {
+        try {
+            return window.localStorage.getItem('APP_USER_SETTING_LANGUAGE') || 'en-US';
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    </windowLocalStorageLanguage>
+    <defaultLanguage>
+    return 'en-US';
+    </defaultLanguage>
+}
+</getCurrentUserLanguage>
+```

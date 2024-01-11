@@ -1,0 +1,385 @@
+```javascript
+<getPrimes>
+function getPrimes(limit) {
+    var sieve = new Array(limit);
+    var n, j, k;
+    var last = Math.floor(Math.sqrt(limit));
+    <initializeSieve>
+    for (n=2; n < limit; n++) {
+        sieve[n] = true;
+    }
+    </initializeSieve>
+    <calculatePrimes>
+    for (n=2; n <= last;) {
+        for (j= n+n; j < limit; j += n) {
+            sieve[j] = false;
+        }
+        for (j=1; j < last; j++) {
+            k = n+j;
+            if (sieve[k]) {
+                n = k;
+                break;
+            }
+        }
+    }
+    </calculatePrimes>
+    <collectPrimes>
+    var primes = [];
+    for (n=2; n < limit; n++) {
+        if (sieve[n]) {
+            primes.push(n);
+        }
+    }
+    </collectPrimes>
+    return primes;
+}
+</getPrimes>
+
+<buildActions>
+function buildActions (controller, record, parentController, parentRecord) {
+    
+    var actions = {}
+    
+    <createActionViews>
+    if (record.id) {
+        actions.view = {
+            href: '/'+controller.path+'/'+record.id,
+            title: 'View',
+        }
+    }
+    </createActionViews>
+    
+    <defineParentControllerActions>
+    if (defined(parentController)) {
+        
+        <handleRelationActions>
+        var relation = parentController.model.relation(controller.model.name)
+        
+        if (defined(relation.viaModel) && defined(relation.viaModel.columns.d)) {
+            actions.unlink = {
+                href: `/${parentController.path}/${parentRecord.id}/unlink?relation=${controller.model.name}&relationId=${record.id}`,
+                title: 'Unlink',
+            }
+        }
+        </handleRelationActions>
+        
+        <handleDeleteActions>
+        else if (defined(controller.model.columns.d)) {
+            actions.delete = {
+                href: `/${controller.path}/${record.id}/delete`,
+                title: 'Delete',
+            }
+        }
+        </handleDeleteActions>
+    }
+    </defineParentControllerActions>
+    
+    <handleControllerActions>
+    else {
+        
+        if (controller.model.columns.d) {
+            actions.delete = {
+                href: `/${controller.path}/${record.id}/delete`,
+                title: 'Delete',
+            }
+        }
+    }
+    </handleControllerActions>
+    
+    <mergeCustomActions>
+    if (defined(controller.actions)) {
+        
+        var controllerActions = _.cloneDeep(controller.actions)
+        
+        _.each(controllerActions, (action, actionName) => {
+            
+            resolveLinkVariables(action, record)
+            
+            if (defined(actions[actionName])) {
+                _.merge(actions[actionName], action)
+            }
+            
+            else {
+                actions[actionName] = action
+            }
+        })
+    }
+    </mergeCustomActions>
+    
+    <assignActionsToRecord>
+    record.actions = _.map(_.sortBy(_.keys(actions)), actionName => {
+        var action = actions[actionName]
+        action.action = actionName
+        return action
+    })
+    </assignActionsToRecord>
+}
+</buildActions>
+
+<queueSubUnsubRequest>
+function queueSubUnsubRequest(message, response) {
+	<initializeQueue>
+	if (typeof subUnsubQueue[message.itemName] === 'undefined') {
+		subUnsubQueue[message.itemName] = [];
+	}
+	</initializeQueue>
+	<enqueueRequest>
+	subUnsubQueue[message.itemName].push({'message': message, 'response': response});
+	return subUnsubQueue[message.itemName].length;
+	</enqueueRequest>
+}
+</queueSubUnsubRequest>
+
+<containsFallback>
+function containsFallback (context, el) {
+  let node = el
+  <traceAncestors>
+  while (node) {
+    if (node === context) {
+      return true
+    }
+    node = node.parentNode
+  }
+  </traceAncestors>
+
+  return false
+}
+</containsFallback>
+
+<extractDataUrls>
+function extractDataUrls(css, preservedTokens) {
+
+    const pattern = /url\(\s*(["']?)data\:/g
+    const maxIndex = css.length - 1
+    const sb = []
+
+    let appendIndex = 0
+    let match
+
+    <parseCssForDataUrls>
+    while ((match = pattern.exec(css)) !== null) {
+
+        let startIndex = match.index + 4  
+        let terminator = match[1]         
+
+        if (terminator.length === 0) {
+            terminator = ')'
+        }
+
+        let foundTerminator = false
+        let endIndex = pattern.lastIndex - 1
+
+        <searchForTerminator>
+        while (foundTerminator === false && endIndex + 1 <= maxIndex) {
+            endIndex = css.indexOf(terminator, endIndex + 1)
+
+            
+            if ((endIndex > 0) && (css.charAt(endIndex - 1) !== '\\')) {
+                foundTerminator = true
+                if (')' != terminator) {
+                    endIndex = css.indexOf(')', endIndex)
+                }
+            }
+        }
+        </searchForTerminator>
+
+        
+        sb.push(css.substring(appendIndex, match.index))
+
+        <handleTerminatorFound>
+        if (foundTerminator) {
+
+            let token = css.substring(startIndex, endIndex)
+            let parts = token.split(',')
+            if (parts.length > 1 && parts[0].slice(-7) == ';base64') {
+                token = token.replace(/\s+/g, '')
+            } else {
+                token = token.replace(/\n/g, ' ')
+                token = token.replace(/\s+/g, ' ')
+                token = token.replace(/(^\s+|\s+$)/g, '')
+            }
+
+            preservedTokens.push(token)
+
+            let preserver = 'url(' + ___PRESERVED_TOKEN_ + (preservedTokens.length - 1) + '___)'
+            sb.push(preserver)
+
+            appendIndex = endIndex + 1
+        } else {
+        </handleTerminatorFound>
+            
+            sb.push(css.substring(match.index, pattern.lastIndex))
+            appendIndex = pattern.lastIndex
+        }
+    }
+    </parseCssForDataUrls>
+
+    <completeStringBuilder>
+    sb.push(css.substring(appendIndex))
+    </completeStringBuilder>
+
+    return sb.join('')
+}
+</extractDataUrls>
+
+<_extract>
+function _extract(keyStr, dataObj) {
+	var altkey,
+		_subKey,
+		_splitPoint,
+		_found = false,
+		dataValue = null,
+		_queryParts = [];
+
+	<initializeExtraction>
+	if (dataObj && typeof dataObj === 'object') {
+		dataValue = Object.create(dataObj);
+		_queryParts = keyStr.split(/[\-\_\.]/);
+	</initializeExtraction>
+
+	<keyInDataObj>
+	
+	if (keyStr in dataValue) {
+		dataValue = dataValue[keyStr];
+		_queryParts.length = 0;
+		_found = true;
+	}
+	</keyInDataObj>
+
+	<queryPartsExtraction>
+ 	while(_queryParts.length) {
+		_splitPoint = _queryParts.shift();
+		_subKey = keyStr.split(new RegExp('('+_splitPoint+')')).slice(0,2).join("");
+		if (_subKey in dataValue) {
+			dataValue = dataValue[_subKey];
+			keyStr = keyStr.split(new RegExp('('+_subKey+'[\-\_\.])')).slice(2).join("");
+			_found = true;
+		} else {
+			_found = false;
+		}
+		
+	}
+	</queryPartsExtraction>
+
+	<alternativeKeyExtraction>
+	if (!_found) {
+		
+		altkey = keyStr.replace(/[\-\_\.]/,' ');
+		if (altkey in dataObj) {
+			dataValue = dataObj[altkey];
+			_found = true;
+		}
+	}
+	</alternativeKeyExtraction>
+
+	return _found ? dataValue : NaN;
+}
+</_extract>
+
+<LogFileTee>
+function LogFileTee(filename, stream2) {
+	<initStreams>
+	var streams = [fs.createWriteStream(path.resolve(filename))];
+	if (stream2 === undefined) {
+		streams.push(process.stdout);
+	} else if (stream2 !== null) {
+		streams.push(stream2);
+	}
+	</initStreams>
+	<initializeLogTee>
+	LogTee.call(this, streams);
+	</initializeLogTee>
+	this.logfile = filename;
+}
+</LogFileTee>
+
+<getTotalFlexGrow>
+function getTotalFlexGrow(columns) {
+    <calculateTotalFlexGrow>
+    var totalFlexGrow = 0;
+    for (var _i = 0, columns_1 = columns; _i < columns_1.length; _i++) {
+        var c = columns_1[_i];
+        totalFlexGrow += c.flexGrow || 0;
+    }
+    </calculateTotalFlexGrow>
+    return totalFlexGrow;
+}
+</getTotalFlexGrow>
+
+<function>
+function(query, root) {
+    
+
+    <handleNullOrEmptyQuery>
+    if (!query) {
+      return [];
+    }
+    </handleNullOrEmptyQuery>
+
+    <handleQueryAsArray>
+    if (query.constructor == Array) {
+      return  (query);
+    }
+    </handleQueryAsArray>
+
+    <validateRootElement>
+    if (!goog.isString(query)) {
+      return [query];
+    }
+
+    if (goog.isString(root)) {
+      root = goog.dom.getElement(root);
+      if (!root) {
+        return [];
+      }
+    }
+    </validateRootElement>
+
+    root = root || goog.dom.getDocument();
+    var od = root.ownerDocument || root.documentElement;
+
+    <detectCaseSensitivity>
+    
+    caseSensitive =
+        root.contentType && root.contentType == 'application/xml' ||
+        goog.userAgent.OPERA &&
+          (root.doctype || od.toString() == '[object XMLDocument]') ||
+        !!od &&
+        (goog.userAgent.IE ? od.xml : (root.xmlVersion || od.xmlVersion));
+    </detectCaseSensitivity>
+
+    <executeQueryFunction>
+    
+    var r = getQueryFunc(query)(root);
+    </executeQueryFunction>
+
+    <finalizeResults>
+    
+    if (r && r.nozip) {
+      return r;
+    }
+    return _zip(r);
+    </finalizeResults>
+  }
+</function>
+
+<alwaysReturns>
+function alwaysReturns(node) {
+            
+    <handleBlockStatementNode>
+    if (node.type === "BlockStatement") {
+
+        
+        return node.body.some(checkForReturnOrIf);
+    }
+    </handleBlockStatementNode>
+
+    <handleSingleNode>
+    
+    return checkForReturnOrIf(node);
+    </handleSingleNode>
+}
+</alwaysReturns>
+```
+
+Each function has been annotated according to the SRP principle, identifying blocks of code that perform single, separable responsibilities within the larger context of the function. The tags are placed directly before and after the specific lines of code that represent these distinct responsibilities.

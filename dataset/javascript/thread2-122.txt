@@ -1,0 +1,399 @@
+```javascript
+<optimizeFileContents>
+function (fileName, fileContents, outFileName, config, pluginCollector) {
+  config = config || {};
+
+  <processPragma>
+  fileContents = pragma.process(fileName, fileContents, config, 'OnSave', pluginCollector);
+  </processPragma>
+
+  <determineOptimizer>
+  var optFunc, optConfig,
+      parts = (String(config.optimize)).split('.'),
+      optimizerName = parts[0],
+      keepLines = parts[1] === 'keepLines',
+      licenseContents = '';
+
+  if (optimizerName && optimizerName !== 'none') {
+      optFunc = envOptimize[optimizerName] || optimize.optimizers[optimizerName];
+      if (!optFunc) {
+          throw new Error('optimizer with name of "' +
+                          optimizerName +
+                          '" not found for this environment');
+      }
+  </determineOptimizer>
+
+  <optimizerConfiguration>
+  optConfig = config[optimizerName] || {};
+  if (config.generateSourceMaps) {
+      optConfig.generateSourceMaps = !!config.generateSourceMaps;
+      optConfig._buildSourceMap = config._buildSourceMap;
+  }
+  </optimizerConfiguration>
+
+  <applyOptimization>
+  try {
+      if (config.preserveLicenseComments) {
+          <extractLicenseComments>
+          try {
+              licenseContents = parse.getLicenseComments(fileName, fileContents);
+          } catch (e) {
+              throw new Error('Cannot parse file: ' + fileName + ' for comments. Skipping it. Error is:\n' + e.toString());
+          }
+          </extractLicenseComments>
+      }
+      fileContents = licenseContents + optFunc(fileName, fileContents, outFileName, keepLines, optConfig);
+      if (optConfig._buildSourceMap && optConfig._buildSourceMap !== config._buildSourceMap) {
+          config._buildSourceMap = optConfig._buildSourceMap;
+      }
+  } catch (e) {
+      if (config.throwWhen && config.throwWhen.optimize) {
+          throw e;
+      } else {
+          logger.error(e);
+      }
+  }
+  </applyOptimization>
+  } else {
+      <resetSourceMap>
+      if (config._buildSourceMap) {
+          config._buildSourceMap = null;
+      }
+      </resetSourceMap>
+  }
+
+  return fileContents;
+}
+</optimizeFileContents>
+
+<createNewDialog>
+function createNewDialog() {
+  <collectUserInfo>
+  var usersIds = [];
+  var usersNames = [];
+
+  $('#users_list .users_form.active').each(function(index) {
+    usersIds[index] = $(this).attr('id');
+    usersNames[index] = $(this).text();
+  });
+  </collectUserInfo>
+
+  <prepareDialogCreation>
+  var dialogName;
+  var dialogOccupants;
+  var dialogType;
+
+  if (usersIds.length > 1) {
+    if (usersNames.indexOf(currentUser.login) > -1) {
+      dialogName = usersNames.join(', ');
+    }else{
+      dialogName = currentUser.login + ', ' + usersNames.join(', ');
+    }
+    dialogOccupants = usersIds;
+    dialogType = 2;
+  } else {
+    dialogOccupants = usersIds;
+    dialogType = 3;
+  }
+
+  var params = {
+    type: dialogType,
+    occupants_ids: dialogOccupants,
+    name: dialogName
+  };
+  </prepareDialogCreation>
+
+  <createDialogWithAPI>
+  QB.chat.dialog.create(params, function(err, createdDialog) {
+    if (err) {
+      console.log(err);
+    } else {
+      <onDialogCreated>
+      console.log("Dialog " + createdDialog._id + " created with users: " + dialogOccupants);
+
+      var dialogId = createdDialog._id;
+      dialogs[dialogId] = createdDialog;
+
+      currentDialog = createdDialog;
+
+      joinToNewDialogAndShow(createdDialog);
+
+      notifyOccupants(createdDialog.occupants_ids, createdDialog._id, 1);
+
+      triggerDialog(createdDialog._id);
+
+      $('a.users_form').removeClass('active');
+      </onDialogCreated>
+    }
+  });
+  </createDialogWithAPI>
+}
+</createNewDialog>
+
+<cacheMethod>
+function doCacheForMethod (signature) {
+  <validateSignature>
+  signature = getValidSignature(signature)
+  if (!hasMethod(signature.signature)) {
+      return
+  }
+  </validateSignature>
+
+  <retrieveCacheConfig>
+  var method = getMethod(signature.signature)
+  var module = getModule(signature.moduleName)
+  if (!defined(immutable.caches[signature.moduleName])) {
+      return
+  }
+  if (!defined(immutable.caches[signature.moduleName][signature.methodName])) {
+      return
+  }
+  var cache = immutable.caches[signature.moduleName][signature.methodName]
+  </retrieveCacheConfig>
+
+  <applyCaching>
+  module.cache(signature.methodName, cache.cache)
+  cache.cached = true
+  </applyCaching>
+}
+</cacheMethod>
+
+<compareHmac>
+function compareHmac(hmac1, hmac2) {
+  <convertBuffersToStrings>
+  var left = hmac1;
+  if (Buffer.isBuffer(hmac1)) {
+      left = hmac1.toString('base64');
+  }
+  var right = hmac2;
+  if (Buffer.isBuffer(hmac2)) {
+      right = hmac2.toString('base64');
+  }
+  </convertBuffersToStrings>
+  return (left == right);
+}
+</compareHmac>
+
+<initializeMemcacheStore>
+function MemcacheStore (options) {
+  <configureDefaults>
+  options = options || {};
+  this._host = options.host || '127.0.0.1';
+  this._port = options.port || 11211;
+  this._prefix = options.prefix || '';
+  this._user = options.user || '';
+  this._password = options.password || '';
+  this._pool = options.pool = (options.pool > 1 ? options.pool : 1);
+  this._connectionString = this._user + ':' + this._password + '@' + this._host + ':' + this._port;
+  </configureDefaults>
+
+  <createConnections>
+  this._clients = [];
+  this._clientIndex = -1;
+  for (var i = 0; i < options.pool; i++) {
+    this._clients.push(memjs.Client.create(this._connectionString));
+  }
+  </createConnections>
+
+  return this;
+}
+</initializeMemcacheStore>
+
+<encodeString>
+function encode(raw) {
+  if (type(raw) !== "string") {
+    return raw;
+  }
+  
+  return raw.replace(/["&'<>`]/g, function(match) {
+    return "&#" + match.charCodeAt(0) + ";";
+  });
+}
+</encodeString>
+
+<getUsStatesList>
+function getUsStatesList(s) {
+  <handleRequests>
+  switch(s) {
+    <statesTerritoriesAbbreviations>
+    case 'usStatesTerrByAbbrLow':
+    case 'usStatesTerrByAbbr':
+    case 'usTerrByAbbrLow':
+    case 'usTerrByAbbr':
+    case 'usStatesByAbbrLow':
+    case 'usStatesByAbbr':
+      if (!this[s]) {
+        <generateList>
+        this[s] = computeList(s);
+        </generateList>
+      }
+      return this[s];
+    </statesTerritoriesAbbreviations>
+
+    <statesTerritoriesNames>
+    case 'usStatesTerrLow':
+    case 'usStatesTerr':
+    case 'usStatesLow':
+    case 'usStates':
+    case 'usTerrLow':
+    case 'usTerr':
+      if (!this[s]) {
+        <generateList>
+        this[s] = computeList(s);
+        </generateList>
+      }
+      return this[s];
+    </statesTerritoriesNames>
+
+    default:
+      throw new Error('getUsStatesList: unknown request: ' + s);
+  }
+  </handleRequests>
+}
+</getUsStatesList>
+
+<parseChord>
+function (chord) {
+  var intervals = [];
+  
+  <defineBaseIntervals>
+  intervals[1] = 'P';
+  intervals[3] = 'M';
+  intervals[5] = 'P';
+  </defineBaseIntervals>
+
+  <modifyIntervalsForChordType>
+  if ((/^(m|dim|ø)/).test(chord)) {
+    intervals[3] = 'm';  
+  }
+  
+  if ((/(dim|ø|[-b]5)/).test(chord)) {
+    intervals[5] = 'dim';  
+  }
+  
+  if ((/^(aug|\+)/).test(chord) || (/[+#]5/).test(chord)) {
+    intervals[5] = 'aug';  
+  }
+  
+  if ((/no5/).test(chord)) {
+    intervals[5] = '';
+  }
+  
+  else if ((/^[5n]/).test(chord) || (/no3/).test(chord)) {
+    intervals[3] = '';
+  }
+  
+  if ((/(ø|7|9|11|13)/).test(chord)) {
+    intervals[7] = 'm';  
+  }
+  
+  if ((/(M7|M9|M11|M13)/).test(chord)) {
+    intervals[7] = 'M';
+  }
+  
+  if ((/(dim7|dim9|dim11|dim13)/).test(chord)) {
+    intervals[7] = 'dim';
+  }
+  
+  if ((/6/).test(chord)) {
+    intervals[6] = 'M';
+    intervals[7] = '';
+  }
+  
+  if ((/sus2/).test(chord)) {
+    intervals[2] = 'M';
+    intervals[3] = '';
+  }
+  
+  else if ((/sus/).test(chord)) {
+    intervals[4] = 'P';
+    intervals[3] = '';
+  }
+  
+  if ((/9/).test(chord)) {
+    intervals[9] = 'M';  
+  }
+  if ((/[+#]9/).test(chord)) {
+    intervals[9] = '';  
+    intervals[10] = 'm'; 
+  }
+  if ((/[-b]9/).test(chord)) {
+    intervals[9] = 'm';  
+  }
+  if ((/add9/).test(chord)) {
+    if (!(/7/).test(chord)) intervals[7] = '';
+  }
+  
+  if ((/[+#]11/).test(chord)) {
+    intervals[11] = 'aug';  
+  }
+  else if ((/[-b]11/).test(chord)) {
+    intervals[11] = 'dim';  
+  }
+  else if ((/add11/).test(chord) || (/\([^\)]*11[^\)]*\)/).test(chord)) {
+    intervals[11] = 'P';
+    if ((/add11/).test(chord) && !(/7|9/).test(chord)) {
+      intervals[7] = '';
+    }
+  }
+  else if ((/11/).test(chord)) {
+    intervals[11] = 'P';
+    intervals[9] = intervals[9] || 'M';  
+  }
+  
+  if ((/[-b]13/).test(chord)) {
+    intervals[13] = 'm';  
+  }
+  else if ((/add13/).test(chord) || (/\([^\)]*13[^\)]*\)/).test(chord)) {
+    intervals[13] = 'M';
+    if ((/add13/).test(chord) && !(/7|9|11/).test(chord)) {
+      intervals[7] = '';
+    }
+  }
+  else if ((/13/).test(chord)) {
+    intervals[13] = 'M';
+    intervals[11] = intervals[11] || 'P';
+    intervals[9] = intervals[9] || 'M';
+  }
+  
+  if ((/no9/).test(chord)) {
+    intervals[9] = '';
+  }
+  
+  if ((/no11/).test(chord)) {
+    intervals[11] = '';
+  }
+  </modifyIntervalsForChordType>
+
+  return intervals;
+}
+</parseChord>
+
+<applyHelpersToObject>
+function(object, extra_helpers) {
+  object = object || {};
+  this._extra_helpers = extra_helpers;
+  <initializeHelpers>
+  var v = new EJS.Helpers(object, extra_helpers || {});
+  </initializeHelpers>
+  <processTemplate>
+  return this.template.process.call(object, object,v);
+  </processTemplate>
+}
+</applyHelpersToObject>
+
+<sendTransportData>
+function (options) {
+  if (typeof options === 'object') {
+    <formatTransportOptions>
+    options.name = this.prefix + '.' + options.name;
+    </formatTransportOptions>
+    <executeSend>
+    return this.transport.send(options);
+    </executeSend>
+  }  else {
+    throw new Error('Transport options must be an object.');
+  }
+}
+</sendTransportData>
+```

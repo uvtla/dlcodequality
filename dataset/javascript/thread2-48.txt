@@ -1,0 +1,182 @@
+```javascript
+<listNames>
+function listNames(theContacts) {
+  var s = '';
+  for (var contact in theContacts) {
+    if (s != '') { s = s + ", " };
+    s = s + contact;
+  }
+  return s;
+}
+</listNames>
+
+<parse_messages>
+function parse_messages (parser_type, str) {
+  var parser = new HTTPParser(parser_type);
+  var buffer = new Buffer(str, 'utf-8');
+  <parse_messages_initialization>
+  var output = [];
+
+  parser.onMessageBegin = function() {
+    output.push({
+      versionMajor: undefined,
+      versionMinor: undefined,
+      method: undefined,
+      uri: undefined,
+      statusCode: undefined,
+      headers: {},
+      body: "",
+      complete: false
+    });
+    parser.field = null;
+    parser.value = null;
+  };
+  </parse_messages_initialization>
+
+  <parse_messages_callbacks>
+  
+  parser.onURL = function(b, start, len) { /* ... */ };
+  parser.onHeaderField = function(b, start, len) { /* ... */ };
+  parser.onHeaderValue = function(b, start, len) { /* ... */ };
+  parser.onHeadersComplete = function(info) { /* ... */ };
+  parser.onBody = function(b, start, len) { /* ... */ };
+  parser.onMessageComplete = function() { /* ... */ };
+  
+  </parse_messages_callbacks>
+
+  parser.execute(buffer, 0, buffer.length);
+  
+  <parse_messages_filtering>
+  var complete_output = output.filter(function (o) {
+    return o.complete;
+  });
+  </parse_messages_filtering>
+  
+  return complete_output;
+}
+</parse_messages>
+
+<buildCSVsForSingleMergedForm>
+function buildCSVsForSingleMergedForm(formSubmissionModel, params, cb) {
+  <form_export_initialization>
+  var formId = params.formId; /* ... */
+  var fileName = date + "-" + formId + "-" + (formName.split(' ').join('_'));
+  cb = _.once(cb);
+  params.statusUpdaterFunction(/* ... */);
+  var exportProgressInterval = setInterval(function() { /* ... */ }, 1000);
+  var fullSubmissionCSVString = csvHeaders.generateCSVHeaders(/* ... */);
+  </form_export_initialization>
+
+  <form_export_data_processing>
+  var submissionQueryStream = formSubmissionModel.find(/* ... */).stream();
+  submissionQueryStream.on('data', function addSubmissionToCSV(submissionJSON) { /* ... */ })
+  .on('error', function(err) { /* ... */ })
+  .on('close', function() { /* ... */ });
+  </form_export_data_processing>
+}
+</buildCSVsForSingleMergedForm>
+
+<makeChainedCallback>
+function makeChainedCallback(i, fns, results, cb) {
+  return function(err, result) {
+    if (err) {
+      return cb(err);
+    }
+    results[i] = result;
+    if (fns[i + 1]) {
+      return fns[i + 1](makeChainedCallback(i + 1, fns, results, cb));
+    } else {
+      return cb(null, results);
+    }
+  };
+}
+</makeChainedCallback>
+
+<anonymous_function_with_confirm>
+function(data) {
+  <fetch_with_confirmation>
+  var confirm = messages["OverrideContentRemoteTrackingBr"] + "\n\n" + messages['Are you sure?'];
+  fetchCallback(data, true, confirm).then(function() {
+    dispatchModelEventOn({type: "modelChanged", action: "fetch", item: data.items});
+  });
+  </fetch_with_confirmation>
+}
+</anonymous_function_with_confirm>
+
+<relatedObject_association>
+function(instance, relatedObject, options) {
+  var opts = _.defaults({}, options, { follow: true, attrs: true });
+  var inverse = opts.follow && relatedObject && relatedObject[this.inverse + 'Relation'];
+  if (opts.attrs) {
+    
+    instance.setAttribute(this.foreignKeyAttr, relatedObject[this.primaryKey]);
+  }
+
+  this._setRelated(instance, relatedObject);
+
+  if (inverse) {
+    inverse.associate(relatedObject, instance, _.extend({}, options, { follow: false, }));
+  }
+}
+</relatedObject_association>
+
+<getHelpManData>
+function getHelpManData(commandData, context) {
+  
+  commandData.command.params = commandData.command.params.filter(function(param) { /* ... */ });
+  addParamGroups(commandData.command);
+  commandData.subcommands.forEach(addParamGroups);
+
+  return {
+    l10n: l10n.propertyLookup, /* ... */,
+    getTypeDescription: function(param) { /* ... */ },
+    getSynopsis: function(param) { /* ... */ },
+    command: commandData.command,
+    subcommands: commandData.subcommands
+  };
+}
+</getHelpManData>
+
+<formatStackInternal>
+function formatStackInternal(error, message, stackFormat) {
+  <stack_formatting_initialization>
+  var format = stackFormat || DEFAULT_FORMAT;
+  var enhanced = enhanceError(error);
+  var stack = message;
+  </stack_formatting_initialization>
+
+  <stack_formatting_processing>
+  for (var i1 = 0; enhanced.stackLines && i1 < enhanced.stackLines.length; i1 += 1) { /* ... */ }
+  </stack_formatting_processing>
+  
+  enhanced.stack = stack;
+  return enhanced;
+}
+</formatStackInternal>
+
+<flushCacheTimed>
+function flushCacheTimed(stream, onFlush) {
+  var nextWrite = lastWrite + settings.time;
+  var now = Date.now();
+  if (now >= nextWrite) {
+    flushCache(stream);
+    onFlush();
+    return;
+  }
+  
+  timeout = setTimeout(function () {
+    flushCache(stream);
+    onFlush();
+  }, nextWrite - now);
+}
+</flushCacheTimed>
+
+<jsonInit_block_definition>
+function() {
+  this.jsonInit({
+    "id": "event_whenbroadcastreceived", /* ... */
+    "extensions": ["colours_event", "shape_hat"]
+  });
+}
+</jsonInit_block_definition>
+```

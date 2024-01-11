@@ -1,0 +1,230 @@
+1.
+<mix>
+function mix(
+  weight: number | string,
+  color: string,
+  otherColor: string,
+): string {
+  <handleTransparency>
+  if (color === 'transparent') return otherColor
+  if (otherColor === 'transparent') return color
+  </handleTransparency>
+  
+  <parseColors>
+  const parsedColor1 = parseToRgb(color)
+  const color1 = {
+    ...parsedColor1,
+    alpha: typeof parsedColor1.alpha === 'number' ? parsedColor1.alpha : 1,
+  }
+
+  const parsedColor2 = parseToRgb(otherColor)
+  const color2 = {
+    ...parsedColor2,
+    alpha: typeof parsedColor2.alpha === 'number' ? parsedColor2.alpha : 1,
+  }
+  </parseColors>
+
+  <computeMixedColor>
+  const alphaDelta = color1.alpha - color2.alpha
+  const x = parseFloat(weight) * 2 - 1
+  const y = x * alphaDelta === -1 ? x : x + alphaDelta
+  const z = 1 + x * alphaDelta
+  const weight1 = (y / z + 1) / 2.0
+  const weight2 = 1 - weight1
+
+  const mixedColor = {
+    red: Math.floor(color1.red * weight1 + color2.red * weight2),
+    green: Math.floor(color1.green * weight1 + color2.green * weight2),
+    blue: Math.floor(color1.blue * weight1 + color2.blue * weight2),
+    alpha:
+      color1.alpha + (color2.alpha - color1.alpha) * (parseFloat(weight) / 1.0),
+  }
+  </computeMixedColor>
+
+  return rgba(mixedColor)
+}
+</mix>
+
+2.
+This function lacks a name, making it difficult to properly annotate for SRP compliance without understanding the context and intent of the code. However, it appears to combine event handling, event delegation, navigation, and handling of focus events, which would normally be split into different responsibilities.
+
+3.
+<readNumericString>
+function readNumericString(s, minValue) {
+  <computeLength>
+  var length = readLength(s);
+  length = (length + minValue + 1) / 2;
+  </computeLength>
+  
+  <modifyString>
+  s.readPadding(length);
+  </modifyString>
+}
+</readNumericString>
+
+4.
+<setValueAtCoordinates>
+function(x, y, value) {
+  <validateCoordinates>
+  if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+    return;
+  }
+  </validateCoordinates>
+  
+  <updateValue>
+  this.data[x][y] = value;
+  </updateValue>
+}
+</setValueAtCoordinates>
+
+5.
+<Msg>
+function Msg() {
+  <EventEmitterSetup>
+  events.EventEmitter.call(this);
+  </EventEmitterSetup>
+
+  <configureArguments>
+  this.args = [
+    // Array with configuration arguments for Msg
+  ];
+  </configureArguments>
+
+  <initializeProperties>
+  this.config = {};
+  this.dependency = {};
+  this.team = {};
+  this.shutdownTimeout = 1000;
+  this.modules = [];
+  </initializeProperties>
+}
+</Msg>
+
+6.
+<setTextureFilter>
+function(enabled) {
+  <selectTextureFilter>
+  var gl = this.context;
+  if (enabled) {
+    this.texture_filter = gl.NEAREST;
+  } else {
+    this.texture_filter = gl.LINEAR;
+  }
+  </selectTextureFilter>
+}
+</setTextureFilter>
+
+7.
+<shiftCellXls>
+function shift_cell_xls(cell, tgt, opts) {
+  <shiftCell>
+  var out = dup(cell);
+  if(tgt.s) {
+    if(out.cRel) out.c += tgt.s.c;
+    if(out.rRel) out.r += tgt.s.r;
+  } else {
+    out.c += tgt.c;
+    out.r += tgt.r;
+  }
+  </shiftCell>
+
+  <normalizeCellAddress>
+  if(!opts || opts.biff < 12) {
+    while(out.c >= 0x100) out.c -= 0x100;
+    while(out.r >= 0x10000) out.r -= 0x10000;
+  }
+  </normalizeCellAddress>
+
+  return out;
+}
+</shiftCellXls>
+
+8.
+<rearrangeElements>
+function (collection, elements, settings, index) {
+  <swapAndFind>
+  for (var i = index + 1; i < elements.length; i++) {
+    elements = swapElements(collection, elements, i - 1, i);
+  }
+  return collection.find(settings.elements_selector);
+  </swapAndFind>
+}
+</rearrangeElements>
+
+9.
+<toWireValue>
+async function toWireValue(obj) {
+  <resolvePromise>
+  let value = await Promise.resolve(obj);
+  </resolvePromise>
+
+  <checkNullOrUndefined>
+  if (value === void 0 || value === null) {
+    return value;
+  }
+  </checkNullOrUndefined>
+
+  <processPrimitive>
+  if (typeof value === 'boolean'
+      || typeof value === 'number'
+      || typeof value === 'string') {
+    return value;
+  }
+  </processPrimitive>
+
+  <processArray>
+  if (Array.isArray(value)) {
+    return convertKeys(value);
+  }
+  </processArray>
+
+  <processFunction>
+  if (typeof value === 'function') {
+    return '' + value;
+  }
+  </processFunction>
+
+  <serializeOrToJson>
+  if (typeof value[Symbols.serialize] === 'function') {
+    return toWireValue(value[Symbols.serialize]());
+  } else if (typeof value.toJSON === 'function') {
+    return toWireValue(value.toJSON());
+  }
+  </serializeOrToJson>
+
+  <convertKeys>
+  return convertKeys(value);
+  </convertKeys>
+}
+</toWireValue>
+
+10.
+<pointsFromGroupedResponse>
+function points_from_grouped_response(response, info) {
+  <initializePoints>
+  var points = [];
+  </initializePoints>
+  
+  <checkDateHistogram>
+  var is_date_histogram = _is_date_histogram(response.aggregations);
+  </checkDateHistogram>
+
+  <definePointsFromGroup>
+  function points_from_group(aggregation, fields, point_base) {
+    // Function to recursively parse and add points based on bucket
+  }
+  </definePointsFromGroup>
+
+  <processAggregations>
+  var grouping = _.clone(info.grouping);
+  if (is_date_histogram) {
+    grouping.push('time');
+  }
+  points_from_group(response.aggregations, grouping, {});
+  </processAggregations>
+
+  <sortPoints>
+  return _time_sort(points);
+  </sortPoints>
+}
+</pointsFromGroupedResponse>

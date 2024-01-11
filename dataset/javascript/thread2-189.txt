@@ -1,0 +1,237 @@
+```javascript
+<stripPathElements>
+function stripPathElements(filePath, nelements, from) {
+  if (!nelements || nelements <= 0) return filePath;
+  from = from || 'start';
+  filePath = filePath.replace(/\/+$/, '');
+  let splitPath = split(filePath);
+  if (from === 'start' && path.isAbsolute(filePath) && splitPath[0] === '/') splitPath = splitPath.slice(1);
+  let start = 0;
+  let end = splitPath.length;
+  if (from === 'start') {
+    start = nelements;
+    end = splitPath.length;
+  } else {
+    start = 0;
+    end = splitPath.length - nelements;
+  }
+  return join(splitPath.slice(start, end));
+}
+</stripPathElements>
+
+<calculateOffsetRatio>
+function (offset) {
+      var ratio = offset / this.state.upperBound;
+      return ratio * (this.props.max - this.props.min) + this.props.min;
+}
+</calculateOffsetRatio>
+
+<getOutputFile>
+function getOutputFile(file, outputDir) {
+  const fileName = path.basename(file).replace('.scss', '.css');
+  return path.join(outputDir, fileName);
+}
+</getOutputFile>
+
+<SwizInitialization>
+function Swiz(defs, options) {
+  if (! (this instanceof Swiz)) {
+    return new Swiz(defs, options);
+  }
+
+  var defaultOptions = {
+    'stripNulls': true,
+
+    'stripSerializerType': true,
+    'for': null
+  }, i, o;
+
+  this._defs = {};
+  for (i = 0; i < defs.length; i++) {
+    o = defs[i];
+    this._defs[o.name] = o;
+  }
+
+  this._options = merge(defaultOptions, options);
+}
+</SwizInitialization>
+
+<oAuthFlowExecution>
+function (auth) {
+        var host = window.location;
+        var pathname = location.pathname.substring(0, location.pathname.lastIndexOf('/'));
+        var defaultRedirectUrl = host.protocol + '
+        var redirectUrl = window.oAuthRedirectUrl || defaultRedirectUrl;
+        var url = null;
+        var scopes = _.map(auth.get('scopes'), function (scope) {
+            if(scope.checked) {
+                return scope.scope;
+            }
+        });
+        var container = window.swaggerUiAuth || (window.swaggerUiAuth = {});
+        var state, dets, ep;
+        container.OAuthSchemeKey = auth.get('title');
+
+        window.enabledScopes = scopes;
+        var flow = auth.get('flow');
+
+        function getTokenName(dets) {
+            return dets.vendorExtensions['x-tokenName'] || dets.tokenName;
+        }
+
+        <handleOAuth>
+        if(auth.get('type') === 'oauth2' && flow && (flow === 'implicit' || flow === 'accessCode')) {
+            dets = auth.attributes;
+            url = dets.authorizationUrl + '?response_type=' + (flow === 'implicit' ? 'token' : 'code');
+            container.tokenName = getTokenName(dets) || 'access_token';
+            container.tokenUrl = (flow === 'accessCode' ? dets.tokenUrl : null);
+            state = container.OAuthSchemeKey;
+        }
+        else if(auth.get('type') === 'oauth2' && flow && (flow === 'application')) {
+            dets = auth.attributes;
+            container.tokenName = getTokenName(dets) || 'access_token';
+            this.clientCredentialsFlow(scopes, dets, container.OAuthSchemeKey);
+            return;
+        }
+        else if(auth.get('type') === 'oauth2' && flow && (flow === 'password')) {
+            dets = auth.attributes;
+            container.tokenName = getTokenName(dets) || 'access_token';
+            this.passwordFlow(scopes, dets, container.OAuthSchemeKey);
+            return;
+        }
+        else if(auth.get('grantTypes')) {
+            
+            var o = auth.get('grantTypes');
+            for(var t in o) {
+                if(o.hasOwnProperty(t) && t === 'implicit') {
+                    dets = o[t];
+                    ep = dets.loginEndpoint.url;
+                    url = dets.loginEndpoint.url + '?response_type=token';
+                    container.tokenName = getTokenName(dets);
+                }
+                else if (o.hasOwnProperty(t) && t === 'accessCode') {
+                    dets = o[t];
+                    ep = dets.tokenRequestEndpoint.url;
+                    url = dets.tokenRequestEndpoint.url + '?response_type=code';
+                    container.tokenName = getTokenName(dets);
+                }
+            }
+        }
+        </handleOAuth>
+
+        <prepareOAuthUrl>
+        redirect_uri = redirectUrl;
+
+        url += '&redirect_uri=' + encodeURIComponent(redirectUrl);
+        url += '&realm=' + encodeURIComponent(realm);
+        url += '&client_id=' + encodeURIComponent(clientId);
+        url += '&scope=' + encodeURIComponent(scopes.join(scopeSeparator));
+        url += '&state=' + encodeURIComponent(state);
+        for (var key in additionalQueryStringParams) {
+            url += '&' + key + '=' + encodeURIComponent(additionalQueryStringParams[key]);
+        }
+
+        window.open(url);
+        </prepareOAuthUrl>
+    }
+</oAuthFlowExecution>
+
+<handleLoginEvent>
+function handle(event) {
+    if(event.data.type == 1 || event.data.type == 3 || event.data.type == 7){
+        facade.models.login().findCreateFind({
+            where:{
+                uid: event.user.id,
+                type: event.data.type,
+            },
+            defaults: {
+                uid: event.user.id,
+                type: event.data.type,
+                time: event.data.time
+            },
+        });
+    }
+}
+</handleLoginEvent>
+
+<common_doc>
+function common_doc(string, status, type){
+    if( ! string ){ string = ''; }
+    if( ! status ){ status = 200; }
+    if( ! type ){ type = 'text/html'; }
+    return {
+	body: [string],
+	headers: {'Content-Type': type},
+	status: status
+    };
+}
+</common_doc>
+
+<sendMessage>
+function send(err, reply, cb) {
+  if(this.before) this.before();
+
+  if(this.cb) {
+    return this.cb(err, reply);
+  }
+  this.conn.write(err || reply, cb);
+}
+</sendMessage>
+
+<queueSection>
+function ( time, callback ) {
+  var _this = this;
+  this.sections.push({
+    condition : function () {
+      return _this.getTime() > time;
+    },
+    callback : callback
+  });
+  return this;
+}
+</queueSection>
+
+<handleError>
+function (error) {
+    if (!this.started) {
+        return;
+    }
+
+    var errorHandlers = this.errorHandlers,
+        length = errorHandlers.length,
+        errorHandler,
+        errorHandled = false,
+        errorString,
+        i;
+
+    <checkSystemExit>
+    if (error instanceof SystemExit) {
+        this._exit(error.code);
+        return;
+    }
+    </checkSystemExit>
+
+    <invokeErrorHandlers>
+    try {
+        for (i = 0; i < length; i += 1) {
+            errorHandler = errorHandlers[i];
+            errorHandled = !!errorHandler(error);
+
+            if (errorHandled) {
+                return;
+            }
+        }
+    } catch (e) {
+        this._printError(e);
+        this._exit(1);
+    }
+    </invokeErrorHandlers>
+
+    <printUncaughtError>
+    errorString = '' + (error.stack || error);
+    this._printError(errorString);
+    this._exit(1);
+    </printUncaughtError>
+}
+</handleError>
+```

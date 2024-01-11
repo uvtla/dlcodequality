@@ -1,0 +1,227 @@
+<augmentStackTraceWithInitialElement>
+function augmentStackTraceWithInitialElement(stackInfo, url, lineNo, message) {
+        <initializeInitialObject>
+        var initial = {
+            'url': url,
+            'line': lineNo
+        };
+        </initializeInitialObject>
+
+        <verifyAndEnhanceStackInfo>
+        if (initial.url && initial.line) {
+            stackInfo.incomplete = false;
+
+            <determineMissingFunctionName>
+            if (!initial.func) {
+                initial.func = guessFunctionName(initial.url, initial.line);
+            }
+            </determineMissingFunctionName>
+
+            <gatherContextForInitialObject>
+            if (!initial.context) {
+                initial.context = gatherContext(initial.url, initial.line);
+            }
+            </gatherContextForInitialObject>
+
+            <findReferenceInMessage>
+            var reference = / '([^']+)' /.exec(message);
+            if (reference) {
+                initial.column = findSourceInLine(reference[1], initial.url, initial.line);
+            }
+            </findReferenceInMessage>
+
+            <updateOrUnshiftStackInfo>
+            if (stackInfo.stack.length > 0) {
+                if (stackInfo.stack[0].url === initial.url) {
+                    if (stackInfo.stack[0].line === initial.line) {
+                        return false; 
+                    } else if (!stackInfo.stack[0].line && stackInfo.stack[0].func === initial.func) {
+                        stackInfo.stack[0].line = initial.line;
+                        stackInfo.stack[0].context = initial.context;
+                        return false;
+                    }
+                }
+            }
+
+            stackInfo.stack.unshift(initial);
+            stackInfo.partial = true;
+            return true;
+            </updateOrUnshiftStackInfo>
+        } else {
+            stackInfo.incomplete = true;
+        }
+        </verifyAndEnhanceStackInfo>
+
+        return false;
+}
+</augmentStackTraceWithInitialElement>
+
+<parsePoint>
+function parsePoint(result) {
+  <extractAndFormatLocation>
+  if (result.geometry) {
+    if (result.geometry.location) {
+      const {lng, lat} = result.geometry.location
+      return helpers.point([lng, lat])
+    }
+  }
+  </extractAndFormatLocation>
+}
+</parsePoint>
+
+<getCacheFor>
+function getCacheFor(transaction, store) {
+  <getCachePrefix>
+  var prefix = store.prefix()[0];
+  </getCachePrefix>
+  
+  <retrieveOrCreateSubCache>
+  var cache = transaction._cache;
+  var subCache = cache.get(prefix);
+  if (!subCache) {
+    subCache = new pouchdbCollections.Map();
+    cache.set(prefix, subCache);
+  }
+  </retrieveOrCreateSubCache>
+  
+  return subCache;
+}
+</getCacheFor>
+
+<sortMediaQueries>
+function sortMediaQueries(a, b) {
+  <removeNonDigitCharacters>
+  const A = a.replace(/\D/g, '');
+  const B = b.replace(/\D/g, '');
+  </removeNonDigitCharacters>
+
+  <compareMediaQueryValues>
+  if (isMax(a) && isMax(b)) {
+    return B - A;
+  } else if (isMin(a) && isMin(b)) {
+    return A - B;
+  } else if (isMax(a) && isMin(b)) {
+    return 1;
+  } else if (isMin(a) && isMax(b)) {
+    return -1;
+  }
+  </compareMediaQueryValues>
+
+  return 1;
+}
+</sortMediaQueries>
+
+<createPhantomInstance>
+function(options) {
+    options = options || {};
+    return new Promise(function(resolve, reject) {
+      <driverCreation>
+      driver.create(options, function(err, browser) {
+        if (err) {
+          return reject(err);
+        }
+        resolve(new Phantom(browser));
+      });
+      </driverCreation>
+    });
+  }
+</createPhantomInstance>
+
+<subscribeToChannel>
+function (channel, subscription, context) {
+      Backbone.Mediator.subscribe(channel, subscription, context, true);
+}
+</subscribeToChannel>
+
+<handleBlocks>
+function handleBlocks (config) {
+  let blocks = []
+  let blocksObj = config.blocks
+  <iterateAndPushBlocks>
+  for (let i in blocksObj) {
+    if (blocksObj.hasOwnProperty(i)) {
+      if (isLanguage(blocksObj[i])) {
+        blocks.push(_getBlock(config, 'language', true))
+      } else {
+        blocks.push(_getBlock(config, i))
+      }
+    }
+  }
+  </iterateAndPushBlocks>
+  return blocks
+}
+</handleBlocks>
+
+<minValue>
+function minValue(bound, formatError) {
+        'use strict';
+        return function (value) {
+            <validateValueAgainstBound>
+            if (value || !isNaN(parseFloat(value))) {
+                var intValue = Number(value);
+                if (!isNaN(intValue) && intValue < bound) {
+                    return formatError(intValue);
+                }
+            }
+            </validateValueAgainstBound>
+            return '';
+        };
+}
+</minValue>
+
+<accumulateData>
+function(err, data){
+      <handleError>
+      if (err) error = err;
+      </handleError>
+      
+      <addDataToList>
+      allLayers.push(data);
+      </addDataToList>
+      
+      <checkForCompletionAndCallback>
+      if (allLayers.length == totalLayers){
+        callback(error, allLayers);
+      }
+      </checkForCompletionAndCallback>
+}
+</accumulateData>
+
+<formatSummary>
+function formatSummary(errors, warnings, fixableErrors, fixableWarnings) {
+    <setSummaryColor>
+    const summaryColor = errors > 0 ? "red" : "yellow";
+    </setSummaryColor>
+    
+    <createSummaryStrings>
+    const summary = [];
+    const fixablesSummary = [];
+
+    if (errors > 0) {
+        summary.push(`${errors} ${pluralize("error", errors)}`);
+    }
+
+    if (warnings > 0) {
+        summary.push(`${warnings} ${pluralize("warning", warnings)}`);
+    }
+
+    if (fixableErrors > 0) {
+        fixablesSummary.push(`${fixableErrors} ${pluralize("error", fixableErrors)}`);
+    }
+
+    if (fixableWarnings > 0) {
+        fixablesSummary.push(`${fixableWarnings} ${pluralize("warning", fixableWarnings)}`);
+    }
+    </createSummaryStrings>
+
+    <composeFinalOutput>
+    let output = chalk[summaryColor].bold(`${summary.join(" and ")} found.`);
+
+    if (fixableErrors || fixableWarnings) {
+        output += chalk[summaryColor].bold(`\n${fixablesSummary.join(" and ")} potentially fixable with the \`--fix\` option.`);
+    }
+    </composeFinalOutput>
+
+    return output;
+}
+</formatSummary>

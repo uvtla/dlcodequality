@@ -1,0 +1,341 @@
+```javascript
+<locateElement>
+function (needle, haystack) {
+            <defaultSize>
+            needle.width = needle.width || 0;
+            needle.height = needle.height || 0;
+            </defaultSize>
+            <checkInViewport>
+            if (haystack == this.VIEWPORT) {
+                return this.isInViewport({
+                    left : needle.x,
+                    top : needle.y
+                }, {
+                    width : needle.width,
+                    height : needle.height
+                });
+            }
+            </checkInViewport>
+            <defaultSizeHaystack>
+            haystack.width = haystack.width || 0;
+            haystack.height = haystack.height || 0;
+            </defaultSizeHaystack>
+            <boundingCheck>
+            if (needle.x < haystack.x || needle.y < haystack.y || needle.x + needle.width > haystack.x + haystack.width
+                    || needle.y + needle.height > haystack.y + haystack.height) {
+                return false;
+            }
+            </boundingCheck>
+            return true;
+        }
+</locateElement>
+
+<initialize>
+function init() {
+        <initCheck>
+        if (isInitialized) {
+            return;
+        }
+        isInitialized = true;
+        </initCheck>
+
+        <checkScrollSetup>
+        function checkScroll() {
+            if (window.pageXOffset != scroll.left) {
+                scroll.top = window.pageYOffset;
+                scroll.left = window.pageXOffset;
+
+                Stickyfill.refreshAll();
+            } else if (window.pageYOffset != scroll.top) {
+                scroll.top = window.pageYOffset;
+                scroll.left = window.pageXOffset;
+
+                stickies.forEach(function (sticky) {
+                    return sticky._recalcPosition();
+                });
+            }
+        }
+        </checkScrollSetup>
+
+        <eventsSetup>
+        checkScroll();
+        window.addEventListener('scroll', checkScroll);
+        window.addEventListener('resize', Stickyfill.refreshAll);
+        window.addEventListener('orientationchange', Stickyfill.refreshAll);
+        </eventsSetup>
+
+        <timerSetup>
+        var fastCheckTimer = void 0;
+        function startFastCheckTimer() {
+            fastCheckTimer = setInterval(function () {
+                stickies.forEach(function (sticky) {
+                    return sticky._fastCheck();
+                });
+            }, 500);
+        }
+        function stopFastCheckTimer() {
+            clearInterval(fastCheckTimer);
+        }
+        </timerSetup>
+
+        <visibilityChangeSetup>
+        var docHiddenKey = void 0;
+        var visibilityChangeEventName = void 0;
+        if ('hidden' in document) {
+            docHiddenKey = 'hidden';
+            visibilityChangeEventName = 'visibilitychange';
+        } else if ('webkitHidden' in document) {
+            docHiddenKey = 'webkitHidden';
+            visibilityChangeEventName = 'webkitvisibilitychange';
+        }
+        if (visibilityChangeEventName) {
+            if (!document[docHiddenKey]) startFastCheckTimer();
+            document.addEventListener(visibilityChangeEventName, function () {
+                if (document[docHiddenKey]) {
+                    stopFastCheckTimer();
+                } else {
+                    startFastCheckTimer();
+                }
+            });
+        } else startFastCheckTimer();
+        </visibilityChangeSetup>
+    }
+</initialize>
+
+<interpolation>
+function(domain, range, value) {
+    var domainSpan = domain[1] - domain[0];
+    var rangeSpan = range[1] - range[0];
+    return (((value - domain[0]) / domainSpan) * rangeSpan + range[0]) || 0;
+}
+</interpolation>
+
+<getVendorPrefix>
+function prefixes(what, where) {
+  where = where || global;
+
+  <prefixLookup>
+  if (what in where) return where[what];
+  else for (var i = 0, key; i < prefixes.vendor.length; i++) {
+    key = prefixes.vendor[i] + what.charAt(0).toUpperCase() + what.slice(1);
+
+    if (key in where) {
+      return where[key];
+    }
+  }
+  </prefixLookup>
+}
+</getVendorPrefix>
+
+<colorPickerSetup>
+function(col, setCurrent) {
+                setCurrent = (typeof setCurrent === "undefined") ? 1 : setCurrent;
+                <colorConversion>
+                if (typeof col == 'string') {
+                    col = hexToHsb(col);
+                } else if (col.r != undefined && col.g != undefined && col.b != undefined) {
+                    col = rgbToHsb(col);
+                } else if (col.h != undefined && col.s != undefined && col.b != undefined) {
+                    col = fixHSB(col);
+                } else {
+                    return this;
+                }
+                </colorConversion>
+                <updateColorPicker>
+                return this.each(function(){
+                    if ($(this).data('colpickId')) {
+                        var cal = $('#' + $(this).data('colpickId'));
+                        cal.data('colpick').color = col;
+                        cal.data('colpick').origColor = col;
+                        fillRGBFields(col, cal.get(0));
+                        fillHSBFields(col, cal.get(0));
+                        fillHexFields(col, cal.get(0));
+                        setHue(col, cal.get(0));
+                        setSelector(col, cal.get(0));
+                        
+                        setNewColor(col, cal.get(0));
+                        cal.data('colpick').onChange.apply(cal.parent(), [col, hsbToHex(col), hsbToRgb(col), cal.data('colpick').el, 1]);
+                        if(setCurrent) {
+                            setCurrentColor(col, cal.get(0));
+                        }
+                    }
+                });
+                </updateColorPicker>
+            }
+</colorPickerSetup>
+
+<preHandlerErrorHandling>
+function onServerPreHandler (ctx, err, value) {
+  if (err) {
+    <errorNormalization>
+    if (err instanceof SuperError) {
+      ctx._response.error = err.rootCause || err.cause || err;
+    } else {
+      ctx._response.error = err;
+    }
+    </errorNormalization>
+    
+    <errorLogging>
+    const internalError = new Errors.MostlyError(
+        Constants.EXTENSION_ERROR, ctx.errorDetails).causedBy(err);
+    ctx.log.error(internalError);
+    </errorLogging>
+
+    return ctx.finish();
+  }
+</preHandlerErrorHandling>
+
+<preHandlerValueHandling>
+  if (value) {
+    ctx._response.payload = value;
+    return ctx.finish();
+  }
+</preHandlerValueHandling>
+
+<actionDispatching>
+  try {
+    let action = ctx._actMeta.action.bind(ctx);
+    
+    <dispatchAction>
+    ctx._actMeta.dispatch(ctx._request, ctx._response, (err) => {
+      
+      <errorInDispatch>
+      if (err) {
+        if (err instanceof SuperError) {
+          ctx._response.error = err.rootCause || err.cause || err;
+        } else {
+          ctx._response.error = err;
+        }
+
+        let internalError = new Errors.MostlyError(
+            Constants.ADD_MIDDLEWARE_ERROR, ctx.errorDetails).causedBy(err);
+        ctx.log.error(internalError);
+
+        return ctx.finish();
+      }
+      </errorInDispatch>
+
+      <pubSubHandling>
+      if (ctx._request.payload.request.type === Constants.REQUEST_TYPE_PUBSUB) {
+        action(ctx._request.payload.pattern);
+        return ctx.finish();
+      }
+      </pubSubHandling>
+
+      <actionExecution>
+      if (ctx._actMeta.isPromisable) {
+        action(ctx._request.payload.pattern)
+          .then(x => ctx._actionHandler(null, x))
+          .catch(e => ctx._actionHandler(e));
+      } else {
+        action(ctx._request.payload.pattern, ctx._actionHandler.bind(ctx));
+      }
+      </actionExecution>
+    });
+    </dispatchAction>
+  } catch (err) {
+    <catchBlockErrors>
+    if (err instanceof SuperError) {
+      ctx._response.error = err.rootCause || err.cause || err;
+    } else {
+      ctx._response.error = err;
+    }
+    
+    ctx._shouldCrash = true;
+
+    ctx.finish();
+    </catchBlockErrors>
+  }
+</actionDispatching>
+
+<getPluralRules>
+function getPluralRules(lang) {
+    <localesToRules>
+    var locales2rules = { /* ... */ };
+    </localesToRules>
+
+    <utilityFunctions>
+    function isIn(n, list) {
+      return list.indexOf(n) !== -1;
+    }
+    function isBetween(n, start, end) {
+      return start <= n && n <= end;
+    }
+    </utilityFunctions>
+
+    <pluralizationRules>
+    var pluralRules = { /* ... */ };
+    </pluralizationRules>
+
+    <ruleSelection>
+    var index = locales2rules[lang.replace(/-.*$/, '')];
+    if (!(index in pluralRules)) {
+      console.warn('plural form unknown for [' + lang + ']');
+      return function() { return 'other'; };
+    }
+    return pluralRules[index];
+    </ruleSelection>
+  }
+</getPluralRules>
+
+<setRotation>
+function (rotation) {
+    <styleAssignment>
+		var rotationStyle = {},
+			cssTransformKey = isIE ? '-ms-transform' : isWebKit ? '-webkit-transform' : isFirefox ? 'MozTransform' : isOpera ? '-o-transform' : '';
+		rotationStyle[cssTransformKey] = rotationStyle.transform = 'rotate(' + rotation + 'deg)';
+		css(this.element, rotationStyle);
+	</styleAssignment>
+}
+</setRotation>
+
+<fileLinking>
+function link(file, type, options) {
+        <initialChecks>
+        if (file == null || file.length === 0 || typeof file !== 'string') {
+            return null;
+        }
+        if (type && typeof type !== 'string') {
+            options = type;
+            type = undefined;
+        }
+        </initialChecks>
+
+        <parserSelection>
+        for (var i = 0; i < parsers.length; i++) {
+            var parser = parsers[i];
+            if (type ? parser.name === type : parser.pattern.test(file)) {
+                var Handler = new parser.Handler(file, options);
+                Handler.name = parser.name;
+                return Handler;
+            }
+        }
+        </parserSelection>
+    }
+</fileLinking>
+
+<createRelease>
+function createRelease(endpoint, version) {
+  return new Promise(function(resolve, reject) {
+    <sendReleaseRequest>
+    superagent
+      .post(endpoint)
+      .set(HEADERS)
+      .send({ version: version })
+      .end(function(err, res) {
+        if (!err) {
+          console.log('Sentry - Pushed release. Version: ' + version);
+          resolve(res);
+        } else {
+          reject(err);
+        }
+      });
+    </sendReleaseRequest>
+  });
+}
+</createRelease>
+```
+
+In these annotations, the functions have been enclosed within tags that generally denote their main responsibility. Within those tags, specific blocks of code that serve distinct sub-responsibilities or steps within the main responsibility have been further annotated to identify these separate tasks.
+
+It's important to note that some functions may seem to contain multiple responsibilities, but I've taken care not to over-segment when these operations collectively serve the main function's purpose. Conversely, I've attempted to avoid under-segmenting the code and have marked distinct responsibilities clearly.

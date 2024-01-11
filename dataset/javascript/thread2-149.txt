@@ -1,0 +1,296 @@
+```javascript
+<reportCoverage>
+function reportCoverage(cov) {
+    <formatReportHeader>
+    print('\n   [bold]{Test Coverage}\n');
+    var sep = '   +------------------------------------------+----------+------+------+--------+',
+        lastSep = '                                              +----------+------+------+--------+';
+	result = sep+'\n';
+    result += '   | filename                                 | coverage | LOC  | SLOC | missed |\n';
+    result += sep+'\n'; </formatReportHeader>
+    
+    <constructCoverageReport>
+    for (var name in cov) {
+        var file = cov[name];
+        if (Array.isArray(file)) {
+            result += '   | ' + rpad(name, 40);
+            result += ' | ' + lpad(file.coverage.toFixed(2), 8);
+            result += ' | ' + lpad(file.LOC, 4);
+            result += ' | ' + lpad(file.SLOC, 4);
+            result += ' | ' + lpad(file.totalMisses, 6);
+            result += ' |\n';
+        }
+    }
+    result += sep+'\n';
+    result += '     ' + rpad('', 40);
+    result += ' | ' + lpad(cov.coverage.toFixed(2), 8);
+    result += ' | ' + lpad(cov.LOC, 4);
+    result += ' | ' + lpad(cov.SLOC, 4);
+    result += ' | ' + lpad(cov.totalMisses, 6);
+    result += ' |\n';
+    result += lastSep; </constructCoverageReport>
+
+    <outputCoverageReport>
+    console.log(result); </outputCoverageReport>
+
+    <annotateAndWriteFiles>
+    for (var name in cov) {
+		if (name.match(file_matcher)) {
+			var file = cov[name];
+			var annotated = '';
+			annotated += colorize('\n  [bold]{' + name + '}:');
+			annotated += colorize(file.source);
+			annotated += '\n';
+			fs.writeFileSync('annotated/'+name, annotated);
+		}
+	} </annotateAndWriteFiles>
+}
+</reportCoverage>
+```
+
+```javascript
+<toggleMaximise>
+function( e ) {
+		e && e.preventDefault();
+		<changeMaximisationState>
+		if( this.isMaximised === true ) {
+			this.layoutManager._$minimiseItem( this );
+		} else {
+			this.layoutManager._$maximiseItem( this );
+		}
+
+		this.isMaximised = !this.isMaximised; </changeMaximisationState>
+        
+        <emitStateChanged>
+		this.emitBubblingEvent( 'stateChanged' ); </emitStateChanged>
+	}
+</toggleMaximise>
+```
+
+```javascript
+<processTagAttributes>
+function(tag, options) {
+    var seenAttrs = false;
+    var attributeNames = [];
+    var selfClosingAllowed = options && options.selfClosingAllowed;
+    
+    <handleTagAttributeTokens>
+    out:
+      while (true) {
+        switch (this.peek().type) {
+          case 'id':
+          case 'class':
+            var tok = this.advance();
+            if (tok.type === 'id') {
+              if (attributeNames.indexOf('id') !== -1) {
+                this.error('DUPLICATE_ID', 'Duplicate attribute "id" is not allowed.', tok);
+              }
+              attributeNames.push('id');
+            }
+            tag.attrs.push({
+              name: tok.type,
+              val: "'" + tok.val + "'",
+              line: tok.loc.start.line,
+              column: tok.loc.start.column,
+              filename: this.filename,
+              mustEscape: false
+            });
+            continue;
+          case 'start-attributes':
+            if (seenAttrs) {
+              console.warn(this.filename + ', line ' + this.peek().loc.start.line + ':\nYou should not have pug tags with multiple attributes.');
+            }
+            seenAttrs = true;
+            tag.attrs = tag.attrs.concat(this.attrs(attributeNames));
+            continue;
+          case '&attributes':
+            var tok = this.advance();
+            tag.attributeBlocks.push({
+              type: 'AttributeBlock',
+              val: tok.val,
+              line: tok.loc.start.line,
+              column: tok.loc.start.column,
+              filename: this.filename
+            });
+            break;
+          default:
+            var pluginResult = this.runPlugin('tagAttributeTokens', this.peek(), tag, attributeNames);
+            if (pluginResult) break;
+            break out;
+        }
+      }
+    </handleTagAttributeTokens>
+
+    <parseSpecialTagsAndDirectives>
+    // Parsing '.'
+    if ('dot' == this.peek().type) {
+      tag.textOnly = true;
+      this.advance();
+    }
+
+    // Handling various token types
+    switch (this.peek().type) {
+      case 'text':
+      case 'interpolated-code':
+        var text = this.parseText();
+        if (text.type === 'Block') {
+          tag.block.nodes.push.apply(tag.block.nodes, text.nodes);
+        } else {
+          tag.block.nodes.push(text);
+        }
+        break;
+      case 'code':
+        tag.block.nodes.push(this.parseCode(true));
+        break;
+      case ':':
+        this.advance();
+        var expr = this.parseExpr();
+        tag.block = expr.type === 'Block' ? expr : this.initBlock(tag.line, [expr]);
+        break;
+      case 'newline':
+      case 'indent':
+      case 'outdent':
+      case 'eos':
+      case 'start-pipeless-text':
+      case 'end-pug-interpolation':
+        break;
+      case 'slash':
+        if (selfClosingAllowed) {
+          this.advance();
+          tag.selfClosing = true;
+          break;
+        }
+      default:
+        var pluginResult = this.runPlugin('tagTokens', this.peek(), tag, options);
+        if (pluginResult) break;
+        this.error('INVALID_TOKEN', 'Unexpected token `' + this.peek().type + '` expected `text`, `interpolated-code`, `code`, `:`' + (selfClosingAllowed ? ', `slash`' : '') + ', `newline` or `eos`', this.peek())
+    }
+    
+    while ('newline' == this.peek().type) this.advance();
+    </parseSpecialTagsAndDirectives>
+
+    <parseTagBlockContent>
+    if (tag.textOnly) {
+      tag.block = this.parseTextBlock() || this.emptyBlock(tag.line);
+    } else if ('indent' == this.peek().type) {
+      var block = this.block();
+      for (var i = 0, len = block.nodes.length; i < len; ++i) {
+        tag.block.nodes.push(block.nodes[i]);
+      }
+    }
+    </parseTagBlockContent>
+
+    return tag;
+  }
+</processTagAttributes>
+```
+
+```javascript
+<buildObject>
+function buildObject(node, blueprintKey, blueprint ) {
+    var value = {};
+
+    <defineObjectProperty>
+    defineProperty(node, blueprintKey, value);
+    </defineObjectProperty>
+
+    <setObjectMetaData>
+    setMeta(value, blueprintKey);
+    </setObjectMetaData>
+
+    return [value, blueprint];
+  }
+</buildObject>
+```
+
+```javascript
+<ResourceManager>
+function ResourceManager(servernode) {
+
+    this.servernode = servernode;
+
+    <initializeGames>
+    this.games = games;
+    </initializeGames>
+
+    <addRootGame>
+    this.addGame('/', servernode.rootDir + path.sep);
+    </addRootGame>
+}
+</ResourceManager>
+```
+
+```javascript
+<deletePanel>
+function _deletePanel( oPanel, bDestroyLayout ) {
+
+		oPanel.setLayout(null);
+		oPanel.setContainer(null);
+
+		if (!bDestroyLayout || !oPanel.getParent()) {
+			<destroyPanel>
+			oPanel.setContent(null);
+			oPanel.destroy(); </destroyPanel>
+		}
+
+	}
+</deletePanel>
+```
+
+```javascript
+<gpfProcessDefineParamResolveBase>
+function _gpfProcessDefineParamResolveBase (params) {
+    var Super = params[_GPF_DEFINE_PARAM_SUPER];
+    <resolveSuperClass>
+    if (!(Super instanceof Function)) {
+        params[_GPF_DEFINE_PARAM_SUPER] = _gpfContext(Super.toString().split("."));
+    }
+    </resolveSuperClass>
+}
+</gpfProcessDefineParamResolveBase>
+```
+
+```javascript
+<isAccessedVarChanged>
+function isAccessedVarChanged(cacheData) {
+  <compareEnvironmentVariables>
+  for (let key in cacheData.env) {
+    if (cacheData.env[key] !== process.env[key]) {
+      return true;
+    }
+  }
+  </compareEnvironmentVariables>
+
+  return false;
+}
+</isAccessedVarChanged>
+```
+
+```javascript
+<encode>
+function encode (filename) {
+  <readAndEncodeFile>
+  var ext = path.extname(filename)
+  var data = fs.readFileSync(filename)
+  var prefix = 'data:audio/' + ext.substring(1) + ';base64,'
+  var encoded = new Buffer(data).toString('base64')
+  return prefix + encoded
+  </readAndEncodeFile>
+}
+</encode>
+```
+
+```javascript
+<getRedoChanges>
+function() {
+			this._commitUndo();
+			var changes = [];
+			<accumulateRedoChanges>
+			for (var i=this.index; i<this.stack.length; i++) {
+				changes = changes.concat(this.stack[i].getRedoChanges());
+			}
+			</accumulateRedoChanges>
+			return changes;
+		}
+</getRedoChanges>
+```

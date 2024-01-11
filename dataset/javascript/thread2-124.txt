@@ -1,0 +1,205 @@
+Below are the SRP annotations for the provided functions:
+
+1.
+<createSearchIndex>
+function (config) {
+  var idx = new lunr.Index
+
+  idx.pipeline.add(
+    lunr.trimmer,
+    lunr.stopWordFilter,
+    lunr.stemmer
+  )
+
+  if (config) config.call(idx, idx)
+
+  return idx
+}
+</createSearchIndex>
+This function is compliant with SRP, representing a creation of a search index.
+
+2.
+<startCronJobs>
+function () {
+    const cronJobsToStart = _getNamesOfCronJobsToStart();
+    if (!cronJobsToStart && _shouldStartCrons() && Shared.isDbConnectionAvailable() === true) {
+        return CronJobManagerJob.startListening().then(function () {
+            Logger.tag('Cron').info('Cron Job Manager is started. Starting all available cron jobs');
+            return Q();
+        }, function (err) {
+            Logger.tag('Cron').error('Error starting Cron Job Manager ');
+            return Q.reject(err);
+        });
+    } else if (cronJobsToStart && _shouldStartCrons()) {
+
+        Logger.tag('Cron').info('Starting specific cron jobs "' + cronJobsToStart.join(', ') + '"');
+
+        try {
+            const cronJobs = Shared.cronModules(cronJobsToStart);
+            let promises = [];
+            for (let cron of cronJobs) {
+                
+                cron.forceRun = true;
+                promises.push(cron.worker(cron, cron));
+            }
+            return Q.all(promises)
+                .then(() => process.exit())
+                .catch(() => process.exit(1));
+        } catch (err) {
+            process.exit(1);
+        }
+    } else {
+        Logger.tag('Cron').warn('Cron Manager is disabled for this environment.');
+        return Q();
+    }
+}
+</startCronJobs>
+This function has multiple responsibilities related to starting cron jobs, managing errors, and exiting processes.
+
+3.
+<determineOrientation>
+function() {
+	if (!gui.hosted) {
+		gui.orientation = window.innerWidth > window.innerHeight ? 1 : 0;
+		gui.broadcastGlobal(gui.BROADCAST_ORIENTATIONCHANGE, gui.orientation);
+	}
+}
+</determineOrientation>
+The function is compliant with SRP, determining the orientation of the GUI.
+
+4.
+<runAfterSuccessScripts>
+function runAfterSuccessScripts() {
+  const autorelease =
+    pkg.version === '0.0.0-semantically-released' &&
+    parseEnv('TRAVIS', false) &&
+    process.env.TRAVIS_BRANCH === 'master' &&
+    !parseEnv('TRAVIS_PULL_REQUEST', false)
+
+  const reportCoverage = hasFile('coverage') && !parseEnv('SKIP_CODECOV', false)
+
+  if (!autorelease && !reportCoverage) {
+    console.log(
+      'No need to autorelease or report coverage. Skipping travis-after-success script...',
+    )
+  } else {
+    const result = spawn.sync(
+      resolveBin('concurrently'),
+      getConcurrentlyArgs(
+        {
+          codecov: reportCoverage
+            ? `echo installing codecov && npx -p codecov@3 -c 'echo running codecov && codecov'`
+            : null,
+          release: autorelease
+            ? `echo installing semantic-release && npx -p semantic-release@15 -c 'echo running semantic-release && semantic-release'`
+            : null,
+        },
+        {killOthers: false},
+      ),
+      {stdio: 'inherit'},
+    )
+
+    process.exit(result.status)
+  }
+}
+</runAfterSuccessScripts>
+This function handles multiple procedural steps for post-build actions.
+
+5.
+<printKeyInfo>
+function printKey () {
+  let keyid = printKeyid(this.primaryKey.getKeyId())
+  let userid = printUser(this.getPrimaryUser().user)
+  return keyid + ' ' + userid
+}
+</printKeyInfo>
+Function is compliant with SRP, focusing solely on printing key information.
+
+6.
+<traversalToJson>
+function traversalToJson(traversal) {
+  var array = traversal.toList().toArray().map(function (elem) { return asJSON(elem); });
+  return JSON.parse(JSON.stringify(array));
+}
+</traversalToJson>
+The function converts a traversal data structure to JSON, which adheres to SRP.
+
+7.
+<processMessages>
+function task () {
+  run = true;
+  var item = messages.shift();
+  if (!item) {
+    run = false;
+  } else if ('message' in item) {
+    if (output_) {
+      write(item);
+    } else {
+      task();
+    }
+  } else if (item.path) {
+    p_ = path.resolve(p_, item.path);
+    task();
+  } else if ('output' in item) {
+    output_ = item.output;
+    task();
+  } else {
+    task();
+  }
+}
+</processMessages>
+This function seems to sequentially process messages, each condition could be seen as a different responsibility within that process.
+
+8.
+<refreshAuthentication>
+function(refreshToken, callback) {
+  return postParams(this.tokenServiceUrl, {
+    grant_type : "refresh_token",
+    refresh_token : refreshToken,
+    client_id : this.clientId,
+    client_secret : this.clientSecret
+  }, callback);
+}
+</refreshAuthentication>
+The function renews authentication which is consistent with SRP.
+
+9.
+<bindSocketEvents>
+function bindSocket(io, indicator) {
+  Object.keys(indicator.watch).forEach((key) => {
+    let eventName = indicator.watch[key];
+    indicator.on(eventName, (msg) => io.emit(eventName, msg));
+  });
+}
+</bindSocketEvents>
+The function binds events to a socket, adhering to SRP.
+
+10.
+<unsuspendSubscription>
+function unsuspendSubscriber (topic, token) {
+  if (typeof token === 'string') {
+    return !!applyTopicDescendents(
+      unsuspendTopic, 'subscriptions', token, topic
+    );
+  }
+
+  var node = ancestorTopicSearch(token.topic, topic);
+  if (node.topic !== token.topic) {
+    return false;
+  }
+
+  var i = searchAround(
+    getId, getPriority,
+    token.id, token.priority,
+    binaryIndexBy(getPriority, token.priority, node.subscriptions),
+    node.subscriptions
+  );
+
+  if (i === -1) {
+    return false;
+  }
+
+  return !!unsuspendNode(node.subscriptions[i]);
+}
+</unsuspendSubscription>
+This function is responsible for unsuspending a subscription and appears to be SRP compliant.

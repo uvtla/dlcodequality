@@ -1,0 +1,525 @@
+```javascript
+<parse>
+function parse(template, options) {
+    <initializeOptions>
+    options = options || {};
+
+    var tags = options.tags || exports.tags,
+        openTag = tags[0],
+        closeTag = tags[tags.length - 1];
+
+    var code = [
+      'var buffer = "";', 
+      "\nvar line = 1;", 
+      "\ntry {",
+      '\nbuffer += "'
+    ];
+    </initializeOptions>
+
+    <initializeControlVariables>
+    var spaces = [],      
+        hasTag = false,   
+        nonSpace = false; 
+    </initializeControlVariables>
+
+    var stripSpace = function () {
+      <stripSpaceLogic>
+      if (hasTag && !nonSpace && !options.space) {
+        while (spaces.length) {
+          code.splice(spaces.pop(), 1);
+        }
+      } else {
+        spaces = [];
+      }
+      </stripSpaceLogic>
+
+      hasTag = false;
+      nonSpace = false;
+    };
+
+    <initializeSectionControl>
+    var sectionStack = [], updateLine, nextOpenTag, nextCloseTag;
+    </initializeSectionControl>
+
+    <setTags>
+    var setTags = function (source) {
+      tags = trim(source).split(/\s+/);
+      nextOpenTag = tags[0];
+      nextCloseTag = tags[tags.length - 1];
+    };
+    </setTags>
+
+    <includePartial>
+    var includePartial = function (source) {
+      code.push(
+        '";',
+        updateLine,
+        '\nvar partial = partials["' + trim(source) + '"];',
+        '\nif (partial) {',
+        '\n  buffer += render(partial,stack[stack.length - 1],partials);',
+        '\n}',
+        '\nbuffer += "'
+      );
+    };
+    </includePartial>
+
+    var openSection = function (source, inverted) {
+      <openSectionLogic>
+      var name = trim(source);
+
+      if (name === "") {
+        throw debug(new Error("Section name may not be empty"), template, line, options.file);
+      }
+
+      sectionStack.push({name: name, inverted: inverted});
+
+      code.push(
+        '";',
+        updateLine,
+        '\nvar name = "' + name + '";',
+        '\nvar callback = (function () {',
+        '\n  return function () {',
+        '\n    var buffer = "";',
+        '\nbuffer += "'
+      );
+      </openSectionLogic>
+    };
+
+    <openInvertedSection>
+    var openInvertedSection = function (source) {
+      openSection(source, true);
+    };
+    </openInvertedSection>
+
+    <closeSection>
+    var closeSection = function (source) {
+      <closeSectionLogic>
+      var name = trim(source);
+      var openName = sectionStack.length != 0 && sectionStack[sectionStack.length - 1].name;
+
+      if (!openName || name != openName) {
+        throw debug(new Error('Section named "' + name + '" was never opened'), template, line, options.file);
+      }
+
+      var section = sectionStack.pop();
+
+      code.push(
+        '";',
+        '\n    return buffer;',
+        '\n  };',
+        '\n})();'
+      );
+
+      if (section.inverted) {
+        code.push("\nbuffer += renderSection(name,stack,callback,true);");
+      } else {
+        code.push("\nbuffer += renderSection(name,stack,callback);");
+      }
+
+      code.push('\nbuffer += "');
+      </closeSectionLogic>
+    };
+    </closeSection>
+
+    <sendPlain>
+    var sendPlain = function (source) {
+      code.push(
+        '";',
+        updateLine,
+        '\nbuffer += lookup("' + trim(source) + '",stack,"");',
+        '\nbuffer += "'
+      );
+    };
+    </sendPlain>
+
+    <sendEscaped>
+    var sendEscaped = function (source) {
+      code.push(
+        '";',
+        updateLine,
+        '\nbuffer += escapeHTML(lookup("' + trim(source) + '",stack,""));',
+        '\nbuffer += "'
+      );
+    };
+    </sendEscaped>
+
+    <mainParsingLoop>
+    var line = 1, c, callback;
+    for (var i = 0, len = template.length; i < len; ++i) {
+      if (template.slice(i, i + openTag.length) === openTag) {
+        <handleTag>
+        i += openTag.length;
+        c = template.substr(i, 1);
+        updateLine = '\nline = ' + line + ';';
+        nextOpenTag = openTag;
+        nextCloseTag = closeTag;
+        hasTag = true;
+
+        switch (c) {
+        case "!": 
+          i++;
+          callback = null;
+          break;
+        case "=": 
+          i++;
+          closeTag = "=" + closeTag;
+          callback = setTags;
+          break;
+        case ">": 
+          i++;
+          callback = includePartial;
+          break;
+        case "#": 
+          i++;
+          callback = openSection;
+          break;
+        case "^": 
+          i++;
+          callback = openInvertedSection;
+          break;
+        case "/": 
+          i++;
+          callback = closeSection;
+          break;
+        case "{": 
+          closeTag = "}" + closeTag;
+        case "&": 
+          i++;
+          nonSpace = true;
+          callback = sendPlain;
+          break;
+        default: 
+          nonSpace = true;
+          callback = sendEscaped;
+        }
+
+        var end = template.indexOf(closeTag, i);
+
+        if (end === -1) {
+          throw debug(new Error('Tag "' + openTag + '" was not closed properly'), template, line, options.file);
+        }
+
+        var source = template.substring(i, end);
+
+        if (callback) {
+          callback(source);
+        }
+
+        var n = 0;
+        while (~(n = source.indexOf("\n", n))) {
+          line++;
+          n++;
+        }
+
+        i = end + closeTag.length - 1;
+        openTag = nextOpenTag;
+        closeTag = nextCloseTag;
+        </handleTag>
+      } else {
+        <handleCharacter>
+        c = template.substr(i, 1);
+
+        switch (c) {
+        case '"':
+        case "\\":
+          nonSpace = true;
+          code.push("\\" + c);
+          break;
+        case "\r":
+          break;
+        case "\n":
+          spaces.push(code.length);
+          code.push("\\n");
+          stripSpace(); 
+          line++;
+          break;
+        default:
+          if (isWhitespace(c)) {
+            spaces.push(code.length);
+          } else {
+            nonSpace = true;
+          }
+
+          code.push(c);
+        }
+        </handleCharacter>
+      }
+    }
+    </mainParsingLoop>
+
+    <checkUnclosedSections>
+    if (sectionStack.length != 0) {
+      throw debug(new Error('Section "' + sectionStack[sectionStack.length - 1].name + '" was not closed properly'), template, line, options.file);
+    }
+    </checkUnclosedSections>
+
+    <stripFinalSpace>
+    stripSpace();
+    </stripFinalSpace>
+
+    <finalizeCode>
+    code.push(
+      '";',
+      "\nreturn buffer;",
+      "\n} catch (e) { throw {error: e, line: line}; }"
+    );
+    </finalizeCode>
+
+    <debugOutput>
+    var body = code.join("").replace(/buffer \+= "";\n/g, "");
+
+    if (options.debug) {
+      if (typeof console != "undefined" && console.log) {
+        console.log(body);
+      } else if (typeof print === "function") {
+        print(body);
+      }
+    }
+    </debugOutput>
+
+    return body;
+}
+</parse>
+
+<callSendAPI>
+function callSendAPI(messageData) {
+    <executeRequest>
+    request({
+        uri: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: {
+            access_token: PAGE_ACCESS_TOKEN
+        },
+        method: 'POST',
+        json: messageData
+
+    }, function(error, response, body) {
+        <handleResponse>
+        if (!error && response.statusCode == 200) {
+            var recipientId = body.recipient_id;
+            var messageId = body.message_id;
+
+            if (messageId) {
+                console.log("Successfully sent message with id %s to recipient %s",
+                    messageId, recipientId);
+            } else {
+                console.log("Successfully called Send API for recipient %s",
+                    recipientId);
+            }
+        } else {
+            console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
+        }
+        </handleResponse>
+    });
+    </executeRequest>
+}
+</callSendAPI>
+
+<examineEvent>
+function examineEvent(target, event) {
+    <eventHandlingLogic>
+        if (spec.templating.isFileName(target) || spec.templating.isEditIcon(target)) {
+            var fileId = spec.templating.getFileId(target),
+                status = spec.onGetUploadStatus(fileId);
+
+            if (status === qq.status.SUBMITTED) {
+                spec.log(qq.format("Detected valid filename click event on file '{}', ID: {}.", spec.onGetName(fileId), fileId));
+                qq.preventDefault(event);
+
+                inheritedInternalApi.handleFilenameEdit(fileId, target, true);
+            }
+        }
+    </eventHandlingLogic>
+}
+</examineEvent>
+
+<mix>
+function mix(receiver, supplier, overwrite) {
+    <mixObjects>
+    var key;
+
+    if (!receiver || !supplier) {
+        return receiver || {};
+    }
+
+    for (key in supplier) {
+        if (supplier.hasOwnProperty(key)) {
+            if (overwrite || !receiver.hasOwnProperty(key)) {
+                receiver[key] = supplier[key];
+            }
+        }
+    }
+    </mixObjects>
+
+    return receiver;
+}
+</mix>
+
+<countIdentifiers>
+function countIdentifiers (node) {
+    <recursiveCount>
+    if (!node.children) return 0;
+    var count = 0, i = 0, len = node.children.length, type;
+    for (; i < len; i++) {
+      type = node.children[i].type;
+      if (type === "identifier" || type === "binder" || type === "key") count += 1;
+      else count += countIdentifiers(node.children[i]);
+    }
+    </recursiveCount>
+    return count;
+}
+</countIdentifiers>
+
+<getIndexOfItemAtY>
+function getIndexOfItemAtY(items, scrollTarget, y, downward) {
+    <initialSetup>
+    const start = downward ? 0 : items.length - 1;
+    const end = downward ? items.length : 0;
+    const step = downward ? 1 : -1;
+
+    const topOfClientArea = scrollTarget.offsetTop + scrollTarget.clientTop;
+    </initialSetup>
+
+    <iterateItems>
+    let item;
+    let itemIndex = start;
+    let itemTop;
+    let found = false;
+    while (itemIndex !== end) {
+        <findItemConditions>
+        item = items[itemIndex];
+        itemTop = item.offsetTop - topOfClientArea;
+        const itemBottom = itemTop + item.offsetHeight;
+        if (itemTop <= y && itemBottom >= y) {
+            found = true;
+            break;
+        }
+        </findItemConditions>
+        itemIndex += step;
+    }
+    </iterateItems>
+
+    if (!found) {
+        return null;
+    }
+
+    <computeAdjustedIndex>
+    const itemStyle = getComputedStyle(item);
+    const itemPaddingTop = itemStyle.paddingTop ? parseFloat(itemStyle.paddingTop) : 0;
+    const itemPaddingBottom = itemStyle.paddingBottom ? parseFloat(itemStyle.paddingBottom) : 0;
+    const contentTop = itemTop + item.clientTop + itemPaddingTop;
+    const contentBottom = contentTop + item.clientHeight - itemPaddingTop - itemPaddingBottom;
+    if ((downward && contentTop <= y) || (!downward && contentBottom >= y)) {
+        return itemIndex;
+    }
+    else {
+        return itemIndex - step;
+    }
+    </computeAdjustedIndex>
+}
+</getIndexOfItemAtY>
+
+<exportsFunction>
+function (exports) {
+
+    <findExport>
+    var exp = undefined;
+
+    
+    exports.forEach(function (_export) {
+        if (_export.action && _export.action === 'export') {
+            exp = _export;
+        }
+
+    });
+    </findExport>
+
+    <validateExport>
+    if (!exp) {
+        throw new Error("The export was using Linz default export method, yet the model's list.export object could not be found.");
+    }
+    </validateExport>
+
+    return exp;
+}
+</exportsFunction>
+
+<removePreviousAssociatedDomains>
+function removePreviousAssociatedDomains(preferences, domains) {
+    <generateFilteredDomainsList>
+    const output = [];
+    const linkDomains = preferences.linkDomain;
+
+    if (!domains) return output;
+    for (let i = 0; i < domains.length; i++) {
+      let domain = domains[i];
+      if (domain.indexOf("applinks:") === 0) {
+        domain = domain.replace("applinks:", "");
+        if (isBranchAssociatedDomains(domain, linkDomains)) {
+          output.push(`applinks:${domain}`);
+        }
+      } else if (isBranchAssociatedDomains(domain, linkDomains)) {
+        output.push(domain);
+      }
+    }
+    </generateFilteredDomainsList>
+
+    return output;
+}
+</removePreviousAssociatedDomains>
+
+<parseJSON>
+function parse(data) {
+  try {
+    <attemptParsing>
+    return JSON.parse(data);
+    </attemptParsing>
+  } catch (e) {
+    <handleParseError>
+    log('Oops! Some problems parsing this ' + (typeof data === 'undefined' ? 'undefined' : _typeof(data)) + '.', 'error', debug);
+    </handleParseError>
+  }
+
+  return null;
+}
+</parseJSON>
+
+<getParams>
+function getParams(req, all) {
+  <initializeValues>
+  const val = { query: {}, body: {}, params: {}, all: {} };
+  </initializeValues>
+
+  if (all) {
+    <aggregateAllParameters>
+    for (const k in req.query) {
+      val.query[k] = req.query[k];
+      val.all[k] = req.query[k];
+    }
+    for (const k in req.body) {
+      val.body[k] = req.body[k];
+      val.all[k] = req.body[k];
+    }
+    for (const k in req.params) {
+      val.params[k] = req.params[k];
+      val.all[k] = req.params[k];
+    }
+    </aggregateAllParameters>
+  } else {
+    <getRequestBasedParameters>
+    if (req.method === 'GET') {
+      val.query = req.query;
+      val.all = req.query;
+    } else {
+      val.body = req.body;
+      val.all = req.body;
+    }
+    for (const k in req.params) {
+      val.params[k] = req.params[k];
+      val.all[k] = req.params[k];
+    }
+    </getRequestBasedParameters>
+  }
+  return val;
+}
+</getParams>
+```

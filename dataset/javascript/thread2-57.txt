@@ -1,0 +1,197 @@
+```javascript
+<waitIdleTimeExpire>
+function waitIdleTimeExpire(key, timeout) {
+  return function(client) {
+    var contains = true;
+    t.sleepFor(200);
+    waitsFor(function() {
+      client.containsKey(key).then(function(success) {
+        contains = success;
+      });
+      return !contains;
+    }, '`' + key + '` key should be expired', timeout);
+    return client;
+  }
+}
+</waitIdleTimeExpire>
+
+<removeFeatures>
+function(features) {
+  if(!(OpenLayers.Util.isArray(features))) {
+    features = [features];
+  }
+  for(var i=0; i<features.length; ++i) {
+    delete this.features[features[i].id];
+  }
+  this.redraw();
+}
+</removeFeatures>
+
+<interpret>
+function interpret(source) {
+  var tree = parser.parse(source);
+  var js = [
+    'module.exports = function (out, globals) {',
+    '  var end = false;',
+    // ... (omitting the repetitive parts for brevity)
+    '  }',
+    '  if (end) {',
+    '    out.end();',
+    '  }',
+    '}'
+  ];
+  interpretChildren(js, tree, '    ');
+  js.push(
+    '  }',
+    '  if (end) {',
+    '    out.end();',
+    '  }',
+    '}'
+  );
+  js = js.join('\n');
+  return js;
+}
+</interpret>
+
+<connect>
+function connect (req, opts, fn) {
+  <establishConnection>
+  var proxy = this.proxy;
+  var socket;
+  if (this.secureProxy) {
+    socket = tls.connect(proxy);
+  } else {
+    socket = net.connect(proxy);
+  }
+  </establishConnection>
+  
+  <handlingData>
+  var buffers = [];
+  var buffersLength = 0;
+
+  function read () {
+    // ...
+  }
+
+  function cleanup () {
+    // ...
+  }
+
+  function onclose (err) {
+    // ...
+  }
+
+  function onend () {
+    // ...
+  }
+
+  function onerror (err) {
+    // ...
+  }
+
+  function ondata (b) {
+    // ...
+  }
+
+  function onsocket (socket) {
+    // ...
+  }
+
+  socket.on('error', onerror);
+  socket.on('close', onclose);
+  socket.on('end', onend);
+
+  if (socket.read) {
+    read();
+  } else {
+    socket.once('data', ondata);
+  }
+  </handlingData>
+
+  <sendingRequest>
+  var hostname = opts.host + ':' + opts.port;
+  var msg = 'CONNECT ' + hostname + ' HTTP/1.1\r\n';
+  var auth = proxy.auth;
+  if (auth) {
+    msg += 'Proxy-Authorization: Basic ' + Buffer.from(auth, 'utf8').toString('base64') + '\r\n';
+  }
+  msg += 'Host: ' + hostname + '\r\n' +
+      'Connection: close\r\n' +
+      '\r\n';
+  socket.write(msg);
+  </sendingRequest>
+}
+</connect>
+
+<updateCurrentProjectContext>
+function _updateCurrentProjectContext() {
+  var defaultScopeOrder = PreferencesImpl.manager._getScopeOrder({});
+  scopeOrderWithProject = _adjustScopeOrderForProject(defaultScopeOrder, true);
+  scopeOrderWithoutProject = _adjustScopeOrderForProject(defaultScopeOrder, false);
+  CURRENT_PROJECT.scopeOrder = scopeOrderWithProject;
+}
+</updateCurrentProjectContext>
+
+<checkSlugAvailability>
+function (slug) {
+  var query = { where: {} };
+  query.where[slugColumn] = slug;
+  return Model.findOne(query).then(function (model) {
+    return model === null;
+  });
+}
+</checkSlugAvailability>
+
+<setupBinding>
+function (target, element, key, path, twoWays, jq, valueFunction, events) {
+  this.clearBinding(element, key);
+  var ab = new WebAtoms.AtomBinding(target, element, key, path, twoWays, jq, valueFunction, events);
+  this.bindings.push(ab);
+  ab.setup();
+}
+</setupBinding>
+
+<ClientConstructor>
+function Client(connParams, db) {
+  this.connParams = connParams;
+  this.connected  = false;
+  this.lastError = null;
+  this.db = db || 'pg';
+}
+</ClientConstructor>
+
+<toBuffer>
+function toBuffer(buf) {
+  if (buf instanceof ArrayBuffer) {
+    return arrayBufferToBuffer(buf);
+  } else if (Buffer.isBuffer(buf)) {
+    return buf;
+  } else if (buf instanceof Uint8Array) {
+    return new Buffer(buf);
+  } else {
+    return buf; 
+  }
+}
+</toBuffer>
+
+<inverseProjection>
+function inverse$15(p) {
+  p.x -= this.x0;
+  p.y -= this.y0;
+  var lon, lat;
+  if (this.sphere) {
+    lon = adjust_lon(this.long0 + (p.x / this.a) / Math.cos(this.lat_ts));
+    lat = Math.asin((p.y / this.a) * Math.cos(this.lat_ts));
+  }
+  else {
+    lat = iqsfnz(this.e, 2 * p.y * this.k0 / this.a);
+    lon = adjust_lon(this.long0 + p.x / (this.a * this.k0));
+  }
+  p.x = lon;
+  p.y = lat;
+  return p;
+}
+</inverseProjection>
+```
+
+In several cases here, certain functions might appear to be doing multiple things because they contain sub-functions, but it is necessary to evaluate the overarching goal of the parent function, which may encapsulate the responsibilities within a single theme or purpose such as setting up a connection or performing a calculation.

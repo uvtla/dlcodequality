@@ -1,0 +1,502 @@
+```javascript
+<function>
+function(format) {
+    <check-and-delete>
+    if (typeof format === "undefined") {
+      _deleteOwnProperties(_clipData);
+      _clipDataFormatMap = null;
+    } </check-and-delete>
+    <delete-specific-format>
+    else if (typeof format === "string" && _hasOwn.call(_clipData, format)) {
+      delete _clipData[format];
+    }
+    </delete-specific-format>
+}
+</function>
+
+<function>
+function getOutputResourcePathMap(packedFiles, context, parseOpts, settings) {
+    <compute-need-output-require-config-pages>
+    var pages = getNeedOutputRequireConfigPages(packedFiles, parseOpts, settings);
+    </compute-need-output-require-config-pages>
+    var resMaps = [];
+    <iterate-pages>
+    pages.forEach(function(page) {
+        var file = page.file;
+        var loadScripts = page.loadScripts || [];
+        var loadOthers = page.loadOthers || [];
+        <get-not-load-packed-files>
+        var notLoadPackFiles = getNotLoadPackedFiles(
+            file, packedFiles, [].concat(loadScripts, loadOthers)
+        );
+        </get-not-load-packed-files>
+        
+        <get-pack-file-path-map>
+        var pkgPathMap = context.getPackFilePathMap(loadScripts,settings);
+        </get-pack-file-path-map>
+
+        <determine-path-map>
+        var pathMap = pkgPathMap;
+        var outputNotPackFiles = settings.outputNotPackPathMap;
+        if (outputNotPackFiles) {
+            <get-not-in-pkg-file-path-map>
+            var notPkgPathMap = context.getNotInPkgFilePathMap(loadScripts, {
+                filter: _.isFunction(outputNotPackFiles) ? outputNotPackFiles : filterOutputFiles
+            },settings);
+            </get-not-in-pkg-file-path-map>
+            <assign-path-maps>
+            pathMap = _.assign({}, notPkgPathMap, pkgPathMap);
+            </assign-path-maps>
+        } else {
+            <get-module-file-path-map>
+            var notPkgPathMap = context.getModuleFilePathMap(parseOpts.notPackPluginResFiles || []);
+            </get-module-file-path-map>
+            <assign-path-maps>
+            pathMap = _.assign({}, notPkgPathMap, pkgPathMap);
+            </assign-path-maps>
+        }
+        </determine-path-map>
+
+        <handle-async-mod-path-map>
+        if(settings.outputAsynModPathMap){
+            var outputAsynModPathMap = settings.outputAsynModPathMap;
+            var asyncScripts = [].concat([],file.asyncs,file.requires);
+            var arrScripts = getDepAsynScripts(asyncScripts,context); 
+            var asynModPathMap = context.getModuleFilePathMap(arrScripts,{ 
+                filter: _.isFunction(outputAsynModPathMap) ? outputAsynModPathMap : filterOutputFiles
+            },settings);
+            pathMap = asynModPathMap || {};
+        }
+        </handle-async-mod-path-map>
+
+        <push-res-maps>
+        resMaps.push({
+            file: file,
+            paths: pathMap
+        });
+        </push-res-maps>
+    });
+    </iterate-pages>
+    return resMaps;
+}
+</function>
+
+<function>
+function basename (filePath) {
+  <determine-basename-windows>
+  if (isWindows) {
+    return path.basename(filePath, path.extname(filePath))
+  }
+  </determine-basename-windows>
+  <determine-basename-default>  
+  return path.basename(filePath)
+  </determine-basename-default>
+}
+</function>
+
+<function>
+function getHeaders(config) {
+  <initialize-headers>
+  const headers = { 'X-Presto-User': config.user };
+  </initialize-headers>
+  <add-catalog-header>
+  if (config.catalog) {
+    headers['X-Presto-Catalog'] = config.catalog;
+  }
+  </add-catalog-header>
+  <add-schema-header>
+  if (config.schema) {
+    headers['X-Presto-Schema'] = config.schema;
+  }
+  </add-schema-header>
+  return headers;
+}
+</function>
+
+<function>
+function step5a(token) {
+    <measure-token>
+    var m = measure(token);
+    </measure-token>
+    
+    <check-measure-and-strip-e>
+    if((m > 1 && token.substr(-1) == 'e') || (m == 1 && !(categorizeChars(token).substr(-4, 3) == 'CVC' && token.match(/[^wxy].$/))))
+        return token.replace(/e$/, '');
+    </check-measure-and-strip-e>
+
+    return token;
+}
+</function>
+
+<function>
+function(filetype, option){
+		var puzzle = this.puzzle, bd = puzzle.board;
+		var pzl = new pzpr.parser.FileData('', puzzle.pid);
+		
+		<set-filetype>
+		this.currentType = filetype = filetype || pzl.FILE_PZPR; 
+		option = option || {};
+		</set-filetype>
+
+		<initialize-data-properties>
+		this.filever = 0;
+		this.datastr = "";
+		</initialize-data-properties>
+		<handle-pbox-xml-filetype> 
+		if(filetype===pzl.FILE_PBOX_XML){
+			this.xmldoc = (new DOMParser()).parseFromString('<?xml version="1.0" encoding="utf-8" ?><puzzle />', 'text/xml');
+			var puzzlenode = this.xmldoc.querySelector('puzzle');
+			puzzlenode.appendChild(this.createXMLNode('board'));
+			puzzlenode.appendChild(this.createXMLNode('answer'));
+		}
+		</handle-pbox-xml-filetype>
+
+		<encode-based-on-filetype>
+		switch(filetype){
+		case pzl.FILE_PZPR:
+			this.encodeData();
+			if(!option.history && option.trial && bd.trialstage>0){ this.encodeTrial();}
+			break;
+
+		case pzl.FILE_PBOX:
+			this.kanpenSave();
+			break;
+
+		case pzl.FILE_PBOX_XML:
+			this.kanpenSaveXML();
+			break;
+
+		default:
+			throw "invalid File Type";
+		}
+		</encode-based-on-filetype>
+
+		<set-parser-properties>
+		pzl.type  = filetype;
+		pzl.filever = this.filever;
+		pzl.cols  = bd.cols;
+		pzl.rows  = bd.rows;
+		if(filetype!==pzl.FILE_PBOX_XML){
+			pzl.body = this.datastr;
+		}
+		else{
+			pzl.body = this.xmldoc;
+		}
+		pzl.metadata.update(puzzle.metadata);
+		if(option.history && (filetype===pzl.FILE_PZPR)){
+			pzl.history = puzzle.opemgr.encodeHistory({time:!!option.time});
+		}
+		</set-parser-properties>
+
+		<cleanup-and-return>
+		this.datastr = "";
+
+		return pzl.generate();
+		</cleanup-and-return>
+	}
+</function>
+
+<function>
+function getDataFromCustomEvent(nativeEvent) {
+  <check-and-retrieve-detail-data>
+  var detail = nativeEvent.detail;
+  if ((typeof detail === 'undefined' ? 'undefined' : _typeof(detail)) === 'object' && 'data' in detail) {
+    return detail.data;
+  }
+  </check-and-retrieve-detail-data>
+  return null;
+}
+</function>
+
+<function>
+function getDeviceConnectionTypesData(deviceInfo) {
+            <log-device-info-debug>
+            if(false) {
+                console.log(
+                    'in getDeviceConnectionTypesData',
+                    deviceInfo.serialNumber,
+                    deviceInfo.ct,
+                    deviceInfo.port,
+                    deviceInfo.isActive,
+                    deviceInfo.isMockDevice
+                );
+            }
+            </log-device-info-debug>
+            var connectionTypes = [];
+
+            <initialize-connection-type-variables>
+            var foundUSB = false;
+            var usbInfo = {};
+            var foundEth = false;
+            var ethInfo = {};
+            var foundWiFi = false;
+            var wifiInfo = {};
+            </initialize-connection-type-variables>
+
+            <define-constants-for-connection-types>
+            var usbCT = driver_const.connectionTypes.usb;
+            var ethCT = driver_const.connectionTypes.ethernet;
+            var wifiCT = driver_const.connectionTypes.wifi;
+            </define-constants-for-connection-types>
+            
+            <check-and-create-usb-connection-info>
+            if(deviceInfo.ct === usbCT) {
+                usbInfo = createDeviceConnectionObj(
+                    deviceInfo.dt,
+                    deviceInfo.ct,
+                    deviceInfo.serialNumber.toString()
+                );
+                <set-usb-info-state>
+                usbInfo.isVerified = true;
+                usbInfo.verified = true;
+                
+                usbInfo.isScanned = true;
+                usbInfo.insertionMethod = 'scan';
+                usbInfo.isActive = deviceInfo.isActive;
+                if(deviceInfo.isActive) {
+                    usbInfo.insertionMethod = 'connected';
+                    usbInfo.isVerified = true;
+                    usbInfo.verified = true;
+                }
+                </set-usb-info-state>
+                foundUSB = true;
+            }
+            </check-and-create-usb-connection-info>
+            
+            <check-and-create-ethernet-connection-info>
+            else if(deviceInfo.ct === ethCT) {
+                ethInfo = createDeviceConnectionObj(
+                    deviceInfo.dt,
+                    deviceInfo.ct,
+                    
+                    deviceInfo.ethernetIP
+                );
+                <set-ethernet-info-state>
+                ethInfo.isScanned = true;
+                ethInfo.insertionMethod = 'scan';
+                ethInfo.isActive = deviceInfo.isActive;
+                if(deviceInfo.isActive) {
+                    ethInfo.insertionMethod = 'connected';
+                    ethInfo.isVerified = true;
+                    ethInfo.verified = true;
+                }
+                </set-ethernet-info-state>
+                foundEth = true;
+            }
+            </check-and-create-ethernet-connection-info>
+            
+            <check-and-create-wifi-connection-info>
+            else if(deviceInfo.ct === wifiCT) {
+                wifiInfo = createDeviceConnectionObj(
+                    deviceInfo.dt,
+                    deviceInfo.ct,
+                    
+                    deviceInfo.wifiIP
+                );
+                <set-wifi-info-state>
+                wifiInfo.isScanned = true;
+                wifiInfo.insertionMethod = 'scan';
+                wifiInfo.isActive = deviceInfo.isActive;
+                if(deviceInfo.isActive) {
+                    wifiInfo.insertionMethod = 'connected';
+                    wifiInfo.isVerified = true;
+                    wifiInfo.verified = true;
+                }
+                </set-wifi-info-state>
+                foundWiFi = true;
+            }
+            </check-and-create-wifi-connection-info>
+            <check-and-create-ethernet-connection-attribute-info>
+            else {
+                console.error('openall_d_s, Encountered Invalid Connection Type', deviceInfo.ct);
+            }
+            if(!foundEth) {
+                if(deviceInfo.ETHERNET_IP) {
+                    if(deviceInfo.ETHERNET_IP.isReal) {
+                        ethInfo = createDeviceConnectionObj(
+                            deviceInfo.dt,
+                            ethCT,
+                            deviceInfo.ethernetIP
+                        );
+                        foundEth = true;
+                        ethInfo.insertionMethod = 'attribute';
+                        ethInfo.foundByAttribute = true;
+                    }
+                }
+            }
+            </check-and-create-ethernet-connection-attribute-info>
+            <check-and-create-wifi-connection-attribute-info>
+            if(!foundWiFi) {
+                if(deviceInfo.WIFI_IP) {
+                    if(deviceInfo.WIFI_IP.isReal) {
+                        wifiInfo = createDeviceConnectionObj(
+                            deviceInfo.dt,
+                            wifiCT,
+                            deviceInfo.wifiIP
+                        );
+                        foundWiFi = true;
+                        wifiInfo.insertionMethod = 'attribute';
+                        wifiInfo.foundByAttribute = true;
+                    }
+                }
+            }
+            </check-and-create-wifi-connection-attribute-info>
+
+            <add-connection-types-to-array>
+            if(foundUSB) {connectionTypes.push(usbInfo);}
+            if(foundEth) {connectionTypes.push(ethInfo);}
+            if(foundWiFi) {connectionTypes.push(wifiInfo);}
+            </add-connection-types-to-array>
+
+            return connectionTypes;
+        }
+</function>
+
+<function>
+function compareTo() {
+  <initialize-variables>
+  var set;
+  </initialize-variables>
+  <handle-arguments-length>
+  if (compareTo.arguments.length == 2)
+   {
+    <set-arguments-length-to-2>
+    set = compareTo.arguments[1];
+    </set-arguments-length-to-2>
+   }
+  else if (compareTo.arguments.length == 1)
+   {
+    <set-arguments-length-to-1>
+    set = this.plainMC;
+    </set-arguments-length-to-1>
+   }
+  else
+   {
+    <throw-exception-for-invalid-arguments>
+    throw "compareTo(): " + compareTo.arguments.length + " arguments given; expected 1 or 2";
+    </throw-exception-for-invalid-arguments>
+   }
+   </handle-arguments-length>
+  <initialize-comparison-variables>
+  var rhs = compareTo.arguments[0];
+  
+  var thislength=0;
+  
+  var i=0;
+  
+  var newrhs;
+  </initialize-comparison-variables>
+  
+  <handle-lost-digits>
+  if (set.lostDigits)
+   this.checkdigits(rhs,set.digits);
+  </handle-lost-digits>
+  
+  <compare-index-and-exponents>
+  if ((this.ind==rhs.ind)&&(this.exp==rhs.exp))
+   {
+    <set-this-length>
+    thislength=this.mant.length;
+    </set-this-length>
+    <check-mantissa-length>
+    if (thislength<rhs.mant.length)
+     return -this.ind;
+    if (thislength>rhs.mant.length)
+     return this.ind;
+    </check-mantissa-length>
+    <compare-significant-digits>
+    if ((thislength<=set.digits)||(set.digits==0))
+     {
+      <compare-mantissa-values>{var $6=thislength;i=0;i:for(;$6>0;$6--,i++){
+       if (this.mant[i]<rhs.mant[i])
+        return -this.ind;
+       if (this.mant[i]>rhs.mant[i])
+        return this.ind;
+       }}</compare-mantissa-values>
+      return 0; 
+     }
+    </compare-significant-digits>
+   }
+  </compare-index-and-exponents>
+  else
+   {
+    <compare-indicators>
+    if (this.ind<rhs.ind)
+     return -1;
+    if (this.ind>rhs.ind)
+     return 1;
+    </compare-indicators>
+   }
+  <clone-and-compare-rhs>
+  newrhs=this.clone(rhs); 
+  newrhs.ind=-newrhs.ind; 
+  return this.add(newrhs,set).ind; 
+  </clone-and-compare-rhs>
+  }
+</function>
+
+<function>
+function(message) {
+        <check-message-start>
+        if (message.data.indexOf("<open ") === 0 || message.data.indexOf("<?xml") === 0) {
+            <prepare-and-parse-data>
+            var data = message.data.replace(/^(<\?.*?\?>\s*)*/, "");
+            if (data === '') return;
+
+            var streamStart = new DOMParser().parseFromString(data, "text/xml").documentElement;
+            this._conn.xmlInput(streamStart);
+            this._conn.rawInput(message.data);
+            </prepare-and-parse-data>
+
+            <handle-stream-start>
+            
+            if (this._handleStreamStart(streamStart)) {
+                <connect-callback>
+                
+                this._connect_cb(streamStart);
+                </connect-callback>
+            }
+            </handle-stream-start>
+        } 
+        <check-message-close>
+        else if (message.data.indexOf("<close ") === 0) {
+            <handle-close-stream>
+            this._conn.rawInput(message.data);
+            this._conn.xmlInput(message);
+            </handle-close-stream>
+            <check-see-other-uri>
+            var see_uri = message.getAttribute("see-other-uri");
+            if (see_uri) {
+                this._conn._changeConnectStatus(Strophe.Status.REDIRECT, "Received see-other-uri, resetting connection");
+                this._conn.reset();
+                this._conn.service = see_uri;
+                <reconnect>
+                this._connect();
+                </reconnect>
+            } 
+            </check-see-other-uri>
+            <handle-connection-fail>
+            else {
+                this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, "Received closing stream");
+                this._conn._doDisconnect();
+            }
+            </handle-connection-fail>
+        }
+        </check-message-close>
+        <handle-other-message-data>
+        else {
+            var string = this._streamWrap(message.data);
+            var elem = new DOMParser().parseFromString(string, "text/xml").documentElement;
+            <set-onmessage-handler>
+            this.socket.onmessage = this._onMessage.bind(this);
+            </set-onmessage-handler>
+            <call-connect-callback>
+            this._conn._connect_cb(elem, null, message.data);
+            </call-connect-callback>
+        }
+        </handle-other-message-data>
+    }
+</function>
+```
+
+The annotations above identify specific responsibilities within the functions that serve particular subtasks as part of the overall function duty, adhering to SRP principles as much as possible without knowledge of the entire ecosystem the code is part of. Each segment of code with a distinct responsibility has been annotated separately. The annotations demonstrate an understanding of where the division of responsibilities could occur, ensuring that the SRP is followed as closely as can be understood from the given context.

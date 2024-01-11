@@ -1,0 +1,200 @@
+Here are the annotations for the provided functions:
+
+1.
+```
+// This function lacks context and appropriate function name, so it's hard to precisely determine its SRP compliance.
+```
+
+2.
+```
+// Non-SRP Compliant Function
+<handleUIResponse>
+function() { 
+    var type = this.getAttribute('type');
+    if(type == 0) {
+      <executeNoAction>
+      config.no && config.no();
+      </executeNoAction>
+      <closeLayer>
+      layer.close(that.index);
+      </closeLayer>
+    } else {
+      <executeYesActionOrElse>
+      config.yes ? config.yes(that.index) : layer.close(that.index);
+      </executeYesActionOrElse>
+    }
+}
+</handleUIResponse>
+```
+
+3.
+```
+// SRP Compliant Function
+<fireDragEvent>
+function fire(type, dragContext) {
+    dragContext = dragContext || context;
+
+    var event = eventBus.createEvent(
+      assign(
+        {},
+        dragContext.payload,
+        dragContext.data,
+        { isTouch: dragContext.isTouch }
+      )
+    );
+    
+    if (eventBus.fire('drag.' + type, event) === false) {
+      return false;
+    }
+
+    return eventBus.fire(dragContext.prefix + '.' + type, event);
+}
+</fireDragEvent>
+```
+
+4.
+```
+// SRP Compliant Function
+<calculateZoomLevel>
+function() {
+    if (this.defaultZoomLevel) {
+        return this.defaultZoomLevel;
+    }
+    
+    var aspectFactor = this._contentAspectRatio / this.getAspectRatio();
+    var output;
+    
+    if (this.homeFillsViewer) { 
+        output = aspectFactor >= 1 ? aspectFactor : 1;
+    } else {
+        output = aspectFactor >= 1 ? 1 : aspectFactor;
+    }
+    
+    return output / this._contentBounds.width;
+}
+</calculateZoomLevel>
+```
+
+5.
+```
+// SRP Compliant Function
+<recordFailure>
+function _failure(errors, test, result) {
+  process.stdout.write('.'.red);
+  failures.push({ errors: errors, test: test, result: result });
+}
+</recordFailure>
+```
+
+6.
+```
+// Non-SRP Compliant Function
+<bin>
+function bin(argv) {
+  
+  <loadConfig>
+  var config = require('../config/config.js')
+  </loadConfig>
+
+  <setupCLIProgram>
+  program
+  .arguments('<uri> [uris...]')
+  .option('-d, --database <database>', 'Database')
+  .parse(argv)
+  </setupCLIProgram>
+
+  <configureDatabase>
+  var defaultDatabase = 'media'
+  config.database = program.database || config.database || defaultDatabase
+  </configureDatabase>
+
+  <validateURIs>
+  var uris = program.args;
+  if (!uris || uris.length === 0) {
+    return 'You must enter a valid uri'
+  }
+  </validateURIs>
+  
+  <processURIs>
+  var i = 0;
+  qpm_queue.promiseWhile(function () { return i < uris.length }, function () {
+    qpm_media.addMedia(uris[i]).then(function(ret) {
+      console.log(ret)
+      ret.conn.close()
+    }).catch(function(err){
+      console.error(err)
+    })
+    console.log(i);
+    i++;
+    return Q.delay(1000); 
+  }).then(function () {
+      console.log("done");
+  }).done();
+  </processURIs>
+
+}
+</bin>
+```
+
+7.
+```
+// SRP Compliant Function
+<initializeMongoose>
+function mongooseInit(mongoose, logger, config) {
+  const Log = logger.bind('mongoose-init')
+  mongoose.Promise = Promise
+  logUtil.logActionStart(Log, 'Connecting to Database', _.omit(config.mongo, ['pass']))
+  mongoose.connect(config.mongo.URI)
+  globals.mongoose = mongoose
+  Log.log('mongoose connected')
+  return mongoose
+}
+</initializeMongoose>
+```
+
+8.
+```
+// SRP Compliant Function
+<sortAppOptions>
+function(appName) {
+    if (appName) {
+      var options = _.sortBy(apps[appName].options, 'weight');
+      apps[appName].options = options;
+      return apps[appName];
+    }
+    return false;
+}
+</sortAppOptions>
+```
+
+9.
+```
+// SRP Compliant Function
+<onAddChildUIEvent>
+function onAddChild(e) {
+    var self = this;
+    if (e.target === self) {
+        updateSubTreeStatus(self, e.component, self.get('depth'), e.index);
+    }
+}
+</onAddChildUIEvent>
+```
+
+10.
+```
+// SRP Compliant Function
+<transformRowCells>
+function transform(row) {
+    let parent = row[0].parent();
+    let visible = [];
+
+    row.forEach((cell, index) => {
+      columns[index].applyCss(cell);
+      visible[columns[index].mapTo] = row[index];
+      row[index].detach();
+    });
+
+    visible.forEach(cell => parent.append(cell));
+}
+</transformRowCells>
+```

@@ -1,0 +1,175 @@
+```javascript
+<_reduce>
+function _reduce(accumulator, iterable, initializer) {
+  for (let item of iterable) {
+    initializer = accumulator(initializer, item);
+  }
+
+  return initializer;
+}
+</_reduce>
+
+<Benchmarked>
+function Benchmarked(options) {
+  if (!(this instanceof Benchmarked)) {
+    return new Benchmarked(options);
+  }
+  Emitter.call(this);
+  this.options = Object.assign({}, options);
+  this.results = [];
+  this.defaults(this);
+}
+</Benchmarked>
+
+<textToMaterialsInfo>
+function ( text ) {
+  var lines = text.split( "\n" );
+  var info = {};
+  var delimiter_pattern = /\s+/;
+  var materialsInfo = {};
+
+  for ( var i = 0; i < lines.length; i ++ ) {
+    var line = lines[ i ];
+    line = line.trim();
+
+    if ( line.length === 0 || line.charAt( 0 ) === '#' ) {
+      continue;
+    }
+
+    var pos = line.indexOf( ' ' );
+
+    <parseKey>
+    var key = ( pos >= 0 ) ? line.substring( 0, pos ) : line;
+    key = key.toLowerCase();
+    </parseKey>
+
+    <parseValue>
+    var value = ( pos >= 0 ) ? line.substring( pos + 1 ) : "";
+    value = value.trim();
+    </parseValue>
+
+    if ( key === "newmtl" ) {
+      info = { name: value };
+      materialsInfo[ value ] = info;
+    } else if ( info ) {
+      if ( key === "ka" || key === "kd" || key === "ks" ) {
+        var ss = value.split( delimiter_pattern, 3 );
+        info[ key ] = [ parseFloat( ss[ 0 ] ), parseFloat( ss[ 1 ] ), parseFloat( ss[ 2 ] ) ];
+      } else {
+        info[ key ] = value;
+      }
+    }
+  }
+
+  var materialCreator = new THREE.MTLLoader.MaterialCreator( this.baseUrl, this.materialOptions );
+  materialCreator.setCrossOrigin( this.crossOrigin );
+  materialCreator.setManager( this.manager );
+  materialCreator.setMaterials( materialsInfo );
+  return materialCreator;
+}
+</textToMaterialsInfo>
+
+<loadInfo>
+function loadInfo() {
+  try {
+    <readFile>
+    var data = fs.readFileSync(__rootdir + '/package.json', { encoding: 'utf8' });
+    </readFile>
+    <parseData>
+    var tmp = JSON.parse(data);
+    appPackage = {
+      name: tmp.name || null,
+      version: tmp.version || 1
+    }
+    </parseData>
+  } catch(e) {
+    return;
+  }
+}
+</loadInfo>
+
+<put_byte>
+function put_byte(c) {
+  outbuf[outoff + outcnt++] = c;
+  if (outoff + outcnt === OUTBUFSIZ) {
+    qoutbuf();
+  }
+}
+</put_byte>
+
+<tabbableElementsNodeFilter>
+function tabbableElementsNodeFilter(node) {
+  var nodeStyle = _ElementUtilities._getComputedStyle(node);
+  if (nodeStyle.display === "none" || nodeStyle.visibility === "hidden") {
+    return _Global.NodeFilter.FILTER_REJECT;
+  }
+  if (node._tabContainer) {
+    return _Global.NodeFilter.FILTER_ACCEPT;
+  }
+  if (node.parentNode && node.parentNode._tabContainer) {
+    var managedTarget = node.parentNode._tabContainer.childFocus;
+    
+    if (managedTarget && node.contains(managedTarget)) {
+      return (getTabIndex(node) >= 0 ? _Global.NodeFilter.FILTER_ACCEPT : _Global.NodeFilter.FILTER_SKIP);
+    }
+    return _Global.NodeFilter.FILTER_REJECT;
+  }
+  var tabIndex = getTabIndex(node);
+  if (tabIndex >= 0) {
+    return _Global.NodeFilter.FILTER_ACCEPT;
+  }
+  return _Global.NodeFilter.FILTER_SKIP;
+}
+</tabbableElementsNodeFilter>
+
+<normalizeDefinitions>
+function (definitions) {
+  var result = [],
+      len = definitions.length,
+      idx,
+      definition;
+  for (idx = 0; idx < len; ++idx) {
+    definition = definitions[idx];
+    if (!(definition instanceof gpf.Parameter)) {
+      definition = this._createFromObject(definition);
+    }
+    result.push(definition);
+  }
+  return result;
+}
+</normalizeDefinitions>
+
+<numberFactory>
+function numberFactory (name, value) {
+  const dependencies = ['config', 'BigNumber']
+
+  return factory(name, dependencies, ({ config, BigNumber }) => {
+    return config.number === 'BigNumber'
+      ? new BigNumber(value)
+      : value
+  })
+}
+</numberFactory>
+
+<RemoteServiceManager>
+function RemoteServiceManager(services) {
+  this.options = services || {};
+  this.services = {};
+
+  <loadSDK>
+  let sdk = require('bi-service-sdk');
+  </loadSDK>
+
+  <setSDKInterface>
+  this.BIServiceSDK = sdk.BIServiceSDKInterface || sdk.BIServiceSDK;
+  </setSDKInterface>
+}
+</RemoteServiceManager>
+
+<extractFileInfo>
+function (file) {
+  var match = pattern.exec(basename(file));
+  return { date: match[1], url: match[2] };
+}
+</extractFileInfo>
+```

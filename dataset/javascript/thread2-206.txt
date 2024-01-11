@@ -1,0 +1,174 @@
+<typof>
+function typof (v) {
+  var s = Object.prototype.toString.call(v);
+  return s.substring(8, s.length - 1).toLowerCase()
+}
+</typof>
+
+<applySelectionToTreeViewModel>
+function (oTreeViewModelRules) {
+			var aSelectedRules = storage.getSelectedRules();
+
+			if (!aSelectedRules) {
+				return null;
+			}
+
+			if (!oTreeViewModelRules) {
+				return null;
+			}
+
+			<updateSelectionInViewModel>
+			aSelectedRules.forEach(function (oRuleDescriptor) {
+				Object.keys(oTreeViewModelRules).forEach(function(iKey) {
+					oTreeViewModelRules[iKey].nodes.forEach(function(oRule) {
+						if (oRule.id === oRuleDescriptor.ruleId) {
+							oRule.selected = oRuleDescriptor.selected;
+							if (!oRule.selected) {
+								oTreeViewModelRules[iKey].selected = false;
+							}
+						}
+					});
+				});
+			});
+			</updateSelectionInViewModel>
+
+			return oTreeViewModelRules;
+		}
+</applySelectionToTreeViewModel>
+
+<reject>
+function reject(collection, predicate) {
+      var func = isArray(collection) ? arrayFilter : baseFilter;
+      return func(collection, negate(getIteratee(predicate, 3)));
+}
+</reject>
+
+<uniqArr>
+function uniqArr(arr) {
+    let obj = {};
+
+    arr.forEach(item => obj[item] = true);
+
+    return Object.keys(obj);
+}
+</uniqArr>
+
+<isBoundingBoxFinite>
+function () {
+        var _min = this.min.array;
+        var _max = this.max.array;
+        return isFinite(_min[0]) && isFinite(_min[1]) && isFinite(_min[2])
+            && isFinite(_max[0]) && isFinite(_max[1]) && isFinite(_max[2]);
+}
+</isBoundingBoxFinite>
+
+<updateFlagState>
+function(key, state) {
+        <removeFlag>
+        this._removeRemove(this.flags.remove, key);
+        </removeFlag>
+
+        <setOrUpdateFlag>
+        var op = this._getOp(this.flags.set, key);
+        if (op) {
+            op.state = state;
+        } else {
+            this.flags.set.push({key: key, state: state});
+        }
+        </setOrUpdateFlag>
+
+        return this;
+}
+</updateFlagState>
+
+<clickAndWaitSecondaryNavbarList>
+function (config) {
+			var _config = objectAssign({}, { wait: true }, config);
+			<clickNavbarList>
+			if (_config.list) {
+				this.click(this.getSecondaryNavbarListElement({ list: _config.list }));
+			} else {
+				throw new Error('adminUIApp:must specify a navbar list!');
+			}
+			</clickNavbarList>
+
+			<waitForListScreen>
+			if (_config.wait) this.waitForListScreen();
+			</waitForListScreen>
+
+			return this;
+		}
+</clickAndWaitSecondaryNavbarList>
+
+<updateAnimatedTilesets>
+function (dt) {
+            if (this.isAnimated) {
+                var result = false;
+                <updateAllAnimatedTilesets>
+                for (var i = 0; i < this.animatedTilesets.length; i++) {
+                    result = this.animatedTilesets[i].update(dt) || result;
+                }
+                </updateAllAnimatedTilesets>
+                return result;
+            }
+
+            return false;
+        }
+</updateAnimatedTilesets>
+
+<fixIsSpentFlag>
+function fixIsSpentFlag(onDone){
+	<queryOutputs>
+	db.query(
+		"SELECT outputs.unit, outputs.message_index, outputs.output_index \n\
+		FROM outputs \n\
+		CROSS JOIN inputs ON outputs.unit=inputs.src_unit AND outputs.message_index=inputs.src_message_index AND outputs.output_index=inputs.src_output_index \n\
+		WHERE is_spent=0 AND type='transfer'",
+		function(rows){
+			console.log(rows.length+" previous outputs appear to be spent");
+			if (rows.length === 0)
+				return onDone();
+			var arrQueries = [];
+			rows.forEach(function(row){
+				console.log('fixing is_spent for output', row);
+				db.addQuery(arrQueries, 
+					"UPDATE outputs SET is_spent=1 WHERE unit=? AND message_index=? AND output_index=?", [row.unit, row.message_index, row.output_index]);
+			});
+			async.series(arrQueries, onDone);
+		}
+	);
+	</queryOutputs>
+}
+</fixIsSpentFlag>
+
+<onEvent>
+function onEvent(data) {
+	var type = data.type;
+
+	<logEvent>
+	debug('onEvent() | [type:%s, data:%o]', type, data);
+	</logEvent>
+
+	<handleEventStateChange>
+	switch (type) {
+		case 'statechange':
+			this.readyState = data.readyState;
+			this._enabled = data.enabled;
+
+			switch (data.readyState) {
+				case 'initializing':
+					break;
+				case 'live':
+					break;
+				case 'ended':
+					this._ended = true;
+					this.dispatchEvent(new Event('ended'));
+					break;
+				case 'failed':
+					break;
+			}
+			break;
+	}
+	</handleEventStateChange>
+}
+</onEvent>

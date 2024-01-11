@@ -1,0 +1,254 @@
+<srem>
+function srem(members) {
+  var i, c = 0;
+  for (i = 0; i < members.length; i++) {
+    <keyRemoval>
+    if (this.keyExists(members[i])) {
+      this.delKey(members[i]);
+      c++;
+    }
+    </keyRemoval>
+  }
+  return c;
+}
+</srem>
+
+<isEmpty>
+function isEmpty(value: mixed): boolean {
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  } else if (typeof value === 'object') {
+    if (value) {
+      <ensureNotIterable>
+      invariant(
+        !isIterable(value) || value.size === undefined,
+        'isEmpty() does not support iterable collections.',
+      );
+      </ensureNotIterable>
+      <checkProperties>
+      for (const _ in value) {
+        return false;
+      }
+      </checkProperties>
+    }
+    return true;
+  } else {
+    return !value;
+  }
+}
+</isEmpty>
+
+<_ajax$>
+function _ajax$(url, settings, override) {
+  <prepareArguments>
+  var originalArgs = settings ? [url, settings] : [url];
+  var originalSettings = settings || url;
+  var extracted = bluetry.extractBluejaxOptions(originalArgs);
+  var bluejaxOptions = $.extend({}, override, extracted[0]);
+  var cleanedOptions = extracted[1];
+  </prepareArguments>
+
+  return doit(originalArgs, originalSettings, cleanedOptions, bluejaxOptions);
+}
+</_ajax$>
+
+<closest>
+function closest(el, sel) {
+  if (!el) return
+  <findMatching>
+  if (matches(el, sel)) {
+    return el
+  } else {
+    return closest(el.parentNode, sel)
+  }
+  </findMatching>
+}
+</closest>
+
+<getProdModules>
+function getProdModules(externalModules, packagePath, dependencyGraph, forceExcludes) {
+  <readPackageJson>
+  const packageJsonPath = path.join(process.cwd(), packagePath);
+  const packageJson = require(packageJsonPath);
+  </readPackageJson>
+
+  <initialCheck>
+  if (!packageJson.dependencies) {
+    return [];
+  }
+  </initialCheck>
+
+  const prodModules = [];
+
+  <processModules>
+  _.forEach(externalModules, module => {
+    let moduleVersion = packageJson.dependencies[module.external];
+
+    if (moduleVersion) {
+      prodModules.push(`${module.external}@${moduleVersion}`);
+      <handlePeerDependencies>
+      try {
+        const modulePackagePath = path.join(
+          path.dirname(path.join(process.cwd(), packagePath)),
+          'node_modules',
+          module.external,
+          'package.json'
+        );
+        const peerDependencies = require(modulePackagePath).peerDependencies;
+        if (!_.isEmpty(peerDependencies)) {
+          this.options.verbose && this.serverless.cli.log(`Adding explicit peers for dependency ${module.external}`);
+          const peerModules = getProdModules.call(this, _.map(peerDependencies, (value, key) => ({ external: key })), packagePath, dependencyGraph, forceExcludes);
+          Array.prototype.push.apply(prodModules, peerModules);
+        }
+      } catch (e) {
+        this.serverless.cli.log(`WARNING: Could not check for peer dependencies of ${module.external}`);
+      }
+      </handlePeerDependencies>
+    } else {
+      <processNonProductionModules>
+      if (!packageJson.devDependencies || !packageJson.devDependencies[module.external]) {
+        const originInfo = _.get(dependencyGraph, 'dependencies', {})[module.origin] || {};
+        moduleVersion = _.get(_.get(originInfo, 'dependencies', {})[module.external], 'version');
+        if (!moduleVersion) {
+          this.serverless.cli.log(`WARNING: Could not determine version of module ${module.external}`);
+        }
+        prodModules.push(moduleVersion ? `${module.external}@${moduleVersion}` : module.external);
+      } else if (packageJson.devDependencies && packageJson.devDependencies[module.external] && !_.includes(forceExcludes, module.external)) {
+        const ignoredDevDependencies = ['aws-sdk'];
+
+        if (!_.includes(ignoredDevDependencies, module.external)) {
+          this.serverless.cli.log(`ERROR: Runtime dependency '${module.external}' found in devDependencies. Move it to dependencies or use forceExclude to explicitly exclude it.`);
+          throw new this.serverless.classes.Error(`Serverless-webpack dependency error: ${module.external}.`);
+        }
+
+        this.options.verbose && this.serverless.cli.log(`INFO: Runtime dependency '${module.external}' found in devDependencies. It has been excluded automatically.`);
+      }
+      </processNonProductionModules>
+    }
+  });
+</processModules>
+
+  return prodModules;
+}
+</getProdModules>
+
+<superPropertiesClass>
+function superPropertiesClass(constructor) {
+  const superCtor = Object.getPrototypeOf(constructor);
+  <checkSuperConstructor>
+  return (superCtor.prototype instanceof PropertiesMixin) ?
+    (superCtor) : null;
+  </checkSuperConstructor>
+}
+</superPropertiesClass>
+
+<bootstrap>
+function bootstrap(bootstrappers) {
+  <runBootstrappers>
+  const bootstrapPromise = bootstrappers.reduce(
+    (metaPromise, bootstrapper) => metaPromise.then((prevMeta) =>
+      Promise.resolve(bootstrapper(prevMeta)).then((newMeta) => Object.assign({}, prevMeta, newMeta))
+    ),
+    Promise.resolve({})
+  ).then((meta) => checkIfReadyToBoot(meta));
+  </runBootstrappers>
+  
+  <addListenMethod>
+  bootstrapPromise.listen = function listen(port, hostname) {
+    return bootstrapPromise.then((meta) => promisifiedListen(meta.app, port, hostname));
+  }
+  </addListenMethod>
+
+  return bootstrapPromise;
+}
+</bootstrap>
+
+<loadPaths>
+function loadPaths(pkg) {
+  const name = pkg.name;
+  const file = pkg.path;
+  <resolveEntryAndPackage>
+  return resolveFile(tmp, path.join(name, file)).then(entry => ({
+    entry: entry,
+    package: path.join(tmp, 'node_modules', name, 'package.json')
+  }));
+  </resolveEntryAndPackage>
+}
+</loadPaths>
+
+<unnamed>
+function (record, index) {
+  
+  <codeExtraction>
+  var code = this.options.codeField ? L.Util.getFieldValue(record, this.options.codeField) : index;
+  </codeExtraction>
+
+  
+  <initializeLookup>
+  this._lookupIndex = this._lookupIndex || L.GeometryUtils.indexFeatureCollection(this.options.locationLookup, this.options.locationIndexField || this.options.codeField);
+  </initializeLookup>
+
+  
+  <findLocation>
+  var geoJSON = this._lookupIndex[code];
+  var location = null;
+
+  if (!geoJSON && code.indexOf('0') === 0) {
+    geoJSON = this._lookupIndex[code.substring(1)];
+  }
+
+  if (geoJSON) {
+    var me = this;
+    var recordToLayer = function (location, record) {
+      return me.recordToLayer(location, record);
+    };
+
+    location = L.GeometryUtils.getGeoJSONLocation(geoJSON, record, this.options.locationTextField, recordToLayer);
+  }
+  </findLocation>
+
+  return location;
+}
+</unnamed>
+
+<guessObjectType>
+function guessObjectType(obj, shortname=false) {
+  
+  <determineType>
+  var type
+  if (typeof obj === "string" && obj) {
+    <matchUris>
+    if (obj in objectTypeUris) {
+      type = objectTypeUris[obj];
+    } else {
+    </matchUris>
+      <inferType>
+      obj = obj.toLowerCase().replace(/s$/,"");
+      type = Object.keys(objectTypes).find(name => {
+        const lowercase = name.toLowerCase();
+        if (lowercase === obj || lowercase === "concept" + obj) {
+          return true;
+        }
+      });
+      </inferType>
+    }
+  } else if (typeof obj === "object") {
+    <processObjectType>
+    if (obj.type) {
+      let types = Array.isArray(obj.type) ? obj.type : [obj.type];
+      for (let uri of types) {
+        if (uri in objectTypeUris) {
+          type = objectTypeUris[uri];
+          break;
+        }
+      }
+    }
+    </processObjectType>
+  }
+  </determineType>
+
+  <formatType>
+  return (shortname && type) ? type.toLowerCase().replace(/^concept(.+)/, "$1") : type;
+  </formatType>
+}
+</guessObjectType>

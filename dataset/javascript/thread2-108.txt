@@ -1,0 +1,119 @@
+```javascript
+<hasParams>
+function hasParams(node) {
+    return isObject(node) &&
+           isArray(node.params) &&
+           node.params.length > 0;
+}
+</hasParams>
+
+<logMessage>
+function logMessage(fig, st, lns) {
+  return lns.reduce((a, b) => a.concat(`  ${b}`), [`\n${fig} ${st}`]);
+}
+</logMessage>
+
+<augment>
+function augment(_opts) {
+         var opts = _opts || {};
+         opts.createFolders = opts.createFolders || true;
+         return opts;
+     }
+</augment>
+
+<isUnpackedDir>
+function isUnpackedDir (dirPath, pattern, unpackDirs) {
+  if (dirPath.startsWith(pattern) || minimatch(dirPath, pattern)) {
+    if (!unpackDirs.includes(dirPath)) {
+      unpackDirs.push(dirPath)
+    }
+    return true
+  } else {
+    return unpackDirs.some(unpackDir => dirPath.startsWith(unpackDir))
+  }
+}
+</isUnpackedDir>
+
+<applyTransforms>
+function applyTransforms(transforms, t, callback) {
+  log.debug('applying', transforms.length, 'transforms');
+  for (var i = 0; i < transforms.length; i++) {
+    var transform = transforms[i];
+    log.debug('next transform', transform);
+    if (transform.isAsync) {
+      return transform(t, function(t) {
+        applyTransforms(transforms.slice(i + 1), t, callback);
+      });
+    } else {
+      var result = transform(t);
+      if (!result) {
+        log.debug('transform has failed or was a final transform');
+        return;
+      }
+    }
+  }
+  log.debug('all transformations done, starting next step');
+  if (nextTickAvailable) {
+    return process.nextTick(function() {
+      callback(t);
+    });
+  }
+  return callback(t);
+}
+</applyTransforms>
+
+<validateSourcePath>
+function validateSourcePath(sourcePath) {
+    const materialPackageJSONPath = pathUtils.resolve(sourcePath, 'package.json');
+
+    return fs.readFileAsync(materialPackageJSONPath, { encoding: 'UTF8' })
+        .then(materialPackageJSONString => {
+            const package = JSON.parse(materialPackageJSONString);
+            if (package.name !== sourcePackageName) {
+                throw new Error(`Source path ${sourcePath} does not appear to be a clone of https:
+            }
+            return sourcePath;
+        });
+}
+</validateSourcePath>
+
+<UInt64Value>
+function UInt64Value(properties) {
+    if (properties)
+        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+}
+</UInt64Value>
+
+<function_cloneNode>
+function(cloneNode){
+    cloneNode.contentAssistProposalIndex = node.contentAssistProposalIndex;
+    if (cloneNode.hasChildNodes()) {
+        for (var i = 0 ; i < cloneNode.childNodes.length ; i++){
+            recursiveSetIndex(cloneNode.childNodes[i]);
+        }
+    }
+}
+</function_cloneNode>
+
+<function_webdriverActions>
+function (selector, property, expected, hash) {
+    this.actionQueue.push(this.webdriverClient.element.bind(this.webdriverClient, selector));
+    this.actionQueue.push(this.webdriverClient.cssProperty.bind(this.webdriverClient, property));
+    this.actionQueue.push(this._cssCb.bind(this, selector, property, hash, expected));
+    return this;
+}
+</function_webdriverActions>
+
+<function_hideMessage>
+function() {
+    if(this._elMsgTbody.style.display != "none") {
+        this._elMsgTbody.style.display = "none";
+        this._elMsgTbody.parentNode.style.width = "";
+        this.fireEvent("tableMsgHideEvent");
+        YAHOO.log("DataTable message hidden", "info", this.toString());
+    }
+}
+</function_hideMessage>
+```

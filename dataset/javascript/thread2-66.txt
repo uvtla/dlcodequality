@@ -1,0 +1,303 @@
+```javascript
+<createByFacebook>
+function createByFacebook(profile, callback) {
+  <checkProfileId>
+  if (!profile.id) {
+    return callback(new Error('Profile id is undefined'));
+  }
+  </checkProfileId>
+
+  <findOrUpdateUser>
+  this.findByFacebookID(profile.id, ok(callback, (user) => {
+    if (user) {
+      return updateUserByFacebookProfile(user, profile, callback);
+    }
+  </findOrUpdateUser>
+
+    <createUserWithProfile>
+    this.create({
+      username: profile.username || null,
+      firstName: profile.first_name,
+      lastName: profile.last_name,
+      name: profile.name,
+      email: profile.email,
+      locale: profile.locale,
+    }, ok(callback, (newUser) => {
+      newUser.addProvider('facebook', profile.id, profile, ok(callback, () => {
+        callback(null, newUser);
+      }));
+    }));
+    </createUserWithProfile>
+  }));
+}
+</createByFacebook>
+
+<readSource>
+function readSource (source, from, to, offset, delimiter) {
+  
+  <initializeParameters>
+  from = from | 0
+  to = to | 0 || from
+  delimiter = delimiter || PREVIEW_OPTS.delimiter
+  if (typeof offset === 'undefined') {
+    offset = PREVIEW_OPTS.offset
+  } else {
+    offset = offset | 0
+  }
+  </initializeParameters>
+
+  <readLines>
+  let lastIdx = -1
+  let currIdx = lastIdx
+  let line = 1
+  let reads = []
+
+  from -= offset
+  to += offset
+
+  while (currIdx < source.length) {
+    currIdx = source.indexOf(delimiter, lastIdx + 1)
+    if (currIdx < 0) {
+      currIdx = source.length
+    }
+
+    if (line > to) {
+      break
+    } else if (line >= from && line <= to) {
+      reads.push({
+        number: line,
+        source: source.substring(lastIdx + delimiter.length, currIdx)
+      })
+    }
+
+    lastIdx = currIdx
+    line ++
+  }
+
+  return reads
+  </readLines>
+}
+</readSource>
+
+<undefinedFunctionName> // The function name is missing here.
+function(args, connectionInfo, processPagedResults) {
+  <setDefaultPaging>
+  args.page = {value: 1};
+  args.pageSize = {value: 200};
+  </setDefaultPaging>
+  
+  <setDefaultProcessMethod>
+  if (!processPagedResults) {
+    processPagedResults = defaultMethod_ForProcessingPagedResults_ForConsignmentProducts; 
+  }
+  </setDefaultProcessMethod>
+
+  <processPagedResults>
+  return utils.processPagesRecursively(args, connectionInfo, fetchProductsByConsignment, processPagedResults);
+  </processPagedResults>
+}
+</undefinedFunctionName>
+
+<plugin>
+function plugin(options){
+  <setDefaults>
+  options = options || {};
+  var keys = options.keys || [];
+  </setDefaults>
+
+  <returnMiddlewareFunction>
+  return function(files, metalsmith, done){
+    <finalizeAsync>
+    setImmediate(done);
+    </finalizeAsync>
+
+    <processFiles>
+    Object.keys(files).forEach(function(file){
+      <checkFile>
+      debug('checking file: %s', file);
+      if (!markdown(file)) return;
+      </checkFile>
+      <convertFile>
+      var data = files[file];
+      var dir = dirname(file);
+      var html = basename(file, extname(file)) + '.html';
+      if ('.' != dir) html = dir + '/' + html;
+
+      debug('converting file: %s', file);
+      var str = mmd.convert(data.contents.toString(), options);
+      data.contents = new Buffer(str);
+      keys.forEach(function(key) {
+        data[key] = mmd.convert(data[key], options);
+      });
+
+      delete files[file];
+      files[html] = data;
+      </convertFile>
+    });
+    </processFiles>
+  };
+  </returnMiddlewareFunction>
+}
+</plugin>
+
+<decodeTransaction>
+function (data) { // No function name provided
+
+  <decodeOrConvertData>
+  var txBuffer;
+  if (utils.isString(data)) {
+      txBuffer = new Array(protobuf.util.base64.length(data));
+      protobuf.util.base64.decode(data, txBuffer, 0);
+  } else {
+      txBuffer = data;
+  }
+  </decodeOrConvertData>
+
+  <parseTransactionProto>
+  var TransactionProto = root.lookup("corepb.Transaction");
+  var txProto = TransactionProto.decode(txBuffer);
+  </parseTransactionProto>
+
+  <setTransactionProperties>
+  this.hash = cryptoUtils.toBuffer(txProto.hash);
+  this.from = account.fromAddress(txProto.from);
+  this.to = account.fromAddress(txProto.to);
+  this.value = utils.toBigNumber("0x" + cryptoUtils.toBuffer(txProto.value).toString("hex"));
+  this.nonce = parseInt(txProto.nonce.toString());
+  this.timestamp = parseInt(txProto.timestamp.toString());
+  this.data = txProto.data;
+  if (this.data.payload.length === 0) {
+      this.data.payload = null;
+  }
+  this.chainID = txProto.chainId;
+  this.gasPrice = utils.toBigNumber("0x" + cryptoUtils.toBuffer(txProto.gasPrice).toString("hex"));
+  this.gasLimit = utils.toBigNumber("0x" + cryptoUtils.toBuffer(txProto.gasLimit).toString("hex"));
+  this.alg = txProto.alg;
+  this.sign = cryptoUtils.toBuffer(txProto.sign);
+  </setTransactionProperties>
+
+  return this;
+}
+</decodeTransaction>
+
+<LCDCharacter>
+function LCDCharacter(memoryPosition, map) {
+  <constructLCDCharacter>
+  if (!(this instanceof LCDCharacter)) {
+      return new LCDCharacter(memoryPosition, map);
+  }
+  </constructLCDCharacter>
+  
+  <validateMemoryPosition>
+  if (!(typeof memoryPosition === 'number') || memoryPosition < 0 || memoryPosition > 7) {
+      throw new Error('The specified memory position is invalid (should be between 0 and 7).');
+  }
+  </validateMemoryPosition>
+  
+  <validateMap>
+  if (!Array.isArray(map) || map.length !== 8) {
+      throw new Error('The specified map is invalid (should be an array containing eight 8-bit integers).');
+  }
+  </validateMap>
+  
+  <setCharacterProperties>
+  this.memoryPosition = memoryPosition;
+  this.map = map;
+  </setCharacterProperties>
+}
+</LCDCharacter>
+
+<getGesture>
+function getGesture(element_) {
+  <initializeElement>
+  const element = ensureDom(element_);
+  if (!element[SYMBOL]) element[SYMBOL] = new Gesture(element);
+  </initializeElement>
+  return element[SYMBOL];
+}
+</getGesture>
+
+<populateInterfacesList>
+function populateInterfacesList(intfs) {
+  <clearInterfaceList>
+  e_interfaceList.innerHTML = ""
+  </clearInterfaceList>
+
+  <normalizeInterfaceDefinitions>
+  fixedIntfs = []
+  intfs.forEach(function(intf){
+      fixedIntfs.push(intf.name)
+      Interfaces[intf.name] = intf
+
+      if (!intf.methods) intf.methods = []
+      if (!intf.attributes) intf.attributes = []
+  })
+  </normalizeInterfaceDefinitions>
+
+  <sortAndPopulateList>
+  intfs = fixedIntfs
+  intfs.sort()
+  intfs.forEach(function(intf){
+    <createElement>
+    var a  = document.createElement("a")
+    a.href          = "#"
+    a.innerHTML     = intf
+    a.interfaceName = intf
+    a.addEventListener("click", el_interfaceClicked, false)
+    </createElement>
+
+    <appendToList>
+    var li = document.createElement("li")
+    li.appendChild(a)
+    e_interfaceList.appendChild(li)
+    </appendToList>
+  })
+  </sortAndPopulateList>
+}
+</populateInterfacesList>
+
+<changeMode>
+function changeMode(newMode) {
+  <getEditorPosition>
+  var editorPos = editable.getDocumentPosition();
+  </getEditorPosition>
+
+  <updateEditorPosition>
+  switch (newMode) {
+    case 'top':
+      updatePos('absolute', 'top', editorPos.y - spaceHeight - dockedOffsetY);
+      break;
+    case 'pin':
+      updatePos('fixed', 'top', pinnedOffsetY);
+      break;
+    case 'bottom':
+      updatePos('absolute', 'top', editorPos.y + (editorRect.height || editorRect.bottom - editorRect.top) + dockedOffsetY);
+      break;
+  }
+  </updateEditorPosition>
+
+  <setNewMode>
+  mode = newMode;
+  </setNewMode>
+}
+</changeMode>
+
+<getLocaleExtraDayPeriods>
+function getLocaleExtraDayPeriods(locale, formStyle, width) {
+  <findLocaleData>
+  var data = findLocaleData(locale);
+  </findLocaleData>
+  <ensureFullData>
+  checkFullData(data);
+  </ensureFullData>
+  <retrieveDayPeriods>
+  var dayPeriodsData = [
+    data[19 ][0 ],
+    data[19 ][1 ]
+  ];
+  var dayPeriods = getLastDefinedValue(dayPeriodsData, formStyle) || [];
+  </retrieveDayPeriods>
+  return getLastDefinedValue(dayPeriods, width) || [];
+}
+</getLocaleExtraDayPeriods>
+```

@@ -1,0 +1,370 @@
+```javascript
+<Client>
+function Client(API_URL, token, opts) {
+  <instanceCheck>
+  if (!(this instanceof Client)) return new Client(API_URL, token, opts);
+  </instanceCheck>
+
+  <optionHandling>
+  if (typeof token == 'object') {
+    opts = token;
+    token = null;
+  }
+  </optionHandling>
+
+  <emitterInitialization>
+  Emitter.call(this);
+  var self = this;
+  opts = opts || {};
+  </emitterInitialization>
+
+  <cacheAndPendingSetup>
+  self.cache = new LRU(opts.maxSize || 500);
+  self.pending = {};
+  </cacheAndPendingSetup>
+
+  <bindingMethods>
+  self.root = get.bind(self, API_URL);
+  self.get = get.bind(self);
+  </bindingMethods>
+
+  <superagentContextSetup>
+  var context = self.context = superagent();
+  </superagentContextSetup>
+
+  <authorizationHeaderSetup>
+  if (token) self.header('authorization', 'Bearer ' + token);
+  </authorizationHeaderSetup>
+
+  <parsersSetup>
+  var parsers = context.request.parse;
+  parsers['application/json'] = parsers['application/hyper+json'] = parseHyperJson;
+  </parsersSetup>
+
+  <patchSuperagent>
+  patchCrappySuperagent(context.request.Response, context.request.parse);
+  </patchSuperagent>
+}
+</Client>
+
+<isPrimitiveType>
+function isPrimitiveType (obj) {
+  return ( typeof obj === 'boolean' ||
+       typeof obj === 'number' ||
+       typeof obj === 'string' ||
+       obj === null ||
+       util.isDate(obj) ||
+       util.isArray(obj));
+}
+</isPrimitiveType>
+
+<amf3encDouble>
+function amf3encDouble(num) {
+    var buf = new Buffer(9);
+    buf.writeUInt8(0x05, 0);
+    buf.writeDoubleBE(num, 1);
+    return buf;
+}
+</amf3encDouble>
+
+<HSVA_TO_RGBA>
+function HSVA_TO_RGBA() {
+  var h = this.h();
+  var s = this.s();
+  var v = this.v();
+  var a = this.a();
+  var hi = Math.floor(h / 60);
+  var f = h / 60 - hi;
+  var p = v * (1 - s);
+  var q = v * (1 - f * s);
+  var t = v * (1 - (1 - f) * s);
+  var rgba;
+
+  <colorConversionAlgorithm>
+  switch (hi) {
+      case 0:
+          rgba = [v, t, p, a]; break;
+      case 1:
+          rgba = [q, v, p, a]; break;
+      case 2:
+          rgba = [p, v, t, a]; break;
+      case 3:
+          rgba = [p, q, v, a]; break;
+      case 4:
+          rgba = [t, p, v, a]; break;
+      case 5:
+          rgba = [v, p, q, a]; break;
+      default:
+          rgba = [0, 0, 0, a];
+  }
+
+  for (var i = rgba.length - 1; i--;) {
+      rgba[i] *= 255;
+  }
+  </colorConversionAlgorithm>
+
+  return kolor.rgba(rgba);
+} 
+</HSVA_TO_RGBA>
+
+<selectIndex>
+function selectIndex(idx){
+  <deselectionLogic>
+  if(selectedItem) selectedItem.className = selectedItem.className.replace(/\s?selected/,'');
+  </deselectionLogic>
+
+  <retrievalAndBoundaryChecking>
+  var r = document.getElementById('searchresults');
+  var items = r.childNodes;
+  if(items.length === 0){
+    selectedSearchIndex = -1;
+    selectedItem = false;
+    return;
+  }
+  </retrievalAndBoundaryChecking>
+
+  <selectionLogic>
+  selectedSearchIndex = idx;
+  var s = selectedItem = items[idx];
+  s.className += ' selected';
+  </selectionLogic>
+
+  <scrollingAdjustment>
+  var o = s.offsetTop - r.offsetTop - r.scrollTop;
+  if(o < 0){
+    r.scrollTop = s.offsetTop - r.offsetTop;
+  }else if(o > r.offsetHeight - s.offsetHeight){
+    r.scrollTop = o + r.scrollTop - r.offsetHeight + s.offsetHeight;
+  }
+  </scrollingAdjustment>
+}
+</selectIndex>
+
+<distance>
+function distance(str1, str2, options_p) {
+  <optionsSetup>
+  var options = _clone_and_set_option_defaults(options_p);
+  str1 = options.full_process ? full_process(str1, options) : str1;
+  str2 = options.full_process ? full_process(str2, options) : str2;
+  if (typeof options.subcost === "undefined") options.subcost = 1;
+  </optionsSetup>
+  
+  <distanceCalculation>
+  if (options.astral) return _iLeven(str1, str2, options, _toArray);
+  else return _wildLeven(str1, str2, options, _leven); 
+  </distanceCalculation>
+}
+</distance>
+
+<AuthenticationHandler>
+function (context, run, done) {
+  <checkResponse>
+  if (!context.response) { return done(); }
+  </checkResponse>
+
+  <checkAuthentication>
+  if (!(context.auth && context.auth.type)) { return done(); }
+  </checkAuthentication>
+
+  <authenticationSetup>
+  var auth = context.auth,
+      originalAuth = context.originalItem.getAuth(),
+      originalAuthParams = originalAuth && originalAuth.parameters(),
+      authHandler = AuthLoader.getHandler(auth.type),
+      authInterface = createAuthInterface(auth);
+  </authenticationSetup>
+
+  <authenticationHandling>
+  if (!authHandler) {
+      run.triggers.console(context.coords, 'warn', 'runtime: could not find a handler for auth: ' + auth.type);
+      return done();
+  }
+  </authenticationHandling>
+
+  < authenticationPostRequest>
+  authHandler.post(authInterface, context.response, function (err, success) {
+      <syncOriginalAuthParams>
+      originalAuthParams && auth.parameters().each(function (param) {
+          param && param.system && originalAuthParams.upsert({key: param.key, value: param.value, system: true});
+      });
+      </syncOriginalAuthParams>
+
+      <contextAuthSetup>
+      _.set(context, 'item.request.auth', auth);
+      </contextAuthSetup>
+
+      <errorHandling>
+      if (err) {
+          run.triggers.console(
+              context.coords,
+              'warn',
+              'runtime~' + auth.type + '.auth: there was an error validating auth: ' + (err.message || err),
+              err
+          );
+          return done();
+      }
+      </errorHandling>
+
+      <authenticationSuccess>
+      if (success) { return done(); }
+      </authenticationSuccess>
+
+      <authenticationReplay>
+      done(null, {replay: true, helper: auth.type + DOT_AUTH});
+      </authenticationReplay>
+  });
+  </authenticationPostRequest>
+}
+</AuthenticationHandler>
+
+<displayStatusInfo>
+async function displayStatusInfo(rootFolder, metadata) {
+  <loadMetadata>
+  const local = path.join(rootFolder, constants.META_DIR, constants.META_LOCAL);
+  const remote = path.join(rootFolder, constants.META_DIR, constants.META_REMOTE);
+  const extensions = eaft.getCodeExtensions();
+
+  const files = [];
+  const keys = [];
+  const data = [];
+  data.local = JSON.parse(fs.readFileSync(local, 'utf8'));
+  data.remote = JSON.parse(fs.readFileSync(remote, 'utf8'));
+  </loadMetadata>
+
+  <prepareFileData>
+  for (const env in data) {
+      for (const codeFile of data[env].files) {
+          const extension = eaft.getExtensionFromFiletype(codeFile.type, extensions);
+          const key = `${codeFile.name}${extension}.${env}`;
+          keys.push(key);
+          codeFile.environment = env;
+          files[key] = codeFile;
+      }
+  }
+  keys.sort();
+  </prepareFileData>
+
+  <diffCalculation>
+  const addedFiles = [];
+  const modifiedFiles = [];
+  const deletedFiles = [];
+  for (let i = 0; i < keys.length; i++) {
+      const file = files[keys[i]];
+      const extension = eaft.getExtensionFromFiletype(file.type, extensions);
+      const nextFile = files[keys[i + 1]];
+
+      if (nextFile && file.name === nextFile.name && file.type === nextFile.type) {
+          i++;
+          if (file.source !== nextFile.source) {
+              modifiedFiles.push(file.name + extension);
+          }
+      } else if (file.environment === 'local') {
+          addedFiles.push(file.name + extension);
+      } else if (file.environment === 'remote') {
+          deletedFiles.push(file.name + extension);
+      }
+  }
+  </diffCalculation>
+
+  <outputStatus>
+  if (addedFiles.length === 0 && modifiedFiles.length === 0 && deletedFiles.length === 0) {
+      process.stdout.write(`Your local and remote project for '${metadata.name}' are in sync`);
+      checkbox.display(`green`);
+  } else {
+      process.stdout.write(`There are some differences between your local and remote projectfiles for '${metadata.name}'`);
+      console.log(``);
+
+      if (addedFiles.length > 0) {
+          console.log(``);
+      }
+      for (const added of addedFiles) {
+          console.log(`   + ${added}`.green);
+      }
+
+      if (modifiedFiles.length > 0) {
+          console.log(``);
+      }
+      for (const modified of modifiedFiles) {
+          console.log(`   ~ ${modified}`.yellow);
+      }
+
+      if (deletedFiles.length > 0) {
+          console.log(``);
+      }
+      for (const deleted of deletedFiles) {
+          console.log(`   - ${deleted}`.red);
+      }
+      console.log(``);
+  }
+  </outputStatus>
+}
+</displayStatusInfo>
+
+<meetExpectations>
+function (cb, expect) {
+  <functionValidation>
+  if (_.isFunction(cb) && cb.__normalised) {
+      return meetExpectations(cb, expect);
+  }
+  </functionValidation>
+
+  <callbackSetup>
+  var userback, 
+      callback = (_.isFunction(cb) && cb) || (_.isFunction(cb && cb.done) && cb.done),
+      callbackError = _.isFunction(cb && cb.error) && cb.error,
+      callbackSuccess = _.isFunction(cb && cb.success) && cb.success;
+  </callbackSetup>
+
+  <callbackDefinition>
+  userback = _.assign(function (err) {
+      callback && callback.apply(this, arguments);
+      if (err) {
+          callbackError && callbackError.apply(this, arguments);
+      }
+      else {
+          callbackSuccess && callbackSuccess.apply(this, (Array.prototype.shift.call(arguments), arguments));
+      }
+  }, _.isPlainObject(cb) && cb, { 
+      error: function () {
+          return userback.apply(this, arguments);
+      },
+      success: function () {
+          userback.apply(this, (Array.prototype.unshift.call(arguments, null), arguments));
+      },
+      done: function () {
+          return userback.apply(this, arguments);
+      },
+      __normalised: true
+  });
+  </callbackDefinition>
+
+  return meetExpectations(userback, expect);
+}
+</meetExpectations>
+
+<doInsertHeading>
+function doInsertHeading(level){
+  <preliminaryChecks>
+  var rep = this.rep,
+    documentAttributeManager = this.documentAttributeManager;
+  if (!(rep.selStart && rep.selEnd) || (level >= 0 && tags[level] === undefined))
+  {
+    return;
+  }
+  </preliminaryChecks>
+
+  <applyHeading>
+  var firstLine, lastLine;
+  firstLine = rep.selStart[0];
+  lastLine = Math.max(firstLine, rep.selEnd[0] - ((rep.selEnd[1] === 0) ? 1 : 0));
+  _(_.range(firstLine, lastLine + 1)).each(function(i){
+    if(level >= 0){
+      documentAttributeManager.setAttributeOnLine(i, 'heading', tags[level]);
+    }else{
+      documentAttributeManager.removeAttributeOnLine(i, 'heading');
+    }
+  });
+  </applyHeading>
+}
+</doInsertHeading>
+```

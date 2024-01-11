@@ -1,0 +1,268 @@
+```javascript
+<webpackInheritanceMechanism>
+function(module, exports, __webpack_require__) {
+
+	"use strict";
+	<setupInheritance>
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	</setupInheritance>
+	var Subscriber_1 = __webpack_require__(8);
+	var Subscription_1 = __webpack_require__(10);
+	
+	<defineFinallyMethod>
+	function _finally(callback) {
+	    return this.lift(new FinallyOperator(callback));
+	}
+	exports._finally = _finally;
+	</defineFinallyMethod>
+	var FinallyOperator = (function () {
+	    function FinallyOperator(callback) {
+	        this.callback = callback;
+	    }
+	    FinallyOperator.prototype.call = function (subscriber, source) {
+	        return source._subscribe(new FinallySubscriber(subscriber, this.callback));
+	    };
+	    return FinallyOperator;
+	}());
+	
+	var FinallySubscriber = (function (_super) {
+	    __extends(FinallySubscriber, _super);
+	    function FinallySubscriber(destination, callback) {
+	        _super.call(this, destination);
+	        this.add(new Subscription_1.Subscription(callback));
+	    }
+	    return FinallySubscriber;
+	}(Subscriber_1.Subscriber));
+	
+ }
+</webpackInheritanceMechanism>
+ 
+<rawgitUrlCreation>
+function rawgit( options ) {
+	var opts;
+	var err;
+	
+	<optionsManipulation>
+	opts = copy( defaults );
+	err = validate( opts, options );
+	if ( err ) {
+		throw err;
+	}
+	opts.slug = opts.slug.replace( DANGLING_SLASH, '' );
+	opts.file = opts.file.replace( FILEPATH_PREFIX, '' );
+	</optionsManipulation>
+
+	return url( opts );
+}
+</rawgitUrlCreation>
+
+<colorFormatting> 
+function chalk(srcStr, color) {
+      <defaultColorCheck>
+      if (!has(colorList, color)) color = 'default';
+      </defaultColorCheck>
+      return colorList[color].replace(/%s/, srcStr);
+    }
+</colorFormatting>
+
+<directiveFiltering>
+function (response, type) {
+		'use strict';
+		let directives = response.response.directives;
+		if (directives) {
+			for (let i = 0; i < directives.length; i++) {
+				if (directives[i].type === type) {
+					return directives[i];
+				}
+			}
+		}
+		return undefined;
+	}
+</directiveFiltering>
+
+<scalarTypesEnhancement>
+function defineScalarTypes(schema: GraphQLSchema): void {
+  Object.entries(scalarTypeDefinitions).forEach(([typeName, definition]) => {
+    const type = schema.getType(typeName);
+    Object.assign(type._scalarConfig, definition);
+  });
+}
+</scalarTypesEnhancement>
+
+<mutableUpdate>
+function (subpath, newValue) {
+    var args = Util.resolveArgs(arguments, '?subpath', 'newValue');
+    update(this, args.subpath, Util.constantly(args.newValue));
+    return this;
+  }
+</mutableUpdate>
+
+<oauthLinkingOrCreation>
+function oauth(id, username, email, req, done) {
+	<linkAccountCheck>
+	if (req.params["0"] === "/link") {
+		return done(null, {
+			__linkUser: true,
+			email: email,
+			username: username,
+			id: id
+		});
+	}
+	</linkAccountCheck>
+	<getUser>
+	fileUtil.getMetastoreSafe(req).then(function(store) {
+		store.getUserByOAuth(id, function(err, user) {
+			if (err) {
+				return done(err);
+			}
+			if (!user) {
+				<createNewUser>
+				return done(null, {
+					__newUser: true,
+					email: email,
+					username: username,
+					id: id
+				});
+				</createNewUser>
+			}
+			done(null, user);
+		}, function noMetastore(err) {
+			done(err);
+		});
+	});
+	</getUser>
+}
+</oauthLinkingOrCreation>
+
+<databaseTableReflection>
+function (tableName, opts) {
+            var m = this.outputIdentifierFunc, im = this.inputIdentifierFunc, self = this;
+            <metadataQuery>
+            return this.metadataDataset.withSql("DESCRIBE ?", sql.identifier(im(tableName))).map(function (row) {
+                var ret = {};
+                var e = row[m("Extra")];
+                var allowNull = row[m("Null")];
+                var key = row[m("Key")];
+                ret.autoIncrement = e.match(/auto_increment/i) !== null;
+                ret.allowNull = allowNull.match(/Yes/i) !== null;
+                ret.primaryKey = key.match(/PRI/i) !== null;
+                var defaultValue = row[m("Default")];
+                ret["default"] = Buffer.isBuffer(defaultValue) ? defaultValue.toString() : defaultValue;
+                if (isEmpty(row["default"])) {
+                    row["default"] = null;
+                }
+                ret.dbType = row[m("Type")];
+                if (Buffer.isBuffer(ret.dbType)) {
+                    
+                    ret.dbType = ret.dbType.toString();
+                }
+                ret.type = self.schemaColumnType(ret.dbType.toString("utf8"));
+                var fieldName = m(row[m("Field")]);
+                return [fieldName, ret];
+            });
+            </metadataQuery>
+        }
+</databaseTableReflection>
+
+<textContentModification>
+function (text, start, end, show, callback) {
+			var isSingle = typeof text === "string"; 
+			var reset = start === undefined && end === undefined && isSingle;
+			var edit;
+			if (isSingle) {
+				<prepareSingleEdit>
+				if (start === undefined) { start = 0; }
+				if (end === undefined) { end = this._model.getCharCount(); }
+				edit = {text: text, selection: [new Selection(start, end, false)]};
+				</prepareSingleEdit>
+			} else {
+				edit = text;
+				<convertRangesToSelections>
+				edit.selection = this._rangesToSelections(edit.selection);
+				</convertRangesToSelections>
+			}
+			edit._code = true;
+			<performTextModification>
+			if (reset) {
+				this._variableLineHeight = false;
+			}
+			this._modifyContent(edit, !reset, show === undefined || show, callback);
+			if (reset) {
+				
+				if (util.isFirefox < 13) {
+					this._fixCaret();
+				}
+			}
+			</performTextModification>
+		}
+</textContentModification>
+
+<ruleMatching>
+function _match (rule, cmtData) {
+        var path = rule.subject.split('.');
+        <dataExtraction>
+        var extracted = cmtData;
+        while (path.length > 0) {
+            var item = path.shift();
+            if (item === '') {
+                continue;
+            }
+            if (extracted.hasOwnProperty(item)) {
+                extracted = extracted[item];
+            }
+            if (extracted === null || typeof extracted === 'undefined') {
+                extracted = null;
+                break;
+            }
+        }
+        if (extracted === null) {
+            
+            return true;
+        }
+        </dataExtraction>
+        <evaluateMatch>
+        switch (rule.op) {
+            case '<':
+                return extracted < rule.value;
+            case '>':
+                return extracted > rule.value;
+            case '~':
+            case 'regexp':
+                return (new RegExp(rule.value)).test(extracted.toString());
+            case '=':
+            case 'eq':
+                return rule.value ===
+                    ((typeof extracted === 'number') ?
+                        extracted : extracted.toString());
+            case '!':
+            case 'not':
+                return !_match(rule.value, extracted);
+            case '&&':
+            case 'and':
+                if (Array.isArray(rule.value)) {
+                    return rule.value.every(function (r) {
+                        return _match(r, extracted);
+                    });
+                } else {
+                    return false;
+                }
+            case '||':
+            case 'or':
+                if (Array.isArray(rule.value)) {
+                    return rule.value.some(function (r) {
+                        return _match(r, extracted);
+                    });
+                } else {
+                    return false;
+                }
+            default:
+                return false;
+        }
+        </evaluateMatch>
+    }
+</ruleMatching>
+```

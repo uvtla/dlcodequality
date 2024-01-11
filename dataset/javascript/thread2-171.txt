@@ -1,0 +1,175 @@
+```javascript
+<processMatch>
+function (match) {
+  var nv = "v" + (path.length + 1);
+  if (match.indexOf("$owner.") == 0) {
+      match = match.substr(7);
+  } else
+  {
+      if (match.indexOf("owner.") == 0) {
+          match = match.substr(6);
+      } else {
+          match = match.substr(1);
+      }
+  }
+
+  match = match.split(".");
+
+  var trail = "";
+
+  match = match.filter(function(m) {
+      if(!m.endsWith("(")){
+          return true;
+      }
+      trail = "." + m;
+      return false;
+  });
+
+  path.push(match);
+  vars.push(nv);
+  return "(" + nv + ")" + trail;
+}
+</processMatch>
+
+<processValueWithMetaData>
+function(value, metaData, name, object) {
+  name = name || 'unknown';
+  object = object || this;
+
+  var that = this;
+  var processors = this.getProcessor();
+
+  _.each(metaData, function(data, option) {
+      if (!(option in processors)) {
+          return;
+      }
+      value = processors[option].call(that, value, data, name, object);
+  });
+
+  return value;
+}
+</processValueWithMetaData>
+
+<TranslateJSONObject>
+function TranslateJSONObject() {
+  var translateSrv;
+  var setting;
+  var promises = [];
+  var destObj = {};
+  var serviceType;
+
+  <initSettings>
+  function init(options) {
+    setting = options || {};
+    if (!setting.googleApiKey && !setting.yandexApiKey) {
+      console.warn(constant.ERROR.MISSING_TOKEN);
+      return false;
+    } else if (setting.yandexApiKey) {
+      serviceType = constant.YANDEX_NAME;
+      translateSrv = require('./service/yandex.js');
+    } else {
+      serviceType = constant.GOOGLE_NAME;
+      translateSrv = require('./service/google.js');
+    }
+    translateSrv.init(setting);
+    return true;
+  }
+  </initSettings>
+
+  <translate>
+  function translate(srcObj, language) {
+    if (!setting.googleApiKey && !setting.yandexApiKey) {
+      return Promise.reject(constant.ERROR.MISSING_TOKEN);
+    }
+    //... rest of the translate function
+  }
+  </translate>
+
+  return {
+    init: init,
+    translate: translate
+  };
+}
+</TranslateJSONObject>
+
+<updateHtml>
+function(html) {
+  var changed = this._html !== html;
+  var focused = this._focusedfield();
+  if (changed) {
+    this._html = html;
+    this._updater.update(html);
+    if(focused) {
+      this._restorefocus(focused);
+    }
+  }
+  this._status(this.spirit);
+  this.ran = true;
+}
+</updateHtml>
+
+<grabTheRightIcon>
+function grabTheRightIcon(icon, variant) {
+  return toCodePoint(
+    variant === '\uFE0F' ?
+    icon.slice(0, -1) :
+    (icon.length === 3 && icon.charAt(1) === '\uFE0F' ?
+    icon.charAt(0) + icon.charAt(2) : icon)
+  );
+}
+</grabTheRightIcon>
+
+<hasRest>
+function hasRest (node) {
+  for (var i = 0, child; (child = node.children[i]); i++) {
+    if (child.type === "rest") return true;
+  }
+  return false;
+}
+</hasRest>
+
+<ServerReadableStream>
+function ServerReadableStream(call, metadata, deserialize) {
+  Readable.call(this, {objectMode: true});
+  this.call = call;
+  <setUpReadableStream>
+  setUpReadable(this, deserialize);
+  </setUpReadableStream>
+
+  this.cancelled = false;
+
+  this.metadata = metadata;
+}
+</ServerReadableStream>
+
+<dataResponseHandler>
+function (callback) {
+  return function (res) {
+    var resData = "";
+    res.setEncoding('utf8');
+    res.on('data',function(chunk) { resData+=chunk; });
+    res.on('end', function() { callback(res, resData); });
+  };
+}
+</dataResponseHandler>
+
+<lowerScriptsInfo>
+function lowerScriptsInfo(docDom) {
+  var $scripts = $(docDom).find('script[src]');
+  $scripts.each(function () {
+    $(this).attr('src', function (idx, path) {
+      return path.toLowerCase();
+    });
+  });
+}
+</lowerScriptsInfo>
+
+<parseContentType>
+function parse(string) {
+  if (!string) {
+    throw new TypeError('argument string is required')
+  }
+  //... rest of the parse function
+}
+</parseContentType>
+```

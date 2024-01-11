@@ -1,0 +1,324 @@
+```javascript
+<initializeGLContext>
+function() {
+    this.gl = this.context.gl;
+    var gl = this.gl;
+    this.vertexBuffer = gl.createBuffer();  
+    this.indexBuffer = this.numIndices > 0
+                ? gl.createBuffer()
+                : null;
+    this.dirty = true;
+}
+</initializeGLContext>
+
+<processUniqArray>
+function uniq(array, isSorted, iteratee, thisArg) {
+  var length = array ? array.length : 0;
+  if (!length) {
+    return [];
+  }
+  if (isSorted != null && typeof isSorted != 'boolean') {
+    thisArg = iteratee;
+    iteratee = isIterateeCall(array, isSorted, thisArg) ? undefined : isSorted;
+    isSorted = false;
+  }
+  var callback = getCallback();
+  if (!(iteratee == null && callback === baseCallback)) {
+    iteratee = callback(iteratee, thisArg, 3);
+  }
+  return (isSorted && getIndexOf() === baseIndexOf)
+    ? sortedUniq(array, iteratee)
+    : baseUniq(array, iteratee);
+}
+</processUniqArray>
+
+<updateCharactersCounter>
+function updateCharactersCounter() {
+  var remaining = options.chars - charsCount();
+  if (remaining === 0) {
+    $countdownDomNode.addClass('ut-text-countdown-max');
+  } else {
+    $countdownDomNode.removeClass('ut-text-countdown-max');
+  }
+  $countdownDomNode.text(remaining + ' / ' + options.chars);
+}
+</updateCharactersCounter>
+
+<createJsonEventData>
+function createJsonEventData(eventId, event, metadata, type) {
+  if (!event || typeof event !== 'object') throw new TypeError("data must be an object.");
+  var eventBuf = new Buffer(JSON.stringify(event));
+  var metaBuf = metadata ? new Buffer(JSON.stringify(metadata)) : null;
+  return new EventData(eventId, type || event.constructor.name, true, eventBuf, metaBuf);
+}
+</createJsonEventData>
+
+<initializeCanvasEnvironment>
+function() {
+    var _this = this;
+    this.canvas = document.createElement('canvas');
+    this.resize(true);
+    document.body.appendChild(this.canvas);
+    this.ctx = this.canvas.getContext('2d');
+    window.addEventListener('resize', function() {
+        setTimeout(function(){ GameController.resize.call(_this); }, 10);
+    });
+    this.setTouchEvents();
+    this.loadSide('left');
+    this.loadSide('right');
+    this.render();
+    if( !this.touches || !this.touches.length ) this.paused = true;
+}
+</initializeCanvasEnvironment>
+
+<diff>
+function diff(node) {
+    var oldBundle = (cachedData.loader.bundle || []).slice();
+    return getDependencies(node.load).then(function(result){
+        var newBundle = (cachedData.loader.bundle || []).slice();
+        if(same(node.deps, result.deps) &&
+           same(oldBundle, newBundle)) {
+            clean(node, result.source);
+            if(result.virtualModules.length) {
+                var promises = result.virtualModules.map(function(l){
+                    var node = cachedData.graph[l.name];
+                    node.load.source = l.source;
+                    node.load.metadata.useSource = true;
+                    return diff(node);
+                });
+                return Promise.all(promises).then(function(results){
+                    result.same = results.every(function(res){
+                        return res.same;
+                    });
+                    return result;
+                });
+            }
+            result.same = true;
+        }
+        return result;
+    });
+}
+</diff>
+
+<getViewState>
+function getViewState(props) {
+  if (!props.viewState && 'latitude' in props && 'longitude' in props && 'zoom' in props) {
+    const {latitude, longitude, zoom, pitch = 0, bearing = 0} = props;
+    return {latitude, longitude, zoom, pitch, bearing};
+  }
+  return props.viewState;
+}
+</getViewState>
+
+<registerDevice>
+async function registerDevice(options) {
+    options = options || {};
+    const atlasClient = options.atlasClient || await AtlasClient.factory();
+    const accountInfo = await atlasClient.fetch('/v1/provision/account');
+    <checkFirstDeviceRegistration>
+    if (!accountInfo.devices.length) {
+        console.error("Must use `registerAccount` for first device");
+        throw new TypeError("No Account");
+    }
+    </checkFirstDeviceRegistration>
+    const signalClient = new SignalClient(null, null, accountInfo.serverUrl);
+    const autoProvision = options.autoProvision !== false;
+    const name = options.name || defaultName;
+    <checkProvisioningCallback>
+    if (!options.onProvisionReady && !autoProvision) {
+        throw new TypeError("Missing: onProvisionReady callback");
+    }
+    </checkProvisioningCallback>
+    const returnInterface = {waiting: true};
+    const provisioningCipher = new ProvisioningCipher();
+    const pubKey = provisioningCipher.getPublicKey().toString('base64');
+    let wsr;
+    const webSocketWaiter = new Promise((resolve, reject) => {
+        wsr = new WebSocketResource(signalClient.getProvisioningWebSocketURL(), {
+            keepalive: {path: '/v1/keepalive/provisioning'},
+            handleRequest: request => {
+                if (request.path === "/v1/address" && request.verb === "PUT") {
+                    const proto = protobufs.ProvisioningUuid.decode(request.body);
+                    request.respond(200, 'OK');
+                    if (autoProvision) {
+                        atlasClient.fetch('/v1/provision/request', {
+                            method: 'POST',
+                            json: {
+                                uuid: proto.uuid,
+                                key: pubKey
+                            }
+                        }).catch(reject);
+                    }
+                    if (options.onProvisionReady) {
+                        const r = options.onProvisionReady(proto.uuid, pubKey);
+                        if (r instanceof Promise) {
+                            r.catch(reject);
+                        }
+                    }
+                } else if (request.path === "/v1/message" && request.verb === "PUT") {
+                    const msgEnvelope = protobufs.ProvisionEnvelope.decode(request.body);
+                    request.respond(200, 'OK');
+                    wsr.close();
+                    resolve(msgEnvelope);
+                } else {
+                    reject(new Error('Unknown websocket message ' + request.path));
+                }
+            }
+        });
+    });
+    await wsr.connect();
+    returnInterface.done = (async () => {
+        const provisionMessage = await provisioningCipher.decrypt(await webSocketWaiter);
+        returnInterface.waiting = false;
+        <registerNewDevice>
+        const addr = provisionMessage.addr;
+        </registerNewDevice>
+        <generateAndSaveCredentials>
+        const identity = provisionMessage.identityKeyPair;
+        const registrationId = libsignal.keyhelper.generateRegistrationId();
+        const password = generatePassword();
+        const signalingKey = generateSignalingKey();
+        </generateAndSaveCredentials>
+        const response = await signalClient.request({
+            httpType: 'PUT',
+            call: 'devices',
+            urlParameters: '/' + provisionMessage.provisioningCode,
+            json: {
+                signalingKey: signalingKey.toString('base64'),
+                supportsSms: false,
+                fetchesMessages: true,
+                registrationId,
+                name
+            },
+            username: addr,
+            password,
+            validateResponse: {deviceId: 'number'}
+        });
+        <persistDeviceData>
+        const username = `${addr}.${response.deviceId}`;
+        await storage.clearSessionStore();
+        await storage.removeOurIdentity();
+        await storage.removeIdentity(addr);
+        await storage.saveIdentity(addr, identity.pubKey);
+        await storage.saveOurIdentity(identity);
+        await storage.putState('addr', addr);
+        await storage.putState('serverUrl', signalClient.url);
+        await storage.putState('deviceId', response.deviceId);
+        await storage.putState('name', name);
+        await storage.putState('username', username);
+        await storage.putState('password', password);
+        await storage.putState('registrationId', registrationId);
+        await storage.putState('signalingKey', signalingKey);
+        </persistDeviceData>
+        <registerDeviceKeys>
+        const authedClient = new SignalClient(username, password, signalClient.url);
+        await authedClient.registerKeys(await authedClient.generateKeys());
+        </registerDeviceKeys>
+    })();
+    returnInterface.cancel = async () => {
+        wsr.close();
+        try {
+            await webSocketWaiter;
+        } catch(e) {
+            console.warn("Ignoring web socket error:", e);
+        }
+    };
+    return returnInterface;
+}
+</registerDevice>
+
+<scanDocument>
+function(from, to) {
+    var currentCursor = this.cursor();
+    var selection = this._scan(true, from, to);
+    if(!selection){
+        selection = this._scan(false, from, to);
+    }
+    this.setCursor(currentCursor);
+    return selection;
+}
+</scanDocument>
+
+<runRollupTask>
+function runRollupTask(entry, filename) {
+    <generateCommonJSBundle>
+    rollup.rollup({
+            entry: entry,
+            plugins: [
+                babel({
+                    loose: 'all'
+                })
+            ]
+        })
+        .then(function(bundle) {
+            return write('dist/' + filename + '.common.js', bundle.generate({
+                format: 'cjs',
+                banner: banner
+            }).code)
+        })
+    </generateCommonJSBundle>
+    <generateDevelopmentBundle>
+    .then(function() {
+            return rollup.rollup({
+                    entry: entry,
+                    plugins: [
+                        replace({
+                            'process.env.NODE_ENV': "'development'"
+                        }),
+                        babel({
+                            loose: 'all'
+                        })
+                    ]
+                })
+                .then(function(bundle) {
+                    return write('dist/' + filename + '.js', bundle.generate({
+                        format: 'umd',
+                        banner: banner,
+                        moduleName: 'React'
+                    }).code)
+                })
+        })
+    </generateDevelopmentBundle>
+    <generateProductionBundle>
+    .then(function() {
+            return rollup.rollup({
+                    entry: entry,
+                    plugins: [
+                        replace({
+                            'process.env.NODE_ENV': "'production'"
+                        }),
+                        babel({
+                            loose: 'all'
+                        })
+                    ]
+                })
+                .then(function(bundle) {
+                    var code = bundle.generate({
+                        format: 'umd',
+                        moduleName: 'React'
+                    }).code
+                    var minified = banner + '\n' + uglify.minify(code, {
+                        fromString: true
+                    }).code
+                    return write('dist/' + filename + '.min.js', minified)
+                })
+                .then(zip)
+        })
+    </generateProductionBundle>
+    .catch(logError)
+    <compressProductionBundle>
+    function zip() {
+        return new Promise(function(resolve, reject) {
+            fs.readFile('dist/' + filename + '.min.js', function(err, buf) {
+                if (err) return reject(err)
+                zlib.gzip(buf, function(err, buf) {
+                    if (err) return reject(err)
+                    write('dist/' + filename + '.min.js.gz', buf).then(resolve)
+                })
+            })
+        })
+    }
+    </compressProductionBundle>
+}
+</runRollupTask>
+```

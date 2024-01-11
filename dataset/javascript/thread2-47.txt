@@ -1,0 +1,315 @@
+```javascript
+<initializeStateNameMapping>
+function(options) {
+    this.stateName = {};
+    this.stateName[OpenLayers.State.INSERT] = "wfs:Insert";
+    this.stateName[OpenLayers.State.UPDATE] = "wfs:Update";
+    this.stateName[OpenLayers.State.DELETE] = "wfs:Delete";
+    OpenLayers.Format.XML.prototype.initialize.apply(this, [options]);
+}
+</initializeStateNameMapping>
+
+<createOnChangeHandler>
+function OnChange(defaultValue) {
+    var suffix = 'Change';
+    return function OnChangeHandler(target, propertyKey) {
+        var _key = " __" + propertyKey + "Value";
+        Object.defineProperty(target, propertyKey, {
+            get: function () { return this[_key]; },
+            set: function (value) {
+                var prevValue = this[_key];
+                this[_key] = value;
+                <emitChangeEventIfValueChanged>
+                if (prevValue !== value && this[propertyKey + suffix]) {
+                    this[propertyKey + suffix].emit(value);
+                }
+                </emitChangeEventIfValueChanged>
+            }
+        });
+    };
+}
+</createOnChangeHandler>
+
+<loadView>
+function (url, async) {
+    <resolveUrlSuffix>
+    var suffix = url.match(/\.[\w\d]+$/),
+        el,
+        id,
+        jqXHR;
+    if (url.match(/^#/)) {
+        url = url.substr(1);
+    }
+    if (el = document.getElementById(url)) {
+        suffix = "." + el.type.match(/\/(x\-)?(.+)/)[2];
+    }
+    if (!suffix && !$view.cached[url]) {
+        url += (suffix = $view.ext);
+    }
+    if (can.isArray(suffix)) {
+        suffix = suffix[0]
+    }
+    </resolveUrlSuffix>
+    
+    <resolveUrlId>
+    id = $view.toId(url);
+    </resolveUrlId>
+    
+    <handleSlashPrefixInUrl>
+    if (url.match(/^\/\//)) {
+        var sub = url.substr(2);
+        url = !window.steal ? sub : steal.config().root.mapJoin(sub);
+    }
+    </handleSlashPrefixInUrl>
+
+    <determineViewType>
+    type = $view.types[suffix];
+    </determineViewType>
+
+    <checkCacheOrLoad>
+    if ($view.cached[id]) {
+        return $view.cached[id];
+    } else if (el) {
+        return $view.registerView(id, el.innerHTML, type);
+    } else {
+        var d = new can.Deferred();
+        can.ajax({
+            async: async,
+            url: url,
+            dataType: "text",
+            error: function (jqXHR) {
+                checkText("", url);
+                d.reject(jqXHR);
+            },
+            success: function (text) {
+                checkText(text, url);
+                $view.registerView(id, text, type, d)
+            }
+        });
+        return d;
+    }
+    </checkCacheOrLoad>
+}
+</loadView>
+
+<aggregateStats>
+function getStats() {
+    var o = {};
+    o.total_connections_received = this.stats.connections;
+    o.total_commands_processed = this.stats.commands;
+    o.total_net_input_bytes = this.stats.ibytes;
+    o.total_net_output_bytes = this.stats.obytes;
+    
+    o.rejected_connections = this.stats.rejected;
+    
+    o.expired_keys = this.stats.expired;
+    o.keyspace_hits = this.stats.hits;
+    o.keyspace_misses = this.stats.misses;
+    
+    o.pubsub_channels = this.stats.pubsub_channels;
+    o.pubsub_patterns = this.stats.pubsub_patterns;
+    
+    return o;
+}
+</aggregateStats>
+
+<findClosestPoints>
+function findClosestPointsFromSegmentToSegment(closestA, closestB, segmentA, segmentB) {
+    <findInitialClosestPoints>
+    const {distA, distB} = findClosestPointsFromLineToLine(
+        segmentA.start, segmentA.dir, segmentB.start, segmentB.dir);
+    </findInitialClosestPoints>
+    
+    <checkBoundsAndAdjust>
+    const isDistAInBounds = distA >= 0 && distA <= 1;
+    const isDistBInBounds = distB >= 0 && distB <= 1;
+    
+    if (isDistAInBounds) {
+        if (isDistBInBounds) {
+            vec3.scaleAndAdd(closestA, segmentA.start, segmentA.dir, distA);
+            vec3.scaleAndAdd(closestB, segmentB.start, segmentB.dir, distB);
+        } else {
+            <fixOutOfBoundsB>
+            if (distB < 0) {
+                vec3.copy(closestB, segmentB.start);
+            } else {
+                vec3.copy(closestB, segmentB.end);
+            }
+            findClosestPointOnSegmentToPoint(closestA, segmentA, closestB);
+            </fixOutOfBoundsB>
+        }
+    } else {
+        if (isDistBInBounds) {
+            <fixOutOfBoundsA>
+            if (distA < 0) {
+                vec3.copy(closestA, segmentA.start);
+            } else {
+                vec3.copy(closestA, segmentA.end);
+            }
+            findClosestPointOnSegmentToPoint(closestB, segmentB, closestA);
+            </fixOutOfBoundsA>
+        } else {
+            <handleBothOutOfBounds>
+            if (distA < 0) {
+                vec3.copy(closestA, segmentA.start);
+            } else {
+                vec3.copy(closestA, segmentA.end);
+            }
+            if (distB < 0) {
+                vec3.copy(closestB, segmentB.start);
+            } else {
+                vec3.copy(closestB, segmentB.end);
+            }
+            const altClosestA = vec3.create();
+            const altClosestB = vec3.create();
+            findClosestPointOnSegmentToPoint(altClosestA, segmentA, closestB);
+            findClosestPointOnSegmentToPoint(altClosestB, segmentB, closestA);
+            if (vec3.squaredDistance(altClosestA, closestB) <
+                vec3.squaredDistance(altClosestB, closestA)) {
+                vec3.copy(closestA, altClosestA);
+            } else {
+                vec3.copy(closestB, altClosestB);
+            }
+            </handleBothOutOfBounds>
+        }
+    }
+    </checkBoundsAndAdjust>
+}
+</findClosestPoints>
+
+<resolveIncludeDirectives>
+function resolveIncludeDirectives(text, fileItem) {
+    <parseSourceCode>
+    var result = [];
+    try {
+        var srcParsed = esprima.parse(text);
+    } catch (e) {
+        logger.error(buildErrMsg(fileItem.ancestor, 'Failed to parse a [%s] JavaScript file. Reason : [%s]', fileItem.filePath, e));
+        throw buildShortErrMsg(fileItem.ancestor, 'Failed to parse a [%s] JavaScript file. Reason : [%s]', path.basename(fileItem.filePath), e)
+    }
+    </parseSourceCode>
+    
+    <extractIncludeDirectives>
+    for (var key in srcParsed.body) {
+        var item = srcParsed.body[key];
+        var includeDirective = resolveIncludeDirectiveDom(item);
+        if (includeDirective != null) {
+            result.push(includeDirective);
+        }
+    }
+    </extractIncludeDirectives>
+    
+    return result;
+}
+</resolveIncludeDirectives>
+
+<addCAmethods>
+function() {
+    var newMethods = $._.$.iot.extraCAMethods();
+    <logNewMethods>
+    $._.$.log && $._.$.log.debug('Adding CA methods:' +
+                                 JSON.stringify(Object.keys(newMethods)));
+    </logNewMethods>
+    <mixinNewMethods>
+    myUtils.mixin($.handler, newMethods, true);
+    </mixinNewMethods>
+}
+</addCAmethods>
+
+<parseValidationRules>
+function parseRules (fields, data) {
+    data = data || {}
+    return Object.keys(fields).reduce((result, field) => {
+        let rules = fields[field]
+        
+        <parseRuleFormat>
+        if (typeof (rules) === 'string') {
+            rules = Pipe(rules, new ArrayPresenter())
+        } else if (!Array.isArray(rules)) {
+            throw new Error('Rules must be defined as a string or an array')
+        }
+        </parseRuleFormat>
+        
+        <handleWildcardFields>
+        if (field.indexOf('*') > -1) {
+            const nodes = field.split(/\.\*\.?/)
+            starToIndex(nodes, data).forEach((f) => { result[f] = rules })
+        } else {
+            result[field] = rules
+        }
+        </handleWildcardFields>
+        
+        return result
+    }, {})
+}
+</parseValidationRules>
+
+<checkIfObjectArray>
+function isObjectArray( value ) {
+    var len;
+    if ( !isArray( value ) ) {
+        return false;
+    }
+    len = value.length;
+    if ( !len ) {
+        return false;
+    }
+    <verifyEachElementIsObject>
+    for ( var i = 0; i < len; i++ ) {
+        if ( !isObject( value[i] ) ) {
+            return false;
+        }
+    }
+    </verifyEachElementIsObject>
+    return true;
+}
+</checkIfObjectArray>
+
+<parseRGBtoRGBA>
+function( rgb ){
+    var ret;
+    var number = $$.util.regex.number;
+    
+    <parseRGBstring>
+    var m = new RegExp("^" + $$.util.regex.rgba + "$").exec(rgb);
+    if( m ){
+        ret = [];
+        var isPct = [];
+        for( var i = 1; i <= 3; i++ ){
+            var channel = m[i];
+            <convertPercentToValue>
+            if( channel[ channel.length - 1 ] === "%" ){
+                isPct[i] = true;
+            }
+            channel = parseFloat( channel );
+            if( isPct[i] ){
+                channel = channel/100 * 255;
+            }
+            </convertPercentToValue>
+            <validateChannelValue>
+            if( channel < 0 || channel > 255 ){ return; }
+            </validateChannelValue>
+            ret.push( Math.floor(channel) );
+        }
+        
+        <handlePartialPercentages>
+        var atLeastOneIsPct = isPct[1] || isPct[2] || isPct[3];
+        var allArePct = isPct[1] && isPct[2] && isPct[3];
+        if( atLeastOneIsPct && !allArePct ){ return; }
+        </handlePartialPercentages>
+        
+        <parseAlphaChannel>
+        var alpha = m[4];
+        if( alpha !== undefined ){
+            alpha = parseFloat( alpha );
+            if( alpha < 0 || alpha > 1 ){ return; }
+            ret.push( alpha );
+        }
+        </parseAlphaChannel>
+    }
+    </parseRGBstring>
+    
+    return ret;
+}
+</parseRGBtoRGBA>
+```

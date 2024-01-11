@@ -1,0 +1,227 @@
+```javascript
+<toggleClassesOnElement>
+function(el, value) {
+    <removeClasses>
+    if (el.cbClasses) {
+        __ep(el).removeClass(el.cbClasses);
+    }
+    </removeClasses>
+
+    el.cbClasses = value;
+
+    <addClasses>
+    if (value) {
+        __ep(el).addClass(value);
+    }
+    </addClasses>
+}
+</toggleClassesOnElement>
+
+<generateDocumentation>
+function generateFormatterExamples(formatterInfo, prereleaseVersion) {
+    <renderOutput>
+    const output = ejs.render(cat("./templates/formatter-examples.md.ejs"), formatterInfo);
+    </renderOutput>
+    <setupFilenames>
+    let filename = "../eslint.github.io/docs/user-guide/formatters/index.md",
+        htmlFilename = "../eslint.github.io/docs/user-guide/formatters/html-formatter-example.html";
+    </setupFilenames>
+
+    <adjustForPrerelease>
+    if (prereleaseVersion) {
+        filename = filename.replace("/docs", `/docs/${prereleaseVersion}`);
+        htmlFilename = htmlFilename.replace("/docs", `/docs/${prereleaseVersion}`);
+        if (!test("-d", path.dirname(filename))) {
+            mkdir(path.dirname(filename));
+        }
+    }
+    </adjustForPrerelease>
+
+    <writeOutput>
+    output.to(filename);
+    formatterInfo.formatterResults.html.result.to(htmlFilename);
+    </writeOutput>
+}
+</generateDocumentation>
+
+<createBanner>
+function createBanner(generator) {
+   'use strict';
+   var placeholder = generator.placeholder;
+
+   <determineBanner>
+   if(placeholder.banner) {
+      return placeholder.banner;
+   }
+   </determineBanner>
+
+   <createNewBanner>
+   return createBannerFromPrompts(placeholder);
+   </createNewBanner>
+
+   function createBannerFromPrompts(placeholder) {
+      var banner = '';
+      return banner;
+   }
+}
+</createBanner>
+
+<getRootDirectory>
+function _getRoot(obj) {
+    return (getCallingDir(((obj && obj.basedir) ? obj.basedir : undefined)) || (obj ? obj.basedir : undefined));
+}
+</getRootDirectory>
+
+<calculateProjection>
+function getProjection() {
+    <initializeVariables>
+    let projection = current
+    let speed = currentSpeed
+    </initializeVariables>
+    <projectPosition>
+    for (let i = 0; i < 600; i++) {
+        const targetSpeed = speed * (1 - springK)
+        speed = linearlyApproach(speed, targetSpeed, acceleration)
+        projection += speed
+    }
+    </projectPosition>
+    return projection
+}
+</calculateProjection>
+
+<calculateZoom>
+function(moZoom) {
+    <initializeZoom>
+    var zoom = null;
+    </initializeZoom>
+    <determineZoomLevel>
+    if (moZoom != null) {
+        zoom = moZoom - this.minZoomLevel;
+        if (this.map.baseLayer !== this) {
+            zoom = this.map.baseLayer.getZoomForResolution(
+                this.getResolutionForZoom(zoom)
+            );
+        }
+    }
+    </determineZoomLevel>
+    return zoom;
+}
+</calculateZoom>
+
+<findAllRecords>
+function findAll() {
+    <setup>
+    var _this = this;
+    var options = arguments[0] === undefined ? {} : arguments[0];
+    var forceFetch = arguments[1] === undefined ? false : arguments[1];
+    </setup>
+    <fetchRecords>
+    if (this._hasSynced && !forceFetch) {
+        return Promise.resolve(this.records);
+    } else {
+        return Promise.resolve(this.records.fetch(options)).then(function () {
+            return _this.records;
+        });
+    }
+    </fetchRecords>
+}
+</findAllRecords>
+
+<dereferenceJsonSchema>
+function(schema, field, reference, seenObjects, path, options) {
+
+    <handleRootReference>
+    if (reference == '#') return {$ref: '#'}
+    </handleRootReference>
+
+    <parseReferencePath>
+    var path = reference.substr(1).split('/').slice(1);
+    path = path.map(function (x) {
+        x = x.replace(/~1/g, '/').replace(/~0/g, '~');
+        return decodeURI(x);
+    })
+    </parseReferencePath>
+
+    <navigateSchema>
+    var pointer = schema;
+    for (var i = 0; i < path.length; i++) {
+        pointer = pointer[path[i]];
+    }
+    </navigateSchema>
+
+    <trackSeenObjects>
+    var objects = seenObjects.filter(function (x) {
+        return x.obj === pointer;
+    });
+    if (objects.length == 1) {
+        seenObjects[0].count = objects[0].count + 1;
+    } else {
+        seenObjects.push({ obj: pointer, count: 1 });
+    }
+    </trackSeenObjects>
+
+    <resolveNestedReferences>
+    if (pointer['$ref']) {
+        return deref(schema, field, pointer['$ref'], seenObjects, path, options);
+    } else {
+        extractReferences(schema, pointer, seenObjects, path, options);
+    }
+    </resolveNestedReferences>
+
+    return pointer;
+}
+</dereferenceJsonSchema>
+
+<runInstallerScript>
+function runInstaller(fileName, cb) {
+    <setupShell>
+    const shell = win ? 'powershell.exe' : 'bash';
+    </setupShell>
+    <resolveFilePath>
+    const filePath = path.resolve(__dirname, fileName);
+    console.log(`Now running: ${shell} ${filePath}`);
+    </resolveFilePath>
+    <executeInstaller>
+    cp.spawnSync(shell, [filePath], { stdio: 'inherit' });
+    </executeInstaller>
+    <callbackInvocation>
+    typeof cb === 'function' && cb();
+    </callbackInvocation>
+}
+</runInstallerScript>
+
+<addCoreFormatsToLocale>
+function addCoreFormats() {
+    <iterateFormats>
+    forEach(CoreParsingFormats, function (df) {
+        <initializeFormat>
+        var src = df.src;
+        </initializeFormat>
+        <validateLocale>
+        if (df.localeCheck && !df.localeCheck(loc)) {
+            return;
+        }
+        </validateLocale>
+        <adjustFormatForLocale>
+        if (df.mdy && loc.mdy) {
+            src = df.mdy;
+        }
+        </adjustFormatForLocale>
+        <addTimeFormat>
+        if (df.time) {
+            loc.addFormat(getFormatWithTime(src, true));
+            loc.addFormat(getFormatWithTime(src));
+        } else {
+            loc.addFormat(src);
+        }
+        </addTimeFormat>
+    });
+    </iterateFormats>
+    <addFallbackTimeFormat>
+    loc.addFormat('{time}');
+    </addFallbackTimeFormat>
+}
+</addCoreFormatsToLocale>
+```
+
+Overall, the annotated JavaScript functions are aimed at isolating responsibilities to conform with the Single Responsibility Principle. Responsibilities that constitute larger sections performing unique logical operations are wrapped with tags, ensuring that sub-responsibilities within functions are also well categorized when applicable.

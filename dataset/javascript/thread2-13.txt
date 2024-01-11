@@ -1,0 +1,277 @@
+```javascript
+<validateAndHashProp>
+function(prop) {
+    <updateHash>
+    cons.updateHash(prop)
+    </updateHash>
+
+    <validateMandatoryFields>
+    var fieldSig = _.prod(
+      _.map(cons.mandatoryFields, function(field) {
+        return _.has(prop, field) && !_.isUndefined(prop[field]) && !_.isNull(prop[field]) ? true : false;
+      }))
+    if (!fieldSig) throw new Error("Node constraints violated: incomplete mandatoryFields.")
+    </validateMandatoryFields>
+
+    return true;
+}
+</validateAndHashProp>
+
+<parseStream>
+function parse (stream, options = {}) {
+  <setupParsing>
+  const Promise = promise(options)
+  try {
+    check.assert.maybe.function(options.reviver, 'Invalid reviver option')
+  } catch (err) {
+    return Promise.reject(err)
+  }
+  </setupParsing>
+
+  <initialization>
+  const errors = []
+  const scopes = []
+  const reviver = options.reviver
+  const shouldHandleNdjson = !!options.ndjson
+  let emitter, resolve, reject, scopeKey
+  </initialization>
+
+  <handleNdjson>
+  if (shouldHandleNdjson && NDJSON_STATE.has(stream)) {
+    const state = NDJSON_STATE.get(stream)
+    NDJSON_STATE.delete(stream)
+    emitter = state.emitter
+    setImmediate(state.resume)
+  } else {
+    emitter = walk(stream, options)
+  }
+  </handleNdjson>
+
+  <registerEventListeners>
+  [... multiple event listener registrations here ...]
+
+  return new Promise((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+  </registerEventListeners>
+
+  [... helper functions for parsing here ...]
+}
+</parseStream>
+
+<getShareData>
+function getShareData(terria) {
+  const initSources = terria.initSources.slice();
+
+  <collectInitSources>
+  addUserAddedCatalog(terria, initSources);
+  addSharedMembers(terria, initSources);
+  addViewSettings(terria, initSources);
+  addFeaturePicking(terria, initSources);
+  addLocationMarker(terria, initSources);
+  </collectInitSources>
+
+  return {
+    version: "0.0.05",
+    initSources: initSources
+  };
+}
+</getShareData>
+
+<envEval>
+function envEval(state, script, data, frame) {
+  try {
+    <pushFrame>
+    state.stack.push(frame.replace(/\s+/g, ' '));
+    </pushFrame>
+
+    <determineEvaluationType>
+    if (/^[_a-zA-Z0-9.]*$/.test(script)) {
+      return property(state, script, data);
+    } else {
+      </determineEvaluationType>
+      
+      <checkAllowEval>
+      if (!state.options.allowEval) {
+        handleError(state, 'allowEval is not set, however \'' + script + '\'' +
+            ' can not be resolved using a simple property path.');
+        return '${' + script + '}';
+      }
+      </checkAllowEval>
+
+      <prepareForEvaluation>
+      var keys = allKeys(data);
+      var func = Function.apply(null, keys.concat("return " + script));
+      var values = keys.map(function(key) { return data[key]; });
+      </prepareForEvaluation>
+
+      <executeDynamicScript>
+      return func.apply(null, values);
+      </executeDynamicScript>
+      
+    }
+  }
+  catch (ex) {
+    <handleError>
+    handleError(state, 'Template error evaluating \'' + script + '\'', ex);
+    return '${' + script + '}';
+    </handleError>
+  }
+  finally {
+    <popFrame>
+    state.stack.pop();
+    </popFrame>
+  }
+}
+</envEval>
+
+<backgroundFunction>
+function background(options) {
+    options = options || {};
+    
+    return function (config) {
+        var values = [];
+        
+        <accumulateBackgroundProperties>
+        [
+            'attachment',
+            'clip',
+            'color',
+            'image',
+            'origin',
+            'position',
+            'repeat',
+            'size'
+        ].forEach(function (prop) {
+            if (options.hasOwnProperty(prop)) {
+                values.push(options[prop]);
+            }
+        });
+        </accumulateBackgroundProperties>
+        
+        if (values.length) {
+            <generateBackgroundStyle>
+            return [['background', values.join(' ')]];
+            </generateBackgroundStyle>
+        }
+        return [];
+    };
+}
+</backgroundFunction>
+
+<convertJdToDate>
+function(jd) {
+        var date = gregorianCalendar.fromJD(jd);
+        
+        <convertGregorianToLunar>
+        var lunar = toLunar(date.year(), date.month(), date.day());
+        </convertGregorianToLunar>
+        
+        <calculateMonthIndex>
+        var monthIndex = this.toMonthIndex(
+            lunar.year, lunar.month, lunar.isIntercalary);
+        </calculateMonthIndex>
+        
+        return this.newDate(lunar.year, monthIndex, lunar.day);
+    }
+</convertJdToDate>
+
+<addCommentToText>
+function addComment( text, multiline ) {
+          if ( options.extractComments ) {
+              <captureCommentDetails>
+              const loc = location();
+              comments[ loc.start.offset ] = {
+                  text: text,
+                  multiline: multiline,
+                  location: loc,
+              };
+              </captureCommentDetails>
+          }
+          return text;
+      }
+</addCommentToText>
+
+<rendererInitialization>
+function renderer(parent, config){
+    this.parent = ( ( "string" == typeof parent )
+		    ? document.getElementById(parent)
+		    : parent );
+    if (this.parent === undefined) {
+        throw "can't find parent element " + parent;
+    }
+    
+    this.tree = new tree();
+    this.node_hidden = {};
+    this.children_hidden = {};
+    this._sort = "ladderize_up";
+    this._layout_dirty = true;
+    this._css_prefix = "phylo_tree_" + (id_counter++) + "_";
+
+    var self = this;
+    this.node_elem_click_handler = function(event) {
+        var node_elem = (event.currentTarget) ? event.currentTarget : event.srcElement;
+        var node = self.tree.nodes[node_elem.node_id];
+        if (node) return self.node_clicked(node, node_elem, event);
+    };
+
+    var default_config = {
+        ... default configuration values ...
+    };
+
+    this.config = ("object" == typeof config
+                   ? bbop.core.merge(default_config, config)
+                   : default_config);
+
+    <additionalConfig>
+    this.config.parent_padding = ( (this.config.parent_padding === undefined)
+                                   ? ((this.config.box_spacing / 2) | 0)
+                                   : this.config.parent_padding );
+
+    this.node_style = { ... styles for node ... };
+    this.leaf_style = { ... styles for leaf ... };
+    if (this.config.leaf_border > 0) {
+        this.leaf_style.border = this.config.leaf_border + "px solid " + this.config.leaf_border_color;
+    }
+    this.connection_style = { ... styles for connection ... };
+    </additionalConfig>
+}
+</rendererInitialization>
+
+<MongoStoreInitialization>
+function MongoStore(options) {
+                if (typeof options === "undefined") { options = {}; }
+                <callSuper>
+                _super.call(this);
+                </callSuper>
+                this._logger = shared.utils.defaultLogger();
+                
+                <setupStore>
+                this._collection = null;
+                this._pending = [];
+                this._root = null;
+                this._cache = new shared.mtx.ObjectCache();
+                this._host = options.host || 'localhost';
+                this._port = options.port || 27017;
+                this._dbName = options.db || 'shared';
+                this._collectionName = options.collection || 'shared';
+                this._safe = options.safe || 'false';
+                </setupStore>
+                
+                <debugStoreCreation>
+                this._logger.debug('STORE', '%s: Store created', this.id());
+                </debugStoreCreation>
+            }
+</MongoStoreInitialization>
+
+<unbindEventFromFunction>
+function unbindToFunction(target, entity, evt, method){
+      <stopListening>
+      target.stopListening(entity, evt, method, target);
+      </stopListening>
+}
+</unbindEventFromFunction>
+```
+
+Each function has been annotated with tags to identify distinct responsibilities, compliant or not compliant with the Single Responsibility Principle (SRP). In some of the functions, nested tags indicate different responsibilities within the function that may represent a violation of SRP.

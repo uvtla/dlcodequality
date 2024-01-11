@@ -1,0 +1,355 @@
+<function1>
+function(key, done) {
+  <checkForKey>
+  if(!this._key) {
+    done('no key found for metadata');
+    return;
+  }
+  </checkForKey>
+  <searchForKey>
+  var ret = null; 
+  for(var i = 0; i < this._data.length; i++) {
+    if(this._data[i][this._key.getName()] === key) {
+      ret = this._clone(this._data[i]);
+      break;
+    }
+  }
+  </searchForKey>
+  done(null, ret);
+}
+</function1>
+
+<sanitisePath>
+function sanitisePath(path, queueObject) {
+  <normalizePath>
+  path = path.replace(/^\//, "").replace(/^\\/, "");
+  </normalizePath>
+
+  <initializePathStack>
+  var pathStack = [];
+  </initializePathStack>
+
+  <sanitizeAndSplitPath>
+  var sanitisedPath = path.length ? path.replace(/\s*$/ig, "") : "index.html";
+  </sanitizeAndSplitPath>
+
+  <parseHeaders>
+  var headers = queueObject.stateData.headers, sanitisedPathParts;
+  </parseHeaders>
+
+  <processQueryStrings>
+  if (sanitisedPath.match(/\?/)) {
+    sanitisedPathParts = sanitisedPath.split(/\?/g);
+    var resource = sanitisedPathParts.shift();
+    var hashedQS = crypto.createHash("sha1").update(sanitisedPathParts.join("?")).digest("hex");
+    sanitisedPath = resource + "?" + hashedQS;
+  }
+  </processQueryStrings>
+
+  <splitAndSanitizeChunks>
+  pathStack = sanitisedPath.split(/\//);
+  pathStack = pathStack.map(function(pathChunk) {
+    if (pathChunk.length >= 250) {
+      return crypto.createHash("sha1").update(pathChunk).digest("hex");
+    }
+    return pathChunk;
+  });
+  </splitAndSanitizeChunks>
+
+  <joinPathStack>
+  sanitisedPath = pathStack.join("/");
+  </joinPathStack>
+
+  <appendFileExtension>
+  if (!sanitisedPath.match(/\.[a-z0-9]{1,6}$/i) || headers["content-type"] && headers["content-type"].match(/text\/html/i) && !sanitisedPath.match(/\.htm[l]?$/i)) {
+    var subMimeType = "";
+    var mimeParts = [];
+    if (headers["content-type"] && headers["content-type"].match(/text\/html/i)) {
+      if (sanitisedPath.match(/\/$/)) {
+        sanitisedPath += "index.html";
+      } else {
+        sanitisedPath += ".html";
+      }
+    } else if (headers["content-type"] && (mimeParts = headers["content-type"].match(/(image|video|audio|application)\/([a-z0-9]+)/i))) {
+      subMimeType = mimeParts[2];
+      sanitisedPath += "." + subMimeType;
+    }
+  }
+  </appendFileExtension>
+
+  return sanitisedPath;
+}
+</sanitisePath>
+
+<Falcon>
+function Falcon(options) {
+  <logAction>
+  debug('constructor', options)
+  </logAction>
+  <initializeOptions>
+  options = options || {}
+  </initializeOptions>
+
+  <setupProperties>
+  this._lock = false
+  this._queue = []
+  this._increment = {}
+  </setupProperties>
+
+  <configureStep>
+  this.step(options.step === undefined ? Falcon.DEFAULT_STEP : options.step)
+  </configureStep>
+  <configureProjectTag>
+  if (Falcon.PROJECT) {
+    this.tag('project', Falcon.PROJECT)
+  }
+  </configureProjectTag>
+  <setupDefaultHandler>
+  this._handler = options.handler || Falcon.DEFAULT_HANDLER
+  </setupDefaultHandler>
+  <processAdditionalTags>
+  if (options.tags) {
+    this.tag(options.tags)
+  }
+  </processAdditionalTags>
+}
+</Falcon>
+
+<indentClassLeft>
+function indentClassLeft( node, classes ) {
+  <checkIndentClass>
+  var indentClass = node.$.className.match( this.classNameRegex ),
+    isIndent = this.isIndent;
+  </checkIndentClass>
+
+  <determineClass>
+  if ( indentClass )
+    return isIndent ? indentClass[ 1 ] != classes.slice( -1 ) : true;
+  else
+    return isIndent;
+  </determineClass>
+}
+</indentClassLeft>
+
+<duplicatePeriod>
+function (period) {
+  <checkOnDuplicatePeriod>
+  if (!this.settings.onDuplicatePeriod.call(this, period, this.element)) {
+  </checkOnDuplicatePeriod>
+    <calculatePositionAndHeight>
+    var options = this.periodData(period);
+    var position = Math.round(period.position().top / this.periodPosition);
+    var height = Math.round(period.height() / this.periodPosition);
+    </calculatePositionAndHeight>
+
+    <addPeriodToEachDay>
+    var $this = this;
+    $('.jqs-day', this.element).each(function (index, parent) {
+      $this.add(parent, position, height, options);
+    });
+    </addPeriodToEachDay>
+
+    <closeOptionsInterface>
+    this.closeOptions();
+    </closeOptionsInterface>
+  }
+}
+</duplicatePeriod>
+
+<wrapInlinesInParagraphs>
+function ($from) {
+  if ($from.length !== 0) {
+    <wrapAndCreateParagraph>
+    var $finalParagraph = $from.nextUntil(blockElementsSelector).addBack().wrapAll('<p/>').parent(),
+      $nextElement = $finalParagraph.nextAll(inlineElementsSelector).first();
+    </wrapAndCreateParagraph>
+    <cleanupAndContinue>
+    $finalParagraph.next('br').remove();
+    wrapInlinesInParagraphsFrom($nextElement);
+    </cleanupAndContinue>
+  }
+}
+</wrapInlinesInParagraphs>
+
+<readData>
+function readData(raw){
+  <deserializeData>
+  var dataObj = micro.toJSON(new Buffer(raw));
+  var type = dataObj._type;
+  delete dataObj._type;
+  </deserializeData>
+
+  <processDataByType>
+  switch (type){
+    case "Ping":
+      <updateLatencyAndEcho>
+      latency = dataObj.latency || latency;
+      socket.send(raw);
+      </updateLatencyAndEcho>
+      break;
+
+    case "GameData" :
+      <setGameData>
+      gameData.set(dataObj);
+      currentZone = gameData.currentZone.update(latency);
+      </setGameData>
+      break;
+
+    case "Zone":
+      <updateZone>
+      if (!gameData.get("isRunning")) return;
+      dataObj = new Zone(dataObj).update(latency).toJSON();
+      currentZone.set(dataObj, {easing:true, silent:true});
+      </updateZone>
+      break;
+
+    case "Player":
+      <updatePlayer>
+      if (!gameData.get("isRunning")) return;
+      dataObj = new Player(dataObj).update(latency).toJSON();
+      currentZone.players.set(dataObj, {easing:true, remove:false, silent:true});
+      </updatePlayer>
+      break;
+
+    case "PlayerUpdate":
+      <processPlayerUpdate>
+      if (!gameData.get("isRunning")) return;
+      currentZone.players.set(dataObj, {add:false, remove:false, silent:true});
+      </processPlayerUpdate>
+      break;
+
+    default:
+      <handleUnknownType>
+      console.warn("Unknown schema type received: "+type);
+      </handleUnknownType>
+      break;
+  }
+  </processDataByType>
+}
+</readData>
+
+<bnBitCount>
+function bnBitCount() {
+  <bitCountCalculation>
+  var r = 0, x = this.s&this.DM;
+  for(var i = 0; i < this.t; ++i) r += cbit(this.data[i]^x);
+  return r;
+  </bitCountCalculation>
+}
+</bnBitCount>
+
+<roundSHA2>
+function roundSHA2(block, H, variant) {
+  <initializeSHA2Variables>
+  var a, b, c, d, e, f, g, h, T1, T2, numRounds, t, binaryStringMult,
+      safeAdd_2, safeAdd_4, safeAdd_5, gamma0, gamma1, sigma0, sigma1,
+      ch, maj, Int, W = [], int1, int2, offset, K;
+  </initializeSHA2Variables>
+
+  <configureSHA2Computation>
+  numRounds = 64;
+  binaryStringMult = 1;
+  Int = Number;
+  safeAdd_2 = safeAdd_32_2;
+  safeAdd_4 = safeAdd_32_4;
+  safeAdd_5 = safeAdd_32_5;
+  gamma0 = gamma0_32;
+  gamma1 = gamma1_32;
+  sigma0 = sigma0_32;
+  sigma1 = sigma1_32;
+  maj = maj_32;
+  ch = ch_32;
+  K = K_sha2;
+  </configureSHA2Computation>
+
+  <initWorkingVars>
+  a = H[0];
+  b = H[1];
+  c = H[2];
+  d = H[3];
+  e = H[4];
+  f = H[5];
+  g = H[6];
+  h = H[7];
+  </initWorkingVars>
+
+  <performSHA2Core>
+  for (t = 0; t < numRounds; t += 1) {
+    if (t < 16) {
+      <initializeMessageSchedule>
+      offset = t * binaryStringMult;
+      int1 = (block.length <= offset) ? 0 : block[offset];
+      int2 = (block.length <= offset + 1) ? 0 : block[offset + 1];
+      W[t] = new Int(int1, int2);
+      </initializeMessageSchedule>
+    } else {
+      W[t] = safeAdd_4(
+              gamma1(W[t - 2]), W[t - 7],
+              gamma0(W[t - 15]), W[t - 16]
+          );
+    }
+    T1 = safeAdd_5(h, sigma1(e), ch(e, f, g), K[t], W[t]);
+    T2 = safeAdd_2(sigma0(a), maj(a, b, c));
+    h = g;
+    g = f;
+    f = e;
+    e = safeAdd_2(d, T1);
+    d = c;
+    c = b;
+    b = a;
+    a = safeAdd_2(T1, T2);
+  }
+  </performSHA2Core>
+
+  <updateHashValues>
+  H[0] = safeAdd_2(a, H[0]);
+  H[1] = safeAdd_2(b, H[1]);
+  H[2] = safeAdd_2(c, H[2]);
+  H[3] = safeAdd_2(d, H[3]);
+  H[4] = safeAdd_2(e, H[4]);
+  H[5] = safeAdd_2(f, H[5]);
+  H[6] = safeAdd_2(g, H[6]);
+  H[7] = safeAdd_2(h, H[7]);
+  </updateHashValues>
+
+  return H;
+}
+</roundSHA2>
+
+<parseConfig>
+function(config) {
+  <mapServices>
+  var services = _.map(config, function(data, key) {
+    <mapRoutes>
+    var routes = _.map(data, function(route) {
+      return {
+        port: route.port,
+        urls: getRouteUrls(route)
+      };
+    });
+    </mapRoutes>
+    return {
+      name: key,
+      routes: routes
+    };
+  });
+  </mapServices>
+
+  <countURLs>
+  var urlCount = getUrlsCounts(services);
+  </countURLs>
+  <checkForDuplicateURLs>
+  var hasDupes = _.reduce(urlCount, function(result, count) {
+    return count > 1 || result;
+  }, false);
+  </checkForDuplicateURLs>
+
+  <throwErrorOnDuplicates>
+  if (hasDupes) {
+    throw new Error(format('Duplicate URL detected: %j', urlCount));
+  }
+  </throwErrorOnDuplicates>
+
+  return services;
+}
+</parseConfig>

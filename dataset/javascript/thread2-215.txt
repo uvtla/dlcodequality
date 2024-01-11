@@ -1,0 +1,258 @@
+```javascript
+<fixOldGradient>
+function fixOldGradient(args, gradient) {
+    <parseGradientType>
+    const type = args[0][0];
+    </parseGradientType>
+    
+    <initializeColorStops>
+    let colorStops = [];
+    </initializeColorStops>
+    
+    <initFromToVariables>
+    let from;
+    let to;
+    </initFromToVariables>
+
+    <filterArgs>
+    args = args.slice(1).filter((arg) => {
+        const fnName = arg.value;
+        if (fnName === "from") {
+            from = arg;
+        } else if (fnName === "to") {
+            to = arg;
+        } else if (fnName === "color-stop") {
+            colorStops.push(arg);
+        } else {
+            return true;
+        }
+        return false;
+    });
+    </filterArgs>
+
+    <addFromToColorStops>
+    if (from) {
+        colorStops.unshift(from);
+    }
+    if (to) {
+        colorStops.push(to);
+    }
+    </addFromToColorStops>
+
+    <mapColorStops>
+    colorStops = colorStops.map((colorStop, i) => {
+        <processColorStop>
+        colorStop = colorStop.nodes;
+        if (colorStop.length > 1) {
+            <calculateStopPosition>
+            const posVal = i * 100 / (colorStops.length - 1);
+            colorStop = colorStop.filter((val) => {
+                return parseFloat(val) !== posVal;
+            });
+            </calculateStopPosition>
+
+            <sortColorStop>
+            if (colorStop.length > 1) {
+                colorStop.sort((word) => {
+                    return isNaN(parseFloat(word)) ? -1 : 1;
+                });
+            }
+            </sortColorStop>
+        }
+        </processColorStop>
+        return colorStop;
+    });
+    </mapColorStops>
+
+    <fixOldGradientBasedOnType>
+    if (type === "radial") {
+        args = fixOldRadialGradient(args);
+    } else {
+        args = fixOldLinearGradient(args);
+    }
+    </fixOldGradientBasedOnType>
+
+    <prependArgsToColorStops>
+    if (args && args.length) {
+        colorStops.unshift(args);
+    }
+    </prependArgsToColorStops>
+
+    <setGradientValue>
+    gradient.value = type + "-gradient";
+    </setGradientValue>
+    
+    return colorStops;
+}
+</fixOldGradient>
+
+<_gpfArraySlice>
+function _gpfArraySlice(array, from, to) {
+    return Array.prototype.slice.call(array, from, to || array.length);
+}
+</_gpfArraySlice>
+
+<ColorConstructor>
+function(val, predefinedColors, fallbackColor, fallbackFormat, hexNumberSignPrefix) {
+    <initializeFallbacks>
+    this.fallbackValue = fallbackColor ?
+      (
+        (typeof fallbackColor === 'string') ?
+        this.parse(fallbackColor) :
+        fallbackColor
+      ) :
+      null;
+
+    this.fallbackFormat = fallbackFormat ? fallbackFormat : 'rgba';
+
+    this.hexNumberSignPrefix = hexNumberSignPrefix === true;
+    </initializeFallbacks>
+
+    <setValueOrColors>
+    this.value = this.fallbackValue;
+
+    this.origFormat = null; 
+
+    this.predefinedColors = predefinedColors ? predefinedColors : {};
+
+    this.colors = $.extend({}, Color.webColors, this.predefinedColors);
+    </setValueOrColors>
+
+    <setColorVal>
+    if (val) {
+      if (typeof val.h !== 'undefined') {
+        this.value = val;
+      } else {
+        this.setColor(String(val));
+      }
+    }
+    </setColorVal>
+
+    <setDefaultColorIfEmpty>
+    if (!this.value) {
+      this.value = {
+        h: 0,
+        s: 0,
+        b: 0,
+        a: 1
+      };
+    }
+    </setDefaultColorIfEmpty>
+}
+</ColorConstructor>
+
+<resetChangeListener>
+function(oList) {
+    var oAttr = oList._getAtt();
+    if (oAttr && oAttr.getChangeListener() && oAttr.getChangeListener().id === oList.getId()) {
+        oAttr.setChangeListener(null);
+    }
+}
+</resetChangeListener>
+
+<_getStyle>
+function _getStyle(el, styleProp) {
+    var x = el, y = null;
+    <getStyleCompatLayer>
+    if (window.getComputedStyle) {
+        y = document.defaultView.getComputedStyle(x, null).getPropertyValue(styleProp);
+    }
+    else if (x.currentStyle) {
+        y = x.currentStyle[styleProp];
+    }
+    </getStyleCompatLayer>
+    return y;
+}
+</_getStyle>
+
+<validateQuery>
+function(query) {
+    query = query || '';
+    
+    <splitAndValidateQuery>
+    var nameChain = query.split('.');
+    for(var i=0; i<nameChain.length; i++) {
+      if(!nameChain[i].match(/(\*(\*)?|[a-zA-Z0-9_]+)/)) {
+        return false;
+      }
+    }
+    </splitAndValidateQuery>
+
+    return true;
+}
+</validateQuery>
+
+<getCoverageReport>
+function getCoverageReport(folder) {
+    <findCoverageReports>
+    var reports = grunt.file.expand(folder + '*/index.html');
+    </findCoverageReports>
+
+    <returnFirstReportOrDefault>
+    if (reports && reports.length > 0) {
+        return reports[0];
+    }
+    </returnFirstReportOrDefault>
+
+    return '';
+}
+</getCoverageReport>
+
+<evaluateIf  >
+function(ctx) {
+    assert(this.args.length == 3);
+    <evaluateConditional>
+    if (this.args[0].evaluate(ctx).booleanValue()) {
+        return this.args[1].evaluate(ctx);
+    } else {
+        return this.args[2].evaluate(ctx);
+    }
+    </evaluateConditional>
+}
+</evaluateIf>
+
+<getFragment>
+function(fragment, forcePushState) {
+    if (fragment == null) {
+        <determineFragment>
+        if (this._hasPushState || !this._wantsHashChange || forcePushState) {
+            fragment = this.location.pathname;
+            var root = this.root.replace(trailingSlash, '');
+            if (!fragment.indexOf(root)) fragment = fragment.slice(root.length);
+        } else {
+            fragment = this.getHash();
+        }
+        </determineFragment>
+    }
+    <removeRouteStripper>
+    return fragment.replace(routeStripper, '');
+    </removeRouteStripper>
+}
+</getFragment>
+
+<createLinkBetweenElements>
+function(elm1, elm2) {
+    <initializeLink>
+    var myLink = new erd.Line({
+        markup: [
+            '<path class="connection" stroke="black" d="M 0 0 0 0"/>',
+            '<path class="connection-wrap" d="M 0 0 0 0"/>',
+            '<g class="labels"/>',
+            '<g class="marker-vertices"/>',
+            '<g class="marker-arrowheads"/>'
+        ].join(''),
+        source: { id: elm1.id },
+        target: { id: elm2.id }
+    });
+    </initializeLink>
+
+    <addToGraph>
+    return myLink.addTo(graph);
+    </addToGraph>
+}
+</createLinkBetweenElements>
+```
+
+**Annotations**:   
+- **Compliant Functions**: `_gpfArraySlice`, `_getStyle`, `validateQuery` - These functions each have a single responsibility.  
+- **Non-Compliant Functions**: `fixOldGradient`, `ColorConstructor`, `resetChangeListener`, `getCoverageReport`, `evaluateIf`, `getFragment`, `createLinkBetweenElements` - These functions perform multiple operations that could potentially be separated into individual responsibilities or functions. The nested tags indicate the distinct blocks of code that handle separate responsibilities.

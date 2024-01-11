@@ -1,0 +1,277 @@
+```javascript
+<activateControlFeature>
+function() {
+    <checkActivation>
+    var activated = false;
+    if(OpenLayers.Control.prototype.activate.apply(this, arguments)) {</checkActivation>
+        <activateDrag>
+        this.dragControl.activate();</activateDrag>
+        <addMainFeature>
+        this.layer.addFeatures([this.box]);</addMainFeature>
+        <handleRotation>
+        this.rotate && this.layer.addFeatures(this.rotationHandles);</handleRotation>
+        <addHandles>
+        this.layer.addFeatures(this.handles);</addHandles>        
+        <setActivated>
+        activated = true;</setActivated>
+    }
+    <returnState>
+    return activated;</returnState>
+}
+</activateControlFeature>
+
+<decodeAMF3UI29>
+function amf3decUI29(buf) {
+    <decodeValue>
+    var val = 0;
+    var len = 1;
+    var b;
+
+    do {
+        b = buf.readUInt8(len++);
+        val = (val << 7) + (b & 0x7F);
+    } while (len < 5 || b > 0x7F);
+
+    if (len == 5) val = val | b; </decodeValue>
+
+    <returnValue>
+    return { len: len, value: val }</returnValue>
+}
+</decodeAMF3UI29>
+
+<initAudio>
+function ( source ) {
+    <setDefaultValues>
+    var _this = this;
+    this.path = source ? source.src : this.path;
+
+    this.isLoaded = false;
+    this.progress = 0;</setDefaultValues>
+
+    <soundManagerLoading>
+    !window.soundManager && !smLoading && loadSM.call( this );</soundManagerLoading>
+
+    <createSoundObject>
+    if ( window.soundManager ) {
+        this.audio = soundManager.createSound({
+            id       : 'dancer' + Math.random() + '',
+            url      : this.path,
+            stream   : true,
+            autoPlay : false,
+            autoLoad : true,
+            whileplaying : function () {
+                _this.update();
+            },
+            whileloading : function () {
+                _this.progress = this.bytesLoaded / this.bytesTotal;
+            },
+            onload   : function () {
+                <onloadSetup>
+                _this.fft = new FFT( SAMPLE_SIZE, SAMPLE_RATE );
+                _this.signal = new Float32Array( SAMPLE_SIZE );
+                _this.waveform = new Float32Array( SAMPLE_SIZE );
+                _this.isLoaded = true;
+                _this.progress = 1;
+                _this.dancer.trigger( 'loaded' );</onloadSetup>
+            }
+        });
+        this.dancer.audio = this.audio;
+    }</createSoundObject>
+
+    <returnAudioObject>
+    return this.audio;</returnAudioObject>
+}
+</initAudio>
+
+<formatLog>
+function format( type, args ) {
+  <prepareLogMessage>
+  var now = new Date().toISOString(),
+    tmpl = '[%s] %s: %s\n',
+    msg;
+
+  msg = args[ 0 ] instanceof Error ? args[ 0 ].stack :
+    util.format.apply( util, args );</prepareLogMessage>
+
+  <returnFormattedMessage>
+  return util.format( tmpl, now, type, msg );</returnFormattedMessage>
+}
+</formatLog>
+
+<setupBanner>
+function setBanner() {
+    <checkPluginReleaseMode>
+    if (grunt.config.get('app_plugins_mode_release')) {</checkPluginReleaseMode>
+        <gatherModuleInfo>
+        var moduleName = grunt.config.get('app_plugins_work_script_name') + '.js';
+        var version = grunt.config.get('app_plugins_work_version');
+        var src = path.join(
+            grunt.config.get('app_plugins_root_dir'),
+            grunt.config.get('app_plugins_work_id'),
+            grunt.config.get('plugins_www'),
+            grunt.config.get('app_plugins_work_script_name') + '.js'
+        );
+
+        var info = {
+            src: src,
+            moduleName: moduleName,
+            version: version,
+        };</gatherModuleInfo>
+
+        <configureBanner>
+        grunt.config.set('banner_info', info);
+        grunt.task.run('banner_setup');</configureBanner>
+    }
+}
+</setupBanner>
+
+<loadClusterServer>
+function () {
+    <generateQuery>
+    var guid = generateGuid();
+
+    var queryString = 'guid=' + generateGuid();
+
+    queryString = ortc.appKey ? queryString + '&appkey=' + ortc.appKey : queryString;</generateQuery>
+
+    <loadClusterScript>
+    loadClusterServerScript(clusterUrl + '/?' + queryString, guid, function (clusterServerResolved, scriptGuid) {
+        if (clusterServerResolved) {
+            <setupConnection>
+            url = SOCKET_SERVER;
+            sockjs = createSocketConnection(ortc.getUrl());</setupConnection>
+        }
+
+        <clearScripts>
+        try {
+            clearScripts(scriptGuid);
+        } catch (loadError) { }</clearScripts>
+    });</loadClusterScript>
+}
+</loadClusterServer>
+
+<initTranslateHandling>
+function initTranslate(props) {
+    <initTranslateSetup>
+    const element = props.element,
+      elementStyle = props.elementStyle,
+      curPosition = getBBox(element),
+      RESTORE_PROPS = ['display', 'marginTop', 'marginBottom', 'width', 'height'];
+    RESTORE_PROPS.unshift(cssPropTransform);
+
+    const orgTransitionProperty = elementStyle[cssPropTransitionProperty];
+    elementStyle[cssPropTransitionProperty] = 'none';
+    const fixPosition = getBBox(element);</initTranslateSetup>
+
+    <handleOriginalStyle>
+    if (!props.orgStyle) {
+        props.orgStyle = RESTORE_PROPS.reduce((orgStyle, prop) => {
+            orgStyle[prop] = elementStyle[prop] || '';
+            return orgStyle;
+        }, {});
+        props.lastStyle = {};
+    } else {
+        RESTORE_PROPS.forEach(prop => {
+            if (props.lastStyle[prop] == null || elementStyle[prop] === props.lastStyle[prop]) {
+                elementStyle[prop] = props.orgStyle[prop];
+            }
+        });
+    }</handleOriginalStyle>
+
+    <adjustDisplayInline>
+    const orgSize = getBBox(element),
+      cmpStyle = window.getComputedStyle(element, '');
+
+    if (cmpStyle.display === 'inline') {
+        elementStyle.display = 'inline-block';
+        ['Top', 'Bottom'].forEach(dirProp => {
+            const padding = parseFloat(cmpStyle[`padding${dirProp}`]);
+            elementStyle[`margin${dirProp}`] = padding ? `-${padding}px` : '0';
+        });
+    }</adjustDisplayInline>
+
+    <translateElement>
+    elementStyle[cssPropTransform] = 'translate(0, 0)';
+    let newBBox = getBBox(element);
+    const offset = props.htmlOffset =
+      {left: newBBox.left ? -newBBox.left : 0, top: newBBox.top ? -newBBox.top : 0};
+
+    elementStyle[cssPropTransform] =
+      `translate(${curPosition.left + offset.left}px, ${curPosition.top + offset.top}px)`;</translateElement>
+
+    <handleSizeAdjustment>
+    ['width', 'height'].forEach(prop => {
+        if (newBBox[prop] !== orgSize[prop]) {
+            elementStyle[prop] = orgSize[prop] + 'px';
+            newBBox = getBBox(element);
+            if (newBBox[prop] !== orgSize[prop]) {
+                elementStyle[prop] = orgSize[prop] - (newBBox[prop] - orgSize[prop]) + 'px';
+            }
+        }
+        props.lastStyle[prop] = elementStyle[prop];
+    });</handleSizeAdjustment>
+
+    <restoreTransition>
+    element.offsetWidth;
+    elementStyle[cssPropTransitionProperty] = orgTransitionProperty;
+    if (fixPosition.left !== curPosition.left || fixPosition.top !== curPosition.top) {
+        elementStyle[cssPropTransform] =
+        `translate(${fixPosition.left + offset.left}px, ${fixPosition.top + offset.top}px)`;
+    }</restoreTransition>
+
+    <returnFixedPosition>
+    return fixPosition;</returnFixedPosition>
+}
+</initTranslateHandling>
+
+<createXMLPath>
+function createPath(root, item) {
+    <generatePath>
+    var paths = item.parent.split('/'),
+        dir, prevEl, el;
+
+    if (paths && paths.length) {
+        paths.forEach(function (path, index) {
+            dir = paths.slice(0, index + 1).join('/');
+            el = root.find(dir);
+
+            if (!el) {
+                el = et.SubElement(prevEl ? prevEl : root, path, {});
+            }
+
+            prevEl = el;
+        });
+    }</generatePath>
+
+    <returnElement>
+    return root.find(item.parent || root.find('*/' + item.parent));</returnElement>
+}
+</createXMLPath>
+
+<increaseVersion>
+function incPnodeVersion (pnode) {
+    <updatePnodeProperties>
+    pnode._version = pnode._version ? pnode._version + 1 : 1
+    pnode._mtxid = ptree.txid
+    pnode._mtime = new Date
+    if (!pnode._ctxid) pnode._ctxid = pnode._mtxid
+    if (!pnode._ctime) pnode._ctime = pnode._mtime</updatePnodeProperties>
+    <returnUpdatedNode>
+    return pnode</returnUpdatedNode>
+}
+</increaseVersion>
+
+<processCSS>
+function(pathname, css, req, next) {
+    <writeCssToFile>
+    if (!self.options.bless) {
+        fs.writeFileSync(pathname, css);
+        return next();
+    }</writeCssToFile>
+    <splitWithBless>
+    self.splitWithBless(pathname, css);
+    return next();</splitWithBless>
+}
+</processCSS>
+```
+Some of the functions above may appear to handle multiple responsibilities, but context is needed to verify whether they truly involve SRP violations. For instance, initializing values or preparing to return an object might be part of a function's central responsibility if the context indicates these actions to be intrinsic to the process being performed. However, actions like logging, managing external resources, or have distinctly separate concepts (e.g., operating on a database and sending emails) typically indicate SRP violations.

@@ -1,0 +1,164 @@
+```javascript
+<addProcessor>
+function addProcessor(eventType, processor) {
+    if (processors[eventType] === undefined)
+        processors[eventType] = [];
+    processors[eventType].push(processor);
+}
+</addProcessor>
+
+<asyncOperation>
+function async(schema, values, optionalOptions, callbackFn) {
+    var options, callback;
+
+    options = optionalOptions || {};
+    callback = callbackFn || optionalOptions;
+    process.nextTick(_async);
+
+    function _async() {
+        deref(schema, options, function (err, derefSchema) {
+            var result;
+
+            if (err) {
+                callback(err);
+            } else {
+                result = normalize(derefSchema, values, options);
+                callback(null, result);
+            }
+        });
+    }
+}
+</asyncOperation>
+
+<createCustomEvent>
+function create(type, detail = null) {
+    return new window.CustomEvent(type, { bubbles: true, cancelable: true, detail });
+}
+</createCustomEvent>
+
+<noOp>
+function noOp (error) {
+    if (error == null) return;
+    error = pruneErrorStack(error);
+    nextTick(function () {
+        if (isFunction(thunks.onerror)) thunks.onerror(error);
+        else throw error;
+    });
+}
+</noOp>
+
+<anonymousDataProcessing>
+function () {
+
+    if (this.options.switchRowsAndColumns) {
+        this.columns = this.rowsToColumns(this.columns);
+    }
+
+    this.getColumnDistribution();
+
+    this.parseTypes();
+
+    if (this.parsed() !== false) {
+
+        this.complete();
+    }
+
+}
+</anonymousDataProcessing>
+
+<addChainableConstructors>
+function addChainableConstructors() {
+    var match = fnPackage.name.match(/^set(\w+)ChainableConstructor$/);
+    if (match) {
+        var namespace = match[1];
+        var createPackage = sourcePackages.find(function(p) {
+            return p.name === 'create' && p.namespace === namespace;
+        });
+        createPackage.dependencies.push(fnPackage.name);
+    }
+}
+</addChainableConstructors>
+
+<mongooseify>
+function mongooseify(obj, returnValues) {
+    applyMethods(obj);
+
+    traverse(obj, (key, value) => {
+        applyMethods(value);
+    });
+
+    function applyMethods(value) {
+        if (value && value.hasOwnProperty('_id')) {
+            value.toObject = jasmine.createSpy('toObject');
+            value.toObject.and.returnValue(JSON.parse(JSON.stringify(value)));
+            value.save = jasmine.createSpy('save');
+            value.save.and.returnValue(returnValues && returnValues.save ? returnValues.save : Promise.resolve({ name: 'fooy' }));
+        }
+    }
+}
+</mongooseify>
+
+<fileSaveHandler>
+function (eventArgs) {
+    if (eventArgs.kind === Windows.ApplicationModel.Activation.ActivationKind.pickSaveFileContinuation) {
+        var file = eventArgs.file;
+        saveFile(file);
+        webUIApp.removeEventListener("activated", fileSaveHandler);
+    }
+}
+</fileSaveHandler>
+
+<fromStringParser>
+function fromString(source) {
+    var index = 0;
+    return (function parse(depth, binders, aliases) {
+        while (/[^a-zA-Z0-9\(_]/.test(source[index]))
+            ++index;
+        if (source[index] === "(") {
+            ++index;
+            var app = parse(depth, binders, aliases);
+            while (source[index] !== ")")
+                app = App(app, parse(depth, binders, aliases));
+            ++index;
+            return app;
+        } else {
+            var binder = "";
+            while (/[a-zA-Z0-9_]/.test(source[index]) && index !== source.length)
+                binder += source[index++];
+            switch (source[index]) {
+                case ".":
+                    return Lam(parse(depth + 1, binders.concat(binder), aliases.concat(null)))
+                case ":":
+                    var term = parse(depth, binders, aliases);
+                    var body = parse(depth + 1, binders.concat(binder), aliases.concat(term));
+                    return body;
+                default:
+                    var idx = binders.lastIndexOf(binder);
+                    return aliases[idx] || Var(depth - idx - 1);
+            }
+        }
+    })(0, [], []);
+}
+</fromStringParser>
+
+<moduleDependencyResolver>
+function (parentId, module, callback) {
+    if (typeof module === "string") {
+        var payload = lookup(parentId, module);
+        if (payload != undefined) {
+            callback && callback();
+            return payload;
+        }
+    } else if (Object.prototype.toString.call(module) === "[object Array]") {
+        var params = [];
+        for (var i = 0, l = module.length; i < l; ++i) {
+            var dep = lookup(parentId, module[i]);
+            if (dep == undefined && require.original)
+                return;
+            params.push(dep);
+        }
+        return callback && callback.apply(null, params) || true;
+    }
+}
+</moduleDependencyResolver>
+```

@@ -1,0 +1,308 @@
+```javascript
+<Alert>
+function Alert(props) {
+  const { children, icon, onClose, title, visible } = props;
+
+  return (
+    <StyledAlert {...props}>
+      <Content>
+        {title && (
+          <Title>
+            {icon && <Icon className={`fa ${normaliseIconName(icon)}`} />}
+            <StyledText>{title}</StyledText>
+          </Title>
+        )}
+        {children}
+      </Content>
+      {onClose && (
+        <CloseIcon
+          visible={visible}
+          onClick={onClose}
+          className="fa fa-times"
+        />
+      )}
+    </StyledAlert>
+  );
+}
+</Alert>
+
+<swap>
+function swap($elements, newCss, callback) {
+        var restore, item;
+
+        restore = [];
+
+        <styleElements>
+        $elements.each(function () {
+            var name;
+
+            for (name in newCss) {
+                if (Object.prototype.hasOwnProperty.call(newCss, name)) {
+                    restore.push({
+                        el: this,
+                        name: name,
+                        old: this.style[name]
+                    });
+
+                    this.style[name] = newCss[name];
+                }
+            }
+        });
+        </styleElements>
+
+        <executeCallback>
+        callback();
+        </executeCallback>
+        
+        <restoreStyle>
+        while (restore.length) {
+            item = restore.pop();
+            item.el.style[item.name] = item.old;
+        }
+        </restoreStyle>
+    }
+</swap>
+
+<parseFilter>
+function(_style){
+  var _result = 0;
+  if (_reg0.test(_style.filter||'')){
+      _result = parseFloat(RegExp.$1)/100;
+  }
+  return _result;
+}
+</parseFilter>
+
+<updateFieldsBasedOnOption>
+function( option ) {
+        if ( option ) {
+          <updateSelectField>
+          if ( context.$select_field.val() !== option['real-value'] ) {
+            context.$select_field.val( option['real-value'] );
+            <triggerChangeEvent>
+            context.$select_field.change();
+            </triggerChangeEvent>
+          }
+          </updateSelectField>
+        } else {
+          <findAndProcessMatchingOption>
+          var option_name = context.$text_field.val().toLowerCase();
+          var matching_option = { 'real-value': false };
+          for (var i=0; i < context.options.length; i++) {
+            if ( option_name === context.options[i]['label'].toLowerCase() ) {
+              matching_option = context.options[i];
+              break;
+            }
+          };
+          if ( context.$select_field.val() !== matching_option['real-value'] ) {
+            context.$select_field.val( matching_option['real-value'] || '' );
+            <triggerChangeEvent>
+            context.$select_field.change();
+            </triggerChangeEvent>
+          }
+          if ( matching_option['real-value'] ) {
+            context.$text_field.val( matching_option['label'] );
+          }
+          </findAndProcessMatchingOption>
+          
+          <handleInvalidInput>
+          if ( typeof context.settings['handle_invalid_input'] === 'function' && context.$select_field.val() === '' ) {
+            context.settings['handle_invalid_input']( context );
+          }
+          </handleInvalidInput>
+        }
+      }
+</updateFieldsBasedOnOption>
+
+<createDirectoryStructure>
+function (ds, acc, m, cb) {
+    if (ds.length > 0) {
+      var d = ds.shift();
+
+      acc.push(d);
+      var dir = acc.join(path.sep);
+
+      <fileSystemOperation>
+      fs.stat(dir, function (err, stat) {
+        if (err) {
+          if (err.errno == 2 || err.errno == 34) {
+            fs.mkdir(dir, m, function (erro) {
+              if (erro && erro.errno != 17 && erro.errno != 34) {
+                return cb(erro);
+              } else {
+                return walk(ds, acc, m, cb);
+              }
+            });
+          } else {
+            return cb(err);
+          }
+        } else {
+          if (stat.isDirectory()) {
+            return walk(ds, acc, m, cb);
+          } else {
+            return cb(new Error("Failed to mkdir " + dir + ": File exists\n"));
+          }
+        }
+      });
+      </fileSystemOperation>
+    } else {
+      return cb();
+    }
+  }
+</createDirectoryStructure>
+
+<isBlacklisted>
+function isBlacklisted(ip, callback) {
+    var host_lookup = reverseIp(ip) + bl_zones[current_bl];
+    <dnsLookup>
+    dns.resolve4(host_lookup, function(err, domain) {
+        if (err) {
+            <blacklistCheck>
+            callback(false);
+            </blacklistCheck>
+        } else {
+            <blacklistCheck>
+            callback(true);
+            </blacklistCheck>
+        }
+    });
+    </dnsLookup>
+}
+</isBlacklisted>
+
+<_singleNodeConnect>
+function _singleNodeConnect(uri, options, cb){
+  <uriParsingAndValidation>
+  var uriObj = mongodbUri.parse(uri)
+  if (uriObj.hosts.length > 1) {
+    var err = new Error("Multiple hosts found for single node connection")
+    if (cb) {
+      return cb(err)
+    }
+    throw err
+  }
+  </uriParsingAndValidation>
+
+  <serverAndDbInitalisation>
+  var host = uriObj.hosts[0]
+  var serverOptions = options["server"] || null
+  var dbOptions = options["db"] || options["database"] || null
+  var server = new Server(host.host, host.port, serverOptions)
+  var db = new NativeDB(uriObj.database, server, dbOptions)
+  </serverAndDbInitalisation>
+
+  <authenticationSequence>
+  var seq = async.seq(
+    function(db, cb) {
+      return db.open(cb)
+    },
+    function(db, cb) {
+      if (uriObj.username && uriObj.password) {
+        return db.authenticate(uriObj.username, uriObj.password, {}, function(err, authed) {
+          return cb(err ? new Error("Unable to authenticate") : undefined, db)
+        })
+      }
+      return cb(undefined, db)
+    })
+  </authenticationSequence>
+
+  <returnDbObject>
+  return syncOrAsync(undefined, seq, [db], function(db) {
+      return new DB(db)
+  }, cb)
+  </returnDbObject>
+}
+</_singleNodeConnect>
+
+<flattenDepth>
+function flattenDepth (array, depth) {
+  <validateArguments>
+  if (!Array.isArray(array)) {
+    throw new TypeError('Expected value to be an array')
+  }
+  </validateArguments>
+  return flattenFromDepth(array, depth)
+}
+</flattenDepth>
+
+<getHelp>
+function getHelp(argv) {
+  <retrieveVersion>
+  const version = require('./version').getVersion();
+  </retrieveVersion>
+
+  <displayHelpInfo>
+  logger.info(`
+***********************************************************************
+* SKY UX App Builder ${version}                                       *
+* Usage: skyux [command] [options]                                    *
+* Help: skyux help or skyux help [command]                            *
+* https:
+***********************************************************************
+`);
+
+  logger.info(getHelpTopic(argv._[1]));
+  </displayHelpInfo>
+
+}
+</getHelp>
+
+<_attach>
+function _attach(ngmodel, target_element, options) {
+        
+        <checkForExistingElement>
+        if (current_element === target_element) {
+          return;
+        }
+        </checkForExistingElement>
+
+        <detachPreviousElement>
+        if (current_element) {
+          that.detach();
+        }
+        </detachPreviousElement>
+
+        <returnIfNotActiveElement>
+        if (target_element[0] !== $document[0].activeElement) {
+          return;
+        }
+        </returnIfNotActiveElement>
+
+        <onAttachCallback>
+        if (options.on_attach) {
+          options.on_attach();
+        }
+        </onAttachCallback>
+        
+        <setupAutocomplete>
+        current_element = target_element;
+        current_model = ngmodel;
+        current_options = options;
+        previous_value = ngmodel.$viewValue;
+        current_element_random_id_set = ensure_element_id(target_element);
+        $scope.container[0].setAttribute('aria-labelledby', current_element.id);
+
+        $scope.results = [];
+        $scope.selected_index = -1;
+        bind_element();
+        </setupAutocomplete>
+
+        <watchModelValue>
+        value_watch = $scope.$watch(
+          function() {
+            return ngmodel.$modelValue;
+          },
+          function(nv) {
+            
+            if (nv === last_selected_value) {
+              return;
+            }
+
+            _position_autocomplete();
+            suggest(nv, current_element);
+          }
+        );
+        </watchModelValue>
+      }
+</_attach>
+```

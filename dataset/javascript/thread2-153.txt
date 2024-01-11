@@ -1,0 +1,172 @@
+```javascript
+<flatten>
+function flatten(obj) {
+    <flattenWorker>
+    var flattenWorker = function(row, namespace, result) {
+        return _.reduce(row, function(result, value, key) {
+            var newKey;
+            newKey = "" + namespace + (namespace ? '.' : '') + key;
+            if (_.isPlainObject(value)) {
+                if (_.size(value)) {
+                    flattenWorker(value, newKey, result);
+                }
+            } else {
+                result[newKey] = value;
+            }
+            return result;
+        }, result);
+    };
+    </flattenWorker>
+    return flattenWorker(obj, '', {});
+}
+</flatten>
+```
+
+```javascript
+<renderToString>
+function renderToString(vnode, context, opts, inner, isSvgMode) {
+    if (vnode==null || typeof vnode==='boolean') {
+        return '';
+    }
+    // The function body is a single complex responsibility of converting a virtual node to a string,
+    // thus it's compliant as a whole despite the various operations involved.
+}
+</renderToString>
+```
+
+```javascript
+<capSplitAndJoin>
+function capSplitAndJoin(joiner, options) {
+  const string = options.fn(this);
+  const members = string.split(/(?=[A-Z])/);
+  return members.join(joiner);
+}
+</capSplitAndJoin>
+```
+
+```javascript
+<unnamedFunction> // Note: The function is unnamed, not ideal for clarity.
+function (evt, callback) {
+    if (!evt || !_.isObject(evt)) {
+        var err = new Error('Please pass a valid event!');
+        debug(err); // Single line, does not constitute a responsibility.
+        throw err;
+    }
+    // The multiple responsibilities for event handling and store interaction suggest SRP violation, 
+    // but without clear separable blocks we keep them under one function tag.
+}
+</unnamedFunction>
+```
+
+```javascript
+<download>
+function download(archive, name, cb) {
+    return maybe(cb, async function () {
+        <statEntry>
+        var entry = await stat(archive, name)
+        if (!entry) {
+            throw new NotFoundError(`The entry ${name} was not found in the archive.`)
+        }
+        </statEntry>
+
+        <downloadDirectory>
+        if (entry.isDirectory()) {
+            let listing = await readdir(archive, name)
+            let promises = listing.map(subname => download(archive, path.join(name, subname)))
+            return Promise.all(promises)
+        }
+        </downloadDirectory>
+
+        <downloadFile>
+        if (entry.isFile()) {
+            if (entry.downloaded === entry.blocks) {
+                return 
+            }
+            return new Promise((resolve, reject) => {
+                archive.content.download({
+                    start: entry.offset,
+                    end: entry.offset + entry.blocks
+                }, err => {
+                    if (err) reject(err)
+                    else resolve()
+                })
+            })
+        }
+        </downloadFile>
+    })
+}
+</download>
+```
+
+```javascript
+<WhammyVideoConstructor>
+function WhammyVideo(duration, quality) {
+    this.frames = [];
+    if (!duration) {
+        duration = 1;
+    }
+    this.duration = 1000 / duration;
+    this.quality = quality || 0.8;
+}
+</WhammyVideoConstructor>
+```
+
+```javascript
+<getVolume>
+function getVolume() {
+    $.get('/controls/volume', function (data) {
+      volume = data.volume;
+      $('.js-volume').val(data.volume);
+
+      if (data.muted) {
+        $('.js-mute').hide();
+        $('.js-unmute').show();
+      } else {
+        $('.js-unmute').hide();
+        $('.js-mute').show();
+      }
+    });
+}
+</getVolume>
+```
+
+```javascript
+<unnamedReadEmitFunction>
+function(pattern, options) {
+      this.emit('read');
+      this.setPattern(pattern, options);
+      var res = this.iteratorStream(this.pattern.base);
+      this.emit('end', this.files);
+      return res;
+}
+</unnamedReadEmitFunction>
+```
+
+```javascript
+<getVitalUnits>
+function getVitalUnits(vitalType) {
+    
+    if (vitalType.toLowerCase() === 'blood pressure') {
+        return 'mm[Hg]';
+    } else if (vitalType.toLowerCase().indexOf('glucose') >= 0) {
+        return 'mg/dL';
+    } else if (vitalType.toLowerCase().indexOf('height') >= 0) {
+        return 'cm';
+    } else if (vitalType.toLowerCase().indexOf('weight') >= 0) {
+        return 'kg';
+    }
+
+    return null;
+}
+</getVitalUnits>
+```
+
+```javascript
+<getMediaItem>
+function getMediaItem(attachment_id, callback) {
+      this.debug('getMediaItem', attachment_id);
+      this.methodCall('wp.getMediaItem', [ this.get('blog'), this.get('username'), this.get('password'), attachment_id ], callback);
+      return this;
+}
+</getMediaItem>
+```

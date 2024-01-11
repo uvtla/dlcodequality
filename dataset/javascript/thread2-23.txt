@@ -1,0 +1,293 @@
+<function1>
+function (serviceName, methodNames, pointCut) {
+    <defineVariables>
+    var fullName, ret = [];</defineVariables>
+
+    <forEachMethodName>
+    methodNames.forEach(function (name) {
+        fullName = serviceName + "." + name;
+        <matchChecking>
+        var match = this.match(fullName, pointCut);
+        if (match) {
+            ret.push(name);
+        }</matchChecking>
+    }, this);</forEachMethodName>
+
+    <returnResults>
+    return ret;</returnResults>
+}
+</function1>
+
+<buildScales>
+function buildScales() {
+    <defineYMax>
+    let yMax = d3Array.max(data.map(getValue));</defineYMax>
+
+    <configureScales>
+    if (isHorizontal) {
+        <horizontalScales>
+        xScale = d3Scale.scaleLinear()
+            .domain([0, yMax])
+            .rangeRound([0, chartWidth - 1]);
+
+        yScale = d3Scale.scaleBand()
+            .domain(data.map(getName))
+            .rangeRound([chartHeight, 0])
+            .padding(0.1);
+
+        yScale2 = d3Scale.scaleBand()
+            .domain(data.map(getGroup))
+            .rangeRound([yScale.bandwidth(), 0])
+            .padding(0.1);</horizontalScales>
+    } else {
+        <verticalScales>
+        xScale = d3Scale.scaleBand()
+            .domain(data.map(getName))
+            .rangeRound([0, chartWidth])
+            .padding(0.1);
+        xScale2 = d3Scale.scaleBand()
+            .domain(data.map(getGroup))
+            .rangeRound([0, xScale.bandwidth()])
+            .padding(0.1);
+
+        yScale = d3Scale.scaleLinear()
+            .domain([0, yMax])
+            .rangeRound([chartHeight, 0])
+            .nice();</verticalScales>
+    }</configureScales>
+
+    <setColors>
+    colorScale = d3Scale.scaleOrdinal()
+        .range(colorSchema)
+        .domain(data.map(getGroup));
+
+    categoryColorMap = colorScale
+        .domain(data.map(getName)).domain()
+        .reduce((memo, item) => {
+            data.forEach(function (v) {
+                if (getName(v) == item) {
+                    memo[v.name] = colorScale(v.group)
+                    memo[v.group] = colorScale(v.group)
+                    memo[v.group + item] = colorScale(v.group)
+                }
+            })
+            return memo;
+        }, {});</setColors>
+}
+</buildScales>
+
+<prepareProject>
+function prepareProject(cordovaPlatforms, args, projectPath) {
+    <platformConversion>
+    if (typeof (cordovaPlatforms) == "string") {
+        cordovaPlatforms = [cordovaPlatforms];
+    }</platformConversion>
+
+    <setDefaultProjectPath>
+    if (!projectPath) {
+        projectPath = defaultConfig.projectPath;
+    }</setDefaultProjectPath>
+
+    <versionManagement>
+    var appendedVersion = cache.getModuleVersionFromConfig(defaultConfig);
+    if (appendedVersion) {
+        appendedVersion = '@' + appendedVersion;
+    } else {
+        appendedVersion = '';
+    }</versionManagement>
+
+    <checkCompatibility>
+    return utilities.isCompatibleNpmPackage(defaultConfig.nodePackageName + appendedVersion).then(function (compatibilityResult) {
+        switch (compatibilityResult) {
+            case utilities.NodeCompatibilityResult.IncompatibleVersion4Ios:
+            case utilities.NodeCompatibilityResult.IncompatibleVersion5:
+                throw new Error('This Cordova version does not support Node.js ...');
+        }
+
+        return setupCordova();
+    })</checkCompatibility>
+    .then(function (cordova) {
+        <addSupportPlugin>
+        return addSupportPluginIfRequested(cordova, defaultConfig);</addSupportPlugin>
+    })
+    .then(function (cordova) {
+        
+        <preparePlatforms>
+        var promise = _addPlatformsToProject(cordovaPlatforms, projectPath, cordova);
+        
+        cordovaPlatforms.forEach(function (platform) {
+            promise = promise.then(function () {
+                
+                <logAndPreparePlatform>
+                var callArgs = utilities.getCallArgs(platform, args);
+                var argsString = _getArgsString(callArgs.options);
+                console.log('Queueing prepare for platform ' + platform + ' w/options: ' + argsString);
+                return cordova.raw.prepare(callArgs);</logAndPreparePlatform>
+            });
+        });
+
+        return promise;</preparePlatforms>
+    });
+}
+</prepareProject>
+
+<SearchBar>
+function SearchBar(language){
+    <initializeProperties>
+	this.type = "SearchBar";
+	this.options = {};
+	this.element = null;
+	this.isNested = false;
+	this.language = language ? language : "en";</initializeProperties>
+
+	<defineTranslations>
+	this.translations = {
+						da: {
+							search: "Søg"
+						},
+						en: {
+							search: "Search"
+						}
+					}</defineTranslations>
+}
+</SearchBar>
+
+<mkdir>
+function mkdir(dir, options) {
+    <sanitizeOptions>
+    options = _.sanitize(options, {owner: null, username: null, group: null});</sanitizeOptions>
+    <checkExistenceAndCreateDirectory>
+    if (!exists(dir)) {
+        fs.mkdirpSync(dir);
+    } else {
+        if (isFile(dir)) {
+            throw new Error(`Path '${dir}' already exists and is a file`);
+        }
+    }</checkExistenceAndCreateDirectory>
+    
+    <ownerGroupUsernameManagement>
+    if (options.owner || options.group || options.username) {
+        let uid = null;
+        let gid = null;
+
+        <extractOwnerAndGroup>
+        if (_.isString(options.owner)) {
+            uid = options.owner;
+        } else if (_.isObject(options.owner)) {
+            uid = (options.owner.uid || options.owner.owner || options.owner.user || options.owner.username);
+            gid = (options.owner.gid || options.owner.group);
+        }
+        if (_.isString(options.username)) {
+            uid = options.username;
+        }
+        if (_.isString(options.group)) {
+            gid = options.group;
+        }</extractOwnerAndGroup>
+
+        <changeOwnership>
+        chown(dir, uid, gid, {abortOnError: false});</changeOwnership>
+    }</ownerGroupUsernameManagement>
+}
+</mkdir>
+
+<isAppInstalled>
+function isAppInstalled(app, prefixes) {
+    <asyncCheckAppInstallation>
+    return new Promise((resolve) => {
+        if (!(app in prefixes)) {
+            return resolve(false)
+        }
+
+        Linking.canOpenURL(prefixes[app])
+            .then((result) => {
+                resolve(!!result)
+            })
+            .catch(() => resolve(false))
+    })</asyncCheckAppInstallation>
+}
+</isAppInstalled>
+
+<function6>
+function() {
+    <cacheDimensionNames>
+    if (this._aDimensionNames) {
+        return this._aDimensionNames;
+    }</cacheDimensionNames>
+
+    <initializeDimensionNamesList>
+    this._aDimensionNames = [];</initializeDimensionNamesList>
+
+    <populateDimensionNames>
+    for (var sName in this._oDimensionSet) {
+        this._aDimensionNames.push(this._oDimensionSet[sName].getName());
+    }</populateDimensionNames>
+
+    <returnDimensionNamesList>
+    return this._aDimensionNames;</returnDimensionNamesList>
+}
+</function6>
+
+<function7>
+function (params) {
+
+    <initializeAttrs>
+    var attrs;</initializeAttrs>
+
+    <determineAttrType>
+    if ('object' == typeof params) {
+        attrs = params;
+    }
+    if ('string' == typeof params) {
+        <processStringParam>
+        if (arguments.length > 1) {
+            attrs = {};
+            attrs[params] = arguments[1];
+        }else{
+            <getAttributes>
+            return getElAttributes(this[0],params);</getAttributes>
+        }</processStringParam>
+    }</determineAttrType>
+
+    <setAttributesOnElements>
+    if (attrs) {
+        this.each(function (inx, ele) {
+            setAttributes(ele, attrs);
+        });
+    }</setAttributesOnElements>
+}
+</function7>
+
+<RouterState>
+function RouterState(root, snapshot) {
+    <callSuperWithRoot>
+    _super.call(this, root);</callSuperWithRoot>
+    <assignSnapshot>
+    this.snapshot = snapshot;</assignSnapshot>
+    <setRouterStateSnapshot>
+    setRouterStateSnapshot(this, root);</setRouterStateSnapshot>
+}
+</RouterState>
+
+<scroll>
+function scroll($container, $el, dir, callback) {
+    <initialScrollSetup>
+    var container = $container[0],
+        maxScroll = container.scrollHeight - container.clientHeight;</initialScrollSetup>
+
+    <startScrollInterval>
+    if (maxScroll && dir && !interval) {
+        
+        <defineScrollInterval>
+        interval = window.setInterval(function () {
+            var scrollTop = $container.scrollTop();
+            if ((dir === -1 && scrollTop <= 0) || (dir === 1 && scrollTop >= maxScroll)) {
+                endScroll($el);
+            } else {
+                <performScroll>
+                $container.scrollTop(scrollTop + 7 * dir);</performScroll>
+                <invokeCallback>
+                callback($el);</invokeCallback>
+            }
+        }, 50);</defineScrollInterval>
+    }</startScrollInterval>
+}</scroll>

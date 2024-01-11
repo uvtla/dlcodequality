@@ -1,0 +1,302 @@
+<compileDirective>
+function compileDirective (node, scope) {
+        <initializeStructures>
+        var ast = {
+                attrs: {},
+                dires: {}
+            }
+        var dirtDefs = _getAllDirts()
+        </initializeStructures>
+
+        <processAttributes>
+        _slice(node.attributes).forEach(function(att) {
+            var aname = att.name
+            var v = att.value
+            
+            if (~componentProps.indexOf(aname)) {
+                return
+            } else if (_isExpr(aname)) {
+                
+                ast.attrs[aname] = v
+            } else if (aname.indexOf(NS) === 0) {
+                var def = dirtDefs[aname]
+                if (def) {
+                    
+                    ast.dires[aname] = {
+                        def: def,
+                        expr: v
+                    }
+                } else {
+                    return
+                }
+            } else if (_isExpr(v.trim())) {
+                
+                ast.attrs[aname] = v
+            } else {
+                return
+            }
+            node.removeAttribute(aname)
+        })
+        </processAttributes>
+
+        <createAttributeDirectives>
+        util.objEach(ast.attrs, function(name, value) {
+            var attd = new AttributeDirective(vm, scope, node, name, value)
+            _directives.push(attd)
+            _setBindings2Scope(scope, attd)
+        })
+        </createAttributeDirectives>
+
+        <createDirectives>
+        util.objEach(ast.dires, function(dname, spec) {
+            var def = spec.def
+            var expr = spec.expr
+            var sep = ';'
+            var d
+            
+            if (def.multi && expr.match(sep)) {
+                Expression.strip(expr)
+                        .split(sep)
+                        .forEach(function(item) {
+                            
+                            if (!item.trim()) return
+                            
+                            d = new Directive(vm, scope, node, def, dname, '{' + item + '}')
+                            _directives.push(d)
+                            _setBindings2Scope(scope, d)
+                        })
+            } else {
+                d = new Directive(vm, scope, node, def, dname, expr)
+                _directives.push(d)
+                _setBindings2Scope(scope, d)
+            }
+        })
+        </createDirectives>
+    }
+</compileDirective>
+
+<getTouchList>
+function getTouchList(ev, eventType) {
+    <handlePointerEvents>
+    if (GestureDetector.HAS_POINTEREVENTS) {
+      return PointerEvent.getTouchList();
+    }
+    </handlePointerEvents>
+
+    <processTouchEvent>
+    if (ev.touches) {
+      if (eventType == EVENT_MOVE) {
+        return ev.touches;
+      }
+
+      <initializeIdentifiers>
+      var identifiers = [];
+      var concat = [].concat(Utils.toArray(ev.touches), Utils.toArray(ev.changedTouches));
+      var touchList = [];
+      </initializeIdentifiers>
+
+      <createTouchList>
+      Utils.each(concat, function(touch) {
+        if (Utils.inArray(identifiers, touch.identifier) === -1) {
+          touchList.push(touch);
+        }
+        identifiers.push(touch.identifier);
+      });
+      </createTouchList>
+
+      return touchList;
+    }
+    </processTouchEvent>
+
+    <createDefaultEvent>
+    ev.identifier = 1;
+    return [ev];
+    </createDefaultEvent>
+  }
+</getTouchList>
+
+<retrieveModels>
+function(req, res) {
+            <collectModelInfo>
+            var models = [];
+            for (modelName in onmModelDictionary) {
+                models.push({
+                    modelName: modelName,
+                    modelPackage: onmModelDictionary[modelName].package
+                });
+            }
+            </collectModelInfo>
+            <sendResponse>
+            res.send(200, models);
+            </sendResponse>
+        }
+</retrieveModels>
+
+<bufferCountOperator>
+function bufferCount(bufferSize, startBufferEvery) {
+    <setDefault>
+    if (startBufferEvery === void 0) {
+        startBufferEvery = null;
+    }
+    </setDefault>
+    <returnOperatorFunction>
+    return function bufferCountOperatorFunction(source) {
+        return source.lift(new BufferCountOperator(bufferSize, startBufferEvery));
+    };
+    </returnOperatorFunction>
+}
+</bufferCountOperator>
+
+<takeOff>
+function takeOff(options, callback) {
+  <handleFunctionOverloading>
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
+  </handleFunctionOverloading>
+  this.logger('RollingSpider#takeOff');
+
+  <checkBatteryStatus>
+  if (this.status.battery < 10) {
+    this.logger('!!! BATTERY LEVEL TOO LOW !!!');
+  }
+  </checkBatteryStatus>
+  <initiateTakeOff>
+  if (!this.status.flying) {
+    this.writeTo(
+      'fa0b',
+      new Buffer([0x02, ++this.steps.fa0b & 0xFF, 0x02, 0x00, 0x01, 0x00])
+    );
+    this.status.flying = true;
+  }
+  </initiateTakeOff>
+
+  <handleStatusChange>
+  this.on('flyingStatusChange', function(newStatus) {
+    if (newStatus === 2) {
+      <executeCallback>
+      if (typeof callback === 'function') {
+        callback();
+      }
+      </executeCallback>
+    }
+  });
+  </handleStatusChange>
+
+}
+</takeOff>
+
+<getComponentName>
+function getComponentName(destPath) {
+  <preprocessPath>
+  const splitregex = new RegExp(`[\\${path.sep}-]+`);
+
+  const parts = destPath
+    .replace('.js', '')
+    .split(splitregex)
+    .map(part => part.charAt(0).toUpperCase() + part.substring(1));
+  </preprocessPath>
+
+  <concatenateParts>
+  return parts.join('');
+  </concatenateParts>
+}
+</getComponentName>
+
+<submitData>
+function () {
+          <initializeVars>
+          var self = this;
+          var ref = self.$ref();
+          var data = $wilddogUtils.toJSON(self);
+          </initializeVars>
+          <updateData>
+          return $wilddogUtils.doSet(ref, data).then(function() {
+            self.$$notify();
+            return self.$ref();
+          });
+          </updateData>
+        }
+</submitData>
+
+<sendResetPasswordEmail>
+function(userEmailToReset) {
+                <logActivity>
+                console.log('iamInterface.users.sendResetPasswordEmail', userEmailToReset);
+                </logActivity>
+                <createQueryString>
+                var query = 'email=' + encodeURIComponent(userEmailToReset);
+                </createQueryString>
+                <submitRequest>
+                return this.request({
+                    url: this._buildUriWithDomain(this.uri + '/resetPassword'),
+                    method: corbel.request.method.GET,
+                    query: query
+                });
+                </submitRequest>
+            }
+</sendResetPasswordEmail>
+
+<readProtocol>
+function(options) {
+        <applyProtocolDefaults>
+        OpenLayers.Protocol.prototype.read.apply(this, arguments);
+        options = options || {};
+        options.params = OpenLayers.Util.applyDefaults(
+            options.params, this.options.params);
+        options = OpenLayers.Util.applyDefaults(options, this.options);
+        if (options.filter && this.filterToParams) {
+            options.params = this.filterToParams(
+                options.filter, options.params
+            );
+        }
+        </applyProtocolDefaults>
+        <determineReadMethod>
+        var readWithPOST = (options.readWithPOST !== undefined) ?
+                           options.readWithPOST : this.readWithPOST;
+        </determineReadMethod>
+        <initializeResponse>
+        var resp = new OpenLayers.Protocol.Response({requestType: "read"});
+        </initializeResponse>
+        <handleRequest>
+        if(readWithPOST) {
+            var headers = options.headers || {};
+            headers["Content-Type"] = "application/x-www-form-urlencoded";
+            resp.priv = OpenLayers.Request.POST({
+                url: options.url,
+                callback: this.createCallback(this.handleRead, resp, options),
+                data: OpenLayers.Util.getParameterString(options.params),
+                headers: headers
+            });
+        } else {
+            resp.priv = OpenLayers.Request.GET({
+                url: options.url,
+                callback: this.createCallback(this.handleRead, resp, options),
+                params: options.params,
+                headers: options.headers
+            });
+        }
+        </handleRequest>
+        return resp;
+    }
+</readProtocol>
+
+<getBanner>
+function getBanner (packagePath) {
+  <loadPackageInfo>
+  const pkg = require(packagePath)
+  const { name, version, license } = pkg
+  </loadPackageInfo>
+
+  <extractURL>
+  const url = pkg.homepage.replace(/#.*$/, '')
+  </extractURL>
+
+  <generateBanner>
+  
+  
+  return ``
+  </generateBanner>
+}
+</getBanner>

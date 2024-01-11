@@ -1,0 +1,196 @@
+<getComments>
+function getComments(id) {
+    <ajaxRequest>
+    $.ajax({
+     type: 'GET',
+     url: opts.getCommentsURL,
+     data: {node: id},
+     success: function(data, textStatus, request) {
+       var ul = $('#cl' + id);
+       var speed = 100;
+       $('#cf' + id)
+         .find('textarea[name="proposal"]')
+         <handleData>
+         .data('source', data.source);
+
+       if (data.comments.length === 0) {
+         <displayEmptyMessage>
+         ul.html('<li>No comments yet.</li>');
+         ul.data('empty', true);</displayEmptyMessage>
+       } else {
+         
+         <processAndDisplayComments>
+         var comments = sortComments(data.comments);
+         speed = data.comments.length * 100;
+         appendComments(comments, ul);
+         ul.data('empty', false);
+         </processAndDisplayComments>
+       }
+       <animateComments>
+       $('#cn' + id).slideUp(speed + 200);
+       ul.slideDown(speed);</animateComments>
+     },
+     error: function(request, textStatus, error) {
+       <handleError>
+       showError('Oops, there was a problem retrieving the comments.');</handleError>
+     },
+     dataType: 'json'
+    });</ajaxRequest>
+  }</getComments>
+
+<simplifyObject>
+function ( obj, arg ) {
+    if ( arg === undefined ) {
+        <getObjectInnerHTML>
+        return obj.innerHTML;</getObjectInnerHTML>
+    }
+    else {
+        <setObjectInnerHTML>
+        obj.innerHTML = arg;
+        return obj;</setObjectInnerHTML>
+    }
+}</simplifyObject>
+
+<disableMinutesIfMidnight>
+function(){		
+        var endHours = this.inputs[2];
+        var endMinutes = this.inputs[3];
+        
+        if( endHours.getValue() == '24' ){ <setMinutesForMidnight>
+        endMinutes.setValue("00"); endMinutes.disable();</setMinutesForMidnight>}
+        else{ <enableMinutes>
+        endMinutes.enable(); </enableMinutes>}		
+    }</disableMinutesIfMidnight>
+
+<prepareOptXhrToSend>
+function(optXhr) {
+    <cacheBusting>
+    if (cacheBuster && qq.indexOf(["GET", "DELETE"], options.method) >= 0) {
+        params.qqtimestamp = new Date().getTime();
+    }</cacheBusting>
+
+    <prepareRequest>
+    return prepareToSend(id, optXhr, path, params, additionalQueryParams, headers, payload);</prepareRequest>
+}</prepareOptXhrToSend>
+
+<TypeVariable>
+function TypeVariable(name) {
+    <initializeComponents>
+    var tuples = [];
+    var test = typeVarPred (tuples.length);</initializeComponents>
+    <createTypeVariable>
+    return _Type (VARIABLE, name, '', 0, always2 (name), [], test, tuples);</createTypeVariable>
+}</TypeVariable>
+
+<mergeAll>
+function mergeAll(concurrent) {
+    <defaultConcurrentValue>
+    if (concurrent === void 0) {
+        concurrent = Number.POSITIVE_INFINITY;
+    }</defaultConcurrentValue>
+    <invokeMergeMap>
+    return Object(_mergeMap__WEBPACK_IMPORTED_MODULE_0__["mergeMap"])(_util_identity__WEBPACK_IMPORTED_MODULE_1__["identity"], concurrent);</invokeMergeMap>
+}</mergeAll>
+
+<random>
+function random(min, max) {
+  <generateRandomNumber>
+  var randomNumber = Math.random() * (max - min + 1) + min;</generateRandomNumber>
+
+  <integrityCheckAndReturn>
+  if (!Number.isInteger(min) || !Number.isInteger(max)) {
+    return randomNumber;
+  } else {
+    return Math.floor(randomNumber);
+  }</integrityCheckAndReturn>
+}</random>
+
+<filter>
+function filter( node ) {
+    <parseNodeInformation>
+    var isNullable;
+    var isOptional;
+    var type;
+    var desc;
+    var val;
+
+    if ( node.type ) {
+        if ( node.type.names.length === 1 ) {
+            type = node.type.names[ 0 ];
+        } else {
+            type = node.type.names;
+        }
+    } else {
+        type = '';
+    }
+    desc = node.description || '';
+    if ( hasOwn.call( node, 'defaultvalue' ) ) {
+        val = node.defaultvalue;
+    } else {
+        val = '';
+    }
+    if ( typeof node.optional === 'boolean' ) {
+        isOptional = node.optional;
+    } else {
+        isOptional = '';
+    }
+    if ( typeof node.nullable === 'boolean' ) {
+        isNullable = node.nullable;
+    } else {
+        isNullable = '';
+    }</parseNodeInformation>
+    <returnFilteredObject>
+    return {
+        'name': node.name,
+        'type': type,
+        'description': desc,
+        'default': val,
+        'optional': isOptional,
+        'nullable': isNullable
+    };</returnFilteredObject>
+}</filter>
+
+<initializeTimer>
+function (config) {
+        
+        <initializeStartFlag>
+        this.started = false;</initializeStartFlag>
+        <assignOnStart>
+        this.onStart = core.FUNCTION_VOID;</assignOnStart>
+        <assignOnStop>
+        this.onStop = core.FUNCTION_VOID;</assignOnStop>
+        <initializeErrorHandlers>
+        this.errorHandlers = [];</initializeErrorHandlers>
+
+        <configureTimer>
+        this.configure(config);</configureTimer>
+    }</initializeTimer>
+
+<groupBy>
+function groupBy (obj, iterate, context) {
+    <initializeGrouping>
+    var groupKey
+    var result = {}</initializeGrouping>
+    <groupByProcessing>
+    if (obj) {
+        <establishContext>
+        context = this || context;</establishContext>
+        <prepareIterateFunction>
+        if (iterate && isObject(iterate)) {
+            iterate = createiterateEmpty(iterate)
+        } else if (!isFunction(iterate)) {
+            iterate = property(iterate)
+        }</prepareIterateFunction>
+        <performGrouping>
+        each(obj, function (val, key) {
+            groupKey = iterate ? iterate.call(context, val, key, obj) : val
+            if (result[groupKey]) {
+                result[groupKey].push(val)
+            } else {
+                result[groupKey] = [val]
+            }
+        });</performGrouping>
+    }</groupByProcessing>
+    <returnGroupedObject>
+    return result</returnGroupedObject>
+}</groupBy>

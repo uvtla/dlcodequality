@@ -1,0 +1,234 @@
+```javascript
+<parseBlock>
+function parseBlock(tokens) {
+  if (tokens.type === 'blockquote') {
+    return [getBlockquoteToken(tokens)];
+  } else if (tokens.type === 'bullet_list' && tokens.content.type === 'list_item' ||
+    tokens.type === 'ordered-list' && tokens.content.type === 'list_item') {
+    return [getListToken(tokens)];
+  }
+  return tokens;
+}
+</parseBlock>
+
+<dup>
+function dup(x) {
+  var i, buff;
+  buff=new Array(x.length);
+  <copyArray>
+  copy_(buff,x);
+  </copyArray>
+  return buff;
+}
+</dup>
+
+<left>
+function left() {
+  var parentRole = getParentRole();
+
+  if (parentRole == "tablist") {
+    <moveFocusTablist>
+    moveFocus(-1, getFocusElements(focusedElement.parentNode));
+    </moveFocusTablist>
+  } else if (focusedControl.parent().submenu) {
+    <cancelSubmenu>
+    cancel();
+    </cancelSubmenu>
+  } else {
+    <moveFocusGeneral>
+    moveFocus(-1);
+    </moveFocusGeneral>
+  }
+}
+</left>
+
+<map>
+function map(fn, m) {
+  <validateFunction>
+  if(!isFunction(fn)) {
+    throw new TypeError('map: Function required for first argument')
+  }
+  </validateFunction>
+
+  <mapImplementation>
+  if(isFunction(m)) {
+    return compose(fn, m)
+  }
+
+  if(isArray(m)) {
+    return array.map(fn, m)
+  }
+
+  if(m && isFunctor(m)) {
+    return (m[fl.map] || m.map).call(m, fn)
+  }
+
+  if(isObject(m)) {
+    return object.map(fn, m)
+  }
+  </mapImplementation>
+
+  <throwInvalidArgument>
+  throw new TypeError('map: Object, Function or Functor of the same type required for second argument')
+  </throwInvalidArgument>
+}
+</map>
+
+<fill>
+function fill(fillWith, len){
+  var buffer = new Buffer(len);
+  <fillBuffer>
+  buffer.fill(fillWith);
+  </fillBuffer>
+  return buffer.toString();
+}
+</fill>
+
+<readOptions>
+function readOptions(ctx) {
+  var configFilePath = path.join(ctx.opts.projectRoot, 'config.xml');
+  <readConfigXML>
+  var configXmlContent = xmlHelper.readXmlAsJson(configFilePath, true);
+  </readConfigXML>
+
+  return parseConfig(configXmlContent);
+}
+</readOptions>
+
+<webpackModuleExports>
+function(module, exports, __webpack_require__) {
+  'use strict';
+  var React = __webpack_require__(2);
+  var $ = React.DOM;
+  var ou = __webpack_require__(5);
+  var types = __webpack_require__(14);
+  var wrapped = __webpack_require__(15);
+
+  var FileField = React.createClass({
+    displayName: 'FileField',
+
+    loadFile: function(event) {
+      var reader = new FileReader();
+      var file = event.target.files[0];
+      var val = ou.merge(this.props.getValue(this.props.path), {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+
+      this.props.update(this.props.path, val, val);
+
+      reader.onload = function(event) {
+        val.data = event.target.result;
+        this.props.update(this.props.path, val, val);
+      }.bind(this);
+
+      if (file) {
+        if (this.props.mode === 'dataURL') {
+          reader.readAsDataURL(file);
+        }
+        else {
+          reader.readAsText(file);
+        }
+      }
+    },
+    render: function() {
+      var fields = this.props.fields || {};
+      var value = this.props.value || {};
+      var list = [
+        $.input({ key: "input", type: "file", onChange: this.loadFile }),
+        $.dl({ key: "fileProperties" },
+             $.dt(null, "Name"), $.dd(null, value.name || '-'),
+             $.dt(null, "Size"), $.dd(null, value.size || '-'),
+             $.dt(null, "Type"), $.dd(null, value.type || '-'))
+      ];
+
+      return wrapped.section(this.props, list.concat(types.object(fields, this.props)));
+    }
+  });
+
+  module.exports = FileField;
+}
+</webpackModuleExports>
+
+<getOptionLabel>
+function getOptionLabel(option, labelKey) {
+  if (option.paginationOption || option.customOption) {
+    return option[getStringLabelKey(labelKey)];
+  }
+
+  let optionLabel;
+
+  <determineOptionLabel>
+  if (typeof option === 'string') {
+    optionLabel = option;
+  }
+
+  if (typeof labelKey === 'function') {
+    optionLabel = labelKey(option);
+  } else if (typeof labelKey === 'string' && isPlainObject(option)) {
+    optionLabel = option[labelKey];
+  }
+  </determineOptionLabel>
+
+  <checkInvariant>
+  invariant(
+    typeof optionLabel === 'string',
+    'One or more options does not have a valid label string. Check the ' +
+    '`labelKey` prop to ensure that it matches the correct option key and ' +
+    'provides a string for filtering and display.'
+  );
+  </checkInvariant>
+
+  return optionLabel;
+}
+</getOptionLabel>
+
+<reinitializeAppearWatch>
+function (opts) {
+  __init.call(this, opts);
+  this.appearWatchElements.forEach(function(ele) {
+    <clearAppearanceStates>
+    delete ele._hasAppear;
+    delete ele._hasDisAppear;
+    delete ele._appear;
+    </clearAppearanceStates>
+  });
+  return this;
+}
+</reinitializeAppearWatch>
+
+<setErrorPath>
+function setErrorPath (error) {
+  var path = error.dataPath.split('.')
+  var missingProperty = error.params && error.params.missingProperty
+  <parseErrorPath>
+  if (path.length > 2) {
+    var property = path[2]
+    var propertySegments = property.split(indexRegExp)
+    if (propertySegments.length > 1) {
+      error.baseProperty = propertySegments[0]
+      error.index = parseInt(propertySegments[1])
+      error.property = missingProperty
+          ? missingProperty
+          : path[3]
+    }
+    else {
+      if (missingProperty) {
+        error.baseProperty = property
+        error.property = missingProperty
+      }
+      else {
+        error.property = property
+      }
+    }
+  }
+  </parseErrorPath>
+  <handleMissingProperty>
+  else {
+    error.property = missingProperty
+  }
+  </handleMissingProperty>
+}
+</setErrorPath>
+```

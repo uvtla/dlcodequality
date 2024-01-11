@@ -1,0 +1,491 @@
+```jsx
+<constructor>
+function (application) {
+    
+    <initializeConnectorId>
+    var id = os.platform() + "-" + application;
+    <lookupConnector>
+    var cn = connectors[id];
+    <validateConnector>
+    if (typeof cn === "undefined")
+        throw new Error("unsupported platform/application combination: " + id);
+    <constructFileName>
+    var filename = path.join(__dirname, cn);
+    <spawnChildProcess>
+    this.c = spawn(filename, [], {
+        stdio: [ "pipe", "pipe", process.stderr ],
+        env: { "CONNECTOR": "FIXME" }
+    });
+    <setStdinEncoding>
+    this.c.stdin.setEncoding("utf8");
+    <setStdoutEncoding>
+    this.c.stdout.setEncoding("utf8");
+    <createDuplexStream>
+    this.io = es.duplex(
+        this.c.stdin,
+        this.c.stdout.pipe(es.split(/\r?\n/))
+    );
+    <handleResponseData>
+    this.responses = [];
+    this.io.pipe(es.through(function onData (data) {
+        if (typeof data === "undefined" || data === "")
+            return;
+        var response = this.responses.shift();
+        if (typeof response === "function")
+            response(data);
+    }.bind(this), function onEnd () {
+        
+    }));
+}
+</constructor>
+
+<__>
+function __() {
+    <initializeDefaultArguments>
+    var us = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+    var store = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    <processArguments>
+    store = typeof us === "boolean" ? us : store;
+    us = typeof us === "boolean" ? [] : us;
+    <initializeSequence>
+    var seq = []; 
+    seq.id = getID();
+    seq.store = store;
+    seq.us = us;
+    seq.ds = [];
+    seq.updatedTo = {};
+    <updateDependencies>
+    seq.us.map(function (u) {
+      
+      u.ds[u.ds.length] = seq;
+      u.updatedTo[seq.id] = 0; 
+    });
+    <setupTimestampMappings>
+    seq.IndexOnTimestamp = {};
+    seq.TimestampOnIndex = {};
+    <initializeFlags>
+    seq.propagating = 0;
+    seq.done = 0;
+    
+    <sequenceEquations>
+    seq.eqs = [];
+    <addEqMethod>
+    seq.addEq = function (eq) {
+      return seq.eqs[seq.eqs.length] = eq;
+    };
+    <evalEqsMethod>
+    seq.evalEqs = function (val) {
+      var val0 = val;
+      seq.eqs.map(function (eq) {
+        return val = eq(val);
+      });
+      return seq.us.length === 0 ? val0 : val;
+    };
+    <extendSequenceWithApi>
+    Object.keys(__.api).map(function (api) {
+      seq[api] = __.api[api](__, seq, store);
+    });
+    <definePropertyForSequence>
+    Object.defineProperties(seq, 
+    {
+      t: {
+        <getter>
+        get: function get() {
+          return seq.valOnT;
+        },
+        <setter>
+        set: function set(tval) {
+          var sanityCheck = seq.propagating === 0 && seq.us.length !== 0 ? function () {
+            throw new Error("Do not set a value of the sequence that depends on other sequences!");
+          }() : function () {
+            seq.propagating = 0;
+            <coreSetterLogic>
+            var core = seq.done === 0 ? function () {
+              seq.valOnT = seq.evalEqs(tval); 
+              seq.T = Date.now();
+              <storeManagement>
+              var core1 = store ? function () {
+                seq.IndexOnTimestamp[seq.T] = seq.length;
+                seq.TimestampOnIndex[seq.length] = seq.T;
+                seq[seq.length] = seq.valOnT; 
+              }() : true;
+              <updateDependenciesStatus>
+              Object.keys(seq.updatedTo).map(function (key) {
+                seq.updatedTo[key] = 1;
+              });
+              <resetUpdateStatus>
+              seq.us.map(function (u) {
+                return u.updatedTo[seq.id] = 0;
+              });
+              <propagateChanges>
+              seq.ds.map(function (d) {
+                var usAllUpdated = d.us.map(function (u) {
+                  return u.updatedTo[d.id];
+                }).reduce(function (a, b) {
+                  return a * b;
+                });
+                var core2 = usAllUpdated === 1 ? function () {
+                  d.propagating = 1;
+                  d.t = d.us.map(function (u) {
+                    return u.t;
+                  });
+                }() : true;
+              });
+            }() : true;
+          }();
+        }
+      }
+    });
+    <returnSequence>
+    return seq;
+  }
+</__>
+
+<setUserColor>
+function setUserColor(option){
+  <determineColor>
+  var col;
+   switch (option){
+                  case 'red':
+                    col=chalk.red;
+                    break;
+                  case 'green':
+                    col=chalk.green;
+                    break;
+                  case 'yellow':
+                    col=chalk.yellow;
+                    break;
+                  case 'blue':
+                    col=chalk.blue;
+                    break;
+                  case 'grey':
+                    col=chalk.grey;
+                    break;
+                  case 'white':
+                    col=chalk.white;
+                    break;     
+                  default:
+                    col=option;
+                    break;
+                }
+    <returnColor>
+    return col;
+}
+</setUserColor>
+
+<editOnCodepen>
+function editOnCodepen(demo) {
+      <collectExternalScripts>
+      var externalScripts = $demoAngularScripts.all();
+      <appendCodepenScript>
+      externalScripts.push('https://codepen...');
+      <translateDataForCodepen>
+      var data = codepenDataAdapter.translate(demo, externalScripts);
+      <buildSubmissionForm>
+      var form = buildForm(data);
+      <appendFormToBody>
+      $document.find('body').append(form);
+      <submitForm>
+      form[0].submit();
+      <removeForm>
+      form.remove();
+    }
+</editOnCodepen>
+
+<generateSelectorCommand>
+function (strategy, selector, mult, context) {
+    <initializeQueryExtensions>
+    let ext = mult ? 's' : '';
+    let command = '';
+    <setupContextParameter>
+    context = !context ? context : `, '${context}'` ;
+    <generateCommandBasedOnStrategy>
+    switch (strategy) {
+      case 'name':
+        command = `au.getElement${ext}ByName('${selector}'${context})`;
+        break;
+      case 'accessibility id':
+        command = `au.getElement${ext}ByAccessibilityId('${selector}'${context})`;
+        break;
+      case 'id':
+        command = `au.getElement${ext}ById('${selector}')`;
+        break;
+      case '-ios uiautomation':
+        command = `au.getElement${ext}ByUIAutomation('${selector}'${context})`;
+        break;
+      default:
+        command = `au.getElement${ext}ByType('${selector}'${context})`;
+    }
+    <returnCommand>
+    return command;
+  }
+</generateSelectorCommand>
+
+<bucketerFunction>
+function(bucketerParams) {
+    
+    <findExperiment>
+    var experiment = bucketerParams.experimentKeyMap[bucketerParams.experimentKey];
+    <findGroup>
+    var groupId = experiment['groupId'];
+    <checkAndProcessGroup>
+    if (groupId) {
+      <lookupGroup>
+      var group = bucketerParams.groupIdMap[groupId];
+      <validateGroup>
+      if (!group) {
+        throw new Error(sprintf(ERROR_MESSAGES.INVALID_GROUP_ID, MODULE_NAME, groupId));
+      }
+      <handleRandomPolicyGroup>
+      if (group.policy === RANDOM_POLICY) {
+        <bucketUserIntoExperiment>
+        var bucketedExperimentId = module.exports.bucketUserIntoExperiment(group,
+                                                                          bucketerParams.bucketingId,
+                                                                          bucketerParams.userId,
+                                                                          bucketerParams.logger);
+
+        <handleUserNotBucketedInAnyExperiment>
+        if (bucketedExperimentId === null) {
+          var notbucketedInAnyExperimentLogMessage = sprintf(LOG_MESSAGES.USER_NOT_IN_ANY_EXPERIMENT, MODULE_NAME, bucketerParams.userId, groupId);
+          bucketerParams.logger.log(LOG_LEVEL.INFO, notbucketedInAnyExperimentLogMessage);
+          return null;
+        }
+        <handleUserNotBucketedIntoExpectedExperimentInGroup>
+        if (bucketedExperimentId !== bucketerParams.experimentId) {
+          var notBucketedIntoExperimentOfGroupLogMessage = sprintf(LOG_MESSAGES.USER_NOT_BUCKETED_INTO_EXPERIMENT_IN_GROUP, MODULE_NAME, bucketerParams.userId, bucketerParams.experimentKey, groupId);
+          bucketerParams.logger.log(LOG_LEVEL.INFO, notBucketedIntoExperimentOfGroupLogMessage);
+          return null;
+        }
+        <logUserBucketedIntoExperimentInGroup>
+        var bucketedIntoExperimentOfGroupLogMessage = sprintf(LOG_MESSAGES.USER_BUCKETED_INTO_EXPERIMENT_IN_GROUP, MODULE_NAME, bucketerParams.userId, bucketerParams.experimentKey, groupId);
+        bucketerParams.logger.log(LOG_LEVEL.INFO, bucketedIntoExperimentOfGroupLogMessage);
+      }
+    }
+    <generateBucketingId>
+    var bucketingId = sprintf('%s%s', bucketerParams.bucketingId, bucketerParams.experimentId);
+    <generateBucketValue>
+    var bucketValue = module.exports._generateBucketValue(bucketingId);
+    <logBucketedUser>
+    var bucketedUserLogMessage = sprintf(LOG_MESSAGES.USER_ASSIGNED_TO_VARIATION_BUCKET, MODULE_NAME, bucketValue, bucketerParams.userId);
+    bucketerParams.logger.log(LOG_LEVEL.DEBUG, bucketedUserLogMessage);
+    <findEntityBucket>
+    var entityId = module.exports._findBucket(bucketValue, bucketerParams.trafficAllocationConfig);
+    <handleUserWithoutVariation>
+    if (entityId === null) {
+      var userHasNoVariationLogMessage = sprintf(LOG_MESSAGES.USER_HAS_NO_VARIATION, MODULE_NAME, bucketerParams.userId, bucketerParams.experimentKey);
+      bucketerParams.logger.log(LOG_LEVEL.DEBUG, userHasNoVariationLogMessage);
+    } <handleInvalidVariationID>
+    else if (entityId === '' || !bucketerParams.variationIdMap.hasOwnProperty(entityId)) {
+      var invalidVariationIdLogMessage = sprintf(LOG_MESSAGES.INVALID_VARIATION_ID, MODULE_NAME);
+      bucketerParams.logger.log(LOG_LEVEL.WARNING, invalidVariationIdLogMessage);
+      return null;
+    } <logUserInVariation>
+    else {
+      var variationKey = bucketerParams.variationIdMap[entityId].key;
+      var userInVariationLogMessage = sprintf(LOG_MESSAGES.USER_HAS_VARIATION, MODULE_NAME, bucketerParams.userId, variationKey, bucketerParams.experimentKey);
+      bucketerParams.logger.log(LOG_LEVEL.INFO, userInVariationLogMessage);
+    }
+    <returnEntityId>
+    return entityId;
+  }
+</bucketerFunction>
+
+<modulePreloadDefinition>
+function require_define(moduleId, prereqs, factory) {
+    <presetVariables>
+    var rem = ["require", "exports", "module"]
+    <validateModuleId>
+    if (typeof moduleId != "string") {
+        console.log("modjewel.define(): first parameter must be a string; was: " + moduleId)
+        return
+    }
+    <adjustFactoryAndPrereqsBasedOnArguments>
+    if (arguments.length == 2) {
+        factory = prereqs
+        prereqs = null
+    }
+    <setDefaultPrereqs>
+    if (!prereqs || prereqs.length == 0) {
+        prereqs = rem
+    }
+    <validateFactory>
+    if (typeof factory != "function") {
+        <handleNonFunctionFactory>
+        if (factory) {
+            ModulePreloadStore[moduleId] = [factory, prereqs]
+            return
+        }
+        console.log("modjewel.define(): factory was falsy: " + factory)
+        return
+    }
+    <validateModuleIdFormat>
+    if (moduleId.match(/^\./)) {
+        console.log("modjewel.define(): moduleId must not start with '.': '" + moduleName + "'")
+        return
+    }
+    <preventDuplicateModuleDefinition>
+    if (hop(ModulePreloadStore, moduleId)) {
+        console.log("modjewel.define(): module '" + moduleId + "' has already been defined")
+        return
+    }
+    <storeModuleDefinition>
+    ModulePreloadStore[moduleId] = [factory, prereqs]
+}
+</modulePreloadDefinition>
+
+<invokeBaidu>
+function invokeBaidu(options, cbk) {
+    
+    <validateOptions>
+    if (!options || !options.uri || !options.params) {
+        throw new Error('Lack required parameters');
+    }
+    <constructUriWithFormat>
+    var uri = util.format("http://... );
+    <appendTimestampAndApikeyToParams>
+    var params = options.params;
+    params.timestamp = Math.round(Date.now() / 1000);
+    params.apikey = options.apiKey;
+    <createHttpInfo>
+    var httpInfo = {
+        href: uri,
+        method: defaultMethod
+    };
+    <signRequestParams>
+    params.sign = signKey(httpInfo, params, options.secretKey);
+    <setupRequestOptions>
+    var requestOptions = {
+        uri: uri,
+        headers: defaultHeaders,
+        method: defaultMethod,
+        form: params
+    };
+    <executeRequestWithCallbackOrPromise>
+    if (typeof cbk === 'function') {
+        request(requestOptions, function (err, response, body) {
+            var result = dealResult(err, body);
+            result.error ? cbk(result.error) : cbk(null, result.data);
+        });
+    } else {
+        return new Promise(function(resolve, reject) {
+            request(requestOptions, function(err, response, body) {
+                var result = dealResult(err, body);
+                result.error ? reject(result.error) : resolve(result.data);
+            });
+        });
+    }
+}
+</invokeBaidu>
+
+<generatePrefixed>
+function generatePrefixed(prefix) {
+	<initializeOutputs>
+	let output = '';
+	let children = '';
+    <iterateOverAllParts>
+	for (const part of allParts) {
+		<createCurrentPartsList>
+		const parts = prefix.concat([part]);
+        <skipNonUniqueOrInvalidParts>
+		if (prefix.indexOf(part) !== -1 || !verify(parts, true)) {
+			
+			continue;
+		}
+		<handleNonSortedArrays>
+		if (!isArraySorted(parts)) {
+			<checkExistenceAndSort>
+			if (exists(parts)) {
+				parts.sort();
+                <generateChain>
+				let chain;
+                <checkAndHandleChildrenOfPart>
+				if (hasChildren(parts)) {
+					chain = parts.join('_') + '<T>';
+				} else {
+					<handleLastPart>
+					const last = parts.pop();
+					const joined = parts.join('_');
+					chain = `${joined}<T>['${last}']`;
+				}
+                <addToOutput>
+				output += `\t${part}: Register_${chain};\n`;
+			}
+			continue;
+		}
+        <verifyAndHandleTodoAndCallback>
+		if (verify(parts, false)) {
+			if (arrayHas(parts)('todo')) {
+				
+				output += `\t${part}: (name: string) => void;\n`;
+			} else {
+				if (arrayHas(parts)('cb')) {
+					output += `\t${part}: CallbackRegisterBase<T>`;
+				} else {
+					output += `\t${part}: RegisterBase<T>`;
+				}
+				if (hasChildren(parts)) {
+					
+					const joined = parts.join('_');
+					output += ` & Register_${joined}<T>`;
+				}
+				output += ';\n';
+			}
+		}
+		<generateChildren>
+		children += generatePrefixed(parts);
+	}
+	<returnTypes>
+	if (output === '') {
+		return children;
+	}
+    <assembleTypeBody>
+	const typeBody = `{\n${output}}\n${children}`;
+    <returnFinalInterface>
+	if (prefix.length === 0) {
+		
+		return `export interface Register<T> extends RegisterBase<T> ${typeBody}`;
+	}
+	const namespace = ['Register'].concat(prefix).join('_');
+	return `interface ${namespace}<T> ${typeBody}`;
+}
+</generatePrefixed>
+
+<makeShallowOptions>
+function makeShallowOptions(nodes, root, passedOptions, wrapper) {
+  <mergePassedOptionsWithDefaults>
+  const options = makeOptions(passedOptions);
+  <getAdapterFromOptions>
+  const adapter = getAdapter(passedOptions);
+  <storeProviderValues>
+  privateSet(options, PROVIDER_VALUES, passedOptions[PROVIDER_VALUES]);
+  <checkRootComponent>
+  if (root || !isCustomComponent(options.wrappingComponent, adapter)) {
+    return options;
+  }
+  <validateAdapterWrapMethod>
+  if (typeof adapter.wrapWithWrappingComponent !== 'function') {
+    throw new TypeError('your adapter does not support `wrappingComponent`. Try upgrading it!');
+  }
+  <wrapNodesWithWrappingComponent>
+  const { node: wrappedNode, RootFinder } = adapter.wrapWithWrappingComponent(nodes, options);
+  <createWrappingComponentWrapper>
+  const wrappingComponent = new WrappingComponentWrapper(wrappedNode, wrapper, RootFinder);
+  <getLegacyContextAndProviderValues>
+  const {
+    legacyContext: wrappingComponentLegacyContext,
+    providerValues: wrappingComponentProviderValues,
+  } = getContextFromWrappingComponent(wrappingComponent, adapter);
+  <setWrappingComponent>
+  privateSet(wrapper, WRAPPING_COMPONENT, wrappingComponent);
+  <returnOptionsWithContextAndProviderValues>
+  return {
+    ...options,
+    context: {
+      ...options.context,
+      ...wrappingComponentLegacyContext,
+    },
+    [PROVIDER_VALUES]: wrappingComponentProviderValues,
+  };
+}
+</makeShallowOptions>
+```

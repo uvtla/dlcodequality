@@ -1,0 +1,145 @@
+<iter>
+function iter (block) {
+    <createHash_and_update>
+    var hash = crypto.createHash(opts.digest || 'md5')
+    hash.update(block)
+    hash.update(data)
+    hash.update(salt)
+    block = hash.digest()
+    </createHash_and_update>
+
+    <iterativeHashing>
+    for (var i = 1; i < (opts.count || 1); i++) {
+      hash = crypto.createHash(opts.digest || 'md5')
+      hash.update(block)
+      block = hash.digest()
+    }
+    </iterativeHashing>
+
+    return block
+}
+</iter>
+
+<ResourceStream>
+function ResourceStream(collection) {
+  <streamSetup>
+  var me = this;
+  BufferedReadable.call(me, {
+    objectMode: true
+  });
+  me._collection = collection;
+  me._fetching = false;
+  </streamSetup>
+
+  <initiateStream>
+  me._pushCollection();
+  </initiateStream>
+}
+</ResourceStream>
+
+<createGRPCError>
+function createGRPCError (message, code, metadata) {
+  const err = new Error()
+  return applyCreate(err, message, code, metadata)
+}
+</createGRPCError>
+
+<prototypeAssertions>
+function () {
+
+        var Proto = $prototype (),  
+            dummy = function () {}
+
+        <assertions>
+        $assert ($prototype.isConstructor (Proto), true)
+        $assert ($prototype.isConstructor (dummy), false)
+        $assert ($prototype.isConstructor (null),  false) 
+
+        $assert ([Proto, dummy].map ($prototype.isConstructor), [true, false])
+        </assertions>
+}
+</prototypeAssertions>
+
+<getMarkerLines>
+function getMarkerLines(
+  loc: NodeLocation,
+  source: Array<string>,
+  opts: Object,
+): { start: number, end: number, markerLines: Object }
+</getMarkerLines>
+
+<classNamesManipulation>
+function(class_names, cancel_sync) {
+
+    <debugCheck>
+		if (Lava.schema.DEBUG && typeof(class_names) == 'string') Lava.t();
+    </debugCheck>
+
+    <addClassLoop>
+		for (var i = 0, count = class_names.length; i < count; i++) {
+			this.addClass(class_names[i], cancel_sync);
+		}
+    </addClassLoop>
+
+}
+</classNamesManipulation>
+
+<convertObjectToNameValueArray>
+function convertObjectToNameValueArray(parameters) {
+  return Object.keys(parameters).reduce((result, key) => {
+    var values = parameters[key];
+    if (!Array.isArray(values)) {
+      values = [values];
+    }
+    return result.concat(
+      values.map(value => {
+        return {
+          name: key,
+          value: value
+        };
+      })
+    );
+  }, []);
+}
+</convertObjectToNameValueArray>
+
+<normalizeFields>
+function normalizeFields (options) {
+    <determineFieldsToReturn>
+    const fields = options.fields || options.outFields
+    const idField = _.get(options, 'collection.metadata.idField')
+    if (options.returnIdsOnly === true && idField) return [idField]
+    else if (options.returnIdsOnly === true) return ['OBJECTID']
+    if (fields === '*') return undefined
+    if (typeof fields === 'string' || fields instanceof String) return fields.split(',')
+    if (fields instanceof Array) return fields
+    </determineFieldsToReturn>
+    return undefined
+}
+</normalizeFields>
+
+<observableElementAtExtension>
+function(module, exports, __webpack_require__) {
+	"use strict";
+	<attachElementAtToObservable>
+	var Observable_1 = __webpack_require__(5);
+	var elementAt_1 = __webpack_require__(455);
+	Observable_1.Observable.prototype.elementAt = elementAt_1.elementAt;
+	</attachElementAtToObservable>
+}
+</observableElementAtExtension>
+
+<removeSubstringsFromObjectProperties>
+function(obj, keys, remove) {
+    <removeLoops>
+    var i = 0,
+      l = keys.length;
+    for (i = 0; i < l; i++) {
+      if (obj[keys[i]] && obj[keys[i]].toString().indexOf(remove) > -1) {
+      obj[keys[i]] = obj[keys[i]].toString().replace(remove, '');
+      }
+    }
+    </removeLoops>
+    return obj;
+}
+</removeSubstringsFromObjectProperties>

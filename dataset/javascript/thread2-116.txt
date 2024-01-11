@@ -1,0 +1,306 @@
+```javascript
+<anonymousFunction1>
+function (e, point) {
+    <checkCrosshairExistence>
+    if (!this.crosshair) { return; }</checkCrosshairExistence>
+
+    <checkPointDefinedOrSnapCrosshair>
+    if ((defined(point) || !pick(this.crosshair.snap, true)) === false) {
+        this.hideCrosshair();
+        return;
+    }</checkPointDefinedOrSnapCrosshair>
+
+    var path,
+      options = this.crosshair,
+      animation = options.animation,
+      pos;
+
+    <setPositionBasedOnOptions>
+    if (!pick(options.snap, true)) {
+        pos = (this.horiz ? e.chartX - this.pos : this.len - e.chartY + this.pos);
+    } else if (defined(point)) {
+        
+        pos = (this.chart.inverted != this.horiz) ? point.plotX : this.len - point.plotY;
+        
+    }</setPositionBasedOnOptions>
+
+    <getPathForCrosshair>
+    if (this.isRadial) {
+        path = this.getPlotLinePath(this.isXAxis ? point.x : pick(point.stackY, point.y));
+    } else {
+        path = this.getPlotLinePath(null, null, null, null, pos);
+    }</getPathForCrosshair>
+
+    <checkPathNotNullAndHideCrosshair>
+    if (path === null) {
+        this.hideCrosshair();
+        return;
+    }</checkPathNotNullAndHideCrosshair>
+
+    <updateOrAddCrossElement>
+    if (this.cross) {
+        this.cross
+          .attr({ visibility: VISIBLE })[animation ? 'animate' : 'attr']({ d: path }, animation);
+    } else {
+        var attribs = {
+            'stroke-width': options.width || 1,
+            stroke: options.color || '#C0C0C0',
+            zIndex: options.zIndex || 2
+        };
+        if (options.dashStyle) {
+            attribs.dashstyle = options.dashStyle;
+        }
+        this.cross = this.chart.renderer.path(path).attr(attribs).add();
+    }</updateOrAddCrossElement>
+}
+</anonymousFunction1>
+
+<extendPrototypeFunction>
+function (p) {
+    var parent = ariaHtmlControllersSuggestions.prototype;
+    for (var key in parent) {
+        <copyParentProperties>
+        if (parent.hasOwnProperty(key) && !p.hasOwnProperty(key)) {
+            p[key] = parent[key];
+        }</copyParentProperties>
+    }
+}
+</extendPrototypeFunction>
+
+<mapFunction>
+function map(arr, iter) {
+    if (Immutable.Map.isMap(arr)) {
+        var type = 'Map';
+        if (Immutable.OrderedMap.isOrderedMap(arr)) {
+            type = 'OrderedMap';
+        }
+
+        <mapAsListConvertToType>
+        return mapAsList(arr, function(value, key) {
+            return Q(iter(value, key))
+            .then(function(result) {
+                return [key, result];
+            });
+        })
+        .then(function(result) {
+            return Immutable[type](result);
+        });</mapAsListConvertToType>
+    } else {
+        <mapAsListConvertToList>
+        return mapAsList(arr, iter)
+        .then(function(result) {
+            return Immutable.List(result);
+        });</mapAsListConvertToList>
+    }
+}
+</mapFunction>
+
+<readLayerFunction>
+function readLayer(map, data, z) {
+    <createLayerAndSetRenderer>
+    var layer = new me.TMXLayer(data, map.tilewidth, map.tileheight, map.orientation, map.tilesets, z);
+    
+    layer.setRenderer(map.getRenderer());
+    </createLayerAndSetRenderer>
+    return layer;
+}
+</readLayerFunction>
+
+<jsonFieldCleanFunction>
+function(json, fields) {
+    <checkJsonType>
+    if (((typeof json) === 'object') && !Array.isArray(json))
+      return hasFields(json,fields);
+    else if (Array.isArray(json)) {
+      var spliced = [];
+      var n = json.length;
+      while (n--)
+        <checkAndPushFields>
+        if (hasFields(json[n],fields))
+          spliced.push(json[n]);
+        </checkAndPushFields>
+
+      <returnSplicedOrFalse>
+      if (spliced.length)
+        return spliced;
+      else
+        return false;</returnSplicedOrFalse>
+    }
+    else
+      <logErrorOnBadData>
+      return console.error(new Error('Bad data passed to clean.forFields()'));</logErrorOnBadData>
+  }</checkJsonType>
+</jsonFieldCleanFunction>
+
+<getSvnRevisionFunction>
+function( target, options, callback ) {
+    if (typeof options === "function") {
+        <handleOptionsAsCallback>
+        callback = options;
+        options = null;
+        </handleOptionsAsCallback>
+    }
+    <setDefaultOptions>
+    options = options || {};</setDefaultOptions>
+    <retrieveInfoAndParseRevision>
+    info( target, options, function( err, data ) {
+        var rev;
+        if ( !err ) {
+            var revString;
+            if (options.lastChangeRevision) {
+                if (data && data.entry && data.entry.commit && data.entry.commit.$ && data.entry.commit.$.revision) {
+                    revString = data.entry.commit.$.revision;
+                }
+            } else {
+                if (data && data.entry && data.entry.$ && data.entry.$.revision) {
+                    revString = data.entry.$.revision;
+                }
+            }
+            if (revString !== undefined) {
+                try {
+                    rev = parseInt(revString, 10);
+                }
+                catch (err3) {
+                    err = 'Invalid revision value [' + revString + ']';
+                }
+            } else {
+                err = 'Could not parse info result to get revision [' + JSON.stringify(data) + ']';
+            }
+        }
+        callback(err, rev);
+    });
+    </retrieveInfoAndParseRevision>
+}
+</getSvnRevisionFunction>
+
+<decryptFunction>
+function decrypt(userKey, chiperText) {
+    <validateInputs>
+    if (utils.isAnArray(userKey) &&
+      utils.isAnArray(chiperText)) {
+
+      userKey = new Uint8Array(userKey);
+      chiperText = new Uint8Array(chiperText);
+    } else {
+
+      throw 'Inputs must be an array';
+    }</validateInputs>
+    <prepareKey>
+    userKey = makeKey(userKey);</prepareKey>
+
+    var i, offset, cpt = [], tmpBlockDecrypt;
+    <decryptBlocks>
+    for (offset = 0; offset < chiperText.length; offset += 16) {
+
+      tmpBlockDecrypt = blockDecrypt(chiperText, offset, userKey);
+      for (i = 0; i < tmpBlockDecrypt.length; i += 1) {
+
+        cpt.push(tmpBlockDecrypt[i]);
+      }
+    }</decryptBlocks>
+
+    return cpt;
+}
+</decryptFunction>
+
+<strategyConstructor>
+function Strategy(options, verify) {
+    <validateOptionsAndVerify>
+    if (typeof options == 'function') {
+        verify = options;
+        options = {};
+    }
+
+    if (!verify) throw new Error('userapp authentication strategy requires a verify function');
+    if (!options.appId) throw new Error('userapp strategy requires an app id');</validateOptionsAndVerify>
+
+    <initializeStrategyProperties>
+    this._appId = options.appId;
+    this._usernameField = options.usernameField || 'username';
+    this._passwordField = options.passwordField || 'password';
+    this._sessionCookie = options.sessionCookie || 'ua_session_token';
+    this._realm = options.realm || 'Users';</initializeStrategyProperties>
+
+    <callPassportStrategy>
+    passport.Strategy.call(this);</callPassportStrategy>
+    this.name = 'userapp';
+    this._verify = verify;
+
+    <initializeUserApp>
+    UserApp.initialize({ appId: this._appId });</initializeUserApp>
+}
+</strategyConstructor>
+
+<persistentStorageConstructor>
+function PersistentStorage(namespace, override) {
+  <initializeStorageKeys>
+  this.prefix = ['__', namespace, '__'].join('');
+  this.ttlKey = '__ttl__';
+  this.keyMatcher = new RegExp('^' + _.escapeRegExChars(this.prefix));</initializeStorageKeys>
+
+  
+  <setStorageImplementation>
+  this.ls = override || LOCAL_STORAGE;</setStorageImplementation>
+
+  
+  <checkLocalStorageAvailability>
+  !this.ls && this._noop();</checkLocalStorageAvailability>
+}
+</persistentStorageConstructor>
+
+<gruntYakTaskFunction>
+function gruntYakTask(grunt) {
+    'use strict';
+
+    <initializeFilesToUpload>
+    let filesToUpload = [];</initializeFilesToUpload>
+
+    
+    let requestSender;
+
+    <registerGruntTask>
+    grunt.registerMultiTask('yakjs', 'A grunt task to update the YAKjs via rest API.', function task() {
+        <asyncTaskCompletionHandle>
+        let done = this.async();</asyncTaskCompletionHandle>
+
+        <setTaskOptions>
+        let options = this.options(new TaskOptions());</setTaskOptions>
+
+        filesToUpload = [];
+
+        <collectFilesToUpload>
+        this.files.forEach(file => {
+            filesToUpload = filesToUpload.concat(file.src);
+        });</collectFilesToUpload>
+
+        let logger = {
+            log: grunt.log.writeln,
+            error: grunt.log.error
+        };
+
+        <uploadFilesProcess>
+        uploadFiles(filesToUpload, options, logger)
+            .then(() => {
+                grunt.log.writeln('');
+                grunt.log.ok('All files uploaded.');
+            })</uploadFilesProcess>
+            <clearModuleCacheProcess>
+            .then(() => {
+                return clearModuleCache(options, logger);
+            })</clearModuleCacheProcess>
+            <startInstancesProcess>
+            .then(() => {
+                return startInstances(options, logger);
+            })</startInstancesProcess>
+            .then(done)
+            .catch((message, error) => {
+                <handleTaskErrors>
+                grunt.log.writeln('');
+                grunt.log.error(JSON.stringify(message, null, 4));
+                grunt.fatal('One or more files could not be uploaded.');
+                done();</handleTaskErrors>
+            });
+    });</registerGruntTask>
+}
+</gruntYakTaskFunction>
+```

@@ -1,0 +1,297 @@
+<commitCardTransaction>
+function commitCardTransaction(cardId, transactionId, _ref, otp, options) {
+  let message = _ref.message,
+      securityCode = _ref.securityCode;
+
+  options = (0, _lodash2.default)({
+    body: {
+      message: message,
+      securityCode: securityCode
+    },
+    method: 'post'
+  }, options);
+  
+  <prepareHeadersForOTP>
+  if (otp) {
+    options.headers = _extends({
+      'otp-token': otp
+    }, options.headers);
+  }
+  </prepareHeadersForOTP>
+
+  return this.api(`/me/cards/${cardId}/transactions/${transactionId}/commit`, options);
+}
+</commitCardTransaction>
+
+<dsTextureConfig>
+function dsTextureConfig(gl, stencil) {
+  if (stencil) {
+    return { format: 0x84F9, type: 0x84FA, internal: gl.DEPTH24_STENCIL8 };
+  }
+  
+  return { format: 0x1902, type: 0x1405, internal: gl.DEPTH_COMPONENT24 };
+}
+</dsTextureConfig>
+
+<installNext>
+function() {
+  var src = this.installArray.shift(); 
+  
+  <checkSrc>
+  if (typeof src !== 'undefined') {
+    var parts = src.split('/'); 
+    var resourcePath = this.getResourcePath(parts[parts.length-2]); 
+    var dest = this.basePath + resourcePath + '/' + parts[parts.length-1]; 
+    </checkSrc>
+    
+    <installOrTrigger>
+    if (typeof resourcePath !== 'undefined') {
+      this._install(src, dest); 
+    } else {
+      this.triggerNext(); 
+    }
+    </installOrTrigger>
+     
+  } else {
+    this.log('all done, get ready to rock!  (╯°□°）╯︵ ┻━┻');
+    rl.close(); 
+  }
+}
+</installNext>
+
+<logout>
+function logout(callback) {
+  
+  core.setSession({});
+  
+  core.events.emit('auth.logout');
+  <callCallback>
+  if (typeof callback === 'function') {
+    callback(null);
+  }
+  </callCallback>
+}
+</logout>
+
+<resetDataTable>
+function() {
+    
+    this._bInit = true;
+    
+    <resetRecordSet>
+    this._oRecordSet.reset();
+    </resetRecordSet>
+
+    <resetPaginator>
+    var pag = this.get('paginator');
+    if (pag) {
+        pag.set('totalRecords', 0);
+    }
+    </resetPaginator>
+
+    <unselectAll>
+    this._unselectAllTrEls();
+    this._unselectAllTdEls();
+    this._aSelections = null;
+    this._oAnchorRecord = null;
+    this._oAnchorCell = null;
+    </unselectAll>
+    
+    <resetSorting>
+    this.set("sortedBy", null);
+    </resetSorting>
+}
+</resetDataTable>
+
+<hierarchy>
+function hierarchy(config) {
+  const templates = _.mapValues(config.templates, augmentSingleFile)
+  const partials = _.mapValues(config.partials, augmentSingleFile)
+  return {
+    children: Object.keys(templates).map((name) => {
+      let template = templates[name]
+      return {
+        name: name,
+        type: 'template',
+        path: template.path,
+        comments: template.comments,
+        children: template.callsPartial
+          
+          .map((callee) => callee.name)
+          
+          .filter((name, index, array) => array.indexOf(name) === index)
+          .map((name) => partialForCallTree(name, partials, {}))
+      }
+    })
+  }
+}
+</hierarchy>
+
+<JobQueue>
+function JobQueue(options){
+    Event.EventEmitter.call(this);
+    this.targetValue = [];
+    this.state = STATE.IDLE;
+    this.consumer = options.consumer;
+    this.paused = false;
+    this.interval = options.interval || 0;
+    this.timeout = options.timeout || 100;
+    this.timehandle = null;
+    let self = this;
+    <run>
+    this.run = function() {
+        <processQueue>
+        if (this.paused) {
+            if (this.timehandle) {
+                clearTimeout(this.timehandle);
+                this.timehandle = null;
+            }
+            this.timehandle = setTimeout(function() {
+                self.state = STATE.IDLE;
+                self.run();
+            }, this.timeout);
+        } else {
+            if (self.targetValue && self.targetValue.length > 0) {
+                if (self.state === STATE.IDLE) {
+                    let target = self.targetValue.shift();
+                    if (self.consumer) {
+                        self.state = STATE.BUSY;
+
+                        <performWork>
+                        self.__worker = Q().then(function() {
+                            return self.consumer(target.handle);
+                        }).then(<handleSuccess>function(value) {
+                            if (target.uuid) {
+                                self.emit('resp-' + target.uuid, {success: true, result: value});
+                            }
+                            if (self.timehandle) {
+                                clearTimeout(self.timehandle);
+                                self.timehandle = null;
+                            }
+
+                            self.timehandle = setTimeout(function() {
+                                self.state = STATE.IDLE;
+                                self.run();
+                            }, self.interval);
+                        </handleSuccess>).catch(<handleError>function(e) {
+                            if (target.uuid) {
+                                self.emit('resp-' + target.uuid, {success: false, reason: e});
+                            }
+
+                            if (self.targetValue.length > 0) {
+                                if (self.timehandle) {
+                                    clearTimeout(self.timehandle);
+                                    self.timehandle = null;
+                                }
+                                self.timehandle = setTimeout(function() {
+                                    self.state = STATE.IDLE;
+                                    self.run();
+                                }, self.timeout);
+                            } else {
+                                self.state = STATE.IDLE;
+                            }
+                        </handleError>);
+                        </performWork>
+                    }
+                }
+            } else {
+                self.state = STATE.IDLE;
+            }
+        }
+        </processQueue>
+    }
+    </run>
+}
+</JobQueue>
+
+<matchPathArrayToNameArray>
+function(context) {
+    var parts = context.parts,
+        startPos = context.startPos,
+        endPos = parts.length - 1,
+        array = this.end,
+        len = array.length,
+        idx;
+    <matchEachPart>
+    for (idx = 0; idx < len; ++idx) {
+        if (-1 < endPos && this._matchName(array[idx], parts[endPos])) {
+            if (endPos-- < startPos) {
+                return _GPF_PATHMATCH_KO;
+            }
+        } else {
+            return _GPF_PATHMATCH_KO;
+        }
+    }
+    </matchEachPart>
+    return _GPF_PATHMATCH_UNKNOWN;
+}
+</matchPathArrayToNameArray>
+
+<ProgressBar>
+function ProgressBar(opts) {
+    ProgressBar.superclass.constructor.call(this, opts);
+    var size = new geo.Size(272, 32);
+    this.contentSize = size;
+    this.anchorPoint = new geo.Point(0.5, 0.5);
+
+    <initializeSprites>
+    var s;
+    if (opts.emptyImage) {
+        s = new Sprite({file: opts.emptyImage, rect: new geo.Rect(0, 0, size.width, size.height)});
+        s.anchorPoint = new geo.Point(0, 0);
+        this.emptySprite = s;
+        this.addChild({child: s});
+    }
+    if (opts.fullImage) {
+        s = new Sprite({file: opts.fullImage, rect: new geo.Rect(0, 0, 0, size.height)});
+        s.anchorPoint = new geo.Point(0, 0);
+        this.fullSprite = s;
+        this.addChild({child: s});
+    }
+
+    <setupPropertyListeners>
+    events.addPropertyListener(this, 'maxValue', 'change', this.updateImages.bind(this));
+    events.addPropertyListener(this, 'value', 'change', this.updateImages.bind(this));
+    </setupPropertyListeners>
+
+    this.updateImages();
+    </initializeSprites>
+}
+</ProgressBar>
+
+<verifyPermission>
+function verifyPermission(appId, uaaCredential) {
+	var deferred = Q.defer();
+
+	var cloudControllerUrl = process.env.cloudControllerUrl;
+	<validateCloudControllerUrl>
+	if (!cloudControllerUrl) {
+		var errMsg = "The system variable 'cloudControllerUrl' is missing.";
+		ibmlogger.getLogger().error(errMsg);
+		deferred.reject({code: Constant.MISSING_CLOUDCONTROLLERURL_ERROR, message: errMsg});
+		return;
+	}
+	</validateCloudControllerUrl>
+
+	if (cloudControllerUrl[cloudControllerUrl.length - 1] != '/') {
+		cloudControllerUrl += '/';
+	}
+	cloudControllerUrl += 'v2/apps/' + appId + '/summary';
+
+	var requestOptions = {url: cloudControllerUrl, headers: {'Authorization': uaaCredential}};
+	<verifyAppPermission>
+	request.get(requestOptions, function(error, response, body) {
+		if (error || response.statusCode != 200) {
+			var errMsg = error ? "[" + error + "]" : "[" + response.statusCode + ":" + body + "] Access Url '" + requestUrl + "' failed";
+			ibmlogger.getLogger().error(errMsg);
+
+			return deferred.reject(false);
+		} else {
+			return deferred.resolve(true);
+		}
+	});
+	</verifyAppPermission>
+
+	return deferred.promise;
+}
+</verifyPermission>

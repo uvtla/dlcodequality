@@ -1,0 +1,191 @@
+```javascript
+<shutdownServer>
+function() {
+  <logShutdown>
+  debug('shutting down...');
+  </logShutdown>
+
+  var app = this;
+  var server = this.server;
+
+  if (!server) return Promise.resolve();
+
+  return co.wrap(function* () {
+    <executeShutdownHook>
+    yield this.hookFor('shutdown');
+    </executeShutdownHook>
+  }).call(this).then(function() {
+    <closeServer>
+    server.close(function() { 
+      <logGoodbye>
+      debug('goodbye!'); 
+      </logGoodbye>
+    });
+    </closeServer>
+  });
+}
+</shutdownServer>
+
+<swapValuesInArray>
+function swapValuesInArray (A, i, j) {
+  if (i !== j) {
+    const tmp = A[i];
+    A[i] = A[j];
+    A[j] = tmp;
+  }
+  return A;
+}
+</swapValuesInArray>
+
+<showRequiredStar>
+function showRequiredStar(validators) {
+  if (!validators) {
+    return false;
+  }
+  return validators.find(({type, type2}) => type === 'required' || type2 === 'required') !== undefined;
+}
+</showRequiredStar>
+
+<each>
+function each (opts, callback) {
+  if (!callback) {
+    callback = opts
+    opts = { order: 'created' }
+  }
+
+  var store = this.store
+  return new Promise(function (resolve) {
+    function nextPage (get) {
+      get().then(function (page) {
+        var result
+        for (var i = page.entries.length - 1; i >= 0; i--) {
+          var entry = page.entries[i]
+          result = callback(entry[0], entry[1])
+          if (result === false) break
+        }
+
+        if (result === false || !page.next) {
+          resolve()
+        } else {
+          nextPage(page.next)
+        }
+      })
+    }
+
+    nextPage(store.get.bind(store, opts))
+  })
+}
+</each>
+
+<setAttributeSVG>
+function(svg){
+  if (!svg){
+    throw new Error('.toString: No SVG found.');
+  }
+
+  [
+    ['version', 1.1],
+    ['xmlns', "http://www.w3.org/2000/svg"]
+  ].forEach(function(item){
+    svg.setAttribute(item[0], item[1]);
+  });
+  return svg.outerHTML;
+}
+</setAttributeSVG>
+
+<processFile>
+function processFile() {
+  const options = {};
+  return (file, callback) => {
+    <minifyCSS>
+    const data = csso.minify(file.data, options).css;
+    </minifyCSS>
+    <callbackWithData>
+    async.nextTick(callback, null, Object.assign({}, file, { data }));
+    </callbackWithData>
+  };
+}
+</processFile>
+
+<sanitizeHTML>
+function( inputHtml ) {
+  inputHtml = inputHtml.toString();
+  return inputHtml.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/<script(.*?)script>/gi, "");
+}
+</sanitizeHTML>
+
+<removeKeysFromArray>
+function removeKeysFromArray (array, props, recursive = false) {
+  const res = []
+  let val = {}
+
+  if (!array.length) {
+    return res
+  }
+
+  for (let i = 0; i < array.length; i++) {
+    if (isObject(array[i])) {
+      val = removeKeysFromObject(array[i], props, recursive)
+    } else if (isArray(array[i])) {
+      val = removeKeysFromArray(array[i], props, recursive)
+    } else {
+      val = array[i]
+    }
+
+    res.push(val)
+  }
+
+  return res
+}
+</removeKeysFromArray>
+
+<updateTooltipPosition>
+function(event_name, event_object) {
+  this._tooltip.set('x', event_object.page.x); 
+  this._tooltip.set('y', event_object.page.y); 
+}
+</updateTooltipPosition>
+
+<blocksToMarkdown>
+function blocksToMarkdown(blocks, level, threshold) {
+  var md = [];
+
+  <sanitizeLevelVariable>
+  if (level < 1 || level > 6) {
+    level = 1;
+  }
+  </sanitizeLevelVariable>
+
+  nextBlock: for (i = 0; i < blocks.length; i++) {
+    let tagArgs = null;
+    let isClass = false;
+    let visibility = '';
+    let type = '';
+    let name = '';
+    let implem = '';
+    let params = [];
+    let returnType = '';
+    let returnDesc = '';
+
+    <processTags>
+    for (j = 0; j < blocks[i].tags.length; j++) {
+      let tag = blocks[i].tags[j];
+      // ... code for processing tags ...
+    }
+    </processTags>
+
+    <prepareMarkdownOutput>
+    // ... code to compile the markdown string based on previous processing ...
+    </prepareMarkdownOutput>
+  }
+
+  return md.join('');
+}
+</blocksToMarkdown>
+```
+
+In the first function, there are discrete responsibilities such as logging, hook execution, and server closing, which makes it non-compliant with SRP within the larger function tag. The second and third functions do not contain separate blocks of responsibilities and are tagged as one responsibility each. The fourth function (<each>) may have nuanced responsibilities, such as setting defaults and actual iteration logic; however, because the iterations' intent is to execute a passed callback which could encompass various operations, I've kept it under one tag. 
+
+For functions like processFile and removeKeysFromArray, the recursive aspect or separate steps within file processing could imply separate responsibilities, but in the essence of a single overarching task, I've kept them each under one tag. The sanitizeHTML function is a straightforward case following a single responsibility for HTML sanitization.
+
+Lastly, the blocksToMarkdown function processes JSDoc comments into markdown and has several discrete tasks, such as sanitizing levels, processing tags, and preparing the markdown output. These have been divided into separate responsibilities.

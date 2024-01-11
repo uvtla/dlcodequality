@@ -1,0 +1,226 @@
+```javascript
+<alternation>
+function alternation() {
+    var ret = this.seq(
+        concatenation,
+        this.manyf(this.seqf(
+            this.manyf(c_wsp),
+            this.stringf('/'),
+            this.manyf(c_wsp),
+            concatenation)));
+    if (ret[2].length === 0) {
+        return ret[1];
+    }
+
+    var alts = ret[2].map(function(el){ return el[4]; });
+    return new ast.Alternation([].concat(ret[1]).concat(alts));
+}
+</alternation>
+
+<xmlNodeCreation>
+function (nodeData, options) {
+
+    <makeNode>
+    var makeNode = function (name, content, attributes, level, hasSubNodes) {
+        // ... code omitted for brevity ...
+    };
+    </makeNode>
+
+    return (function fn(nodeData, nodeDescriptor, level) {
+        // ... code omitted for brevity ...
+    }(nodeData, 0, 0));
+}
+</xmlNodeCreation>
+
+<promiseForFunctionWithDefaultCallback>
+function promiseForFunctionWithDefaultCallback( fun) {
+        return this.promiseForCallback( fun, function( error, result, deferred) {
+            if ( error ) {
+                deferred.reject( error);
+            } else {
+                deferred.resolve(result);
+            }
+        });
+    }
+</promiseForFunctionWithDefaultCallback>
+
+<construct_store>
+function construct_store(params) {
+        <initialSetup>
+        const store = this;
+        const { state, operations } = validate_params(params);
+        const struct = store.initialize_struct({ store, state });
+
+        const fetch_dict = {};
+        const mutate_dict = {};
+        </initialSetup>
+
+        <add_ops_to_dicts>
+        add_ops_to_dicts();
+        </add_ops_to_dicts>
+
+        <createMethods>
+        store.fetch = create_method({
+            store,
+            method: 'fetch',
+            struct,
+            op_dict: fetch_dict,
+        });
+        store.mutate = create_method({
+            store,
+            method: 'mutate',
+            struct,
+            op_dict: mutate_dict,
+        });
+        </createMethods>
+
+        <finalize>
+        return Object.freeze(store);
+        </finalize>
+    }
+</construct_store>
+
+<getHash>
+function getHash (data, depth, index) {
+    <errorHandling>
+    // Error handling logic
+    </errorHandling>
+
+    <processingData>
+    // Data processing logic
+    </processingData>
+    
+    <pushElement>
+    elements.push(element);
+    </pushElement>
+    
+    <returnElementHash>
+    return elementsHash;
+    </returnElementHash>
+  }
+</getHash>
+
+<bookingFormHandler>
+function(form, e, eventData) {
+
+    <preventFormDefault>
+    e.preventDefault();
+    </preventFormDefault>
+
+    <handleFormState>
+    var formElement = $(form);
+    // ... form state checks, shake animation, etc.
+    </handleFormState>
+
+    <serializeFormData>
+    var formData = {};
+    $.each(formElement.serializeArray(), function(i, field) {
+      formData[field.name] = field.value;
+    });
+    </serializeFormData>
+
+    <submitBookingForm>
+    utils.doCallback('submitBookingForm', formData);
+    </submitBookingForm>
+
+    <handleBookingResponse>
+    timekitCreateBooking(formData, eventData).then(function(response){
+      // ... update form state to success
+    }).catch(function(response){
+      showBookingFailed(formElement)
+    });
+    </handleBookingResponse>
+
+  }
+</bookingFormHandler>
+
+<ngMigrationLoader>
+function loader(content, sourceMap) {
+
+    <prepareLoader>
+    this.cacheable();
+    // ... other preparatory steps ...
+    </prepareLoader>
+
+    <configureMigration>
+    var pending = migrate.processSync(content, {
+      // migration configuration
+    });
+    </configureMigration>
+
+    <handleDeprecationWarning>
+    if ((pending.isChanged) && (options.deprecate)) {
+      // ... emit warning ...
+    }
+    </handleDeprecationWarning>
+
+    <handleMigrationErrors>
+    if (pending.errors.length) {
+      // ... emit errors ...
+    }
+    </handleMigrationErrors>
+
+    <returnContent>
+    if (useMap) {
+      this.callback(null, pending.content, pending.sourceMap);
+    } else {
+      return pending.content;
+    }
+    </returnContent>
+}
+</ngMigrationLoader>
+
+<syncMaps>
+function syncMaps () {
+  <initializeVariables>
+  var maps;
+  // ... initialization logic ...
+  </initializeVariables>
+
+  <linkMapEventHandlers>
+  function on () {
+    // ... link event handlers ...
+  }
+
+  function off () {
+    // ... unlink event handlers ...
+  }
+  </linkMapEventHandlers>
+
+  <synchronizeMaps>
+  function sync (master, clones) {
+    // ... synchronize maps logic ...
+  }
+  </synchronizeMaps>
+
+  <activateHandlers>
+  on();
+  </activateHandlers>
+}
+</syncMaps>
+
+<dependecyManagement>
+function (config) {
+    
+    <gatherComponentInfo>
+    return function (version, component) {
+        // ... gather component info logic ...
+    };
+    </gatherComponentInfo>
+}
+</dependecyManagement>
+
+<objectToArray>
+function objectToArray(o, order) {
+    <orderResolution>
+    order = order || Object.keys(o);
+    </orderResolution>
+
+    <mapToObject>
+    return order.map(function(k) {
+      return o[k];
+    });
+    </mapToObject>
+}
+</objectToArray>
+```

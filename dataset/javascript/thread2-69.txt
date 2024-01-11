@@ -1,0 +1,248 @@
+Below are the annotations for the provided JavaScript functions:
+
+```javascript
+<promisify>
+function promisify(func) {
+        return function(str, options) {
+            var result,
+                deferred = q.defer(),
+                promise = deferred.promise;
+                
+            // Validate the function
+            <validateFunction>
+            if (!_.isFunction(func)) {
+                deferred.reject();
+            } </validateFunction>
+            else {
+                // Execute the function and process the result
+                <executeAndProcessResult>
+                result = func(str, options);
+
+                if (_.isBoolean(result)) {
+                    promise = handleBoolean(result, deferred);
+                }
+                else if (_.isFunction(result.then)) {
+                    promise = result;
+                } </executeAndProcessResult>
+            }
+            return promise;
+        };
+}
+</promisify>
+
+<createDynamicDropdown>
+function() {
+    this.$menu = $('<div class="' + this.settings.menuClass + '" style="display: none" />');
+    var $ul = $('<ul/>').appendTo(this.$menu);
+
+    for (var i in this.options) {
+        if (!this.options.hasOwnProperty(i)) {
+            continue;
+        }
+
+        var option = this.options[i];
+
+        if (option === '-') {
+            $('<hr/>').appendTo(this.$menu);
+            $ul = $('<ul/>').appendTo(this.$menu);
+        }
+        else {
+            var $li = $('<li></li>').appendTo($ul),
+                $a = $('<a>' + option.label + '</a>').appendTo($li);
+
+            if (typeof option.onClick === 'function') {
+                // Attach event handlers
+                <attachEventHandlers>
+                (function($a, onClick) {
+                    setTimeout($.proxy(function() {
+                        $a.mousedown($.proxy(function(ev) {
+                            this.hideMenu();
+                            onClick.call(this.currentTarget, $.extend(ev, {currentTarget: this.currentTarget}));
+                        }, this));
+                    }, this), 1);
+                }).call(this, $a, option.onClick);
+                </attachEventHandlers>
+            }
+        }
+    }
+}
+</createDynamicDropdown>
+
+<mapArray>
+function mapArray(fn, array) {
+  let newArray = [],
+      index = -1;
+
+  while (++index < array.length) {
+    newArray[index] = fn(array[index], index, array);
+  }
+
+  return newArray;
+}
+</mapArray>
+
+<normalizeX509>
+function normalizeX509(raw, loggerPrefix) {
+    logger.debug(`${loggerPrefix} [normalizeX509] raw cert: ${raw}`);
+    
+    // Process the X509 certificate
+    <processX509>
+    const regex = /(\-\-\-\-\-\s*BEGIN ?[^-]+?\-\-\-\-\-)([\s\S]*)(\-\-\-\-\-\s*END ?[^-]+?\-\-\-\-\-)/;
+    let matches = raw.match(regex);
+    if (!matches || matches.length !== 4) {
+        throw new Error('Failed to find start line or end line of the certificate.');
+    }
+    matches.shift();
+    matches = matches.map((element) => {
+        return element.trim();
+    });
+    </processX509>
+    
+    return matches.join('\n') + '\n';
+}
+</normalizeX509>
+
+<curry4>
+function curry4(f) {
+    return function(w) {
+      return function(x) {
+        return function(y) {
+          return function(z) {
+            // Apply the curried function
+            <applyCurriedFunction>
+            return f(w, x, y, z);
+            </applyCurriedFunction>
+          };
+        };
+      };
+    };
+  }
+</curry4>
+
+<omitNested>
+function omitNested(path, collection, isCollectionObject) {
+  const nextPath = path.shift();
+  
+  // Clean collection
+  <cleanCollection>
+  const cleanCollection = getCleanCollection(collection, isCollectionObject);
+  </cleanCollection>
+
+  if (!path.length) {
+    // Remove property or index
+    <removePropertyOrIndex>
+    const removeMethod = isCollectionObject ? removeKeyFromObject : removeIndicesFromArray;
+    return removeMethod(nextPath, cleanCollection);
+    </removePropertyOrIndex>
+  }
+
+  // Omit from collection recursively
+  <omitRecursively>
+  const omitMethod = isObject(cleanCollection[nextPath]) ? omitFromObject : omitFromArray;
+  collection[nextPath] = omitMethod(cleanCollection[nextPath], [path]);
+  </omitRecursively>
+
+  return collection;
+}
+</omitNested>
+
+<mediaPlayerFullscreenControl>
+function() {
+	var t = this;
+	
+	if (zyMedia.features.nativeFullscreenPrefix != '-') {
+		// Fullscreen event listener
+		<fullscreenEventListener>
+		var func = function(e) {
+			if (t.isFullScreen) {
+				if (!isInFullScreenMode()) {
+					t.exitFullScreen()
+				}
+			}
+		};
+		document.addEventListener(zyMedia.features.nativeFullscreenPrefix + 'fullscreenchange', func)
+		</fullscreenEventListener>
+	}
+
+	// Setup fullscreen button
+	<setupFullscreenButton>
+	t.fullscreenBtn = document.createElement('div');
+	t.fullscreenBtn.className = 'zy_fullscreen_btn';
+	t.controls.appendChild(t.fullscreenBtn);
+
+	t.fullscreenBtn.addEventListener('click', function() {
+		if ((zyMedia.features.nativeFullscreenPrefix != '-' && isInFullScreenMode()) || t.isFullScreen) {
+			t.exitFullScreen()
+		} else {
+			t.enterFullScreen()
+		}
+	});
+	</setupFullscreenButton>
+}
+</mediaPlayerFullscreenControl>
+
+<removePnode>
+function removePnode(pnode, skipParent) {
+    if (!pnode.exists) return pnode
+    
+    // Recursively remove children
+    <removeChildren>
+    for (var i = 0; i < pnode.children.length; i++) removePnode(pnode.children[i], true)
+    </removeChildren>
+    
+    if (!skipParent) {
+        // Remove the node from its parent
+        <removeNodeFromParent>
+        removeChild(pnode.parent, pnode)
+        </removeNodeFromParent>
+    }
+
+    // Cleanup operations
+    <cleanup>
+    delete data[pnode.path]
+    incTransaction()
+    feed('remove', pnode)
+    </cleanup>
+    
+    return pnode
+}
+</removePnode>
+
+<formatDateISO8601>
+function(date) {
+    // Format date to ISO 8601
+    <formatDate>
+    return sprintf("%04d-%02d-%02dT%02d:%02d:%02dZ",
+           date.getUTCFullYear(),
+           (date.getUTCMonth() + 1),
+           date.getUTCDate(),
+           (date.getUTCHours()),
+           (date.getUTCMinutes() + 1),
+           (date.getUTCSeconds() + 1)
+    );
+    </formatDate>
+}
+</formatDateISO8601>
+
+<calculateLuminance>
+function(hexNum) {
+            // Validate the hex number
+            <validateHex>
+            if(typeof hexNum !== "number") {
+                hexNum = parseInt(hexNum, 16);
+            }
+            if(isNaN(hexNum) || hexNum < 0x000000 || hexNum > 0xffffff) {
+                return undefined;
+            }
+            </validateHex>
+
+            // Calculate luminance
+            <calculateLuminance>
+            var r = (hexNum & 0xff0000) >> 16,
+                g = (hexNum & 0x00ff00) >> 8,
+                b = hexNum & 0x0000ff;
+            return Math.round(0.2126 * r + 0.7152 * g + 0.0722 * b);
+            </calculateLuminance>
+}
+</calculateLuminance>
+```

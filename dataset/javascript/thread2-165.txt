@@ -1,0 +1,255 @@
+Sure, I will annotate these functions regarding the Single Responsibility Principle (SRP):
+
+1. Function concerning setting attributes for an SVG marker:
+```javascript
+<setSvgMarkerAttributes>
+function(marker, width, height, block) {
+    var attr = ['marker']
+    
+    <addMarkerToAttr>
+    if (marker != 'all') attr.push(marker)
+    </addMarkerToAttr>
+    attr = attr.join('-')
+    
+    <generateMarker>
+    marker = arguments[1] instanceof SVG.Marker ?
+      arguments[1] :
+      this.doc().marker(width, height, block)
+    </generateMarker>
+
+    return this.attr(attr, marker)
+}
+</setSvgMarkerAttributes>
+```
+The function has separate responsibilities, which are annotated within it: `addMarkerToAttr` and `generateMarker`.
+
+2. Function for parsing a chunk of a file:
+```javascript
+<parseFileChunk>
+function parseFileChunk(data){
+  var chunk = {};
+  chunk.chunkIdx = new Float64Array(data.buffer, 8, 1)[0];
+  chunk.fileID = String.fromCharCode.apply(null, new Uint16Array(data.buffer, 32, 8));
+  chunk.msgIdx = new Float64Array(data.buffer, 16, 1)[0];
+  chunk.data = new Uint8Array(data.buffer, 48);
+  return chunk;
+}
+</parseFileChunk>
+```
+This function performs a single responsibility, which is to parse a file chunk.
+
+3. Function for restoring authentication:
+```javascript
+<restoreAuthentication>
+function(provider) {
+      if (!this.isCurrent()) {
+        return;
+      }
+      
+      <determineAuthProvider>
+      var authType;
+      if (_.isString(provider)) {
+        authType = provider;
+        provider = Parse.User._authProviders[authType];
+      } else {
+        authType = provider.getAuthType();
+      }
+      </determineAuthProvider>
+      
+      <validateAuthData>
+      var authData = this.get('authData');
+      if (!authData || !provider) {
+        return;
+      }
+      </validateAuthData>
+      
+      <handleRestoringAuth>
+      var success = provider.restoreAuthentication(authData[authType]);
+      if (!success) {
+        this._unlinkFrom(provider);
+      }
+      </handleRestoringAuth>
+    }
+</restoreAuthentication>
+```
+Different responsibilities are identified within the function: `determineAuthProvider`, `validateAuthData`, and `handleRestoringAuth`.
+
+4. Function for managing data attributes:
+```javascript
+<manageDataAttributes>
+function(attr, val, el, index, obj, attrCamel) {
+  // The complexity of this function with multiple if-else branches 
+  // and similar operations suggests that decomposition might be beneficial for SRP.
+}
+</manageDataAttributes>
+```
+This function manages data attributes but violates SRP with complex conditional logic and should be decomposed into smaller functions.
+
+5. Function to list modules in a directory:
+```javascript
+<listModulesInDirectory>
+function listModulesInDirectory(modulesDir) {
+    const log = debug('phantomas:modules'); // This is just a single line of logging, not a separate responsibility.
+    
+    <readDirectory>
+    var ls = fs.readdirSync(modulesDir),
+        modules = [];
+    </readDirectory>
+
+    <filterValidModules>
+    ls.forEach(function(entry) {
+        if (fs.existsSync(modulesDir + '/' + entry + '/' + entry + '.js')) {
+            modules.push(entry);
+        }
+    });
+    </filterValidModules>
+
+    return modules.sort(); // Sorting the modules is part of the primary responsibility, not a separate one.
+}
+</listModulesInDirectory>
+```
+The function has distinct responsibilities: `readDirectory` and `filterValidModules`.
+
+6. Function to run a script:
+```javascript
+<runScript>
+function _runScript(config, options) {
+  <setupSandbox>
+  const useSandbox = ((isFunction(config.useSandbox)) ? _config.useSandbox(_config) || false : config.useSandbox);
+  const module = new Module(config);
+  const scopeParams = _getScopeParams(config, module, config.scope);
+  const script = _createScript(config, options, config.scope);
+  </setupSandbox>
+
+  <executeScript>
+  try {
+    if (useSandbox) {
+      script.runInContext(_createSandbox(config), options)(...scopeParams);
+    } else {
+      script.runInThisContext(options)(...scopeParams);
+    }
+  } catch(error) {
+    if (config.squashErrors) cache.delete(options.filename);
+    if (!config.squashErrors) {
+      if (_runError(error, module)) throw error;
+    } else {
+      throw error;
+    }
+  }
+  </executeScript>
+
+  return module;
+}
+</runScript>
+```
+The function has separate responsibilities, which are setup (`setupSandbox`) and execution (`executeScript`) of the script.
+
+7. Function to handle file reader events:
+```javascript
+<handleFileReaderEvents>
+function (r) { 
+    <checkReadyState>
+    if (me._readyState === FileReader.DONE) {
+        return;
+    }
+    </checkReadyState>
+
+    <markFileReaderDone>
+    me._readyState = FileReader.DONE;
+    </markFileReaderDone>
+
+    <prepareResult>
+    if (r instanceof Array) {
+        r = new Uint8Array(r).buffer;
+    }
+    me._result = r;
+    </prepareResult>
+
+    <triggerOnLoad>
+    if (typeof me.onload === 'function') {
+        me.onload(new ProgressEvent('load', { target:me }));
+    }
+    </triggerOnLoad>
+
+    <triggerOnLoadEnd>
+    if (typeof me.onloadend === 'function') {
+        me.onloadend(new ProgressEvent('loadend', { target:me }));
+    }
+    </triggerOnLoadEnd>
+}
+</handleFileReaderEvents>
+```
+Individual event handling steps are annotated, but they collectively fulfill the single purpose of handling file reader events, so the function is compliant with SRP.
+
+8. Function for sending an HTTP GET request for an image:
+```javascript
+<httpGetImage>
+function () {
+    <parseUrl>
+    var options = url.parse(this.source, false);
+    </parseUrl>
+
+    <configureHttpRequest>
+    extend(options, {
+      method: 'get',
+      headers: {
+        host: options.host,
+        accept: 'image/*'
+      }
+    });
+    </configureHttpRequest>
+
+    <selectHttpLibrary>
+    var library = options.protocol === 'https:' ? https : http;
+    </selectHttpLibrary>
+
+    <setupHttpRequest>
+    this.request = library.request(options);
+    this.request.on('response', this.onResponse.bind(this));
+    this.request.on('error', this.onError.bind(this));
+    this.request.setTimeout(5000, this.onTimeout.bind(this));
+    </setupHttpRequest>
+
+    <sendHttpRequest>
+    this.startTime = new Date().getTime();
+    this.request.end();
+    </sendHttpRequest>
+}
+</httpGetImage>
+```
+This function is non-compliant with SRP as it has multiple distinct responsibilities.
+
+9. Function to write characters to a buffer:
+```javascript
+<writeToBuffer>
+function write(buffer, offs) {
+			for (var i = 2; i < arguments.length; i++) {
+				for (var j = 0; j < arguments[i].length; j++) {
+					buffer[offs++] = arguments[i].charAt(j);
+				}
+			}
+		}
+</writeToBuffer>
+```
+This function is compliant with SRP, handling one single responsibility - writing data to a buffer.
+
+10. Function to map parser over a stream:
+```javascript
+<mapParserStream>
+function(parser) {
+    return highland.map(function(item) {
+      <applyParser>
+      if (_.isFunction(parser)) {
+        return parser(item);
+      }
+      if (_.isObject(parser) && (parser.parse != null)) {
+        return parser.parse(item);
+      }
+      </applyParser>
+
+      return item; // Returning an unmodified item is part of applying the parser, not a separate responsibility.
+    });
+}
+</mapParserStream>
+```
+While it appears that applying a parser is a distinct responsibility, in this context, it constitutes the primary purpose of the highland map, thus making the function compliant with SRP.

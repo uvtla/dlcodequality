@@ -1,0 +1,225 @@
+<subscribe>
+function subscribe(listener) {
+  <validateListener>
+  if (typeof listener !== 'function') {
+    throw new Error('Expected listener to be a function.');
+  }
+  </validateListener>
+
+  var isSubscribed = true;
+
+  <manageNextListeners>
+  ensureCanMutateNextListeners();
+  nextListeners.push(listener);
+  </manageNextListeners>
+
+  return function unsubscribe() {
+    <checkSubscription>
+    if (!isSubscribed) {
+      return;
+    }
+    </checkSubscription>
+
+    isSubscribed = false;
+
+    <removeListener>
+    ensureCanMutateNextListeners();
+    var index = nextListeners.indexOf(listener);
+    nextListeners.splice(index, 1);
+    </removeListener>
+  };
+}
+</subscribe>
+
+<handleReaderEvent>
+function (event) {
+  <handleReaderErrors>
+  var reader = event.target;
+  _gpfAssert(reader === this._reader, "Unexpected change of reader");
+  if (reader.error) {
+    gpfFireEvent.call(this,
+      gpfI.IReadableStream.ERROR,
+      {
+        error: {
+          name: reader.error.name,
+          message: reader.error.message
+        }
+      },
+      this._eventsHandler
+    );
+  }
+  </handleReaderErrors>
+
+  <processReaderCompletion>
+  else if (reader.readyState === FileReader.DONE) {
+    var buffer = new Int8Array(reader.result);
+    var len = buffer.length;
+    var result = [];
+    for (var idx = 0; idx < len; ++idx) {
+      result.push(buffer[idx]);
+    }
+    gpfFireEvent.call(this, gpfI.IReadableStream.EVENT_DATA, {buffer: result}, this._eventsHandler);
+  }
+  </processReaderCompletion>
+}
+</handleReaderEvent>
+
+<configureStack>
+function ( options, queue ) {
+  <determineQueue>
+  queue =
+    Util.is.Array( queue ) || Util.is.Function( queue ) && queue ||
+    Util.is.Array( options ) || Util.is.Function( options ) && options ||
+    false;
+  if( queue ) {
+    this.queue( queue );
+  }
+  </determineQueue>
+
+  <extendAndVerifyOptions>
+  options = this.options = Util.is.Object( options ) && Util.extend( {}, options ) || {};
+  options.__proto__ = Stack.defaultOptions;
+  if( options.hasOwnProperty( 'breakOn' ) ) {
+    if( Util.isnt.Function( options.breakOn ) && options.breakOn !== false ) {
+      throw new TypeError("options.breakOn should be either a function or false");
+    }
+  }
+  </extendAndVerifyOptions>
+}
+</configureStack>
+
+<compareArrays>
+function compareArrays (x, y) {
+  <compareArrayElements>
+  for (let i = 0, ii = Math.min(x.length, y.length); i < ii; i++) {
+    const v = compareNatural(x[i], y[i])
+    if (v !== 0) {
+      return v
+    }
+  }
+  </compareArrayElements>
+
+  <compareArraySizes>
+  if (x.length > y.length) { return 1 }
+  if (x.length < y.length) { return -1 }
+  </compareArraySizes>
+
+  <defaultEquality>
+  return 0
+  </defaultEquality>
+}
+</compareArrays>
+
+<negate>
+function negate(bytes) {
+  <flipBits>
+  for (var i = 0; i < 8; i++) {
+      bytes[i] ^= 0xFF;
+  }
+  </flipBits>
+
+  <incrementCounter>
+  for (var i = 7; i > -1; i--) {
+      bytes[i]++;
+      if (bytes[i] !== 0) {
+          break;
+      }
+  }
+  </incrementCounter>
+}
+</negate>
+
+<setActivePaneId>
+function setActivePaneId(newPaneId) {
+  <verifyAndSetNewPane>
+  if (!_isSpecialPaneId(newPaneId) && newPaneId !== _activePaneId) {
+    var oldPaneId = _activePaneId,
+        oldPane = _getPane(ACTIVE_PANE),
+        newPane = _getPane(newPaneId);
+
+    if (!newPane) {
+      throw new Error("invalid pane id: " + newPaneId);
+    }
+    _activePaneId = newPaneId;
+  </verifyAndSetNewPane>
+
+  <triggerPaneEvents>
+  exports.trigger("activePaneChange", newPaneId, oldPaneId);
+  exports.trigger("currentFileChange", _getPane(ACTIVE_PANE).getCurrentlyViewedFile(),
+                                                      newPaneId,
+                                                      oldPane.getCurrentlyViewedFile(),
+                                                      oldPaneId);
+  </triggerPaneEvents>
+
+  <updatePane>
+  _makePaneMostRecent(_activePaneId);
+  focusActivePane();
+  </updatePane>
+}
+</setActivePaneId>
+
+<immutableAppHttpRedirect>
+function immutableAppHttpRedirect (url, code, cookies, headers) {
+  <setDefaultValues>
+  if (!url) {
+    url = '/'
+  }
+  if (!code) {
+    code = 302
+  }
+  </setDefaultValues>
+
+  <constructError>
+  var err = new Error('Redirect')
+  err.code = code
+  err.cookies = cookies
+  err.headers = headers
+  err.url = url
+  </constructError>
+
+  <throwRedirect>
+  throw err
+  </throwRedirect>
+}
+</immutableAppHttpRedirect>
+
+<getParentCaretContainer>
+function getParentCaretContainer(node) {
+  <searchForCaretContainer>
+  while (node) {
+    if (node.id === caretContainerId) {
+      return node;
+    }
+    node = node.parentNode;
+  }
+  </searchForCaretContainer>
+}
+</getParentCaretContainer>
+
+<adjustContentItemDimensions>
+function() {
+  <setHeight>
+  this._el.content_item.style.height = TL.Util.ratio.r16_9({w:this.options.width}) + "px";
+  </setHeight>
+  <setWidth>
+  this._el.content_item.style.width = this.options.width + "px";
+  </setWidth>
+}
+</adjustContentItemDimensions>
+
+<authorize>
+function authorize(ctx) {
+  <lookupAuthorizeMiddleware>
+  var fn = lookup(ctx.operation, 'middleware', 'authorize');
+  </lookupAuthorizeMiddleware>
+
+  <handleAuthorization>
+  var prefix = describe(ctx);
+  if (fn) {
+    return fn(ctx);
+  } else {
+    debug(prefix + 'authorize middleware disabled (not defined)');
+  }
+  </handleAuthorization>
+}
+</authorize>

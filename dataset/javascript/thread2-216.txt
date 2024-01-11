@@ -1,0 +1,198 @@
+<startsWith>
+function startsWith(str, test){
+  if(str === test){ return true; }
+  return str.substring(0, test.length+1) === test+'.';
+}
+</startsWith>
+
+<getRegExp>
+function getRegExp(node) {
+        if (node.value instanceof RegExp) {
+            return node.value;
+        } else if (typeof node.value === "string") {
+
+            <deriveParent>
+            var parent = context.getAncestors().pop();
+            if ((parent.type === "NewExpression" || parent.type === "CallExpression") &&
+            parent.callee.type === "Identifier" && parent.callee.name === "RegExp") {
+            </deriveParent>
+
+                <constructRegExp>
+                try {
+                    return new RegExp(node.value);
+                } catch (ex) {
+                    return null;
+                }
+                </constructRegExp>
+
+            }
+        } else {
+            return null;
+        }
+
+    }
+</getRegExp>
+
+<gamma1_64>
+function gamma1_64(x) {
+	var rotr19 = rotr_64(x, 19), rotr61 = rotr_64(x, 61),
+		shr6 = shr_64(x, 6);
+	
+	return new Int_64(
+			rotr19.highOrder ^ rotr61.highOrder ^ shr6.highOrder,
+			rotr19.lowOrder ^ rotr61.lowOrder ^ shr6.lowOrder
+		);
+}
+</gamma1_64>
+
+<CBC>
+function CBC(blockcipher, cipherkeybuf, ivbuf) {
+  if (!(this instanceof CBC)) {
+    return new CBC(blockcipher, cipherkeybuf, ivbuf);
+  }
+
+  this.blockcipher = blockcipher;
+  this.cipherkeybuf = cipherkeybuf;
+  this.ivbuf = ivbuf;
+}
+</CBC>
+
+<countDays>
+function countDays (koyomi, firstDay, length) {
+  var days = 0;
+  var d = firstDay;
+  while(length--){
+    <determineOpenDays>
+    if (koyomi.isOpen(d)) {
+      days++;
+    }
+    </determineOpenDays>
+    <incrementDay>
+    d.setTime(d.getTime() + A_DAY);
+    </incrementDay>
+  }
+  return days;
+}
+</countDays>
+
+<updateValues>
+function (data) {
+        var self = this;
+
+        for (var name in data) {
+          <updateElement>
+          self.find('#' + name).value(data[name]);
+          </updateElement>
+        }
+
+        return self;
+      }
+</updateValues>
+
+<getDriver>
+function getDriver(name) {
+  if (!this.drivers[name]) {
+    <logDriverError>
+    log.error(new Error('Driver "' + name + '" is not registered.'));
+    </logDriverError>
+    return null;
+  }
+  return this.drivers[name];
+}
+</getDriver>
+
+<optionsFunction>
+function(options) {
+        var _this = this,
+            <completeJobCallback>
+            complete = function(job) {
+                completeJob(_this, job, options.callback);
+            },
+            </completeJobCallback>
+            <constructJobOptions>
+            jobOptions = {
+                src: options.src,
+                loadWithAjax: options.loadWithAjax,
+                ajaxHeaders: options.loadWithAjax ? options.ajaxHeaders : null,
+                crossOriginPolicy: options.crossOriginPolicy,
+                ajaxWithCredentials: options.ajaxWithCredentials,
+                callback: complete,
+                abort: options.abort,
+                timeout: this.timeout
+            },
+            </constructJobOptions>
+            <createNewJob>
+            newJob = new ImageJob(jobOptions);
+            </createNewJob>
+
+        <manageJobQueue>
+        if ( !this.jobLimit || this.jobsInProgress < this.jobLimit ) {
+            newJob.start();
+            this.jobsInProgress++;
+        }
+        else {
+            this.jobQueue.push( newJob );
+        }
+        </manageJobQueue>
+    }
+</optionsFunction>
+
+<maintain>
+function maintain() {
+    let ci = ini.get(process.cwd() +  '/config/maintain.json');
+    if (!!ci) {
+        <processMaintenanceTasks>
+        filelist.mapPath('/config/maintain').map(async srv=>{
+            let task = new (require(srv.path))(srv.name);
+            if(!((ci.GetInfo())[task.name])){
+                try{
+                    let result = await task.Execute();
+                    if(result){
+                        (ci.GetInfo())[task.name]= true;
+                        ci.SetInfo(ci.GetInfo()).Save();
+                        console.log(`维护任务${task.name}结束.`);
+                    }
+                    else{
+                        console.log(`因为运行错误，任务${task.name}中断执行`);
+                    }
+                }
+                catch(e){
+                    console.log(e);
+                    console.log(`因为运行错误，任务${task.name}中断执行`);
+                }
+            }
+        });
+        </processMaintenanceTasks>
+    }
+    else{
+        <logMissingConfig>
+        console.log("/config/maintain.json is not exist.");
+        </logMissingConfig>
+    }
+}
+</maintain>
+
+<normalize>
+function normalize(argumts, offset, chaining) {
+  var args;
+
+  if (argumts.length > 0) {
+    <sliceArguments>
+    args = slice(argumts, offset);
+    </sliceArguments>
+  } else {
+    return undefined;
+  }
+
+  
+  if (args.length === 1) {
+    if (chaining || (Array.isArray(args[0]) && args[0].length > 0)) {
+      return args[0];
+    } else {
+      return [args[0]];
+    }
+  } else {
+    return args;
+  }
+}
+</normalize>

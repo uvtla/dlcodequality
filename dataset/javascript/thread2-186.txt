@@ -1,0 +1,264 @@
+```javascript
+<injectEdgeLabelProxies>
+function injectEdgeLabelProxies(g) {
+  _.forEach(g.edges(), function(e) {
+    <createEdgeLabelProxy>
+    var edge = g.edge(e);
+    if (edge.width && edge.height) {
+      <calculateProxyLabelPosition>
+      var v = g.node(e.v);
+      var w = g.node(e.w);
+      var label = { rank: (w.rank - v.rank) / 2 + v.rank, e: e };
+      </calculateProxyLabelPosition>
+      util.addDummyNode(g, "edge-proxy", label, "_ep");
+    }
+    </createEdgeLabelProxy>
+  });
+}
+</injectEdgeLabelProxies>
+
+<onUpdateProfile>
+function onUpdateProfile() {
+  <getUserInput>
+  var displayName = $('#display-name').val();
+  var photoURL = $('#photo-url').val();
+  </getUserInput>
+  <updateUserProfile>
+  activeUser().updateProfile({
+    'displayName': displayName,
+    'photoURL': photoURL
+  }).then(function() {
+    <notifyUserOfSuccess>
+    refreshUserData();
+    alertSuccess('Profile updated!');
+    </notifyUserOfSuccess>
+  }, onAuthError);
+  </updateUserProfile>
+}
+</onUpdateProfile>
+
+<disableButton>
+function() {   
+  this.disabled = true;   
+  Dom.addClass(this.el,"inputEx-Button-disabled"); 
+  <handleSubmitType>
+  if (this.options.type === "submit") {
+     this.el.disabled = true;
+  }
+  </handleSubmitType>
+}
+</disableButton>
+
+<getPointRelativeToCanvas>
+function getPointRelativeToCanvas (point) {
+  return {
+    x: point.x / canvas.width,
+    y: point.y / canvas.height
+  };
+}
+</getPointRelativeToCanvas>
+
+<sortBy>
+function sortBy(collection, evaluator) {
+  <convertToSortableArray>
+  var array = map(collection, function(item){return item})
+  </convertToSortableArray>
+  <sortArray>
+  array.sort(function(a,b){
+    var aValue = evaluator(a),
+        bValue = evaluator(b)
+    return aValue==bValue ? 0 : (aValue>bValue ? 1 : -1)
+  })
+  </sortArray>
+  <convertBackToCollection>
+  var sortedCollection = map(array, function(item){return item}, features.newCollection, features.append)
+  </convertBackToCollection>
+  return sortedCollection
+}
+</sortBy>
+
+<addVariable>
+function addVariable() {
+  <updateVariableService>
+  variableService.addOrUpdate(vm.variable, function () {
+    vm.variables[vm.variable.key] = vm.variable.value;
+    <resetVariable>
+    vm.variable = {
+      key: undefined,
+      value: undefined
+    };
+    </resetVariable>
+  });
+  </updateVariableService>
+}
+</addVariable>
+
+<parseLimit>
+function parseLimit(string) {
+  <interpretStringForLimit>
+  var matches = ('' + string).toLowerCase().match(regexp),
+      bytes = null, power;
+  </interpretStringForLimit>
+  <calculateBytes>
+  if (matches) {
+    bytes = parseFloat(matches[1]);
+    power = powers[matches[2]];
+
+    if (bytes && power) {
+      bytes = Math.pow(bytes * 1024, power);
+    }
+  }
+  </calculateBytes>
+  return bytes || null;
+}
+</parseLimit>
+
+<validate>
+function validate(globs, options) {
+  <initializeErrorFlag>
+  let hasError = false
+  </initializeErrorFlag>
+  <validateInputs>
+  <checkGlobs>
+  if (globs == null || globs.length === 0) {
+      console.error("ERROR: requires file globs.")
+      hasError = true
+  }
+  </checkGlobs>
+  <checkOutputOption>
+  if (options.output != null && Array.isArray(options.output)) {
+      console.error("ERROR: --output option should not be multiple.")
+      hasError = true
+  }
+  </checkOutputOption>
+  <checkPrefixOption>
+  if (options.prefix != null) {
+      if (Array.isArray(options.prefix)) {
+          console.error("ERROR: --prefix option should not be multiple.")
+          hasError = true
+      }
+  }
+  </checkPrefixOption>
+  <checkVerboseOption>
+  if (options.verbose && !options.output) {
+      console.error("ERROR: --verbose option should be used together with --output option.")
+      hasError = true
+  }
+  </checkVerboseOption>
+  <checkWatchOption>
+  if (options.watch && !options.output) {
+      console.error("ERROR: --watch option should be used together with --output option.")
+      hasError = true
+  }
+  </checkWatchOption>
+  </validateInputs>
+  return !hasError
+}
+</validate>
+
+<Command>
+function Command(types, commandSpec) {
+  <processCommandSpec>
+  Object.keys(commandSpec).forEach(function(key) {
+    this[key] = commandSpec[key];
+  }, this);
+  </processCommandSpec>
+  <validateCommand>
+  if (!this.name) {
+    throw new Error('All registered commands must have a name');
+  }
+  </validateCommand>
+  <initializeParams>
+  if (this.params == null) {
+    this.params = [];
+  }
+  </initializeParams>
+  <validateParamsArray>
+  if (!Array.isArray(this.params)) {
+    throw new Error('command.params must be an array in ' + this.name);
+  }
+  </validateParamsArray>
+  <setDefaultDescriptions>
+  this.hasNamedParameters = false;
+  this.description = 'description' in this ? this.description : undefined;
+  this.description = lookup(this.description, 'canonDescNone');
+  this.manual = 'manual' in this ? this.manual : undefined;
+  this.manual = lookup(this.manual);
+  </setDefaultDescriptions>
+  <processParamSpecs>
+  <initializeParamCollections>
+  var paramSpecs = this.params;
+  this.params = [];
+  this.paramGroups = {};
+  this._shortParams = {};
+  </initializeParamCollections>
+  <addParamFunction>
+  var addParam = function(param) {
+    var groupName = param.groupName || l10n.lookup('canonDefaultGroupName');
+    this.params.push(param);
+    if (!this.paramGroups.hasOwnProperty(groupName)) {
+      this.paramGroups[groupName] = [];
+    }
+    this.paramGroups[groupName].push(param);
+  }.bind(this);
+  </addParamFunction>
+  <groupParamProcessing>
+  var usingGroups = false;
+  paramSpecs.forEach(function(spec) {
+    if (!spec.group) {
+      var param = new Parameter(types, spec, this, null);
+      addParam(param);
+      if (!param.isPositionalAllowed) {
+        this.hasNamedParameters = true;
+      }
+      if (usingGroups && param.groupName == null) {
+        throw new Error('Parameters can\'t come after param groups.' +
+                        ' Ignoring ' + this.name + '/' + spec.name);
+      }
+      if (param.groupName != null) {
+        usingGroups = true;
+      }
+    }
+    else {
+      spec.params.forEach(function(ispec) {
+        var param = new Parameter(types, ispec, this, spec.group);
+        addParam(param);
+        if (!param.isPositionalAllowed) {
+          this.hasNamedParameters = true;
+        }
+      }, this);
+      usingGroups = true;
+    }
+  }, this);
+  </groupParamProcessing>
+  <shortParamSetup>
+  this.params.forEach(function(param) {
+    if (param.short != null) {
+      if (this._shortParams[param.short] != null) {
+        throw new Error('Multiple params using short name ' + param.short);
+      }
+      this._shortParams[param.short] = param;
+    }
+  }, this);
+  </shortParamSetup>
+  </processParamSpecs>
+}
+</Command>
+
+<setupFrameBufferTexture>
+function setupFrameBufferTexture ( framebuffer, renderTarget, attachment, textureTarget ) {
+  <convertRenderFormats>
+  var glFormat = paramThreeToGL( renderTarget.texture.format );
+  var glType = paramThreeToGL( renderTarget.texture.type );
+  </convertRenderFormats>
+  <initializeTexture>
+  state.texImage2D( textureTarget, 0, glFormat, renderTarget.width, renderTarget.height, 0, glFormat, glType, null );
+  </initializeTexture>
+  <attachTexture>
+  _gl.bindFramebuffer( _gl.FRAMEBUFFER, framebuffer );
+  _gl.framebufferTexture2D( _gl.FRAMEBUFFER, attachment, textureTarget, properties.get( renderTarget.texture ).__webglTexture, 0 );
+  _gl.bindFramebuffer( _gl.FRAMEBUFFER, null );
+  </attachTexture>
+}
+</setupFrameBufferTexture>
+```

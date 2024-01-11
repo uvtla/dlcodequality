@@ -1,0 +1,223 @@
+<function>
+function (options) {
+  <setOptions>
+  this.options = $.extend({}, this._defaults, options);
+  </setOptions>
+
+  <calculateLineHeight>
+  if (this.options.lineHeight === 'auto') {
+    var lineHeightCss = this.$element.css('line-height'),
+      lineHeight = 18;
+
+    if (lineHeightCss !== "normal") {
+      lineHeight = parseInt(lineHeightCss, 10);
+    }
+
+    this.options.lineHeight = lineHeight;
+  }
+  </calculateLineHeight>
+
+  <setMaxHeight>
+  if (this.options.maxHeight === undefined) {
+    this.options.maxHeight = parseInt(this.options.lines, 10) * parseInt(this.options.lineHeight, 10);
+  }
+  </setMaxHeight>
+
+  <validatePosition>
+  if (this.options.position !== 'start' && this.options.position !== 'middle' && this.options.position !== 'end') {
+    this.options.position = 'end';
+  }
+  </validatePosition>
+
+  <initializeClipNode>
+  this.$clipNode = $($.parseHTML(this.options.showMore), this.$element);
+  </initializeClipNode>
+
+  <performUpdateIfOriginal>
+  if (this.original) {
+    this.update();
+  }
+  </performUpdateIfOriginal>
+</function>
+
+<async function retrieveEntityByAttribute>
+async function retrieveEntityByAttribute(entitySet, componentID, attribute, value) {
+  <constructQuery>
+  const query = Q => [
+    Q.all(componentID).where(Q.attr(attribute).equals(value)),
+    Q.limit(1)
+  ];
+  </constructQuery>
+
+  <executeQuery>
+  if (entitySet.isAsync) {
+    const existing = await entitySet.query(query, { debug: false });
+    <extractEntity>
+    if (existing.size() === 1) {
+      return existing.at(0);
+    }
+
+    return null;
+    </extractEntity>
+  } else {
+    return Promise.resolve(true).then(() => {
+      const existing = entitySet.query(query);
+
+      <extractEntity>
+      if (existing.size() === 1) {
+        return existing.at(0);
+      }
+      return null;
+      </extractEntity>
+    });
+  }
+  </executeQuery>
+</async function retrieveEntityByAttribute>
+
+<function parseHmtxTable>
+function parseHmtxTable(data, start, numMetrics, numGlyphs, glyphs) {
+  var p, i, glyph, advanceWidth, leftSideBearing;
+  p = new parse.Parser(data, start);
+  <parseGlyphMetrics>
+  for (i = 0; i < numGlyphs; i += 1) {
+    if (i < numMetrics) {
+      advanceWidth = p.parseUShort();
+      leftSideBearing = p.parseShort();
+    }
+    glyph = glyphs[i];
+    glyph.advanceWidth = advanceWidth;
+    glyph.leftSideBearing = leftSideBearing;
+  }
+  </parseGlyphMetrics>
+</function parseHmtxTable>
+
+<function>
+function(url) {
+  <parseQueryString>
+  var query = getQueryString(url);
+  </parseQueryString>
+  <findQueryParam>
+  for (var name in query) {
+    if (query[name] === '?') {
+      return name;
+    }
+  }
+  </findQueryParam>
+  return null;
+}
+</function>
+
+<function>
+function () {
+  var title = newTodoTitle.trim();
+  <createTodoIfValidTitle>
+  if (title) {
+    model.create(newTodoTitle, function (results) {
+      var todo = createTodoComponent(listComponent, results[0].id, results[0].title);
+      todos.push(todo);
+      itemsLeft++;
+      checkedAll = false;
+    });
+  }
+  </createTodoIfValidTitle>
+}
+</function>
+
+<Group_constructor>
+function Group(options) {
+  this.defaults = Group.defaults;
+  this.debug = debug;
+  <extendEntity>
+  Entity.call(this, options);
+  </extendEntity>
+}
+</Group_constructor>
+
+<formatPriority>
+function formatPriority(priority) {
+  var s = '';
+  s += (priority >> 24);
+  s += ' | ';
+  s += (priority >> 8) & 0xFFFF;
+  s += ' | ';
+  s += priority & 0xFF;
+  return s;
+}
+</formatPriority>
+
+<normalizeObject>
+function normalizeObject(val) {
+  <handlePathProperty>
+  if (val.hasOwnProperty('path')) {
+    val.src = val.path;
+  }
+  </handlePathProperty>
+
+  <normalizeOptions>
+  val = normalizeOptions(val);
+  </normalizeOptions>
+
+  <handleFilesInOptions>
+  if (val.options && val.options.files) {
+    var config = {};
+    config.files = val.options.files;
+    delete val.options.files;
+    return normalize(config, val);
+  }
+  </handleFilesInOptions>
+
+  <moveAttributes>
+  val = utils.move(val, 'src');
+  val = utils.move(val, 'dest');
+  </moveAttributes>
+
+  <handleSrcAndDestProperties>
+  if ('src' in val || val.hasOwnProperty('dest')) {
+    return toFiles(val);
+  }
+  </handleSrcAndDestProperties>
+
+  <handleFilesProperty>
+  if (!val.hasOwnProperty('files')) {
+    return filesObjects(val);
+  }
+
+  if (Array.isArray(val.files)) {
+    return reduceFiles(val.files, val);
+  }
+
+  if (val.files && !utils.isObject(val.files)) {
+    throw new TypeError('expected "files" to be an array or object');
+  }
+
+  val.files = normalizeFiles(val);
+  return val;
+  </handleFilesProperty>
+</normalizeObject>
+
+<getEventObject>
+function getEventObject(eventObjects, eventType, listener) {
+  <findMatchingEventObject>
+  var i, numberOfEvents = eventObjects.length;
+
+  for (i = 0; i < numberOfEvents; i += 1) {
+    if (isValueEqualToValue(eventObjects[i].type, eventType) &&
+        isValueEqualToValue(eventObjects[i].callback, listener)) {
+      return eventObjects[i];
+    }
+  }
+  </findMatchingEventObject>
+
+  return null;
+}
+</getEventObject>
+
+<list>
+function list(p) {
+  <readDirectoryAsPromise>
+  var def = Q.defer();
+  fs.readdir(p, def.makeNodeResolver());
+  return def.promise;
+  </readDirectoryAsPromise>
+}
+</list>

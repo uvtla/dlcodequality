@@ -1,0 +1,221 @@
+```javascript
+<getGroupById>
+function(groupId) {
+    <validateGroupId>
+    if (groupId === null || groupId === undefined) {
+      throw new Error("Tried to get group for undefined/null id");
+    }
+    </validateGroupId>
+    return Promise.resolve(this.get("group" + groupId));
+}
+</getGroupById>
+
+<updateStateWithInitialArray>
+function () {
+    var curState = this._currentState;
+    var initialArray = this.initialArray;
+    var oldValues; 
+    <checkCurrentStateAgainstInitialArray>
+    if (curState.initialArray == initialArray && !(this._changes & this.CHANGED_INITIAL_ARRAY)) {
+        return;
+    }
+    </checkCurrentStateAgainstInitialArray>
+    <createOldValuesStackHashMap>
+    if (curState.initialArray) {
+        oldValues = new ariaUtilsStackHashMap();
+        var oldItems = this.items;
+        var oldItemsLength = oldItems.length, oldElt;
+        for (var i = 0; i < oldItemsLength; i++) {
+            oldElt = oldItems[i];
+            oldValues.push(oldElt.value, oldElt);
+        }
+    }
+    </createOldValuesStackHashMap>
+    <getReturnedItems>
+    var returnedItems;
+    if (ariaUtilsType.isObject(initialArray)) {
+        returnedItems = this._getItemsFromMap(oldValues);
+    } else {
+        returnedItems = this._getItemsFromArray(oldValues);
+    }
+    </getReturnedItems>
+    <disposeOldValues>
+    if (oldValues) {
+        this._removeListenersOnItems(oldValues.removeAll());
+        oldValues.$dispose();
+    }
+    </disposeOldValues>
+    <updateCurrentState>
+    this.items = returnedItems.items;
+    var filteredOutElements = returnedItems.filteredOutElements;
+    var arrayLength = this.items.length;
+    curState.initialArray = initialArray;
+    curState.sortOrder = this.SORT_INITIAL;
+    curState.sortName = null;
+    curState.sortKeyGetter = null;
+    curState.pageSize = -1;
+    this.filteredInCount = arrayLength - filteredOutElements;
+    this.pages = [{ 
+        pageIndex : 0,
+        pageNumber : 1,
+        firstItemIndex : 0,
+        lastItemIndex : arrayLength - 1,
+        firstItemNumber : arrayLength > 0 ? 1 : 0,
+        lastItemNumber : this.filteredInCount
+    }];
+    this._changes = this._changes & !this.CHANGED_INITIAL_ARRAY;
+    </updateCurrentState>                
+}
+</updateStateWithInitialArray>
+
+<describeTileOrEntity>
+function(x, y){
+    <convertMouseCoordsToTile>
+    var coords = this.renderer.mouseToTileCoords(x, y),
+        tile = this.map.get(coords.x, coords.y);
+    </convertMouseCoordsToTile>
+    <checkAndDescribeEntityOrTile>
+    if(!tile){
+        return;
+    }
+    var entityTile = this.entityManager.get(tile.x, tile.y);
+    if(entityTile){
+        this.console.log('Looks like a <strong>' + entityTile.name + '</strong> standing on a <strong>' + tile.name + '</strong> to me.');
+    }
+    else{
+        this.console.log('Looks like a <strong>' + tile.name + '</strong> to me.');
+    }
+    </checkAndDescribeEntityOrTile>
+}
+</describeTileOrEntity>
+
+<loadModel>
+function (options, callback) {
+    <handleArguments>
+    if (arguments.length === 1 && options instanceof Function) {
+        callback = options;
+        options = null;
+    }
+    options = options || {};
+    </handleArguments>
+
+    var self = this;
+
+    <handleModelFetching>
+    if (this._fetch.state === FETCHSTATE.LOADING) {
+        this._fetch.callbacks.push(function (err, model) {
+            modelFetchedComplete(err, model, options, callback);
+        });
+    } else if (this._fetch.state == FETCHSTATE.LOADED && !options.noCache) {
+        modelFetchedComplete(null, this, options, callback);
+    } else {
+        self._fetch.state = FETCHSTATE.LOADING;
+        this.$context.$dataSource.loadModel(this, options, function (err, model) {
+            self._fetch.state = err ? FETCHSTATE.ERROR : FETCHSTATE.LOADED;
+            modelFetchedComplete.call(self, err, model, options, callback);
+            _.each(self._fetch.callbacks, function (cb) {
+                cb.call(self, err, model);
+            });
+        });
+    }
+    </handleModelFetching>
+}
+</loadModel>
+
+<resolveOptionCollection>
+function (optionCollection, key, model, collection) {
+    <determineOptionCollection>
+    if (optionCollection) {
+        return strTo(optionCollection, model, Collection) || collection;
+    }
+    return strTo(key, model, Collection) || null;
+    </determineOptionCollection>
+}
+</resolveOptionCollection>
+
+<routerMiddleware>
+function routerMiddleware(history) {
+  return function () {
+    return function (next) {
+      return function (action) {
+        <handleAction>
+        if (action.type !== _actions.CALL_HISTORY_METHOD) {
+          return next(action);
+        }
+        var _action$payload = action.payload,
+            method = _action$payload.method,
+            args = _action$payload.args;
+        history[method].apply(history, _toConsumableArray(args));
+        </handleAction>
+      };
+    };
+  };
+}
+</routerMiddleware>
+
+<FPNodeConstructor>
+function FPNode(item, parent) {
+    <initializeDefaults>
+    if (item === void 0) { item = null; }
+    if (parent === void 0) { parent = null; }
+    this.item = item;
+    this.parent = parent;
+    this.support = 1;
+    this.nextSameItemNode = null;
+    this._children = [];
+    </initializeDefaults>
+}
+</FPNodeConstructor>
+
+<throwErrorOnUndefinedColumnName>
+function throwErrorOnUndefinedColumnName(keys, extract) {
+    <validateKeysAgainstRegex>
+    var regexRefs = /([a-zA-Z$_][\w$]+)(\s*\.\s*[a-zA-Z$_][\w$]+)*/g, 
+        parts, variable;
+    keys = keys.concat(['true', 'false']);
+    while ((parts = regexRefs.exec(extract))) {
+        variable = parts[1];
+        if (keys.indexOf(variable) < 0) {
+            throw new ReferenceError(variable + ' not defined.');
+        }
+    }
+    </validateKeysAgainstRegex>
+}
+</throwErrorOnUndefinedColumnName>
+
+<BufStreamConstructor>
+function BufStream(lvlup) {
+  <initializeBufStream>
+  if (!(this instanceof BufStream)) return new BufStream(lvlup)
+  this.pending = []
+  this.open = false
+  <handleLevelUpInstance>
+  if (typeof lvlup == "object" && lvlup.db) {
+    if (lvlup.isOpen()) {
+      this.db = lvlup.db
+      this.open = true
+    }
+    else
+      lvlup.once("ready", this._go.bind(this, lvlup))
+  }
+  else
+    throw new Error("Please provide a LevelUP instance")
+  </handleLevelUpInstance>
+  </initializeBufStream>
+}
+</BufStreamConstructor>
+
+<getUnwatchedKeys>
+function getUnwatchedKeys() {
+    <computeDifferenceInKeys>
+    var arr1 = Object.keys(store._store),
+        arr2 = Object.keys(store._key_to_watcher_subscriptions);
+    </computeDifferenceInKeys>
+    <filterUnwatchedKeys>
+    return arr1.filter(function (i) {
+      return arr2.indexOf(i) === -1;
+    });
+    </filterUnwatchedKeys>
+}
+</getUnwatchedKeys>
+```

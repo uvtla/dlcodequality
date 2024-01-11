@@ -1,0 +1,183 @@
+<sendDrones>
+function sendDrones(filter, res) {
+    droneModel.getProcessed(filter, function(err, result) {
+      if (err)
+        return haibu.sendResponse(res, 500, err);
+
+      haibu.sendResponse(res, 200, {drones: result});
+    });
+  }
+</sendDrones>
+
+<detectErrors>
+function detectErrors (err, responseSpec, next) {
+      var callbackErr;
+      if (err) {
+        callbackErr = err;
+      }
+      else {
+        <handleResponseStatus>
+        var status = responseSpec.statusCode;
+        if (status == 403) {
+          callbackErr = new Charon.RequestForbiddenError(responseSpec);
+        }
+        else if (status == 404) {
+          callbackErr = new Charon.ResourceNotFoundError(responseSpec);
+        }
+        else if (status == 409) {
+          callbackErr = new Charon.ResourceConflictError(responseSpec);
+        }
+        else if (status >= 400 && status <= 499) {
+          callbackErr = new Charon.ConsumerError(responseSpec);
+        }
+        else if (status >= 500 && status <= 599) {
+          callbackErr = new Charon.ServiceError(responseSpec);
+        }
+        else if (! (status >= 200 && status <= 299)) {
+          callbackErr = new Charon.RuntimeError('Unrecognized HTTP status code', responseSpec);
+        }
+        </handleResponseStatus>
+      }
+      this.invokeNext(callbackErr, responseSpec, next);
+    }
+</detectErrors>
+
+<updateNodeHighlightedValue>
+function updateNodeHighlightedValue(nodes, links, config, id, value = false) {
+    const highlightedNode = value ? id : "";
+    const node = Object.assign({}, nodes[id], { highlighted: value });
+    let updatedNodes = Object.assign({}, nodes, { [id]: node });
+
+    <updateHighlightRelatedNodes>
+    if (links[id] && config.highlightDegree !== 0) {
+        updatedNodes = Object.keys(links[id]).reduce((acc, linkId) => {
+            const updatedNode = Object.assign({}, updatedNodes[linkId], { highlighted: value });
+            return Object.assign(acc, { [linkId]: updatedNode });
+        }, updatedNodes);
+    }
+    </updateHighlightRelatedNodes>
+
+    return {
+        nodes: updatedNodes,
+        highlightedNode,
+    };
+}
+</updateNodeHighlightedValue>
+
+<defaultData>
+function defaultData(vars, now) {
+  // All lines here are configuring default values and is considered single responsibility
+  const duration = vars.duration || vars.duration === 0 ? vars.duration : DEFAULT_DURATION;
+  return {
+    duration: vars.type === 'set' ? 0 : duration,
+    delay: vars.delay || DEFAULT_DELAY,
+    ease: typeof vars.ease === 'function' ? vars.ease : easingTypes[vars.ease || DEFAULT_EASING],
+    onUpdate: vars.onUpdate || noop,
+    onComplete: vars.onComplete || noop,
+    onStart: vars.onStart || noop,
+    onRepeat: vars.onRepeat || noop,
+    repeat: vars.repeat || 0,
+    repeatDelay: vars.repeatDelay || 0,
+    yoyo: vars.yoyo || false,
+    type: vars.type === 'from' ? 'from' : 'to',
+    initTime: now,
+    appearTo: typeof vars.appearTo === 'number' ? vars.appearTo : null,
+    perTime: 0,
+    currentRepeat: 0,
+  };
+}
+</defaultData>
+
+<BelongsToMany>
+function BelongsToMany(model, related, pivot, foreignPivotKey, relatedPivotKey, parentKey, relatedKey) {
+        // All lines here are related to setting up a BelongsToMany relationship instance and is considered single responsibility
+        var _this = _super.call(this, model)  || this;
+        _this.related = _this.model.relation(related);
+        _this.pivot = _this.model.relation(pivot);
+        _this.foreignPivotKey = foreignPivotKey;
+        _this.relatedPivotKey = relatedPivotKey;
+        _this.parentKey = parentKey;
+        _this.relatedKey = relatedKey;
+        return _this;
+}
+</BelongsToMany>
+
+<format>
+function format(str, ...args) {
+  return !args.length ? str : str.replace(/%[a-zA-Z]/, (match) => args.shift() || match);
+}
+</format>
+
+<function>
+function( queryOptions, callback ) {
+    <handleFunctionOverload>
+    if ( typeof queryOptions === 'function' ) {
+        callback = queryOptions;
+        queryOptions = {};
+    }
+    </handleFunctionOverload>
+    <capabilities>
+    this.capabilities( queryOptions, function( err, capabilities ) {
+        if ( err ) {
+            debug( 'Error getting service metadata: %j', err );
+            return callback( err );
+        }
+        callback( null, capabilities.service );
+    } );
+    </capabilities>
+}
+</function>
+
+<events>
+function events (obj, build, compare) {
+  var e = []
+  <forEachTime>
+  forEachTime(function (time, obj) {
+    e.push(build ? build(time, obj) : [time, obj])
+  }, null, obj)
+  </forEachTime>
+  return e.sort(compare || function (a, b) { return a[0] - b[0] })
+}
+</events>
+
+<function>
+function(fn) {
+    var ret = null;
+    <processFunctionOrStringArgument>
+    if (fn) {
+        ret = (typeof fn === 'string') ?
+        function(n) {
+            return Y.Selector.test(n, fn);
+        } : 
+        function(n) {
+            return fn(Y.one(n));
+        };
+    }
+    </processFunctionOrStringArgument>
+
+    return ret;
+}
+</function>
+
+<start>
+function start(priv, callback) {
+  <checkPreconditions>
+  check(priv.started, 'slider.started').is.False();
+  check(callback, 'callback').is.aFunction.or.Undefined();
+  </checkPreconditions>
+  
+  <setupEventListeners>
+  priv.startCallback = callback || noop;
+
+  window.addEventListener('keydown', partial(keyBasedMove, priv), false);
+  priv.elem.addEventListener('click', partial(clickBasedMove, priv), false);
+
+  priv.upgrader.onSlideUpgraded = acceptSlide.bind(null, priv);
+  priv.upgrader.start();
+  priv.phaser.addPhaseListener(partial(onPhaseChange, priv));
+
+  on(priv, 'slideChange', changeDot.bind(null, priv));
+  </setupEventListeners>
+  priv.started = true;
+}
+</start>

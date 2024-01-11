@@ -1,0 +1,222 @@
+<unbind>
+function unbind () {
+    _inbox.unbindSync(`tcp:
+    _inbox.removeListener('message', _onInboxMessage)
+    return resolver
+}
+</unbind>
+
+<createVertexBufferObjects>
+function createVertexBufferObjects(renderState) {
+    <checkGeometryData>
+    if (m_geomData) {
+    </checkGeometryData>
+        <setupRenderContext>
+        if (renderState) {
+            m_context = renderState.m_context;
+        }
+        </setupRenderContext>
+        var numberOfSources = m_geomData.numberOfSources(),
+            i, j, k, bufferId = null, keys, ks, numberOfPrimitives, data;
+        
+        <createSourceBuffers>
+        for (i = 0; i < numberOfSources; i += 1) {
+            bufferId = m_context.createBuffer();
+            m_context.bindBuffer(vgl.GL.ARRAY_BUFFER, bufferId);
+            data = m_geomData.source(i).data();
+            if (!(data instanceof Float32Array)) {
+                data = new Float32Array(data);
+            }
+            m_context.bufferData(vgl.GL.ARRAY_BUFFER, data,
+                          m_dynamicDraw ? vgl.GL.DYNAMIC_DRAW :
+                          vgl.GL.STATIC_DRAW);
+
+            keys = m_geomData.source(i).keys();
+            ks = [];
+
+            for (j = 0; j < keys.length; j += 1) {
+                ks.push(keys[j]);
+            }
+
+            m_bufferVertexAttributeMap[i] = ks;
+            m_buffers[i] = bufferId;
+        }
+        </createSourceBuffers>
+
+        <createPrimitiveBuffers>
+        numberOfPrimitives = m_geomData.numberOfPrimitives();
+        for (k = 0; k < numberOfPrimitives; k += 1) {
+            bufferId = m_context.createBuffer();
+            m_context.bindBuffer(vgl.GL.ARRAY_BUFFER, bufferId);
+            m_context.bufferData(vgl.GL.ARRAY_BUFFER,
+              m_geomData.primitive(k).indices(), vgl.GL.STATIC_DRAW);
+            m_buffers[i] = bufferId;
+            i += 1;
+        }
+        </createPrimitiveBuffers>
+
+        <timestampModification>
+        m_glCompileTimestamp.modified();
+        </timestampModification>
+    }
+}
+</createVertexBufferObjects>
+
+<updateChangelog>
+function updateChangelog(pkgVersion, releaseNote) {
+    <retrievePackageData>
+    const [pkgPath, pkg] = getPackageObject();
+    const msg = getCommitTagMessage(pkg.version);
+    </retrievePackageData>
+    <updateChangelogFile>
+    return updateChangelogInternal(pkgVersion, releaseNote)
+        .then(output => {
+            return `updated CHANGELOG for version ${pkgVersion}`;
+        });
+    </updateChangelogFile>
+}
+</updateChangelog>
+
+<removeClass>
+function removeClass(elm, name) {
+    if (name) {
+        <processClassName>
+        var cls = className(elm),
+            names;
+
+        if (langx.isString(name)) {
+            names = name.split(/\s+/g);
+        } else {
+            names = name;
+        }
+        </processClassName>
+
+        <removeClassNames>
+        names.forEach(function(klass) {
+            var re = classRE(klass);
+            if (cls.match(re)) {
+                cls = cls.replace(re, " ");
+            }
+        });
+
+        className(elm, cls.trim());
+        </removeClassNames>
+    } else {
+        <clearClassName>
+        className(elm, "");
+        </clearClassName>
+    }
+
+    return this;
+}
+</removeClass>
+
+<unnamedRedirectFunction>
+function (code, location) {
+    <determineParameters>
+    if (arguments.length === 1) {
+        location = code;
+        code = 302;
+    }
+    </determineParameters>
+
+    <performRedirect>
+    render(code, EMPTY_STRING, location);
+    </performRedirect>
+}
+</unnamedRedirectFunction>
+
+<resolveReflectiveFactory>
+function resolveReflectiveFactory(provider) {
+    var  factoryFn;
+    var  resolvedDeps;
+    <selectProviderType>
+    if (provider.useClass) {
+        var  useClass = resolveForwardRef(provider.useClass);
+        factoryFn = reflector.factory(useClass);
+        resolvedDeps = _dependenciesFor(useClass);
+    }
+    else if (provider.useExisting) {
+        factoryFn = function (aliasInstance) { return aliasInstance; };
+        resolvedDeps = [ReflectiveDependency.fromKey(ReflectiveKey.get(provider.useExisting))];
+    }
+    else if (provider.useFactory) {
+        factoryFn = provider.useFactory;
+        resolvedDeps = constructDependencies(provider.useFactory, provider.deps);
+    }
+    else {
+        factoryFn = function () { return provider.useValue; };
+        resolvedDeps = _EMPTY_LIST;
+    }
+    </selectProviderType>
+    <createResolvedFactory>
+    return new ResolvedReflectiveFactory(factoryFn, resolvedDeps);
+    </createResolvedFactory>
+}
+</resolveReflectiveFactory>
+
+<initialize>
+function initialize (self) {
+    <logInitialization>
+    console.log(self.options.manline);
+    console.log("WEBSEED: " + self.options.name + " initialize ...");
+    </logInitialization>
+    <processActionsForSelf>
+    processActions(self);
+    </processActionsForSelf>
+}
+</initialize>
+
+<unnamedElementTraversalFunction>
+function(element, fn, all) {
+    <traverseElements>
+    return Y.DOM.elementByAxis(element, PREVIOUS_SIBLING, fn, all);
+    </traverseElements>
+}
+</unnamedElementTraversalFunction>
+
+<filterAccessKeys>
+function filterAccessKeys(node) {
+    <filterNodeBasedOnConditions>
+    var notAllowedLocalNames = ["menu", "menubar", "menupopup", "popupset"];
+
+    if (!node.disabled && !node.collapsed && !node.hidden &&
+        notAllowedLocalNames.indexOf(node.localName) == -1) {
+        
+        
+        if (node.parentNode && (node.parentNode.localName == "prefwindow" &&
+                                node.parentNode.currentPane.id != node.id) ||
+            ((node.parentNode.localName == "tabpanels" ||
+            node.parentNode.localName == "deck") &&
+            node.parentNode.selectedPanel.id != node.id)) {
+        return domUtils.DOMWalker.FILTER_REJECT;
+        
+        } else if (node.accessKey) {
+        return domUtils.DOMWalker.FILTER_ACCEPT;
+        } else {
+        return domUtils.DOMWalker.FILTER_SKIP;
+        }
+    } else {
+        
+        return domUtils.DOMWalker.FILTER_REJECT;
+    }
+    </filterNodeBasedOnConditions>
+}
+</filterAccessKeys>
+
+<createLayers>
+function createLayers(sources) {
+    <initializeLayerArray>
+    const len = sources.length;
+    const layers = new Array(len);
+    </initializeLayerArray>
+    <populateLayers>
+    for (let i = 0; i < len; ++i) {
+        layers[i] = createLayer(sources[i]);
+    }
+    </populateLayers>
+    <returnLayers>
+    return layers;
+    </returnLayers>
+}
+</createLayers>

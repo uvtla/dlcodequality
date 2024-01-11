@@ -1,0 +1,213 @@
+Note: As some functions are not named and are shown just with their parameters and body, I will refer to them using their first parameter or a short description of their functionality for identification.
+
+**Function 1: signUpOrLoginWithMobilePhone**
+```javascript
+<signUpOrLoginWithMobilePhone>
+function(
+        mobilePhoneNumber,
+        smsCode,
+        attrs,
+        options
+      ) {
+        attrs = attrs || {};
+        attrs.mobilePhoneNumber = mobilePhoneNumber;
+        attrs.smsCode = smsCode;
+        var user = AV.Object._create('_User');
+        return user.signUpOrlogInWithMobilePhone(attrs, options);
+      }
+</signUpOrLoginWithMobilePhone>
+```
+SRP Compliance: This function has a single responsibility - signing up or logging in a user with their mobile phone number. Hence, it is compliant with the SRP.
+
+**Function 2: getCode**
+```javascript
+<getCode>
+function getCode(code, opts, attrs, url) {
+  var type = getType(attrs),
+    parserOpts = getParserOptions(attrs)
+
+  if (url) {
+    <readFile>
+    var src = getAttr(attrs, 'src')
+    if (src) {
+      var
+        charset = getAttr(attrs, 'charset'),
+        file = path.resolve(path.dirname(url), src)
+      code = require('fs').readFileSync(file, charset || 'utf8')
+    }
+    </readFile>
+  }
+  return _compileJS(code, opts, type, parserOpts, url)
+}
+</getCode>
+```
+SRP Compliance: The getCode function has a potential SRP violation. Reading file contents could be considered a separate responsibility from compiling JS code.
+
+**Function 3: removeMethod**
+```javascript
+<removeMethod>
+<removeKeybinding>
+function removeMethod (char, method) {
+  if (!hasKeybinding(char, method)) return;
+  var fnIndex = bindings[char].methods.indexOf(method);
+  window.removeEventListener('keyup', bindings[char].listeners[fnIndex]);
+  bindings[char].methods.splice(fnIndex, 1);
+  bindings[char].listeners.splice(fnIndex, 1);
+</removeKeybinding>
+
+<cleanupBindings>
+  if (!bindings[char].methods.length) {
+    delete bindings[char];
+  } else if (fnIndex === 0) {
+    window.addEventListener('keyup', bindings[char].listeners[0]);
+  }
+}
+</cleanupBindings>
+</removeMethod>
+```
+SRP Compliance: The removeMethod function combines removing a keybinding and cleaning up bindings, which can be considered separate responsibilities.
+
+**Function 4: TypedFeatureStructure**
+```javascript
+<TypedFeatureStructure>
+function TypedFeatureStructure(options) {
+  this.type = options.type;
+  if (!this.type) {
+    this.type = options.signature.typeLattice.bottom;
+  }
+  this.features = {};
+  this.aux_type = null;
+  this.aux_features = {};
+  this.forward = null;
+  this.forward_mark = NO_GENERATION;
+  this.unifact = null;
+  this.unifact_mark = NO_GENERATION;
+  this.label = null;
+  this.printed = false;
+  this.id = node_id_counter++;
+  this.coreference = false;
+  if (options.features) {
+    this.setFeatures(options.features, options.signature);
+  }
+  this.lexicalString = null;
+  this.incoming = {};
+}
+</TypedFeatureStructure>
+```
+SRP Compliance: This function is a constructor initializing an object's state, so it is considered compliant with the SRP.
+
+**Function 5: FindDarkestColor**
+```javascript
+<FindDarkestColor>
+function(){
+  var darkest,
+    minBrightness = Number.MAX_VALUE;
+  this.each(function(c){
+    var luma = c.luminance();
+    if(luma < minBrightness){
+      darkest = c;
+      minBrightness = luma;
+    }
+  });
+  return darkest;
+}
+</FindDarkestColor>
+```
+SRP Compliance: This function appears to only have a single responsibility - finding the darkest color from a set of colors. Hence, it is compliant with the SRP.
+
+**Function 6: initializePopOverInteractionData**
+```javascript
+<initializePopOverInteractionData>
+function initializePopOverInteractionData() {
+  var $li = jQuery(this).parent().parent();
+  var index = parseInt($li.attr('data-interaction-index'));
+  var interaction = that.interactions[index];
+
+  if (!interaction) {
+    return;
+  }
+
+  durationText.setText(that.formatDuration(interaction.duration));
+  processingText.setText(that.formatDuration(interaction.duration - interaction.roundtrip));
+  requestTimeText.setText(that.formatDuration(interaction.requestTime));
+  roundtripText.setText(that.formatDuration(interaction.roundtrip));
+
+  bytesReceivedText.setText(interaction.bytesReceived);
+  requestNumberText.setText(interaction.requests.length);
+
+  startTimeText.setText(that.formatTime(interaction.start));
+}
+</initializePopOverInteractionData>
+```
+SRP Compliance: This function is responsible for initializing popover interaction data, which involves multiple DOM manipulations related to a single conceptual purpose; thus, it follows SRP.
+
+**Function 7: onCopy**
+```javascript
+<onCopy>
+function onCopy(
+  opts?: Options,
+  event: *,
+  change: Change,
+  editor: Editor
+): Object {
+  <getCopiedFragmentBlock>
+  const copiedFragment = getCopiedFragment(opts, change.value);
+  if (!copiedFragment) {
+    return null;
+  }
+  </getCopiedFragmentBlock>
+
+  <cloneFragmentBlock>
+  cloneFragment(event, change.value, copiedFragment);
+  </cloneFragmentBlock>
+  return true;
+}
+</onCopy>
+```
+SRP Compliance: This function's purpose is to handle the copy operation, which can be seen as one responsibility when considering the context of a copy event within an editor. It can be argued it is SRP compliant.
+
+**Function 8: resolvePort**
+```javascript
+<resolvePort>
+async function resolvePort (port) {
+  const portfinder = require('portfinder')
+  portfinder.basePort = parseInt(port) || 8080
+  port = await portfinder.getPortPromise()
+  return port
+}
+</resolvePort>
+```
+SRP Compliance: The resolvePort function has a singular task - finding an available network port. This function is compliant with the SRP.
+
+**Function 9: promiseWrapper**
+```javascript
+<promiseWrapper>
+function (azurePromise) {
+  var deferred = $q.defer();
+  azurePromise.done(function (items) {
+    deferred.resolve(items);
+  }, function (err) {
+    deferred.reject(err);
+  });
+  return deferred.promise;
+}
+</promiseWrapper>
+```
+SRP Compliance: This function wraps an Azure Promise with another promise mechanism ($q). This adaptation for compatibility is a single responsibility, and hence the function follows SRP.
+
+**Function 10: MouseEventBoundaryCondition**
+```javascript
+<MouseEventBoundaryCondition>
+function(e){
+  if(this === e.target ||
+     container_id === jQuery(e.target).parent().attr('id') ||
+     container_id === jQuery(e.target).attr('id')){
+    <updateStartPosition>
+      _update_start_pos(e);
+      jQuery(container_div).bind('mousemove', _scroller);
+    </updateStartPosition>
+  }
+}
+</MouseEventBoundaryCondition>
+```
+SRP Compliance: This function performs the task of checking boundary conditions for mouse events and then updates the start position if the conditions are met. It can be considered as a single responsibility towards handling mouse events within a specific boundary condition.

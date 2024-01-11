@@ -1,0 +1,255 @@
+```javascript
+<validateAndHashProperty>
+function(prop) {
+    cons.updateHash(prop) // Updates the hash of the property, which could be seen as part of validation in some contexts.
+      
+    var fieldSig = _.prod( // Checks the mandatory fields in the property object.
+      _.map(cons.mandatoryFields, function(field) {
+        return _.has(prop, field) && !_.isUndefined(prop[field]) && !_.isNull(prop[field]) ? true : false;
+      }))
+    if (!fieldSig) throw new Error("Node constraints violated: incomplete mandatoryFields.") // Throws an error if mandatory fields are missing or invalid.
+
+    return true; // Concludes that validation and recording have passed.
+}
+</validateAndHashProperty>
+
+<parseJSON>
+function parse (stream, options = {}) {
+  <createPromise>
+  const Promise = promise(options) // Creates a Promise object based on the provided options.
+  
+  try {
+    check.assert.maybe.function(options.reviver, 'Invalid reviver option') // Validates the 'reviver' option if provided.
+  } catch (err) {
+    return Promise.reject(err) // Rejects the promise if there's a validation error.
+  }
+  </createPromise>
+
+  <initializeParsingVariables>
+  const errors = [] // Initializes an array to store parsing errors.
+  const scopes = [] // Initializes an array to maintain scopes during parsing.
+  const reviver = options.reviver // Assigns the 'reviver' function if provided.
+  const shouldHandleNdjson = !! options.ndjson // Determines if NDJSON handling is required.
+  </initializeParsingVariables>
+
+  let emitter, resolve, reject, scopeKey
+  if (shouldHandleNdjson && NDJSON_STATE.has(stream)) {
+    <resumeNdJson>
+    const state = NDJSON_STATE.get(stream) // Retrieves the NDJSON state for the stream if it exists.
+    NDJSON_STATE.delete(stream) // Removes the state from NDJSON_STATE.
+    emitter = state.emitter // Assigns the emitter from the NDJSON state.
+    setImmediate(state.resume) // Resumes the NDJSON handling.
+    </resumeNdJson>
+  } else {
+    emitter = walk(stream, options) // Initializes the emitter by walking through the stream.
+  }
+  
+  <setEventListeners>
+  // Sets up event listeners for the various events that can occur during streaming and parsing.
+  emitter.on(events.array, array)
+  emitter.on(events.object, object)
+  emitter.on(events.property, property)
+  emitter.on(events.string, value)
+  emitter.on(events.number, value)
+  emitter.on(events.literal, value)
+  emitter.on(events.endArray, endScope)
+  emitter.on(events.endObject, endScope)
+  emitter.on(events.end, end)
+  emitter.on(events.error, error)
+  emitter.on(events.dataError, error)
+  
+  if (shouldHandleNdjson) {
+    emitter.on(events.endLine, endLine)
+  }
+  </setEventListeners>
+
+  return new Promise((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+  
+  // The following functions handle the individual parts of the parsing operation.
+  // This is considered a single responsibility because they are exclusively dealing with a single process: parsing the input stream.
+}
+</parseJSON>
+
+<gatherShareData>
+function getShareData(terria) {
+  const initSources = terria.initSources.slice(); // Clones the initial sources.
+
+  addUserAddedCatalog(terria, initSources); // Adds user-added catalog to the initial sources.
+  addSharedMembers(terria, initSources); // Adds shared members to the initial sources.
+  addViewSettings(terria, initSources); // Adds view settings to the initial sources.
+  addFeaturePicking(terria, initSources); // Adds feature picking settings to the initial sources.
+  addLocationMarker(terria, initSources); // Adds location marker to the initial sources.
+
+  return {
+    version: "0.0.05",
+    initSources: initSources // Aggregates all the modifications into a final share data object.
+  };
+}
+</gatherShareData>
+
+<evaluateEnvironment>
+function envEval(state, script, data, frame) {
+  try {
+    <pushFrameToStack>
+    state.stack.push(frame.replace(/\s+/g, ' ')); // Pushes frame onto the state stack.
+    </pushFrameToStack>
+    
+    <handleSimpleProperty>
+    if (/^[_a-zA-Z0-9.]*$/.test(script)) {
+      return property(state, script, data); // Returns the property directly if the script is a simple path.
+    }
+    </handleSimpleProperty>
+    else {
+      <checkAllowEvalOption>
+      if (!state.options.allowEval) {
+        handleError(state, 'allowEval is not set, however \'' + script + '\'' +
+            ' can not be resolved using a simple property path.');
+        return '${' + script + '}';
+      }
+      </checkAllowEvalOption>
+
+      <executeScript>
+      var keys = allKeys(data); // Extracts all keys from the data.
+      var func = Function.apply(null, keys.concat("return " + script)); // Constructs a Function object to evaluate the script.
+
+      var values = keys.map(function(key) { return data[key]; }); // Maps the keys to their respective values.
+      return func.apply(null, values); // Executes the script with the values and returns the result.
+      </executeScript>
+    }
+  }
+  catch (ex) {
+    <handleEvaluationError>
+    handleError(state, 'Template error evaluating \'' + script + '\'', ex); // Handles any errors that occurred during script evaluation.
+    return '${' + script + '}';
+    </handleEvaluationError>
+  }
+  finally {
+    <popFrameFromStack>
+    state.stack.pop(); // Pops the frame from the state stack.
+    </popFrameFromStack>
+  }
+}
+</evaluateEnvironment>
+
+<generateBackgroundStyle>
+function background(options) {
+    options = options || {}; // Ensures options is an object.
+    
+    return function (config) {
+        var values = [];
+        ['attachment', 'clip', 'color', 'image', 'origin', 'position', 'repeat', 'size']
+        .forEach(function (prop) {
+            if (options.hasOwnProperty(prop)) {
+                values.push(options[prop]); // Collects background property values from options.
+            }
+        });
+        if (values.length) {
+            return [['background', values.join(' ')]]; // Constructs the background style declaration.
+        }
+        return []; // Returns an empty array if there are no values.
+    };
+}
+</generateBackgroundStyle>
+
+<convertJdToLunarDate>
+function(jd) {
+        var date = gregorianCalendar.fromJD(jd); // Converts Julian Date to Gregorian Calendar date.
+        var lunar = toLunar(date.year(), date.month(), date.day()); // Converts Gregorian date to lunar date.
+        var monthIndex = this.toMonthIndex(
+            lunar.year, lunar.month, lunar.isIntercalary); // Converts lunar year/month to a month index.
+        return this.newDate(lunar.year, monthIndex, lunar.day); // Returns a new date object based on the calculated lunar date.
+}
+</convertJdToLunarDate>
+
+<extractComment>
+function addComment(text, multiline) {
+    if (options.extractComments) { // Checks if there is an option to extract comments.
+        const loc = location(); // Determines the location of the comment within the source.
+
+        comments[loc.start.offset] = {
+            text: text,
+            multiline: multiline,
+            location: loc, // Saves the comment data along with its location.
+        };
+    }
+    return text; // Returns the text of the comment.
+}
+</extractComment>
+
+<initializeRenderer>
+function renderer(parent, config){
+    this.parent = ( ("string" == typeof parent) // Resolves the parent element based on the provided identifier or reference.
+            ? document.getElementById(parent)
+            : parent );
+    if (this.parent === undefined) {
+        throw "can't find parent element " + parent; // Throws an error if the parent element cannot be found.
+    }
+    this.tree = new tree(); // Initializes a new tree object.
+    this.node_hidden = {}; // Initializes an object to keep track of hidden nodes.
+    this.children_hidden = {}; // Initializes an object to keep track of hidden children.
+    this._sort = "ladderize_up"; // Sets the default sort method for the tree.
+    this._layout_dirty = true; // Indicates that the layout needs updating.
+    this._css_prefix = "phylo_tree_" + (id_counter++) + "_"; // Generates a unique prefix for CSS classes.
+
+    var self = this; // Captures the current context.
+    this.node_elem_click_handler = function(event) { // Defines a click handler for node elements.
+        var node_elem = (event.currentTarget) ? event.currentTarget : event.srcElement;
+        var node = self.tree.nodes[node_elem.node_id]; // Retrieves the corresponding tree node.
+        if (node) return self.node_clicked(node, node_elem, event); // Handles a node click event.
+    };
+
+    var default_config = { // Defines default configuration values for layout and styling.
+        box_height: 24,
+        box_spacing: 10,
+        leaf_padding: 4,
+        leaf_border: 2,
+        leaf_margin: 1,
+        node_size: 8,
+        leaf_border_color: "blue",
+        leaf_font: "Helvetica, Arial, sans-serif",
+        transition_time: "0.8s"
+    };
+
+    <mergeConfigurations>
+    this.config = ("object" == typeof config // Merges provided config with default_config if it's an object.
+                   ? bbop.core.merge(default_config, config)
+                   : default_config);
+    </mergeConfigurations>
+
+    // Configuration is continued throughout the function, setting styles and additional properties.
+    // This is considered part of initializing the renderer, hence under one responsibility.
+}
+</initializeRenderer>
+
+<initializeMongoStore>
+function MongoStore(options) {
+    <defaultOptions>
+    if (typeof options === "undefined") { options = {}; } // Sets default empty options if no options are provided.
+    </defaultOptions>
+    _super.call(this); // Calls the constructor of the parent class.
+    this._logger = shared.utils.defaultLogger(); // Initializes the default logger.
+
+    this._collection = null; // Initializes the property to hold the MongoDB collection.
+    this._pending = []; // Initializes a queue for pending operations.
+
+    this._root = null; // Initializes the property to hold the root data structure.
+
+    this._cache = new shared.mtx.ObjectCache(); // Initializes an object cache.
+    this._host = options.host || 'localhost'; // Sets the MongoDB host with a default.
+    this._port = options.port || 27017; // Sets the MongoDB port with a default.
+    this._dbName = options.db || 'shared'; // Sets the database name with a default.
+    this._collectionName = options.collection || 'shared'; // Sets the collection name with a default.
+    this._safe = options.safe || 'false'; // Sets the 'safe' option with a default.
+    this._logger.debug('STORE', '%s: Store created', this.id()); // Logs the creation of the store.
+}
+</initializeMongoStore>
+
+<unbindFunction>
+function unbindToFunction(target, entity, evt, method){
+    target.stopListening(entity, evt, method, target); // Unbinds a method from an event on a target entity.
+}
+</unbindFunction>
+```

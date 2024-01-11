@@ -1,0 +1,315 @@
+Below are the annotations identifying SRP compliance or violations for each function:
+
+1. Function 1:
+```javascript
+<function1>
+function(context, callback, binds) {
+    var instance = new Instance(this);
+    var count = 0,
+        binded = false;
+    for (var i = 1, len = this.parts.length; i < len; i = i + 2) {
+        var block = this.parts[i];
+        if (block.binded) {
+            <setupHandlerAndSubscribe>
+            binded = true;
+            var h = handler(instance, context, block.func, count, callback),
+                dep = block.dep;
+            for (var j = 0, lenJ = dep.length; j < lenJ; j++)
+                context.subscribe(dep[j], h, false, instance.binds);
+            </setupHandlerAndSubscribe>
+        }
+        count++;
+    }
+    if (binded && binds)
+        binds.push(unsub(instance));
+    return instance;
+}
+</function1>
+```
+
+2. Function 2:
+```javascript
+<regexBodyMatch>
+function regexBodyMatch(path, ruleSet, body, expectedBody){
+
+    var matchingObjects = jsonPath({json: {body: body}, path: path});
+    var matchingExpectedObjects = jsonPath({json: {body: expectedBody}, path: path});
+
+    <validateMin>
+    if(ruleSet.hasOwnProperty("min")){
+        var failing = matchingObjects.map(function(match){
+            if(match.length < ruleSet.min){
+                return {
+                    error: "failed to meet minimum for :" + path,
+                    expected: ruleSet.min,
+                    actual: match.length
+                };
+            }
+        }).filter(function(f){
+            return !!f;
+        });
+
+        if(failing.length){
+            return failing[0];
+        }
+    }
+    </validateMin>
+    <validateMax>
+    if(ruleSet.hasOwnProperty("max")){
+        var failing = matchingObjects.map(function(match){
+            if(match.length > ruleSet.max){
+                return {
+                    error: "failed to meet maximum for :" + path,
+                    expected: ruleSet.max,
+                    actual: match.length
+                };
+            }
+        }).filter(function(f){
+            return !!f;
+        });
+        if(failing.length){
+            return failing[0];
+        }
+    }
+    </validateMax>
+    <validateMatchType>
+    if(ruleSet.hasOwnProperty("match") && ruleSet.match === "type"){
+        var typeCheckFailure = checkTypeMatch(matchingObjects, matchingExpectedObjects, path);
+        if(typeCheckFailure){
+            return typeCheckFailure;
+        }
+    }
+    </validateMatchType>
+    <validateMatchRegex>
+    if(ruleSet.hasOwnProperty("match") && ruleSet.match === "regex"){
+        if(!checkRegexMatch(ruleSet, matchingObjects)){
+            return {
+                error: "Unable to match regex: ",
+                expected: ruleSet.regex,
+                actual: matchingObjects
+            };
+        }
+    }
+    </validateMatchRegex>
+    return false; 
+}
+</regexBodyMatch>
+```
+
+3. Function 3:
+```javascript
+<function3>
+function(out) {
+    this._frame.writeMarkupEnd(out);
+    <appendLabelIfPresent>
+    var label = this._cfg.label;
+    if (label) {
+        var ariaHidden = this._cfg.waiAria ? ' aria-hidden="true"' : '';
+        out.write('<span class="xFieldset_' + this._cfg.sclass + '_normal_label"' + ariaHidden + '>' + ariaUtilsString.escapeHTML(label) + '</span>');
+    }
+    </appendLabelIfPresent>
+}
+</function3>
+```
+
+4. Function 4:
+```javascript
+<interpolation2>
+function interpolation2(prefix, v0, i0, v1, suffix) {
+    var different = bindingUpdated2(v0, v1);
+    return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
+}
+</interpolation2>
+```
+
+5. Function 5:
+```javascript
+<function5>
+function(scriptName, params) {
+    var ctx = u.context(SMALL);
+    logger.debugf('Invoke execute(msgId=%d,scriptName=%s,params=%s)', ctx.id, scriptName, u.str(params));
+    
+    return futureExec(ctx, 0x2B, p.encodeNameParams(scriptName, params), p.decodeValue());
+}
+</function5>
+```
+
+6. Function 6:
+```javascript
+<constructCode>
+function constructCode(code, system, display) {
+    const codeObj = new models.Concept(system, code, display);
+    return codeObj;
+}
+</constructCode>
+```
+
+7. Function 7:
+```javascript
+<setupAndLoadPlugin>
+function(settings, pluginInfo, options) {
+    <setupPlugin>
+    var plugin;
+    if (_.has(pluginInfo, 'plugin')) {
+        plugin = pluginInfo.plugin;
+    } else if (_.has(pluginInfo, 'module')) {
+        if (_.contains(settings.loadedModules, pluginInfo.module)) {
+            return settings;
+        }
+        
+        try {
+            plugin = require(pluginInfo.module);
+        } catch (err) {
+            throw new GrawlixPluginError({
+                msg: "cannot find module '" + pluginInfo.module + "'",
+                plugin: pluginInfo,
+                trace: new Error() 
+            });
+        }
+        settings.loadedModules.push(pluginInfo.module);
+    } else {
+        plugin = pluginInfo;
+    }
+    var pluginOpts = _.has(pluginInfo, 'options') ? pluginInfo.options : {};
+    
+    if (_.isFunction(plugin)) {
+        plugin = plugin(pluginOpts, options);
+    }
+    
+    if (!(plugin instanceof GrawlixPlugin)) {
+        throw new GrawlixPluginError({
+            msg: 'invalid plugin',
+            plugin: pluginInfo
+        });
+    } else if (plugin.name === null || _.isEmpty(plugin.name)) {
+        throw new GrawlixPluginError({
+            msg: 'invalid plugin - name property not provided',
+            plugin: pluginInfo
+        });
+    } else if (_.contains(settings.loadedPlugins, plugin.name)) {
+        return settings;
+    }
+    </setupPlugin>
+    <initializePlugin>
+    plugin.init(pluginOpts);
+    </initializePlugin>
+    <loadPluginFilters>
+    if (!_.isUndefined(plugin.filters) && _.isArray(plugin.filters)) {
+        try {
+            loadFilters(settings, plugin.filters, options.allowed);
+        } catch (err) {
+            err.plugin = pluginInfo;
+            throw err;
+        }
+    }
+    </loadPluginFilters>
+    <loadPluginStyles>
+    if (!_.isUndefined(plugin.styles) && _.isArray(plugin.styles)) {
+        try {
+            loadStyles(settings, plugin.styles);
+        } catch (err) {
+            err.plugin = pluginInfo;
+            throw err;
+        }
+    }
+    </loadPluginStyles>
+    settings.loadedPlugins.push(plugin.name);
+    
+    return settings;
+}
+</setupAndLoadPlugin>
+```
+
+8. Function 8:
+```javascript
+<updateLocationFromCurrentState>
+function() {
+    var current = $state.current();
+
+    <constructURLFromState>
+    if(current && current.url) {
+        var path;
+        path = current.url;
+        var params = current.params || {};
+        var query = {};
+        for(var name in params) {
+            var re = new RegExp(':'+name, 'g');
+            if(path.match(re)) {
+                path = path.replace(re, params[name]);
+            } else {
+                query[name] = params[name];
+            }
+        }
+    </constructURLFromState>
+    <updateBrowserLocation>
+    $location.path(path);
+    $location.search(query);
+    _url = $location.url();
+    </updateBrowserLocation>
+  }
+}
+</updateLocationFromCurrentState>
+```
+
+9. Function 9:
+```javascript
+<yeast>
+function yeast() {
+    <incrementSeed>
+    var now = encode$1(+new Date());
+    if (now !== prev) return (seed = 0), (prev = now);
+    return now + "." + encode$1(seed++);
+    </incrementSeed>
+}
+</yeast>
+```
+
+10. Function 10:
+```javascript
+<triggerEventHandling>
+function trigger(app, evName, data) {
+    <setupTriggerData>
+    var triggerData = app;
+    if ("string" === typeof app) {
+        triggerData = {
+            eventName: evName,
+            appName: app,
+            data: data
+        };
+    }
+    if ("*" !== defaultAppName) {
+        triggerData.appName = triggerData.appName || defaultAppName;
+        if ("string" === typeof app && ("object" === typeof evName || "undefined" === typeof evName)) {
+            triggerData.eventName = app;
+        }
+    }
+    if (!triggerData || typeof (triggerData.eventName) === "undefined") {
+        evUtil.log("Ev name not spec for publish", "ERROR", "Events");
+        triggerData = null;
+        return null;
+    }
+    triggerData.passDataByRef = triggerData.passDataByRef || !cloneData;
+    _storeEventData(triggerData);
+    </setupTriggerData>
+    <invokeEventListeners>
+    var callBacks = evUtil.getListeners(lstnrs, triggerData.eventName, triggerData.appName);
+    if (callBacks.length > 0) {
+        for (var j = 0; j < callBacks.length; j++) {
+            var eventData = triggerData.passDataByRef ? triggerData.data : evUtil.cloneEventData(triggerData.data);
+            var eventInformation = {appName: triggerData.appName, eventName: triggerData.eventName};
+            var callBack = callBacks[j];
+            if (callBack.aSync || (eventData && eventData.aSync)) {
+                setTimeout(_createCallBack(callBack, eventData, eventInformation), 0);
+            } else {
+                _createCallBack(callBack, eventData, eventInformation)();
+            }
+        }
+    }
+    </invokeEventListeners>
+    triggerData = null;
+    return (callBacks.length > 0);
+}
+</triggerEventHandling>
+```
+
+Please note that descriptions are provided alongside the tags in some cases for clearer understanding.

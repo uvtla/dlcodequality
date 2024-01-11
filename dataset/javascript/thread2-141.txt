@@ -1,0 +1,471 @@
+```javascript
+<assertFunctions>
+function assertFunctions(functions) {
+  <inputValidation>
+  if (!Array.isArray(functions)) {
+    throw new TypeError(msg.argFuncArray);
+  }
+  </inputValidation>
+
+  const funcs = [];
+
+  for (let i = 0; i < functions.length; i++) {
+    const item = functions[i];
+  
+    <handleObjectItems>
+    if (typeof item === 'object') {
+      const bind = elv.coalesce(item.bind, null);
+      const { fn } = item;
+      const label = elv.coalesce(item.label, fn.name, `anonymous${i}`);
+      const params = elv.coalesce(item.params, []);
+
+      if (typeof fn !== 'function') {
+        throw new TypeError(msg.argFuncFn);
+      }
+
+      if (typeof label !== 'string') {
+        throw new TypeError(msg.argFuncLabel);
+      }
+
+      if (!Array.isArray(params)) {
+        throw new TypeError(msg.argFuncParams);
+      }
+
+      funcs.push({
+        bind,
+        fn,
+        label,
+        params,
+      });
+
+      continue;
+    }
+    </handleObjectItems>
+
+    <handleFunctionItems>
+    if (typeof item !== 'function') {
+      throw new TypeError(msg.argFuncItem);
+    }
+
+    funcs.push({
+      bind: null,
+      fn: item,
+      label: elv.coalesce(item.name, `anonymous${i}`),
+      params: [],
+    });
+    </handleFunctionItems>
+  }
+
+  return funcs;
+}
+</assertFunctions>
+
+<findDefaultPlugins>
+function findDefaultPlugins() {
+  <checkDirectoryExists>
+  const globPath = path.join(__dirname, BUILT_IN_DEFAULT_PLUGIN_FOLDER_NAME);
+  if (!fs.existsSync(globPath)) {
+    return [];
+  }
+  </checkDirectoryExists>
+  
+  <processFiles>
+  return walkSync(globPath, {
+    directories: false,
+    globs: [`${MARKBIND_PLUGIN_PREFIX}*.js`],
+  }).map(file => path.parse(file).name);
+  </processFiles>
+}
+</findDefaultPlugins>
+
+<buildUrl>
+function buildUrl(file, frontmatter) {
+      
+  <handleSpecificCanocialUrl>
+  var canonicalUrl = get(frontmatter, urlProperty);
+  if (is.string(canonicalUrl)) {
+    return canonicalUrl;
+  }
+  </handleSpecificCanocialUrl>
+
+  <omitIndexCheck>
+  var indexFile = 'index.html';
+  if (omitIndex && path.basename(file) === indexFile) {
+    return replaceBackslash(file.slice(0, 0 - indexFile.length));
+  }
+  </omitIndexCheck>
+
+  <omitExtensionCheck>
+  if (omitExtension) {
+    return replaceBackslash(file.slice(0, 0 - path.extname(file).length));
+  }
+  </omitExtensionCheck>
+
+  <defaultUrlProcessing>
+  return replaceBackslash(file);
+  </defaultUrlProcessing>
+}
+</buildUrl>
+
+<generateGCMPayload>
+function generateGCMPayload(requestData, pushId, timeStamp, expirationTime) {
+  <initializePayload>
+  let payload = {
+    priority: 'high'
+  };
+  payload.data = {
+    data: requestData.data,
+    push_id: pushId,
+    time: new Date(timeStamp).toISOString()
+  }
+  </initializePayload>
+
+  <handleOptionalKeys>
+  const optionalKeys = ['content_available', 'notification'];
+  optionalKeys.forEach((key, index, array) => {
+    if (requestData.hasOwnProperty(key)) {
+      payload[key] = requestData[key];
+    }
+  });
+  </handleOptionalKeys>
+
+  <handleExpirationTime>
+  if (expirationTime) {
+    let timeToLive = Math.floor((expirationTime - timeStamp) / 1000);
+    if (timeToLive < 0) {
+      timeToLive = 0;
+    }
+    if (timeToLive >= GCMTimeToLiveMax) {
+      timeToLive = GCMTimeToLiveMax;
+    }
+    payload.timeToLive = timeToLive;
+  }
+  </handleExpirationTime>
+
+  return payload;
+}
+</generateGCMPayload>
+
+<functionWithNoName>
+function(sId) {
+  <deriveNamespacedId>
+  var sNamespace = this.getMetadata().getNamespace();
+  sId = sNamespace + "." + sId;
+  </deriveNamespacedId>
+  
+  <fetchComponentById>
+  return this.base ? this.base.byId(sId) : undefined;
+  </fetchComponentById>
+}
+</functionWithNoName>
+
+<scanBarcode>
+function scanBarcode() {
+  <initializeResult>
+  barcode_result.textContent = "";
+  </initializeResult>
+
+  <initializeDrawingContext>
+  let context = null,
+    width = 0,
+    height = 0,
+    dbrCanvas = null;
+
+  if (isPC) {
+    context = ctx;
+    width = videoWidth;
+    height = videoHeight;
+    dbrCanvas = canvas;
+  } else {
+    context = mobileCtx;
+    width = mobileVideoWidth;
+    height = mobileVideoHeight;
+    dbrCanvas = mobileCanvas;
+  }
+
+  context.drawImage(videoElement, 0, 0, width, height);
+  </initializeDrawingContext>
+
+  <createVideoAnalysisSetup>
+  var vid = document.getElementById("video");
+  console.log("video width: " + vid.videoWidth + ", height: " + vid.videoHeight);
+  var barcodeCanvas = document.createElement("canvas");
+  barcodeCanvas.width = vid.videoWidth;
+  barcodeCanvas.height = vid.videoHeight;
+  var barcodeContext = barcodeCanvas.getContext('2d');
+  var imageWidth = vid.videoWidth,
+    imageHeight = vid.videoHeight;
+  barcodeContext.drawImage(videoElement, 0, 0, imageWidth, imageHeight);
+  </createVideoAnalysisSetup>
+
+  <analyzeImageData>
+  var imageData = barcodeContext.getImageData(0, 0, imageWidth, imageHeight);
+  var idd = imageData.data;
+  </analyzeImageData>
+
+  <performDecoding>
+  let results;
+  try {
+    results = reader.DecodeBuffer(idd.buffer, imageWidth, imageHeight, imageWidth * 4, 7, "");
+  } catch (e) {
+    console.log(e);
+  }
+  </performDecoding>
+
+  <handleDecodingResults>
+  if (!results) {
+    setTimeout(scanBarcode, 30);
+  } else {
+    <processDecodedResults>
+    let json = JSON.parse(results);
+    let barcodeResults = json['textResult'];
+    if (barcodeResults.length == 0) {
+      setTimeout(scanBarcode, 30);
+    } else {
+      buttonVideo.disabled = false;
+      let txts = [];
+      for (let i = 0; i < barcodeResults.length; ++i) {
+        if (barcodeResults[i].LocalizationResult.ExtendedResultArray[0].Confidence >= 30) {
+          txts.push(b64DecodeUnicode(barcodeResults[i].BarcodeText));
+        }
+      }
+      if (txts.length == 0) {
+        setTimeout(scanBarcode, 30);
+        console.log("No confident results");
+      } else {
+        barcode_result.textContent = txts.join(", ");
+        buttonVideo.disabled = false;
+        if (isPC) {
+          canvas.style.display = 'block';
+        } else {
+          mobileCanvas.style.display = 'block';
+        }
+      }
+    }
+    </processDecodedResults>
+  }
+  </handleDecodingResults>
+}
+</scanBarcode>
+
+<getChildResources>
+function getChildResources(resource){
+  <aggregateChildResources>
+        var result = [], children = _resources[resource].children;
+        children.forEach(function (child) {
+            var childReturn = getChildResources(child);
+            childReturn.push(child);
+            result = result.concat(childReturn);
+        });
+  </aggregateChildResources>
+
+        return result;
+    }
+</getChildResources>
+
+<access>
+function access(options) {
+  <initializeDefaultOptions>
+  options = options || {};
+
+  
+  options.origins = 'origins' in options
+    ? options.origins
+    : '*';
+
+  
+  options.methods = 'methods' in options
+    ? options.methods
+    : ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'OPTIONS'];
+
+  
+  options.credentials = 'credentials' in options
+    ? options.credentials
+    : true;
+
+  
+  options.maxAge = 'maxAge' in options
+    ? options.maxAge
+    : '30 days';
+
+  
+  options.headers = 'headers' in options
+    ? options.headers
+    : '';
+
+  
+  options.exposed = 'exposed' in options
+    ? options.exposed
+    : '';
+  </initializeDefaultOptions>
+
+  <applyHeaderFormatting>
+  
+  
+  
+  
+  ['methods', 'headers', 'exposed', 'origins'].forEach(function cleanup(key) {
+    if (Array.isArray(options[key])) options[key] = options[key].join(', ');
+  });
+
+  
+  
+  
+  
+  if ('string' === typeof options.maxAge) {
+    options.maxAge = ms(options.maxAge) / 1000;
+  }
+  </applyHeaderFormatting>
+
+  <deriveAccessControlData>
+  var separator = /[, ]+/
+    , methods = options.methods.toUpperCase().split(separator).filter(Boolean)
+    , headers = options.headers.toLowerCase().split(separator).filter(Boolean)
+    , origins = options.origins.toLowerCase().split(separator).filter(Boolean);
+  </deriveAccessControlData>
+
+  <control>
+  return function control(req, res, next) {
+    <checkHeadersPresence>
+    var origin = (req.headers.origin || '').toLowerCase().trim()
+      , credentials = options.credentials;
+
+    
+    
+    
+    
+    
+    
+    
+    if (!('origin' in req.headers)) {
+      if ('function' === typeof next) next();
+      return false;
+    }
+    </checkHeadersPresence>
+
+	  
+    <validateCorsRequest>
+    
+    
+    
+    
+    
+    if (
+         ~origin.indexOf('%')
+      || (origin !== 'null' && !parse(origin).protocol)
+      || options.origins !== '*' && !~origins.indexOf(origin)
+      || (methods.length && !~methods.indexOf(req.method))
+      
+    ) {
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'text/plain');
+      res.end([
+        'Invalid HTTP Access Control (CORS) request:',
+        '  Origin: '+ req.headers.origin,
+        '  Method: '+ req.method
+      ].join('\n'));
+
+      return true;
+    }
+    </validateCorsRequest>
+
+	  <setCorsHeaders>
+    
+    
+    
+    
+    
+    if (options.origins !== '*' || credentials) {
+      setHeader(res, 'Access-Control-Allow-Origin', req.headers.origin);
+      vary(res, 'Origin');
+    } else {
+      setHeader(res, 'Access-Control-Allow-Origin', '*');
+    }
+
+    if (credentials) {
+      setHeader(res, 'Access-Control-Allow-Credentials', 'true');
+    }
+    </setCorsHeaders>
+
+	  <handlePreflight>
+    
+    
+    
+    
+    
+    
+    
+    if (
+         'OPTIONS' === req.method
+      && req.headers['access-control-request-method']
+    ) {
+      if (options.maxAge) {
+        setHeader(res, 'Access-Control-Max-Age', options.maxAge);
+      }
+
+      if (options.methods) {
+        setHeader(res, 'Access-Control-Allow-Methods', methods.join(', '));
+      }
+
+      if (options.headers) {
+        setHeader(res, 'Access-Control-Allow-Headers', options.headers);
+      } else if (req.headers['access-control-request-headers']) {
+        setHeader(res, 'Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
+      }
+
+      
+      
+      
+      
+      
+      
+      res.statusCode = 200;
+      res.setHeader('Content-Length', 0);
+      res.end('');
+
+      return true;
+    }
+    </handlePreflight>
+
+	  <exposeCorsHeaders>
+    if (options.exposed) {
+      setHeader(res, 'Access-Control-Expose-Headers', options.exposed);
+    }
+    </exposeCorsHeaders>
+
+    <callNext>
+    if ('function' === typeof next) next();
+    </callNext>
+    return false;
+  };
+  </control>
+}
+</access>
+
+<getConfig>
+function getConfig(api )  {
+  <configureCache>
+  api.cache.never();
+  </configureCache>
+
+  <createBabelConfig>
+  return {
+    babelrc: false,
+    presets: presets.map(preset => require.resolve(preset)),
+    plugins: plugins.map(plugin => require.resolve(plugin)),
+  };
+  </createBabelConfig>
+}
+</getConfig>
+
+<functionWithNoNameAndMarkerParameter>
+function(marker) {
+    <removeMarker>
+    if (this.markers && this.markers.length) {
+        OpenLayers.Util.removeItem(this.markers, marker);
+        marker.erase();
+    }
+    </removeMarker>
+}
+</functionWithNoNameAndMarkerParameter>
+```

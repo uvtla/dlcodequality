@@ -1,0 +1,317 @@
+```javascript
+<parseSourceText>
+function() {
+    <setupVariables>
+    var line, lines = this.sourceText.split(/\n/mg),
+        lineLen = lines.length;
+
+    var inCommenting, curComment, closeCommentIdx;
+    </setupVariables>
+
+    for (var i = 0; i < lineLen; ++i) {
+        <processLines>
+        line = lines[i].trim();
+        if (line.startsWith('')) {
+            inCommenting = false;
+            closeCommentIdx = i;
+        } else if (!inCommenting && (1 === i - closeCommentIdx) && /(\bfunction\b\s*?(\w+?)\s*\(([^\(\)]*)\))|((\w+)?\s*(?::|=)\s*function\s*\(([^\(\)]*)\))/.test(line)) {
+            curComment.setFunc(RegExp.$2 || RegExp.$5, RegExp.$3 || RegExp.$6);
+            if ('string' !== typeof curComment.getTag('ignore')) {
+                this.Comments.push(curComment);
+            }
+            curComment = null;
+        } else if (!inCommenting && (1 === i - closeCommentIdx) && /(\w+)\s*(?::|=)(?!\s*function)/.test(line)) {
+            curComment.setAttr(RegExp.$1);
+            if ('string' !== typeof curComment.getTag('ignore')) {
+                this.Comments.push(curComment);
+            }
+            curComment = null;
+        } else if (inCommenting) {
+            line = line.replace(/^\*/, '').trim();
+            if (/^@(\w+)([^\r\n]*)/.test(line)) {
+                curComment.addTag(RegExp.$1, RegExp.$2 || "");
+            } else {
+                curComment.addDesc(line);
+            }
+        }
+        </processLines>
+    } 
+
+    <mergeResults>
+    this._merge();
+    </mergeResults>
+}
+</parseSourceText>
+
+<RugConstructor>
+function Rug( graph ) {
+    
+    <initializeProperties>
+    this._parent = graph;
+    this._root = undefined;
+    this._children = {};
+    this._config = {
+        "type": "rug",
+        "size": 6,
+        "labels": []
+    };
+    this._data = graph._data;
+    </initializeProperties>
+    
+    <defineTransforms>
+    this._transforms = {
+        'x': function X( d ) {
+            return graph._xScale( d[ 0 ] );
+        },
+        'y': function Y( d ) {
+            return d[ 1 ];
+        }
+    };
+    </defineTransforms>
+
+    <configurePath>
+    this._path = this.path()
+        .x( this._transforms.x )
+        .y( this._transforms.y );
+    </configurePath>
+    
+    <addToGraphConfiguration>
+    if ( graph._config.hasOwnProperty( 'marks' ) ) {
+        graph._config.marks.push( this._config );
+    } else {
+        graph._config.marks = [ this._config ];
+    }
+    if ( graph._children.hasOwnProperty( 'marks' ) ) {
+        graph._children.marks.push( this );
+    } else {
+        graph._children.marks = [ this ];
+    }
+    </addToGraphConfiguration>
+
+    return this;
+}
+</RugConstructor>
+
+<nearest>
+function nearest(predicate, node) {
+    <traverseAncestors>
+    while ((node = node.parent)) {
+        if (predicate(node)) return node;
+    }
+    </traverseAncestors>
+
+    return undefined;
+}
+</nearest>
+
+<createUniformBlockInfoFromProgram>
+function createUniformBlockInfoFromProgram(gl, program, uniformBlockSpec, blockName) {
+    <setupUniformBlock>
+    const blockSpecs = uniformBlockSpec.blockSpecs;
+    const uniformData = uniformBlockSpec.uniformData;
+    const blockSpec = blockSpecs[blockName];
+    if (!blockSpec) {
+        warn("no uniform block object named:", blockName);
+        return {
+            name: blockName,
+            uniforms: {},
+        };
+    }
+    </setupUniformBlock>
+
+    <initializeBuffer>
+    const array = new ArrayBuffer(blockSpec.size);
+    const buffer = gl.createBuffer();
+    const uniformBufferIndex = blockSpec.index;
+    gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+    gl.uniformBlockBinding(program, blockSpec.index, uniformBufferIndex);
+    </initializeBuffer>
+
+    <createUniformsMap>
+    let prefix = blockName + ".";
+    if (arraySuffixRE.test(prefix)) {
+        prefix = prefix.replace(arraySuffixRE, ".");
+    }
+    const uniforms = {};
+    blockSpec.uniformIndices.forEach(function(uniformNdx) {
+        const data = uniformData[uniformNdx];
+        const typeInfo = typeMap[data.type];
+        const Type = typeInfo.Type;
+        const length = data.size * typeInfo.size;
+        let name = data.name;
+        if (name.substr(0, prefix.length) === prefix) {
+            name = name.substr(prefix.length);
+        }
+        uniforms[name] = new Type(array, data.offset, length / Type.BYTES_PER_ELEMENT);
+    });
+    </createUniformsMap>
+
+    return {
+        name: blockName,
+        array: array,
+        asFloat: new Float32Array(array),  
+        buffer: buffer,
+        uniforms: uniforms,
+    };
+}
+</createUniformBlockInfoFromProgram>
+
+<microTimestamp>
+function microTimestamp () {
+    <generateTimestamp>
+    var time = microtime.nowStruct()
+    var micro = ('000000' + time[1]).slice(-6)
+    </generateTimestamp>
+    
+    <formatTimestamp>
+    return moment.unix(time[0]).format('YYYY-MM-DD HH:mm:ss') + '.' + micro
+    </formatTimestamp>
+}
+</microTimestamp>
+
+<fe>
+function fe($e,et,tt){
+    <configureEventEmitter>
+    return"function"==typeof $e.prependListener?$e.prependListener(et,tt):void($e._events&&$e._events[et]?Me($e._events[et])?$e._events[et].unshift(tt):$e._events[et]=[tt,$e._events[et]]:$e.on(et,tt))
+    </configureEventEmitter>
+}
+</fe>
+
+<copyBoundingBox>
+function (bbox) {
+        <initializeVariables>
+        var min = this.min;
+        var max = this.max;
+        </initializeVariables>
+
+        <copyValues>
+        vec3Copy(min.array, bbox.min.array);
+        vec3Copy(max.array, bbox.max.array);
+        </copyValues>
+
+        <setDirtyFlags>
+        min._dirty = true;
+        max._dirty = true;
+        </setDirtyFlags>
+
+        return this;
+}
+</copyBoundingBox>
+
+<wrap>
+function wrap(method) {
+            return <createWrappedFunction>function() {
+                
+                <gatherArguments>
+                var args = Array.prototype.slice.apply(arguments);
+                </gatherArguments>
+                
+                <invokeOriginalMethod>
+                args.unshift(this);
+                return ss[method].apply(ss, args);
+                </invokeOriginalMethod>
+            </createWrappedFunction>;
+}
+</wrap>
+
+<_ioComplete>
+function _ioComplete(o, c) {
+        <prepareResponse>
+        var r = o.e ? { status: 0, statusText: o.e } : o.c,
+            a = c.arguments;
+        </prepareResponse>
+
+        <fireCompleteEvents>
+        if (a) {
+            Y.fire(E_COMPLETE, o.id, r, a);
+        }
+        else {
+            Y.fire(E_COMPLETE, o.id, r);
+        }
+        </fireCompleteEvents>
+
+        <handleConfiguration>
+        if (c.on && c.on.complete) {
+            _tE('complete', c).fire(o.id, r);
+        }
+        </handleConfiguration>
+}
+</_ioComplete>
+
+<_getTripsFromStop>
+function _getTripsFromStop(db, stop, tripSearchDate, callback) {
+
+    <initializeResults>
+    let rtn = [];
+    </initializeResults>
+
+    <setupCounters>
+    let done = 0;
+    let count = 0;
+    </setupCounters>
+
+    <prepareQuery>
+    let serviceIdString = "'" + tripSearchDate.serviceIds.join("', '") + "'";
+    let select = "SELECT gtfs_stop_times.trip_id " +
+        "FROM gtfs_stop_times " +
+        "INNER JOIN gtfs_trips ON gtfs_stop_times.trip_id=gtfs_trips.trip_id " +
+        "WHERE stop_id='" + stop.id + "' AND " +
+        "departure_time_seconds >= " + tripSearchDate.preSeconds + " AND departure_time_seconds <= " + tripSearchDate.postSeconds + " AND " +
+        "pickup_type <> " + StopTime.PICKUP_TYPE_NONE + " AND " +
+        "gtfs_trips.service_id IN (" + serviceIdString + ")";
+    </prepareQuery>
+
+    <executeQuery>
+    db.select(select, function(err, results) {
+
+        <handleErrors>
+        if ( err ) {
+            return callback(
+                new Error('Could not get Trip(s) from database')
+            );
+        }
+        </handleErrors>
+
+        <handleNoResults>
+        if ( results.length === 0 ) {
+            return callback(null, rtn);
+        }
+        </handleNoResults>
+
+        <processResults>
+        count = results.length;
+        for ( let i = 0; i < results.length; i++ ) {
+            TripsTable.getTrip(db, results[i].trip_id, tripSearchDate.date, function(err, trip) {
+
+                <handleTripErrors>
+                if ( err ) {
+                    return callback(err);
+                }
+                </handleTripErrors>
+
+                <addTripToResults>
+                rtn.push(trip);
+                </addTripToResults>
+
+                <checkCompletion>
+                _finish();
+                </checkCompletion>
+
+            });
+        }
+        </processResults>
+
+    });
+    </executeQuery>
+
+    <_finish>
+    function _finish() {
+        done++;
+        if ( done === count ) {
+            return callback(null, rtn);
+        }
+    }
+    </_finish>
+}
+</_getTripsFromStop>
+```

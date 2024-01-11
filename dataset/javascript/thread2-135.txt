@@ -1,0 +1,224 @@
+```javascript
+<defaultComparison>
+function defaultComparison(left, right) {
+        var leftS = $toString(left),
+            rightS = $toString(right),
+            val = 1;
+
+        if (leftS === rightS) {
+            val = +0;
+        } else if (leftS < rightS) {
+            val = -1;
+        }
+
+        return val;
+}
+</defaultComparison>
+
+
+<getPfIcon>
+function getPfIcon(iconName) {
+  const currentIcon = icons.pfIcons[iconName];
+  currentIcon.yOffset = 64;
+  <adjustIcon>
+  currentIcon.transform = `rotate(180 0 ${currentIcon.height / 2}) scale(-1 1)`
+  </adjustIcon>
+  return generateIcon(currentIcon, `${iconName}`)
+}
+</getPfIcon>
+
+
+<executeRemoteMethod>
+function (methodName, params, execOptions) {
+  <createRequestId>
+  var requestId = this._getRequestId(methodName, params);
+  </createRequestId>
+  <getPromiseForRequest>
+  var promise = this._getRequestPromise(requestId);
+  </getPromiseForRequest>
+
+  if (!promise) {
+      <addRequestToBatch>
+      this._addToBatch(methodName, params);
+      </addRequestToBatch>
+      <createPromise>
+      promise = this._createPromise(requestId);
+      </createPromise>
+      <runBatchedRequests>
+      this._run(execOptions);
+      </runBatchedRequests>
+  }
+
+  return promise;
+}
+</executeRemoteMethod>
+
+
+<commonErrorStatusHandler>
+function commonErrorStatusHandler(result) {
+  <logWarning>
+  console.warn('接口调用出错', this.type || this.method, this.url, this.data, result.status, result);
+  </logWarning>
+
+  <handleFailStatus>
+  if (result.status === REQUEST_FAIL_STATUS) {
+      
+  }
+  </handleFailStatus>
+  <handleOtherStatus>
+  else if (result.status == 1) {
+      
+  }
+  </handleOtherStatus>
+}
+</commonErrorStatusHandler>
+
+
+<minjs>
+function minjs(config, tools) {
+  return tools.simpleStream(config, [
+    <configConcat>
+    config.concat && concat(config.concat),
+    </configConcat>
+    <configMinify>
+    config.minify && uglify(config.uglifyjs)
+    </configMinify>
+  ])
+}
+</minjs>
+
+
+<handleUIColorPickerUpdate>
+function(ui)
+{
+  try
+  {
+    <retrieveColorValue>
+    var all = ui.val('all');
+    </retrieveColorValue>
+    <applyBackgroundColor>
+    activePreview.css({ backgroundColor: all && '#' + all.hex || 'transparent' });
+    </applyBackgroundColor>
+    <setAlphaValue>
+    setAlpha.call($this, activePreview, all && Math.precision((all.a * 100) / 255, 4) || 0);
+    </setAlphaValue>
+  }
+  catch (e) { }
+}
+</handleUIColorPickerUpdate>
+
+
+<_rescheduleInterval>
+function _rescheduleInterval(timeout, now) {
+    <calculateNextOccurrence>
+    timeout.occurrence = Math.round((now - timeout.firstTime) / timeout.interval);
+    </calculateNextOccurrence>
+    <setNextExecutionTime>
+    timeout.time = timeout.firstTime + timeout.occurrence * timeout.interval;
+    </setNextExecutionTime>
+}
+</_rescheduleInterval>
+
+
+<destroyDpad>
+function(name) {
+  if (this._dpads[name]) {
+      <destroyParsedDefinitionInputs>
+      for (var d in this._dpads[name].parsedDefinition) {
+          this._dpads[name].parsedDefinition[d].input.destroy();
+      }
+      </destroyParsedDefinitionInputs>
+      <deleteDpad>
+      delete this._dpads[name];
+      </deleteDpad>
+      <triggerControlDestroyed>
+      Crafty.trigger("ControlDestroyed", { type: "Dpad", name: name });
+      </triggerControlDestroyed>
+  }
+}
+</destroyDpad>
+
+
+<binl>
+function binl(x, len) {
+  <initializeHashValues>
+  var T, j, i, l,
+    h0 = 0x67452301,
+    h1 = 0xefcdab89,
+    h2 = 0x98badcfe,
+    h3 = 0x10325476,
+    h4 = 0xc3d2e1f0,
+    A1, B1, C1, D1, E1,
+    A2, B2, C2, D2, E2;
+  </initializeHashValues>
+
+  <prepareInput>
+  x[len >> 5] |= 0x80 << (len % 32);
+  x[(((len + 64) >>> 9) << 4) + 14] = len;
+  l = x.length;
+  </prepareInput>
+
+  <processInput>
+  for (i = 0; i < l; i += 16) {
+    A1 = A2 = h0;
+    B1 = B2 = h1;
+    C1 = C2 = h2;
+    D1 = D2 = h3;
+    E1 = E2 = h4;
+    for (j = 0; j <= 79; j += 1) {
+      // complex hashing process...
+    }
+
+    T = safe_add(h1, safe_add(C1, D2));
+    h1 = safe_add(h2, safe_add(D1, E2));
+    h2 = safe_add(h3, safe_add(E1, A2));
+    h3 = safe_add(h4, safe_add(A1, B2));
+    h4 = safe_add(h0, safe_add(B1, C2));
+    h0 = T;
+  }
+  </processInput>
+  
+  return [h0, h1, h2, h3, h4];
+}
+</binl>
+
+
+<QuickSearchField>
+function QuickSearchField($input, options) {
+  <setInstanceVariables>
+  this.$input = $input;
+  this.options = options;
+  </setInstanceVariables>
+  
+  <setDefaultOptions>
+  options.maxResults = options.maxResults || 10;
+  </setDefaultOptions>
+
+  <bindEventHandlers>
+  this._handleInput   = this._handleInput.bind(this);
+  this._handleKeyDown = this._handleKeyDown.bind(this);
+  </bindEventHandlers>
+
+  <registerEventListeners>
+  $input.on("input", this._handleInput);
+  $input.on("keydown", this._handleKeyDown);
+  </registerEventListeners>
+
+  <setHighlightOptions>
+  if (options.highlightZeroResults !== undefined) {
+      this._highlightZeroResults = options.highlightZeroResults;
+  } else {
+      this._highlightZeroResults = true;
+  }
+  </setHighlightOptions>
+
+  <setFirstHighlightIndex>
+  this._firstHighlightIndex = options.firstHighlightIndex;
+  </setFirstHighlightIndex>
+
+  <calculateDropdownPosition>
+  this._dropdownTop = $input.offset().top + $input.height() + (options.verticalAdjust || 0);
+  </calculateDropdownPosition>
+}
+</QuickSearchField>
+```

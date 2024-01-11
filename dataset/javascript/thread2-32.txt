@@ -1,0 +1,425 @@
+```javascript
+<queryWorksheet>
+async function queryWorksheet(workSheetInfo, query, options) {
+    <createIdentifierKey>
+    var key = util.createIdentifier(
+        workSheetInfo.worksheetId,
+        JSON.stringify(query)
+    );
+    </createIdentifierKey>
+
+    <prepareOptions>
+    options = options || {};
+    options.query = query;
+    </prepareOptions>
+
+    <fetchData>
+    return await fetchData(
+        key,
+        api.converter.queryResponse,
+        () => {
+            <extendWithQueryRequest>
+            let payload = util._extend(
+                workSheetInfo,
+                api.converter.queryRequest(options)
+            );
+            </extendWithQueryRequest>
+
+            <executeRequest>
+            return executeRequest('query_worksheet', payload);
+            </executeRequest>
+        });
+}
+</fetchData>
+</queryWorksheet>
+
+<parse_uri>
+function parse_uri(uri = document.location) {
+    <initializeOptions>
+    const options = {
+        strictMode: false,
+        key: [
+            "source",   
+            "protocol",
+            "authority", 
+            "userInfo", 
+            "user",
+            "password",
+            "host",
+            "port",
+            "relative", 
+            "path",
+            "directory",
+            "file",
+            "query",
+            "anchor"
+        ],
+        query: {
+            name: "parameters",
+            parser: /(?:^|&)([^&=]*)=?([^&]*)/g
+        },
+        parser: {
+            strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+            loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+        }
+    }
+    </initializeOptions>
+
+    <uriMatchParsing>
+    var matches = options.parser[options.strictMode ? "strict" : "loose"].exec(uri)
+    </uriMatchParsing>
+
+    <buildResult>
+    const result = {}
+    let i = 14
+    while (i--) {
+        result[options.key[i]] = matches[i] || ""
+    }
+    </buildResult>
+
+    <parseQueryParameters>
+    result[options.query.name] = {}
+    result[options.key[12]].replace(options.query.parser, function ($0, $1, $2) {
+        if ($1) {
+            result[options.query.name][$1] = $2
+        }
+    })
+    </parseQueryParameters>
+
+    return result
+}
+</parse_uri>
+
+<demuxSsa>
+function demuxSsa (params, cb) {
+  <assertParamTypes>
+  assert.equal(typeof params, 'object')
+  assert.equal(typeof params._ssa, 'object')
+  assert.equal(typeof cb, 'function')
+  </assertParamTypes>
+
+  <unpackAndCallbackExecution>
+  const req = params._ssa.req
+  const res = params._ssa.res
+  const nw = xtend(params)
+  delete nw._ssa
+  </unpackAndCallbackExecution>
+
+  <executeCallback>
+  cb(req, res, nw)
+  </executeCallback>
+}
+</demuxSsa>
+
+<hamming>
+function hamming( a, b, clbk ) {
+    <validateInputs>
+    var aType = isString( a ),
+        bType = isString( b ),
+        len,
+        d, i;
+    if ( !isArray( a ) && !aType ) {
+        throw new TypeError( 'hamming()::invalid input argument. Sequence must be either an array or a string. Value: `' + a + '`.' );
+    }
+    if ( !isArray( b ) && !bType ) {
+        throw new TypeError( 'hamming()::invalid input argument. Sequence must be either an array or a string. Value: `' + b + '`.' );
+    }
+    if ( aType !== bType ) {
+        throw new TypeError( 'hamming()::invalid input arguments. Sequences must be the same type; i.e., both strings or both arrays.' );
+    }
+    if ( arguments.length > 2 ) {
+        if ( !isFunction( clbk ) ) {
+            throw new TypeError( 'hamming()::invalid input argument. Accessor must be a function. Value: `' + clbk + '`.' );
+        }
+    }
+    len = a.length;
+    if ( len !== b.length ) {
+        throw new Error( 'hamming()::invalid input arguments. Sequences must be the same length.' );
+    }
+    </validateInputs>
+
+    <calculateHammingDistance>
+    d = 0;
+    if ( clbk ) {
+        for ( i = 0; i < len; i++ ) {
+            if ( clbk( a[i], i, 0 ) !== clbk( b[i], i, 1 ) ) {
+                d += 1;
+            }
+        }
+    } else {
+        for ( i = 0; i < len; i++ ) {
+            if ( a[ i ] !== b[ i ] ) {
+                d += 1;
+            }
+        }
+    }
+    </calculateHammingDistance>
+
+    return d;
+}
+</hamming>
+
+<includesAtLoader>
+function includesAtLoader(graph) {
+  var found = false;
+
+  <defineHelper>
+  var isAtLoader = function(name) {
+    return name === "@loader";
+  };
+  </defineHelper>
+
+  <iterateOverGraphNodes>
+  keys(graph).forEach(function(name) {
+    <excludeNodeFromBuild>
+    var node = graph[name];
+    if (isPluginExcludedFromBuild(node)) {
+      return;
+    }
+    </excludeNodeFromBuild>
+
+    <checkAtLoader>
+    if (isAtLoader(name)) {
+      return (found = true);
+    }
+    </checkAtLoader>
+
+    <checkDependenciesForAtLoader>
+    defaultTo(node.dependencies, []).forEach(function(depName) {
+      if (isAtLoader(depName)) {
+        return (found = true);
+      }
+    });
+    </checkDependenciesForAtLoader>
+  });
+  </iterateOverGraphNodes>
+
+  return found;
+}
+</includesAtLoader>
+
+<BaseCoverArt>
+function BaseCoverArt(options) {
+  <setDefaultOptions>
+  options = options || {};
+  </setDefaultOptions>
+
+  <initializeProperties>
+  this.userAgent = options.userAgent || _userAgent;
+  this.host = _host;
+  this.basePath = _path;
+  this.http = _http;
+  </initializeProperties>
+}
+</BaseCoverArt>
+
+<directives>
+function directives() {
+  var i, p, pn;
+
+  <directiveLoop>
+  for (;;) {
+    <checkForString>
+    if (state.tokens.next.id === "(string)") {
+      <peekNextToken>
+      p = peek(0);
+      if (p.id === "(endline)") {
+        i = 1;
+        <skipEndLines>
+        do {
+          pn = peek(i);
+          i = i + 1;
+        } while (pn.id === "(endline)");
+        </skipEndLines>
+
+        <checkForMissingSemicolon>
+        if (pn.id !== ";") {
+          <breakIfNotSpecificTokens>
+          if (pn.id !== "(string)" && pn.id !== "(number)" &&
+              pn.id !== "(regexp)" && pn.identifier !== true &&
+              pn.id !== "}") {
+            break;
+          }
+          </breakIfNotSpecificTokens>
+          <warnForMissingSemicolon>
+          warning("W033", state.tokens.next);
+          </warnForMissingSemicolon>
+        } else {
+          p = pn;
+        }
+      </peekNextToken>
+      </checkForString>
+      <checkForEndOrMissingSemicolon>
+      else if (p.id === "}") {
+        <warnForMissingSemicolonInBlock>
+        warning("W033", p);
+        </warnForMissingSemicolonInBlock>
+      } else if (p.id !== ";") {
+        break;
+      }
+      </checkForEndOrMissingSemicolon>
+
+      <advanceAndUpdateDirective>
+      advance();
+      if (state.directive[state.tokens.curr.value]) {
+        <warnForExistingDirective>
+        warning("W034", state.tokens.curr, state.tokens.curr.value);
+        </warnForExistingDirective>
+      }
+      if (state.tokens.curr.value === "use strict") {
+        <setStrictMode>
+        if (!state.option["(explicitNewcap)"])
+          state.option.newcap = true;
+        state.option.undef = true;
+        </setStrictMode>
+      }
+      state.directive[state.tokens.curr.value] = true;
+      if (p.id === ";") {
+        <advanceToNextToken>
+        advance(";");
+        </advanceToNextToken>
+      }
+      continue;
+      </advanceAndUpdateDirective>
+    }
+    break;
+  }
+  </directiveLoop>
+}
+</directives>
+
+<parseConsecutiveLists>
+function parseConsecutiveLists(list, listType, trimTrailing) {
+  <initializeRegex>
+  var olRgx = (options.disableForced4SpacesIndentedSublists) ? /^ ?\d+\.[ \t]/gm : /^ {0,3}\d+\.[ \t]/gm,
+      ulRgx = (options.disableForced4SpacesIndentedSublists) ? /^ ?[*+-][ \t]/gm : /^ {0,3}[*+-][ \t]/gm,
+      counterRxg = (listType === 'ul') ? olRgx : ulRgx,
+      result = '';
+  </initializeRegex>
+
+  <parseLists>
+  if (list.search(counterRxg) !== -1) {
+    <recursiveParsing>
+    (function parseCL(txt) {
+      var pos = txt.search(counterRxg);
+      if (pos !== -1) {
+        <appendParsedList>
+        result += '\n<' + listType + '>\n' + processListItems(txt.slice(0, pos), !!trimTrailing) + '</' + listType + '>\n';
+        </appendParsedList>
+        <switchListType>
+        listType = (listType === 'ul') ? 'ol' : 'ul';
+        counterRxg = (listType === 'ul') ? olRgx : ulRgx;
+        </switchListType>
+        <continueParsing>
+        parseCL(txt.slice(pos));
+        </continueParsing>
+      } else {
+        <finalizeParsing>
+        result += '\n<' + listType + '>\n' + processListItems(txt, !!trimTrailing) + '</' + listType + '>\n';
+        </finalizeParsing>
+      }
+    })(list);
+    </recursiveParsing>
+  } else {
+    <singleListParsing>
+    result = '\n<' + listType + '>\n' + processListItems(list, !!trimTrailing) + '</' + listType + '>\n';
+    </singleListParsing>
+  }
+  </parseLists>
+
+  return result;
+}
+</parseConsecutiveLists>
+
+<functionWithNoName>
+function(from, to){
+    <initializeRangeAndCellNodes>
+    var range = [], cellNodes = this._cellNodes, n = cellNodes.length;
+    if (n === 0) {
+      return range;
+    }
+    </initializeRangeAndCellNodes>
+
+    var cellNode, ordinal;
+
+    <setToIndex>
+    if (_isUnd(to) || to === -1) {
+      to = this._getCellOrdinal(cellNodes[n-1]);
+    }
+    </setToIndex>
+    <setFromIndex>
+    if (_isUnd(from) || from === -1) {
+      from = this._getCellOrdinal(cellNodes[0]);
+    }
+    </setFromIndex>
+
+    <findToIndex>
+    var toIndex = Math.min(to, n - 1);
+    while (toIndex >= 0) {
+      cellNode = cellNodes[toIndex];
+      ordinal = this._getCellOrdinal(cellNode);
+      if (ordinal <= to) {
+        break;
+      }
+      toIndex -= 1;
+    }
+    if (toIndex === -1) {
+      return range;
+    }
+    </findToIndex>
+
+    <validateFromLessThanOrdinal>
+    if (ordinal < from) {
+      return range;
+    }
+    </validateFromLessThanOrdinal>
+
+    <findFromIndex>
+    var fromIndex = Math.min(toIndex, from);
+    while (fromIndex >= 0) {
+      cellNode = cellNodes[fromIndex];
+      ordinal = this._getCellOrdinal(cellNode);
+      if (ordinal <= from) {
+        if (ordinal < from) {
+          fromIndex += 1;
+        }
+        break;
+      }
+      fromIndex -= 1;
+    }
+    if (fromIndex === -1) {
+      fromIndex = 0;
+    }
+    </findFromIndex>
+
+    <createRange>
+    var index;
+    for (index = fromIndex; index <= toIndex; index++) {
+      cellNode = cellNodes[index];
+      range.push(this._readCell(cellNode, {}));
+    }
+    </createRange>
+
+    return range;
+}
+</functionWithNoName>
+
+<saveContentToEntitlementsFile>
+function saveContentToEntitlementsFile(content) {
+  <convertToPlist>
+  var plistContent = plist.build(content);
+  </convertToPlist>
+  <getFilePath>
+  var filePath = pathToEntitlementsFile();
+  </getFilePath>
+
+  <createDirectoryPath>
+  mkpath.sync(path.dirname(filePath));
+  </createDirectoryPath>
+
+  <writeToFile>
+  fs.writeFileSync(filePath, plistContent, 'utf8');
+  </writeToFile>
+}
+</saveContentToEntitlementsFile>
+```

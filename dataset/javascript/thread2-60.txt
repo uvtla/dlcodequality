@@ -1,0 +1,231 @@
+```javascript
+<dispose>
+function dispose(moduleNames, callback) {
+  <determineInputParams>
+  var nameOrArr, cb;
+
+  if (typeof moduleNames === 'function') {
+      logger.debug('Disposing all modules on scope, ' + self.name);
+      nameOrArr = null;
+      cb = moduleNames;
+  } else {
+      logger.debug({
+          message: 'Disposing module(s) on scope, ' + self.name,
+          moduleNames: moduleNames
+      });
+      nameOrArr = moduleNames;
+      cb = callback;
+  }
+  </determineInputParams>
+
+  <performDispose>
+  return optionalAsync(function () {
+      var results;
+
+      if (is.array(nameOrArr)) {
+          results = context.container.dispose(nameOrArr).disposed.concat(
+              context.singletonContainer.dispose(nameOrArr).disposed
+          );
+
+          return {
+              result: results.length === nameOrArr.length,
+              disposed: results
+          };
+      }
+
+      return context.container.dispose(nameOrArr) ||
+          context.singletonContainer.dispose(nameOrArr);
+  }, new Error(), cb);
+  </performDispose>
+}
+</dispose>
+
+<writeSourceMap>
+function writeSourceMap(srcpath, destpath, options, f) {
+  var path = require('path'),
+      SourceMapGenerator = require('source-map').SourceMapGenerator,
+      sourceMap = new SourceMapGenerator({file: path.basename(destpath)}),
+      sourceMapDest = destpath + '.map',
+      sourceMappingUrl = encodeURIComponent(path.basename(sourceMapDest)),
+      res;
+  <generateSourceMap>
+  res = f(sourceMap) + (options.sourceMap ?
+    '\n//# sourceMappingURL=' + sourceMappingUrl : '');
+  </generateSourceMap>
+  <writeFiles>
+  if (options.sourceMap) {
+    grunt.file.write(sourceMapDest, sourceMap.toString());
+    grunt.file.copy(srcpath, path.join.apply(path, [
+      path.dirname(destpath),
+      path.basename(srcpath)
+    ]));
+  }
+  </writeFiles>
+
+  return res;
+}
+</writeSourceMap>
+
+<handleInputMask>
+function (element, value) {
+  <applyOrRemoveMask>
+  if (value) {
+      if (value.constructor === String) {
+          $(element).mask(value);
+      } else {
+          $(element).mask(value.mask, value.settings);
+      }
+  } else {
+      $(element).unmask();
+  }
+  </applyOrRemoveMask>
+}
+</handleInputMask>
+
+<setBrowserClasses>
+function (browser) {
+  <generateCssClasses>
+  var classes = ["stage"], value;
+
+  for (var key in browser) {
+      if (browser.hasOwnProperty(key)) {
+
+          value = browser[key];
+
+          if (typeof(value) === "boolean") {
+              if (browserClassMap.hasOwnProperty(key)) {
+                  classes.push(browserClassMap[key][value ? 0 : 1]);
+              } else if (key === 'isIOS' && value) {
+                  classes.push('ios');
+                  classes.push('ios' + this._getIOSVersion());
+              }
+          } else {
+              if (key === 'version') {
+                  classes.push(browser.name + value);
+              } else {
+                  classes.push(value);
+              }
+          }
+      }
+  }
+  </generateCssClasses>
+
+  this.set('componentClass', classes.join(" "));
+}
+</setBrowserClasses>
+
+<WrappedResponse>
+function WrappedResponse(msg, hdr, err, res) {
+  this._msg = msg;
+  this.headers = hdr;
+  this.error = err;
+  this.response = res;
+}
+</WrappedResponse>
+
+<logWrap>
+function logWrap(level) {
+  return function log() {
+    <prepareLogMessage>
+    let context, message, args, trace, err;
+
+    if (arguments[0] instanceof Error) {
+      context = API.getContext();
+      args = Array.prototype.slice.call(arguments, 1);
+      if (!args.length) {
+        err = arguments[0];
+        message = err.name + ': ' + err.message;
+      } else {
+        err = arguments[0];
+        message = arguments[1];
+        args = Array.prototype.slice.call(args, 1);
+      }
+    } else if (arguments[0] == null || (typeof (arguments[0]) !== 'object' && arguments[0] !== null) ||
+        Array.isArray(arguments[0])) {
+      context = API.getContext();
+      message = arguments[0];
+      args = Array.prototype.slice.call(arguments, 1);
+    } else {
+      context = merge(API.getContext(), arguments[0]);
+      message = arguments[1];
+      args = Array.prototype.slice.call(arguments, 2);
+    }
+    </prepareLogMessage>
+
+    <writeTrace>
+    trace = API.format(level, context || {}, message, args, err);
+    API.stream.write(trace + '\n');
+    </writeTrace>
+  };
+}
+</logWrap>
+
+<createTag>
+function create(req, res, next) {
+  <getRequestBodyData>
+  var body = req.body,
+      slug = string.slugify(body.title);
+  </getRequestBodyData>
+
+  <lookupOrCreateTag>
+  db.tags.findBySlug(slug, function (err, tag) {
+    if (err && err.statusCode != 404) {
+      return next(err);
+    }
+
+    if (tag) {
+      res.json(201, tag);
+    } else {
+      db.tags.create(req.body, function (err, tag) {
+        if (err) {
+          next(err);
+        } else {
+          res.json(201, tag);
+          <emitTagCreationEvent>
+          signals.emit('tag:create', tag);
+          </emitTagCreationEvent>
+        }
+      });
+    }
+  });
+  </lookupOrCreateTag>
+}
+</createTag>
+
+<property>
+function property() {
+  <resourceConstructorCall>
+  var self = Thng.resourceConstructor.call(this, this.id);
+  </resourceConstructorCall>
+
+  <delegatePropertyCall>
+  return self.property.apply(self, arguments);
+  </delegatePropertyCall>
+}
+</property>
+
+<getTargetInstForInputEventIE>
+function getTargetInstForInputEventIE(topLevelType, targetInst) {
+  <specialActiveElementHandling>
+  if (topLevelType === topLevelTypes.topSelectionChange || topLevelType === topLevelTypes.topKeyUp || topLevelType === topLevelTypes.topKeyDown) {
+    if (activeElement && activeElement.value !== activeElementValue) {
+      activeElementValue = activeElement.value;
+      return activeElementInst;
+    }
+  }
+  </specialActiveElementHandling>
+}
+</getTargetInstForInputEventIE>
+
+<mixinEmitter>
+function mixin(obj) {
+  <attachEmitterMethods>
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  </attachEmitterMethods>
+
+  return obj;
+}
+</mixinEmitter>
+```

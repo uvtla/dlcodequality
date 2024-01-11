@@ -1,0 +1,402 @@
+```javascript
+<toAlpha>
+function toAlpha(color) {
+    <installMethod>
+    color.installMethod('toAlpha', function (color) {
+        var me = this.rgb(),
+            other = color(color).rgb(),
+            epsilon = 1e-10,
+            a = new color.RGB(0, 0, 0, me._alpha),
+            channels = ['_red', '_green', '_blue'];
+
+        <channelsModification>
+        channels.forEach(function (channel) {
+            if (me[channel] < epsilon) {
+                a[channel] = me[channel];
+            } else if (me[channel] > other[channel]) {
+                a[channel] = (me[channel] - other[channel]) / (1 - other[channel]);
+            } else if (me[channel] > other[channel]) {
+                a[channel] = (other[channel] - me[channel]) / other[channel];
+            } else {
+                a[channel] = 0;
+            }
+        });
+        </channelsModification>
+
+        <alphaCalculation>
+        if (a._red > a._green) {
+            if (a._red > a._blue) {
+                me._alpha = a._red;
+            } else {
+                me._alpha = a._blue;
+            }
+        } else if (a._green > a._blue) {
+            me._alpha = a._green;
+        } else {
+            me._alpha = a._blue;
+        }
+
+        if (me._alpha < epsilon) {
+            return me;
+        }
+        </alphaCalculation>
+
+        <channelsAdjustment>
+        channels.forEach(function (channel) {
+            me[channel] = (me[channel] - other[channel]) / me._alpha + other[channel];
+        });
+        me._alpha *= a._alpha;
+        </channelsAdjustment>
+
+        return me;
+    });
+    </installMethod>
+}
+</toAlpha>
+
+<getRangeSelectors>
+function getRangeSelectors(range) {
+    var i, startIndex = 0, endIndex, text = range.document.getText();
+    
+    <calculateStartIndex>
+    for (i = 0; i < range.startLine; i++) {
+        startIndex = text.indexOf("\n", startIndex) + 1;
+    }
+    </calculateStartIndex>
+    
+    <calculateEndIndex>
+    endIndex = startIndex;
+    for (i = range.startLine + 1; i <= range.endLine + 1; i++) {
+        endIndex = text.indexOf("\n", endIndex) + 1;
+    }
+    </calculateEndIndex>
+    
+    var allSelectors = extractAllSelectors(text.substring(startIndex, endIndex));
+
+    return (allSelectors.length ? allSelectors[0].selectorGroup || allSelectors[0].selector : "");
+}
+</getRangeSelectors>
+
+<rbeta>
+function rbeta(a, b) {
+    var a0, b0, alpha, beta, gamma, delta, k1, k2;
+
+    <validateParameters>
+    if (a <= 0 || b <= 0) { return function() { return NaN; }; }
+    </validateParameters>
+
+    <calculateConstants>
+    a0 = Math.min(a, b);
+    b0 = Math.max(a, b);
+    alpha = a0 + b0;
+    </calculateConstants>
+
+    <calculateForSmallA0>
+    if (a0 <= 1) {
+        beta = 1 / a0;
+        delta = 1 + b0 - a0;
+        k1 = delta * (0.0138889 + 0.0416667 * a0) / (b0 * beta - 0.777778);
+        k2 = 0.25 + (0.5 + 0.25 / delta) * a0;
+        </calculateForSmallA0>
+
+        <samplingAlgorithmSmallA0>
+        return function() {
+          
+            while (true) {
+                // Random number generation and calculations...
+                // Break condition within the loop...
+            }
+            return a === a0 ? a0 / (a0 + w) : w / (a0 + w);
+        };
+        </samplingAlgorithmSmallA0>
+    }
+    </calculateForSmallA0>
+
+    <calculateForNotSmallA0>
+    beta = Math.sqrt((alpha - 2) / (2 * a0 * b0 - alpha));
+    gamma = a0 + 1 / beta;
+    </calculateForNotSmallA0>
+
+    <samplingAlgorithmNotSmallA0>
+    return function() {
+      
+        while (true) {
+          
+            // Random number generation and calculations...
+            // Break condition within the loop...
+        }
+        
+        return a !== a0 ? b0 / (b0 + w) : w / (b0 + w);
+    };
+    </samplingAlgorithmNotSmallA0>
+}
+</rbeta>
+
+<undefinedFunction1>
+function(ev) {
+    <getPageY>
+    var y = ev.pageY;
+    if (!y && 0 !== y) {
+        y = ev.clientY || 0;
+        </getPageY>
+        
+        <adjustForIE>
+        if ( this.isIE ) {
+            y += this._getScrollTop();
+        }
+        </adjustForIE>
+    }
+
+    return y;
+}
+</undefinedFunction1>
+
+<undefinedFunction2>
+function (completion, localWebRtcStream) {
+    <tryExistingPeerConnection>
+    if (_peerConnection) {
+        completion.call(null, null, _peerConnection);
+        return;
+    }
+
+    _peerConnectionCompletionHandlers.push(completion);
+
+    if (_peerConnectionCompletionHandlers.length > 1) {
+        return;
+    }
+    </tryExistingPeerConnection>
+
+    <defineConstraints>
+    var pcConstraints = {
+        optional: [
+            
+            {DtlsSrtpKeyAgreement: true},
+            {googIPv6: false}
+        ]
+    };
+    </defineConstraints>
+
+    <logDebugInfo>
+    OT.debug('Creating peer connection config "' + JSON.stringify(config) + '".');
+    </logDebugInfo>
+
+    <validateIceServers>
+    if (!config.iceServers || config.iceServers.length === 0) {
+        OT.error('No ice servers present');
+    }
+    </validateIceServers>
+
+    <createPeerConnection>
+    OT.$.createPeerConnection(config, pcConstraints, localWebRtcStream, attachEventsToPeerConnection);
+    </createPeerConnection>
+}
+</undefinedFunction2>
+
+<generateCentWord>
+function generateCentWord(num) {
+    var word = "";
+    var hundredth;
+    var tenth;
+    var one;
+    var extractArr;
+
+    <extractNumbers>
+    extractArr = extract(str(num));
+    hundredth = extractArr[0];
+    tenth = extractArr[1];
+    one = extractArr[2];
+    </extractNumbers>
+
+    <buildWord>
+    word += getCent(tenth, one);
+    </buildWord>
+
+    return word;
+}
+</generateCentWord>
+
+<functionParamSqueue>
+function(paramSqueue) {
+    if (!paramSqueue) paramSqueue = '';
+    paramSqueue = '';
+    var emitter = new events.EventEmitter();
+    var squeueRes_dict = {
+        'id': [],
+        'partition': [],
+        'nameUUID': [],
+        'status': []
+    }
+
+    <executeCommand>
+    var exec_cmd = require('child_process').exec;
+    exec_cmd(queueBinary + '  -o \"%i \%P \%j \%t\" ' + paramSqueue, function(err, stdout, stderr) {
+        </executeCommand>
+        
+        <handleError>
+        if (err) {
+            emitter.emit('listError', err);
+            return;
+        }
+        </handleError>
+        
+        <parseCommandOutput>
+        var squeueRes_str = ('' + stdout).replace(/\"/g, '');
+        squeueRes_str.split('\n')
+            .filter(function(jobArray, i) {
+                return jobArray.length > 0 && i > 0;
+            })
+            .map(function(jobLine, i) {
+                return test = jobLine.split(' ').filter(function(val) {
+                    return val != '';
+                });
+            })
+            .map(function(jobArray, i) {
+                squeueRes_dict.id.push(jobArray[0]);
+                squeueRes_dict.partition.push(jobArray[1]);
+                squeueRes_dict.nameUUID.push(jobArray[2]);
+                squeueRes_dict.status.push(jobArray[3]);
+            });
+        </parseCommandOutput>
+        
+        <emitData>
+        emitter.emit('data', squeueRes_dict);
+        </emitData>
+    });
+
+    return emitter;
+}
+</functionParamSqueue>
+
+<autoSuspendFunction>
+function() {
+    var self = this;
+
+    <checkConditions>
+    if (!self.autoSuspend || !self.ctx || typeof self.ctx.suspend === 'undefined' || !Howler.usingWebAudio) {
+        return;
+    }
+    </checkConditions>
+
+    <verifyWebAudioAndPause>
+    for (var i=0; i<self._howls.length; i++) {
+        if (self._howls[i]._webAudio) {
+            for (var j=0; j<self._howls[i]._sounds.length; j++) {
+                if (!self._howls[i]._sounds[j]._paused) {
+                    return self;
+                }
+            }
+        }
+    }
+    </verifyWebAudioAndPause>
+
+    <setupSuspendTimer>
+    if (self._suspendTimer) {
+        clearTimeout(self._suspendTimer);
+    }
+    </setupSuspendTimer>
+
+    <initiateSuspend>
+    self._suspendTimer = setTimeout(function() {
+        if (!self.autoSuspend) {
+            return;
+        }
+
+        self._suspendTimer = null;
+        self.state = 'suspending';
+        self.ctx.suspend().then(function() {
+            self.state = 'suspended';
+
+            if (self._resumeAfterSuspend) {
+                delete self._resumeAfterSuspend;
+                self._autoResume();
+            }
+        });
+    }, 30000);
+    </initiateSuspend>
+
+    return self;
+}
+</autoSuspendFunction>
+
+<notifyAndTrigger>
+function(event, extraParams){
+    <checkForEmptySelection>
+    if( this.length === 0 ){ return; }
+    </checkForEmptySelection>
+
+    <notifyCy>
+    this.cy().notify({
+        type: event,
+        collection: this.filter(function(){
+            return !this.removed();
+        })
+    });
+    </notifyCy>
+   
+    <triggerEvent>
+    this.trigger(event, extraParams);
+    </triggerEvent>
+    return this;
+}
+</notifyAndTrigger>
+
+<setLambda>
+function setLambda(lambdaOptions, context) {
+    
+    <initializeOptions>
+    const options = lambdaOptions ? copy(lambdaOptions, deep) : {};
+    </initializeOptions>
+    
+    <manageRegion>
+    let region = options.region;
+    if (!region) {
+        const currentRegion = getRegion();
+        options.region = currentRegion;
+        region = currentRegion;
+    }
+    const regionKey = regions.getOrSetRegionKey(region);
+    </manageRegion>
+
+    <retrieveOrCreateLambdaInstance>
+    let lambda = lambdaByRegionKey.get(regionKey);
+    if (lambda) {
+        const debug = (context && context.debug) || console.log.bind(console);
+
+        <reuseLambdaCondition>
+        if (!lambdaOptions || Object.getOwnPropertyNames(lambdaOptions).length === 0) {
+            debug(`Reusing cached Lambda instance for region (${region}) with ANY options, since no options were specified`);
+            return lambda;
+        }
+
+        if (Object.getOwnPropertyNames(options).length === 1) {
+            debug(`Reusing cached Lambda instance for region (${region}) with ANY options, since only region was specified`);
+            return lambda;
+        }
+        </reuseLambdaCondition>
+
+        <compareOptions>
+        const optionsUsed = lambdaOptionsByRegionKey.get(regionKey);
+
+        if (deepEqual(optionsUsed, options, strict)) {
+            debug(`Reusing cached Lambda instance for region (${region}) with identical options`);
+            return lambda;
+        } else {
+            const logger = context && context.warn ? context : console;
+            logger.warn(`Replacing cached Lambda instance (${stringify(optionsUsed)}) for region (${region}) with new instance (${stringify(options)})`);
+        }
+        </compareOptions>
+    }
+    </retrieveOrCreateLambdaInstance>
+
+    <createNewLambdaInstance>
+    const Aws = context.AWS ? context.AWS : AWS;
+    lambda = new Aws.Lambda(options);
+    
+    lambdaByRegionKey.set(regionKey, lambda);
+    lambdaOptionsByRegionKey.set(regionKey, options);
+    </createNewLambdaInstance>
+
+    return lambda;
+}
+</setLambda>
+```

@@ -1,0 +1,217 @@
+```jsx
+<extractSelectionText>
+function () {
+    var nativeSel, nativeRange;
+    if ( this.isFocus() && (nativeSel = this.getNative()) ) {
+        <getRangeText>
+        nativeRange = browser.ie9below ? nativeSel.createRange() : nativeSel.getRangeAt( 0 );
+        return browser.ie9below ? nativeRange.text : nativeRange.toString();
+        </getRangeText>
+    }
+    return '';
+}
+</extractSelectionText>
+
+<updateElementRepresentation>
+function(elem) {
+	<serializeElementValue>
+	var t = this,
+		strValue;
+
+	try {strValue = JSON.stringify(elem.value);}
+	catch (e) {strValue = "{object}";}
+	</serializeElementValue>
+
+	<updateStringValue>
+	if (strValue !== elem.strValue) {
+		var priorStrValue = elem.strValue;
+		elem.strValue = strValue;
+	</updateStringValue>
+
+	<updateDisplayText>
+	elem.span.text(strValue);
+	if (elem.innerView) {
+		elem.innerView.model = elem.value;
+		elem.innerView.setData();
+	</updateDisplayText>
+
+	<togglingElementVisibility>
+	var isClosed = false;
+	if (priorStrValue) {
+		isClosed = elem.innerView.isClosed;
+	} else {
+		isClosed = t.closedOnInit ? true : strValue.length < AUTO_CLOSE_CHARS;
+	}
+	t.toggleClosed(elem, isClosed);
+	</togglingElementVisibility>
+	}
+}
+</updateElementRepresentation>
+
+<renderPercentageIndicator>
+function() {
+	var width = canvasWidth,
+	height = canvasHeight,
+	positionX = canvasWidth / 2,
+	positionY = canvasHeight / 2,
+	alphaPercentage = (width / 100) * self.currentPercentage;
+
+	<clearCanvas>
+	clear();
+	</clearCanvas>
+
+	<drawPercentageText>
+	ctx.restore();
+	ctx.beginPath();
+	ctx.font = font;
+	ctx.fillStyle = color;
+	ctx.textAlign = "center";
+	ctx.fillText((self.currentPercentage | 0) + "%", positionX, positionY - (lineWidth + 10));
+	</drawPercentageText>
+	
+	<drawProgress>
+	ctx.lineWidth = lineWidth;
+	ctx.strokeStyle = color;
+	if (glowColor) {
+		ctx.shadowOffsetX = 0;
+		ctx.shadowOffsetY = 0;
+		ctx.shadowBlur = 10;
+		ctx.shadowColor = glowColor;
+	}
+	ctx.moveTo(positionX - (width / 2), positionY);
+	ctx.lineTo(alphaPercentage, positionY);
+	ctx.stroke();
+	</drawProgress>
+
+	<saveCanvasState>
+	ctx.save();
+	</saveCanvasState>
+}
+</renderPercentageIndicator>
+
+<BCDtoInteger>
+function(bcd) 
+{
+	var n = 0;
+	var m = 1;
+	for(var i = 0; i<bcd.length; i+=1) {
+		n += (bcd[bcd.length-1-i] & 0x0F) * m;
+		n += ((bcd[bcd.length-1-i]>>4) & 0x0F) * m * 10;
+		m *= 100;
+	}
+	return n;
+}
+</BCDtoInteger>
+
+<createDelayedObservable>
+function delayWhen$2(delayDurationSelector, subscriptionDelay) {
+	if (subscriptionDelay) {
+		return new SubscriptionDelayObservable(this, subscriptionDelay)
+			.lift(new DelayWhenOperator(delayDurationSelector));
+	}
+	return this.lift(new DelayWhenOperator(delayDurationSelector));
+}
+</createDelayedObservable>
+
+<checkIfReserved>
+function reserved(name) {
+	if (!_.isString(name)) {
+		return false;
+	}
+	
+	return _.contains(RESERVED, name);
+}
+</checkIfReserved>
+
+<validateWithException>
+function validateToThrow() {
+	var s = this;
+	var error = s.validate.apply(s, arguments);
+	
+	if (error) {
+		throw error;
+	}
+}
+</validateWithException>
+
+<initializeSetCache>
+function SetCache(values) {
+	var index = -1,
+	length = values == null ? 0 : values.length;
+	
+	this.__data__ = new MapCache();
+	while (++index < length) {
+		this.add(values[index]);
+	}
+}
+</initializeSetCache>
+
+<createSpriteMouseEvent>
+function SpriteMouseEvent(metas) {
+	this.target = metas.target;
+	this.x = metas.x;
+	this.y = metas.y;
+	this.from = metas.from;
+	this.fromX = metas.fromX;
+	this.fromY = metas.fromY;
+	this.stage = metas.stage;
+}
+</createSpriteMouseEvent>
+
+<handleWriteCoil>
+function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
+	<parseRequest>
+	var address = requestBuffer.readUInt16BE(2);
+	var state = requestBuffer.readUInt16BE(4);
+	</parseRequest>
+
+	<checkRequestBuffer>
+	if (_errorRequestBufferLength(requestBuffer)) {
+		return;
+	}
+	</checkRequestBuffer>
+
+	<prepareResponse>
+	var responseBuffer = Buffer.alloc(8);
+	responseBuffer.writeUInt16BE(address, 2);
+	responseBuffer.writeUInt16BE(state, 4);
+	</prepareResponse>
+
+	<executeWriteAndRespond>
+	if (vector.setCoil) {
+		var callbackInvoked = false;
+		var cb = function(err) {
+			if (err) {
+				if (!callbackInvoked) {
+					callbackInvoked = true;
+					callback(err);
+				}
+				
+				return;
+			}
+
+			if (!callbackInvoked) {
+				modbusSerialDebug({ action: "FC5 response", responseBuffer: responseBuffer });
+				
+				callbackInvoked = true;
+				callback(null, responseBuffer);
+			}
+		};
+
+		try {
+			if (vector.setCoil.length === 4) {
+				vector.setCoil(address, state === 0xff00, unitID, cb);
+			}
+			else {
+				var promiseOrValue = vector.setCoil(address, state === 0xff00, unitID);
+				_handlePromiseOrValue(promiseOrValue, cb);
+			}
+		}
+		catch(err) {
+			cb(err);
+		}
+	}
+	</executeWriteAndRespond>
+}
+</handleWriteCoil>
+```

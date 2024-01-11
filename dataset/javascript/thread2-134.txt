@@ -1,0 +1,236 @@
+```javascript
+<mergeSubmatrices>
+function mergeSubmatrices(sbmA, sbmB) {
+    
+    <checkCompatibility>
+    if (sbmA.x != sbmB.x || sbmA.y != sbmB.y) {
+      return
+    }
+    </checkCompatibility>
+    
+    <initializeMatrix>
+    var mat = {}
+    mat.x = sbmA.x
+    mat.y = sbmA.y
+    mat.data = []
+    </initializeMatrix>
+    
+    <mergeData>
+    for (var i = 0; i < mat.x; i++) {
+      mat.data[i] = _.union(sbmA.data[i], sbmB.data[i]).sort()
+    }
+    </mergeData>
+    
+    return mat
+}
+</mergeSubmatrices>
+
+<bindAndBufferData>
+function bindAndBufferData(array) {
+    var gl = this.gl;
+    <bindBuffer>
+    gl.bindBuffer(TGT, this.buffer);
+    </bindBuffer>
+    <bufferData>
+    gl.bufferData(TGT, array, this.usage);
+    </bufferData>
+    <unbindBuffer>
+    gl.bindBuffer(TGT, null);
+    </unbindBuffer>
+
+    <setByteLength>
+    this.byteLength = (array.byteLength === undefined) ? array : array.byteLength;
+    </setByteLength>
+    <computeLength>
+    this._computeLength();
+    </computeLength>
+}
+</bindAndBufferData>
+
+<scaleAndDrawImage>
+function scaleAndDrawImage(source, $destination, maxSize) {
+    <calculateSize>
+    var size = calculateSize(source, maxSize);
+    </calculateSize>
+    <setDimensions>
+    setDimensions($destination, size, 1);
+    </setDimensions>
+    <getContextAndDrawImage>
+    var destCtx = $destination[0].getContext('2d');
+    destCtx.drawImage(source, 0, 0, source.width, source.height,
+        0, 0, size.width, size.height);
+    </getContextAndDrawImage>
+}
+</scaleAndDrawImage>
+
+<dropArrayElements>
+function unsafeDrop(n, a, l) {
+    <createNewArray>
+    const b = new Array(l)
+    </createNewArray>
+    <copyElements>
+    for (let i = 0; i < l; ++i) {
+        b[i] = a[n + i]
+    }
+    </copyElements>
+    return b
+}
+</dropArrayElements>
+
+<createOneOfTypeChecker>
+function createOneOfTypeChecker(expectedEnumOfTypeValues) {
+    <returnChainableChecker>
+    return createChainableChecker(function (data, dataName, componentName, fullDataName) {
+        <validateDataValues>
+        if (getDataType(expectedEnumOfTypeValues) !== 'array') {
+            throw new Error('[SAN ERROR] '
+                + 'Data `' + dataName + '` of `' + componentName + '` has invalid '
+                + 'DataType notation inside `oneOf`, array is expected.'
+            );
+        }
+
+        var dataValue = data[dataName];
+
+        for (var i = 0, len = expectedEnumOfTypeValues.length; i < len; i++) {
+            var checker = expectedEnumOfTypeValues[i];
+            if (typeof checker !== 'function') {
+                continue;
+            }
+            try {
+                checker(data, dataName, componentName, fullDataName);
+                return;
+            }
+            catch (e) {
+            }
+        }
+        
+        throw new Error('[SAN ERROR] '
+            + 'Invalid ' + componentName + ' data `' + dataName + '` of value'
+            + '(`' + dataValue + '` supplied to ' + componentName + ')'
+        );
+        </validateDataValues>
+    });
+    </returnChainableChecker>
+}
+</createOneOfTypeChecker>
+
+<initializeMailer>
+function Mailer(config, middleware) {
+    <assignMiddleware>
+    app[middleware] = this;
+    </assignMiddleware>
+    
+    <mergeConfigs>
+    this.config = protos.extend({
+        default: 'sendmail'
+    }, config);
+    </mergeConfigs>
+    
+    <createTransports>
+    createTransports.call(this);
+    </createTransports>
+}
+</initializeMailer>
+
+<updateButtonState>
+function updateButtonState(stateName) {
+    <setStateName>
+    this._stateName = stateName;
+    </setStateName>
+    <updateUI>
+    this._updateIcons();
+    if (this._updateFrameWidth()) {
+        this._frame.resize(this._frameWidth, this._outerHeight);
+    }
+    ariaUtilsArray.forEach(this._iconsLeft, this._changeIconState, this);
+    this._frame.changeState(stateName);
+    ariaUtilsArray.forEach(this._iconsRight, this._changeIconState, this);
+    this.innerWidth = this._frame.innerWidth;
+    this.innerHeight = this._frame.innerHeight;
+    </updateUI>
+}
+</updateButtonState>
+
+<removeResponseListeners>
+function removeListeners() {
+    <removeErrorListener>
+    res.removeListener('error', removeListeners);
+    </removeErrorListener>
+    <removeCloseListener>
+    res.removeListener('close', removeListeners);
+    </removeCloseListener>
+    <removeFinishListener>
+    res.removeListener('finish', onResponseFinished);
+    </removeFinishListener>
+}
+</removeResponseListeners>
+
+<selectFieldUI>
+function selectField(options) {
+    var self = this;
+    <mixinComponents>
+    var $el = mixin_basic_component(self, "select");
+    mixin_emitter(self);
+    </mixinComponents>
+
+    var _sel_idx = -1;
+    <defineDataProperty>
+    Object.defineProperty(self, "data", {
+        get: function () {
+            return _sel_idx;
+        },
+        set: function (n) {
+            if (n == null || n < 0 || n > options.options.length) n = -1;
+            _sel_idx = n;
+            updateUI();
+        }
+    });
+    </defineDataProperty>
+
+    <updateUIFunction>
+    function updateUI(){
+        $el.empty();
+        for (var i=0; i<options.options.length; i++){
+          (function(o,i){
+            var $o = $$('option');
+            if (_sel_idx == i) $o.addClass('selected');
+            $o.text(o);
+            $o.click(function(){
+              self.data = i;
+              self.emit('change');
+            });
+            $el.append($o);
+          })(options.options[i], i);
+        }
+    }
+    </updateUIFunction>
+}
+</selectFieldUI>
+
+<findByCredentials>
+function findByCredentials(username, password, cb) {
+    <encodePassword>
+    crypto.encode(password, function(err, encoded) {
+        if(err) { return cb(err); }
+    </encodePassword>
+
+    <getClientAndQuery>
+    db.getClient(function(err, client, done) {
+        client.query(SELECT_CREDENTIALS, [username, encoded], function(err, r) {
+            <processQueryResults>
+            var result = r && r.rows[0];
+            if(!err && !result) { err = new exceptions.AuthenticationFailed(); }
+            if(err) {
+                cb(err);
+                done(err);
+            } else {
+                cb(null, result);
+                done();
+            }
+            </processQueryResults>
+        });
+    });
+    </getClientAndQuery>
+}
+</findByCredentials>
+```

@@ -1,0 +1,389 @@
+```javascript
+<getCroppedCanvas>
+function getCroppedCanvas() {
+  <verifyStateAndFeatureSupport>
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  if (!this.ready || !window.HTMLCanvasElement) {
+    return null;
+  }
+  var canvasData = this.canvasData;
+  </verifyStateAndFeatureSupport>
+
+  <getSourceCanvas>
+  var source = getSourceCanvas(this.image, this.imageData, canvasData, options);
+  </getSourceCanvas>
+
+  <checkCropped>
+  if (!this.cropped) {
+    return source;
+  }
+  </checkCropped>
+
+  <calculateInitialDimensionsAndRatio>
+  var _getData = this.getData(),
+      initialX = _getData.x,
+      initialY = _getData.y,
+      initialWidth = _getData.width,
+      initialHeight = _getData.height;
+  var ratio = source.width / Math.floor(canvasData.naturalWidth);
+  if (ratio !== 1) {
+    initialX *= ratio;
+    initialY *= ratio;
+    initialWidth *= ratio;
+    initialHeight *= ratio;
+  }
+  </calculateInitialDimensionsAndRatio>
+
+  <computeSizes>
+  var aspectRatio = initialWidth / initialHeight;
+  var maxSizes = getAdjustedSizes({
+    aspectRatio: aspectRatio,
+    width: options.maxWidth || Infinity,
+    height: options.maxHeight || Infinity
+  });
+  var minSizes = getAdjustedSizes({
+    aspectRatio: aspectRatio,
+    width: options.minWidth || 0,
+    height: options.minHeight || 0
+  }, 'cover');
+  var _getAdjustedSizes = getAdjustedSizes({
+    aspectRatio: aspectRatio,
+    width: options.width || (ratio !== 1 ? source.width : initialWidth),
+    height: options.height || (ratio !== 1 ? source.height : initialHeight)
+  }),
+      width = _getAdjustedSizes.width,
+      height = _getAdjustedSizes.height;
+  width = Math.min(maxSizes.width, Math.max(minSizes.width, width));
+  height = Math.min(maxSizes.height, Math.max(minSizes.height, height));
+  </computeSizes>
+  
+  <createAndConfigureCanvas>
+  var canvas = document.createElement('canvas');
+  var context = canvas.getContext('2d');
+  canvas.width = normalizeDecimalNumber(width);
+  canvas.height = normalizeDecimalNumber(height);
+  context.fillStyle = options.fillColor || 'transparent';
+  context.fillRect(0, 0, width, height);
+  var _options$imageSmoothingEnabled = options.imageSmoothingEnabled,
+      imageSmoothingEnabled = _options$imageSmoothingEnabled === undefined ? true : _options$imageSmoothingEnabled,
+      imageSmoothingQuality = options.imageSmoothingQuality;
+  context.imageSmoothingEnabled = imageSmoothingEnabled;
+  if (imageSmoothingQuality) {
+    context.imageSmoothingQuality = imageSmoothingQuality;
+  }
+  </createAndConfigureCanvas>
+
+  <defineDrawingDimensions>
+  var sourceWidth = source.width;
+  var sourceHeight = source.height;
+  var srcX = initialX;
+  var srcY = initialY;
+  var srcWidth = void 0;
+  var srcHeight = void 0;
+  var dstX = void 0;
+  var dstY = void 0;
+  var dstWidth = void 0;
+  var dstHeight = void 0;
+  if (srcX <= -initialWidth || srcX > sourceWidth) {
+    srcX = 0;
+    srcWidth = 0;
+    dstX = 0;
+    dstWidth = 0;
+  } else if (srcX <= 0) {
+    dstX = -srcX;
+    srcX = 0;
+    srcWidth = Math.min(sourceWidth, initialWidth + srcX);
+    dstWidth = srcWidth;
+  } else if (srcX <= sourceWidth) {
+    dstX = 0;
+    srcWidth = Math.min(initialWidth, sourceWidth - srcX);
+    dstWidth = srcWidth;
+  }
+  if (srcWidth <= 0 || srcY <= -initialHeight || srcY > sourceHeight) {
+    srcY = 0;
+    srcHeight = 0;
+    dstY = 0;
+    dstHeight = 0;
+  } else if (srcY <= 0) {
+    dstY = -srcY;
+    srcY = 0;
+    srcHeight = Math.min(sourceHeight, initialHeight + srcY);
+    dstHeight = srcHeight;
+  } else if (srcY <= sourceHeight) {
+    dstY = 0;
+    srcHeight = Math.min(initialHeight, sourceHeight - srcY);
+    dstHeight = srcHeight;
+  }
+  var params = [srcX, srcY, srcWidth, srcHeight];
+  if (dstWidth > 0 && dstHeight > 0) {
+    var scale = width / initialWidth;
+    params.push(dstX * scale, dstY * scale, dstWidth * scale, dstHeight * scale);
+  }
+  </defineDrawingDimensions>
+
+  <performDrawImage>
+  context.drawImage.apply(context, [source].concat(toConsumableArray(params.map(function (param) {
+    return Math.floor(normalizeDecimalNumber(param));
+  }))));
+  </performDrawImage>
+
+  return canvas;
+}
+</getCroppedCanvas>
+
+<App>
+function App() {
+  <initializeUI>
+  this.ui = {
+    'map': 'j-map',
+    'panel': 'j-panel',
+    'header': 'j-header',
+    'overlay': 'j-overlay'
+  };
+  </initializeUI>
+
+  <selectAppElement>
+  this.$app = document.getElementById('j-app');
+  </selectAppElement>
+
+  <instantiateModels>
+  this.map;
+  this.user = new User();
+  this.places = new Places();
+  this.checkin = Checkin;
+  </instantiateModels>
+
+  <definePages>
+  this._PAGES = ['dashboard', 'new_place', 'place_detailed', 'checkin'];
+  </definePages>
+
+  <setUpActivePageControl>
+  this._activePageName = '';
+  Object.defineProperty(this, 'activePage', {
+    set: function(params) {
+      var self = this;
+      self._PAGES.forEach(function(pName) {
+        self.$app.classList.remove(pName);
+      });
+      self.$app.classList.add(params.pageName);
+      self.renderPage(params.pageName, params.detailed);
+      this._activePageName = params.pageName;
+    },
+    get: function() {
+      return this._activePageName;
+    }
+  });
+  </setUpActivePageControl>
+
+  <initializeApp>
+  this._init();
+  </initializeApp>
+}
+</App>
+
+<mkScriptHashReplayScript>
+function mkScriptHashReplayScript(address) {
+  <decodeAddress>
+  var addrHex = bs58check.decode(address).toString('hex');
+  var subAddrHex = addrHex.substring(4, addrHex.length);
+  </decodeAddress>
+
+  <constructScript>
+  return zopcodes.OP_DUP + zopcodes.OP_HASH160 + zbufferutils.getStringBufferLength(subAddrHex) + subAddrHex + zopcodes.OP_EQUALVERIFY + zopcodes.OP_CHECKSIG;
+  </constructScript>
+}
+</mkScriptHashReplayScript>
+
+<initializeRecord>
+function(records,config) {
+  this.id = new Date();
+  <processRecords>
+  if ( records instanceof Array ) {
+      this.records = records;
+  } else {
+      var dataField = records.data;
+      var data = records.datasource;
+      this.records =  data[dataField];
+  }
+  </processRecords>
+  <setUpConfig>
+  this.config = config;
+  if ( this.config ) {
+      this.propertyConfigMap = {};
+      this.config.cols.forEach( col => {
+          this.propertyConfigMap[col.property] = col;
+      });
+  }
+  </setUpConfig>
+}
+</initializeRecord>
+
+<SemanticResponse>
+function SemanticResponse (response, path) {
+  <assignSchemaAndHeaders>
+  this.schema = response.schema || null;
+  this.headers = response.headers || null;
+  </assignSchemaAndHeaders>
+
+  <determineEmptiness>
+  this.isEmpty = !response.schema;
+  </determineEmptiness>
+
+  <defaultCollectionAndWrapping>
+  this.isCollection = false;
+  this.isWrapped = false;
+  this.wrapperProperty = "";
+  </defaultCollectionAndWrapping>
+
+  <lastModifiedAndLocationDefaults>
+  this.lastModified = null;
+  this.location = "";
+  </lastModifiedAndLocationDefaults>
+
+  <setWrapperInfo>
+  if (!this.isEmpty) {
+    this.setWrapperInfo(response, path);
+  }
+  </setWrapperInfo>
+}
+</SemanticResponse>
+
+<CommandProcessor>
+function CommandProcessor(conn) {
+  <inheritEventEmitter>
+  events.EventEmitter.call(this);
+  </inheritEventEmitter>
+
+  <initializeConnectionsAndTimeStamps>
+  this.conn = conn;
+  this.connected_at = +new Date();
+  this.last_data_at = 0;
+  this.last_ping_at = 0;
+  </initializeConnectionsAndTimeStamps>
+
+  <initializeTimeouts>
+  p.data_timeout = -1; 
+  p.data_timeout_TID = null;
+  p.ping_timeout = -1; 
+  p.ping_timeout_TID = null;
+  </initializeTimeouts>
+
+  <setupRequests>
+  this._request_id = 0;
+  this._requests_in_flight = {};
+  </setupRequests>
+
+  <setupConnectionEvents>
+  var _handle_disconnection = _.once(this._handle_disconnection.bind(this));
+  conn.on('data',  this.process_data.bind(this));
+  conn.on('error', _handle_disconnection);
+  conn.on('end',   _handle_disconnection); 
+  conn.on('close', _handle_disconnection);
+  </setupConnectionEvents>
+
+  <initializeTimeoutHandlers>
+  this._emit_data_timeout = this._emit_data_timeout .bind(this);
+  this._emit_ping_timeout = this._emit_ping_timeout .bind(this);
+  this.set_timeouts();
+  </initializeTimeoutHandlers>
+}
+</CommandProcessor>
+
+<makeLineChartPath>
+function makeLineChartPath(chart, width, t, maxValue, chartHeight, chartHeightOffset, markerRadius, pointsOnScreen) {
+  <makePath>
+  return makeLineOrAreaChartPath(chart, width, t, maxValue, chartHeight, chartHeightOffset, markerRadius, pointsOnScreen, false, false);
+  </makePath>
+}
+</makeLineChartPath>
+
+<AppMessageListener>
+function AppMessageListener(message) {
+  <processPID>
+  if (message.pid) { 
+    dashboard.pid = message.pid
+    if (message.state === 'run'&& conf.signal) pidlink.getData(dashboard.pid, conf.id, pidLinkListener)
+  }
+  </processPID>
+  <processExitAndLaunch>
+  if (message.exit) dashboard.exitCode = message.exit
+  if (message.lastLaunch) dashboard.lastLaunch = message.lastLaunch
+  </processExitAndLaunch>
+  <handleStateChange>
+  if (message.state) {
+    dashboard.state = message.state
+    if (message.state === 'stop') {
+      watchers.deactivate() 
+      dashboard.pid = 0
+    }
+    if (message.state === 'crash') {
+      
+      var previousCrash = dashboard.lastCrash
+      dashboard.lastCrash = message.lastExit
+      dashboard.crashCount++
+      dashboard.pid = 0
+      <recoveryDecision>
+      var doRecovery = !previousCrash 
+      if (!doRecovery) { 
+        var elapsed = Math.floor((dashboard.lastCrash - previousCrash) / 1000)
+        doRecovery = elapsed >= minSecondsCrashToCrash
+      }
+      if (doRecovery) appLink.recover()
+      </recoveryDecision>
+    }
+    if (message.state === 'run' ||
+      message.state === 'debug' ||
+      message.state === 'crash') {
+      watchers.activate()
+    }
+    updateDashboard()
+  }
+  </handleStateChange>
+}
+</AppMessageListener>
+
+<changedActiveItems>
+function changedActiveItems(item) {
+  <handleNonDataflowURL>
+  if (!defined(item._dataflowUrl)) {
+    var shownDimensionCombinations = calculateShownDimensionCombinations(
+      item,
+      item._fullDimensions
+    );
+    var columns = item._tableStructure.columns.slice(
+      0,
+      shownDimensionCombinations.ids.length + item._numberOfInitialColumns
+    );
+    if (columns.length > 0) {
+      columns = columns.concat(
+        buildTotalSelectedColumn(item, shownDimensionCombinations)
+      );
+      updateColumns(item, columns);
+    }
+    return when();
+  } else {
+    <dataflowURLDataLoading>
+    var activeConceptIds = calculateActiveConceptIds(item);
+    var dimensionRequestString = calculateDimensionRequestString(
+      item,
+      activeConceptIds,
+      item._fullDimensions
+    );
+    if (!defined(dimensionRequestString)) {
+      return; 
+    }
+    return loadAndBuildTable(item, dimensionRequestString);
+    </dataflowURLDataLoading>
+  }
+  </handleNonDataflowURL>
+}
+</changedActiveItems>
+
+<Compiler>
+function Compiler(options) {
+  options = options || {};
+  Base.call(this, options);
+  this.indentation = options.indent;
+}
+</Compiler>
+```

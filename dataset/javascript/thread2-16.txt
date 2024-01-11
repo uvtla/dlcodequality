@@ -1,0 +1,235 @@
+```javascript
+<toknam>
+function toknam(code) {
+  var keys = Object.keys(C);
+  for (var i = 0, l = keys.length; i < l; i++) {
+    var key = keys[i];
+    if (C[key] === code) { return key; }
+  }
+  return code && ("0x" + code.toString(16));
+}
+</toknam>
+```
+This function is compliant with SRP as its single responsibility is to map a code to a token name or return a hexadecimal string representation of the code.
+
+```javascript
+<warnIfGridRowColumnExists>
+function warnIfGridRowColumnExists (decl, result) {
+  let rule = decl.parent
+  let decls = []
+  rule.walkDecls(/^grid-(row|column)/, d => {
+    if (!/-end$/.test(d.prop) && !/^span/.test(d.value)) {
+      decls.push(d)
+    }
+  })
+  if (decls.length > 0) {
+    decls.forEach(d => {
+      d.warn(result,
+        `You already have a grid-area declaration present in the rule. ` +
+        `You should use either grid-area or ${ d.prop }, not both`)
+    })
+  }
+
+  return undefined
+}
+</warnIfGridRowColumnExists>
+```
+The function is SRP compliant, though it performs multiple steps, all steps contribute to a single responsibility - warning if grid row or column properties exist alongside grid-area.
+
+```javascript
+<getDependency>
+function getDependency(filepath) {
+    var bowerInfoStr = fs.readFileSync(filepath, {encoding: 'utf8'});
+    var bowerInfo = JSON.parse(bowerInfoStr);
+    return mapDependencyData(bowerInfo);
+}
+</getDependency>
+```
+While this function reads a file and parses its contents, the main responsibility is to get dependency information from a given filepath, making it SRP compliant.
+
+```javascript
+<pickAttributes>
+function pickAttributes(result, attributes) {
+  if (shouldIncludeAllAttributes(attributes)) {
+    attributes = function() { 
+      return(true); 
+    };
+  }
+  return(_.pick(result, attributes));
+}
+</pickAttributes>
+```
+This function is SRP compliant; its single responsibility is to filter the attributes from a result object.
+
+```javascript
+<multiselectUpdate>
+function() {
+  if (typeof this.options.selectAllValue === 'number') {
+    this.options.selectAllValue = this.options.selectAllValue.toString();
+  }
+
+  var alreadyHasSelectAll = this.hasSelectAll();
+
+  if (!alreadyHasSelectAll && this.options.includeSelectAllOption && this.options.multiple
+    && $('option', this.$select).length > this.options.includeSelectAllIfMoreThan) {
+
+    <insertSelectAllDivider>
+    if (this.options.includeSelectAllDivider) {
+      this.$ul.prepend($(this.options.templates.divider));
+    }
+    </insertSelectAllDivider>    
+
+    <createSelectAllElement>
+    var $li = $(this.options.templates.li);
+    $('label', $li).addClass("checkbox");
+    if (this.options.enableHTML) {
+      $('label', $li).html(" " + this.options.selectAllText);
+    }
+    else {
+      $('label', $li).text(" " + this.options.selectAllText);
+    }
+    
+    if (this.options.selectAllName) {
+      $('label', $li).prepend('<input type="checkbox" name="' + this.options.selectAllName + '" />');
+    }
+    else {
+      $('label', $li).prepend('<input type="checkbox" />');
+    }
+    </createSelectAllElement>
+
+    <configureAndAppendSelectAll>
+    var $checkbox = $('input', $li);
+    $checkbox.val(this.options.selectAllValue);
+
+    $li.addClass("multiselect-item multiselect-all");
+    $checkbox.parent().parent().addClass('multiselect-all');
+
+    this.$ul.prepend($li);
+
+    $checkbox.prop('checked', false);
+    </configureAndAppendSelectAll>
+  }
+}
+</multiselectUpdate>
+```
+In this unnamed function, distinct responsibilities are annotated for creating and updating UI elements, this represents a violation of SRP.
+
+```javascript
+<concatFiles>
+function concatFiles() {
+  return Promise.all(argv._.map(handleGlob)).then(globs => {
+    const files = globs.reduce((acc, cur) => acc.concat(cur), []);
+
+    if (
+      <validation>
+      (files.length < 2 && typeof argv.banner === 'undefined' && !argv.footer) ||
+      (files.length === 0 && (typeof argv.banner === 'undefined' || !argv.footer))
+      ) {
+      throw new Error(
+        chalk.bold.red('Require at least 2 file, banner or footer to concatenate. ("ncat --help" for help)\n')
+      );
+      </validation>
+    });
+    <fileConcatenation>
+    return files.forEach(file => {
+      concat.add(file.file, file.content, file.map);
+    });
+    </fileConcatenation>
+  });
+}
+</concatFiles>
+```
+Different responsibilities, such as validation and file concatenation, are annotated within this function, indicating a violation of SRP.
+
+```javascript
+<getConditions>
+function getConditions (req) {
+  if (req.baucis.conditions === undefined) {
+    req.baucis.conditions = {};
+    if (req.body.name === undefined) {
+      req.baucis.conditions[this.findBy()] = req.body.id || req.body._id;
+    } else {
+      req.baucis.conditions.name = req.body.name;
+    }
+  }
+  return req.baucis.conditions;
+}
+</getConditions>
+```
+This function is SRP compliant as it has a single responsibility to extract or initialize conditions for a request object.
+
+```javascript
+<createBundle>
+function createBundle(skyPagesConfig, webpack) {
+  const webpackConfig = require('../config/webpack/build-public-library.webpack.config');
+  const config = webpackConfig.getWebpackConfig(skyPagesConfig);
+  return runCompiler(webpack, config);
+}
+</createBundle>
+```
+The function maintains SRP by being responsible for only creating a bundle with the given configuration settings.
+
+```javascript
+<fireCallback>
+function fireCallback(callbackName) {
+  var data = [], len = arguments.length - 1;
+  while ( len-- > 0 ) data[ len ] = arguments[ len + 1 ];
+
+  <invokeGlobalCallback>
+  var globalCallbackValue;
+  if (globals[callbackName]) {
+    globalCallbackValue = globals[callbackName].apply(globals, data);
+  }
+  </invokeGlobalCallback>
+  
+  <invokeOptionCallback>
+  var optionCallbackValue;
+  if (options[callbackName]) {
+    optionCallbackValue = options[callbackName].apply(options, data);
+  }
+  </invokeOptionCallback>
+  
+  <determineReturnValue>
+  if (typeof globalCallbackValue !== 'boolean') { globalCallbackValue = true; }
+  if (typeof optionCallbackValue !== 'boolean') { optionCallbackValue = true; }
+  return (globalCallbackValue && optionCallbackValue);
+  </determineReturnValue>
+}
+</fireCallback>
+```
+This function has distinct responsibilities such as invoking global and option callbacks, and determining the return value, thus it violates SRP.
+
+```javascript
+<createIndexObject>
+function (excludeDisabled, caseSensitive, multiValue, sanitizeKeys) {
+  var obj = {}, 
+      key = this._postman_listIndexKey,
+      sanitiseKeys = this._postman_sanitizeKeys || sanitizeKeys,
+      sensitive = !this._postman_listIndexCaseInsensitive || caseSensitive,
+      multivalue = this._postman_listAllowsMultipleValues || multiValue;
+      
+  this.each(function (member) {
+    <memberValidation>
+    if (!member || !member.hasOwnProperty(key) || (excludeDisabled && member.disabled) ||
+      (sanitiseKeys && !member[key])) {
+      return;
+    }
+    </memberValidation>
+
+    <consolidateIndexProperty>
+    var prop = sensitive ? member[key] : String(member[key]).toLowerCase();
+    if (multivalue && obj.hasOwnProperty(prop)) {
+      (!Array.isArray(obj[prop])) && (obj[prop] = [obj[prop]]);
+      obj[prop].push(member.valueOf());
+    }
+    else {
+      obj[prop] = member.valueOf();
+    }
+    </consolidateIndexProperty>
+  });
+
+  return obj;
+}
+</createIndexObject>
+```
+While multiple steps are present, the function is SRP compliant because each step contributes to the cohesive responsibility of creating an index object from list members.

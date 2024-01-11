@@ -1,0 +1,192 @@
+```javascript
+<fetchAncestor>
+function fetchAncestor(type, ids, includePath, req) {
+    return router.actions["get" + util.toCapitalisedCamelCase(type)](ids, {include: includePath, parentRequest: req});
+}
+</fetchAncestor>
+
+<handlePlaceholder>
+function () {
+    if (!_placeholderSupported && this._cfg.placeholder) {
+        var element = this._domElt;
+        if (element.value === "") {
+            element.value = this._cfg.placeholder;
+            var cssClass = new aria.utils.ClassList(element);
+            cssClass.add('placeholder');
+            cssClass.$dispose();
+            if (this._hasFocus) {
+                ariaUtilsCaret.setPosition(element, 0, 0);
+            }
+            this._hasPlaceholder = true;
+            this._domElt.unselectable = "on";
+        }
+    }
+}
+</handlePlaceholder>
+
+<re_basicSortRows>
+function re_basicSortRows(field, sortType) {
+  <initializeRows>
+  var oThis = this,
+      groupField = this.gridComp.options.groupField;
+  if (!field) {
+      this.rows = new Array();
+      this.groupRows = new Array();
+      if (this.options.values) {
+          $.each(this.options.values, function (i) {
+              var rowObj = {};
+              rowObj.value = this;
+              rowObj.valueIndex = i;
+              oThis.rows.push(rowObj);
+              oThis.addOneRowGroup(rowObj);
+              oThis.rows = oThis.getGroupRows();
+          });
+      }
+      return;
+  }
+  </initializeRows>
+  <sortLogic>
+  if (groupField && field && groupField != field) {
+      oThis.rows = [];
+      $.each(this.groupRows, function () {
+          var nowGroup = this;
+          nowGroup.rows.sort(oThis.gridComp.SortByFun(field, sortType));
+          oThis.rows = oThis.rows.concat(nowGroup.rows);
+      });
+  } else {
+      this.rows.sort(this.gridComp.SortByFun(field, sortType));
+  }
+  </sortLogic>
+}
+</re_basicSortRows>
+
+<compareStringCH>
+function compareStringCH(x, y) {
+  <parametersDefaulting>
+  var isAsc = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+  var spC = arguments[3];
+  var spC2 = arguments[4];
+  var spV = arguments[5];
+  </parametersDefaulting>
+  <convertToPinyinAndCompare>
+  if (__WEBPACK_IMPORTED_MODULE_0__core__["a" ].GB2312Pinyin.fonts) {
+    x = x == null || x === '' ? '' : __WEBPACK_IMPORTED_MODULE_1__regexp__["chFirst"].test(x) ? getGB2312Pinyin(getFirstChar(x)) : getFirstChar(x);
+    y = y == null || y === '' ? '' : __WEBPACK_IMPORTED_MODULE_1__regexp__["chFirst"].test(y) ? getGB2312Pinyin(getFirstChar(y)) : getFirstChar(y);
+    return compare(x, y, isAsc, spC, spC2, spV);
+  } else {
+    return compareStringEN(x, y, isAsc, spC, spC2, spV);
+  }
+  </convertToPinyinAndCompare>
+}
+</compareStringCH>
+
+<multiplyByInverse>
+function multiplyByInverse(node) {
+  <extractDenominator>
+  let denominator = node.args[1];
+  if (Node.Type.isParenthesis(denominator)) {
+    denominator = denominator.content;
+  }
+  if (!Node.Type.isOperator(denominator) || denominator.op !== '/') {
+    return Node.Status.noChange(node);
+  }
+  </extractDenominator>
+  
+  <createInverseAndNewNode>
+  const inverseNumerator = denominator.args[1];
+  const inverseDenominator = denominator.args[0];
+  const inverseFraction = Node.Creator.operator('/', [inverseNumerator, inverseDenominator]);
+
+  const newNode = Node.Creator.operator('*', [node.args[0], inverseFraction]);
+  return Node.Status.nodeChanged(ChangeTypes.MULTIPLY_BY_INVERSE, node, newNode);
+  </createInverseAndNewNode>
+}
+</multiplyByInverse>
+
+<setupClient>
+function(id, socket) {
+  EventEmitter.call(this);
+  this.id = id;
+  this.socket = socket;
+  <initializeRemoteAddress>
+  this.remoteAddress = {
+    ip: socket.handshake.address.address,
+    port: socket.handshake.address.port
+  };
+  </initializeRemoteAddress>
+
+  <socketEventHandlers>
+  var self = this;
+
+  socket.on('disconnect', this.emit.bind(this, 'disconnect'));
+
+  socket.on('error', this.emit.bind(this, 'error'));
+
+  socket.on('message', function(msg) {
+    self.emit('message', msg);
+  });
+  </socketEventHandlers>
+  
+  this.state = ST_INITED;
+}
+</setupClient>
+
+<getNotIncrementedTopicPayloads>
+function getNotIncrementedTopicPayloads(previousConsumerReadOffset, consumer) {
+    let notIncrementedTopicPayloads = consumer.topicPayloads.filter((topicPayload) => {
+        <compareOffsets>
+        let {topic, partition, offset: currentOffset} = topicPayload;
+        let previousTopicPayloadForPartition = _.find(previousConsumerReadOffset, {topic, partition});
+        return previousTopicPayloadForPartition && currentOffset === previousTopicPayloadForPartition.offset;
+        </compareOffsets>
+    });
+
+    return notIncrementedTopicPayloads;
+}
+</getNotIncrementedTopicPayloads>
+
+<updateAnnotationPosition>
+function() {
+  var elem = $(this);
+  var data = window.kelmu.data[id];
+  data.selectedElementNumber = parseInt(elem.attr('data-annotation'), 10);
+  var elemData = data.definitions['step' + data.stepNumber][data.subStepNumber][data.selectedElementNumber];
+  <setElementData>
+  elemData.top = parseFloat(elem.css('top'));
+  elemData.left = parseFloat(elem.css('left'));
+
+  if (elem.hasClass('kelmu-annotation')) {
+    elemData.height = elem.height();
+    elemData.width = elem.width();
+  }
+  </setElementData>
+}
+</updateAnnotationPosition>
+
+<defineModule>
+function(id, deps, factory, _special) {
+    define(id, deps, factory, _special || USED_AS_TRANSPORT);
+}
+</defineModule>
+
+<axisCenteredPositionProperties>
+function axisCenteredPositionProperties(options) {
+  <calculateCenteringOffsets>
+  const { oDim, wDim } = options;
+  const { center, leftOffset, rightOffset } = centeringProperties(options);
+  if (leftOffset > 0 || rightOffset > 0) {
+    
+    if (leftOffset < rightOffset) {
+      return { offset: rightOffset, position: wDim - oDim };
+    }
+    
+    if (rightOffset < leftOffset) {
+      return { offset: -leftOffset, position: 0 };
+    }
+  }
+  </calculateCenteringOffsets>
+  
+  return { offset: 0, position: center - oDim / 2 };
+}
+</axisCenteredPositionProperties>
+```

@@ -1,0 +1,186 @@
+<solveIntersection>
+function solveIntersection (a, b, c, d) {
+  var ba = rvSub(b, a)
+  var dc = rvSub(d, c)
+
+  var baXdc = ratPerp(ba, dc)
+
+  if (ratSign(baXdc) === 0) {
+    return null
+  }
+
+  var ac = rvSub(a, c)
+  var dcXac = ratPerp(dc, ac)
+
+  var t = ratDiv(dcXac, baXdc)
+  var s = rvMuls(ba, t)
+  var r = rvAdd(a, s)
+
+  return r
+}
+</solveIntersection>
+
+<defineGlobalObject>
+function(module, exports) {
+  (function(global) {"use strict";
+  <determineRootObject>
+  var objectTypes = {
+      'boolean': false,
+      'function': true,
+      'object': true,
+      'number': false,
+      'string': false,
+      'undefined': false
+  };
+  exports.root = (objectTypes[typeof self] && self) || (objectTypes[typeof window] && window);
+  var freeGlobal = objectTypes[typeof global] && global;
+  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal)) {
+      exports.root = freeGlobal;
+  }
+  </determineRootObject>
+  
+  }.call(exports, (function() { return this; }())))
+}
+</defineGlobalObject>
+
+<loadProviders>
+function loadProviders (store, cid, callback) {
+  pull(
+    store.query({ prefix: makeProviderKey(cid) }),
+    pull.map((entry) => {
+      const parts = entry.key.toString().split('/')
+      const lastPart = parts[parts.length - 1]
+      const rawPeerId = utils.decodeBase32(lastPart)
+      return [new PeerId(rawPeerId), readTime(entry.value)]
+    }),
+    pull.collect((err, res) => {
+      if (err) {
+        return callback(err)
+      }
+
+      return callback(null, new Map(res))
+    })
+  )
+}
+</loadProviders>
+
+<getFromAttribute>
+function getFromAttribute(component, propertyName, source) {
+  var value;
+  var mappings = source.mappings || {};
+  var route = component.name + '.' + propertyName;
+  var primitiveAttribute = <findPrimitiveAttribute>findAttribute(mappings, route);</findPrimitiveAttribute>
+  if (primitiveAttribute && source.hasAttribute(primitiveAttribute)) {
+    value = source.getAttribute(primitiveAttribute);
+  }
+  return value;
+
+  function findAttribute(mappings, route) {
+    var attributes = Object.keys(mappings);
+    for (var i = 0, l = attributes.length; i < l; i++) {
+      var attribute = attributes[i];
+      if (mappings[attribute] === route) {
+        return attribute;
+      }
+    }
+    return undefined;
+  }
+}
+</getFromAttribute>
+
+<removeClass>
+function removeClass(element, name) {
+    var oldList = <classListExtraction>classList(element),</classListExtraction>
+        newList;
+
+    if (!hasClass(element, name)) return;
+
+    
+    newList = oldList.replace(' ' + name + ' ', ' ');
+
+    
+    element.className = newList.substring(1, newList.length - 1);
+}
+</removeClass>
+
+<createFieldRequest>
+function createFieldRequest(columnName, position) {
+
+    if (util.isNaN(position) || position <= 0) {
+        throw new TypeError('Position should be a number which is higher than one!');
+    }
+
+    var xw = createXMLWriter();
+
+    xw = xw.startElement('gs:cell')
+        .writeAttribute('row', 1)
+        .writeAttribute('col', position)
+        .writeAttribute('inputValue', columnName)
+        .endElement();
+
+    return xw.endElement().toString();
+}
+</createFieldRequest>
+
+<parseQueryMap>
+function parseQueryMap(query) {
+  var map = {};
+  parseQueryString(query, function(key, value) {
+    map[key] = value;
+  });
+  return map;
+}
+</parseQueryMap>
+
+<customizeMethods>
+function customizeMethods(custom) {
+  _.each(custom, function(classMethods, className) {
+    _.extend(xml2js.CLASSES[className].methods, _.pick(classMethods, function(methodSpec, methodName) {
+      return isValidMethodSpec(methodSpec, className + '.' + methodName);
+    }));
+  });
+}
+</customizeMethods>
+
+<getClass>
+function getClass(value) {
+      if (value == null) {
+        return value === null ? <identifyNullType>'Null'</identifyNullType> : <identifyUndefinedType>'Undefined'</identifyUndefinedType>;
+      }
+      try {
+        var result = <extractClassName>_.result(/^\[object (.*?)\]$/.exec(toString.call(value)), 1);</extractClassName>
+      } catch(e) {}
+
+      return result || '';
+}
+</getClass>
+
+<defaultConfiguration>
+function defaultConfiguration(config) {
+  config = _.defaults({}, config, {
+    <setDefaultValues>
+    name: 'Sparky',
+    endpoint: '/relay',
+    convos: [],
+    sending_address: config.address,
+    inbound_address: config.address,
+    transport: 'sparkpost',
+    restrict_inbound: true,
+    logger: 'verbose',
+    size_limit: '50mb'
+    </setDefaultValues>
+  });
+
+  config.address = <cleanAddresses>
+  cleanAddress(config.address);
+  config.sending_address = cleanAddress(config.sending_address);
+  config.inbound_address = cleanAddress(config.inbound_address);
+  </cleanAddresses>
+
+  config.logger = <setupLogger>
+  _.isString(config.logger) ? require('./logger')(config.logger) : config.logger;
+  </setupLogger>
+
+  return config;
+}
+</defaultConfiguration>

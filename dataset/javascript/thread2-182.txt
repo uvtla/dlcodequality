@@ -1,0 +1,387 @@
+```javascript
+<createFilterFunction>
+function (f, fieldsIndex, ignoreEmptyFields) {
+  if (!f)
+    <returnEmptyFunction>return function () {};</returnEmptyFunction>
+  return function () {
+    var context = this;
+    var args = arguments;
+
+    <checkAndPauseCollection>
+    if (self.collection.paused)
+      return;
+    </checkAndPauseCollection>
+
+    <handleFieldsIndexAndProjection>
+    if (fieldsIndex !== undefined && self.projectionFn) {
+      args[fieldsIndex] = self.projectionFn(args[fieldsIndex]);
+      if (ignoreEmptyFields && _.isEmpty(args[fieldsIndex]))
+        return;
+    }
+    </handleFieldsIndexAndProjection>
+
+    <enqueueObservedTask>
+    self.collection._observeQueue.queueTask(function () {
+      f.apply(context, args);
+    });
+    </enqueueObservedTask>
+  };
+}
+</createFilterFunction>
+
+<querySelectorAllWithFlag>
+function querySelectorAll(sel, flag) {
+  <performQuerySelector>
+  var nodes = this.root.querySelectorAll(normalize(sel));
+  </performQuerySelector>
+  return !flag ? nodes : <mapNodesToTags>
+  Array.prototype.map.call(nodes, function (node) {
+    return node._tag || undefined;
+  });
+  </mapNodesToTags>
+}
+</querySelectorAllWithFlag>
+
+<fetchMapDataWithFilter>
+function(x, y, filter) {
+  <mapDataRetrieval>
+  if(filter){
+    <filterMapData>
+    var result = this.map.get(x, y);
+    if(result){
+      return result.filter(filter);
+    }
+    </filterMapData>
+  }
+  </mapDataRetrieval>
+  return this.map.get(x, y);
+}
+</fetchMapDataWithFilter>
+
+<appendToDataAndExecuteCallback>
+function(data, done) {
+  <pushDataLoop>
+  for(var i = 0; i < data.length; i++) {
+    this._data.push(this._clone(data[i]));
+  }
+  </pushDataLoop>
+  <executeCallback>done();</executeCallback>
+}
+</appendToDataAndExecuteCallback>
+
+<organizeFeatureCollection>
+function (featureCollection, indexKey) {
+  <initialSetup>
+  var features = featureCollection.features;
+  var feature;
+  var properties;
+  var featureIndex = {};
+  var value;
+  </initialSetup>
+
+  <consolidateFeatures>
+  for (var index = 0; index < features.length; ++index) {
+    feature = features[index];
+    properties = feature.properties;
+    value = properties[indexKey];
+   
+    if (value in featureIndex) {
+      <mergeDuplicateFeatures>
+      var existingFeature = featureIndex[value];
+      if (existingFeature.geometry.type !== 'GeometryCollection') {
+        featureIndex[value] = {
+          type: 'Feature',
+          geometry: {
+            type: 'GeometryCollection',
+            geometries: [feature.geometry, existingFeature.geometry]
+          }
+        };
+      }
+      else {
+        existingFeature.geometry.geometries.push(feature.geometry);
+      }
+      </mergeDuplicateFeatures>
+    }
+    else {
+      <assignFeature>
+      featureIndex[value] = feature;
+      </assignFeature>
+    }
+  }
+  </consolidateFeatures>
+
+  <returnFeatureIndex>return featureIndex;</returnFeatureIndex>
+}
+</organizeFeatureCollection>
+
+<createTupleFactory>
+function tuple4Of(a, b, c, d) {
+  <instantiateTuple>
+  var self = getInstance(this, tuple4Of);
+  self.types = rest(arguments);
+  return self;
+  </instantiateTuple>
+}
+</createTupleFactory>
+
+<asyncReadComponentsMap>
+async function readComponentsMap(path) {
+  <readFilePromise>
+  return new Promise((resolve, reject) => {
+    <readFromFileSystem>
+    fs.readFile(path, (err, data) => {
+      if (err) {
+        <handleError>return resolve({});</handleError>
+      }
+      <parseData>resolve(JSON.parse(data));</parseData>
+    });
+    </readFromFileSystem>
+  });
+  </readFilePromise>
+}
+</asyncReadComponentsMap>
+
+<mongodbAppender>
+function mongodbAppender(config) {
+  <validateConfig>
+  if (!config || !config.connectionString) {
+    throw new Error('connectionString is missing. Cannot connect to mongdb.');
+  }
+  </validateConfig>
+
+  <setupVariables>
+  var collection;
+  var cache = [];
+  var layout = config.layout || log4js.layouts.messagePassThroughLayout;
+  var collectionName = config.collectionName || 'log';
+  var connectionOptions = config.connectionOptions || {};
+  </setupVariables>
+
+  <defineErrorHelper>
+  function ERROR(err) {
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+    this.name = err.toString();
+    this.message = err.message || 'error';
+  }
+  </defineErrorHelper>
+
+  <defineReplaceKeys>
+  function replaceKeys(src) {
+    <declarations>
+    var result = {};
+    </declarations>
+
+    <defineMixin>
+    function mixin(dest, source, cloneFunc) {
+      if (lxHelpers.isObject(source)) {
+        <replaceInvalidKeys>
+        lxHelpers.forEach(source, function (value, key) {
+          if (key[0] === '$') {
+            key = key.replace('$', '_dollar_');
+          }
+          key = key.replace(/\./g, '_dot_');
+          dest[key] = cloneFunc ? cloneFunc(value) : value;
+        });
+        </replaceInvalidKeys>
+      }
+      return dest;
+    }
+    </defineMixin>
+
+    <handleNonObjectValues>
+    if (!src || typeof src !== 'object' || typeof src === 'function' || src instanceof Date || src instanceof RegExp ||  src instanceof mongodb.ObjectID) {
+      return src;
+    }
+    </handleNonObjectValues>
+
+    <handleErrorObject>
+    if (lxHelpers.getType(src) === 'error') {
+      return new ERROR(src);
+    }
+    </handleErrorObject>
+
+    <processArrayValues>
+    if (lxHelpers.isArray(src)) {
+      result = [];
+      lxHelpers.arrayForEach(src, function (item) {
+        result.push(replaceKeys(item));
+      });
+    }
+    </processArrayValues>
+
+    <callMixin>return mixin(result, src, replaceKeys);</callMixin>
+  }
+  </defineReplaceKeys>
+
+  <defineGetOptions>
+  function getOptions() {
+    var options = { w: 0 };
+    if (config.write === 'normal' || config.write === 'safe') {
+      options.w = 1;
+      if(config.write === 'safe') options.journal = true;
+    }
+    return options;
+  }
+  </defineGetOptions>
+
+  <defineInsertFunction>
+  function insert(loggingEvent) {
+    var options = getOptions();
+    <insertLogic>
+    if (collection) {
+      if (options.w === 0) {
+        <insertWithoutWaiting>
+        collection.insert(logEventMapper(loggingEvent), options);
+        </insertWithoutWaiting>
+      } else {
+        <insertWithCallback>
+        collection.insert(logEventMapper(loggingEvent), options, function (error) {
+          if (error) {
+            <handleInsertError>
+            console.error('log: Error writing data to log!');
+            console.error(error);
+            console.log('log: Connection: %s, collection: %, data: %j', config.connectionString, collectionName, loggingEvent);
+            </handleInsertError>
+          }
+        });
+        </insertWithCallback>
+      }
+    } else {
+      <cacheLoggingEvent>cache.push(loggingEvent);</cacheLoggingEvent>
+    }
+    </insertLogic>
+  }
+  </defineInsertFunction>
+
+  <fixMongoDBConnectionString>
+  if (config.connectionString.indexOf('mongodb:undefined') === 0) {
+    config.connectionString = 'mongodb://undefined';
+  }
+  </fixMongoDBConnectionString>
+
+  <connectToMongoDB>
+  mongodb.MongoClient.connect(config.connectionString, connectionOptions, function (err, db) {
+    if (err) {
+      <handleConnectionError>
+      console.error('Error connecting to mongodb! URL: %s', config.connectionString);
+      console.error(err);
+      </handleConnectionError>
+    }
+    collection = db.collection(config.collectionName || 'log');
+    <flushCache>
+    cache.forEach(function (loggingEvent) {
+      setImmediate(function () {
+        insert(loggingEvent);
+      });
+    });
+    </flushCache>
+  });
+  </connectToMongoDB>
+
+  <appenderFunction>
+  return function (loggingEvent) {
+    <prepareLoggingEventData>
+    if (Object.prototype.toString.call(loggingEvent.data[0]) === '[object String]') {
+      loggingEvent.data = layout(loggingEvent);
+    } else if (loggingEvent.data.length === 1) {
+      loggingEvent.data = loggingEvent.data[0];
+    }
+    loggingEvent.data = replaceKeys(loggingEvent.data);
+    </prepareLoggingEventData>
+    <performInsert>insert(loggingEvent);</performInsert>
+  };
+  </appenderFunction>
+}
+</mongodbAppender>
+
+<GetHeadersPacketInheritance>
+function GetHeadersPacket(locator, stop) {
+  <handleInstantiation>
+  if (!(this instanceof GetHeadersPacket))
+    return new GetHeadersPacket(locator, stop);
+  </handleInstantiation>
+  
+  <callParentConstructor>GetBlocksPacket.call(this, locator, stop);</callParentConstructor>
+}
+</GetHeadersPacketInheritance>
+
+<generateLayers>
+function generateLayers () {
+  <logStart>grunt.log.write("Generating layers...");</logStart>
+
+  <defineConfig>
+  var config = lang.extend({}, requireConfig, {
+    isPrepareStage: true,
+    optimize: "none",
+    optimizeCss: "none",
+    appDir: buildDir,
+    dir: tempDir,
+    baseUrl: "./",
+    logLevel: 2, // WARN
+    removeCombined: false,
+    skipDirOptimize: true,
+    keepBuildDir: false,
+    skipSemiColonInsertion: true,
+    pragmas: {
+      prepare: true,
+      build: true
+    },
+    pragmasOnSave: {
+      prepareSave: true
+    },
+    modules: modules.map(function (module) { return { name: module }; }),
+    onBuildWrite: function (moduleName, modulePath, contents) {
+      <processOnBuildWriteStart>
+      layers.some(function (layer) {
+        var relPath = path.relative(path.resolve(config.dir), modulePath);
+        var layerDir = layer.dir;
+        if (!Array.isArray(layerDir)) {
+          layerDir = [layerDir];
+        }
+        layerDir.forEach(function(dir) {
+          if (relPath.indexOf(dir) === 0) {
+            if (options.ignoreModules) {
+              if (options.ignoreModules.some(function (m) {
+                return m === moduleName;
+              })) {
+                return;
+              }
+            }
+            layer.modules[moduleName] = true;
+          }
+        });
+      });
+      if (moduleName.indexOf('xhtmpl!') === 0) {
+        modulesToDelete.push(path.join(outputDir, modulePath.slice('xhtmpl!'.length)));
+        if (contents.charAt(contents.length-1) === ";") {
+          contents = contents.slice(0, contents.length-1);
+        }
+        file.saveFile(path.join(buildDir, modulePath.slice('xhtmpl!'.length)), contents);
+      }
+      </processOnBuildWriteEnd>
+      <returnModuleWithPragmas>return "\n";</returnModuleWithPragmas>
+    }
+  });
+  </defineConfig>
+
+  <runOptimizer>
+  requirejs.optimize(
+    config,
+    lang.safeCallback(function () {
+      <processLayers>
+      layers.forEach(function (layer) {
+        var modules = Object.keys(layer.modules).sort(),
+          content = "define([\n\t\"" + modules.join("\",\n\t\"") + "\"\n], function () {});";
+        file.saveFile(path.join(buildDir, layer.name) + ".js", content);
+      });
+      </processLayers>
+      <logSuccess>grunt.log.writeln('OK'.green);</logSuccess>
+      <optimizeModulesCall>optimizeModules();</optimizeModulesCall>
+    }),
+    lang.errorCallback
+  );
+  </runOptimizer>
+}
+</generateLayers>
+```

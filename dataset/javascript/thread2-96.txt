@@ -1,0 +1,334 @@
+```javascript
+<createElement>
+function(descriptor, options) {
+  var options = options || {};
+
+  <parseTagName>
+  var tagName = /^([a-zA-Z0-9]*)/.exec(descriptor);
+  options.tag = tagName && tagName[1] ? tagName[1] : 'div';
+  </parseTagName>
+
+  <parseId>
+  var id = /#([a-zA-Z0-9_]*)/.exec(descriptor);
+  if (id && id[1]) options.id = id[1];
+  </parseId>
+
+  <parseClasses>
+  var matchClasses = new SRegExp(/\.([a-zA-Z0-9_-]*)/g);
+  if (!options.class) {
+    options.class = matchClasses.match(descriptor).map(function(m) {
+      return m.match[1];
+    }).join(' ');
+  }
+  </parseClasses>
+
+  return new ElementRenderer(options);
+}
+</createElement>
+
+<carveMaze>
+function(x, y, depth, maxDepth) {
+  <checkMaxDepth>
+  if (depth >= maxDepth) {
+    console.warn("MAXIMUM DEPTH REACHED: %d", maxDepth);
+    return;
+  }
+  </checkMaxDepth>
+
+  <validateCell>
+  if (!this.isCell(x, y)) {
+    return;
+  }
+  </validateCell>
+
+  <processNeighbors>
+  let dirs = this.getShuffledNeighborDirs(x, y);
+  for (var key in dirs) {
+    var sDir = dirs[key];
+    var n = this.getNeighbor(x, y, sDir);
+    if (n === null) {
+      continue;
+    }
+
+    if (this.isMasked(n.x, n.y)) {
+      continue;
+    }
+
+    if (this.isCell(n.x, n.y) && !this.hasConnections(n.x, n.y)) {
+      this.connectUndirected(x, y, sDir);
+      this.carveMaze(n.x, n.y, depth + 1, maxDepth);
+    }
+  }
+  </processNeighbors>
+}
+</carveMaze>
+
+<curatedDeviceDisconnected>
+function curatedDeviceDisconnected(eventData) {
+  self.log(' *** Handle', self.handle, 'triggered event: DEVICE_DISCONNECTED', eventData.name, eventData.operation);
+}
+</curatedDeviceDisconnected>
+
+<pinchControlInitialization>
+function(options) {
+  OpenLayers.Control.prototype.initialize.apply(this, arguments);
+  this.handler = new OpenLayers.Handler.Pinch(this, {
+    start: this.pinchStart,
+    move: this.pinchMove,
+    done: this.pinchDone
+  }, this.handlerOptions);
+}
+</pinchControlInitialization>
+
+<processStdin>
+function stdin() {
+  var buf = '';
+  process.stdin.setEncoding('utf8');
+  
+  <readStdin>
+  process.stdin.on('data', function(chunk) {
+    buf += chunk;
+  });
+  </readStdin>
+
+  <compileOutput>
+  process.stdin.on('end', function() {
+    var output;
+    if (options.client) {
+      output = pug.compileClient(buf, options);
+    } else {
+      var fn = pug.compile(buf, options);
+      output = fn(options);
+    }
+    process.stdout.write(output);
+  }).resume();
+  </compileOutput>
+}
+</processStdin>
+
+<getSVGFromChart>
+function (additionalOptions) {
+  var chart = this,
+    chartCopy,
+    sandbox,
+    svg,
+    seriesOptions,
+    sourceWidth,
+    sourceHeight,
+    cssWidth,
+    cssHeight,
+    options = merge(chart.options, additionalOptions); 
+
+  <setDocument>
+  if (!doc.createElementNS) {
+    
+  }
+  </setDocument>
+
+  <prepareSandbox>
+  sandbox = createElement(DIV, null, {
+    position: ABSOLUTE,
+    top: '-9999em',
+    width: chart.chartWidth + PX,
+    height: chart.chartHeight + PX
+  }, doc.body);
+  </prepareSandbox>
+
+  <calculateDimensions>
+  cssWidth = chart.renderTo.style.width;
+  cssHeight = chart.renderTo.style.height;
+  sourceWidth = options.exporting.sourceWidth ||
+    options.chart.width ||
+    (/px$/.test(cssWidth) && parseInt(cssWidth, 10)) ||
+    600;
+  sourceHeight = options.exporting.sourceHeight ||
+    options.chart.height ||
+    (/px$/.test(cssHeight) && parseInt(cssHeight, 10)) ||
+    400;
+  </calculateDimensions>
+
+  <updateChartOptions>
+  extend(options.chart, {
+    animation: false,
+    renderTo: sandbox,
+    forExport: true,
+    width: sourceWidth,
+    height: sourceHeight
+  });
+  options.exporting.enabled = false; 
+  delete options.data; 
+  </updateChartOptions>
+
+  <buildChartCopy>
+  options.series = [];
+  each(chart.series, function (serie) {
+    seriesOptions = merge(serie.options, {
+      animation: false, 
+      enableMouseTracking: false,
+      showCheckbox: false,
+      visible: serie.visible
+    });
+
+    if (!seriesOptions.isInternal) { 
+      options.series.push(seriesOptions);
+    }
+  });
+  </buildChartCopy>
+
+  <mergeAdditionalOptions>
+  if (additionalOptions) {
+    each(['xAxis', 'yAxis'], function (axisType) {
+      each(splat(additionalOptions[axisType]), function (axisOptions, i) {
+        options[axisType][i] = merge(options[axisType][i], axisOptions);
+      });
+    });
+  }
+  </mergeAdditionalOptions>
+
+  <finalizeChartCopy>
+  chartCopy = new Highcharts.Chart(options, chart.callback);
+  </finalizeChartCopy>
+
+  <adjustAxes>
+  each(['xAxis', 'yAxis'], function (axisType) {
+    each(chart[axisType], function (axis, i) {
+      var axisCopy = chartCopy[axisType][i],
+        extremes = axis.getExtremes(),
+        userMin = extremes.userMin,
+        userMax = extremes.userMax;
+
+      if (axisCopy && (userMin !== UNDEFINED || userMax !== UNDEFINED)) {
+        axisCopy.setExtremes(userMin, userMax, true, false);
+      }
+    });
+  });
+  </adjustAxes>
+
+  <retrieveSVG>
+  svg = chartCopy.container.innerHTML;
+  </retrieveSVG>
+
+  <cleanup>
+  options = null;
+  chartCopy.destroy();
+  discardElement(sandbox);
+  </cleanup>
+
+  <sanitizeAndFormatSVG>
+  svg = this.sanitizeSVG(svg);
+  svg = svg.replace(/(url\(#highcharts-[0-9]+)&quot;/g, '$1')
+    .replace(/&quot;/g, "'");
+  </sanitizeAndFormatSVG>
+
+  return svg;
+}
+</getSVGFromChart>
+
+<initializePhysics>
+function () {
+  var data = this.data;
+
+  <setupDebugging>
+  this.debug = data.debug;
+  </setupDebugging>
+
+  <initializeCallbacks>
+  this.callbacks = {beforeStep: [], step: [], afterStep: []};
+  </initializeCallbacks>
+
+  <setupEventListeners>
+  this.listeners = {};
+  </setupEventListeners>
+
+  <initializeDriver>
+  this.driver = null;
+  switch (data.driver) {
+    case 'local':
+      this.driver = new LocalDriver();
+      break;
+
+    case 'network':
+      this.driver = new NetworkDriver(data.networkUrl);
+      break;
+
+    case 'worker':
+      this.driver = new WorkerDriver({
+        fps: data.workerFps,
+        engine: data.workerEngine,
+        interpolate: data.workerInterpolate,
+        interpolationBufferSize: data.workerInterpBufferSize,
+        debug: data.workerDebug
+      });
+      break;
+
+    default:
+      throw new Error('[physics] Driver not recognized: "%s".', data.driver);
+  }
+  </initializeDriver>
+
+  <configureDriver>
+  this.driver.init({
+    quatNormalizeSkip: 0,
+    quatNormalizeFast: false,
+    solverIterations: data.iterations,
+    gravity: data.gravity
+  });
+
+  this.driver.addMaterial({name: 'defaultMaterial'});
+  this.driver.addMaterial({name: 'staticMaterial'});
+  this.driver.addContactMaterial('defaultMaterial', 'defaultMaterial', {
+    friction: data.friction,
+    restitution: data.restitution,
+    contactEquationStiffness: data.contactEquationStiffness,
+    contactEquationRelaxation: data.contactEquationRelaxation,
+    frictionEquationStiffness: data.frictionEquationStiffness,
+    frictionEquationRegularization: data.frictionEquationRegularization
+  });
+  this.driver.addContactMaterial('staticMaterial', 'defaultMaterial', {
+    friction: 1.0,
+    restitution: 0.0,
+    contactEquationStiffness: data.contactEquationStiffness,
+    contactEquationRelaxation: data.contactEquationRelaxation,
+    frictionEquationStiffness: data.frictionEquationStiffness,
+    frictionEquationRegularization: data.frictionEquationRegularization
+  });
+  </configureDriver>
+}
+</initializePhysics>
+
+<filterValidRule>
+function filterValidRule(rule) {
+  return (rule.hasOwnProperty('match') && typeof rule.match === "object")
+    && (rule.hasOwnProperty('use') && (
+      typeof rule.use === "object"
+      || typeof rule.use === "function"
+    ))
+    && (
+      (rule.match.hasOwnProperty('request'))
+      || (rule.match.hasOwnProperty('base'))
+    )
+}
+</filterValidRule>
+
+<buildUpdateFn>
+function buildUpdateFn(element, className, attrs) {
+  return function updateAttrValue(fallback) {
+    <updateWithInterpolationCheck>
+    if (!needsInterpolation(fallback)) {
+      attrs[attrs.$normalize(className)] = fallback;
+    }
+    </updateWithInterpolationCheck>
+  };
+}
+</buildUpdateFn>
+
+<toggleOperationsDialog>
+function(evt) {  
+  if (that._operationsDialog.isShowing()) {
+    that._operationsDialog.hide();
+  } else {
+    that._operationsDialog.show();
+  }
+}
+</toggleOperationsDialog>
+```

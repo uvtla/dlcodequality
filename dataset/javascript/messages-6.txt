@@ -1,0 +1,2045 @@
+<transformHexAlpha>
+function transformHexAlpha(string, source, decl) {
+    return recurse(string);
+
+    function recurse(input) {
+        <findHexa>
+        var hexa_pos = input.indexOf('hexa');
+        var subs = input.substring(hexa_pos);
+        </findHexa>
+
+        <parseHexOpacity>
+        var h = HEX_RE.exec(subs);
+        var o = OPACITY_RE.exec(subs);
+        </parseHexOpacity>
+
+        <validateInputs>
+        var i_h = INV_HEX_RE.exec(subs);
+        var i_o = INV_OPACITY_RE.exec(subs);
+
+        if(i_h !== null){
+            throw decl.error('Invalid hex color: ' + i_h[0], { plugin: 'postcss-color-hexa' });
+        }
+
+        if(i_o !== null){
+            throw decl.error('Invalid opacity: ' + i_o[0], { plugin: 'postcss-color-hexa' });
+        }
+        </validateInputs>
+
+        <replaceHexAlpha>
+        if (!h) {
+            return input;
+        }
+
+        var rgb = hexToRgb(h[0]);
+        var rgb_chars = [rgb.r, rgb.g, rgb.b];
+        var hexa = '';
+
+        if (o) {
+            rgb_chars.push(o[0]);
+            hexa = 'rgba(' + rgb_chars.join(', ') + ')';
+        } else {
+            hexa = 'rgb(' + rgb_chars.join(', ') + ')';
+        }
+
+        var result = input.replace(HEX_ALPHA_RE, hexa);
+
+        if (result.indexOf('hexa') === -1) {
+            return result;
+        } else {
+            return recurse(result);
+        }
+        </replaceHexAlpha>
+    }
+}
+</transformHexAlpha>
+
+<clean>
+function clean(code) {
+
+    try {
+        const ast = babylon.parse(code, {
+            sourceType: 'module',
+            plugins: [
+                'jsx',
+                'flow'
+            ]
+        });
+
+        <transformAst>
+        const cleanAst = strip(ast).program;
+        const resultCode = generate(cleanAst, {}).code;
+        </transformAst>
+
+        <replaceMarkers>
+        return resultCode.replace(/(\/\*\$ | \#\*\/)/g, '');
+        </replaceMarkers>
+
+    } catch (e) {
+        console.log(code);
+        throw e;
+    }
+}
+</clean>
+
+<resizeWidget>
+function resizeWidget(propagate) {          
+    var cfg = this._cfg, domElt = this.getDom();
+
+    if (!domElt) {
+        return;
+    }
+
+    <calculateSizeConf>
+    var widthConf = this._getWidthConf();
+    var heightConf = this._getHeightConf();
+    </calculateSizeConf>
+
+    <applySizeConstraints>
+    if (this._changedContainerSize || this._sizeConstraints) { 
+        if (this._changedContainerSize) {
+            
+            var width = cfg.widthMaximized || cfg.width;
+            var height = cfg.heightMaximized || cfg.height;
+            var constrainedWidth = ariaUtilsMath.normalize(width, widthConf.min, widthConf.max);
+            var constrainedHeight = ariaUtilsMath.normalize(height, heightConf.min, heightConf.max);
+
+            domElt.style.width = width > -1 ? constrainedWidth + "px" : "";
+            domElt.style.height = height > -1 ? constrainedHeight + "px" : "";
+            if (this._frame) { 
+                var frameWidth = width > -1 ? constrainedWidth : -1;
+                var frameHeight = height > -1 ? constrainedHeight : -1;
+                this._frame.resize(frameWidth, frameHeight);
+            }
+        }
+
+        var changed = ariaUtilsSize.setContrains(domElt, widthConf, heightConf);
+        if (changed && this._frame) {
+            this._frame.resize(changed.width, changed.height);
+            
+            if (domElt.parentNode && propagate) {
+                <delegateContentChange>
+                aria.utils.Delegate.delegate(aria.DomEvent.getFakeEvent('contentchange', domElt.parentNode));
+                </delegateContentChange>
+            }
+        }
+        this._changedContainerSize = changed;
+    }
+    </applySizeConstraints>
+}
+</resizeWidget>
+
+<isMouseOnNode>
+function isMouseOnNode(node, e){
+    if (node){
+        <calculateBoundaries>
+        var currMousePos = e.position || e.cyPosition;
+        var topLeft = {
+            x: (node.position("x") - node.width() / 2 - parseFloat(node.css('padding-left'))),
+            y: (node.position("y") - node.height() / 2 - parseFloat(node.css('padding-top')))};
+        var bottomRight = {
+            x: (node.position("x") + node.width() / 2 + parseFloat(node.css('padding-right'))),
+            y: (node.position("y") + node.height() / 2+ parseFloat(node.css('padding-bottom')))};
+        </calculateBoundaries>
+
+        <checkPosition>
+        if (currMousePos.x >= topLeft.x && currMousePos.y >= topLeft.y &&
+            currMousePos.x <= bottomRight.x && currMousePos.y <= bottomRight.y){
+            return true;
+        }
+        </checkPosition>
+    }
+    return false;
+}
+</isMouseOnNode>
+
+<generateCmds>
+function generateCmds(paths) {
+
+    var appends = [];
+
+    <gatherOptions>
+    if (grunt.option("quiet") || config.quiet) {
+        appends.push("--quiet");
+    }
+
+    if (grunt.option("verbose") || config.verbose) {
+        appends.push("--verbose");
+    }
+
+    if (grunt.option("rules") || config.rules) {
+        var rules = _.isString(config.rules) ? config.rules.split(",") : config.rules;
+        appends.push("--rules=" + rules.join(","));
+    }
+
+    if (grunt.option("dryRun") || config.dryRun) {
+        appends.push("--dry-run");
+    }
+
+    if (grunt.option("diff") || config.diff) {
+        appends.push("--diff");
+    }
+
+    if (grunt.option("allowRisky") || config.allowRisky) {
+        appends.push("--allow-risky yes");
+    }
+
+    if (grunt.option("usingCache") || config.usingCache) {
+        appends.push("--using-cache " + config.usingCache);
+    }
+
+    if (grunt.option("configfile") || config.configfile) {
+        appends.push("--config=" + config.configfile);
+    }
+    </gatherOptions>
+
+    <constructCmds>
+    var bin = path.normalize(config.bin),
+        append = appends.join(" "),
+        cmds = [];
+
+    if (paths.length) {
+        cmds = _.map(paths, function(thePath) {
+            return bin + " fix " + thePath + " " + append;
+        });
+    }
+
+    if (grunt.option("configfile") || config.configfile) {
+        cmds.push(bin + " fix " + append);
+    }
+    </constructCmds>
+
+    return cmds;
+}
+</generateCmds>
+
+<getId>
+function getId(id) {
+    id = id + "";
+    <checkIdFormat>
+    if (id && id.indexOf("+") != -1) {
+        if (Aria.testMode) {
+            return this.$getAutoId(id);
+        }
+        return null;
+    }
+    </checkIdFormat>
+    return this.$getId(id);
+}
+</getId> 
+
+<hasKeyValue>
+function hasKeyValue(key, value) {
+    return function(obj) {
+        return isUndefined(value) ? <checkKeyExists>has(obj, key)</checkKeyExists> && obj[key] === value : <compareValues>areSVZ(value, obj[key])</compareValues>;
+    };
+}
+</hasKeyValue>
+
+<ValidationFailed>
+function ValidationFailed(reason) {
+  Error.captureStackTrace(this, this.constructor);
+  this.type = 'bad_request';
+  this.statusCode = 400;
+  this.message = 'Request validation failed';
+  <storeReason>
+  this.reason = reason;
+  </storeReason>
+}
+</ValidationFailed>
+
+<initOnClick>
+function initOnClick() {
+    var clicks = document.querySelectorAll('[data-nctr]');
+
+    for (var i = 0; i < clicks.length; i++) {
+        <attachEventListeners>
+        var tag = clicks[i];
+        if (tag.addEventListener) {
+            tag.addEventListener("click", clickTrack, false);
+        } else {
+            if (tag.attachEvent) {
+                tag.attachEvent("onclick", clickTrack);
+            }
+        }
+        </attachEventListeners>
+    }
+}
+</initOnClick>
+
+<readBody>
+function readBody(options) {
+    var opts = options || {};
+    assert.object(opts, 'opts');
+
+    <defineMaxSize>
+    var maxBodySize = opts.maxBodySize || 0;
+    </defineMaxSize>
+
+    function readBody(req, res, next) {
+        <checkIfRead>
+        if (req._readBody) {
+            next();
+            return;
+        } else {
+            req._readBody = true;
+        }
+        </checkIfRead>
+
+        <checkConditions>
+        if ((req.getContentLength() === 0 && !req.isChunked()) ||
+            req.contentType() === 'multipart/form-data' ||
+            req.contentType() === 'application/octet-stream') {
+            next();
+            return;
+        }
+        </checkConditions>
+
+        var bodyWriter = createBodyWriter(req);
+
+        <initializeVariables>
+        var bytesReceived = 0;
+        var digest;
+        var gz;
+        var hash;
+        var md5;
+
+        var unsupportedCompression;
+        </initializeVariables>
+
+        <setupHash>
+        if ((md5 = req.headers['content-md5'])) {
+            hash = crypto.createHash('md5');
+        }
+        </setupHash>
+
+        function done() {
+            <cleanUp>
+            bodyWriter.end();
+            </cleanUp>
+
+            <checkUnsupportedCompression>
+            if (unsupportedCompression) {
+                var error = unsupportedCompression + ' not supported';
+                next(new UnsupportedMediaTypeError(error));
+                return;
+            }
+            </checkUnsupportedCompression>
+
+            <checkBodySize>
+            if (maxBodySize && bytesReceived > maxBodySize) {
+                var msg = 'Request body size exceeds ' + maxBodySize;
+                var err;
+
+                if (PayloadTooLargeError !== undefined) {
+                    err = new PayloadTooLargeError(msg);
+                } else {
+                    err = new RequestEntityTooLargeError(msg);
+                }
+
+                next(err);
+                return;
+            }
+            </checkBodySize>
+
+            <verifyBodyContent>
+            if (!req.body.length) {
+                next();
+                return;
+            }
+            </verifyBodyContent>
+
+            <validateMD5>
+            if (hash && md5 !== (digest = hash.digest('base64'))) {
+                next(new BadDigestError(MD5_MSG, md5, digest));
+                return;
+            }
+            </validateMD5>
+
+            next();
+        }
+
+        <setupEncodingHandlers>
+        if (req.headers['content-encoding'] === undefined) {
+            req.once('end', done);
+        } else if (req.headers['content-encoding'] === 'gzip') {
+            gz = zlib.createGunzip();
+            gz.on('data', bodyWriter.write);
+            gz.once('end', done);
+            req.once('end', gz.end.bind(gz));
+        } else {
+            unsupportedCompression = req.headers['content-encoding'];
+            res.setHeader('Accept-Encoding', 'gzip');
+            req.once('end', done);
+        }
+        </setupEncodingHandlers>
+
+        <onDataReceived>
+        req.on('data', function onRequestData(chunk) {
+            if (maxBodySize) {
+                bytesReceived += chunk.length;
+
+                if (bytesReceived > maxBodySize) {
+                    return;
+                }
+            }
+
+            if (hash) {
+                hash.update(chunk, 'binary');
+            }
+
+            if (gz) {
+                gz.write(chunk);
+            } else {
+                bodyWriter.write(chunk);
+            }
+        });
+        </onDataReceived>
+
+        req.once('error', next);
+        req.resume();
+    }
+
+    return (readBody);
+}
+</readBody><CannotParseTreeError>
+function CannotParseTreeError(errors){
+  superError.call(
+    this,
+    'CannotParseTreeError',
+    util.format('Could not parse the tree for metadata; errors: %s', JSON.stringify(errors))
+  );
+  <storeErrors>
+  this.errors = errors;
+  </storeErrors>
+}
+</CannotParseTreeError>
+
+<get>
+function get(key, def) {
+  <handleArrayKeys>
+  if (Array.isArray(key)) {
+    return AsyncStorage.multiGet(key)
+      .then((values) => values.map(([_, value]) => {
+        return useDefault(def, value) ? def : parse(value)
+      }))
+      .then(results => Promise.all(results))
+  }
+  </handleArrayKeys>
+  <handleSingleKey>
+  return AsyncStorage.getItem(key).then(value => useDefault(def, value) ? def : parse(value))
+  </handleSingleKey>
+}
+</get>
+
+<set>
+function set(tree, i, item) {
+	<validateIndex>
+	var len = tree.size;
+	if (i < 0 || len < i) {
+		throw new Error("Index " + i + " out of range!");
+	}
+	</validateIndex>
+	<handleNewItem>
+	if (i === len) return push(item, tree);
+	</handleNewItem>
+	<updateTail>
+	var offset = (0, _util.tailOffset)(tree);
+	if (i >= offset) {
+		var newTail = (0, _util.createLeafFrom)(tree.tail);
+		newTail[i - offset] = item;
+		return new Tree(tree.size, tree.root, newTail);
+	}
+	</updateTail>
+	<updateRoot>
+	var newRoot = (0, _util.setRoot)(i, item, tree.root);
+	return new Tree(tree.size, newRoot, tree.tail);
+	</updateRoot>
+}
+</set>
+
+<setAggregationLevel>
+function(aDimensionName) {
+	this._oAggregationLevel = {};
+	<handleUndefinedDimension>
+	if (!aDimensionName) {
+		aDimensionName = this._oQueryResult.getAllDimensionNames();
+	}
+	</handleUndefinedDimension>
+	<addToAggregation>
+	this.addToAggregationLevel(aDimensionName);
+	this._oSelectedPropertyNames = null; 
+	</addToAggregation>
+}
+</setAggregationLevel>
+
+<akaya>
+function akaya(server, pluginOptions) {
+  <decorateServer>
+  server.decorate('server', 'aka', serverDecorator.bind(this, server))
+  </decorateServer>
+  <decorateRequest>
+  server.decorate('request', 'aka', function (id, params = {}, options = {}) {
+    options = joi.attempt(options, internals.scheme.options)
+
+    const path = server.aka(id, params)
+    let protocol
+
+    <handleRelativePath>
+    if (options.rel) {
+      return path
+    }
+    </handleRelativePath>
+
+    <determineProtocol>
+    switch (options.secure) {
+      case true:
+        protocol = 'https'
+        break
+      case false:
+        protocol = 'http'
+        break
+      default:
+        protocol = this.headers['x-forwarded-proto'] || server.info.protocol
+    }
+    </determineProtocol>
+
+    return `${protocol}://` + path;
+  })
+  </decorateRequest>
+}
+</akaya>
+
+<searchPath>
+function searchPath(newValue) {
+  <checkInput>
+  if (!newValue || newValue.length < 2) {
+    return undefined;
+  }
+  </checkInput>
+
+  <createRegexp>
+  var regexp = new RegExp(LxUtils.escapeRegexp(newValue), 'ig');
+  </createRegexp>
+
+  <performSearch>
+  return _searchPath(lxSelect.choices, regexp);
+  </performSearch>
+}
+</searchPath>
+
+<_removeEvent>
+function _removeEvent(type, handler) {
+	<initializeVariables>
+    var userHandlerList = null, eventId = this._EVNET_UID, isRemoveAll = handler === undefined;
+    userHandlerList = USER_HANDLER_CACHE[eventId][type];
+    </initializeVariables>
+    
+    <checkRemoveSingleHandler>
+    if (!isRemoveAll) {
+        isRemoveAll = true;
+        Utils.each(userHandlerList, function removeKityEvent(fn, index) {
+            if (fn === handler) {
+                <deleteHandler>
+                delete userHandlerList[index];
+                </deleteHandler>
+            } else {
+                isRemoveAll = false;
+            }
+        });
+    }
+    </checkRemoveSingleHandler>
+    
+    <removeAllHandlers>
+    if (isRemoveAll) {
+        deleteDomEvent(this.node, type, INNER_HANDLER_CACHE[eventId][type]);
+        delete USER_HANDLER_CACHE[eventId][type];
+        delete INNER_HANDLER_CACHE[eventId][type];
+    }
+    </removeAllHandlers>
+
+    return this;
+}
+</_removeEvent>
+
+<destroyTile>
+function () {
+	<clearIntervals>
+    if (this.hatchInterval) clearInterval(this.hatchInterval); 
+    </clearIntervals>
+    <clearCanvas>
+    if (this.cvsDiv) {
+        this.clear();
+    }
+    </clearCanvas>
+    <callParentDestroy>
+    OpenLayers.Tile.prototype.destroy.call(this);
+    </callParentDestroy>
+}
+</destroyTile>
+
+<deactivateControl>
+function() {
+	<determineDeactivation>
+    var deactivated = false;
+    if(OpenLayers.Control.prototype.deactivate.apply(this, arguments)) {
+        <removeFeatures>
+        this.layer.removeFeatures(this.handles);
+        this.rotate && this.layer.removeFeatures(this.rotationHandles);
+        this.layer.removeFeatures([this.box]);
+        </removeFeatures>
+        <deactivateDragControl>
+        this.dragControl.deactivate();
+        </deactivateDragControl>
+        deactivated = true;
+    }
+    </determineDeactivation>
+    return deactivated;
+}
+</deactivateControl>
+
+<Snap>
+function Snap(w, h) {
+	<handleElement>
+    if (w) {
+        if (w.tagName) {
+            return wrap(w);
+        }
+        if (w instanceof Element) {
+            return w;
+        }
+        if (h == null) {
+            <querySelector>
+            w = glob.doc.querySelector(w);
+            </querySelector>
+            return wrap(w);
+        }
+    }
+    </handleElement>
+    <setDefaultSize>
+    w = w == null ? "100%" : w;
+    h = h == null ? "100%" : h;
+    </setDefaultSize>
+    <createPaper>
+    return new Paper(w, h);
+    </createPaper>
+}
+</Snap><updateItems>
+function() {
+    var animated = false;
+    <updateEachItem>
+    for (var i = 0; i < this._items.length; i++) {
+        animated = this._items[i].update() || animated;
+    }
+    </updateEachItem>
+    return animated;
+}
+</updateItems>
+
+<isCursorKilled>
+function isCursorKilled(cursor, callback) {
+  <checkCursorState>
+  if (cursor.s.killed) {
+    <notifyCursor>
+    setCursorNotified(cursor, callback);
+    </notifyCursor>
+    return true;
+  }
+  </checkCursorState>
+  return false;
+}
+</isCursorKilled>
+
+<destroyControl>
+function() {
+    <removeLayerIfExists>
+    if(this.active && this.layers) {
+        this.map.removeLayer(this.layer);
+    }
+    </removeLayerIfExists>
+    <applyParentDestroy>
+    OpenLayers.Control.prototype.destroy.apply(this, arguments);
+    </applyParentDestroy>
+    <destroyLayer>
+    if(this.layers) {
+        this.layer.destroy();
+    }
+    </destroyLayer>
+}
+</destroyControl>
+
+<filterMap>
+function(array, fun) {
+    <checkArray>
+    if (!isSeq(array)) throw new TypeError("expected an array as the first argument");
+    </checkArray>
+    <performFilterMap>
+    return _.filter(_.map(array, function(e) {
+      return fun(e);
+    }), existy);
+    </performFilterMap>
+}
+</filterMap>
+
+<_scrollTo>
+function _scrollTo(scrollTo, targetElement, tooltipLayer) {
+    <skipScrolling>
+    if (!this._options.scrollToElement) return;
+    </skipScrolling>
+
+    <determineRectangle>
+    var rect = scrollTo === 'tooltip' ? tooltipLayer.getBoundingClientRect() : targetElement.element.getBoundingClientRect();
+    </determineRectangle>
+
+    <scrollIfNeeded>
+    if (!_elementInViewport(targetElement.element)) {
+        var winHeight = _getWinSize().height;
+        var top = rect.bottom - (rect.bottom - rect.top);
+        var bottom = rect.bottom - winHeight;
+
+        if (top < 0 || targetElement.element.clientHeight > winHeight) {
+            <scrollUp>
+            window.scrollBy(
+                0,
+                rect.top - (winHeight / 2 - rect.height / 2) - this._options.scrollPadding
+            );
+            </scrollUp>
+        } else {
+            <scrollDown>
+            window.scrollBy(
+                0,
+                rect.top - (winHeight / 2 - rect.height / 2) + this._options.scrollPadding
+            );
+            </scrollDown>
+        }
+    }
+    </scrollIfNeeded>
+}
+</_scrollTo>
+
+<mapObject>
+function(object, callback) {
+    <injectValues>
+    return inject(object, [], function(memo, key, value){
+      memo.push(callIterator(callback, key, value))
+    })
+    </injectValues>
+}
+</mapObject>
+
+<checkArguments>
+function(payload) {
+    <reduceToUltimateTruth>
+    return _.reduce(payload, function(ultimateTruth, arg) {
+      return ultimateTruth || _.includes(arg, '-') || _.includes(arg, '--');
+    }, false);
+    </reduceToUltimateTruth>
+}
+</checkArguments>
+
+<encode>
+function encode(data, buffer, offset) {
+  <collectBuffers>
+  var buffers = []
+  var result = null
+  encode._encode(buffers, data)
+  result = Buffer.concat(buffers)
+  </collectBuffers>
+  <trackEncodedBytes>
+  encode.bytes = result.length
+  </trackEncodedBytes>
+  <copyToBuffer>
+  if (Buffer.isBuffer(buffer)) {
+    result.copy(buffer, offset)
+    return buffer
+  }
+  </copyToBuffer>
+  return result
+}
+</encode>
+
+<setTag>
+function setTag(ifd, tag, value) {
+    var offset, length, tagOffset, valueOffset = 0;
+
+    <convertTagName>
+    if (typeof(tag) === 'string') {
+        var tmpTags = tags[ifd.toLowerCase()];
+        for (var hex in tmpTags) {
+            if (tmpTags[hex] === tag) {
+                tag = hex;
+                break;
+            }
+        }
+    }
+    </convertTagName>
+    offset = offsets[ifd.toLowerCase() + 'IFD'];
+    length = data.SHORT(offset);
+
+    <findTagOffset>
+    for (var i = 0; i < length; i++) {
+        tagOffset = offset + 12 * i + 2;
+        if (data.SHORT(tagOffset) == tag) {
+            valueOffset = tagOffset + 8;
+            break;
+        }
+    }
+    </findTagOffset>
+
+    <writeValue>
+    if (!valueOffset) {
+        return false;
+    }
+    data.LONG(valueOffset, value);
+    </writeValue>
+    return true;
+}
+</setTag>
+
+<verifyToken>
+function verify(token, sign, options) {
+  return function (done) {
+    <performVerification>
+    _jsonwebtoken2['default'].verifySync(token, sign, options, done);
+    </performVerification>
+  };
+}
+</verifyToken><decorateProperties>
+function(obj, propNames, item) {
+    <findContext>
+    var drilldownContext = drilldown(obj, this.dictPath),
+    </findContext>
+    <checkContext>
+    decoratingObjectItself = drilldownContext === obj,
+    force = this.force;
+    </checkContext>
+    <assignProperties>
+    propNames.forEach(function(propName) {
+        if (
+            !(decoratingObjectItself && REGEXP_INTEGER.test(propName)) &&
+            (force || !(propName in drilldownContext))
+        ) {
+            drilldownContext[propName] = item;
+        }
+    });
+    </assignProperties>
+    return obj;
+}
+</decorateProperties>
+
+<roundFraction>
+function roundFraction(places) {
+    <calculatePlaces>
+    places = Math.pow(10, places || 0);
+    </calculatePlaces>
+    <checkNaN>
+    if (isNaN(this["n"]) || isNaN(this["d"])) {
+      return new Fraction(NaN);
+    }
+    </checkNaN>
+    <createFraction>
+    return new Fraction(Math.round(places * this["s"] * this["n"] / this["d"]), places);
+    </createFraction>
+}
+</roundFraction>
+
+<buildDependencies>
+function _buildDependencies(links) {
+  <initializeDependencyList>
+  var deplist = [];
+  </initializeDependencyList>
+  <collectDependencies>
+  _.each(links, function(link) {
+    var l=_.values(link)[0];
+    _.each(l.parent, function(p) {
+      _.each(l.child, function(c) {
+        deplist.push([c,p]);
+      });
+    });
+  });
+  </collectDependencies>
+  return deplist;
+}
+</buildDependencies>
+
+<modifyTooltip>
+function modifyTooltip($super) {
+            <checkSVGSupport>
+            if(!this.hasSVG) {
+                $super();
+                return;
+            }
+            </checkSVGSupport>
+            var i, loopSplit, loopKeyName, loopKeyElem, loopValElem,
+                <selectTooltipElements>
+                $tooltip = $('.highcharts-tooltip', $(this.renderTo)),
+                tooltipElements = (this.hasSVG) ? $('tspan', $tooltip) :
+                                                  $('span > span', $tooltip);
+                </selectTooltipElements>
+            <addClassToElements>
+            for(i = 0; i < tooltipElements.length; i += 3) {
+                loopKeyElem = tooltipElements[i];
+                if(tooltipElements.length < i + 2) {
+                    break;
+                }
+                loopValElem = tooltipElements[i + 1];
+                loopSplit = (this.hasSVG) ? loopKeyElem.textContent.split(':') :
+                                            $(loopKeyElem).html().split(':');
+                loopKeyName = loopSplit[0];
+                this.addClassToElement(loopKeyElem, 'key');
+                this.addClassToElement(loopKeyElem, loopKeyName + '-key');
+                this.addClassToElement(loopValElem, 'value');
+                this.addClassToElement(loopValElem, loopKeyName + '-value');
+            }
+            </addClassToElements>
+}
+</modifyTooltip>
+
+<cleanUpData>
+function cleanUpData(data) {
+  <validateDataType>
+  if (!(data instanceof Tag) && !(data && typeof data.trigger == T_FUNCTION))
+    return data
+  </validateDataType>
+  <filterReservedWords>
+  var o = {}
+  for (var key in data) {
+    if (!contains(RESERVED_WORDS_BLACKLIST, key))
+      o[key] = data[key]
+  }
+  </filterReservedWords>
+  return o
+}
+</cleanUpData>
+
+<appendComponent>
+function appendComponent(target, mount, component) {
+    <readTargetFile>
+    var file = fs.readFileSync(target, 'utf-8');
+    var $ = cheerio.load(file);
+    </readTargetFile>
+    <ensureMountExists>
+    if (!$(mount).is(mount)) { throw messages.errors.domNodeNotFound(mount); }
+    </ensureMountExists>
+    <appendAndSave>
+    $(mount).append(component);
+    fs.writeFileSync(target, $.html());
+    </appendAndSave>
+}
+</appendComponent>
+
+<removeFile>
+function removeFile(file) {
+  <findListItem>
+  var $li = $('#' + file.id);
+  </findListItem>
+  <updateProgress>
+  delete percentages[file.id];
+  updateTotalProgress();
+  </updateProgress>
+  <removeElement>
+  $li.off().find('.file-panel').off().end().remove();
+  </removeElement>
+}
+</removeFile>
+
+<applyPathPolicies>
+function applyPathPolicies() {
+    <initializePolicyList>
+	var allPolicies = [];
+	for (var routePath in config.policies) {
+		if (routePath.charAt(0) === '/') {
+			var currentPolicies = config.policies[routePath];
+			if (currentPolicies === true) {
+				currentPolicies = [];
+			}
+			if (!Object.isArray(currentPolicies)) {
+				currentPolicies = [currentPolicies];
+			}
+			allPolicies.push({route: routePath, policies: currentPolicies});
+		}
+	}
+    </initializePolicyList>
+    <attachPoliciesToRoutes>
+	allPolicies.forEach(function(pathPolicy) {
+		pathPolicy.policies.forEach(function(policy) {
+			var policyPath = path.join(config.rootDir, config.paths.policies, policy);
+			app.all(pathPolicy.route, require(policyPath));
+		});
+	});
+    </attachPoliciesToRoutes>
+}
+</applyPathPolicies>
+
+<getColorFnAndIcon>
+function getColorFnAndIconByType(type) {
+  var colorFn, icon
+  <switchType>
+  switch (type) {
+    case 'error':
+      colorFn = chalk.red
+      icon = figures.cross
+      break
+    case 'warn':
+      colorFn = chalk.yellow
+      icon = figures.warning
+      break
+    case 'success':
+      colorFn = chalk.green
+      icon = figures.tick
+      break
+    default:
+      colorFn = chalk.blue
+      icon = figures.info
+      break
+  }
+  </switchType>
+  return { colorFn, icon }
+}
+</getColorFnAndIcon>
+
+<getCurrentUrl>
+function getCurrentUrl() {
+    <fetchRoot>
+	var root = cleanRoot(),
+		location = LOCATION(),
+		loc = (location.pathname + location.search),
+		index = loc.indexOf(root);
+    </fetchRoot>
+    <extractPath>
+	return loc.substr(index + root.length);
+    </extractPath>
+}
+</getCurrentUrl><addMatrixStack>
+function addMatrixStack() {
+  <initializeConstants>
+  gl.MODELVIEW = ENUM | 1;
+  gl.PROJECTION = ENUM | 2;
+  </initializeConstants>
+  <initializeMatrices>
+  var tempMatrix = new Matrix();
+  var resultMatrix = new Matrix();
+  gl.modelviewMatrix = new Matrix();
+  gl.projectionMatrix = new Matrix();
+  </initializeMatrices>
+  <initializeStacks>
+  var modelviewStack = [];
+  var projectionStack = [];
+  </initializeStacks>
+  var matrix, stack;
+  <defineMatrixMode>
+  gl.matrixMode = function(mode) {
+    switch (mode) {
+      case gl.MODELVIEW:
+        matrix = 'modelviewMatrix';
+        stack = modelviewStack;
+        break;
+      case gl.PROJECTION:
+        matrix = 'projectionMatrix';
+        stack = projectionStack;
+        break;
+      default:
+        throw new Error('invalid matrix mode ' + mode);
+    }
+  };
+  </defineMatrixMode>
+  <loadIdentity>
+  gl.loadIdentity = function() {
+    Matrix.identity(gl[matrix]);
+  };
+  </loadIdentity>
+  <loadMatrix>
+  gl.loadMatrix = function(m) {
+    var from = m.m, to = gl[matrix].m;
+    for (var i = 0; i < 16; i++) {
+      to[i] = from[i];
+    }
+  };
+  </loadMatrix>
+  <multMatrix>
+  gl.multMatrix = function(m) {
+    gl.loadMatrix(Matrix.multiply(gl[matrix], m, resultMatrix));
+  };
+  </multMatrix>
+  <setPerspective>
+  gl.perspective = function(fov, aspect, near, far) {
+    gl.multMatrix(Matrix.perspective(fov, aspect, near, far, tempMatrix));
+  };
+  </setPerspective>
+  <setFrustum>
+  gl.frustum = function(l, r, b, t, n, f) {
+    gl.multMatrix(Matrix.frustum(l, r, b, t, n, f, tempMatrix));
+  };
+  </setFrustum>
+  <setOrtho>
+  gl.ortho = function(l, r, b, t, n, f) {
+    gl.multMatrix(Matrix.ortho(l, r, b, t, n, f, tempMatrix));
+  };
+  </setOrtho>
+  <setScale>
+  gl.scale = function(x, y, z) {
+    gl.multMatrix(Matrix.scale(x, y, z, tempMatrix));
+  };
+  </setScale>
+  <setTranslate>
+  gl.translate = function(x, y, z) {
+    gl.multMatrix(Matrix.translate(x, y, z, tempMatrix));
+  };
+  </setTranslate>
+  <setRotate>
+  gl.rotate = function(a, x, y, z) {
+    gl.multMatrix(Matrix.rotate(a, x, y, z, tempMatrix));
+  };
+  </setRotate>
+  <setLookAt>
+  gl.lookAt = function(ex, ey, ez, cx, cy, cz, ux, uy, uz) {
+    gl.multMatrix(Matrix.lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz, tempMatrix));
+  };
+  </setLookAt>
+  <pushMatrix>
+  gl.pushMatrix = function() {
+    stack.push(Array.prototype.slice.call(gl[matrix].m));
+  };
+  </pushMatrix>
+  <popMatrix>
+  gl.popMatrix = function() {
+    var m = stack.pop();
+    gl[matrix].m = hasFloat32Array ? new Float32Array(m) : m;
+  };
+  </popMatrix>
+  <project>
+  gl.project = function(objX, objY, objZ, modelview, projection, viewport) {
+    modelview = modelview || gl.modelviewMatrix;
+    projection = projection || gl.projectionMatrix;
+    viewport = viewport || gl.getParameter(gl.VIEWPORT);
+    var point = projection.transformPoint(modelview.transformPoint(new Vector(objX, objY, objZ)));
+    return new Vector(
+      viewport[0] + viewport[2] * (point.x * 0.5 + 0.5),
+      viewport[1] + viewport[3] * (point.y * 0.5 + 0.5),
+      point.z * 0.5 + 0.5
+    );
+  };
+  </project>
+  <unProject>
+  gl.unProject = function(winX, winY, winZ, modelview, projection, viewport) {
+    modelview = modelview || gl.modelviewMatrix;
+    projection = projection || gl.projectionMatrix;
+    viewport = viewport || gl.getParameter(gl.VIEWPORT);
+    var point = new Vector(
+      (winX - viewport[0]) / viewport[2] * 2 - 1,
+      (winY - viewport[1]) / viewport[3] * 2 - 1,
+      winZ * 2 - 1
+    );
+    return Matrix.inverse(Matrix.multiply(projection, modelview, tempMatrix), resultMatrix).transformPoint(point);
+  };
+  </unProject>
+  <setInitialMatrixMode>
+  gl.matrixMode(gl.MODELVIEW);
+  </setInitialMatrixMode>
+}
+</addMatrixStack>
+
+<drop>
+function drop() {
+    if (selectionMarker) {
+        var selectionData = {
+            xAxis: [],
+            yAxis: []
+        },
+        selectionBox = selectionMarker.getBBox(),
+        selectionLeft = selectionBox.x - plotLeft,
+        selectionTop = selectionBox.y - plotTop;
+
+        <calculateSelection>
+        if (hasDragged) {
+
+            each(axes, function (axis) {
+                var translate = axis.translate,
+                    isXAxis = axis.isXAxis,
+                    isHorizontal = inverted ? !isXAxis : isXAxis,
+                    selectionMin = translate(
+                        isHorizontal ?
+                            selectionLeft :
+                            plotHeight - selectionTop - selectionBox.height,
+                        true,
+                        0,
+                        0,
+                        1
+                    ),
+                    selectionMax = translate(
+                        isHorizontal ?
+                            selectionLeft + selectionBox.width :
+                            plotHeight - selectionTop,
+                        true,
+                        0,
+                        0,
+                        1
+                    );
+
+                    selectionData[isXAxis ? 'xAxis' : 'yAxis'].push({
+                        axis: axis,
+                        min: mathMin(selectionMin, selectionMax), 
+                        max: mathMax(selectionMin, selectionMax)
+                    });
+
+            });
+            fireEvent(chart, 'selection', selectionData, zoom);
+        }
+        </calculateSelection>
+        <destroySelectionMarker>
+        selectionMarker = selectionMarker.destroy();
+        </destroySelectionMarker>
+    }
+    <resetStates>
+    chart.mouseIsDown = mouseIsDown = hasDragged = false;
+    removeEvent(doc, hasTouch ? 'touchend' : 'mouseup', drop);
+    </resetStates>
+}
+</drop>
+
+<parseCommandLine>
+function parseCommandLine(commandLine, readFile) {
+    var options = {};
+    var fileNames = [];
+    var errors = [];
+    <initializeOptionMaps>
+    var _a = getOptionNameMap(), optionNameMap = _a.optionNameMap, shortOptionNames = _a.shortOptionNames;
+    </initializeOptionMaps>
+    parseStrings(commandLine);
+    return {
+        options: options,
+        fileNames: fileNames,
+        errors: errors
+    };
+    <parseOptions>
+    function parseStrings(args) {
+        var i = 0;
+        while (i < args.length) {
+            var s = args[i];
+            i++;
+            if (s.charCodeAt(0) === 64 ) {  // @ symbol for response files
+                <parseResponseFile>
+                parseResponseFile(s.slice(1));
+                </parseResponseFile>
+            }
+            else if (s.charCodeAt(0) === 45 ) {  // - for options
+                <parseOption>
+                s = s.slice(s.charCodeAt(1) === 45  ? 2 : 1).toLowerCase();      
+                if (s in shortOptionNames) {
+                    s = shortOptionNames[s];
+                }
+                if (s in optionNameMap) {
+                    var opt = optionNameMap[s];
+                    if (opt.isTSConfigOnly) {
+                        errors.push(ts.createCompilerDiagnostic(ts.Diagnostics.Option_0_can_only_be_specified_in_tsconfig_json_file, opt.name));
+                    }
+                    else {        
+                        if (!args[i] && opt.type !== "boolean") {
+                            errors.push(ts.createCompilerDiagnostic(ts.Diagnostics.Compiler_option_0_expects_an_argument, opt.name));
+                        }
+                        switch (opt.type) {
+                            case "number":
+                                options[opt.name] = parseInt(args[i]);
+                                i++;
+                                break;
+                            case "boolean":
+                                options[opt.name] = true;
+                                break;
+                            case "string":
+                                options[opt.name] = args[i] || "";
+                                i++;
+                                break;
+                            case "list":
+                                var result = parseListTypeOption(opt, args[i], errors);
+                                options[opt.name] = result || [];
+                                if (result) {
+                                    i++;
+                                }
+                                break;
+                            default:
+                                options[opt.name] = parseCustomTypeOption(opt, args[i], errors);
+                                i++;
+                                break;
+                        }
+                    }
+                }
+                else {
+                    errors.push(ts.createCompilerDiagnostic(ts.Diagnostics.Unknown_compiler_option_0, s));
+                }
+                </parseOption>
+            }
+            else {
+                fileNames.push(s);
+            }
+        }
+    }
+    </parseOptions>
+}
+</parseCommandLine>
+
+<listKeys>
+function listKeys(args) {
+    return new Promise((resolve) => {
+        <setInfoFlag>
+        const bInfo = (args && args.info === 'true');
+        </setInfoFlag>
+        const result = {};
+        if (bInfo) result._info={leaf: false};
+        for (let i=0; i<localStorage.length; i++) {
+            <getLocalStorageKey>
+            const key = localStorage.key(i);
+            if (key == 'MACtoIP') continue;
+            result[key] = {};
+            </getLocalStorageKey>
+            <addInfo>
+            if (bInfo) {
+                const size = localStorage.getItem(key).length;
+                result[key]._info = {
+                    doc: {
+                        short: size + ' byte'
+                    },
+                    leaf: true,
+                };
+            }
+            </addInfo>
+        }
+        <resolvePromise>
+        resolve(result);
+        </resolvePromise>
+    });
+}
+</listKeys>
+
+<sendHealthDataToServer>
+function sendHealthDataToServer() {
+    var result = new $.Deferred();
+    <getHealthData>
+    getHealthData().done(function (healthData) {
+        var url = brackets.config.healthDataServerURL,
+            data = JSON.stringify(healthData);
+        </getHealthData>
+        <postHealthData>
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            dataType: "text",
+            contentType: "text/plain"
+        })
+        .done(function () {
+            result.resolve();
+        })
+        .fail(function (jqXHR, status, errorThrown) {
+            console.error("Error in sending Health Data. Response : " + jqXHR.responseText + ". Status : " + status + ". Error : " + errorThrown);
+            result.reject();
+        });
+        </postHealthData>
+    })
+    .fail(function () {
+        result.reject();
+    });
+    return result.promise();
+}
+</sendHealthDataToServer>
+
+<frontBack>
+function frontBack(value) {
+    <scaleValue>
+    var _scale = _.partial(scale, calibration.lon, 80);
+    </scaleValue>
+    <emitEvents>
+    if (isSimilar(value, calibration.lon)) return emitter.emit('front', 0);
+    if (value > calibration.lon) return emitter.emit('front', _scale(value));
+    if (value < calibration.lon) return emitter.emit('back', _scale(value));
+    </emitEvents>
+}
+</frontBack>
+
+<CuteFile>
+function CuteFile(file, chunkSize) {
+    var pending = [],
+        blob = file.source,
+        total = blob.size,
+        chunks = chunkSize ? Math.ceil(total / chunkSize) : 1,
+        start = 0,
+        index = 0,
+        len, api;
+
+    <initializeAPI>
+    api = {
+        file: file,
+        <hasBlocks>
+        has: function() {
+            return !!pending.length;
+        },
+        </hasBlocks>
+        <shiftBlock>
+        shift: function() {
+            return pending.shift();
+        },
+        </shiftBlock>
+        <unshiftBlock>
+        unshift: function(block) {
+            pending.unshift(block);
+        }
+        </unshiftBlock>
+    };
+    </initializeAPI>
+    <chunkFile>
+    while (index < chunks) {
+        len = Math.min(chunkSize, total - start);
+
+        pending.push({
+            file: file,
+            start: start,
+            end: chunkSize ? (start + len) : total,
+            total: total,
+            chunks: chunks,
+            chunk: index++,
+            cuted: api
+        });
+        start += len;
+    }
+    </chunkFile>
+    <setupFileAttributes>
+    file.blocks = pending.concat();
+    file.remaning = pending.length;
+    </setupFileAttributes>
+    return api;
+}
+</CuteFile>
+
+<toggleAttribute>
+function toggleAttribute(attr, options) {
+    options = options ? _.clone(options) : {};
+    <getValue>
+    var val = this.get(attr);
+    if(!_.isBoolean(val)) console.error('Tried to toggle non-boolean value ' + attr +'!', this);
+    </getValue>
+    <toggleValue>
+    return this.set(attr, !val, options);
+    </toggleValue>
+}
+</toggleAttribute>
+
+<generateUID>
+function generateUID(onDone) {
+    <validateUID>
+    l_validateUID();
+    </validateUID>
+    var uid = ++l_states['uid_count'];
+    <syncState>
+    l_states.sync(function (err) {
+        if (err) {
+            return onDone(err);
+        }
+        LOG.warn('uid generated: ' + uid);
+        onDone(null, uid);
+    });
+    </syncState>
+}
+</generateUID>
+
+<updateGamepads>
+function updateGamepads(gamepads) {
+    var i;
+    var sceneEl = this.sceneEl;
+    var trackedControlsSystem = sceneEl.systems['tracked-controls'];
+    gamepads = gamepads || []
+    
+    <convertToList>
+    gamepads = Array.from(gamepads)
+    </convertToList>
+
+    <mergeGamepads>
+    this.gamepads.forEach(function (gamepad) {
+      if (gamepads[gamepad.index]) { return; }
+      
+      gamepad.pose = true;
+      gamepads[gamepad.index] = gamepad;
+    });
+    </mergeGamepads>
+
+    <updateOriginalControllerList>
+    this.updateControllerListOriginal(gamepads);
+    </updateOriginalControllerList>
+}
+</updateGamepads><updateProgressBar>
+function updateProgressBar(e) {
+  <selectProgressElement>
+  var $progress = $('.progress:first', this.$el),
+  </selectProgressElement>
+  <initializeCompletion>
+      complete;
+  </initializeCompletion>
+  <computeCompletion>
+  if (e.lengthComputable) {
+    complete = e.loaded / e.total * 100;
+    complete = complete ? complete : 0;
+    </computeCompletion>
+    <setProgressBarValue>
+    $progress.attr('value', complete);
+    $progress.html(complete);
+    </setProgressBarValue>
+  }
+}
+</updateProgressBar>
+
+<createBodyWriter>
+function createBodyWriter(req) {
+  <initializeBuffers>
+  var buffers = [];
+  </initializeBuffers>
+  <detectTextContent>
+  var contentType = req.contentType();
+  var isText = false;
+  </detectTextContent>
+  <checkContentType>
+  if (!contentType ||
+      contentType === 'application/json' ||
+      contentType === 'application/x-www-form-urlencoded' ||
+      contentType === 'multipart/form-data' ||
+      contentType.substr(0, 5) === 'text/') {
+    isText = true;
+  }
+  </checkContentType>
+  <createBodyBuffer>
+  req.body = new Buffer(0);
+  </createBodyBuffer>
+  <returnBodyWriter>
+  return {
+      write: function (chunk) {
+          buffers.push(chunk);
+      },
+      end: function () {
+          req.body = Buffer.concat(buffers);
+          if (isText) {
+              req.body = req.body.toString('utf8');
+          }
+      }
+  };
+  </returnBodyWriter>
+}
+</createBodyWriter>
+
+<addMonitoring>
+function addMonitoring(connection, probe) {
+  <applyAspectAround>
+  aspect.around(
+    connection,
+    'execute',
+    function(target, methodName, args, probeData) {
+      <notifyStartProbes>
+      probe.metricsProbeStart(probeData, methodName, args);
+      probe.requestProbeStart(probeData, methodName, args);
+      </notifyStartProbes>
+      <aroundCallback>
+      aspect.aroundCallback(args, probeData, function(target, callbackArgs, probeData) {
+        <traceTransaction>
+        var callbackPosition = aspect.findCallbackArg(args);
+        if (typeof callbackPosition != 'undefined') {
+          aspect.strongTraceTransactionLink('oracle: ', methodName, args[callbackPosition]);
+        }
+        </traceTransaction>
+        <notifyEndProbes>
+        probe.metricsProbeEnd(probeData, methodName, args);
+        probe.requestProbeEnd(probeData, methodName, args);
+        </notifyEndProbes>
+      });
+      </aroundCallback>
+    },
+    function(target, methodName, args, probeData, rc) {
+      <checkSyncInvocation>
+      if (aspect.findCallbackArg(args) == undefined) {
+        probe.metricsProbeEnd(probeData, methodName, args);
+        probe.requestProbeEnd(probeData, methodName, args);
+      }
+      </checkSyncInvocation>
+      return rc;
+    }
+  );
+  </applyAspectAround>
+}
+</addMonitoring>
+
+<validateAuthorizationParams>
+function validateAuthorizationParams(req, res, next) {
+  <retrieveConnectParams>
+  var params = req.connectParams
+  </retrieveConnectParams>
+  <validateResponseType>
+  if (!params.response_type || !params.response_type.trim()) {
+    return next(new AuthorizationError({
+      error: 'invalid_request',
+      error_description: 'Missing response type',
+      redirect_uri: params.redirect_uri,
+      statusCode: 302
+    }))
+  }
+  </validateResponseType>
+  <parseResponseTypes>
+  var responseTypes = params.response_type.trim().split(' ')
+  </parseResponseTypes>
+  <checkValidResponseType>
+  var isValidResponseType = responseTypes.indexOf('none') !== -1
+    ? responseTypes.length === 1
+    : responseTypes.every(
+      function (responseType) {
+        return validResponseTypes.indexOf(responseType) !== -1
+      }
+    )
+  </checkValidResponseType>
+  <handleInvalidResponseType>
+  if (!isValidResponseType) {
+    return next(new AuthorizationError({
+      error: 'unsupported_response_type',
+      error_description: 'Unsupported response type',
+      redirect_uri: params.redirect_uri,
+      statusCode: 302
+    }))
+  }
+  </handleInvalidResponseType>
+  <checkResponseModes>
+  if (!params.response_mode || params.response_mode.trim() &&
+    validResponseModes.indexOf(params.response_mode.trim()) === -1) {
+    return next(new AuthorizationError({
+      error: 'unsupported_response_mode',
+      error_description: 'Unsupported response mode',
+      redirect_uri: params.redirect_uri,
+      statusCode: 302
+    }))
+  }
+  </checkResponseModes>
+  <validateScope>
+  if (!params.scope) {
+    return next(new AuthorizationError({
+      error: 'invalid_scope',
+      error_description: 'Missing scope',
+      redirect_uri: params.redirect_uri,
+      statusCode: 302
+    }))
+  }
+  </validateScope>
+  <ensureOpenIdScope>
+  if (params.scope.indexOf('openid') === -1) {
+    return next(new AuthorizationError({
+      error: 'invalid_scope',
+      error_description: 'Missing openid scope',
+      redirect_uri: params.redirect_uri,
+      statusCode: 302
+    }))
+  }
+  </ensureOpenIdScope>
+  <checkNonce>
+  if (!params.nonce && requiresNonce(responseTypes)) {
+    return next(new AuthorizationError({
+      error: 'invalid_request',
+      error_description: 'Missing nonce',
+      redirect_uri: params.redirect_uri,
+      statusCode: 302
+    }))
+  }
+  </checkNonce>
+  <proceedToNextMiddleware>
+  next()
+  </proceedToNextMiddleware>
+}
+</validateAuthorizationParams>
+
+<isSingleCaretContainer>
+function isSingleCaretContainer(elm) {
+  <liftCaretPositions>
+  return Options.liftN([
+    CaretFinder.firstPositionIn(elm),
+    CaretFinder.lastPositionIn(elm)
+  ], function (firstPos, lastPos) {
+    var normalizedFirstPos = InlineUtils.normalizePosition(true, firstPos);
+    var normalizedLastPos = InlineUtils.normalizePosition(false, lastPos);
+    </liftCaretPositions>
+    <findNextCaretPosition>
+    return CaretFinder.nextPosition(elm, normalizedFirstPos).map(function (pos) {
+      return pos.isEqual(normalizedLastPos);
+    }).getOr(true);
+    </findNextCaretPosition>
+  }).getOr(true);
+}
+</isSingleCaretContainer>
+
+<sort>
+function sort(type) {
+  <validateSortType>
+  if (!~SORT_TYPES.indexOf(type)) {
+    throw new FieldError('Sorting type can be ' + SORT_TYPES.join(' or '))
+  }
+  </validateSortType>
+  <returnSortObject>
+  return {
+    type: type
+  }
+  </returnSortObject>
+}
+</sort>
+
+<makeJsonResponseBody>
+function makeJsonResponseBody(statusCode, flash) {
+  <checkSessionFlash>
+  const hasSession = !!R.path(['session', 'flash'], this);
+  </checkSessionFlash>
+  <createResponseBody>
+  return {
+    statusCode: statusCode,
+    flash: {
+      notice: hasSession ? flash.apply(this, ['notice']) : [],
+      error: hasSession ? flash.apply(this, ['error']) : []
+    }
+  };
+  </createResponseBody>
+}
+</makeJsonResponseBody>
+
+<AbortError>
+function AbortError(message) {
+  <defineMessage>
+  Object.defineProperty(this, 'message', {
+    value: message || '',
+    configurable: true,
+    writable: true
+  })
+  </defineMessage>
+  <captureStackTrace>
+  Error.captureStackTrace(this, this.constructor)
+  </captureStackTrace>
+}
+</AbortError>
+
+<_cmdInstall>
+function cmdInstall(packagePath, destinationDirectory, options, callback, pCallback, doUpdate) {
+    <validateOptions>
+    if (!options || !options.disabledDirectory || !options.apiVersion || !options.systemExtensionDirectory) {
+        callback(new Error(Errors.MISSING_REQUIRED_OPTIONS), null);
+        return;
+    }
+    </validateOptions>
+    <runValidation>
+    function validateCallback(err, validationResult) {
+        validationResult.localPath = packagePath;
+        </runValidation>
+        <deleteTemporaryFiles>
+        function deleteTempAndCallback(err) {
+            if (validationResult.extractDir) {
+                fs.remove(validationResult.extractDir);
+                delete validationResult.extractDir;
+            }
+            callback(err, validationResult);
+        }
+        </deleteTemporaryFiles>
+        <handleValidationErrors>
+        if (err || validationResult.errors.length > 0) {
+            validationResult.installationStatus = Statuses.FAILED;
+            deleteTempAndCallback(err);
+            return;
+        }
+        </handleValidationErrors>
+        <assumeExtensionName>
+        var extensionName, guessedName;
+        if (options.nameHint) {
+            guessedName = path.basename(options.nameHint, ".zip");
+        } else {
+            guessedName = path.basename(packagePath, ".zip");
+        }
+        if (validationResult.metadata) {
+            extensionName = validationResult.metadata.name;
+        } else {
+            extensionName = guessedName;
+        }
+        </assumeExtensionName>
+        <prepareInstallation>
+        validationResult.name = extensionName;
+        var installDirectory = path.join(destinationDirectory, extensionName),
+            legacyDirectory = path.join(destinationDirectory, guessedName),
+            systemInstallDirectory = path.join(options.systemExtensionDirectory, extensionName);
+        </prepareInstallation>
+        <checkAPICompatibility>
+        if (validationResult.metadata && validationResult.metadata.engines &&
+                validationResult.metadata.engines.brackets) {
+            var compatible = semver.satisfies(options.apiVersion,
+                                              validationResult.metadata.engines.brackets);
+            if (!compatible) {
+                installDirectory = path.join(options.disabledDirectory, extensionName);
+                validationResult.installationStatus = Statuses.DISABLED;
+                validationResult.disabledReason = Errors.API_NOT_COMPATIBLE;
+                _removeAndInstall(packagePath, installDirectory, validationResult, deleteTempAndCallback);
+                return;
+            }
+        }
+        </checkAPICompatibility>
+        <handleExistingInstallation>
+        var hasLegacyPackage = validationResult.metadata && legacyPackageCheck(legacyDirectory);
+        if (hasLegacyPackage || fs.existsSync(installDirectory) || fs.existsSync(systemInstallDirectory)) {
+            if (doUpdate === true) {
+                if (hasLegacyPackage) {
+                    fs.remove(legacyDirectory, function (err) {
+                        if (err) {
+                            deleteTempAndCallback(err);
+                            return;
+                        }
+                        _removeAndInstall(packagePath, installDirectory, validationResult, deleteTempAndCallback);
+                    });
+                } else {
+                    _removeAndInstall(packagePath, installDirectory, validationResult, deleteTempAndCallback);
+                }
+            } else if (hasLegacyPackage) {
+                validationResult.installationStatus = Statuses.NEEDS_UPDATE;
+                validationResult.name = guessedName;
+                deleteTempAndCallback(null);
+            } else {
+                _checkExistingInstallation(validationResult, installDirectory, systemInstallDirectory, deleteTempAndCallback);
+            }
+        } else {
+            validationResult.disabledReason = null;
+            _performInstall(packagePath, installDirectory, validationResult, deleteTempAndCallback);
+        }
+        </handleExistingInstallation>
+    }
+    <validatePackage>
+    validate(packagePath, options, validateCallback);
+    </validatePackage>
+}
+</_cmdInstall>
+
+<consumeContext>
+function consumeContext(ChildConsumer, ContextAPI) {
+  <forwardRefWithContext>
+  return React.forwardRef(({ context: parentContext = {}, ...props }, ref) => (
+    <ContextAPI.Consumer>
+      {context => (
+        <ChildConsumer
+          {...props}
+          ref={ref}
+          context={{
+            ...parentContext,
+            ...context
+          }}
+        />
+      )}
+    </ContextAPI.Consumer>
+  ))
+  </forwardRefWithContext>
+}
+</consumeContext><fixDefaultChecked>
+function fixDefaultChecked(elem) {
+  <checkType>
+  if (rcheckableType.test(elem.type)) {
+    </checkType>
+    <setDefaultChecked>
+    elem.defaultChecked = elem.checked;
+    </setDefaultChecked>
+  }
+}
+</fixDefaultChecked>
+
+<addParts>
+function addParts(config, parts, value) {
+  <getNextPart>
+  const part = parts.shift();
+  </getNextPart>
+  <handleFinalPart>
+  if (parts.length === 0) {
+    </handleFinalPart>
+    <normalizeValue>
+    if (value === 'false') { value = false; }
+    if (value === 'true') { value = true; }
+    </normalizeValue>
+    <setConfigValue>
+    config[part] = value;
+    </setConfigValue>
+  } else {
+    <createNestedObject>
+    if (config[part] === undefined) {
+      config[part] = {};
+    }
+    </createNestedObject>
+    <recursiveCall>
+    addParts(config[part], parts, value);
+    </recursiveCall>
+  }
+}
+</addParts>
+
+<attachEvent>
+function(eventName, callback) {
+  <getAllCallbacks>
+  var allCallbacks = callbacksFor(this), callbacks;
+  </getAllCallbacks>
+  <getEventCallbacks>
+  callbacks = allCallbacks[eventName];
+  </getEventCallbacks>
+  <initializeCallbacks>
+  if (!callbacks) {
+    callbacks = allCallbacks[eventName] = [];
+  }
+  </initializeCallbacks>
+  <registerCallback>
+  if (indexOf(callbacks, callback) === -1) {
+    callbacks.push(callback);
+  }
+  </registerCallback>
+}
+</attachEvent>
+
+<addChild>
+function addChild(getValue, newChild, tree) {
+  <findInsertIndex>
+  tree.children.splice(
+    binaryIndexBy(getValue, getValue(newChild), tree.children),
+    0, newChild
+  );
+  </findInsertIndex>
+  <returnNewChild>
+  return newChild;
+  </returnNewChild>
+}
+</addChild>
+
+<_getStats>
+function getStats(uri) {
+  <returnFileStats>
+  return new FileSystemStats({
+    isFile: true,
+    mtime: SESSION_START_TIME.toISOString(),
+    size: 0,
+    realPath: uri,
+    hash: uri
+  });
+  </returnFileStats>
+}
+</_getStats>
+
+<insertRating>
+function insertRating(rating, config, conn) {
+  <validateRatingData>
+  if ((!rating.uri || rating.uri === '') && (!rating.cacheURI || rating.cacheURI === '')) {
+    return 'You must enter a valid uri'
+  }
+  if (!rating.reviewer || rating.reviewer === '') {
+    return 'You must enter a valid reviewer'
+  }
+  </validateRatingData>
+  <getDefaultConfig>
+  config = config || require('../config/config.js')
+  </getDefaultConfig>
+  <createQueryPromise>
+  return new Promise((resolve, reject) => {
+    if (!conn) {
+      var conn = wc_db.getConnection(config.db)
+    }
+
+    var sql;
+    if (rating.uri) {
+      sql = 'INSERT into Rating values (NULL, :uri, :rating, NULL, :reviewer, NULL, NOW())'
+    } else {
+      sql = 'INSERT into Rating SELECT NULL, a.uri, :rating, NULL, :reviewer, NULL, NOW() from Media a where a.cacheURI = :cacheURI '
+    }
+    debug('insertRating', sql, rating)
+
+    conn.query(sql, { replacements: { "uri" : rating.uri, "cacheURI" : rating.cacheURI, "reviewer" : rating.reviewer, "rating" : rating.rating ? rating.rating : null } }).then(function(ret){
+      return resolve({"ret" : ret, "conn" : conn})
+    }).catch(function(err) {
+      return reject({"err" : err, "conn" : conn})
+    })
+  })
+  </createQueryPromise>
+}
+</insertRating>
+
+<loadAllExtensions>
+function loadAllExtensions(subtype, context, done) {
+  <getTypes>
+  var types = this.types,
+      loaded = {};
+  </getTypes>
+  <iterateExtensions>
+  this.allExtensions(function (type, id, plugin, next) {
+    <checkSubtype>
+    if (!plugin[subtype]) return next();
+    if ('string' === typeof plugin[subtype]) {
+      try {
+        plugin[subtype] = require(path.resolve(path.join(plugin.dir, plugin[subtype])));
+      } catch (e) {
+        console.log('failed to load plugin', id, e.message, e.stack);
+        e.message += '; error loading plugin ' + id;
+        return next(e);
+      }
+    }
+    </checkSubtype>
+    <initializeLoadedType>
+    if (!loaded[type]) loaded[type] = {};
+    </initializeLoadedType>
+    <initializeSubtype>
+    if (!types[type][subtype]) {
+      loaded[type][id] = plugin[subtype];
+      return next();
+    }
+    </initializeSubtype>
+    <initializePlugins>
+    types[type][subtype](id, plugin[subtype], plugin, context, function (err, initialized) {
+      loaded[type][id] = initialized;
+      next(err);
+    });
+    </initializePlugins>
+  }, function (err) {
+    done(err, loaded);
+  });
+  </iterateExtensions>
+}
+</loadAllExtensions>
+
+<int64shr>
+function int64shr(dst, x, shift) {
+  <shiftRightLogic>
+  dst.l = (x.l >>> shift) | (x.h << (32 - shift));
+  </shiftRightLogic>
+  <shiftRightArith>
+  dst.h = (x.h >>> shift);
+  </shiftRightArith>
+}
+</int64shr>
+
+<isAvailable>
+function isAvailable(time, duration, availabilities) {
+  <check30MinuteDuration>
+  if (duration === 30) {
+    return (availabilities.indexOf(time) !== -1);
+  }
+  </check30MinuteDuration>
+  <check60MinuteDuration>
+  else if (duration === 60) {
+    const secondHalfHourTime = incrementTimeByThirtyMins(time);
+    return (availabilities.indexOf(time) !== -1 && availabilities.indexOf(secondHalfHourTime) !== -1);
+  }
+  </check60MinuteDuration>
+  <throwDurationError>
+  throw new Error(`Was not able to understand duration ${duration}`);
+  </throwDurationError>
+}
+</isAvailable>
+
+<forEachItem>
+function forEachItem(callback, context) {
+  var callbackContext = context || this;
+  <iterateItems>
+  for (var i = 0; i < this.length; i++) {
+    var item = this[i];
+    callback.call(callbackContext, item, i);
+    <checkItemMutation>
+    if (this[i] !== item) {
+      i--;
+    }
+    </checkItemMutation>
+  }
+  </iterateItems>
+  <returnThis>
+  return this;
+  </returnThis>
+}
+</forEachItem>

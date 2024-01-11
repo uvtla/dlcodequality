@@ -1,0 +1,511 @@
+```javascript
+<flattenValue>
+function flattenValue(parent, parentProperty, value, subjects) {
+  var flattened = null;
+  
+  <nullCheck>
+  if (value === null) {
+    // No operation performed on null values
+  }
+  </nullCheck>
+  
+  <arrayCheck>
+  else if (value.constructor === Array) {
+    for (var i in value) {
+      _flatten(parent, parentProperty, value[i], subjects);
+    }
+  }
+  </arrayCheck>
+  
+  <objectCheck>
+  else if (value.constructor === Object) {
+    <handleLiteralsOrTypes>
+    if ('@literal' in value || parentProperty === '@type') {
+      flattened = _clone(value);
+    }
+    </handleLiteralsOrTypes>
+    
+    <handleIdArray>
+    else if (value['@id'].constructor === Array) {
+      if (parent !== null) {
+        throw {
+          message: 'Embedded graph literals cannot be flattened.'
+        };
+      }
+      for (var idx in value['@id']) {
+        _flatten(parent, parentProperty, value['@id'][idx], subjects);
+      }
+    }
+    </handleIdArray>
+    
+    <handleRegularObject>
+    else {
+      var subject;
+      if (value['@id'] in subjects) {
+        subject = subjects[value['@id']];
+      } else {
+        subject = { '@id': value['@id'] };
+        subjects[value['@id']] = subject;
+      }
+      flattened = { '@id': subject['@id'] };
+      for (var key in value) {
+        var v = value[key];
+        if (v !== null && key !== '@id') {
+          if (key in subject) {
+            if (subject[key].constructor !== Array) {
+              subject[key] = [subject[key]];
+            }
+          } else {
+            subject[key] = [];
+          }
+          _flatten(subject[key], key, v, subjects);
+          if (subject[key].length === 1) {
+            subject[key] = subject[key][0];
+          }
+        }
+      }
+    }
+    </handleRegularObject>
+    
+  }
+  </objectCheck>
+  
+  <simpleValueCheck>
+  else {
+    flattened = value;
+  }
+  </simpleValueCheck>
+
+  
+  <finalizeFlattening>
+  if (flattened !== null && parent !== null) {
+    if (parent.constructor === Array) {
+      var duplicate = false;
+      if (flattened.constructor === Object && '@id' in flattened) {
+        duplicate = parent.filter(function (e) {
+          return (e.constructor === Object && '@id' in e && e['@id'] === flattened['@id']);
+        }).length > 0;
+      }
+      if (!duplicate) {
+        parent.push(flattened);
+      }
+    } else {
+      parent[parentProperty] = flattened;
+    }
+  }
+  </finalizeFlattening>
+  
+}
+</flattenValue>
+```
+
+```javascript
+<encryptData>
+function encryptData(password, plaintext, params, rp) {
+  params = params || {};
+  rp = rp || {};
+
+  var j = sjcl.json, p = j._add({ iv: sjcl.random.randomWords(4,0) }, j.defaults), tmp, prp, adata;
+  j._add(p, params);
+  adata = p.adata;
+  
+  <processInputParameters>
+  if (typeof p.salt === "string") {
+    p.salt = sjcl.codec.base64.toBits(p.salt);
+  }
+  if (typeof p.iv === "string") {
+    p.iv = sjcl.codec.base64.toBits(p.iv);
+  }
+  </processInputParameters>
+
+  <parameterValidation>
+  if (!sjcl.mode[p.mode] || !sjcl.cipher[p.cipher] || (typeof password === "string" && p.iter <= 100) || (p.ts !== 64 && p.ts !== 96 && p.ts !== 128) || (p.ks !== 128 && p.ks !== 192 && p.ks !== 256) || (p.iv.length < 2 || p.iv.length > 4)) {
+    throw new sjcl.exception.invalid("json encrypt: invalid parameters");
+  }
+  </parameterValidation>
+
+  <processPassword>
+  if (typeof password === "string") {
+    tmp = sjcl.misc.cachedPbkdf2(password, p);
+    password = tmp.key.slice(0, p.ks / 32);
+    p.salt = tmp.salt;
+  } else if (sjcl.ecc && password instanceof sjcl.ecc.elGamal.publicKey) {
+    tmp = password.kem();
+    p.kemtag = tmp.tag;
+    password = tmp.key.slice(0, p.ks / 32);
+  }
+  </processPassword>
+
+  <prepareData>
+  if (typeof plaintext === "string") {
+    plaintext = sjcl.codec.utf8String.toBits(plaintext);
+  }
+  if (typeof adata === "string") {
+    p.adata = adata = sjcl.codec.utf8String.toBits(adata);
+  }
+  </prepareData>
+
+  <initializeCipher>
+  prp = new sjcl.cipher[p.cipher](password);
+  </initializeCipher>
+
+  <finalizeAndEncrypt>
+  j._add(rp, p);
+  rp.key = password;
+  p.ct = sjcl.mode[p.mode].encrypt(prp, plaintext, p.iv, adata, p.ts);
+  </finalizeAndEncrypt>
+
+  <returnCipherText>
+  return p;
+  </returnCipherText>
+}
+</encryptData>
+```
+
+```javascript
+<generateNumber>
+function getNumber(type, min, max, format, options) {
+  var ret;
+
+  <handleOptions>
+  if (!options) {
+    options = format;
+    format = null;
+  }
+  </handleOptions>
+
+  <generateRandomNumber>
+  if (type === 'int') {
+    ret = utils.randomInt(min, max);
+  } else if (type === 'float') {
+    ret = utils.randomFloat(min, max);
+  }
+  </generateRandomNumber>
+
+  <roundNumber>
+  if (typeof options.hash.round === 'number') {
+    ret = Math.round(ret / options.hash.round) * options.hash.round;
+  }
+  </roundNumber>
+
+  <formatNumber>
+  if (format) {
+    ret = numbro(ret).format(format);
+  }
+  </formatNumber>
+
+  <returnResult>
+  return ret;
+  </returnResult>
+}
+</generateNumber>
+```
+
+```javascript
+<parseConditions>
+function parseConditions(arr, defaultOp) {
+  var ret = [];
+  
+  <generateParsedArray>
+  arr.forEach(function (a) {
+    <convertStringToIdentifier>
+    if (isString(a)) {
+      a = this.stringToIdentifier(a);
+    }
+    </convertStringToIdentifier>
+   
+    <validateIdentifier>
+    if (isInstanceOf(a, Identifier)) {
+      ret.push([a, defaultOp]);
+    }
+    </validateIdentifier>
+    
+    <handleHash>
+    else if (isHash(a)) {
+      ret = ret.concat(array.toArray(a));
+    }
+    </handleHash>
+    
+    <throwErrorOnInvalidSpecifier>
+    else {
+      throw new QueryError("Invalid condition specifier " + a);
+    }
+    </throwErrorOnInvalidSpecifier>
+  }, this);
+  </generateParsedArray>
+
+  <returnParsedArray>
+  return ret;
+  </returnParsedArray>
+}
+</parseConditions>
+```
+
+```javascript
+<getHelpContents>
+async function getHelpContents(args, output) {
+  <handleSpecialArguments>
+  if ('!' in args) {
+    return getAllCommands(output);
+  }
+  </handleSpecialArguments>
+
+  <handleArgumentsLength>
+  if (args._.length == 0) {
+    return getGeneralHelpContents(output);
+  } else if (args._.length == 1) {
+    return getVerbHelp(args._[0], output);
+  } else if (args._.length >= 2) {
+    <provideOperationHelp>
+    const serviceManifest = getServiceManifest(args);
+    if (serviceManifest) {
+      const { operation } = serviceManifest;
+      output.write(`${operation.description}\n\n`);
+      output.write(`Usage:\n${chalk.cyan.bold(operation.command)}\n\n`);
+    } else {
+      return getVerbHelp(args._[0], output);
+    }
+    </provideOperationHelp>
+  }
+  </handleArgumentsLength>
+
+  <provideHelpForService>
+  const serviceManifest = getServiceManifest(args);
+  if (serviceManifest) {
+    return getHelpContentsForService(serviceManifest, output);
+  }
+  </provideHelpForService>
+
+  <fallbackToGeneralHelp>
+  return getGeneralHelpContents(output);
+  </fallbackToGeneralHelp>
+}
+</getHelpContents>
+```
+
+```javascript
+<deleteProduct>
+function f_urun_sil(_tahta_id, _urun_id, _kul_id) {
+  <checkProductId>
+  if (!_urun_id) {
+    throw new exception.Istisna("Ürün Silinemedi!", "Silinecek ürün bulunamadı! Tekrar deneyiniz.");
+  }
+  </checkProductId>
+
+  <setupDeleteOptions>
+  var opts = {};
+  opts.bArrAnahtarKelimeler = false;
+  opts.bArrIliskiliFirmalar = false;
+  opts.bUreticiKurum = false;
+  </setupDeleteOptions>
+
+  <retrieveProductAndPerformDeletion>
+  return f_urun_id(_urun_id, _tahta_id, opts)
+    .then(function (_dbUrun) {
+      <emitDeletionEvent>
+      emitter.emit(schema.SABIT.OLAY.URUN_SILINDI, _dbUrun, _tahta_id, _kul_id);
+      </emitDeletionEvent>
+
+      <removeProductFromSets>
+      return result.dbQ.Q.all([
+        result.dbQ.srem(result.kp.tahta.ssetOzelUrunleri(_tahta_id, true), _urun_id),
+        result.dbQ.sadd(result.kp.tahta.ssetOzelUrunleri(_tahta_id, false), _urun_id)
+      ])</removeProductFromSets>
+        .then(function () {
+          <removeProductBids>
+          return result.dbQ.smembers(result.kp.urun.ssetTeklifleri(_tahta_id, _urun_id))
+            .then(function (_iTeklif_idler) {
+              if (Array.isArray(_iTeklif_idler) && _iTeklif_idler.length > 0) {
+                return [
+                  result.dbQ.hdel(result.kp.teklif.hsetUrunleri, _iTeklif_idler),
+                  result.dbQ.srem(result.kp.urun.ssetTeklifleri(_tahta_id, _urun_id), _iTeklif_idler)
+                ]
+                  .allX()
+                  .then(function () {
+                    return _urun_id;
+                  });
+              }
+              return _urun_id;
+            });
+          </removeProductBids>
+        });
+    });
+  </retrieveProductAndPerformDeletion>
+}
+</deleteProduct>
+```
+
+```javascript
+<computeNavigation>
+function computeNavigation(commands) {
+  <initializeNavigation>
+  if ((typeof commands[0] === 'string') && commands.length === 1 && commands[0] === '/') {
+    return new Navigation(true, 0, commands);
+  }
+  </initializeNavigation>
+  var numberOfDoubleDots = 0;
+  var isAbsolute = false;
+  <reduceCommandsToNavigation>
+  var res = commands.reduce(function (res, cmd, cmdIdx) {
+    <handleObjectsAndOutlets>
+    if (typeof cmd === 'object' && cmd != null) {
+      if (cmd.outlets) {
+        var outlets_1 = {};
+        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__utils_collection__["d"])(cmd.outlets, function (commands, name) {
+          outlets_1[name] = typeof commands === 'string' ? commands.split('/') : commands;
+        });
+        return res.concat([{ outlets: outlets_1 }]);
+      }
+      if (cmd.segmentPath) {
+        return res.concat([cmd.segmentPath]);
+      }
+    }
+    </handleObjectsAndOutlets>
+    
+    <processStringCommands>
+    if (!(typeof cmd === 'string')) {
+      return res.concat([cmd]);
+    }
+    if (cmdIdx === 0) {
+      cmd.split('/').forEach(function (urlPart, partIndex) {
+        <handleRelativePaths>
+        if (partIndex == 0 && urlPart === '.') {
+          // No operation: retain current directory indication
+        }
+        </handleRelativePaths>
+        <identifyAbsolutePath>
+        else if (partIndex == 0 && urlPart === '') {
+          isAbsolute = true;
+        }
+        </identifyAbsolutePath>
+        <processParentDirectory>
+        else if (urlPart === '..') {
+          numberOfDoubleDots++;
+        }
+        </processParentDirectory>
+        <pushValidUrlPart>
+        else if (urlPart != '') {
+          res.push(urlPart);
+        }
+        </pushValidUrlPart>
+      });
+      return res;
+    }
+    </processStringCommands>
+    return res.concat([cmd]);
+  }, []);
+  </reduceCommandsToNavigation>
+  
+  <finalizeNavigation>
+  return new Navigation(isAbsolute, numberOfDoubleDots, res);
+  </finalizeNavigation>
+}
+</computeNavigation>
+```
+
+```javascript
+<arraySlice>
+function slice() {
+  <initializeVariables>
+  for (var
+    o = +this,                // Convert to a number
+    i = o,                    // Initialize index
+    l = arguments.length,     // Length of arguments
+    n = l - o,                // New array length calculation
+    a = Array(n < 0 ? 0 : n); // Create new array with calculated length
+    i < l; i++                // Iterate through the rest of the arguments
+  )
+  </initializeVariables>
+  {
+    <assignElements>
+    a[i - o] = arguments[i];
+    </assignElements>
+  }
+  
+  <returnNewArray>
+  return a;
+  </returnNewArray>
+}
+</arraySlice>
+```
+
+```javascript
+<writeDocumentationFile>
+function writeDocsFile(srcPath, destDir, options) {
+  
+  <setupFilePathsAndNames>
+  var filename = options.slug + '.md';
+  var destPath = path.join(destDir, filename);
+  var promises = [];
+  var filePath;
+  var files;
+  </setupFilePathsAndNames>
+
+  <readSourcePath>
+  if (fs.statSync(srcPath).isDirectory()) {
+    files = fs.readdirSync(srcPath);
+  } else {
+    files = [srcPath];
+  }
+  </readSourcePath>
+
+  <processFiles>
+  for (var i = 0; i < files.length; i++) {
+    if (files[0] !== srcPath) {
+      filePath = path.join(srcPath, files[i]);
+    } else {
+      filePath = srcPath;
+    }
+
+    <parseFile>
+    if (fs.statSync(filePath).isFile()) {
+      promises.push(parseSourceFile(filePath));
+    }
+    </parseFile>
+  }
+  </processFiles>
+
+  <combineAndWriteMarkdown>
+  return RSVP.all(promises)
+    .then(function (markdownArray) {
+      return massageMarkdown(markdownArray.join('\n'), options);
+    })
+    .then(function (markdown) {
+      return new RSVP.Promise(function (resolve, reject) {
+        
+        <createWriteStream>
+        var stream = fs.createWriteStream(destPath, { flags: 'w' });
+        </createWriteStream>
+
+        <handleStreamEvents>
+        stream.on('finish', resolve);
+        stream.on('error', reject);
+        </handleStreamEvents>
+
+        <writeToFile>
+        stream.write(markdown);
+        </writeToFile>
+
+        <closeStream>
+        stream.end();
+        </closeStream>
+
+        console.log('Wrote Markdown to file ' + destPath);
+      });
+    });
+  </combineAndWriteMarkdown>
+}
+</writeDocumentationFile>
+```
+
+```javascript
+<normalizeValue>
+function normalize(val, safe) {
+  <convertValue>
+  return (
+    val == null ? '' : val === false ? '' : Array.isArray(val) ? val.map(normalize).join('') : safe === false ? $.escapeHTML(val) : String(val)
+  )
+  </convertValue>
+}
+</normalizeValue>
+```

@@ -1,0 +1,300 @@
+Here are the annotated functions according to the SRP:
+
+```javascript
+<setClientInfo>
+function setClientInfo(req) {
+  let client = req.client = {};
+  <initUserAgendAndOS>
+  initUserAgendAndOS(req.headers, client);
+  </initUserAgendAndOS>
+  <initClientIp>
+  initClientIp(req, client);
+  </initClientIp>
+}
+</setClientInfo>
+
+<es>
+function es(cb) {
+  const env = process.env.NODE_ENV || 'development';
+  const output = env === 'development' ? './build' : './dist';
+  let cbs = 0;
+
+  <bundleFirstFile>
+  rollup.rollup({
+    input: './src/dom7.js',
+    external: ['ssr-window'],
+  }).then((bundle) => {
+    return bundle.write({
+      // Bundle writing config here
+    });
+  }).then(() => {
+    cbs += 1;
+    if (cb && cbs === 2) cb();
+  });
+  </bundleFirstFile>
+
+  <bundleSecondFile>
+  rollup.rollup({
+    input: './src/dom7.modular.js',
+    external: ['ssr-window'],
+  }).then((bundle) => {
+    return bundle.write({
+      // Bundle writing config here
+    });
+  }).then(() => {
+    cbs += 1;
+    if (cb && cbs === 2) cb();
+  });
+  </bundleSecondFile>
+}
+</es>
+
+<unnamed>
+function() {
+  var dimensionModel = this.dimensionModel;
+
+  <getScrollValues>
+  var scrollX = dimensionModel.get('scrollX');
+  var scrollY = dimensionModel.get('scrollY');
+  </getScrollValues>
+
+  <calculateSpaceHeights>
+  var spaceHeights = this._getSpaceHeights(scrollX, scrollY);
+  </calculateSpaceHeights>
+
+  <setScrollbar>
+  this._setScrollbar(scrollX, scrollY, spaceHeights);
+  </setScrollbar>
+
+  if (dimensionModel.get('frozenBorderWidth')) {
+    <setFrozenBorder>
+    this._setFrozenBorder(scrollX);
+    </setFrozenBorder>
+  }
+
+  <resetScrollBorderHeight>
+  this._resetScrollBorderHeight();
+  </resetScrollBorderHeight>
+}
+</unnamed>
+
+<getAndCache>
+function getAndCache (url) {
+  var xhr = new XMLHttpRequest();
+
+  <checkCache>
+  if (cache[url]) {
+    return cache[url]
+  }
+  </checkCache>
+
+  <xhrRequest>
+  xhr.open('GET', url, false);
+  xhr.send();
+  var script = xhr.responseText;
+  cache[url] = evalJS(script);
+  </xhrRequest>
+
+  return cache[url]
+}
+</getAndCache>
+
+<beforeWhere>
+function beforeWhere(array, exp) {
+  if(!isArray(array) || isUndefined(exp))
+    return array;
+
+  <findConditionIndex>
+  var index = array.map(function(elm) {
+    return $parse(exp)(elm);
+  }).indexOf(true);
+  </findConditionIndex>
+
+  <sliceArray>
+  return array.slice(0, (index === -1) ? array.length : ++index);
+  </sliceArray>
+}
+</beforeWhere>
+
+<createContentLeftMultiSelectRow>
+function createContentLeftMultiSelectRow(row, displayFlag) {
+  var displayStr = '';
+  if (!this.options.autoExpand && row.level > 0 && displayFlag != 'block') {
+    <calculateDisplayStyle>
+    displayStr = 'display:none;';
+    </calculateDisplayStyle>
+  }
+  var tmpcheck = row.value["$_#_@_id"];
+  if (!tmpcheck) {
+    <generateCheck>
+    tmpcheck = setTimeout(function () {});
+    </generateCheck>
+  }
+
+  <compareObj>
+  var rootObj = row.value;
+  var objAry = this.selectRows;
+  var re = objCompare(rootObj, objAry);
+  </compareObj>
+  var heightStr = '';
+
+  if (!this.options.needResetHeight) {
+    <calculateHeightStyle>
+    heightStr = 'height:' + (this.options.rowHeight + 1) + 'px;';
+    </calculateHeightStyle>
+  }
+
+  var createFlag = true;
+  <onBeforeCreateCheck>
+  if (typeof this.options.onBeforeCreateLeftMul == 'function') {
+    var obj = {
+      gridObj: this,
+      rowObj: row
+    };
+    createFlag = this.options.onBeforeCreateLeftMul.call(this, obj);
+  }
+  </onBeforeCreateCheck>
+
+  <generateHTML>
+  // Create HTML string based on the above checks
+  </generateHTML>
+
+  return htmlStr;
+}
+</createContentLeftMultiSelectRow>
+
+<click>
+function click(d) {
+  if (!d.children) {
+    <addAnnotationTag>
+    context.queryLib.addAnnotationTag(d.text);
+    </addAnnotationTag>
+    return;
+  }
+
+  <calculateTransitionValues>
+  kx = (d.y ? w - 40 : w) / (1 - d.y);
+  ky = h / d.dx;
+  x.domain([d.y, 1]).range([d.y ? 40 : 0, w]);
+  y.domain([d.x, d.x + d.dx]);
+  </calculateTransitionValues>
+
+  <performTransition>
+  var t = g.transition()
+      // Transition details and animations here
+  </performTransition>
+
+  <stopEventPropagation>
+  d3.event.stopPropagation();
+  </stopEventPropagation>
+}
+</click>
+
+<codeAroundComment>
+function codeAroundComment(token) {
+  let currentToken = token;
+
+  <findPreviousNonCommentToken>
+  do {
+    currentToken = sourceCode.getTokenBefore(currentToken, { includeComments: true });
+  } while (currentToken && astUtils.isCommentToken(currentToken));
+  </findPreviousNonCommentToken>
+
+  <checkTokenOnSameLineBefore>
+  if (currentToken && astUtils.isTokenOnSameLine(currentToken, token)) {
+    return true;
+  }
+  </checkTokenOnSameLineBefore>
+
+  currentToken = token;
+
+  <findNextNonCommentToken>
+  do {
+    currentToken = sourceCode.getTokenAfter(currentToken, { includeComments: true });
+  } while (currentToken && astUtils.isCommentToken(currentToken));
+  </findNextNonCommentToken>
+
+  <checkTokenOnSameLineAfter>
+  if (currentToken && astUtils.isTokenOnSameLine(token, currentToken)) {
+    return true;
+  }
+  </checkTokenOnSameLineAfter>
+
+  return false;
+}
+</codeAroundComment>
+
+<setIndexInfo>
+function setIndexInfo(name, origWhere, origSort) {
+  origWhere = origWhere || {};
+  origSort = origSort || {};
+
+  <preventDuplicatingId>
+  if (origWhere._id) {
+    return;
+  }
+  </preventDuplicatingId>
+
+  var whereNames = [], where = {}, whereSorted = {};
+  var sortNames = [], sort = {}, sortSorted = {};
+
+  <prepareWhereConstraints>
+  _.each(origWhere, function (val, key) {
+    whereNames.push(key);
+    where[key] = 1;
+  });
+  _.each(whereNames.sort(), function (key) {
+    whereSorted[key] = 1;
+  });
+  </prepareWhereConstraints>
+
+  <prepareSortConstraints>
+  _.each(origSort, function (val, key) {
+    sortNames.push(key);
+    sort[key] = origSort[key];
+  });
+  _.each(sortNames.sort(), function (key) {
+    sortSorted[key] = origSort[key];
+  });
+  </prepareSortConstraints>
+
+  <prepareIndexInfoQuery>
+  var json = {
+    name: name,
+    where: where,
+    sort: sort
+  };
+  var str = JSON.stringify(json);
+  var query = cache.idxInfo[str] = cache.idxInfo[str] || {
+    str: str,
+    name: name,
+    count: 0
+  };
+  query.count++;
+  </prepareIndexInfoQuery>
+
+  <checkForIndexInfoSave>
+  var now = (new Date()).getTime();
+  if ((now - idxInfoLastSave) > idxInfoInterval) {
+    idxInfoLastSave = now;
+    saveIndexInfo();
+  }
+  </checkForIndexInfoSave>
+}
+</setIndexInfo>
+
+<getRefresh>
+function getRefresh (weex) {
+  const { extractComponentStyle } = weex
+  const { dispatchNativeEvent } = weex.utils
+
+  return {
+    <componentDefinition>
+    // Component definition here
+    </componentDefinition>
+  }
+}
+</getRefresh>
+```
+
+For each function, I've identified blocks of code that represent individual cohesive responsibilities based on the SRP. All the identified responsibilities are bordered by the respective tags indicating the area of the code they pertain to. Single lines of code or variable assignments were not tagged on their own unless they are part of larger blocks constituting an underlying process or operation.

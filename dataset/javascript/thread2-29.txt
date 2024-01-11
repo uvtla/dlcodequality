@@ -1,0 +1,305 @@
+```javascript
+<parseKey>
+function parseKey(e) {
+  <checkModifierKeys>
+  if (e.ctrlKey || e.metaKey) {
+    return true;
+  }
+  </checkModifierKeys>
+  shift_down = e.shiftKey ? true : false;
+  var nudge = shift_down ? 10 : 1;
+
+  switch (e.keyCode) {
+  case 37:
+    doNudge(e, -nudge, 0);
+    break;
+  case 39:
+    doNudge(e, nudge, 0);
+    break;
+  case 38:
+    doNudge(e, 0, -nudge);
+    break;
+  case 40:
+    doNudge(e, 0, nudge);
+    break;
+  case 27:
+    <handleEscapeKey>
+    if (options.allowSelect) Selection.release();
+    </handleEscapeKey>
+    break;
+  case 9:
+    return true;
+  }
+
+  return false;
+}
+</parseKey>
+
+<formatStack>
+function formatStack(stack, options) {
+  var newStack = []
+    , lineFormatter = options.lineFormatter || defaultFormatter
+    , line
+    , i, l, j, m
+
+  <splitErrorStack>
+  stack = stack.split('\n')
+  </splitErrorStack>
+
+  for (i=0, l=stack.length; i<l; i++) {
+    <formatAndFilterStackLines>
+    line = lineFormatter(stack[i], {colors: options.colors})
+    for (j=0, m=options.filter.length; j<m; j++) {
+      if (line && line.indexOf(options.filter[j]) !== -1) {
+        line = null
+        break
+      }
+    }
+    if (line) {
+      newStack.push(line)
+    }
+    </formatAndFilterStackLines>
+  }
+  return newStack.join('\n')
+}
+</formatStack>
+
+<readNewMessages>
+function readNewMessages(state) {
+  
+  <checkIfStateClosed>
+  if (state.closed) return Promise.resolve();
+  </checkIfStateClosed>
+
+  <checkIfMessagesCallbackExists>
+  if (!state.messagesCallback) return Promise.resolve();
+  </checkIfMessagesCallbackExists>
+
+  <getMessagesHigherThenProcessAndCallback>
+  return getMessagesHigherThen(state.db, state.lastCursorId).then(function (newerMessages) {
+    var useMessages = newerMessages.map(function (msgObj) {
+      if (msgObj.id > state.lastCursorId) {
+        state.lastCursorId = msgObj.id;
+      }
+
+      return msgObj;
+    }).filter(function (msgObj) {
+      return _filterMessage(msgObj, state);
+    }).sort(function (msgObjA, msgObjB) {
+      return msgObjA.time - msgObjB.time;
+    });
+
+    useMessages.forEach(function (msgObj) {
+      if (state.messagesCallback) {
+        state.eMIs.add(msgObj.id);
+        state.messagesCallback(msgObj.data);
+      }
+    });
+    return Promise.resolve();
+  });
+  </getMessagesHigherThenProcessAndCallback>
+}
+</readNewMessages>
+
+<anonymousStoreFunction>
+function(storeName, cb) {
+    var result;
+    <initiateTransactionAndStore>
+    var transaction = this.transaction(storeName, MODE.READ_WRITE, result, cb);
+    var store = this.store(storeName, transaction, cb);
+    </initiateTransactionAndStore>
+    var request;
+    try {
+      <clearStore>
+      request = store.clear();
+      </clearStore>
+    } catch (err) {
+      <handleErrorCallback>
+      if (isFunction(cb)) return cb(err);
+      </handleErrorCallback>
+    }
+    <requestOnSuccess>
+    request.onsuccess = function(event) {
+      result = event.target.result;
+    };
+    </requestOnSuccess>
+    <requestOnError>
+    request.onerror = function(event) {
+      if (isFunction(cb)) return cb(event.target.error);
+    };
+    </requestOnError>
+  }
+</anonymousStoreFunction>
+
+<getValidLEDResult>
+function(ledName) {
+  var result = this.isValidLEDName(ledName) ? tessel.port[this.validLEDNames.indexOf(ledName)] : null;
+
+  return result;
+}
+</getValidLEDResult>
+
+<uploadFile>
+function uploadFile(endpoint, releaseVersion, filePath) {
+  
+  <constantDefinitions>
+  var IGNORE_DOMAIN = '~';
+  var staticBase = process.env.STATIC_BASE;
+  var IGNORE_PATH = staticBase ? url.parse(staticBase).path + '/' : '';
+  var CONFLICT_CODE = 409;
+  </constantDefinitions>
+
+  <parseFilePath>
+  var fileData = path.parse(filePath);
+  </parseFilePath>
+  <prepareFileNameAndPathForSentry>
+  var fileName = fileData.name + fileData.ext;
+  var sentryFilePath = IGNORE_DOMAIN + IGNORE_PATH + fileName;
+  </prepareFileNameAndPathForSentry>
+
+  <uploadProcess>
+  return new Promise(function(resolve, reject) {
+    superagent
+      .post(endpoint)
+      .set(HEADERS)
+      .attach('file', filePath)
+      .field('name', sentryFilePath)
+      .end(function(err, res) {
+        if (!err) {
+          console.log('Sentry (release: ' + releaseVersion +
+            ') - Successfully uploaded ' + fileName);
+          resolve();
+        } if (err && err.response && err.response.statusCode === CONFLICT_CODE) {
+          console.log('Sentry (' + releaseVersion + ') - ' + fileName +
+            ' already exists.');
+          resolve();
+        } else {
+          reject(err);
+        }
+      });
+  });
+  </uploadProcess>
+}
+</uploadFile>
+
+<removeComments>
+function removeComments() {
+
+  var commentNodes = [];
+
+  <recursiveCommentSearch>
+  function searchForComment(node) {
+    if(node.type == 'comment') {
+      commentNodes.push(node);
+    }
+    if(!_(node.children).isUndefined()) {
+      _.each(node.children, searchForComment);
+    }
+  }
+  </recursiveCommentSearch>
+  
+  <removeCommentNodes>
+  searchForComment($._root);
+  _.each(commentNodes, function(node) {
+    $(node).remove();
+  });
+  </removeCommentNodes>
+}
+</removeComments>
+
+<serve>
+function serve(server, req, callback) {
+	<sourceGetTile>
+	source.getTile(req.z, req.x, req.y, function(err, buffer) {
+		if (err) return callback(err);
+		var headers = {'Content-Type': 'application/x-protobuf'};
+		if (options.compression === 'gzip') {
+			headers['Content-Encoding'] = 'gzip';
+		}
+		callback(null, buffer, headers);
+	});
+	</sourceGetTile>
+}
+</serve>
+
+<handleProgress>
+function handleProgress( e )
+  {
+    <logReminder>
+    console.debug( 'REMINDER : implement handleProgress' );
+    </logReminder>
+    
+    <checkLengthComputableAndOnProgress>
+    if( e.lengthComputable )
+    if( o.onProgress )
+    _.Consequence.Take( o.onProgress,
+    {
+      progress : e.loaded / e.total,
+      options : o,
+    });
+    </checkLengthComputableAndOnProgress>
+  }
+</handleProgress>
+
+<webhook>
+function webhook() {
+  var opts = {
+    validate: true,
+  };
+
+  <parseArguments>
+  var tokenString;
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    var arg = arguments[i];
+    if (typeof arg === 'string') {
+      tokenString = arg;
+    } else {
+      opts = _.extend(opts, arg);
+    }
+  }
+  </parseArguments>
+
+  <setAuthToken>
+  opts.authToken = tokenString ? tokenString : process.env.TWILIO_AUTH_TOKEN;
+  </setAuthToken>
+
+  <validateRequest>
+  return function hook(request, response, next) {
+    
+    if (opts.validate) {
+      
+      if (!opts.authToken) {
+        <handleMissingAuthToken>
+        console.error('[Twilio]: Error - Twilio auth token is required for webhook request validation.');
+        response.type('text/plain')
+          .status(500)
+          .send('Webhook Error - we attempted to validate this request without first configuring our auth token.');
+        </handleMissingAuthToken>
+      } else {
+        <actualValidation>
+        var valid = validateExpressRequest(request, opts.authToken, {
+          url: opts.url,
+          host: opts.host,
+          protocol: opts.protocol
+        });
+
+        if (valid) {
+            next();
+        } else {
+          return response
+            .type('text/plain')
+            .status(403)
+            .send('Twilio Request Validation Failed.');
+        }
+        </actualValidation>
+      }
+    } else {
+      next();
+    }
+  };
+  </validateRequest>
+}
+</webhook>
+```
+
+All functions are annotated with tags to highlight the distinct responsibilities they contain. This helps determine whether they comply with the Single Responsibility Principle (SRP) or if they contain multiple responsibilities.

@@ -1,0 +1,274 @@
+Below are the annotations for the provided JavaScript functions:
+
+Function 1:
+```
+function(key, context) {
+    <functionResponsibility>
+    var first, keys, subkey;
+    if (typeof context === "undefined" || context === null) {
+        context = this;
+    }
+    if (key.indexOf(".") > -1) {
+        keys = key.split(".");
+        first = keys.shift();
+        subkey = keys.join(".");
+        return this._attr_get(keys.join("."), context[first]);
+    } else {
+        return context[key];
+    }
+    </functionResponsibility>
+}
+```
+This function's responsibility is to retrieve a value from an object based on a dot-notation key. It is compliant with SRP.
+
+Function 2:
+```
+function genValidHourValues(b24H, sLeadingChar) {
+    <functionResponsibility>
+    var iStart = b24H ? 0 : 1;
+    var b2400 = this._oTimePicker.getSupport2400() ? 24 : 23;
+    var iEnd = b24H ? b2400 : 12;
+
+    return genValues(iStart, iEnd, sLeadingChar);
+    </functionResponsibility>
+}
+```
+This function appears to be generating a range of valid hour values. It looks to be SRP compliant.
+
+Function 3:
+```
+function (uastring, extensions) {
+    <functionResponsibility>
+    if (!(this instanceof UAParser)) {
+        return new UAParser(uastring, extensions).getResult();
+    }
+
+    var ua = uastring || ((window && window.navigator && window.navigator.userAgent) ? window.navigator.userAgent : EMPTY);
+    var rgxmap = extensions ? util.extend(regexes, extensions) : regexes;
+
+    this.getBrowser = function () {
+        var browser = mapper.rgx.apply(this, rgxmap.browser);
+        browser.major = util.major(browser.version);
+        return browser;
+    };
+    this.getCPU = function () {
+        return mapper.rgx.apply(this, rgxmap.cpu);
+    };
+    this.getDevice = function () {
+        return mapper.rgx.apply(this, rgxmap.device);
+    };
+    this.getEngine = function () {
+        return mapper.rgx.apply(this, rgxmap.engine);
+    };
+    this.getOS = function () {
+        return mapper.rgx.apply(this, rgxmap.os);
+    };
+    this.getResult = function() {
+        return {
+            ua      : this.getUA(),
+            browser : this.getBrowser(),
+            engine  : this.getEngine(),
+            os      : this.getOS(),
+            device  : this.getDevice(),
+            cpu     : this.getCPU()
+        };
+    };
+    this.getUA = function () {
+        return ua;
+    };
+    this.setUA = function (uastring) {
+        ua = uastring;
+        return this;
+    };
+    this.setUA(ua);
+    return this;
+    </functionResponsibility>
+}
+```
+This function initializes an object of `UAParser` with methods to get different pieces of user agent data. Each method is a responsibility but they collectively serve to categorize user agent data. It's a bit on the edge but could be seen as SRP compliant if we view the overall task as 'user agent data parsing'.
+
+Function 4:
+```
+function(val, item) {
+    <checkValueContainsItem>
+    if (_.isString(val)) return val.indexOf(item) !== -1;
+    if (_.isArray(val))  return _.indexOf(val, item) !== -1;
+    if (_.isObject(val)) return _.has(val, item);
+    return false;
+    </checkValueContainsItem>
+}
+```
+This function checks if a value contains an item for different types of data structures, so it is split up into different responsibilities despite the singular purpose of checking containment. Not strictly SRP compliant.
+
+Function 5:
+```
+function baseEach(collection, callback) {
+    <iterateCollection>
+    var index = -1,
+        iterable = collection,
+        length = collection ? collection.length : 0;
+
+    if (typeof length == 'number' && length > -1 && length <= maxSafeInteger) {
+        while (++index < length) {
+            if (callback(iterable[index], index, collection) === false) {
+                break;
+            }
+        }
+    } else {
+        baseForOwn(collection, callback);
+    }
+    return collection;
+    </iterateCollection>
+}
+```
+The responsibility of this function is to iterate over a collection and apply a callback function. It is SRP compliant.
+
+Function 6:
+```
+function normalizeRelatedNodes(node, options) {
+    <normalizeNodes>
+    'use strict';
+    ['any', 'all', 'none'].forEach(type => {
+        if (!Array.isArray(node[type])) {
+            return;
+        }
+        node[type]
+            .filter(checkRes => Array.isArray(checkRes.relatedNodes))
+            .forEach(checkRes => {
+                checkRes.relatedNodes = checkRes.relatedNodes.map(relatedNode => {
+                    var res = {
+                        html: relatedNode.source
+                    };
+                    if (options.elementRef && !relatedNode.fromFrame) {
+                        res.element = relatedNode.element;
+                    }
+                    if (options.selectors !== false || relatedNode.fromFrame) {
+                        res.target = relatedNode.selector;
+                    }
+                    if (options.xpath) {
+                        res.xpath = relatedNode.xpath;
+                    }
+                    return res;
+                });
+            });
+    });
+    </normalizeNodes>
+}
+```
+Normalizing related nodes is the single coherent task this function performs, and it appears to be SRP compliant.
+
+Function 7:
+```
+function drawLinearBarHighlights(context, options) {
+    <drawHighlights>
+    // Variable declarations
+    let {isVertical, width, length, barWidth, barOffset, barMargin,
+        X, Y, ticksLength, ticksPadding} = context.barDimensions;
+    let hlWidth = width * (parseFloat(options.highlightsWidth) || 0) / 100;
+
+    // Early return if no highlights or width
+    if (!options.highlights || !hlWidth) return ;
+
+    // Calculating dimensions and intervals
+    let hasLeft = options.tickSide !== 'right';
+    let hasRight = options.tickSide !== 'left';
+    let i = 0;
+    let s = options.highlights.length;
+    let tickOffset = (width - barWidth) / 2;
+    let interval = options.maxValue - options.minValue;
+    
+    // Calculating effective positions
+    let eX = round(isVertical ? X + tickOffset : X + barMargin + barOffset);
+    let eH = hlWidth;
+    let eY = isVertical ? Y + length - barMargin - barOffset: Y + tickOffset;
+    
+    let hLeft = round((options.ticksWidth / 100 + ticksPadding) * width)
+        + (hlWidth - options.ticksWidth / 100 * width);
+    let hRight = round(barWidth + ticksPadding * width);
+
+    context.save();
+
+    // Drawing loop for highlights
+    for (; i < s; i++) {
+        let entry = options.highlights[i];
+        
+        let eStart = ticksLength * abs(options.minValue - entry.from) /
+            interval;
+        
+        let eW = ticksLength * abs((entry.to - entry.from) / interval);
+
+        context.beginPath();
+        context.fillStyle = entry.color;
+
+        // Drawing highlight rectangles based on vertical or horizontal orientation
+        if (isVertical) {
+            if (hasLeft) context.rect(eX - hLeft, eY - eStart, eH, -eW);
+            if (hasRight) context.rect(eX + hRight, eY - eStart, eH, -eW);
+        } else {
+            if (hasLeft) context.rect(eX + eStart, eY - hLeft, eW, eH);
+            if (hasRight) context.rect(eX + eStart, eY + hRight, eW, eH);
+        }
+
+        context.fill();
+        context.closePath();
+    }
+    </drawHighlights>
+}
+```
+Drawing linear bar highlights is the cohesive responsibility being taken care of in this function. It is SRP compliant.
+
+Function 8:
+```
+function setToArray$1(set) {
+    <convertSetToArray>
+    var index = -1,
+        result = Array(set.size);
+
+    set.forEach(function (value) {
+        result[++index] = value;
+    });
+    return result;
+    </convertSetToArray>
+}
+```
+This function converts a Set to an Array, which is a single responsibility. It is SRP compliant.
+
+Function 9:
+```
+function (done) {
+    <retrieveModelData>
+    var select = {};
+    select[pathName] = 1;
+
+    Model.findOne({_id: model}, select, function (err, doc) {
+      if (err) return done(err);
+      if (!doc) return done(null, []);
+
+      done(null, doc[pathName].reduce(function (o, friend) {
+        o[friend._id] = friend.toObject();
+        return o;
+      }, {}));
+    });
+    </retrieveModelData>
+}
+```
+This function is responsible for retrieving model data from the database and formatting it before returning. This reflects a single responsibility of data retrieval and transformation, and thus is SRP compliant.
+
+Function 10:
+```
+function formatParamUrl (url) {
+    <formatUrl>
+    var start = url.indexOf('/:')
+    if (start === -1) return url
+
+    var end = url.indexOf('/', ++start)
+
+    if (end === -1) {
+        return url.slice(0, start) + '{' + url.slice(++start) + '}'
+    } else {
+        return formatParamUrl(url.slice(0, start) + '{' + url.slice(++start, end) + '}' + url.slice(end))
+    }
+    </formatUrl>
+}
+```
+Formatting a URL to swap placeholders with a new syntax is what this function is about. It can be considered SRP compliant since it is singularly focused on URL formatting.

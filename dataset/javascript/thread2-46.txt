@@ -1,0 +1,208 @@
+```
+<isNodeIgnored>
+function isNodeIgnored(node) {
+    const parent = node.parent;
+
+    if (!parent) {
+        return false;
+    }
+
+    if (parent.some((child) => (child.type === 'comment' && PATTERN_IGNORE.test(child.text)))) {
+        return true;
+    }
+
+    return isNodeIgnored(parent);
+}
+</isNodeIgnored>
+
+<build>
+function build (app, mod, args) {
+  <getConfiguration>
+  var conf = getConf(app, mod);
+  args = args || {};
+  var appConf = conf.appConf;
+  var comboConf = (typeof appConf.comboConf === 'object') && !_.isEmpty(appConf.comboConf) ? appConf.comboConf : {
+    mode: 'client'
+  };
+  </getConfiguration>
+  
+  <buildProcess>
+  if (args.isSimple) {
+    if (comboConf.mode === 'client') {
+      return buildCheck(app, mod, conf, args, buildSingleModuleSimple);
+    }
+    return buildCheck(app, mod, conf, args, buildSingleModuleSimpleServer);
+  }
+  if (comboConf.mode === 'client') {
+    return buildCheck(app, mod, conf, args, buildSingleModule);
+  }
+  return buildCheck(app, mod, conf, args, buildSingleModuleServer);
+  </buildProcess>
+}
+</build>
+
+<_revealMasks>
+function _revealMasks(diff) {
+    <processDiffs>
+    for (var i = 0; i < diff.length; i++) {
+        var currPart = diff[i];
+
+        if (!_isDiffPart(currPart)) continue;
+
+        var prevPart = diff[i - 1],
+            nextPart = diff[i + 1],
+            matchedMask = currPart.value.match(MASK_REGEXP);
+
+        if (!matchedMask) continue;
+
+        <maskRegExpCreation>
+        var regExp = new RegExp('^' +
+            matchedMask[1].replace(specialСhars, '\\$1') +
+                matchedMask[2] +
+                    matchedMask[3].replace(specialСhars, '\\$1') + '$');
+        </maskRegExpCreation>
+
+        <updateDiffs>
+        if (currPart.added && nextPart && nextPart.removed) {
+            if (nextPart.value.match(regExp)) {
+                nextPart.removed = undefined;
+                diff.splice(i--, 1);
+            }
+        } else if (currPart.removed && prevPart && prevPart.added) {
+            if (prevPart.value.match(regExp)) {
+                prevPart.added = undefined;
+                diff.splice(i--, 1);
+            }
+        }
+        </updateDiffs>
+    }
+    </processDiffs>
+
+    return diff;
+}
+</_revealMasks>
+
+<involuteXbez>
+function involuteXbez(t) {
+    <calculateInvoluteParameters>
+    var x = t*2-1;
+    var theta = x*(te-ts)/2 + (ts + te)/2;
+    </calculateInvoluteParameters>
+    
+    <returnXbezValue>
+    return Rb*(Math.cos(theta)+theta*Math.sin(theta));
+    </returnXbezValue>
+}
+</involuteXbez>
+
+<_getPathValue>
+function _getPathValue(parsed, obj) {
+    <traverseObject>
+    var tmp = obj
+      , res;
+    for (var i = 0, l = parsed.length; i < l; i++) {
+        var part = parsed[i];
+        if (tmp) {
+            if ('undefined' !== typeof part.p)
+                tmp = tmp[part.p];
+            else if ('undefined' !== typeof part.i)
+                tmp = tmp[part.i];
+            if (i == (l - 1)) res = tmp;
+        } else {
+            res = undefined;
+        }
+    }
+    </traverseObject>
+
+    return res;
+}
+</_getPathValue>
+
+<processPending>
+function () {
+    this.isReady = true;
+
+    for (var id in this._pending) {
+        if (this._pending.hasOwnProperty(id)) {
+            <cancelPending>
+            ariaCoreTimer.cancelCallback(this._pending[id]);
+            ariaCoreIO.reissue(id);
+            </cancelPending>
+        }
+    }
+    this._pending = {};
+}
+</processPending>
+
+<flip>
+function flip(fn) {
+    return function () {
+        <reverseArguments>
+        var args = list.apply(null, arguments).reverse();
+        </reverseArguments>
+
+        <applyFlippedFunction>
+        return fn.apply(this, args);
+        </applyFlippedFunction>
+    };
+}
+</flip>
+
+<getValue>
+function getValue(key, name, raw) {
+    <applyTransform>
+    if (this.conf.transform) {
+        if (typeof (this.conf.transform.value) == 'function') {
+            return this.conf.transform.value.call(this, key, name, raw);
+        }
+    }
+    </applyTransform>
+
+    <retrieveValue>
+    var value = process.env[raw] || this[name];
+    </retrieveValue>
+
+    <convertNative>
+    if (this.conf.native && typeof (value) == 'string') {
+        value = native.to(
+            value, this.conf.native.delimiter, this.conf.native.json);
+    }
+    </convertNative>
+
+    return value;
+}
+</getValue>
+
+<onSDPDescription>
+function onSDPDescription(id, rtcId, data) {
+    if (scope._servConn.useRTC) {
+        if (scope.hasWebRTCSupport()) {
+            <handleWebRTCConnection>
+            var peer = getOrCreatePeer(id);
+            peer.rtcId = rtcId;
+            peer.onServerMessage(JSON.parse(data));
+            </handleWebRTCConnection>
+        } else {
+            <sendRTCState>
+            scope._servConn.sendRTCState(false, id);
+            </sendRTCState>
+        }
+    }
+}
+</onSDPDescription>
+
+<rotate>
+function(angle) {
+    <calculateRotation>
+    var rad = this.DEG_TO_RAD * angle,
+        cosVal = Math.cos(rad),
+        sinVal = Math.sin(rad),
+        mtx3d = new $B.geom.Matrix3D(1, 0, 0, 0, 0, cosVal, -sinVal, 0, 0, sinVal, cosVal, 0);
+    </calculateRotation>
+
+    <applyRotation>
+    return this.concat(mtx3d);
+    </applyRotation>
+}
+</rotate>
+```

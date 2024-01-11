@@ -1,0 +1,473 @@
+```html
+<getAttribute>
+function getAttribute(path, attrNode, context) {
+    path.forEach((attributeName, i) => {
+        <checkAttributeExistence>
+        if (!(attrNode.attributes && attrNode.attributes[attributeName])) {
+            <handleOriginNodes>
+            if (attrNode._origNodes) {
+                let subAttrNode = null;
+                attrNode._origNodes.forEach((origNode, inheritDepth) => {
+                    if (!origNode || !origNode.attributes || !origNode.attributes[attributeName]) return;
+
+                    let origSubAttrNode = origNode.attributes[attributeName];
+
+                    <handleAttributeInheritance>
+                    if (subAttrNode) {
+                        if (subAttrNode.inherit === 'inherit') {
+                            
+                        } else if (subAttrNode.inherit === 'replace') {
+                            return; 
+                        } else {
+                            let attrPath = context.attrPath.join('.');
+                            throw new ImplementationError(
+                                `Cannot overwrite attribute "${attributeName}" in "${attrPath}" (maybe use "inherit"?)`
+                            );
+                        }
+                    } else {
+                        subAttrNode = {};
+                    }
+                    </handleAttributeInheritance>
+
+                    <copyAttribueOptions>
+                    Object.keys(origSubAttrNode).forEach(optionName => {
+                        if (subAttrNode.hasOwnProperty(optionName)) return; 
+
+                        if (optionName === 'attributes') {
+                            subAttrNode[optionName] = {};
+                        } else if (optionName === 'dataSources') {
+                            subAttrNode[optionName] = origSubAttrNode[optionName];
+                        } else if (typeof origSubAttrNode[optionName] === 'object') {
+                            subAttrNode[optionName] = cloneDeep(origSubAttrNode[optionName]);
+                        } else {
+                            subAttrNode[optionName] = origSubAttrNode[optionName];
+                        }
+                    });
+                    </copyAttribueOptions>
+
+                    <setOriginalNodes>
+                    subAttrNode._origNodes = subAttrNode._origNodes || Array(attrNode._origNodes.length);
+                    subAttrNode._origNodes[inheritDepth] = origSubAttrNode;
+                    </setOriginalNodes>
+
+                    <updateAttributeNode>
+                    attrNode.attributes[attributeName] = subAttrNode;
+                    </updateAttributeNode>
+                });
+            }
+            </handleOriginNodes>
+
+            <throwErrorOnMissingAttribute>
+            if (!(attrNode.attributes && attrNode.attributes[attributeName])) {
+                throw new RequestError(
+                    'Unknown attribute ' + `"${context.attrPath.concat(path.slice(0, i + 1)).join('.')}"`
+                );
+            }
+            </throwErrorOnMissingAttribute>
+        }
+        </checkAttributeExistence>
+
+        <updateAttributeNodeReference>
+        attrNode = attrNode.attributes[attributeName];
+        </updateAttributeNodeReference>
+
+        <resolveResourceIncludes>
+        if (attrNode.resource) {
+            const subContext = Object.assign({}, context);
+            subContext.attrPath = subContext.attrPath.concat(path.slice(0, i + 1));
+            resolveIncludes(attrNode, subContext);
+        }
+        </resolveResourceIncludes>
+    });
+
+    return attrNode;
+}
+</getAttribute>
+
+<inherits>
+function inherits (ctorA, ctorB) {
+    <setupPrototypeChain>
+    function f() {}
+    f.prototype = ctorB.prototype;
+    ctorA.prototype = new f();
+    </setupPrototypeChain>
+}
+</inherits>
+
+<profile>
+function profile(excludeRegex) {
+  var categories = [];
+  return {
+    forCategory: forCategory,
+    toArray    : toArray,
+    toString   : toString
+  };
+
+  <toArray>
+  function toArray() {
+    return categories;
+  }
+  </toArray>
+
+  <toString>
+  function toString() {
+    return categories
+      .map(String)
+      .filter(Boolean)
+      .join('\n');
+  }
+  </toString>
+
+  <forCategory>
+  function forCategory(label) {
+    var eventsByFilename = {},
+        isUsed           = false,
+        self             = {
+          forCategory: forCategory,
+          start      : start,
+          stop       : stop,
+          report     : report,
+          toString   : toString
+        };
+
+    label = label || ('category-' + String.fromCharCode(65 + categories.length));
+    categories.push(self);
+    return self;
+
+    <start>
+    function start(key) {
+      return createEventTransform(key);
+    }
+    </start>
+
+    <stop>
+    function stop() {
+      return createEventTransform(null);
+    }
+    </stop>
+
+    <createEventTransform>
+    function createEventTransform(data) {
+      return inspect(onComplete);
+
+      function onComplete(filename) {
+        isUsed = true;
+        var now = Date.now();
+        var events = eventsByFilename[filename] = eventsByFilename[filename] || [];
+        events.push(now, data);
+      }
+    }
+    </createEventTransform>
+
+    <report>
+    function report() {
+      return Object.keys(eventsByFilename)
+        .filter(testIncluded)
+        .reduce(reduceFilenames, {});
+
+      function testIncluded(filename) {
+        return !excludeRegex || !excludeRegex.test(filename);
+      }
+
+      function reduceFilenames(reduced, filename) {
+        var totalsByKey = {},
+            list        = eventsByFilename[filename],
+            lastKey     = null,
+            lastTime    = NaN;
+
+        for (var i = 0; i < list.length; i += 2) {
+          var time = list[i],
+              key  = list[i + 1];
+          if (lastKey) {
+            var initial = totalsByKey[key] || 0,
+                delta   = ((time - lastTime) / 1000) || 0;
+            totalsByKey[lastKey] = initial + delta;
+          }
+          lastKey = key;
+          lastTime = time;
+        }
+
+        var total = 0;
+        for (var key in totalsByKey) {
+          total += totalsByKey[key];
+        }
+        totalsByKey.total = total;
+
+        var short = path.relative(process.cwd(), filename);
+        reduced[short] = totalsByKey;
+        return reduced;
+      }
+    }
+    </report>
+
+    <toString>
+    function toString() {
+      var json            = report(),
+          filenames       = Object.keys(json),
+          longestFilename = filenames.reduce(reduceFilenamesToLength, 0),
+          columnOrder     = orderColumns(),
+          headerRow       = [label].concat(columnOrder).map(leftJustify).join(' '),
+          delimiter       = (new Array(headerRow.length + 1)).join('-');
+
+      if (isUsed) {
+        return [delimiter, headerRow, delimiter]
+          .concat(rows())
+          .concat(delimiter)
+          .filter(Boolean)
+          .join('\n');
+      } else {
+        return '';
+      }
+
+      <orderColumns>
+      function orderColumns() {
+        var keyTotals = filenames.reduce(reduceFilenamesToKeyTotal, {});
+        return sort(keyTotals);
+
+        function reduceFilenamesToKeyTotal(reduced, filename) {
+          var item = json[filename];
+          return Object.keys(item)
+            .reduce(reducePropToLength.bind(item), reduced);
+        }
+      }
+      </orderColumns>
+
+      <rows>
+      function rows() {
+        var fileTotals = filenames.reduce(reducePropToLength.bind(json), {}),
+            fileOrder  = sort(fileTotals);
+        return fileOrder.map(rowForFile);
+
+        function rowForFile(filename) {
+          var data = json[filename];
+          return [filename]
+            .concat(columnOrder
+              .map(dataForColumn)
+              .map(formatFloat))
+            .map(leftJustify)
+            .join(' ');
+
+          function dataForColumn(column) {
+            return data[column];
+          }
+
+          function formatFloat(number) {
+            var padding  = '000',
+                warning  = ((number > 99) ? '>' : ' '),
+                integer  = (padding + Math.min(99, Math.floor(number))).slice(-2),
+                fraction = (padding + Math.round(1000 * number)).slice(-3);
+            return warning + integer + '.' + fraction;
+          }
+        }
+      }
+      </rows>
+
+      <reduceFilenamesToLength>
+      function reduceFilenamesToLength(reduced, filename) {
+        return Math.max(filename.length, reduced);
+      }
+      </reduceFilenamesToLength>
+
+      <leftJustify>
+      function leftJustify(name, i) {
+        var length = i ? Math.max(7, columnOrder[i - 1].length) : longestFilename;
+        var padding = (new Array(length + 1)).join(' ');
+        return (name + padding).slice(0, length);
+      }
+      </leftJustify>
+
+      <reducePropToLength>
+      function reducePropToLength(reduced, key) {
+        var value = (typeof this[key] === 'object') ? this[key].total : this[key];
+        reduced[key] = (reduced[key] || 0) + value;
+        return reduced;
+      }
+      </reducePropToLength>
+
+      <sort>
+      function sort(object) {
+        return Object.keys(object)
+          .reduce(createObjects.bind(object), [])
+          .sort(sortTimeDescending)
+          .map(getColumnName);
+
+        function createObjects(reduced, field) {
+          reduced.push({
+            name: field,
+            time: Math.round(this[field] * 1000) / 1000  
+          });
+          return reduced;
+        }
+
+        function sortTimeDescending(a, b) {
+          return b.time - a.time;
+        }
+
+        function getColumnName(object) {
+          return object.name;
+        }
+      }
+      </sort>
+    }
+    </toString>
+  }
+}
+</forCategory>
+</profile>
+
+<cacheResults>
+function cacheResults (result) {
+    <stringifyResult>
+    try {
+        var cacheValue = JSON.stringify(result)
+    }
+    catch (err) {
+        // Handles JSON stringify errors, but it's an empty catch block.
+    }
+    </stringifyResult>
+
+    <checkCacheValueDefined>
+    if (defined(cacheValue)) {
+        <logCacheSet>
+        debug('view:id:collection:set', this.idCacheKey)
+        </logCacheSet>
+
+        <setCache>
+        return this.cache.redis.setAsync(this.idCacheKey, cacheValue)
+        </setCache>
+    }
+    </checkCacheValueDefined>
+}
+</cacheResults>
+
+<anonymousFunction1>
+function (setting) {
+    <resetDataRoots>
+    var r = data.getRoot(setting), rs = data.getRoots();
+    r.curEditNode = null;
+    r.curEditInput = null;
+    r.curHoverNode = null;
+    r.dragFlag = 0;
+    r.dragNodeShowBefore = [];
+    r.dragMaskList = new Array();
+    rs.showHoverDom = true;
+    </resetDataRoots>
+}
+</anonymousFunction1>
+
+<_findPaneForDocument>
+function _findPaneForDocument(document) {
+    <getPaneFromElement>
+    var pane = _getPaneFromElement($(document._masterEditor.$el.parent().parent()));
+    </getPaneFromElement>
+
+    <findInWorkingSets>
+    if (!pane) {
+        var info = findInAllWorkingSets(document.file.fullPath).shift();
+        if (info) {
+            pane = _panes[info.paneId];
+        }
+    }
+    </findInWorkingSets>
+
+    return pane;
+}
+</_findPaneForDocument>
+
+<anonymousFunction2>
+function() {
+  var self = this;
+  
+  <extendBindings>
+  this.bindings = _.extend({}, this._bindings);
+  </extendBindings>
+
+  <generateBindingsForEachElement>
+  _.each(this.$('[data-model]'), function(element) {
+    var attr = $(element).data('model'),
+        options = self.__getFieldOptions(attr),
+        fieldBinding = self.__generateModelFieldBinding(attr, options);
+
+    <handleSelectOptions>
+    if ($(element).is('select')) {
+      fieldBinding.selectOptions = self.__generateSelectOptions(element, options);
+    }
+    </handleSelectOptions>
+
+    <bindDataModel>
+    self.bindings['[data-model="' + attr + '"]'] = fieldBinding;
+    </bindDataModel>
+  });
+  </generateBindingsForEachElement>
+}
+</anonymousFunction2>
+
+<findUrlToken>
+function findUrlToken(node, pos) {
+    <searchForUrlToken>
+    for (let i = 0, il = node.parsedValue.length, url; i < il; i++) {
+        iterateCSSToken(node.parsedValue[i], token => {
+            if (token.type === 'url' && containsPoint(token, pos)) {
+                url = token;
+                return false;
+            }
+        });
+
+        if (url) {
+            return url;
+        }
+    }
+    </searchForUrlToken>
+}
+</findUrlToken>
+
+<Response>
+function Response(statusCode, headers, body) {
+    <setStatusCode>
+    this.statusCode = statusCode;
+    </setStatusCode>
+
+    <normalizeHeaders>
+    this.headers = {};
+    for (var key in headers) {
+        this.headers[key.toLowerCase()] = headers[key];
+    }
+    </normalizeHeaders>
+
+    <setBody>
+    this.body = body;
+    </setBody>
+}
+</Response>
+
+<mapPrototypes>
+function mapPrototypes(vendor, protos, funcs) {
+    <iterateOverPrototypes>
+    var p, f, proto, func;
+
+    for (p = 0; (proto = protos[p]); p++) {
+
+        <checkAndAssignFunctions>
+        for (f = 0; (func = funcs[f]); f++) {
+
+            <skipOverwriting>
+            if (!vendor[func] || proto[func] || proto.prototype[func]) {
+                continue;
+            }
+            </skipOverwriting>
+
+            <extendProtoWithVendorFunc>
+            if (proto === Object) {
+                proto[func] = vendor[func];
+            } else {
+                extendPrototype.call(this, vendor, proto, func);
+            }
+            </extendProtoWithVendorFunc>
+        }
+        </checkAndAssignFunctions>
+    }
+    </iterateOverPrototypes>
+}
+</mapPrototypes>
+```
+Given the size of the functions, particularly the profile function, it's challenging to encapsulate all responsibilities neatly. Where complex inner functions or operations perform tasks related to but distinct from the outer function, additional tags have been used to indicate these responsibilities. However, in some cases such as cacheResults, where try-catch can be considered a part of the responsibility to handle caching, additional tags for error handling are not used. This approach ensures balance without over-segmenting responsibilities within the overall task of the function.

@@ -1,0 +1,208 @@
+```javascript
+<readDotEnvConfigs>
+function readDotEnvConfigs(opts) {
+  <checkIfEnvironmentIsLoaded>
+  if (hasLoadedEnvironment) {
+    return;
+  }
+  hasLoadedEnvironment = true;
+  </checkIfEnvironmentIsLoaded>
+  
+  <cloneOriginalEnvironment>
+  originalEnv = clone(process.env);
+  </cloneOriginalEnvironment>
+
+  <normalizeOptions>
+  if (isString(opts)) {
+    var debugName = opts
+    opts = { debugName: debugName }
+  }
+
+  opts = opts || {};
+  defaults(opts, {
+    debugName: 'loadenv',
+    ignoreNodeEnv: false,
+    project: ''
+  });
+  </normalizeOptions>
+
+  <initializeDebug>
+  var debug = require('debug')(opts.debugName);
+  </initializeDebug>
+
+  <validateOptions>
+  if (!isString(opts.project)) {
+    throw new Error('loadenv: `projects` option must be a string');
+  }
+
+  
+  if (last(opts.project) === '/') {
+    opts.project = opts.project.replace(/\/+$/, '')
+  }
+  </validateOptions>
+
+  <loadEnvironmentFiles>
+  if (!isEmpty(opts.project)) {
+    if (!opts.ignoreNodeEnv) {
+      loadEnv(opts.project + '/.env.' + nodeEnv)
+    }
+    loadEnv(opts.project + '/.env');
+  }
+
+  
+  if (!opts.ignoreNodeEnv) {
+    loadEnv('.env.' + nodeEnv)
+  }
+  loadEnv('.env');
+  </loadEnvironmentFiles>
+
+  <parseEnvironmentVariables>
+  process.env = eson()
+    .use(function (key, val) {
+      if (isString(val) && val.match(/^\s*[+\-]?[0-9]+\s*$/)) {
+        return parseInt(val);
+      }
+      return !isNaN(val) ? parseFloat(val) : val;
+    })
+    .parse(JSON.stringify(process.env));
+  </parseEnvironmentVariables>
+
+  <setRootDirectoryAndLog>
+  process.env.ROOT_DIR = applicationRoot;
+  debug(process.env);
+  </setRootDirectoryAndLog>
+
+  <loadEnvFunction>
+  function loadEnv(name) {
+    var fullEnvPath = path.resolve(applicationRoot, './configs/' + name);
+    try {
+      debug('Loaded environment: ' + fullEnvPath);
+      fs.statSync(fullEnvPath);
+      dotenv.config({ path: fullEnvPath });
+    }
+    catch (e) {
+      debug('Could not load environment "' + fullEnvPath + '"');
+    }
+  }
+  </loadEnvFunction>
+}
+</readDotEnvConfigs>
+
+<fixDemoComponentHtml>
+function fixDemoComponentHtml(component, folder) {
+  <removeIgnoredLines>
+    var re = /<!-- ignore the following lines[\s\S]*<!-- start to learn the demo from here -->\r?\n/;
+    component.code = component.code.replace(re, '');
+  </removeIgnoredLines>
+
+  <checkForStrippingErrors>
+    if (component.code.indexOf('jigsaw-demo-description') != -1) {
+        console.error('ERROR: can not strip "jigsaw-demo-description" from html!');
+        console.error(`       path=${folder}`);
+        process.exit(1);
+    }
+  </checkForStrippingErrors>
+}
+</fixDemoComponentHtml>
+
+<toArray>
+function toArray(tree) {
+  <createArrayFromTree>
+	var out = [];
+	if (tree.root) {
+		rootToArray(tree.root, out);
+	}
+	return out.concat(tree.tail);
+  </createArrayFromTree>
+}
+</toArray>
+
+<_deletePanel>
+function _deletePanel(oPanel) {
+  <cleanUpAndDestroyPanel>
+	oPanel.setContent(null);
+	oPanel.setLayout(null);
+	oPanel.setContainer(null);
+	oPanel.destroy();
+  </cleanUpAndDestroyPanel>
+}
+</_deletePanel>
+
+<_hasApproximateKey>
+function _hasApproximateKey(object, search) {
+  <filterApproximateKeys>
+  var properties = Object.keys(object),
+    prop, flag;
+  return 0 < properties.filter(function (elm) {
+    prop = object[elm];
+
+    
+    if(flag) return true;
+
+    if (isString(prop)) {
+      prop = (sensitive) ? prop : prop.toLowerCase();
+      return flag = (hasApproxPattern(prop, search) !== false);
+    }
+
+    return false;
+
+  }).length;
+  </filterApproximateKeys>
+}
+</_hasApproximateKey>
+
+<Object_assign>
+function Object_assign(target) { 
+  <assignPropertiesFromSources>
+  var args = arguments;
+
+  for (var i = 1, iz = args.length; i < iz; ++i) {
+      var source = args[i];
+
+      if (source) {
+          var keys = Object.keys(source);
+
+          for (var k = 0, kz = keys.length; k < kz; ++k) {
+              var key  = keys[k];
+              var desc = Object.getOwnPropertyDescriptor(source, key);
+
+              if (desc && desc["enumerable"]) {
+                  target[key] = source[key];
+              }
+          }
+      }
+  }
+  </assignPropertiesFromSources>
+  return target;
+}
+</Object_assign>
+
+<updateCurrentService>
+function updateCurrentService() {
+  <setOrClearServiceBasedOnState>
+  for(var serviceName in this.services) {
+    var serviceProperties = this.services[serviceName];
+    if(serviceProperties.state != 'idle') {
+      this._setService(serviceName);
+      return;
+    }
+  }
+  this._clearService(); 
+  </setOrClearServiceBasedOnState>
+}
+</updateCurrentService>
+
+<AtlasLoader>
+function AtlasLoader(url, crossorigin) {
+  <initializeAtlasLoader>
+    EventTarget.call(this);
+    this.url = url;
+    this.baseUrl = url.replace(/[^\/]*$/, '');
+    this.crossorigin = crossorigin;
+    this.loaded = false;
+  </initializeAtlasLoader>
+}
+</AtlasLoader>
+```
+
+For functions that seem to contain multiple sections each relating to a different responsibility, such sections have been annotated individually to show SRP violations. Functions that appear to perform a single responsibility have been annotated as such.

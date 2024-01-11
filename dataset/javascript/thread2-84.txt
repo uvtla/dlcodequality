@@ -1,0 +1,327 @@
+```javascript
+<setRef>
+function setRef (buffer, offset, value) {
+  <logging>
+  debug('Array reference "type" setter for buffer at offset', offset)
+  </logging>
+  var ptr
+  <setPointerType>
+  if (value instanceof this) {
+    ptr = value.buffer
+  } else {
+    ptr = new this(value).buffer
+  }
+  </setPointerType>
+  <writePointer>
+  _ref.writePointer(buffer, offset, ptr)
+  </writePointer>
+}
+</setRef>
+
+<anonymous>
+function(binaries, callback) {
+  <createProjectStructure>
+  helper.createProjectStructure(appPath, function(err) {
+      callback && callback(err, binaries);
+  });
+  </createProjectStructure>
+}
+</anonymous>
+
+<webpackLoader>
+function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  <moduleExportsSetup>
+  Object.defineProperty(exports, "__esModule", {
+      value: true
+  });
+  exports.renderWithEntry = undefined;
+  </moduleExportsSetup>
+  
+  <dependenciesLoading>
+  var _react = __webpack_require__(3);
+  
+  var _react2 = _interopRequireDefault(_react);
+  
+  var _reactDom = __webpack_require__(30);
+  
+  var _reactRedux = __webpack_require__(168);
+  
+  var _reactHotLoader = __webpack_require__(198);
+  
+  var _style = __webpack_require__(202);
+  
+  var _style2 = _interopRequireDefault(_style);
+  
+  var _EntryWrapper = __webpack_require__(204);
+  
+  var _EntryWrapper2 = _interopRequireDefault(_EntryWrapper);
+  
+  var _store = __webpack_require__(216);
+  
+  var _store2 = _interopRequireDefault(_store);
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  </dependenciesLoading>
+  
+  <defaultExportSetup>
+  var ID_SELECTOR = 'react-pianist'; 
+  
+  exports.default = function (Entry) {
+  
+      <applyStyle>
+      (0, _style2.default)();
+      </applyStyle>
+  
+      return renderWithEntry(Entry);
+  };
+  </defaultExportSetup>
+  
+  <renderWithEntry>
+  var renderWithEntry = exports.renderWithEntry = function renderWithEntry(Entry) {
+      return (0, _reactDom.render)(_react2.default.createElement(
+          _reactHotLoader.AppContainer,
+          null,
+          _react2.default.createElement(
+              _reactRedux.Provider,
+              { store: _store2.default },
+              _react2.default.createElement(
+                  _EntryWrapper2.default,
+                  null,
+                  _react2.default.createElement(Entry, null)
+              )
+          )
+      ), document.getElementById(ID_SELECTOR));
+  };
+  </renderWithEntry>
+
+}
+</webpackLoader>
+
+<windowHashHandler>
+function () {
+  var hash = window.location.hash;
+  var filterIndex = hash.indexOf('filter=');
+  if (filterIndex !== -1) {
+    <extractFilterString>
+    var filterString = hash.substr(filterIndex + 7).trim();
+    </extractFilterString>
+    <filterVisibleLayers>
+    var visible = layersControl.filter(filterString);
+    </filterVisibleLayers>
+
+    <setupFirstBaseLayer>
+    var first = Object.keys(visible)[0];
+    if (first in baseLayers) {
+      map.addLayer(baseLayers[first]);
+      map.eachLayer(function (layer) {
+        if (layer._providerName !== first) {
+          map.removeLayer(layer);
+        }
+      });
+      layersControl.filter(filterString);
+    }
+    </setupFirstBaseLayer>
+  }
+}
+</windowHashHandler>
+
+<readControls>
+function readControls( controlPath, filingCabinet ) {
+
+  <logReadControlsStart>
+  logger.showInfo( '*** Reading controls...' );
+  </logReadControlsStart>
+  
+  <logEngineControls>
+  logger.showInfo( 'Engine controls:' );
+  </logEngineControls>
+  <getEngineControls>
+  getControls(
+    '/node_modules/md-site-engine/controls',
+    '',
+    filingCabinet.controls
+  );
+  </getEngineControls>
+  
+  <logSiteControls>
+  logger.showInfo( 'Site controls:' );
+  </logSiteControls>
+  <getSiteControls>
+  getControls(
+    controlPath,
+    '',
+    filingCabinet.controls
+  );
+  </getSiteControls>
+}
+</readControls>
+
+<sliceUntil>
+function(str, to) {
+  if (isUndefined(to)) to = str.length;
+  return str.slice(0, numberOrIndex(str, to));
+}
+</sliceUntil>
+
+<loadDataWithOptions>
+function (options) {
+  <validateOptions>
+  if (!isStringValid(options.key)) {
+    throw new TypeError('Unable to load data, a key is not a non-empty string.');
+  }
+  
+  if (!isStringValid(options.urlTemplate) && !angular.isFunction(options.urlTemplate)) {
+    throw new TypeError('Unable to load data, a urlTemplate is not a non-empty string or not a function.');
+  }
+  
+  var errorHandler = options.loadFailureHandler;
+  if (errorHandler !== undefined) {
+    if (!angular.isString(errorHandler)) {
+      throw new Error('Unable to load data, a loadFailureHandler is not a string.');
+    } else {
+      errorHandler = $injector.get(errorHandler);
+    }
+  }
+  </validateOptions>
+
+  <setupLoadersAndParts>
+  var loaders = [],
+    prioritizedParts = getPrioritizedParts();
+  
+  angular.forEach(prioritizedParts, function (part) {
+    loaders.push(
+      part.getTable(options.key, $q, $http, options.$http, options.urlTemplate, errorHandler)
+    );
+    part.urlTemplate = part.urlTemplate || options.urlTemplate;
+  });
+  </setupLoadersAndParts>
+  
+  <handleStructureChangeDuringLoad>
+  var structureHasBeenChangedWhileLoading = false;
+  var dirtyCheckEventCloser = $rootScope.$on('$translatePartialLoaderStructureChanged', function () {
+    structureHasBeenChangedWhileLoading = true;
+  });
+  </handleStructureChangeDuringLoad>
+
+  <loadTranslations>
+  return $q.all(loaders)
+    .then(function () {
+      <closeDirtyCheckEvent>
+      dirtyCheckEventCloser();
+      </closeDirtyCheckEvent>
+      if (structureHasBeenChangedWhileLoading) {
+        <handleRetry>
+        if (!options.__retries) {
+          options.__retries = (options.__retries || 0) + 1;
+          return service(options);
+        } else {
+          $log.warn('The partial loader has detected a multiple structure change (with addPort/removePart) ' +
+            'while loading translations. You should consider using promises of $translate.use(lang) and ' +
+            '$translate.refresh(). Also parts should be added/removed right before an explicit refresh ' +
+            'if possible.');
+        }
+        </handleRetry>
+      }
+      var table = {};
+      prioritizedParts = getPrioritizedParts();
+      angular.forEach(prioritizedParts, function (part) {
+        <mergeTranslationTables>
+        deepExtend(table, part.tables[options.key]);
+        </mergeTranslationTables>
+      });
+      return table;
+    }, function () {
+      <closeDirtyCheckEventOnReject>
+      dirtyCheckEventCloser();
+      </closeDirtyCheckEventOnReject>
+      return $q.reject(options.key);
+    });
+  </loadTranslations>
+}
+</loadDataWithOptions>
+
+<_pickBestAction>
+function _pickBestAction(key, modifiers, action) {
+  <determineActionBasedOnKey>
+  if (!action) {
+      action = _getReverseMap()[key] ? 'keydown' : 'keypress';
+  }
+  </determineActionBasedOnKey>
+  
+  <changeActionIfModifiersExist>
+  if (action == 'keypress' && modifiers.length) {
+      action = 'keydown';
+  }
+  </changeActionIfModifiersExist>
+
+  return action;
+}
+</_pickBestAction>
+
+<setSelection>
+function setSelection(from, to, oldFrom, oldTo) {
+  goalColumn = null;
+  if (oldFrom == null) {oldFrom = sel.from.line; oldTo = sel.to.line;}
+  if (posEq(sel.from, from) && posEq(sel.to, to)) return;
+  if (posLess(to, from)) {var tmp = to; to = from; from = tmp;}
+  
+  <updateSelectionLines>
+  if (from.line != oldFrom) {
+    var from1 = skipHidden(from, oldFrom, sel.from.ch);
+    if (!from1) setLineHidden(from.line, false);
+    else from = from1;
+  }
+  if (to.line != oldTo) to = skipHidden(to, oldTo, sel.to.ch);
+  </updateSelectionLines>
+
+  <checkAndUpdateSelectionInversion>
+  if (posEq(from, to)) sel.inverted = false;
+  else if (posEq(from, sel.to)) sel.inverted = false;
+  else if (posEq(to, sel.from)) sel.inverted = true;
+  </checkAndUpdateSelectionInversion>
+
+  <clearEmptyLines>
+  if (options.autoClearEmptyLines && posEq(sel.from, sel.to)) {
+    var head = sel.inverted ? from : to;
+    if (head.line != sel.from.line && sel.from.line < doc.size) {
+      var oldLine = getLine(sel.from.line);
+      if (/^\s+$/.test(oldLine.text))
+        setTimeout(operation(function() {
+          if (oldLine.parent && /^\s+$/.test(oldLine.text)) {
+            var no = lineNo(oldLine);
+            replaceRange("", {line: no, ch: 0}, {line: no, ch: oldLine.text.length});
+          }
+        }), 10);
+    }
+  }
+  </clearEmptyLines>
+
+  <finalUpdateOfSelection>
+  sel.from = from; sel.to = to;
+  selectionChanged = true;
+  </finalUpdateOfSelection>
+}
+</setSelection>
+
+<binder>
+function binder(taskID) {
+  expected++;
+  <createBindingFunction>
+  return function(ret) {
+    expected--;
+    if(!returned && taskID !== 'false') {
+      if (typeof taskID == 'number') returned=[];
+      else if (typeof taskID == 'string') returned={};
+    };
+    taskID !== false ? returned[taskID]=ret : returned = ret;
+  </createBindingFunction>
+  
+  <runQueuedTasksOnCompletion>
+  setTimeout(function(){if (! expected) runQueue();},1);
+  </runQueuedTasksOnCompletion>
+}
+</binder>
+```

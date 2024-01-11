@@ -1,0 +1,221 @@
+```javascript
+<anonymousRejectFunction>
+function() {
+  var args = Array.prototype.slice.call(arguments, 0);
+  deferredObject.reject.apply(null, ctxArgs.concat(args));
+}
+</anonymousRejectFunction>
+
+<ignoreMatch>
+function ignoreMatch(ignores, pathName) {
+  let result = false;
+
+  <forEachIgnore>
+  ignores.forEach(ignore => {
+    if (minimatch(pathName, ignore)) {
+      result = true;
+    }
+  });
+  </forEachIgnore>
+
+  return result;
+}
+</ignoreMatch>
+
+<show>
+function show() {
+
+  <clearPopupTimeout>
+  popupTimeout = null;
+  </clearPopupTimeout>
+
+  <cancelTransitionTimeout>
+  if ( transitionTimeout ) {
+    $timeout.cancel( transitionTimeout );
+    transitionTimeout = null;
+  }
+  </cancelTransitionTimeout>
+
+  <checkTooltipContent>
+  if ( !(options.useContentExp ? ttScope.contentExp() : ttScope.content) ) {
+    return angular.noop;
+  }
+  </checkTooltipContent>
+
+  <creationOfTooltip>
+  createTooltip();
+  </creationOfTooltip>
+
+  <setInitialTooltipStylesAndDigest>
+  tooltip.css({ top: 0, left: 0, display: 'block' });
+  ttScope.$digest();
+  </setInitialTooltipStylesAndDigest>
+
+  <positionAndOpenTooltip>
+  positionTooltip();
+
+  ttScope.isOpen = true;
+  ttScope.$apply(); 
+  </positionAndOpenTooltip>
+
+  return positionTooltip;
+}
+</show>
+
+<serve>
+function serve(root, route, opts) {
+  opts = opts || {};
+  route = route || '/';
+  <assertRoot>
+  assert(root, 'root directory is required to serve files');
+  </assertRoot>
+
+  <configureAndLogStatic>
+  debug('static "%s" "%s" %j', route, root, opts);
+  opts.root = resolve(root);
+  opts.index = opts.index || 'index.html';
+
+  routes[route] = opts;
+  </configureAndLogStatic>
+
+  return function *serve(next) {
+    yield* next;
+    debug('path: "%s"', this.path);
+
+    <extractRoute>
+    var route = this.path.split('/')[1] || '/';
+    </extractRoute>
+
+    <checkRequestMethodAndBody>
+    if (this.method != 'HEAD' && this.method != 'GET') return;
+    if (this.body != null || this.status != 404) return;
+    </checkRequestMethodAndBody>
+
+    <sendStaticFile>
+    yield send(this, this.path.slice(1 + route.length) || '/', routes[route]);
+    </sendStaticFile>
+  };
+}
+</serve>
+
+<formatSpecDescription>
+function formatSpecDescription(spec) {
+  const egText = spec.example ? ` (eg. "${spec.example}")` : ''
+  const docsText = spec.docs ? `. See ${spec.docs}` : ''
+  return `${spec.desc}${egText}${docsText}` || ''
+}
+</formatSpecDescription>
+
+<isPre>
+function isPre(p1, p2) {
+  
+  <stripVersion>
+  const stripped = semver.coerce(p2).raw;
+  </stripVersion>
+  
+  <calculateDiff>
+  const diff = semver.diff(p1, stripped);
+  </calculateDiff>
+  
+  <checkPreRelease>
+  return ['premajor', 'preminor', 'prepatch', 'prerelease'].indexOf(diff) >= 0 ? true : false;
+  </checkPreRelease>
+}
+</isPre>
+
+<downloadCodeModule>
+function downloadCodeModule(db, module, codePath) {
+  <assembleFilePath>
+  const moduleName = module.replace(/^\/code\
+  const fileName = `${moduleName}.js`;
+  const filePath = path.join(codePath, fileName);
+  </assembleFilePath>
+
+  <loadAndWriteModule>
+  return db.code.loadCode(moduleName, 'module', false)
+    .then((file) => writeFile(filePath, file))
+    </loadAndWriteModule>
+    
+    <logDownload>
+    .then(() => console.log(`Module ${moduleName} downloaded.`));
+    </logDownload>
+}
+</downloadCodeModule>
+
+<createComponent>
+function createComponent(loader, obj) {
+
+  <resolveReferencesAndModify>
+  obj = resolveMarkReferences(loader, obj);
+
+  if (obj[CMD_COMPONENT_URI]) {
+      obj[CMD_COMPONENT] = obj[CMD_COMPONENT_URI];
+      delete obj[CMD_COMPONENT_URI];
+  }
+  </resolveReferencesAndModify>
+
+  <throwIfInvalidComponent>
+  if( obj[CMD_COMPONENT] === undefined ){
+      throw new Error('invalid create component command');
+  }
+  </throwIfInvalidComponent>
+
+  <componentCreationAndAddition>
+  const component = loader.registry.createComponent(obj);
+
+  return Promise.resolve(component)
+      .then(component => {
+          if (!loader.entity) {
+              return _createEntity(loader, null, { shadow: true });
+          }
+          
+          return component;
+      })
+      .then(() => loader.entity.addComponent(component))
+      .then(() => component);
+  </componentCreationAndAddition>
+}
+</createComponent>
+
+<anonymousEventFunction>
+function (ev) {
+    var target = Event.getTarget(ev); 
+
+    <findTargetCell>
+    while (target && !(target.tagName.toUpperCase() == 'TD' && Dom.hasClass(target.parentNode,'ygtvrow'))) { 
+        target = Dom.getAncestorByTagName(target,'td'); 
+    }
+    </findTargetCell>
+
+    <nullChecks>
+    if (Lang.isNull(target)) { return null; }
+    if (/\bygtv(blank)?depthcell/.test(target.className)) { return null;}
+    </nullChecks>
+
+    <validateAndRetrieveTarget>
+    if (target.id) {
+        var m = target.id.match(/\bygtv([^\d]*)(.*)/);
+        if (m && m[2] && this._nodes[m[2]]) {
+            return target;
+        }
+    }
+    </validateAndRetrieveTarget>
+
+    return null;
+}
+</anonymousEventFunction>
+
+<serializeInstruction>
+function serializeInstruction(instruction) {
+  return JSON.stringify({
+    <transformInstruction>
+    path: instruction.path,
+    component: instruction.component,
+    params: Object.keys(instruction.params).reduce(function (acc, key) {
+      return (key !== 'childRoute' && (acc[key] = instruction.params[key])), acc;
+    }, {})
+    </transformInstruction>
+  });
+}
+</serializeInstruction>
+```

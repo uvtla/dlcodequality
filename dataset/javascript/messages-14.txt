@@ -1,0 +1,868 @@
+<stackTraceAugmentation>
+function augmentStackTraceWithInitialElement(stackInfo, url, lineNo, message) {
+        var initial = {
+            'url': url,
+            'line': lineNo
+        };
+
+        if (initial.url && initial.line) {
+            stackInfo.incomplete = false;
+
+            if (!initial.func) {
+                initial.func = guessFunctionName(initial.url, initial.line);
+            }
+
+            if (!initial.context) {
+                initial.context = gatherContext(initial.url, initial.line);
+            }
+
+            var reference = / '([^']+)' /.exec(message);
+            if (reference) {
+                initial.column = findSourceInLine(reference[1], initial.url, initial.line);
+            }
+
+            if (stackInfo.stack.length > 0) {
+                if (stackInfo.stack[0].url === initial.url) {
+                    if (stackInfo.stack[0].line === initial.line) {
+                        return false; 
+                    } else if (!stackInfo.stack[0].line && stackInfo.stack[0].func === initial.func) {
+                        stackInfo.stack[0].line = initial.line;
+                        stackInfo.stack[0].context = initial.context;
+                        return false;
+                    }
+                }
+            }
+
+            stackInfo.stack.unshift(initial);
+            stackInfo.partial = true;
+            return true;
+        } else {
+            stackInfo.incomplete = true;
+        }
+
+        return false;
+    }
+</stackTraceAugmentation>
+
+<pointParser>
+function parsePoint(result) {
+  if (result.geometry) {
+    if (result.geometry.location) {
+      const {lng, lat} = result.geometry.location
+      return helpers.point([lng, lat])
+    }
+  }
+}
+</pointParser>
+
+<cacheRetrieval>
+function getCacheFor(transaction, store) {
+  var prefix = store.prefix()[0];
+  var cache = transaction._cache;
+  var subCache = cache.get(prefix);
+  if (!subCache) {
+    subCache = new pouchdbCollections.Map();
+    cache.set(prefix, subCache);
+  }
+  return subCache;
+}
+</cacheRetrieval>
+
+<mediaQueriesSort>
+function sortMediaQueries(a, b) {
+  const A = a.replace(/\D/g, '');
+  const B = b.replace(/\D/g, '');
+
+  if (isMax(a) && isMax(b)) {
+    return B - A;
+  } else if (isMin(a) && isMin(b)) {
+    return A - B;
+  } else if (isMax(a) && isMin(b)) {
+    return 1;
+  } else if (isMin(a) && isMax(b)) {
+    return -1;
+  }
+
+  return 1;
+}
+</mediaQueriesSort>
+
+<phantomCreation>
+function(options) {
+    options = options || {};
+    return new Promise(function(resolve, reject) {
+      driver.create(options, function(err, browser) {
+        if (err) {
+          return reject(err);
+        }
+        resolve(new Phantom(browser));
+      });
+    });
+  }
+</phantomCreation>
+
+<mediatorSubscription>
+function (channel, subscription, context) {
+      Backbone.Mediator.subscribe(channel, subscription, context, true);
+    }
+</mediatorSubscription>
+
+<blocksHandler>
+function handleBlocks (config) {
+  let blocks = []
+  let blocksObj = config.blocks
+  for (let i in blocksObj) {
+    if (blocksObj.hasOwnProperty(i)) {
+      if (isLanguage(blocksObj[i])) {
+        blocks.push(_getBlock(config, 'language', true))
+      } else {
+        blocks.push(_getBlock(config, i))
+      }
+    }
+  }
+  return blocks
+}
+</blocksHandler>
+
+<minValueValidator>
+function minValue(bound, formatError) {
+        'use strict';
+        return function (value) {
+            if (value || !isNaN(parseFloat(value))) {
+                var intValue = Number(value);
+                if (!isNaN(intValue) && intValue < bound) {
+                    return formatError(intValue);
+                }
+            }
+            return '';
+        };
+    }
+</minValueValidator>
+
+<allLayersHandler>
+function(err, data){
+      if (err) error = err;
+      allLayers.push(data);
+      if (allLayers.length == totalLayers){
+        callback(error, allLayers);
+      }
+    }
+</allLayersHandler>
+
+<summaryFormatter>
+function formatSummary(errors, warnings, fixableErrors, fixableWarnings) {
+    const summaryColor = errors > 0 ? "red" : "yellow";
+    const summary = [];
+    const fixablesSummary = [];
+
+    if (errors > 0) {
+        summary.push(`${errors} ${pluralize("error", errors)}`);
+    }
+
+    if (warnings > 0) {
+        summary.push(`${warnings} ${pluralize("warning", warnings)}`);
+    }
+
+    if (fixableErrors > 0) {
+        fixablesSummary.push(`${fixableErrors} ${pluralize("error", fixableErrors)}`);
+    }
+
+    if (fixableWarnings > 0) {
+        fixablesSummary.push(`${fixableWarnings} ${pluralize("warning", fixableWarnings)}`);
+    }
+
+    let output = chalk[summaryColor].bold(`${summary.join(" and ")} found.`);
+
+    if (fixableErrors || fixableWarnings) {
+        output += chalk[summaryColor].bold(`\n${fixablesSummary.join(" and ")} potentially fixable with the \`--fix\` option.`);
+    }
+
+    return output;
+}
+</summaryFormatter><setOperations>
+function(gt, or) {
+
+		var or1 = or.values[0],
+			or2 = or.values[1];
+		var difference1 = set.difference(gt, or1);
+		var difference2 = set.difference(gt, or2);
+		return set.intersection(difference1, difference2);
+	}
+</setOperations>
+
+<sessionInitialization>
+function Session(suite) {
+	Emitter.call(this);
+
+	
+	this.files = [];
+
+	
+	this.suite = suite;
+
+	
+	this.global = global;
+
+	
+	this.context = new Context(this);
+
+	
+	this.engine = new Mocha({
+		
+		
+		ignoreLeaks: true,
+		useColors: true,
+		
+		timeout: suite.options.timeout || 10000,
+		
+		reporter: suite.options.reporter
+	});
+
+	
+	
+	
+
+	
+	this.engine.suite.emit('pre-require', this.global, null, this.engine);
+
+	
+	
+	
+	
+	
+}
+</sessionInitialization>
+
+<pathsConfiguration>
+function configurePaths(cfg) {
+	var sourcesBasePath = path.resolve(appPath, cfg.get('sourcesBasePath')),
+	   sources = cfg.get('sources'),
+	   build = cfg.get('build'),
+	   buildBaseUri,
+	   buildDir = nodeEnv == 'development' ? build.baseDirNameDev : build.baseDirNameDist,
+	   buildPath = path.join( path.resolve(appPath, cfg.get('buildBasePath')), buildDir),
+	   keys, key,
+	   i;
+
+	buildBaseUri = cfg.get('staticBaseUri') + '/' + buildDir + '/';
+	cfg.set('buildBaseUri', buildBaseUri);
+	cfg.set('cssUri', buildBaseUri + build.css.dirName + build.css.external[nodeEnv]);
+	cfg.set('jsUri', buildBaseUri + build.js.dirName + build.js.external[nodeEnv]);
+	cfg.set('testUri', buildBaseUri + build.js.dirName + 'test.js');
+
+	cfg.set('staticPath',            path.resolve(appPath, cfg.get('staticPath')));
+	cfg.set('routesPath',            path.resolve(appPath, cfg.get('routesPath')));
+	cfg.set('buildBasePath',         path.resolve(appPath, cfg.get('buildBasePath')));
+	cfg.set('helpersPath',           path.resolve(appPath, cfg.get('helpersPath')));
+	cfg.set('handlebarsHelpersPath', path.resolve(appPath, cfg.get('handlebarsHelpersPath')));
+
+	cfg.set('repoWebViewBaseUri', cfg.get('repository').replace('.git', '/') );
+
+	keys = Object.keys(sources);
+	for (i = 0; i < keys.length; i++) {
+		key = keys[i];
+		cfg.set('sources.'+key, path.resolve(sourcesBasePath, sources[key]));
+	}
+
+	build.css.inline[nodeEnv] &&
+		cfg.set('build.css.inline',   path.resolve(buildPath, build.css.inline[nodeEnv]));
+
+	build.css.external[nodeEnv] &&
+		cfg.set('build.css.external', path.resolve(buildPath, build.css.external[nodeEnv]));
+
+	build.js.inline[nodeEnv] &&
+		cfg.set('build.js.inline',    path.resolve(buildPath, build.js.inline[nodeEnv]));
+
+	build.js.external[nodeEnv] &&
+		cfg.set('build.js.external',  path.resolve(buildPath, build.js.external[nodeEnv]));
+
+	cfg.set('build.spritesheets', path.resolve(buildPath, build.spriteSheets.dirName));
+
+	return cfg;
+}
+</pathsConfiguration>
+
+<versionInitialization>
+function V1(domain) {
+  Version.prototype.constructor.call(this, domain, 'v1');
+
+  
+  this._commands = undefined;
+  this._ratePlans = undefined;
+  this._sims = undefined;
+}
+</versionInitialization>
+
+<timbitsLoader>
+function loadTimbits(callback) {
+
+  var folder = path.join(config.home, "/timbits");
+  var files = filteredFiles(folder, /\.(coffee|js)$/);
+  var pending = files.length;
+  
+  files.forEach(function(file) {
+    var name = file.substring(0, file.lastIndexOf("."));
+    timbits.add(name, require(path.join(folder, file)), function() {
+      pending--;
+      if (pending === 0) callback();
+    });
+  });
+}
+</timbitsLoader>
+
+<secureRandomGenerator>
+async function(length) {
+    const buf = new Uint8Array(length);
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(buf);
+    } else if (typeof window !== 'undefined' && typeof window.msCrypto === 'object' && typeof window.msCrypto.getRandomValues === 'function') {
+      window.msCrypto.getRandomValues(buf);
+    } else if (nodeCrypto) {
+      const bytes = nodeCrypto.randomBytes(buf.length);
+      buf.set(bytes);
+    } else if (this.randomBuffer.buffer) {
+      await this.randomBuffer.get(buf);
+    } else {
+      throw new Error('No secure random number generator available.');
+    }
+    return buf;
+  }
+</secureRandomGenerator>
+
+<statusRepresentation>
+function statusToText(status) {
+          var words = [];
+
+          if (status.index=='A') {
+            words.push({
+              code: 'A',
+              color: '#00b111',
+              title: 'Added'
+            });
+          }
+
+          if (status.index=='M') {
+            words.push({
+              code: 'M',
+              color: '#9000b1',
+              title: 'Modified'
+            });
+          }
+
+          if (status.index=='R') {
+            words.push({
+              code: 'R',
+              color: '#0065b1',
+              title: 'Renamed'
+            });
+          }
+
+          if (status.index=='!') {
+            words.push({
+              code: 'I',
+              color: '#b16d00',
+              title: 'Ignored'
+            });
+          }
+
+          if (status.index=='C') {
+            words.push({
+              code: 'C',
+              color: '#b16d00',
+              title: 'Copied'
+            });
+          }
+
+          if (status.index==' ') {
+            words.push({
+              code: ' ',
+              color: '#b16d00',
+              title: 'Unmodified'
+            });
+          }
+
+          if (status.index=='D') {
+            words.push({
+              code: 'D',
+              color: '#de2d00',
+              title: 'Deleted'
+            });
+          }
+
+          return words;
+        }
+</statusRepresentation>
+
+<tooltipBinding>
+function showTooltipBind() {
+              if(hasEnableExp && !scope.$eval(attrs[prefix+'Enable'])) {
+                return;
+              }
+
+              prepareTooltip();
+
+              if ( ttScope.popupDelay ) {
+                
+                
+                if (!popupTimeout) {
+                  popupTimeout = $timeout( show, ttScope.popupDelay, false );
+                  popupTimeout.then(function(reposition){reposition();});
+                }
+              } else {
+                show()();
+              }
+            }
+</tooltipBinding>
+
+<wordSplitter>
+function splitWord (word) {
+  Util.assert(word);
+
+  if (word.length < MAX_SAMPLE_SIZE) {
+    return [word];
+  }
+
+  let chunks = [];
+  for (let ii = 0; ii < word.length - MAX_SAMPLE_SIZE + 1; ++ii) {
+    chunks.push(word.substring(ii, ii + MAX_SAMPLE_SIZE));
+  }
+  return chunks;
+}
+</wordSplitter>
+
+<adapterLoader>
+function loadAdapter(type, location) {
+    var options = adapterConfig[type];
+    try {
+        var modulePath = adapterModulePath(type, options);
+
+        global.JuttleAdapterAPI = JuttleAdapterAPI;
+
+        var start = new Date();
+
+        if (!options.builtin) {
+            checkCompatible(type, modulePath, location);
+        }
+
+        var init = require(modulePath);
+
+        var loaded = new Date();
+        var adapter = init(options);
+
+        global.JuttleAdapterAPI = undefined;
+
+        if (adapter.name !== type) {
+            throw new Error('adapter name ', adapter.name, ' != type ', type);
+        }
+        var initialized = new Date();
+
+        logger.debug(adapter.name, 'adapter loaded in', (loaded - start), 'ms,',
+                     'initialized in', (initialized - loaded), 'ms');
+
+        register(adapter.name, adapter);
+
+        return adapter;
+    } catch (err) {
+        logger.error('error loading adapter ' + type + ': ' + err.message);
+        throw err;
+    }
+}
+</adapterLoader><propertyUpdateValidator>
+function(prop) {
+    
+    cons.updateHash(prop)
+      
+    var fieldSig = _.prod(
+      _.map(cons.mandatoryFields, function(field) {
+        return _.has(prop, field) && !_.isUndefined(prop[field]) && !_.isNull(prop[field]) ? true : false;
+      }))
+    if (!fieldSig) throw new Error("Node constraints violated: incomplete mandatoryFields.")
+
+    
+    return true;
+  }
+</propertyUpdateValidator>
+
+<streamParser>
+function parse (stream, options = {}) {
+  const Promise = promise(options)
+
+  try {
+    check.assert.maybe.function(options.reviver, 'Invalid reviver option')
+  } catch (err) {
+    return Promise.reject(err)
+  }
+
+  const errors = []
+  const scopes = []
+  const reviver = options.reviver
+  const shouldHandleNdjson = !! options.ndjson
+
+  let emitter, resolve, reject, scopeKey
+  if (shouldHandleNdjson && NDJSON_STATE.has(stream)) {
+    const state = NDJSON_STATE.get(stream)
+    NDJSON_STATE.delete(stream)
+    emitter = state.emitter
+    setImmediate(state.resume)
+  } else {
+    emitter = walk(stream, options)
+  }
+
+  emitter.on(events.array, array)
+  emitter.on(events.object, object)
+  emitter.on(events.property, property)
+  emitter.on(events.string, value)
+  emitter.on(events.number, value)
+  emitter.on(events.literal, value)
+  emitter.on(events.endArray, endScope)
+  emitter.on(events.endObject, endScope)
+  emitter.on(events.end, end)
+  emitter.on(events.error, error)
+  emitter.on(events.dataError, error)
+
+  if (shouldHandleNdjson) {
+    emitter.on(events.endLine, endLine)
+  }
+
+  return new Promise((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+
+  function array () {
+    if (errors.length > 0) {
+      return
+    }
+
+    beginScope([])
+  }
+
+  function beginScope (parsed) {
+    if (errors.length > 0) {
+      return
+    }
+
+    if (scopes.length > 0) {
+      value(parsed)
+    }
+
+    scopes.push(parsed)
+  }
+
+  function value (v) {
+    if (errors.length > 0) {
+      return
+    }
+
+    if (scopes.length === 0) {
+      return scopes.push(v)
+    }
+
+    const scope = scopes[scopes.length - 1]
+
+    if (scopeKey) {
+      scope[scopeKey] = v
+      scopeKey = null
+    } else {
+      scope.push(v)
+    }
+  }
+
+  function object () {
+    if (errors.length > 0) {
+      return
+    }
+
+    beginScope({})
+  }
+
+  function property (name) {
+    if (errors.length > 0) {
+      return
+    }
+
+    scopeKey = name
+  }
+
+  function endScope () {
+    if (errors.length > 0) {
+      return
+    }
+
+    if (scopes.length > 1) {
+      scopes.pop()
+    }
+  }
+
+  function end () {
+    if (shouldHandleNdjson) {
+      const resume = emitter.pause()
+      emitter.removeAllListeners()
+      NDJSON_STATE.set(stream, { emitter, resume })
+    }
+
+    if (errors.length > 0) {
+      return reject(errors[0])
+    }
+
+    if (reviver) {
+      scopes[0] = transform(scopes[0], '')
+    }
+
+    resolve(scopes[0])
+  }
+
+  function transform (obj, key) {
+    if (obj && typeof obj === 'object') {
+      Object.keys(obj).forEach(childKey => {
+        obj[childKey] = transform(obj[childKey], childKey)
+      })
+    }
+
+    return reviver(key, obj)
+  }
+
+  function error (e) {
+    errors.push(e)
+  }
+
+  function endLine () {
+    if (scopes.length > 0) {
+      end()
+    }
+  }
+}
+</streamParser>
+
+<shareDataGenerator>
+function getShareData(terria) {
+  const initSources = terria.initSources.slice();
+
+  addUserAddedCatalog(terria, initSources);
+  addSharedMembers(terria, initSources);
+  addViewSettings(terria, initSources);
+  addFeaturePicking(terria, initSources);
+  addLocationMarker(terria, initSources);
+
+  return {
+    version: "0.0.05",
+    initSources: initSources
+  };
+}
+</shareDataGenerator>
+
+<templateEngine>
+function envEval(state, script, data, frame) {
+  try {
+    state.stack.push(frame.replace(/\s+/g, ' '));
+    
+    if (/^[_a-zA-Z0-9.]*$/.test(script)) {
+      return property(state, script, data);
+    }
+    else {
+      if (!state.options.allowEval) {
+        handleError(state, 'allowEval is not set, however \'' + script + '\'' +
+            ' can not be resolved using a simple property path.');
+        return '${' + script + '}';
+      }
+
+      
+      
+      
+      
+      
+      
+      var keys = allKeys(data);
+      var func = Function.apply(null, keys.concat("return " + script));
+
+      var values = keys.map(function(key) { return data[key]; });
+      return func.apply(null, values);
+
+      
+      
+      
+      
+      
+      
+      
+    }
+  }
+  catch (ex) {
+    handleError(state, 'Template error evaluating \'' + script + '\'', ex);
+    return '${' + script + '}';
+  }
+  finally {
+    state.stack.pop();
+  }
+}
+</templateEngine>
+
+<cssPropertyCombiner>
+function background(options) {
+    options = options || {};
+    
+    return function (config) {
+        var values = [];
+        [
+            'attachment',
+            'clip',
+            'color',
+            'image',
+            'origin',
+            'position',
+            'repeat',
+            'size'
+        ].forEach(function (prop) {
+            if (options.hasOwnProperty(prop)) {
+                values.push(options[prop]);
+            }
+        });
+        if (values.length) {
+            return [['background', values.join(' ')]];
+        }
+        return [];
+    };
+}
+</cssPropertyCombiner>
+
+<chineseLunarInterpreter>
+function(jd) {
+        var date = gregorianCalendar.fromJD(jd);
+        var lunar = toLunar(date.year(), date.month(), date.day());
+        var monthIndex = this.toMonthIndex(
+            lunar.year, lunar.month, lunar.isIntercalary);
+        return this.newDate(lunar.year, monthIndex, lunar.day);
+    }
+</chineseLunarInterpreter>
+
+<commentExtractor>
+function addComment( text, multiline ) {
+
+          if ( options.extractComments ) {
+
+              const loc = location();
+
+              comments[ loc.start.offset ] = {
+                  text: text,
+                  multiline: multiline,
+                  location: loc,
+              };
+
+          }
+
+          return text;
+
+      }
+</commentExtractor>
+
+<rendererInitializer>
+function renderer(parent, config){
+  
+  // ...[initialization code]...
+
+}
+</rendererInitializer>
+
+<MongoStoreConstructor>
+function MongoStore(options) {
+  if (typeof options === "undefined") { options = {}; }
+  _super.call(this);
+  // ...[initialization code]...
+}
+</MongoStoreConstructor>
+
+<unbindFunction>
+function unbindToFunction(target, entity, evt, method){
+  target.stopListening(entity, evt, method, target);
+}
+</unbindFunction><webGLBufferInitializer>
+function() {
+		this.gl = this.context.gl;
+		var gl = this.gl;
+		this.vertexBuffer = gl.createBuffer();
+
+		
+		this.indexBuffer = this.numIndices > 0
+					? gl.createBuffer()
+					: null;
+
+		this.dirty = true;
+	}
+</webGLBufferInitializer>
+
+<arrayUniqifier>
+function uniq(array, isSorted, iteratee, thisArg) {
+      
+      // ...[code omitted for brevity]...
+
+    }
+</arrayUniqifier>
+
+<characterCounterUpdater>
+function updateCharactersCounter() {
+      
+      // ...[code omitted for brevity]...
+
+    }
+</characterCounterUpdater>
+
+<jsonEventDataCreator>
+function createJsonEventData(eventId, event, metadata, type) {
+  
+  // ...[code omitted for brevity]...
+
+}
+</jsonEventDataCreator>
+
+<canvasInitializer>
+function() {
+			
+			// ...[code omitted for brevity]...
+
+		}
+</canvasInitializer>
+
+<dependencyDiff>
+function diff(node) {
+
+		// ...[code omitted for brevity]...
+
+	}
+</dependencyDiff>
+
+<viewStateExtractor>
+function getViewState(props) {
+  
+  // ...[code omitted for brevity]...
+
+}
+</viewStateExtractor>
+
+<deviceRegistration>
+async function registerDevice(options) {
+    
+    // ...[code omitted for brevity]...
+
+}
+</deviceRegistration>
+
+<cursorSelectionScanner>
+function(from, to) {
+			var currentCursor = this.cursor();
+			
+			// ...[code omitted for brevity]...
+
+			return selection;
+		}
+</cursorSelectionScanner>
+
+<rollupBuildExecutor>
+function runRollupTask(entry, filename) {
+
+    
+    
+    
+    // ...[code omitted for brevity]...
+
+}
+</rollupBuildExecutor>

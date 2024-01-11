@@ -1,0 +1,294 @@
+```javascript
+<clearElementTextContent>
+function () {
+    var elem,
+        i = 0;
+
+    for (; ( elem = this[i] ) != null; i++) {
+        if (elem.nodeType === 1) {
+            
+            elem.textContent = '';
+        }
+    }
+    return this;
+}
+</clearElementTextContent>
+
+<testAlphabeticalOrder>
+function getAlphabetical() {
+      <errorHandling>
+      try {
+      </errorHandling>
+        storeBeingTested.getList(test.list, {}, {name: 1}, function (list, error) {
+          <errorCondition>
+          if (typeof error != 'undefined') {
+            callback(error);
+            return;
+          }
+          </errorCondition>
+          
+          <listNavigationAndAssertion>
+          test.shouldBeTrue(list.moveFirst(), 'moveFirst');
+          test.shouldBeTrue(!list.movePrevious(), 'movePrevious');
+          test.shouldBeTrue(list.get('name') == 'Al Pacino', 'AP');
+          test.shouldBeTrue(list.moveLast(), 'moveLast');
+          test.shouldBeTrue(!list.moveNext(), 'moveNext');
+          test.shouldBeTrue(list.get('name') == 'Tom Hanks', 'TH');
+          </listNavigationAndAssertion>
+
+          callback(true);
+        });
+      <errorHandling>
+      }
+      catch (err) {
+        callback(err);
+      }
+      </errorHandling>
+}
+</testAlphabeticalOrder>
+
+<logTestResults>
+function writeLogs(test, dirName) {
+  <buildLogString>
+  var logs =
+    test.fullTitle() +
+    '\n' +
+    test.file +
+    '\nStart: ' +
+    test.start +
+    '\nEnd: ' +
+    test.end +
+    '\nElapsed: ' +
+    test.duration +
+    '\nStatus: ' +
+    test.state;
+  if (test.state === 'fail') {
+    logs += '\nError: ' + test.err.stack;
+  }
+  </buildLogString>
+
+  <createDirectoryAndWriteLogs>
+  mkdirp.sync(testDir(test, dirName));
+  fs.writeFileSync(testURL(test, dirName), logs);
+  </createDirectoryAndWriteLogs>
+
+  test.url = testURL(test, dirName);
+}
+</logTestResults>
+
+<createStructuresWithCharacterSearch>
+function makeStructures(char) {
+    <createStructureInstance>
+    let structures = function (id) {
+        return new StructureImpl(char, id);
+    };
+    </createStructureInstance>
+    
+    <attachSearchFunctionToStructures>
+    structures.search = search_1.makeCharacterSearch(char.agent, "structure" , char.id, char.ssoToken);
+    </attachSearchFunctionToStructures>
+    
+    return structures;
+}
+</createStructuresWithCharacterSearch>
+
+<setHideTooltipTimeout>
+function () {
+
+    var me = this;
+
+    me.logger.log("Setting hide tooltip timeout", "time");
+
+    return setTimeout(function () {
+
+        <logAndHideTooltip>
+        me.logger.log("Hide tooltip", "time");
+        me.hide();
+        </logAndHideTooltip>
+
+    }, this.cfg.getProperty("autodismissdelay"));
+
+}
+</setHideTooltipTimeout>
+
+<retryGetUserInfoWithStorageUpdate>
+function getUserInfoRecursive(callback) {
+    <retryLogic>
+    getUserInfoRetryCount++;
+
+    if (getUserInfoRetryCount > getUserInfoRetry) {
+        getUserInfoTimeout && clearTimeout(getUserInfoTimeout);
+
+        getUserInfoRetryCount = 0;
+
+        fireEvent('error', {
+            code: 6101,
+            message: CHAT_ERRORS[6101],
+            error: null
+        });
+    }
+    </retryLogic>
+    else {
+        <resetTimeout>
+        getUserInfoTimeout && clearTimeout(getUserInfoTimeout);
+
+        getUserInfoTimeout = setTimeout(function() {
+            getUserInfoRecursive(callback);
+        }, getUserInfoRetryCount * 10000);
+        </resetTimeout>
+
+        <sendMessageAndHandleResponse>
+        return sendMessage({
+            chatMessageVOType: chatMessageVOTypes.USER_INFO,
+            typeCode: params.typeCode
+        }, {
+            onResult: function(result) {
+                <handleResult>
+                var returnData = {
+                    hasError: result.hasError,
+                    cache: false,
+                    errorMessage: result.errorMessage,
+                    errorCode: result.errorCode
+                };
+
+                if (!returnData.hasError) {
+                    getUserInfoTimeout && clearTimeout(getUserInfoTimeout);
+
+                    <formatDataAndUpdateStorage>
+                    var messageContent = result.result;
+                    var currentUser = formatDataToMakeUser(messageContent);
+
+                    
+                    if (canUseCache) {
+                        if (db) {
+                            db.users
+                                .where('id')
+                                .equals(currentUser.id)
+                                .toArray()
+                                .then(function(users) {
+                                    if (users.length > 0 && users[0].id > 0) {
+                                        db.users
+                                            .update(currentUser.id, {
+                                                cellphoneNumber: currentUser.cellphoneNumber,
+                                                email: currentUser.email,
+                                                image: currentUser.image,
+                                                name: currentUser.name
+                                            })
+                                            .catch(function(error) {
+                                                fireEvent('error', {
+                                                    code: error.code,
+                                                    message: error.message,
+                                                    error: error
+                                                });
+                                            });
+                                    }
+                                    else {
+                                        db.users.put(currentUser)
+                                            .catch(function(error) {
+                                                fireEvent('error', {
+                                                    code: error.code,
+                                                    message: error.message,
+                                                    error: error
+                                                });
+                                            });
+                                    }
+                                });
+                        }
+                        else {
+                            fireEvent('error', {
+                                code: 6601,
+                                message: CHAT_ERRORS[6601],
+                                error: null
+                            });
+                        }
+                    }
+                    </formatDataAndUpdateStorage>
+
+                    <resultAssignment>
+                    resultData = {
+                        user: currentUser
+                    };
+
+                    returnData.result = resultData;
+                    getUserInfoRetryCount = 0;
+
+                    callback && callback(returnData);
+                    </resultAssignment>
+
+                    
+                    callback = undefined;
+                }
+                </handleResult>
+            }
+        });
+        </sendMessageAndHandleResponse>
+    }
+}
+</retryGetUserInfoWithStorageUpdate>
+
+<findIndexOfNextEnvAppearance>
+function getIndexOfNextEnvAppearance(fromIndex, env, sequence){
+    <mapEnvAndFindIndex>
+    return sequence.map(function(el){
+      return el._env;
+    }).indexOf(env, fromIndex);
+    </mapEnvAndFindIndex>
+}
+</findIndexOfNextEnvAppearance>
+
+<parsePersonStringToObject>
+function parsePersonString(obj) {
+    <validateAndSplitPersonString>
+    if (typeof (obj) === "string") {
+        var parts = _personRegex.exec(obj);
+
+        
+        if (!parts) {
+            return {
+                name: obj
+            };
+        } else {
+            var result = {
+                name: parts[1]
+            };
+            if (parts[2]) {
+                result.email = parts[2];
+            }
+            if (parts[3]) {
+                result.url = parts[3];
+            }
+            return result;
+        }
+    } else {
+    </validateAndSplitPersonString>
+    
+    <returnObjectAsIs>
+    return obj;
+    </returnObjectAsIs>
+}
+</parsePersonStringToObject>
+
+<removeFriendshipBetweenMembers>
+function removeFriendship(m1, m2) {
+    <updateDBToRemoveFriend>
+    return this.update({ _id: m1 }, {
+      $pull: _defineProperty({}, pathName, { _id: m2 })
+    });
+    </updateDBToRemoveFriend>
+}
+</removeFriendshipBetweenMembers>
+
+<restoreSelection>
+function setRange(saved, sel) {
+    <checkSavedSelection>
+    if (!saved) { return; }
+    </checkSavedSelection>
+    
+    <restoreRangeToSelection>
+    sel = sel || getSelection();
+    sel.removeAllRanges();
+    sel.addRange(saved);
+    </restoreRangeToSelection>
+}
+</restoreSelection>
+```

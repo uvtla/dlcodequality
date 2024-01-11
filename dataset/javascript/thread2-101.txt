@@ -1,0 +1,227 @@
+```javascript
+<getPageClonePutOperations>
+function getPageClonePutOperations(pageData, locals) {
+  return bluebird.all(_.reduce(pageData, (promises, pageValue, pageKey) => {
+    if (typeof pageValue === 'string' && getComponentName(pageValue)) {
+      <getPutOperations>
+      promises.push(components.get(pageValue, locals)
+        .then(refData => composer.resolveComponentReferences(refData, locals, isInstanceReferenceObject))
+        .then(resolvedData => {
+          <renameReferences>
+          _.each(references.listDeepObjects(resolvedData, isInstanceReferenceObject), obj => {
+            obj._ref = renameReferenceUniquely(obj._ref);
+          });
+          </renameReferences>
+
+          <trackPageDataAssignment>
+          const ref = renameReferenceUniquely(pageValue);
+          pageData[pageKey] = ref;
+          </trackPageDataAssignment>
+
+          <getComponentPutOperations>
+          return dbOps.getPutOperations(components.cmptPut, ref, resolvedData, locals);
+          </getComponentPutOperations>
+        }));
+      </getPutOperations>
+    } else {
+      <recursivePageClonePutOperations>
+      promises = promises.concat(getPageClonePutOperations(pageValue, locals));
+      </recursivePageClonePutOperations>
+    }
+    return promises;
+  }, [])).then(_.flatten); 
+}
+</getPageClonePutOperations>
+
+<baseDifference>
+function baseDifference(array, values) {
+  <initializeVariables>
+  var index = -1,
+      indexOf = getIndexOf(),
+      length = array ? array.length : 0,
+      isLarge = length >= largeArraySize && indexOf === baseIndexOf,
+      result = [];
+  </initializeVariables>
+
+  <largeArrayOptimization>
+  if (isLarge) {
+    var cache = createCache(values);
+    if (cache) {
+      indexOf = cacheIndexOf;
+      values = cache;
+    } else {
+      isLarge = false;
+    }
+  }
+  </largeArrayOptimization>
+
+  <filterArray>
+  while (++index < length) {
+    var value = array[index];
+    if (indexOf(values, value) < 0) {
+      result.push(value);
+    }
+  }
+  </filterArray>
+
+  <releaseLargeArrayCache>
+  if (isLarge) {
+    releaseObject(values);
+  }
+  </releaseLargeArrayCache>
+  return result;
+}
+</baseDifference>
+
+<lockUnlockedInputs>
+function lockUnlockedInputs(container, disable) {
+  var j, i, inputs, nInputs;
+  <defaultParameterSetup>
+  if ('undefined' === typeof disable) disable = true;
+  </defaultParameterSetup>
+
+  <toggleInputLocks>
+  for (j = -1; ++j < len; ) {
+      inputs = container.getElementsByTagName(inputTags[j]);
+      nInputs = inputs.length;
+      for (i = -1 ; ++i < nInputs ; ) {
+          if (disable) {
+              if (!inputs[i].disabled) {
+                  inputs[i].disabled = true;
+                  W.waitScreen.lockedInputs.push(inputs[i]);
+              }
+          }
+          else {
+              if (inputs[i].disabled) {
+                  inputs[i].disabled = false;
+              }
+          }
+      }
+  }
+  </toggleInputLocks>
+
+  <resetLockedInputs>
+  if (!disable) W.waitScreen.lockedInputs = [];
+  </resetLockedInputs>
+}
+</lockUnlockedInputs>
+
+<removeEventListeners>
+function () {
+  eventUtil.removeListener(Aria.$window.document.body, "mousedown", {
+    fn : this._onMouseDown,
+    scope : this
+  });
+  eventUtil.removeListener(Aria.$window.document.body, "touchstart", {
+    fn : this._onMouseDown,
+    scope : this
+  });
+  disconnectMouseEvents(this);
+}
+</removeEventListeners>
+
+<zeroFillArray>
+function zero_fill_array(n) {
+  var o = new Array(n);
+  for(var i = 0; i < n; ++i) o[i] = 0;
+  return o;
+}
+</zeroFillArray>
+
+<cook>
+function cook (trv) {
+  <replaceEscapeSequences>
+  return trv.replace(
+    ESCAPE_SEQUENCE,
+    (escSeq) => {
+      const chr = escSeq.charAt(1)
+      const repl = SV_TABLE[chr]
+      if (repl === undefined) { 
+        return chr
+      }
+      if (typeof repl === 'function') {
+        return repl(escSeq)
+      }
+      return repl
+    })
+  </replaceEscapeSequences>
+}
+</cook>
+
+<maxValueNode>
+function maxValueNode(root) {
+  <traverseRightTree>
+  var current = root;
+  while (current.right) {
+    current = current.right;
+  }
+  </traverseRightTree>
+  return current;
+}
+</maxValueNode>
+
+<decryptData>
+function(data) {
+  <validateDataFormat>
+  if (!(data && 'function' === typeof data.isBase64 && data.isBase64())) {
+    throw new CError('wrong data format to decrypt').log();
+  }
+  </validateDataFormat>
+  <parseDecryptedData>
+  return JSON.parse(this.encoder.decryptAes(data, this.getSecret()));
+  </parseDecryptedData>
+}
+</decryptData>
+
+<unmount>
+function unmount(asSub) {
+  var vm = this;
+  
+  var node = vm.node;
+  var parEl = node.el.parentNode;
+
+  <removeChildElement>
+  removeChild(parEl, node.el);
+  </removeChildElement>
+
+  <nullifyNodeElement>
+  node.el = null;
+  </nullifyNodeElement>
+
+  <triggerDidHooks>
+  if (!asSub) { drainDidHooks(vm, true); }
+  </triggerDidHooks>
+}
+</unmount>
+
+<cleanup>
+function cleanup() {
+  <awaitCloseLiveBrowser>
+  var closeDeferred = (brackets.platform === "mac") ? NativeApp.closeLiveBrowser() : $.Deferred().resolve();
+  closeDeferred.done(function () {
+    <setStatusInactive>
+    _setStatus(STATUS_INACTIVE, reason || "explicit_close");
+    </setStatusInactive>
+
+    <removeLiveDevServers>
+    _regServers.forEach(function (server) {
+        LiveDevServerManager.removeServer(server);
+    });
+    _regServers = [];
+    </removeLiveDevServers>
+
+    <resolveCloseDeferred>
+    _closeDeferred.resolve();
+    </resolveCloseDeferred>
+  }).fail(function (err) {
+    <errorHandling>
+    if (err) {
+        reason +=  " (" + err + ")";
+    }
+    _setStatus(STATUS_INACTIVE, reason || "explicit_close");
+    _closeDeferred.resolve();
+    </errorHandling>
+  });
+}
+</cleanup>
+```

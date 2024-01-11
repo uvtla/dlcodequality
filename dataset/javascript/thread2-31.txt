@@ -1,0 +1,268 @@
+<parse_compobj>
+function parse_compobj(obj) {
+    var v = {};
+    var o = obj.content;
+
+    <parse_id>
+    var l = 28, m;
+    m = __lpstr(o, l);
+    l += 4 + __readUInt32LE(o, l);
+    v.UserType = m;
+    </parse_id>
+
+    <parse_clipboard>
+    m = __readUInt32LE(o, l);
+    l += 4;
+    switch (m) {
+        case 0x00000000: break;
+        case 0xffffffff: case 0xfffffffe: l += 4; break;
+        default:
+            if (m > 0x190) throw new Error("Unsupported Clipboard: " + m.toString(16));
+            l += m;
+    }
+    </parse_clipboard>
+
+    <parse_reserved>
+    m = __lpstr(o, l);
+    l += m.length === 0 ? 0 : 5 + m.length;
+    v.Reserved1 = m;
+    </parse_reserved>
+
+    <check_extension>
+    if ((m = __readUInt32LE(o, l)) !== 0x71b2e9f4) return v;
+    throw new Error("Unsupported Unicode Extension");
+    </check_extension>
+}
+</parse_compobj>
+
+<Spotlight>
+function Spotlight() {
+    <spotlightRotations_declaration>
+    var spotlightRotations = [ /* ... Array Content ... */ ];
+    </spotlightRotations_declaration>
+
+    <minigameAlias_declaration>
+    var minigameAlias = { /* ... Object Content ... */ };
+    </minigameAlias_declaration>
+
+    <class_fields>
+    
+    this.PEST_CONTROL = 'pest control';
+    /* ... More Fields ... */
+    this.TROUBLE_BREWING = 'trouble brewing';
+    </class_fields>
+
+    <readRotations_method>
+    var readRotations = function () {
+        /* ... Method Implementation ... */
+    }
+    </readRotations_method>
+
+    <getRotation_method>
+    this.getRotation = function (onDate) {
+        /* ... Method Implementation ... */
+    }
+    </getRotation_method>
+
+    <getMinigameNext_method>
+    this.getMinigameNext = function (minigame) {
+        /* ... Method Implementation ... */
+    }
+    </getMinigameNext_method>
+}
+</Spotlight>
+
+<color_conversion>
+function (color) {
+    <validate_and_convert>
+    var type = this.type(color, 'color.toHex() : "' + color + '" ' + MSG_NOT_COLOR);
+    switch (type) {
+        /* ... Case Setup for Conversion ... */
+    }
+    </validate_and_convert>
+}
+</color_conversion>
+
+<Logger>
+function Logger(sid, flag) {
+  
+  this.sid = sid;
+  
+  <create_log_stream>
+  this.out = fs.createWriteStream(
+    __dirname + '/logs/' + sid.replace(/:/g, '-') + '.log', { flags: flag || 'w' });
+  </create_log_stream>
+  
+  this.buf = {};
+  
+  this.last = {};
+}
+</Logger>
+
+<runSeleniumInBackground>
+function runSeleniumInBackground(done) {
+    <announce_start>
+    console.log([moment().format('HH:mm:ss:SSS')] + ' kne: starting selenium server in background...');
+    </announce_start>
+
+    <start_selenium_process>
+    selenium_proc = child_process.spawn('java',
+        /* ... Arguments ... */,
+        {
+            stdio: ['ignore', 'pipe', 'pipe'],
+        });
+    var running = false;
+    </start_selenium_process>
+
+    <handle_selenium_output>
+    selenium_proc.stderr.on('data', function (buffer) {
+        /* ... Error Handling ... */
+    });
+
+    selenium_proc.on('close', function (code) {
+        /* ... Close Event Handling ... */
+    });
+    </handle_selenium_output>
+}
+</runSeleniumInBackground>
+
+<UrlNode>
+function UrlNode(data) {
+    <method_definitions>
+    this.append = function (next) { /* ... Implementation ... */ };
+    this.getData = function () { /* ... Implementation ... */ };
+    /* ... More Methods ... */
+    this.getParams = function () { /* ... Implementation ... */ };
+    </method_definitions>
+
+    <initialize_data_and_params>
+    var queryParamSplit = data.split("?");
+    this.params = null;
+    this.data = null;
+    this.next = null;
+    if (queryParamSplit != null && queryParamSplit.length > 1) {
+        this.setData(queryParamSplit[0]);
+        this.setParams(queryParamSplit[1]);
+    } else {
+        this.setData(data);
+    }
+    </initialize_data_and_params>
+}
+</UrlNode>
+
+<update_ngModel>
+function (model) {
+    <check_ngModel>
+    if (!this.ngModel) {
+        return;
+    }
+    </check_ngModel>
+
+    <update_model>
+    var index = this.selected.indexOf(model);
+    if (index !== -1) {
+        this.selected.splice(index, 1);
+        if (this.multiple) {
+            this.ngModel.$setViewValue(this.selected);
+        } else {
+            this.ngModel.$setViewValue(undefined);
+        }
+    }
+    </update_model>
+}
+</update_ngModel>
+
+<parseInlineKatex>
+function parseInlineKatex(state, silent) {
+    <setup>
+    var dollar = 0x24;
+    /* ... Setup Variables ... */
+    </setup>
+
+    <check_initial_condition>
+    if (state.src.charCodeAt(pos) !== dollar) { return false; }
+    ++pos;
+    /* ... Additional Checks ... */
+    </check_initial_condition>
+
+    <process_markdown_latex>
+    while ((matchStart = state.src.indexOf('$', matchEnd)) !== -1) {
+        /* ... Inline Parsing Logic ... */
+    }
+    </process_markdown_latex>
+
+    <handle_failure>
+    if (!silent) state.pending += marker;
+    state.pos += marker.length;
+    </handle_failure>
+
+    return true;
+}
+</parseInlineKatex>
+
+<callApi>
+function callApi(method, parameters, callback) {
+
+    <parameter_validation>
+    if (typeof parameters === 'undefined') {
+        throw new Error('undefined is not a valid parameters object.');
+    }
+
+    if (typeof parameters !== 'object') {
+        throw new Error('valid parameters object required.');
+    }
+    </parameter_validation>
+
+    <check_api_keys>
+    var opts = this.options;
+    var noCallback = !callback || typeof callback !== 'function';
+    let noApiKey = typeof opts.API_KEY !== 'string' || opts.API_KEY.length === 0 || typeof opts.API_SECRET !== 'string' || opts.API_SECRET.length === 0;
+    if (noApiKey) {
+        if (noCallback) {
+            throw new Error('API key and API secret required.');
+        }
+        return callback(new Error("API key and API secret required."));
+    }
+    </check_api_keys>
+
+    <set_method>
+    opts.method = method;
+    </set_method>
+
+    <construct_url>
+    let url = makeApiUrl(opts, parameters);
+    </construct_url>
+
+    <setup_request_options>
+    let reqOptions = {
+        uri: url,
+        json: true,
+        timeout: process.env.CF_TIMEOUT || opts.DEFAULT_TIMEOUT
+    };
+    </setup_request_options>
+
+    <execute_request>
+    if (noCallback) {
+        return new Request(reqOptions);
+    }
+
+    return callRequest(reqOptions, handleCallback.bind(null, callback));
+    </execute_request>
+}
+</callApi>
+
+<wheel_event_handler>
+function () {
+    <shouldPreventDefault>
+    var shouldPreventDefault = function (deltaX, deltaY) {
+        /* ... Implementation ... */
+    };
+    </shouldPreventDefault>
+
+    <attach_mousewheel_event>
+    $this.mousewheel(function (e, delta, deltaX, deltaY) {
+        /* ... Event Handling Logic ... */
+    });
+    </attach_mousewheel_event>
+}
+</wheel_event_handler>

@@ -1,0 +1,323 @@
+Let's annotate these functions for SRP compliance:
+
+1. Function: buttonEmphasize
+
+```javascript
+<buttonEmphasize>
+function buttonEmphasize(e) {
+  <updateButtonStyles>
+  for (var n = 0; n < buttons.length; n++) {
+    if (vars[buttons[n].name] && buttons[n].emphasis && buttons[n].tag != '')
+      detectElement(buttons[n].tag) ? toolbar.find('.' + vars.css + '_tool_' + buttons[n].cls).addClass(emphasize) : $('.' + vars.css + '_tool_' + buttons[n].cls).removeClass(emphasize);
+  }
+  </updateButtonStyles>
+
+  <checkTextFormats>
+  if (vars.format && $.isArray(vars.formats)) {
+    var isFoundFormat = false;
+
+    for (var f = 0; f < vars.formats.length; f++) {
+      var thisFormat = [];
+      thisFormat[0] = vars.formats[f][0];
+
+      if (vars.formats[f][0].length > 0 && detectElement(thisFormat)) {
+        formatLabelView(vars.formats[f][1]);
+
+        isFoundFormat = true;
+        break;
+      }
+    }
+
+    if (!isFoundFormat)
+      formatLabelView(vars.formats[0][1]);
+  }
+  </checkTextFormats>
+
+  <switchStyles>
+  styleFieldSwitch("", false);
+  formatFieldSwitch(false);
+  </switchStyles>
+}
+</buttonEmphasize>
+```
+- The function has multiple responsibilities, one for updating button styles, checking text formats, and switching styles. Each has been separated into distinct responsibilities.
+
+2. Function: parseObj
+
+```javascript
+<parseObj>
+function parseObj(opts) {
+  var obj = new Obj();
+
+  <assignProperties>
+  Object.keys(opts).forEach(function (key) {
+    obj[key] = opts[key];
+  });
+  </assignProperties>
+
+  return obj;
+}
+</parseObj>
+```
+- Though we loop through properties, it is creating an object with properties, which is a single cohesive responsibility.
+
+3. The third function provided has no name, still:
+
+```javascript
+<removeGroup>
+function (group, containersAsWell) {
+  var index = this.groups.indexOf(group), i;
+
+  <removeFromGroups>
+  if (index != -1) {
+    this.groups.splice(index, 1);
+  }
+  </removeFromGroups>
+
+  <handleAssociatedContainers>
+  if (containersAsWell) {
+    if (YAHOO.lang.isValue(group.groupContainer)) {
+      this.removeContainer(group.groupContainer);
+    } else {
+      for (i in group.containers) {
+        if (group.containers.hasOwnProperty(i)) {
+          var elem = group.containers[i].container;
+          this.removeContainer(elem);
+        }
+      }
+
+      for (i in group.groups) {
+        if (group.containers.hasOwnProperty(i)) {
+          var g = group.groups[i].group;
+          this.removeGroup(g);
+        }
+      }
+    }
+  }
+  </handleAssociatedContainers>
+}
+</removeGroup>
+```
+- The function has mixed responsibilities, one for removing the group and another for handling associated containers. These responsibilities are separated.
+
+4. Function: knRestifyHandler
+
+```javascript
+<knRestifyHandler>
+function knRestifyHandler(args) {
+  var svc = new knServiceContext(args);
+
+  return (function (request, response, next) {
+    <handleRequest>
+    knHandleRequest(svc, request, response, next);
+    </handleRequest>
+  });
+}
+</knRestifyHandler>
+```
+- It creates a new service context and returns a function to handle requests. This is a single responsibility for setting up a request handler.
+
+5. Function: (unnamed)
+
+```javascript
+<stopObserver>
+function () {
+  var self = this;
+  if (self._stopped)
+    return;
+  self._stopped = true;
+
+  <stopHandles>
+  _.each(self._stopHandles, function (handle) {
+    handle.stop();
+  });
+  </stopHandles>
+
+
+  <clearProperties>
+  _.each(self._writesToCommitWhenWeReachSteady, function (w) {
+    w.committed();
+  });
+  self._writesToCommitWhenWeReachSteady = null;
+
+  
+  self._published = null;
+  self._unpublishedBuffer = null;
+  self._needToFetch = null;
+  self._currentlyFetching = null;
+  self._oplogEntryHandle = null;
+  self._listenersHandle = null;
+
+  Package.facts && Package.facts.Facts.incrementServerFact(
+    "mongo-livedata", "observe-drivers-oplog", -1);
+  </clearProperties>
+}
+</stopObserver>
+```
+- The function stops an observer, clears related properties, and records a fact. The clearProperties block could be considered a violation, but it's all part of the stopping process, so we can see it as a single responsibility.
+
+6. Function: gulpInjectStringifiedHtml
+
+```javascript
+<gulpInjectStringifiedHtml>
+function gulpInjectStringifiedHtml(params) {
+  return through.obj(function (file, enc, cb) {
+
+    if (file.isNull()) {
+      return cb(null, file);
+    }
+
+    <handleFileStreams>
+    if (file.isStream()) {
+      file.contents = file.contents.pipe(new bufferstreams(function (err, buf, cb) {
+        if (err) throw err;
+        cb(null, doInjectHtml(buf.toString(), file, params));
+      }));
+      cb(null, file);
+    }
+    </handleFileStreams>
+
+    <handleFileBuffers>
+    if (file.isBuffer()) {
+      file.contents = doInjectHtml(file.contents.toString(), file, params);
+      cb(null, file);
+    }
+    </handleFileBuffers>
+
+  });
+}
+</gulpInjectStringifiedHtml>
+```
+- The function injects HTML into files with streams and buffers. Each operation serves the same purpose and therefore is compliant with SRP.
+
+7. Function: UnaryFilter
+
+```javascript
+<UnaryFilter>
+function UnaryFilter(properties) {
+  if (properties)
+    <assignProperties>
+    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+      if (properties[keys[i]] != null)
+        this[keys[i]] = properties[keys[i]];
+    </assignProperties>
+}
+</UnaryFilter>
+```
+- This is simply assigning properties, which is a single responsibility.
+
+8. Function: (unnamed for overlays)
+
+```javascript
+<addOverlay>
+function (element, location, placement, onDraw) {
+  var options;
+  <prepareOptions>
+  if ($.isPlainObject(element)) {
+    options = element;
+  } else {
+    options = {
+      element: element,
+      location: location,
+      placement: placement,
+      onDraw: onDraw
+    };
+  }
+  </prepareOptions>
+
+  element = $.getElement(options.element);
+
+  <avoidDuplicateOverlays>
+  if (getOverlayIndex(this.currentOverlays, element) >= 0) {
+    
+    return this;
+  }
+  </avoidDuplicateOverlays>
+
+  <createAndDrawOverlay>
+  var overlay = getOverlayObject(this, options);
+  this.currentOverlays.push(overlay);
+  overlay.drawHTML(this.overlaysContainer, this.viewport);
+  </createAndDrawOverlay>
+
+  <triggerAddOverlayEvent>
+  this.raiseEvent('add-overlay', {
+    element: element,
+    location: options.location,
+    placement: options.placement
+  });
+  </triggerAddOverlayEvent>
+  return this;
+}
+</addOverlay>
+```
+- The function is responsible for adding overlays and does various tasks, but they are all part of adding an overlay, so it is SRP compliant.
+
+9. Function: (unnamed for combining results)
+
+```javascript
+<combineResults>
+function () {
+  var level = this.$level === 0 ? 0 : this.$level - 1;
+
+  <storeArgumentsAsResults>
+  if (arguments.length > 0) {
+    this.$results[level] = [];
+    for (var i = 0; i < arguments.length; i++) {
+      this.$results[level][i] = arguments[i];
+    }
+  } else {
+    var $this = this,
+        index = this.$busy++;
+
+    return function () {
+      if ($this.$results[level] === null || $this.$results[level] === undefined) {
+        $this.$results[level] = [];
+      }
+
+      <storeCallbackResults>
+      if ($this.$busy > 0) {
+        var i = 0;
+
+        if (arguments.length > 0) {
+          $this.$results[level][index] = [];
+          for (i = 0; i < arguments.length; i++) {
+            $this.$results[level][index][i] = arguments[i];
+          }
+        }
+      </storeCallbackResults>
+
+      <scheduleNextTask>
+      if (--$this.$busy === 0) {
+        if ($this.$results[level].length > 0) {
+          var args = $this.$results[level],
+              res = [];
+
+          for (i = 0; i < args.length; i++) {
+            Array.prototype.push.apply(res, args[i]);
+          }
+          $this.$results[level] = res;
+        }
+
+        $this.$schedule();
+      }
+      </scheduleNextTask>
+    };
+  }
+}
+</combineResults>
+```
+- The function serves to combine results of asynchronous operations; despite different operations within, the overall purpose is coherent and serves one role.
+
+10. Function: isItemTag
+
+```javascript
+<isItemTag>
+function isItemTag(tagName, prefix, local, feedType) {
+  return tagName === 'item' || tagName === 'entry' ||
+    (local === 'item' && (prefix === '' || feedType === 'rdf')) ||
+    (local === 'entry' && (prefix === '' || feedType === 'atom'));
+}
+</isItemTag>
+```
+- It's a single responsibility function to determine if a given tag name corresponds to an item or an entry tag. It's SRP compliant.

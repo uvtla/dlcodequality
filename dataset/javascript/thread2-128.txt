@@ -1,0 +1,252 @@
+```javascript
+<checkChildNodes>
+function(node) {
+    var hasNodes = false;
+
+    if (node.hasChildNodes()) {
+        for (var i = 0, len = node.childNodes.length; i < len; i++) {
+            if (node.childNodes[i].nodeType === 1) {
+                hasNodes = true;
+                break;
+            }
+        }
+    }
+
+    return hasNodes;
+}
+</checkChildNodes>
+
+<updateGestureState>
+function (gestureState, touchHistory) {
+    gestureState.numberActiveTouches = touchHistory.numberActiveTouches;
+    gestureState.moveX = currentCentroidXOfTouchesChangedAfter(touchHistory, gestureState._accountsForMovesUpTo);
+    gestureState.moveY = currentCentroidYOfTouchesChangedAfter(touchHistory, gestureState._accountsForMovesUpTo);
+    const movedAfter = gestureState._accountsForMovesUpTo;
+    const prevX = previousCentroidXOfTouchesChangedAfter(touchHistory, movedAfter);
+    const x = currentCentroidXOfTouchesChangedAfter(touchHistory, movedAfter);
+    const prevY = previousCentroidYOfTouchesChangedAfter(touchHistory, movedAfter);
+    const y = currentCentroidYOfTouchesChangedAfter(touchHistory, movedAfter);
+    const nextDX = gestureState.dx + (x - prevX);
+    const nextDY = gestureState.dy + (y - prevY);
+    
+    const dt = touchHistory.mostRecentTimeStamp - gestureState._accountsForMovesUpTo;
+    gestureState.vx = (nextDX - gestureState.dx) / dt;
+    gestureState.vy = (nextDY - gestureState.dy) / dt;
+
+    gestureState.dx = nextDX;
+    gestureState.dy = nextDY;
+    gestureState._accountsForMovesUpTo = touchHistory.mostRecentTimeStamp;
+}
+</updateGestureState>
+
+<getCookieValue>
+function() {
+    <checkCookies>
+    if (document.cookie.length > 0) {
+        var cookies = document.cookie.split('; ');
+        
+        <defineTrimIfExists>
+        if (typeof String.prototype.trim !== 'function') {
+            String.prototype.trim = function() {
+                return this.replace(/^\s+|\s+$/g, ''); 
+            }
+        }
+        </defineTrimIfExists>
+
+        <parseCookies>
+        for (var i in cookies) {
+            var cookieParts = cookies[i].split('=');
+            var cookieName = decodeURIComponent(cookieParts.shift()).trim();
+            var cookieContent = cookieParts.join('=');
+
+            <matchCookieToName>
+            if (obj.name === cookieName) {
+                <parseCookieValue>
+                if (obj.json && cookieContent.length > 0) {
+                    cookieContent = JSON.parse(cookieContent);
+                } else if (! obj.raw) {
+                    cookieContent = decodeURIComponent(cookieContent);
+                }
+                </parseCookieValue>
+
+                return cookieContent;
+            }
+            </matchCookieToName>
+        }
+        </parseCookies>
+        
+        return undefined;
+    }
+    </checkCookies>
+}
+</getCookieValue>
+
+<browserifySwap>
+function browserifySwap(file) {
+    var env = process.env.BROWSERIFYSWAP_ENV
+    , data = ''
+    , swapFile;
+    
+    <checkCachedConfig>
+    if (!env || cachedConfig === -1) return through();
+    </checkCachedConfig>
+
+    <useCachedConfig>
+    if (cachedConfig) {
+        swapFile = swap(cachedConfig, env, file);
+        
+        <pipeThroughSwapFile>
+        return swapFile ? through(write, end) : through();
+        </pipeThroughSwapFile>
+    } else {
+        return through(write, end)
+    }
+    </useCachedConfig>
+
+    function write(d, enc, cb) { data += d; cb(); }
+    function end(cb) {
+        
+      var self = this;
+
+      <handleSwapFile>
+      if (swapFile) {
+          swapFile = swapFile.replace(/\\/g, '/');
+          debug.inspect({ file: file, swapFile: swapFile });
+          self.push(requireSwap(swapFile));
+          return cb();
+      }
+      </handleSwapFile>
+
+      <resolveSwapsAndHandle>
+      resolveSwaps(root, function (err, config) {
+          if (config && config.packages) viralifyDeps(config.packages);
+          var swaps = config && config.swaps;
+
+          
+          cachedConfig = swaps || -1;
+
+          if (err) return cb(err);
+
+          debug.inspect({ swaps: swaps, env: env });
+          swapFile = swap(swaps, env, file);
+          debug.inspect({ file: file, swapFile: swapFile });
+
+          var src = swapFile ? requireSwap(swapFile.replace(/\\/g, '/')) : data;
+          self.push(src);
+          cb();
+      });
+      </resolveSwapsAndHandle>
+    }
+}
+</browserifySwap>
+
+<basicGithubId>
+function basicGithubId (text) {
+    return text
+        .toLowerCase()
+        .replace(/\s+/g, '-')         
+        .replace(/%25|%/ig, '')       
+        .replace(RE_ENTITIES, '')     
+        .replace(RE_SPECIALS_DOT, '') 
+        .replace(RE_CJK, '')          
+}
+</basicGithubId>
+
+<handleSelectionByMouse>
+function(oArgs) {
+    var sMode = this.get("selectionMode");
+    <handleSelectionMode>
+    if(sMode == "cellblock") {
+        this._handleCellBlockSelectionByMouse(oArgs);
+    }
+    else if(sMode == "cellrange") {
+        this._handleCellRangeSelectionByMouse(oArgs);
+    }
+    else {
+        this._handleSingleCellSelectionByMouse(oArgs);
+    }
+    </handleSelectionMode>
+}
+</handleSelectionByMouse>
+
+<getFirst>
+function (str) {
+    <validateString>
+    if (typeof(str) !== 'string') {
+        throw new Error(-1, "函数getFisrt需要字符串类型参数!");
+    }
+    </validateString>
+    var chars = []; 
+    for (var i = 0, len = str.length; i < len; i++) {
+        <processCharacter>
+        var ch = str.charAt(i);
+        chars.push(this._getChar(ch));
+        </processCharacter>
+    }
+    
+    return this._getResult(chars);
+}
+</getFirst>
+
+<defaultComp>
+function defaultComp(a,b) {
+    var as = '' + a,
+        bs = '' + b;
+
+    if (as < bs) {
+        return -1;
+    } else if (as > bs) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+</defaultComp>
+
+<convertToKeyValueArray>
+function(options) {
+    var newArray = [],
+        keyIdentifier = (options && options.key) || "key",
+        valueIdentifier = (options && options.value) || "value";
+    <convertEachKeyValue>
+    this.itsa_each(function(value, key) {
+        var obj = {};
+        obj[keyIdentifier] = key;
+        obj[valueIdentifier] = value;
+        newArray[newArray.length] = obj;
+    });
+    </convertEachKeyValue>
+    return newArray;
+}
+</convertToKeyValueArray>
+
+<ensureEvaluated>
+function ensureEvaluated(moduleName, entry, seen, loader) {
+    
+    <checkEntry>
+    if (!entry || entry.evaluated || !entry.declarative)
+        return;
+    </checkEntry>
+
+    seen.push(moduleName);
+
+    <processDependencies>
+    for (var i = 0, l = entry.normalizedDeps.length; i < l; i++) {
+        var depName = entry.normalizedDeps[i];
+        if (indexOf.call(seen, depName) == -1) {
+            if (!loader.defined[depName])
+                loader.get(depName);
+            else
+                ensureEvaluated(depName, loader.defined[depName], seen, loader);
+        }
+    }
+    </processDependencies>
+
+    if (entry.evaluated)
+        return;
+
+    entry.evaluated = true;
+    entry.module.execute.call(__global);
+}
+</ensureEvaluated>
+```

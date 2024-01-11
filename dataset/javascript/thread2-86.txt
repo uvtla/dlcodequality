@@ -1,0 +1,374 @@
+Below are the annotated JavaScript functions based on SRP (Single Responsibility Principle) compliance:
+
+1. Compliant with SRP:
+<calculateCoordinate>
+function (d, chart, series) {
+    var returnCx = 0;
+    if (series.x.measure !== null && series.x.measure !== undefined) {
+        returnCx = series.x._scale(d.cx);
+    } else if (series.x._hasCategories() && series.x.categoryFields.length >= 2) {
+        returnCx = series.x._scale(d.cx) + dimple._helpers.xGap(chart, series) + ((d.xOffset + 0.5) * (((chart._widthPixels() / series.x._max) - 2 * dimple._helpers.xGap(chart, series)) * d.width));
+    } else {
+        returnCx = series.x._scale(d.cx) + ((chart._widthPixels() / series.x._max) / 2);
+    }
+    return returnCx;
+}
+</calculateCoordinate>
+
+2. Violation of SRP:
+<handleButtonClicks>
+function () {
+    if (initial) {
+        $('<div id="LikedAvatars" class="AvatarsCollection"/>').appendTo($('body'));
+        $('<div id="DislikedAvatars" class="AvatarsCollection"/>').appendTo($('body'));
+    }
+    
+    $.each(this.footer.find('button'), function (index, el) {
+        <attachEventHandlers>
+        $(el).on('click', function () {
+            <updateState>
+            DemoAvatars.clicked = true;
+            DemoAvatars.AvatarsTooltipLike && DemoAvatars.AvatarsTooltipLike.close();
+            DemoAvatars.AvatarsTooltipDislike && DemoAvatars.AvatarsTooltipDislike.close();
+            this.AvatarRemoved = true;
+            </updateState>
+            
+            <determineAction>
+            var liked = $(el).hasClass('button-heart');
+            </determineAction>
+            
+            <performAnimation>
+            this.animate('slide' + (liked ? 'Right' : 'Left'), {
+                complete: function () {
+                    this.wrapper.css('display', 'none');
+                    var collectionContainer = liked ? $('#LikedAvatars') : $('#DislikedAvatars');
+                    if (collectionContainer.find('div[data-avatar-tooltip]').length && ((collectionContainer.find('div[data-avatar-tooltip]').length + 1) * $(collectionContainer.find('div[data-avatar-tooltip]')[0]).outerWidth(true) > collectionContainer.outerWidth())) {
+                        $(collectionContainer.find('div[data-avatar-tooltip]')[0]).remove();
+                    }
+                    this.animate('popIn', {
+                        element: $('<div data-avatar-tooltip="You ' + (liked ? 'liked' : 'disliked') + ' ' + DemoAvatars.Avatars[this.AvatarIndex] + '"/>').append($('<div/>').html('<img src="https:..."/>'))
+                    });
+                    DemoAvatars.AvatarsTooltip && DemoAvatars.AvatarsTooltip.attach();
+                }.bind(this)
+            });
+            </performAnimation>
+            <generateTooltip>
+            generateAvatarJBox();
+            </generateTooltip>
+        }.bind(this));
+        </attachEventHandlers>
+    }.bind(this));
+}
+</handleButtonClicks>
+
+3. Compliant with SRP:
+<initializePkgJsonEmbark>
+function PkgJsonEmbark(filepath, kind) {
+  PkgJson.call(this, filepath);
+  this.kind = kind || 'invoked';
+  this.nodeRange = undefined;
+  this.pkg = undefined;
+  this.version = undefined;
+}
+</initializePkgJsonEmbark>
+
+4. Violation of SRP:
+<resolveTreeStructure>
+function resolve(tree, options) {
+    var settings = _.defaults(options, {
+        childNode: 'children',
+        clone: false,
+        attempts: 5,
+        splice: true,
+        isPromise: _.isFunction,
+        isSplice: function isSplice(node, path, tree) {
+          var parentNodePath = path.slice(0, -1);
+          var parentNode = parentNodePath.length ? _.get(tree, parentNodePath) : tree; 
+
+          return _.isArray(node) && _.isArray(parentNode); 
+        },
+        wrapper: function wrapper(node) {
+          return Promise.resolve(node());
+        }
+    });
+
+    var base = settings.clone ? _.cloneDeep(tree) : tree;
+    var dirty = true; 
+    var splices = [];
+
+    <resolvePromises>
+    var resolver = function resolver(root, path) {
+        var promiseQueue = [];
+        _.forEach(root, function (child, childIndex) {
+          if (_.isArray(child)) {
+            promiseQueue.push(resolver(child, path.concat([childIndex])));
+          } else if (_.isPlainObject(child)) {
+            promiseQueue.push(resolver(child, path.concat([childIndex])));
+          } else if (_.isFunction(child)) {
+            var nodePath = path.concat([childIndex]);
+            promiseQueue.push(settings.wrapper(child, nodePath, base).then(function (res) {
+                if (!dirty && _.isObject(res) && treeTools.hasSome(res, function (v) {
+                  return settings.isPromise(v);
+                })) {
+                  dirty = true; 
+                } 
+                _.set(base, nodePath, res); 
+                if (settings.splice && settings.isSplice(res, nodePath, base)) {
+                  splices.push(nodePath);
+                }
+            }));
+          }
+        });
+        return Promise.all(promiseQueue);
+    };
+    </resolvePromises>
+
+    return Promise.resolve().then(function () {
+        return new Promise(function (resolve, reject) {
+          <attemptResolving>
+          var attemptNext = function attemptNext() {
+            if (--settings.attempts > 0 && dirty) {
+              dirty = false; 
+              resolver(base, []).then(attemptNext);
+            } else {
+              resolve();
+            }
+          };
+          attemptNext();
+          </attemptResolving>
+        });
+    }).then(function () {
+        <performSplicing>
+        if (!settings.splice) return;
+        splices.reverse().forEach(function (path) {
+          var spliceParentPath = path.slice(0, -1);
+          var spliceParent = spliceParentPath.length ? _.get(base, spliceParentPath) : base;
+          var spliceOffset = path[path.length - 1];
+          spliceParent.splice.apply(spliceParent, [spliceOffset, 1].concat(_toConsumableArray(_.get(base, path))));
+        });
+        </performSplicing>
+        return null;
+    }).then(function () {
+        return base;
+    });
+}
+</resolveTreeStructure>
+
+5. Compliant with SRP:
+<transformJSXSyntax>
+function transformJSX(ast, pragma) {
+    assert(t.isFile(ast) || t.isProgram(ast), '<ast> must be a babel ast for transformJSX(ast: AST, pragma: String): AST');
+    assert(typeof pragma === 'string' && pragma, '<pragma> must be a non-empty string for transformJSX(ast: AST, pragma: String): AST');
+    
+    const call = buildCall(pragma);
+    
+    traverse(ast, {
+        JSXElement: {
+            exit(path) {
+                const openingElement = path.get('openingElement');
+                const expression = buildElementCall(call, openingElement);
+                expression.arguments = [...expression.arguments, ...path.node.children];
+                path.replaceWith(t.inherits(expression, path.node));
+            }
+        }
+    });
+    return ast;
+}
+</transformJSXSyntax>
+
+6. Compliant with SRP:
+<getAPIDescriptionElements>
+function getAPIDescriptionElems(){
+    var resp = $('.documentation__routes');
+    var namespaces = _.map(resp.children(), function(sectionChild){
+        var namespace = {
+            name: sectionChild.attribs.id.replace(/\s/, ''),
+        };
+        var methodDescWrapElems = _.map(sectionChild.children, function(child, i){
+            if(child.attribs && child.attribs.class && utils.hasClass('toc-el', child.attribs.class)){
+                return child;     
+            }
+        });
+        namespace.el = _.compact(methodDescWrapElems);
+        return namespace;
+    });
+    return namespaces;
+}
+</getAPIDescriptionElements>
+
+7. Violation of SRP:
+<RopeJointInitialization>
+function RopeJoint(def, bodyA, bodyB, anchor) {
+  if (!(this instanceof RopeJoint)) {
+    return new RopeJoint(def, bodyA, bodyB, anchor);
+  }
+
+  def = options(def, DEFAULTS);
+  Joint.call(this, def, bodyA, bodyB);
+  bodyA = this.m_bodyA;
+  bodyB = this.m_bodyB;
+
+  this.m_type = RopeJoint.TYPE;
+  <calculateLocalAnchors>
+  this.m_localAnchorA = anchor ? bodyA.getLocalPoint(anchor) : def.localAnchorA || Vec2.neo(-1.0, 0.0);
+  this.m_localAnchorB = anchor ? bodyB.getLocalPoint(anchor) : def.localAnchorB || Vec2.neo(1.0, 0.0);
+  </calculateLocalAnchors>
+  
+  <setJointAttributes>
+  this.m_maxLength = def.maxLength;
+  this.m_mass = 0.0;
+  this.m_impulse = 0.0;
+  this.m_length = 0.0;
+  this.m_state = inactiveLimit;
+  </setJointAttributes>
+
+  
+  
+  
+  
+  
+  
+  
+}
+</RopeJointInitialization>
+
+8. Compliant with SRP:
+<findElementsInYUIContext>
+function(selector) {
+        var nodelist = Y.all(Y.Selector.query(selector, this._node));
+        nodelist._query = selector;
+        nodelist._queryRoot = this._node;
+        return nodelist;
+    }
+</findElementsInYUIContext>
+
+9. Compliant with SRP:
+<setupDebugUtility>
+function setup(env) {
+    createDebug.debug = createDebug;
+    createDebug.default = createDebug;
+    createDebug.coerce = coerce;
+    createDebug.disable = disable;
+    createDebug.enable = enable;
+    createDebug.enabled = enabled;
+    createDebug.humanize = require('ms');
+    
+    Object.keys(env).forEach(key => {
+        createDebug[key] = env[key];
+    });
+    
+    createDebug.instances = [];
+    
+    createDebug.names = [];
+    createDebug.skips = [];
+    
+    createDebug.formatters = {};
+    
+    createDebug.selectColor = function selectColor(namespace) {
+        let hash = 0;
+        for (let i = 0; i < namespace.length; i++) {
+            hash = ((hash << 5) - hash) + namespace.charCodeAt(i);
+            hash |= 0; 
+        }
+        return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
+    };
+    
+    createDebug.create = function createDebug(namespace) {
+        let prevTime;
+        function debug(...args) {
+            if (!debug.enabled) {
+                return;
+            }
+            const self = debug;
+            const curr = Number(new Date());
+            const ms = curr - (prevTime || curr);
+            self.diff = ms;
+            self.prev = prevTime;
+            self.curr = curr;
+            prevTime = curr;
+            args[0] = createDebug.coerce(args[0]);
+            if (typeof args[0] !== 'string') {
+                args.unshift('%O');
+            }
+            let index = 0;
+            args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
+                if (match === '%%') {
+                    return match;
+                }
+                index++;
+                const formatter = createDebug.formatters[format];
+                if (typeof formatter === 'function') {
+                    const val = args[index];
+                    match = formatter.call(self, val);
+                    args.splice(index, 1);
+                    index--;
+                }
+                return match;
+            });
+            createDebug.formatArgs.call(self, args);
+            const logFn = self.log || createDebug.log;
+            logFn.apply(self, args);
+        }
+        debug.namespace = namespace;
+        debug.enabled = createDebug.enabled(namespace);
+        debug.useColors = createDebug.useColors();
+        debug.color = createDebug.selectColor(namespace);
+        debug.destroy = function destroy() {
+            const index = createDebug.instances.indexOf(this);
+            if (index !== -1) {
+                createDebug.instances.splice(index, 1);
+                return true;
+            }
+            return false;
+        };
+        debug.extend = function extend(namespace, delimiter) {
+            const newDebug = createDebug.create(this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace);
+            newDebug.log = this.log;
+            return newDebug;
+        };
+        if (typeof createDebug.init === 'function') {
+            createDebug.init(debug);
+        }
+        createDebug.instances.push(debug);
+        return debug;
+    };
+    
+    createDebug.enable(createDebug.load());
+    
+    return createDebug;
+}
+</setupDebugUtility>
+
+10. Compliant with SRP:
+<createResourceClusters>
+function createClusters(units, distanceApart = 15.0) {
+    const squaredDistanceApart = distanceApart * distanceApart;
+    return units.reduce((clusters, u) => {
+        const isGeyser = vespeneGeyserTypes.includes(u.unitType);
+        const { distance, target } = clusters.reduce((acc, b) => {
+            const d = distanceSquared(u.pos, b.centroid);
+            if (d < acc.distance) {
+                return { distance: d, target: b };
+            } else {
+                return acc;
+            }
+        }, { distance: Infinity, target: null });
+        if (distance > squaredDistanceApart) {
+            return clusters.concat([{
+                centroid: u.pos,
+                mineralFields: isGeyser ? [] : [u],
+                vespeneGeysers: isGeyser ? [u] : [],
+            }]);
+        } else {
+            if (isGeyser) {
+                target.vespeneGeysers = [...target.vespeneGeysers, u];
+            } else {
+                target.mineralFields = [...target.mineralFields, u];
+            }
+            const size = target.mineralFields.length + target.vespeneGeysers.length;
+            target.centroid = divide(add(multiply(target.centroid, (size - 1)), u.pos), size);
+            return clusters;
+        }
+    }, []);
+}
+</createResourceClusters>

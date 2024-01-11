@@ -1,0 +1,204 @@
+```javascript
+<dictify>
+function dictify(serializedFormArray) {
+  <formArrayToDictionary>
+  var o = {};
+  $.each(serializedFormArray, function() {
+    if (o[this.name] !== undefined) {
+      if (!o[this.name].push) {
+        o[this.name] = [o[this.name]];
+      }
+      o[this.name].push(this.value || '');
+    } else {
+      o[this.name] = this.value || '';
+    }
+  });
+  </formArrayToDictionary>
+  return o;
+}
+</dictify>
+
+<computeTextRadius>
+function computeTextRadius(lines) {
+    <calculateRadius>
+    var textRadius = 0;
+
+    for (var i = 0, n = lines.length; i < n; ++i) {
+        var dx = lines[i].width / 2;
+        var dy = (Math.abs(i - n / 2 + 0.5) + 0.5) * DEFAULT_CANVAS_LINE_HEIGHT;
+        textRadius = Math.max(textRadius, Math.sqrt(dx * dx + dy * dy));
+    }
+    </calculateRadius>
+
+    return textRadius;
+}
+</computeTextRadius>
+
+<transformValues>
+function (trans, val) {
+		<createLookupObject>
+		var key,
+			tmpArr = {},
+			isArr = $.isArray(trans);
+		for (key in trans) {
+			if (isArr || trans.hasOwnProperty(key)) {
+				tmpArr[trans[key]] = val || key;
+			}
+		}
+		</createLookupObject>
+		return tmpArr;
+	}
+</transformValues>
+
+<addToMenu>
+function(menu,ind) {
+            
+            <checkAndExpandMenu>
+            if (menu instanceof MenuItem) {
+                
+                if (menu.submenu == null) menu.submenu = new Menu();
+                menu = menu.submenu;
+            }
+            </checkAndExpandMenu>
+            
+            <addItemToMenu>
+            menu.addItem(this,ind);
+            </addItemToMenu>
+            
+            return this;
+        }
+</addToMenu>
+
+<createPointObject>
+function () {
+		<pointDetails>
+		var point = this;
+		return {
+			x: point.category,
+			y: point.y,
+			key: point.name || point.category,
+			series: point.series,
+			point: point,
+			percentage: point.percentage,
+			total: point.total || point.stackTotal
+		};
+		</pointDetails>
+	}
+</createPointObject>
+
+<decodeRaw>
+function decodeRaw(value, position, options) {
+    <decodeEntities>
+    return entities(
+      value,
+      xtend(options, {position: normalize(position), warning: handleWarning})
+    )
+    </decodeEntities>
+  }
+</decodeRaw>
+
+<getKnownHashesFromAssets>
+function getKnownHashesFromAssets(assetMetadata) {
+  <collectHashes>
+  const knownHashes = new Set();
+  for (const metadata of Object.values(assetMetadata)) {
+    knownHashes.add(metadata.hash);
+  }
+  </collectHashes>
+  return knownHashes;
+}
+</getKnownHashesFromAssets>
+
+<batchModelSave>
+function(properties, value, equals, props, cascade, options)
+  {
+    <saveModel>
+    function saveIt(model)
+    {
+      model.$save( props, cascade, options );
+    }
+    </saveModel>
+
+    <executeBatchSave>
+    batchExecute(function()
+    {
+      this.eachWhere( saveIt, properties, value, equals );
+
+    }, this );
+    </executeBatchSave>
+
+    return this;
+  }
+</batchModelSave>
+
+<getType>
+function getType(number, countryCode) {
+    <parseNumber>
+    try {
+        var phoneUtil = i18n.phonenumbers.PhoneNumberUtil.getInstance();
+        var numberObj = phoneUtil.parseAndKeepRawInput(number, countryCode);
+        return phoneUtil.getNumberType(numberObj)
+    } catch (e) {
+    </parseNumber>
+    <handleParsingError>
+        return -99;
+    </handleParsingError>
+}
+</getType>
+
+<validate>
+function validate( opts, options ) {
+	<validateOptionsObject>
+	if ( !isObject( options ) ) {
+		return new TypeError( 'invalid input argument. Options argument must be an object. Value: `' + options + '`.' );
+	}
+	</validateOptionsObject>
+	
+	<setPackages>
+	opts.packages = options.packages;
+	if ( !isStringArray( opts.packages ) ) {
+		return new TypeError( 'invalid option. Packages option must be a string array. Option: `' + opts.packages + '`.' );
+	}
+	</setPackages>
+	
+	<setPeriod>
+	if ( options.hasOwnProperty( 'period' ) ) {
+		opts.period = options.period;
+		if ( !isString( opts.period ) ) {
+			return new TypeError( 'invalid option. Period option must be a string. Option: `' + opts.period + '`.' );
+		}
+	}
+	</setPeriod>
+	
+	<setHostname>
+	if ( options.hasOwnProperty( 'hostname' ) ) {
+		opts.hostname = options.hostname;
+		if ( !isString( opts.hostname ) ) {
+			return new TypeError( 'invalid option. Hostname option must be a string. Option: `' + opts.hostname + '`.' );
+		}
+	}
+	</setHostname>
+	
+	<setPort>
+	if ( options.hasOwnProperty( 'port' ) ) {
+		opts.port = options.port;
+		if ( !isNonNegativeInteger( opts.port ) ) {
+			return new TypeError( 'invalid option. Port option must be a nonnegative integer. Option: `' + opts.port + '`.' );
+		}
+	}
+	</setPort>
+	
+	<setProtocol>
+	if ( options.hasOwnProperty( 'protocol' ) ) {
+		opts.protocol = options.protocol;
+		if ( opts.protocol !== 'http' && opts.protocol !== 'https' ) {
+			return new TypeError( 'invalid option. The following protocols are supported: `"http", "https"`. Option: `' + opts.protocol + '`.' );
+		}
+	}
+	</setProtocol>
+	return null;
+}
+</validate>
+```
+
+All functions have been annotated for SRP compliance. Some functions handle singular responsibilities and are fully enclosed in one set of tags, while others contain multiple blocks representing separate responsibilities, each enclosed in its own set of tags.

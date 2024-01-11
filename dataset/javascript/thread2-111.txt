@@ -1,0 +1,369 @@
+```javascript
+<encodeMuLawSamples>
+function encode$2(samples) {
+  let muLawSamples = new Uint8Array(samples.length);
+  for (let i=0; i<samples.length; i++) {
+    muLawSamples[i] = encodeSample$1(samples[i]);
+  }
+  return muLawSamples;
+}
+</encodeMuLawSamples>
+
+<GitConstructor>
+function Git(repo, initialBranch) {
+  this._repo = repo
+  this._staged = []
+  this._localBranches = []
+  this._remoteBranches = []
+  this._currentBranch = initialBranch
+  this._commits = []
+}
+</GitConstructor>
+
+<updateHeatmap>
+function(x, y){
+  <validateArguments>
+  if(x < 0 || y < 0)
+    return;
+  </validateArguments>
+
+  var me = this,
+      heatmap = me.get("heatmap"),
+      data = me.get("data");
+
+  <initializeHeatmapData>
+  if(!data[x])
+    data[x] = [];
+
+  if(!data[x][y])
+    data[x][y] = 0;
+  </initializeHeatmapData>
+  
+  data[x][y]+=(arguments.length<3)?1:arguments[2];
+  
+  me.set("data", data);
+  
+  <updateMaxValueAndRedraw>
+  if(me.max < data[x][y]){
+    heatmap.get("actx").clearRect(0,0,heatmap.get("width"),heatmap.get("height"));
+    me.setDataSet({ max: data[x][y], data: data }, true);
+    return;
+  }
+  heatmap.drawAlpha(x, y, data[x][y], true);
+  </updateMaxValueAndRedraw>
+}
+</updateHeatmap>
+
+<promiseBasedUserValidation>
+function main (params) {
+  return new Promise((resolve, reject) => {
+    <preValidationDebugging>
+    var debug = typeof params.debug === 'boolean' ? params.debug : false
+
+    if (typeof params !== 'object') {
+      if (debug) console.log('Format ze starej wersji.')
+      
+      reject(new Error('Nieprawidłowy format danych.'))
+      return
+    }
+    </preValidationDebugging>
+
+    <validateParamsAndLogin>
+    if (
+      (typeof params.username === 'string' &&
+        (params.username !== '' && params.username !== ' ')
+      ) &&
+      (
+        (typeof params.password === 'string' &&
+          (params.password !== '' && params.password !== ' ')
+        ) ||
+        (typeof params.hash === 'string' &&
+          (params.hash !== '' && params.hash !== ' ')
+        )
+      )
+    ) {
+      if (debug) console.log('Loguję...')
+      login(params).then(o => {
+        resolve(new Client(params.username, o.agent, o.id, o.hash))
+      }).catch(e => {
+        reject(e)
+      })
+    } else {
+      reject(new Error('Nieprawidłowy format danych.'))
+    }
+    </validateParamsAndLogin>
+  })
+}
+</promiseBasedUserValidation>
+
+<getRouteInfo>
+function getRouteInfo(appName, urlRequest, query, lang, user, referrer) {
+
+  <prepareActiveUser>
+  var activeUser = user ? {
+    _id: user._id,
+    name: user.username,
+    role: user.role,
+    user: user
+  } : {};
+  </prepareActiveUser>
+
+  <cacheLookup>
+  var cacheKey = appName + '||' + lang + '||' + urlRequest;
+  var cachedRouteInfo = routeInfoCache[cacheKey];
+  if (!user && cachedRouteInfo) {
+    cachedRouteInfo.query = query;  
+    return cachedRouteInfo;
+  }
+  </cacheLookup>
+
+  <initializeVariablesDetermineAMP>
+  var isAmp = /\.html$/.test(urlRequest);
+  if (isAmp) {
+    urlRequest = urlRequest.substring(0, urlRequest.length - 5);
+  }
+
+  var url = urlRequest.toLowerCase();
+  var i, route, routeInfo;
+  var routes = getRoutes(appName);
+  </initializeVariablesDetermineAMP>
+  
+  if (routes) {
+    <matchRouteAndConstructRouteInfo>
+    for (i = 0; i < routes.length; i++) {
+      route = routes[i];
+      if (route.urlRegex.test(url)) {
+        routeInfo = _.extend({
+          appName:    appName,
+          referrer:   referrer,
+          lang:       lang,
+          url:        urlRequest,
+          query:      query,
+          activeUser: activeUser,
+          isAmp:      isAmp,
+          tokens:     getTokenValuesFromUrl(route.urlPattern, urlRequest)
+        }, route);
+
+        if (isAmp) {
+          routeInfo.wrapper = 'amp';
+        }
+
+        if (!user) {
+          routeInfoCache[cacheKey] = routeInfo;
+        }
+
+        return routeInfo;
+      }
+    }
+    </matchRouteAndConstructRouteInfo>
+  }
+
+  <throwIfNoValidRoute>
+  throw new Error('404: ' + appName + ' ' + urlRequest + ' is not a valid request');
+  </throwIfNoValidRoute>
+}
+</getRouteInfo>
+
+<dynamicFunctionGenerator>
+function (def) {
+  if (def) {
+    var self = this,
+      index,
+      count,
+      tmpDef,
+      defNewKey,
+      sigIndex,
+      signatures;
+
+    <prepareDefinition>
+    if (!(def instanceof Array)) {
+      tmpDef = {};
+      for (index in def) {
+        if (def.hasOwnProperty(index)) {
+          defNewKey = index.replace(/ /g, '');
+          if (defNewKey.indexOf('*') === -1) {
+            tmpDef[defNewKey] = def[index];
+          } else {
+            signatures = this.generateSignaturePermutations(defNewKey);
+            for (sigIndex = 0; sigIndex < signatures.length; sigIndex++) {
+              if (!tmpDef[signatures[sigIndex]]) {
+                tmpDef[signatures[sigIndex]] = def[index];
+              }
+            }
+          }
+        }
+      }
+      def = tmpDef;
+    }
+    </prepareDefinition>
+
+    <invokeFunction>
+    return function () {
+      var arr = [],
+        lookup,
+        type;
+      for (index = 0; index < arguments.length; index++) {
+        type = typeof arguments[index];
+        if (type === 'object' && arguments[index] instanceof Array) {
+          type = 'array';
+        }
+        if (arguments.length === 1 && type === 'undefined') {
+          break;
+        }
+        arr.push(type);
+      }
+
+      lookup = arr.join(',');
+      if (def[lookup]) {
+        return self.callExtend(this, '$main', def, def[lookup], arguments);
+      } else {
+        for (index = arr.length; index >= 0; index--) {
+          lookup = arr.slice(0, index).join(',');
+          if (def[lookup + ',...']) {
+            return self.callExtend(this, '$main', def, def[lookup + ',...'], arguments);
+          }
+        }
+      }
+      throw('Irrelon Overload: Overloaded method does not have a matching signature for the passed arguments: ' + JSON.stringify(arr));
+    };
+    </invokeFunction>
+  }
+
+  return function () {};
+}
+</dynamicFunctionGenerator>
+
+<deserializeFormData>
+function deserialize(formEl, data, options, nodeCallback) {
+  <setupDeserializeEnvironment>
+  var parent = makeElement(formEl),
+      opts = getOptions(options),
+      elements = getElements(parent, opts.skipDisabled, opts.skipReadOnly);
+  if (!isType(data, 'object')) {
+    if (!isType(data, 'string'))
+      return;
+    try { 
+      data = JSON.parse(data);
+    } catch (e) {
+      error('Passed string is not a JSON string > ' + data);
+    }
+  }
+  </setupDeserializeEnvironment>
+  for (var i = 0, l = elements.length; i < l; i++) {
+    var el = elements[i], textKey;
+    if (!isInput(el)) {
+      <populateNonInputElements>
+      if (textKey = el.getAttribute(_defaults.attributeText))
+        el.textContent = getObjectValue(textKey, opts.delimiter, data);
+      continue;
+      </populateNonInputElements>
+    }
+    var key = el.name || opts.useIdOnEmptyName && el.id,
+        value = getObjectValue(key, opts.delimiter, data);
+    if (isType(value, 'undefined') || value === null) {
+      <clearUnmatchedInputs>
+      opts.deserializeClean && clearInput(el, opts.triggerChange);
+      continue;
+      </clearUnmatchedInputs>
+    }
+    var mutated = nodeCallback && nodeCallback(el, value);
+    if (!mutated)
+      <setValueToInputs>
+      setValueToInput(el, value, opts.triggerChange);
+      </setValueToInputs>
+  }
+}
+</deserializeFormData>
+
+<extractStylesFromXml>
+function parseStyles(content, xml) {
+  if (!content) {
+    return {}
+  }
+  const doc = xml.createDocument(content)
+  
+  <parseNumberFormats>
+  const numFmts = xml.select(doc, null, '
+    .map(parseNumberFormatStyle)
+    .reduce((formats, format) => {
+      formats[format.id] = format
+      return formats
+    }, [])
+  </parseNumberFormats>
+
+  return xml.select(doc, null, '
+    if (xf.hasAttribute('xfId')) {
+      <extendBaseStylesWithCellStyles>
+      return {
+        ...baseStyles[xf.xfId],
+        ...parseCellStyle(xf, numFmts)
+      }
+      </extendBaseStylesWithCellStyles>
+    }
+    <parseCellStyle>
+    return parseCellStyle(xf, numFmts)
+    </parseCellStyle>
+  })
+}
+</extractStylesFromXml>
+
+<simplifyErrorRecoveryCode>
+function removeErrorRecovery (fn) {
+  var parseFn = String(fn);
+  try {
+    var JSONSelect = require("JSONSelect");
+    var Reflect = require("reflect");
+    var ast = Reflect.parse(parseFn);
+
+    <updateASTForErrorHandling>
+    var labeled = JSONSelect.match(':has(:root > .label > .name:val("_handle_error"))', ast);
+    labeled[0].body.consequent.body = [labeled[0].body.consequent.body[0], labeled[0].body.consequent.body[1]];
+    </updateASTForErrorHandling>
+
+    <stringifyAndCleanAST>
+    return Reflect.stringify(ast).replace(/_handle_error:\s?/,"").replace(/\\\\n/g,"\\n");
+    </stringifyAndCleanAST>
+  } catch (e) {
+    return parseFn;
+  }
+}
+</simplifyErrorRecoveryCode>
+
+<addGetterSetterToBindingHandlers>
+function addGetterSetter(bindingHandlersObject) {
+  <defineSetProperty>
+  Object.defineProperties(bindingHandlersObject, {
+    'set': {
+      configurable: true,
+      value: function setBindingHandler(nameOrObject, value) {
+        if (typeof nameOrObject === 'string') {
+          bindingHandlersObject[nameOrObject] = value;
+        } else if (typeof nameOrObject === 'object') {
+          <handleSetForObject>
+          if (value !== undefined) {
+            options.onError(
+              new Error("Given extraneous `value` parameter (first param should be a string, but it was an object)." + nameOrObject));
+          }
+          extend(bindingHandlersObject, nameOrObject);
+          </handleSetForObject>
+        } else {
+          options.onError(
+            new Error("Given a bad binding handler type: " + nameOrObject));
+        }
+      }
+    },
+  </defineSetProperty>
+    <defineGetProperty>
+    'get': {
+      configurable: true,
+      value: function getBindingHandler(name) {
+        <retrieveValue>
+        return bindingHandlersObject[name];
+        </retrieveValue>
+      }
+    }
+  </defineGetProperty>
+  });
+}
+</addGetterSetterToBindingHandlers>
+```

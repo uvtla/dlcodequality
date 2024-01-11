@@ -1,0 +1,306 @@
+```javascript
+<webpackModuleExports>
+function(module, exports, __webpack_require__) {
+	
+	"use strict";
+	<exportSubject>
+	var Subject_1 = __webpack_require__(4);
+	exports.Subject = Subject_1.Subject;
+	</exportSubject>
+	
+	<exportObservable>
+	var Observable_1 = __webpack_require__(5);
+	exports.Observable = Observable_1.Observable;
+	</exportObservable>
+	
+	<requireModules>
+	__webpack_require__(295);
+	// (remaining __webpack_require__ calls are omitted for brevity)
+	__webpack_require__(605);
+	</requireModules>
+	
+	<exportSubscription>
+	var Subscription_1 = __webpack_require__(10);
+	exports.Subscription = Subscription_1.Subscription;
+	</exportSubscription>
+	
+	<exportSubscriber>
+	var Subscriber_1 = __webpack_require__(8);
+	exports.Subscriber = Subscriber_1.Subscriber;
+	</exportSubscriber>
+	
+	<exportAsyncSubject>
+	var AsyncSubject_1 = __webpack_require__(298);
+	exports.AsyncSubject = AsyncSubject_1.AsyncSubject;
+	</exportAsyncSubject>
+	
+	<exportReplaySubject>
+	var ReplaySubject_1 = __webpack_require__(393);
+	exports.ReplaySubject = ReplaySubject_1.ReplaySubject;
+	</exportReplaySubject>
+	
+	// (additional export blocks are omitted for brevity)
+	
+	<exportScheduler>
+	var Scheduler = {
+	    asap: asap_1.asap,
+	    queue: queue_1.queue,
+	    animationFrame: animationFrame_1.animationFrame,
+	    async: async_1.async
+	};
+	exports.Scheduler = Scheduler;
+	</exportScheduler>
+	
+	<exportSymbol>
+	var Symbol = {
+	    rxSubscriber: rxSubscriber_1.$$rxSubscriber,
+	    observable: observable_1.$$observable,
+	    iterator: iterator_1.$$iterator
+	};
+	exports.Symbol = Symbol;
+	</exportSymbol>
+}
+</webpackModuleExports>
+
+<base64ArrayBuffer>
+function base64ArrayBuffer(bytes) {
+    <base64Encoding>
+    var base64    = ''
+    var encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    var byteLength    = bytes.byteLength
+    var byteRemainder = byteLength % 3
+    var mainLength    = byteLength - byteRemainder
+    var a, b, c, d
+    var chunk
+   
+    for (var i = 0; i < mainLength; i = i + 3) {
+      chunk = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+      a = (chunk & 16515072) >> 18 
+      b = (chunk & 258048)   >> 12 
+      c = (chunk & 4032)     >>  6 
+      d = chunk & 63               
+      base64 += encodings[a] + encodings[b] + encodings[c] + encodings[d]
+    }
+    </base64Encoding>
+    
+    <handleRemainder>
+    if (byteRemainder == 1) {
+      chunk = bytes[mainLength]
+      a = (chunk & 252) >> 2 
+      b = (chunk & 3)   << 4 
+      base64 += encodings[a] + encodings[b] + '=='
+    } else if (byteRemainder == 2) {
+      chunk = (bytes[mainLength] << 8) | bytes[mainLength + 1]
+      a = (chunk & 64512) >> 10 
+      b = (chunk & 1008)  >>  4 
+      c = (chunk & 15)    <<  2 
+      base64 += encodings[a] + encodings[b] + encodings[c] + '='
+    }
+    </handleRemainder>
+    
+    return base64
+}
+</base64ArrayBuffer>
+
+<pluginManager>
+function(data) {
+    <pluginActivation>
+    if (data.active) {
+        bs.pluginManager.enablePlugin(data.name);
+    } else {
+        bs.pluginManager.disablePlugin(data.name);
+    }
+    </pluginActivation>
+    <setUserPlugins>
+    bs.setOption("userPlugins", bs.getUserPlugins());
+    </setUserPlugins>
+}
+</pluginManager>
+
+<generatePathString>
+function generatePathString(paths) {
+  let pathString = '';
+
+  <checkPaths>
+  if (!paths || !paths.length) return pathString;
+  </checkPaths>
+
+  <formatPaths>
+  if (paths.length > 1) {
+    pathString = paths.map(pathItem => filepathName(pathItem));
+    
+    if (pathString.length > maxInputStringLength) {
+      const remainder = pathString.length - maxInputStringLength;
+      pathString = `${pathString
+        .slice(0, maxInputStringLength)
+        .join(', ')} ...and ${remainder} other${remainder > 1 ? 's' : ''}`;
+    } else {
+      pathString = pathString.join(', ');
+    }
+  } else {
+    pathString = filepathName(paths[0]);
+  }
+  </formatPaths>
+
+  return pathString;
+}
+</generatePathString>
+
+<LGAudioVisualization>
+function LGAudioVisualization() {
+    <initializeProperties>
+    this.properties = {
+        continuous: true,
+        mark: -1
+    };
+    </initializeProperties>
+
+    <inputSetup>
+    this.addInput("data", "array");
+    this.addInput("mark", "number");
+    </inputSetup>
+
+    <setSize>
+    this.size = [300, 200];
+    </setSize>
+
+    <initializeBuffer>
+    this._last_buffer = null;
+    </initializeBuffer>
+}
+</LGAudioVisualization>
+
+<_Browser_getElement>
+function _Browser_getElement(id) {
+    <getElementInfo>
+	return _Browser_withNode(id, function(node) {
+		var rect = node.getBoundingClientRect();
+		var x = _Browser_window.pageXOffset;
+		var y = _Browser_window.pageYOffset;
+		return {
+			__$scene: _Browser_getScene(),
+			__$viewport: {
+				__$x: x,
+				__$y: y,
+				__$width: _Browser_doc.documentElement.clientWidth,
+				__$height: _Browser_doc.documentElement.clientHeight
+			},
+			__$element: {
+				__$x: x + rect.left,
+				__$y: y + rect.top,
+				__$width: rect.width,
+				__$height: rect.height
+			}
+		};
+	});
+    </getElementInfo>
+}
+</_Browser_getElement>
+
+<popupComputedStyle>
+function () {
+    <defineVariables>
+    var size, zIndex;
+    </defineVariables>
+
+    <computeZIndex>
+    if (this.isOpen && this.computedStyle.zIndex) {
+        zIndex = this.computedStyle.zIndex;
+    } else {
+        zIndex = ariaPopupsPopupManager.getZIndexForPopup(this);
+    }
+    </computeZIndex>
+
+    <computeSize>
+    if (this.conf.preferredWidth > 0) {
+        size = { width : this.conf.preferredWidth, height : 0 };
+    } else {
+        
+        size = this._getFreeSize();
+    }
+    </computeSize>
+
+    <computePosition>
+    
+    var position = this._getPosition(size);
+    </computePosition>
+
+    <setComputedStyle>
+    var computedStyle = {
+        'top' : position.top,
+        'bottom' : position.bottom,
+        'right' : position.right,
+        'left' : position.left,
+        'height' : size.height,
+        'width' : size.width,
+        'zIndex' : zIndex
+    };
+    </setComputedStyle>
+
+    return computedStyle;
+}
+</popupComputedStyle>
+
+<iterateChildren>
+function (callback, context) {
+    <iterate>
+    var _children = this._children;
+    for(var i = 0, len = _children.length; i < len; i++) {
+        var child = _children[i];
+        callback.call(context, child, i);
+    }
+    </iterate>
+}
+</iterateChildren>
+
+<createAttributeWrapper>
+function createAttributeWrapper(gl, program, attributes, doLink) {
+  <initializeWrapper>
+  var obj = {}
+  </initializeWrapper>
+  
+  <setupAttributes>
+  for(var i=0, n=attributes.length; i<n; ++i) {
+    var a = attributes[i]
+    var name = a.name
+    var type = a.type
+    var location = gl.getAttribLocation(program, name)
+    
+    <handleAttributeTypes>
+    switch(type) {
+      case 'bool':
+      case 'int':
+      case 'float':
+        addVectorAttribute(gl, program, location, 1, obj, name, doLink)
+      break
+      
+      default:
+        if(type.indexOf('vec') >= 0) {
+          var d = type.charCodeAt(type.length-1) - 48
+          if(d < 2 || d > 4) {
+            throw new Error('gl-shader: Invalid data type for attribute ' + name + ': ' + type)
+          }
+          addVectorAttribute(gl, program, location, d, obj, name, doLink)
+        } else {
+          throw new Error('gl-shader: Unknown data type for attribute ' + name + ': ' + type)
+        }
+      break
+    }
+    </handleAttributeTypes>
+  }
+  </setupAttributes>
+
+  <returnAttributeObject>
+  return obj
+  </returnAttributeObject>
+}
+</createAttributeWrapper>
+
+<hasAllProperties>
+function hasAllProperties(fieldList, o) {
+    <checkObjectFields>
+    return (o instanceof Object) && all(function (field) { return (field in o); }, fieldList);
+    </checkObjectFields>
+}
+</hasAllProperties>
+```

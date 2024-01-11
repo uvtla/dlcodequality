@@ -1,0 +1,350 @@
+```javascript
+<colorRangeMerge>
+function( rc ){
+    if( is.ColorRange(rc) ){
+        <mergeConstraints>
+        addAll(this.hueConstraint, rc.hueConstraint);
+        addAll(this.saturationConstraint, rc.saturationConstraint);
+        addAll(this.brightnessConstraint, rc.brightnessConstraint);
+        addAll(this.alphaConstraint, rc.alphaConstraint);
+        this.black.min = Math.min( this.black.min, rc.black.min );
+        this.black.max = Math.max( this.black.max, rc.black.max );
+        this.white.min = Math.min( this.white.min, rc.white.min );
+        this.white.max = Math.max( this.white.max, rc.white.max );
+        </mergeConstraints>
+    } else {
+        <createConstraintsFromValues>
+        this.hueConstraint.push( new FloatRange(rc.hue(),rc.hue()) );
+        this.saturationConstraint.push( new FloatRange(rc.saturation(),rc.saturation()) );
+        this.brightnessConstraint.push( new FloatRange(rc.brightness(),rc.brightness()) );
+        this.alphaConstraint.push( new FloatRange(rc.alpha(),rc.alpha()) );
+        </createConstraintsFromValues>
+    }
+    return this;
+}
+</colorRangeMerge>
+
+<MapboxEventManager>
+function MapboxEventManager(options) {
+  <initializeProperties>
+  this.origin = options.origin || 'https://api.mapbox.com';
+  this.endpoint = 'events/v2';
+  this.access_token = options.accessToken;
+  this.version = '0.2.0'
+  this.sessionID = this.generateSessionID();
+  this.userAgent = this.getUserAgent();
+  this.options = options;
+  this.send = this.send.bind(this);
+  </initializeProperties>
+  
+  <parseOptions>
+  this.countries = (options.countries) ? options.countries.split(",") : null;
+  this.types = (options.types) ? options.types.split(",") : null;
+  this.bbox = (options.bbox) ? options.bbox : null;
+  this.language = (options.language) ? options.language.split(",") : null;
+  this.limit = (options.limit) ? +options.limit : null;
+  this.locale = navigator.language || null;
+  this.enableEventLogging = this.shouldEnableLogging(options);
+  </parseOptions>
+  
+  <setupEventQueue>
+  this.eventQueue = new Array();
+  this.flushInterval = options.flushInterval || 1000;
+  this.maxQueueSize = options.maxQueueSize || 100;
+  this.timer = (this.flushInterval) ? setTimeout(this.flush.bind(this), this.flushInterval) : null;
+  </setupEventQueue>
+  
+  this.lastSentInput = "";
+  this.lastSentIndex = 0;
+}
+</MapboxEventManager>
+
+<calculate>
+function (type, number1, number2) {
+  var result;
+  
+  <parseNumbers>
+  number1 = helper.number(number1);
+  number2 = helper.number(number2);
+  </parseNumbers>
+
+  <checkForErrors>
+  if (isNaN(number1) || isNaN(number2)) {
+    if (number1[0] === '=' || number2[0] === '=') {
+      throw Error('NEED_UPDATE');
+    }
+    throw Error('VALUE');
+  }
+  </checkForErrors>
+
+  <performOperation>
+  switch (type) {
+    case '+':
+      result = number1 + number2;
+      break;
+    case '-':
+      result = number1 - number2;
+      break;
+    case '/':
+      result = number1 / number2;
+      if (result == Infinity) {
+        throw Error('DIV_ZERO');
+      } else if (isNaN(result)) {
+        throw Error('VALUE');
+      }
+      break;
+    case '*':
+      result = number1 * number2;
+      break;
+    case '^':
+      result = Math.pow(number1, number2);
+      break;
+  }
+  </performOperation>
+
+  return result;
+}
+</calculate>
+
+<xmlSerialization>
+function xmlText(node, opt_cdata) {
+  <serializeNodeToXmlText>
+  var buf = [];
+  xmlTextR(node, buf, opt_cdata);
+  return buf.join('');
+  </serializeNodeToXmlText>
+}
+</xmlSerialization>
+
+<dataService>
+function (params) {
+  <validateParams>
+  assert.ok(params.__fhdb, "__fhdb parameter required for shared database");
+  </validateParams>
+
+  <optionsHandler>
+  this.copyDefaultOptions = function (target) {
+    target.__fhdb = params.__fhdb;
+    target.__dbperapp = params.__dbperapp;
+    return target;
+  };
+  </optionsHandler>
+
+  <createCollection>
+  this.createCollection = function (name, options, callback) {
+    assert.ok(name, "collection name required");
+    options = this.copyDefaultOptions(options || {});
+    options.type = name;
+    <createCollectionBody>
+    if (callback) {
+      params.ditcher.doCreate(options, callback);
+    } else {
+      return new Promise(function (resolve, reject) {
+        params.ditcher.doCreate(options, function (err, collection) {
+          if (err) {
+            return reject(err);
+          }
+          resolve(collection);
+        });
+      });
+    }
+    </createCollectionBody>
+  };
+  </createCollection>
+
+  <dropCollection>
+  this.dropCollection = function (name, callback) {
+    assert.ok(name, "collection name required");
+    var options = { type: name };
+    options = this.copyDefaultOptions(options || {});
+    <dropCollectionBody>
+    if (callback) {
+      params.ditcher.doDropCollection(options, callback);
+    } else {
+      return new Promise(function (resolve, reject) {
+        params.ditcher.doDropCollection(options, function (err, result) {
+          if (err) {
+            return reject(err);
+          }
+          resolve(result);
+        });
+      });
+    }
+    </dropCollectionBody>
+  };
+  </dropCollection>
+
+  <listCollections>
+  this.listCollections = function (filter, options) {
+    options = this.copyDefaultOptions(options || {});
+    return params.ditcher.doGetCollectionsListCursor(filter, options);
+  };
+  </listCollections>
+
+  <getCollectionInstance>
+  this.collection = function (name, options, callback) {
+    assert.ok(name, "collection name required");
+    options = this.copyDefaultOptions(options || {});
+    options.type = name;
+    return params.ditcher.doGetCollectionInstance(options, callback);
+  };
+  </getCollectionInstance>
+
+  <createIndex>
+  this.createIndex = function (name, fieldOrSpec, options, callback) {
+    assert.ok(name, "collection name required");
+    assert.ok(fieldOrSpec, "index spec required");
+    options = this.copyDefaultOptions(options || {});
+    options.type = name;
+    options.index = fieldOrSpec;
+    <createIndexBody>
+    if (callback) {
+      params.ditcher.doIndex(options, callback);
+    } else {
+      return new Promise(function (resolve, reject) {
+        params.ditcher.doIndex(options, function (err, result) {
+          if (err) {
+            return reject(err);
+          }
+          resolve(result);
+        });
+      });
+    }
+    </createIndexBody>
+  };
+  </createIndex>
+
+  <renameCollection>
+  this.renameCollection = function (fromCollection, toCollection, options, callback) {
+    assert.ok(fromCollection, "current collection name required");
+    assert.ok(toCollection, "new collection name required");
+    options = this.copyDefaultOptions(options || {});
+    options.type = fromCollection;
+    options.toCollection = toCollection;
+    <renameCollectionBody>
+    if (callback) {
+      params.ditcher.doRenameCollection(options, callback);
+    } else {
+      return new Promise(function (resolve, reject) {
+        params.ditcher.doRenameCollection(options, function (err, result) {
+          if (err) {
+            return reject(err);
+          }
+          resolve(result);
+        });
+      });
+    }
+    </renameCollectionBody>
+  };
+  </renameCollection>
+
+  <closeDatabaseConnection>
+  this.close = function (force, callback) {
+    if (typeof force === "function") {
+      callback = force;
+      force = false;
+    }
+    return params.ditcher.database.close(force, callback);
+  };
+  </closeDatabaseConnection>
+}
+</dataService>
+
+<initializeSplitButton>
+function SplitButton(label) {
+  <inheritFromEmitter>
+  ui.Emitter.call(this);
+  </inheritFromEmitter>
+  <setupElement>
+  this.el = $(html);
+  this.events();
+  this.render({ label: label });
+  </setupElement>
+  this.state = 'hidden';
+}
+</initializeSplitButton>
+
+<compareVector3Equality>
+function vector3AreEqual (x, y, eps) {
+  <performEqualityCheck>
+  return (isZero(x.x - y.x, eps) &&
+    isZero(x.y - y.y, eps) &&
+    isZero(x.z - y.z, eps));
+  </performEqualityCheck>
+}
+</compareVector3Equality>
+
+<authenticationFlow>
+function() {
+    <chooseNextStage>
+    const nextStage = this._chooseStage();
+    if (!nextStage) {
+        throw new Error("No incomplete flows from the server");
+    }
+    this._currentStage = nextStage;
+    </chooseNextStage>
+
+    <handleDummyLogin>
+    if (nextStage == 'm.login.dummy') {
+        this.submitAuthDict({
+            type: 'm.login.dummy',
+        });
+        return;
+    }
+    </handleDummyLogin>
+
+    <reportError>
+    if (this._data.errcode || this._data.error) {
+        this._stateUpdatedCallback(nextStage, {
+            errcode: this._data.errcode || "",
+            error: this._data.error || "",
+        });
+        return;
+    }
+    </reportError>
+
+    <prepareStageStatus>
+    const stageStatus = {};
+    if (nextStage == EMAIL_STAGE_TYPE) {
+        stageStatus.emailSid = this._emailSid;
+    }
+    this._stateUpdatedCallback(nextStage, stageStatus);
+    </prepareStageStatus>
+}
+</authenticationFlow>
+
+<removeStringAccents>
+function removeAccent(str) {
+    <patternDefinition>
+    var reAccents = /[àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ]/g;
+    </patternDefinition>
+
+    <replacementsDefinition>
+    var replacements = '_aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY';
+    </replacementsDefinition>
+
+    <performReplacement>
+    return str.replace(reAccents, function (match) {
+        return replacements[reAccents.source.indexOf(match)];
+    });
+    </performReplacement>
+}
+</removeStringAccents>
+
+<expandPropertiesInLines>
+function replaceProperties (lines, properties) {
+  <filterLinesWithProperties>
+  var filteredLines = [];
+  lines.forEach((line) => {
+    <expandLineProperties>
+    for (var prop in properties) {
+      line = expandReference(line, prop, properties[prop]);
+    }
+    </expandLineProperties>
+    filteredLines.push(line);
+  });
+  </filterLinesWithProperties>
+  return filteredLines;
+}
+</expandPropertiesInLines>
+```

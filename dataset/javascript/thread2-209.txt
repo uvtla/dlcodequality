@@ -1,0 +1,244 @@
+```javascript
+<startApp>
+async function startApp(config = {}) {
+  <appInitialization>
+  const {
+    databaseURL = DEFAULT_MONGO,
+    port = DEFAULT_PORT,
+    host = DEFAULT_HOST,
+    autoConnect = true
+  } = config;</appInitialization>
+
+  <processSetup>
+  process.once('SIGUSR2', async () => {
+    await app.destroy();
+    process.kill(process.pid, 'SIGUSR2');
+  });</processSetup>
+
+  <databaseSetup>
+  const db = new _database.default();</databaseSetup>
+
+  <appCreation>
+  const appMeta = await (0, _createApp.default)(config, db);
+  const {
+    app
+  } = appMeta;</appCreation>
+
+  <serverSetup>
+  const server = await listen(app, port, host);</serverSetup>
+
+  <serverTeardownHandler>
+  (0, _serverDestroy.default)(server);</serverTeardownHandler>
+
+  <appDestroyMethod>
+  app.destroy = async () => {
+    await Promise.all([disconnectFromDatabase(db), destroy(server)]);
+  };</appDestroyMethod>
+
+  <serverInitialization>
+  const {
+    port: serverPort
+  } = server.address();
+  const url = `http://${host}:${serverPort}`;
+  const router = (0, _koaRouter.default)();</serverInitialization>
+
+  <databaseConnection>
+  const connect = async () => {
+    await db.connect(databaseURL);
+  };
+
+  if (autoConnect) {
+    await connect();
+  }</databaseConnection>
+
+  <returnStatement>
+  return { ...appMeta,
+    router,
+    url,
+    ...(autoConnect ? {} : {
+      connect
+    })
+  };</returnStatement>
+}
+</startApp>
+
+<unnamedFunction>
+function(options) {
+        <setCallback>
+        this.describe({
+            callback: function() {
+                <setDescription>
+                var description = this.description,
+                    inputs = options.inputs,
+                    input, i, ii;
+                for (i=0, ii=description.dataInputs.length; i<ii; ++i) {
+                    input = description.dataInputs[i];
+                    this.setInputData(input, inputs[input.identifier]);
+                }</setDescription>
+                if (options.callback) {
+                    <invokeCallback>
+                    options.callback.call(options.scope);</invokeCallback>
+                }
+            },
+            scope: this
+        });</setCallback>
+        <returnThis>
+        return this;</returnThis>
+}
+</unnamedFunction>
+
+<XMLHttpRequestEvent>
+function XMLHttpRequestEvent(xhr, type) {
+  <eventInitialization>
+  this.type = type;
+  this.bubbles = false;
+  this.cancelable = false;
+  this.timeStamp = now();
+
+  this.isTrusted = false;
+  this.defaultPrevented = false;
+
+  this.eventPhase = 2;
+
+  this.target = xhr;
+  this.currentTarget = xhr;</eventInitialization>
+}
+</XMLHttpRequestEvent>
+
+<checkSC>
+function checkSC(i) {
+  <scanWhitespaceAndComments>
+  if (i >= tokensLength) return 0;
+
+  let l;
+  let lsc = 0;
+
+  while (i < tokensLength) {
+    if (l = checkS(i)) tokens[i].sc_child = 1;
+    else if (l = checkCommentML(i)) tokens[i].sc_child = 2;
+    else if (l = checkCommentSL(i)) tokens[i].sc_child = 3;
+    else break;
+
+    i += l;
+    lsc += l;
+  }</scanWhitespaceAndComments>
+
+  return lsc || 0;
+}
+</checkSC>
+
+<functionWithBodyRN>
+function(body, r, n)
+{
+    <calculate>
+    var rcn = vcross(r, n);
+    return body.m_inv + body.i_inv*rcn*rcn;</calculate>
+}
+</functionWithBodyRN>
+
+<setStyles>
+function setStyles(element, styles) {
+  <applyStyles>
+  Object.keys(styles).forEach(function (prop) {
+    var unit = '';
+    
+    if (['width', 'height', 'top', 'right', 'bottom', 'left'].indexOf(prop) !== -1 && isNumeric(styles[prop])) {
+      unit = 'px';
+    }
+    element.style[prop] = styles[prop] + unit;
+  });</applyStyles>
+}
+</setStyles>
+
+<Module>
+function Module(options) {
+  <handleOptions>
+  options = options || {};
+
+  if (types.isString(options)) {
+    options = {
+      name: options
+    };
+  }</handleOptions>
+
+  <validateModule>
+  if (!types.isString(options.name) && !types.isString(options.source)) {
+    throw new TypeError("Must provide a name or source for the module");
+  }</validateModule>
+
+  <setupModule>
+  this.deps = options.deps ? options.deps.slice(0) : [];
+  this.type = options.type || Type.UNKNOWN;</setupModule>
+
+  <mergeModule>
+  return this.merge(options);</mergeModule>
+}
+</Module>
+
+<formValidation>
+function (event) {
+            <initialize>
+            var self = this;</initialize>
+            
+            <preventDefaultOnInvalid>
+            if (this.invalidElements.length > 0)
+                event.preventDefault();</preventDefaultOnInvalid>
+            
+            <performValidation>
+            for (var validationType in self.validate) {
+                var invalidFields = self.getElementsByPattern(self.validate[validationType], self.patterns[validationType], validationType);
+                if (invalidFields.length > 0) {
+                    <handleInvalidFields>
+                    this.invalidElements = invalidFields;
+                    event.preventDefault();
+                    
+                    self.publicInterface.onInvalidation(invalidFields, this.legends[validationType]);</handleInvalidFields>
+                }
+            }</performValidation>
+        }</formValidation>
+
+<parseCommand>
+function(command) {
+        <preparePlaceholders>
+        var patt = /("[^"]*")/,
+            quotedStringPlaceholder = "__QUOTEDSTR__",
+            escapedQuotePlaceholder = "__ESCAPED_QUOTE__",
+            matches = [],
+            match;
+
+        command = command.replace(/\\\"/g, escapedQuotePlaceholder);</preparePlaceholders>
+
+        <extractQuotedStrings>
+        while ((match = patt.exec(command))) {
+            var matched = match[0];
+            <replaceQuotedString>
+            command =
+                command.substr(0, match.index) + quotedStringPlaceholder + command.substr(match.index + matched.length);
+            matches.push(matched.substring(1, matched.length - 1));</replaceQuotedString>
+        }</extractQuotedStrings>
+
+        <splitCommand>
+        var parts = command.split(" ");
+        parts = parts.map(function(part) {
+            var item = part.trim();
+            <replacePlaceholders>
+            if (item === quotedStringPlaceholder) {
+                item = matches.shift();
+            }
+            item = item.replace(new RegExp(escapedQuotePlaceholder, "g"), '"');</replacePlaceholders>
+            return item;
+        });</splitCommand>
+
+        <returnCommandParts>
+        return parts;</returnCommandParts>
+    }</parseCommand>
+
+<putKeyValue>
+function put(obj, key, val, immutable) {
+    <handleImmutable>
+    if (immutable)
+        return _put(assign({}, obj), key, val);</handleImmutable>
+    <performPut>
+    return _put(obj, key, val);</performPut>
+}</putKeyValue>
+```

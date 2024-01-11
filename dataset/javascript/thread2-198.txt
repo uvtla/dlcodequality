@@ -1,0 +1,233 @@
+```javascript
+<renderVueComponent>
+function() {
+  var _vm = this;
+  var _h = _vm.$createElement;
+  var _c = _vm._self._c || _h;
+  return _c(
+    _vm.tag,
+    {
+      tag: "component",
+      class: ["input-group-" + (_vm.append ? "append" : "prepend")],
+      attrs: { id: _vm.id }
+    },
+    [
+      _vm.isText ? _c("InputGroupText", [_vm._t("default")], 2) : _vm._e(),
+      _vm._v(" "),
+      !_vm.isText ? _vm._t("default") : _vm._e()
+    ],
+    2
+  )
+}
+</renderVueComponent>
+
+<replaceSpecialChars>
+function replaceSpecialChars(item) {
+	if (!j79.isString(item)) {
+		return item;
+	}
+
+	var result = item;
+
+	var specialChars = Object.keys(SPECIAL_CHARS_MAP);
+	for (var index in specialChars) {
+		result = replaceSpecialChar(result, specialChars[index]);
+	}
+
+	return result;
+}
+</replaceSpecialChars>
+
+<Preview>
+function Preview() {
+    var state = clientStore.getAll();
+    var preview = provider.renderPreview(state.selectedKind, state.selectedStory);
+    return preview;
+  }
+</Preview>
+
+<renderResponse>
+function renderResponse(res, postUrl) {
+    options.fault = options.fault || {};
+
+    var fault = templates['soapFault']({
+      code:         options.fault.code,
+      description:  options.fault.description
+    });
+
+    var form = options.formTemplate ?
+      interpolate(options.formTemplate) : templates[(!options.plain_form ? 'form' : 'form_el')];
+
+    res.set('Content-Type', 'text/html');
+    res.send(form({
+      callback: postUrl,
+      wctx:     options.wctx,
+      wresult:  fault
+    }));
+  }
+</renderResponse>
+
+<generateNewLoginTokenAndUpdateUser>
+function () {
+    var self = this;
+    var user = <findUser>
+    Meteor.users.findOne(self.userId, {
+      fields: { "services.resume.loginTokens": 1 }
+    });</findUser>
+    
+    if (!self.userId || !user) {
+      throw new Meteor.Error("You are not logged in.");
+    }
+
+    
+    var currentHashedToken = <getCurrentToken>
+    Accounts._getLoginToken(self.connection.id);</getCurrentToken>
+    
+    var currentStampedToken = <findCurrentToken>
+    _.find(user.services.resume.loginTokens, function (stampedToken) {
+        return stampedToken.hashedToken === currentHashedToken;
+    });</findCurrentToken>
+    
+    if (!currentStampedToken) { 
+      throw new Meteor.Error("Invalid login token");
+    }
+    
+    var newStampedToken = <generateNewToken>
+    Accounts._generateStampedLoginToken();</generateNewToken>
+    
+    newStampedToken.when = currentStampedToken.when;
+    <saveNewToken>
+    Accounts._insertLoginToken(self.userId, newStampedToken);</saveNewToken>
+    
+    return <loginUser>
+    loginUser(self, self.userId, newStampedToken);</loginUser>
+  }
+</generateNewLoginTokenAndUpdateUser>
+
+<nodeToHtmlString>
+function( node ) {
+    var out = '',
+        j = 0;
+
+    if(node.nodeType && node.nodeType === 3){
+      var containerNode = modules.domUtils.createNode('div');
+      modules.domUtils.appendChild(containerNode, modules.domUtils.clone(node));
+      out += modules.domUtils.innerHTML(containerNode);
+    }
+
+    if(node.nodeType && node.nodeType === 1 && modules.domUtils.hasAttribute(node, 'data-include') === false){
+      out += '<' + node.tagName.toLowerCase();
+      var attrs = modules.domUtils.getOrderedAttributes(node);
+      for (j = 0; j < attrs.length; j++) {
+        out += ' ' + attrs[j].name +  '=' + '"' + attrs[j].value + '"';
+      }
+      if(this.selfClosingElt.indexOf(node.tagName.toLowerCase()) === -1){
+        out += '>';
+      }
+      if(node.childNodes && node.childNodes.length > 0){
+        for (j = 0; j < node.childNodes.length; j++) {
+          var text = this.walkTreeForHtml( node.childNodes[j] );
+          if(text !== undefined){
+            out += text;
+          }
+        }
+      }
+      if(this.selfClosingElt.indexOf(node.tagName.toLowerCase()) > -1){
+        out += ' />';
+      }else{
+        out += '</' + node.tagName.toLowerCase() + '>';
+      }
+    }
+    return (out === '')? undefined : out;
+  }
+</nodeToHtmlString>
+
+<defaultFormatter>
+function defaultFormatter() {
+  var pThis = this,
+    items = pThis.points || splat(pThis),
+    xAxis = items[0].series.xAxis,
+    x = pThis.x,
+    isDateTime = xAxis && xAxis.options.type === 'datetime',
+    useHeader = isString(x) || isDateTime,
+    s;
+
+  s = useHeader ?
+    ['<span style="font-size: 10px">' +
+    (isDateTime ? dateFormat('%A, %b %e, %Y', x) :  x) +
+    '</span>'] : [];
+
+  each(items, function (item) {
+    s.push(item.point.tooltipFormatter(useHeader));
+  });
+  return s.join('<br/>');
+}
+</defaultFormatter>
+
+<assignIfStringLikeObj>
+function assignIfStringLikeObj(name, toObj, fromObj, where) {
+    var t, value;
+    if ('undefined' !== typeof fromObj[name]) {
+        if ('object' !== typeof fromObj[name]) {
+            new TypeError((where || 'WaitingRoom.parseSettings: ') + name +
+                          'must be object or undefined. Found: ' +
+                          fromObj[name]);
+        }
+        for (t in fromObj[name]) {
+            if (fromObj[name].hasOwnProperty(t)) {
+                value = fromObj[name][t];
+                if ('string' !== typeof value &&
+                    'function' !== typeof value &&
+                    false !== value) {
+
+                    throw new TypeError(
+                        (where || 'WaitingRoom.parseSettings: ') + name +
+                            '.' + t + ' must be string, function, false or ' +
+                            'undefined. Found: ' + value
+                    );
+                }
+            }
+        }
+        toObj[name] = fromObj[name];
+    }
+}
+</assignIfStringLikeObj>
+
+<flexibleControlContext>
+function(sStableIdPropertyName) {
+		this._oControl = oControl;
+
+		this._sStableIdPropertyName = sStableIdPropertyName || 'id';
+		this._sStableId = this._getStableId();
+
+		this._sComponentName = <extractComponentName>
+		Utils.getComponentClassName(oControl);</extractComponentName>
+		if (!this._sComponentName) {
+			Utils.log.error("The Control does not belong to an SAPUI5 component. Variants and Changes for this control might not work as expected.");
+		}
+		this._oAppDescriptor = <getAppDescriptor>
+		Utils.getAppDescriptor(oControl);</getAppDescriptor>
+		this._sSiteId = <getSiteId>
+		Utils.getSiteId(oControl);</getSiteId>
+
+		this._oChangePersistence = <initializeChangePersistence>
+		ChangePersistenceFactory.getChangePersistenceForControl(this._oControl);</initializeChangePersistence>
+		this._oChanges = {};
+	}
+</flexibleControlContext>
+
+<randomPointInTriangleFunction>
+function ( face, geometry, useCachedAreas ) {
+		var vA, vB, vC, vD;
+
+		vA = geometry.vertices[ face.a ];
+		vB = geometry.vertices[ face.b ];
+		vC = geometry.vertices[ face.c ];
+
+		return <calculateRandomPoint>
+		THREE.GeometryUtils.randomPointInTriangle( vA, vB, vC );</calculateRandomPoint>
+	}
+</randomPointInTriangleFunction>
+```
+
+The annotations provided identify different levels of responsibilities within certain functions, such as DOM manipulation, error handling, data formatting, or system interfacing, which may indicate SRP compliance or violations depending on the function's specific purpose. The goal is to distinguish between cohesive blocks of code serving specific tasks.

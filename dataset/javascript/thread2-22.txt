@@ -1,0 +1,290 @@
+```javascript
+<nodeNameToCheck>
+function (nodeName) {
+    nodeName = nodeName.toUpperCase();
+    return function (node) {
+        if (node !== undefined && node.nodeName !== undefined) {
+            return node && node.nodeName.toUpperCase() === nodeName;
+        }
+        return false;
+    };
+}
+</nodeNameToCheck>
+```
+This function has a single cohesive responsibility - to create a function that checks if a given node's name matches a specified nodeName.
+
+```javascript
+<checkHttpCode>
+function checkHttpCode(expected, res, body, callback) {
+  if (res.statusCode !== expected) {
+    if (!body) {
+      return callback(new Error(format('Unexpected deis response (expected %s but %s was returned)', expected, res.statusCode)));
+    }
+
+    var error = body.hasOwnProperty('detail') ?
+        body.detail : JSON.stringify(body);
+
+    return callback(new Error(error));
+  }
+
+  return callback(null, body);
+}
+</checkHttpCode>
+```
+This function has a single responsibility - to check if the HTTP response status code matches an expected code and handle the callback accordingly.
+
+```javascript
+<compileToken>
+function compileToken (token, arg) {
+  let fn = tokens[token] || noOp
+
+  return function () {
+    return arg ? fn.call(this, arg) : fn.call(this)
+  }
+}
+</compileToken>
+```
+The compileToken function is responsible for compiling a token into a function; it adheres to the SRP.
+
+```javascript
+<f_alert_secildi>
+function f_alert_secildi(_uyari) {
+    l.info("f_alert_secildi");
+    <getUyeIds>
+    var ids = f_uye_id_array(_uyari);
+    </getUyeIds>
+
+    return _uyari.RENDER.Sonuc.Data.map(function (_elm) {
+        <createDetail>
+        var detay = f_detay_olustur(schema.SABIT.UYARI.ALERT, _uyari, _elm);
+        </createDetail>
+        <addResultAndDikkat>
+        return f_uyari_sonucu_ekle(detay)
+            .then(function (_id) {
+                var db_dikkat = require('./db_dikkat');
+                return ids.mapX(null, db_dikkat.f_db_dikkat_ekle, _id).allX();
+            });
+        </addResultAndDikkat>
+    }).allX();
+}
+</f_alert_secildi>
+```
+The `f_alert_secildi` function handles several responsibilities - logging, obtaining user IDs, creating details, adding results, and interacting with the `db_dikkat` module, which are annotated separately.
+
+```javascript
+<percentEscape>
+function percentEscape(value) {
+    var escapedString = '';
+
+    for (var i = 0; i < value.length; i++) {
+        var char = value.charCodeAt(i);
+
+        if ((char >= 48 && char <= 57) ||       
+            (char >= 65 && char <= 90) ||       
+            (char >= 97 && char <= 122) ||      
+            char == 45 ||                       
+            char == 95 ||                       
+            char == 46 ||                       
+            char == 126) {                      
+            escapedString += String.fromCharCode(char);
+        }
+        else {
+            escapedString += '%' + char.toString(16).toUpperCase();
+        }
+    }
+    return escapedString;
+}
+</percentEscape>
+```
+The `percentEscape` function is singular in its responsibility to escape a string for URL encoding; hence, it adheres to the SRP.
+
+```javascript
+<ElementConfiguration>
+function(view, config, widget) {
+    <Initialize>
+    var name,
+        resource_owner,
+        container_resources,
+        static_classes,
+        static_properties,
+        static_styles;
+    this._id = Lava.ELEMENT_ID_PREFIX + view.guid;
+    this._view = view;
+    this._config = config;
+    this._widget = widget;
+    this._tag_name = config.tag_name;
+    this._is_void = Lava.isVoidTag(this._tag_name);
+    </Initialize>
+    <HandleResources>
+    if (Lava.schema.RESOURCES_ENABLED && config.resource_id) {
+        resource_owner = Lava.view_manager.locateTarget(widget, config.resource_id.locator_type, config.resource_id.locator);
+        if (Lava.schema.DEBUG && !resource_owner) Lava.t("[Element container] resource owner not found: " + config.resource_id.locator_type + "=" + config.resource_id.locator);
+        container_resources = resource_owner.getResource(config.resource_id.name);
+    }
+    </HandleResources>
+    <AssignResources>
+    if (Lava.schema.RESOURCES_ENABLED && container_resources) {
+        if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.t("Element container: received resource type is not container: " + container_resources.type);
+        static_classes = container_resources.value['static_classes'];
+        static_properties = container_resources.value['static_properties'];
+        static_styles = container_resources.value['static_styles'];
+    } else {
+        static_classes = config['static_classes'];
+        static_properties = config['static_properties'];
+        static_styles = config['static_styles'];
+    }
+    </AssignResources>
+    <HandleBindings>
+    if (static_classes) this._static_classes = static_classes.slice();
+    for (name in static_styles) {
+        this._static_styles[name] = static_styles[name];
+    }
+    for (name in static_properties) {
+        this._static_properties[name] = static_properties[name];
+    }
+    for (name in config.events) {
+        this._events[name] = Firestorm.clone(config.events[name]);
+    }
+    this._property_bindings = this._createArguments(config.property_bindings, view, this._onPropertyBindingChanged);
+    this._style_bindings = this._createArguments(config.style_bindings, view, this._onStyleBindingChanged);
+    this._class_bindings = this._createArguments(config.class_bindings, view, this._onClassBindingChanged);
+    for (name in this._class_bindings) {
+        this._class_bindings_values[name] = this._toClassNames(this._class_bindings[name].getValue() || '');
+    }
+	</HandleBindings>
+}
+</ElementConfiguration>
+```
+The `ElementConfiguration` function violates the SRP as it combines initialization, resource handling, resource assignment, and bindings into one function.
+
+```javascript
+<HotkeyInitialization>
+function Hotkey (combo, description, callback, action, allowIn, persistent) {
+    this.combo = combo instanceof Array ? combo : [combo];
+    this.description = description;
+    this.callback = callback;
+    this.action = action;
+    this.allowIn = allowIn;
+    this.persistent = persistent;
+    this._formated = null;
+}
+</HotkeyInitialization>
+```
+The `Hotkey` function is an initializer function with a single responsibility - to create a hotkey with the given properties.
+
+```javascript
+<PluginDescriptors>
+function(chart) {
+    var cache = chart.$plugins || (chart.$plugins = {});
+    if (cache.id === this._cacheId) {
+        return cache.descriptors;
+    }
+    <PluginHandling>
+    var plugins = [];
+    var descriptors = [];
+    var config = (chart && chart.config) || {};
+    var options = (config.options && config.options.plugins) || {};
+    this._plugins.concat(config.plugins || []).forEach(function(plugin) {
+        var idx = plugins.indexOf(plugin);
+        if (idx !== -1) {
+            return;
+        }
+        var id = plugin.id;
+        var opts = options[id];
+        if (opts === false) {
+            return;
+        }
+        if (opts === true) {
+            opts = helpers.clone(defaults.global.plugins[id]);
+        }
+        plugins.push(plugin);
+        descriptors.push({
+            plugin: plugin,
+            options: opts || {}
+        });
+    });
+    </PluginHandling>
+    cache.descriptors = descriptors;
+    cache.id = this._cacheId;
+    return descriptors;
+}
+</PluginDescriptors>
+```
+The function violates the SRP as it's responsible for handling plugin cache and managing plugin descriptors.
+
+```javascript
+<URLReader>
+function(first) {
+    var reader  = this._reader,
+        uri     = first,
+        inner   = "",
+        c       = reader.peek();
+    <SkipWhitespace>
+    while (c && isWhitespace(c)) {
+        reader.read();
+        c = reader.peek();
+    }
+    </SkipWhitespace>
+    <ReadURL>
+    if (c === "'" || c === "\"") {
+        inner = this.readString();
+        if (inner !== null) {
+            inner = PropertyValuePart.parseString(inner);
+        }
+    } else {
+        inner = this.readUnquotedURL();
+    }
+    </ReadURL>
+    c = reader.peek();
+    <SkipWhitespaceEnd>
+    while (c && isWhitespace(c)) {
+        reader.read();
+        c = reader.peek();
+    }
+    </SkipWhitespaceEnd>
+    <ValidateURL>
+    if (inner === null || c !== ")") {
+        uri = null;
+    } else {
+        uri += PropertyValuePart.serializeString(inner) + reader.read();
+    }
+    </ValidateURL>
+    return uri;
+}
+</URLReader>
+```
+The `URLReader` function has multiple responsibilities, such as skipping whitespace, reading the content of a URL, and validating the format of the URL.
+
+```javascript
+<ArrayFilterWrapper>
+function ( target, callback ) {
+    if ( typeof Array.prototype.filter === 'function' ) {
+        this.filter = function ( target, callback ) {
+            if ( this.is(target) ) {
+                return target.filter( callback );
+            } else {
+                throw new Error('[ixBand] "filter()" ' + MSG_NOT_ARRAY);
+            }
+        };
+    } else {
+        this.filter = function ( target, callback ) {
+            if ( this.is(target) ) {
+                var tArray = target,
+                    aryNum = tArray.length,
+                    result = [], i;
+                for ( i = 0; i < aryNum; ++i ) {
+                    var ary = tArray[i],
+                        state = callback.call( this , ary, i, tArray );
+                    if ( state == true ) result.push( ary );
+                }
+                return result;
+            } else {
+                throw new Error('[ixBand] "filter()" ' + MSG_NOT_ARRAY);
+            }
+        };
+    }
+    return this.filter( target, callback );
+}
+</ArrayFilterWrapper>
+```
+This function is a wrapper for an array filter operation, and it has a single responsibility - to provide a filter method for arrays. However, there's redundancy in creating two separate implementations based on an existing feature check.

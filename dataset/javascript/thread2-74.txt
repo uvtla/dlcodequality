@@ -1,0 +1,228 @@
+Function 1:
+<createAndConfigureType>
+function(typeData)
+{
+    <createNewType>
+    var newType = new ASProxy(this, typeData.name); </createNewType>
+
+    <addAccessorsToType>
+    var accessors = typeData.accessors;
+    for (var i = 0; i < accessors.length; i++)
+    {
+        this.addPropertyToType(newType, accessors[i]);
+    }
+    </addAccessorsToType>
+
+    <addMethodsToType>
+    var methods = typeData.methods;
+    for (var i = 0; i < methods.length; i++)
+    {
+        if (FABridge.blockedMethods[methods[i]] == undefined)
+        {
+            this.addMethodToType(newType, methods[i]);
+        }
+    }
+    </addMethodsToType>
+
+    <cacheAndReturnNewType>
+    this.remoteTypeCache[newType.typeName] = newType;
+    return newType;
+    </cacheAndReturnNewType>
+}
+</createAndConfigureType>
+
+Function 2:
+<cloneObjectWithWeakMap>
+function clone(obj, custom_method, extra_args, wm) {
+
+    <handleWeakMapParameters>
+    if (custom_method instanceof WeakMap) {
+        wm = custom_method;
+        custom_method = null;
+    } else if (extra_args instanceof WeakMap) {
+        wm = extra_args;
+        extra_args = null;
+    }
+
+    if (!wm) {
+        wm = new WeakMap();
+        wm.source = obj;
+        wm.custom_method = custom_method;
+        wm.extra_args = extra_args;
+    } else if (wm.has(obj)) {
+        return wm.get(obj);
+    }
+    </handleWeakMapParameters>
+
+    <prepareCustomMethodArguments>
+    if (custom_method) {
+        extra_args = [wm].concat(extra_args);
+    }
+    </prepareCustomMethodArguments>
+
+    <performClone>
+    return real_clone({'_': obj}, custom_method, extra_args, wm)['_'];
+    </performClone>
+}
+</cloneObjectWithWeakMap>
+
+Function 3:
+<copyArrayPortion>
+function copy(array, first, count) {
+    <setDefaultValues>
+    first = valueOrDefault(first, 0);
+    count = valueOrDefault(count, array.length);
+    </setDefaultValues>
+    <performSliceOperation>
+    return Array.prototype.slice.call(array, first, count);
+    </performSliceOperation>
+}
+</copyArrayPortion>
+
+Function 4:
+<migrateDownCommand>
+function down(){
+    <prepareMigrationCommand>
+    var key = (grunt.option('name') || ""),
+        label = ( key || "EMPTY"),
+        cmd = (migrateBinPath + " down " + key).trim();
+    </prepareMigrationCommand>
+
+    <executeMigrationCommand>
+    grunt.log.write('Running migration "DOWN" [' + label + ']...').ok();
+    run(cmd);
+    </executeMigrationCommand>
+}
+</migrateDownCommand>
+
+Function 5:
+<parseXMLDeclaration>
+function declaration() {
+    <matchDeclarationStart>
+    var m = match(/^<\?xml\s*/);
+    if (!m) return;
+    </matchDeclarationStart>
+    
+    <initializeDeclarationNode>
+    var node = {
+        attributes: {},
+    };
+    </initializeDeclarationNode>
+
+    <parseAttributes>
+    while (!(eos() || is('?>'))) {
+        var attr = attribute();
+        if (!attr) return node;
+        node.attributes[attr.name] = attr.value;
+    }
+    </parseAttributes>
+
+    <matchDeclarationEnd>
+    match(/\?>\s*/);
+    </matchDeclarationEnd>
+
+    <returnNode>
+    return node;
+    </returnNode>
+}
+</parseXMLDeclaration>
+
+Function 6:
+<calculateEffectiveVectorLength>
+function isSpanVec(vec, index) {
+    <calculateSpan>
+    var effectivelen = vec.reduce(function (prev, mem) { return prev += mem.span ? mem.span : 1; }, 0);
+    </calculateSpan>
+    <compareLengthAndIndex>
+    return effectivelen > index;
+    </compareLengthAndIndex>
+}
+</calculateEffectiveVectorLength>
+
+Function 7:
+<timeoutCallbackWrapper>
+function t(time, done) {
+  <handleArguments>
+  if (arguments.length === 1) {
+    done = time;
+    time = 2000;
+  }
+  var error = new Error(`Callback took too long (max: ${time})`);
+  var waiting = true;
+  </handleArguments>
+
+  <setCallbackTimeout>
+  var timeout = setTimeout(function () {
+    if (!waiting) return;
+    waiting = false;
+    done(error);
+  }, time);
+  </setCallbackTimeout>
+
+  <callbackCompletionHandler>
+  function handler() {
+    if (!waiting) return;
+    clearTimeout(timeout);
+    waiting = false;
+    done.apply(this, arguments);
+  }
+  </callbackCompletionHandler>
+
+  <returnCallbackHandler>
+  return handler;
+  </returnCallbackHandler>
+}
+</timeoutCallbackWrapper>
+
+Function 8:
+<navigationToRoute>
+function(route, args) {
+    <generateRouteUrl>
+    url = urls.route(route, args);
+    </generateRouteUrl>
+    <logNavigation>
+    logging.log("navigate to ", url);
+    </logNavigation>
+    <performNavigation>
+    window.location.hash = url;
+    </performNavigation>
+    <chainFunctionCall>
+    return this;
+    </chainFunctionCall>
+}
+</navigationToRoute>
+
+Function 9:
+<getCollectionModel>
+function (query, indexName) {
+    <retrieveModelFromCollection>
+    var model = this.collection.get(query, indexName);
+    </retrieveModelFromCollection>
+    <checkAndReturnModel>
+    if (model && includes(this.models, model)) return model;
+    </checkAndReturnModel>
+}
+</getCollectionModel>
+
+Function 10:
+<getNewPathForDestination>
+function getPathToDestination(pathToSource, pathToDestinationFile) {
+    <determineDestinationType>
+    var isDestinationDirectory = (/\/$/).test(pathToDestinationFile);
+    </determineDestinationType>
+    <extractFileName>
+    var fileName = path.basename(pathToSource);
+    </extractFileName>
+    <computeNewPath>
+    var newPathToDestination;
+    if (typeof pathToDestinationFile === 'undefined') {
+        newPathToDestination = pathToSource;
+    } else {
+        newPathToDestination = pathToDestinationFile + (isDestinationDirectory ? fileName : '');
+    }
+    </computeNewPath>
+    <returnComputedPath>
+    return newPathToDestination;
+    </returnComputedPath>
+}
+</getNewPathForDestination>

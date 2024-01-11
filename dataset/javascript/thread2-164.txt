@@ -1,0 +1,196 @@
+1.
+
+<jsonInitFunction>
+function() {
+    this.jsonInit({
+      "message0": Blockly.Msg.DATA_ITEMOFLIST,
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "INDEX"
+        },
+        {
+          "type": "field_variable",
+          "name": "LIST",
+          "variableTypes": [Blockly.LIST_VARIABLE_TYPE]
+        }
+      ],
+      "output": null,
+      "category": Blockly.Categories.dataLists,
+      "extensions": ["colours_data_lists"],
+      "outputShape": Blockly.OUTPUT_SHAPE_ROUND
+    });
+}
+</jsonInitFunction>
+
+2.
+
+<iterateStyleRules>
+function iterateStyleRules(argument) {
+    <checkAndCollectStyles>
+	if (typeof argument === 'string') {
+		checkStyleExistence(styleDefinitions, argument);
+		collectedStyles.push(styleDefinitions[argument]);
+		return;
+	}
+	</checkAndCollectStyles>
+
+    <objectStyleIteration>
+	if (typeof argument === 'object') {
+		Object.keys(argument).forEach(function(styleName) {
+			checkStyleExistence(styleDefinitions, styleName);
+			if (argument[styleName]) {
+				collectedStyles.push(styleDefinitions[styleName])
+			}
+		})
+	}
+    </objectStyleIteration>
+}
+</iterateStyleRules>
+
+3.
+
+<baseMatchesProperty>
+function baseMatchesProperty(path, srcValue) {
+    if (isKey(path) && isStrictComparable(srcValue)) {
+      return matchesStrictComparable(toKey(path), srcValue);
+    }
+    return function(object) {
+      var objValue = get(object, path);
+      return (objValue === undefined && objValue === srcValue)
+        ? hasIn(object, path)
+        : baseIsEqual(srcValue, objValue, undefined, UNORDERED_COMPARE_FLAG | PARTIAL_COMPARE_FLAG);
+    };
+}
+</baseMatchesProperty>
+
+4.
+
+<parse>
+function parse(data, options, next) {
+    <preprocessArguments>
+	data = this.get(data);
+	if ('function' === typeof options) {
+      next = options;
+      options = {};
+    }
+    </preprocessArguments>
+
+    <checkDataAndCallback>
+	if (!data) return next();
+	debug('found %s in the package contents', data);
+	next(undefined, this.normalize(data));
+    </checkDataAndCallback>
+}
+</parse>
+
+5.
+
+<constructor>
+function (expression, descending, opts) {
+	<initializeSorting>
+	descending = isBoolean(descending) ? descending : true;
+	opts = opts || {};
+	this.__expression = expression;
+	this.__descending = descending;
+	var nulls = isString(opts) ? opts : opts.nulls;
+	this.__nulls = isString(nulls) ? nulls.toLowerCase() : null;
+	</initializeSorting>
+}
+</constructor>
+
+6.
+
+<_VirtualDom_applyAttrsNS>
+function _VirtualDom_applyAttrsNS(domNode, nsAttrs) {
+    <applyNamespaceAttributes>
+	for (var key in nsAttrs) {
+      var pair = nsAttrs[key];
+      var namespace = pair.f;
+      var value = pair.o;
+
+      value
+        ? domNode.setAttributeNS(namespace, key, value)
+        : domNode.removeAttributeNS(namespace, key);
+    }
+    </applyNamespaceAttributes>
+}
+</_VirtualDom_applyAttrsNS>
+
+7.
+
+<CraftyCoordinateConversion>
+function (x, y) {
+    <conversionFormula>
+	return {
+		x: (x - Crafty.stage.x + document.body.scrollLeft + document.documentElement.scrollLeft - Crafty.viewport._x)/Crafty.viewport._zoom,
+		y: (y - Crafty.stage.y + document.body.scrollTop + document.documentElement.scrollTop - Crafty.viewport._y)/Crafty.viewport._zoom
+	}
+	</conversionFormula>
+}
+</CraftyCoordinateConversion>
+
+8.
+
+<getUuid>
+function(cacheNum) {
+    <setDefaultCacheNum>
+	if (cacheNum === undefined) {
+        cacheNum = 1;
+    }
+	</setDefaultCacheNum>
+
+    <generateUuids>
+	if (!uuidCache.length) {
+        ajax({url: this.urlPrefix + "/_uuids", data: {count: cacheNum}, async: false}, {
+            success: function(resp) {
+              uuidCache = resp.uuids;
+            }
+          },
+          "Failed to retrieve UUID batch."
+        );
+    }
+    </generateUuids>
+
+    <retrieveUuid>
+	return uuidCache.shift();
+	</retrieveUuid>
+}
+</getUuid>
+
+9.
+
+<Th>
+function Th(iid, val) {
+    <executeThrowHook>
+	var aret;
+	if (sandbox.analysis && sandbox.analysis._throw) {
+		aret = sandbox.analysis._throw(iid, val);
+		if (aret) {
+			val = aret.result;
+		}
+	}
+	</executeThrowHook>
+
+	<returnValue>
+	return (lastComputedValue = val);
+	</returnValue>
+}
+</Th>
+
+10.
+
+<normalizePath>
+function normalizePath(fsPath) {
+	<normalizeAndConvertPath>
+	fsPath = path.normalize(fsPath);
+	if (process.platform === 'win32') {
+		fsPath = fsPath.replace(backwardSlashRegExp, '/');
+	}
+	</normalizeAndConvertPath>
+
+	<returnPath>
+	return fsPath;
+	</returnPath>
+}
+</normalizePath>

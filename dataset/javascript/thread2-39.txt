@@ -1,0 +1,132 @@
+```javascript
+<setTabId>
+function setTabId (sections) {
+    sections.forEach(function (section, sectionIndex) {
+        if (!Array.isArray(section)) {
+            return;
+        }
+        section.forEach(function (tab, tabIndex) {
+            tab.tabId = (tab.label).replace(/\s+/g, '-').toLowerCase() + '-' + sectionIndex + '-' + tabIndex;
+        });
+    });
+}
+</setTabId>
+
+<getLinearizedBaseContracts>
+function getLinearizedBaseContracts (id, contractsById) {
+  <mapLinearizedBaseContracts>
+  return contractsById[id].attributes.linearizedBaseContracts.map(function (id) { return contractsById[id] })
+  </mapLinearizedBaseContracts>
+}
+</getLinearizedBaseContracts>
+
+<stripComments>
+function stripComments(content) {
+	const regexp = /("(?:[^\\"]*(?:\\.)?)*")|('(?:[^\\']*(?:\\.)?)*')|(\/\*(?:\r?\n|.)*?\*\/)|(\/{2,}.(?:(?:\r?\n)|$))/g;
+	return content.replace(regexp, function (match, m1, m2, m3, m4) {
+		if (m3) {
+			return '';
+		} else if (m4) {
+			const length_1 = m4.length;
+			<handleNewLineComments>
+			if (length_1 > 2 && m4[length_1 - 1] === '\n') {
+				return m4[length_1 - 2] === '\r' ? '\r\n' : '\n';
+			}
+			else {
+				return '';
+			}
+			</handleNewLineComments>
+		} else {
+			return match;
+		}
+	});
+}
+</stripComments>
+
+<getElementMetrics>
+function (elm) {
+    var self = this, pos, size;
+    elm = self.get(elm);
+    pos = self.getPos(elm);
+    size = self.getSize(elm);
+    return {
+      x: pos.x, y: pos.y,
+      w: size.w, h: size.h
+    };
+}
+</getElementMetrics>
+
+<bindAutoBindMethods>
+function bindAutoBindMethods(component) {
+  for (var autoBindKey in component.__reactAutoBindMap) {
+    if (component.__reactAutoBindMap.hasOwnProperty(autoBindKey)) {
+      var method = component.__reactAutoBindMap[autoBindKey];
+      <createBoundMethods>
+      component[autoBindKey] = bindAutoBindMethod(
+        component, ReactErrorUtils.guard( method, component.constructor.displayName + '.' + autoBindKey )
+      );
+      </createBoundMethods>
+    }
+  }
+}
+</bindAutoBindMethods>
+
+<addType>
+function addType(typeName, type) {
+	if (types[typeName]) {
+		throw new Error("Type already registered '" + typeName + "'");
+	}
+	types[typeName] = type;
+}
+</addType>
+
+<raiseEventOnConnection>
+function (connection) {
+    if (connection) {
+        <startEvent>
+        ariaCoreIO.$raiseEvent({
+            name : "startEvent",
+            o : connection
+        });
+        </startEvent>
+        <customStartEvent>
+        if (connection.startEvent) {
+            ariaCoreIO.$raiseEvent({
+                name : connection.startEvent,
+                o : connection
+            });
+        }
+        </customStartEvent>
+    }
+}
+</raiseEventOnConnection>
+
+<drillRec>
+function drillRec(v){
+    const next = v.get(0);
+    if(v.length > 1 || !isAVector(next)) return v;
+    return drillRec(next);
+}
+</drillRec>
+
+<clearAndRemoveDisplayDiv>
+function () {
+    this._displayDiv.innerHTML = '';
+    if (this._displayDiv != null) {
+        <removeDisplayElement>
+        aria.utils.Dom.removeElement(this._displayDiv);
+        </removeDisplayElement>
+    }
+    this._displayDiv = null;
+}
+</clearAndRemoveDisplayDiv>
+
+<bufferSubData>
+function( array, offset ){
+    var gl = this.gl;
+    gl.bindBuffer(    TGT, this.buffer );
+    gl.bufferSubData( TGT, offset, array );
+    gl.bindBuffer(    TGT, null );
+}
+</bufferSubData>
+```

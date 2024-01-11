@@ -1,0 +1,333 @@
+```javascript
+<fundMultipleAccounts>
+async function () {
+    <logTransfer>
+    logger.info('* Foundation funding ETH on value chain to valueRegistrar');
+    </logTransfer>
+    await setupFundManager.transferEth(foundationAddr, foundationPassphrase, valueRegistrarAddr, MIN_FUND.toString(10));
+
+    <logTransfer>
+    logger.info('* Foundation funding ETH on value chain to valueDeployer');
+    </logTransfer>
+    await setupFundManager.transferEth(foundationAddr, foundationPassphrase, valueDeployerAddr, MIN_FUND.toString(10));
+
+    <logTransfer>
+    logger.info('* Foundation funding ETH on value chain to valueOps');
+    </logTransfer>
+    await setupFundManager.transferEth(foundationAddr, foundationPassphrase, valueOpsAddr, MIN_FUND.toString(10));
+
+    <logTransfer>
+    logger.info('* Foundation funding ETH on value chain to utility chain owner');
+    </logTransfer>
+    await setupFundManager.transferEth(foundationAddr, foundationPassphrase, utilityChainOwnerAddr, MIN_FUND.mul(100000).toString(10));
+
+    <logTransfer>
+    logger.info('* Foundation funding ETH on value chain to staker');
+    </logTransfer>
+    await setupFundManager.transferEth(foundationAddr, foundationPassphrase, stakerAddr, MIN_FUND.mul(100000).toString(10));
+
+    return Promise.resolve();
+}
+</fundMultipleAccounts>
+
+<galleryComponent>
+function(element) {
+
+        this.core = $(element).data('lightGallery');
+        this.$el = $(element);
+
+        <checkItemLength>
+        if (this.core.$items.length < 2) {
+            return false;
+        }
+        </checkItemLength>
+
+        <configureSettings>
+        this.core.s = $.extend({}, defaults, this.core.s);
+        this.interval = false;
+        </configureSettings>
+
+        this.fromAuto = true;
+        this.canceledOnTouch = false;
+        this.fourceAutoplayTemp = this.core.s.fourceAutoplay;
+
+        <conditionalProgressBar>
+        if (!this.core.doCss()) {
+            this.core.s.progressBar = false;
+        }
+        </conditionalProgressBar>
+
+        this.init();
+
+        return this;
+}
+</galleryComponent>
+
+<textInputConfiguration>
+function () {
+    var inputElm = this.getTextInputField();
+
+    if (inputElm) {
+        this._updateState();
+
+        <inputFieldProperties>
+        inputElm.readOnly = this.isTextInputReadOnly();
+        inputElm.disabled = this._cfg.disabled;
+        </inputFieldProperties>
+
+        <ariaAccessibilityAttributes>
+        if (this._cfg.waiAria) {
+            if (this._cfg.formatError || this._cfg.error) {
+                inputElm.setAttribute("aria-invalid", "");
+            } else {
+                inputElm.removeAttribute("aria-invalid");
+            }
+        }
+        </ariaAccessibilityAttributes>
+
+    }
+}
+</textInputConfiguration>
+
+<authenticateAppToken>
+function(request, response, next){
+    var apptkn;
+    <extractAppToken>
+    if (!utils.Misc.isNullOrUndefined(request.get(X_BOLT_APP_TOKEN))) {
+        apptkn = request.get(X_BOLT_APP_TOKEN);
+    }
+    else {
+        var error = new Error(errors['110']);
+        response.end(utils.Misc.createResponse(null, error, 110));
+        return;
+    }
+    </extractAppToken>
+
+    <appTokenNameValidation>
+    var name = __getAppFromAppToken(apptkn, request);
+    if (utils.Misc.isNullOrUndefined(name)) {
+        var error = new Error(errors['113']);
+        response.end(utils.Misc.createResponse(null, error, 113));
+        return;
+    }
+    var appnm = utils.String.trim(name.toLowerCase());
+    </appTokenNameValidation>
+
+    <checkAppSystemName>
+    if (appnm == 'bolt') {
+        next();
+    }
+    else {
+        models.app.findOne({ 
+            name: appnm, system: true
+        }, function(appError, app){
+            if (!utils.Misc.isNullOrUndefined(appError)) {
+                response.end(utils.Misc.createResponse(null, appError));
+            }
+            else if(utils.Misc.isNullOrUndefined(app)){
+                var error = new Error(errors['504']);
+                response.end(utils.Misc.createResponse(null, error, 504));
+            }
+            else{
+                next();
+            }
+        });
+    }
+    </checkAppSystemName>
+}
+</authenticateAppToken>
+
+<removeResources>
+function remove (dataStore, collectionName, resources, callback) {
+  
+  <openDataStore>
+  dataStore.__openDataStore(collectionName, (err, existingResources) => {
+    if (err) {
+      return callback(err);
+    }
+  </openDataStore>
+
+    <filterRemoveResources>
+    let removedResources = [];
+    resources.forEach((resource) => {
+      let removed = _.remove(existingResources, resource.filter(dataStore.__router));
+      removedResources = removedResources.concat(removed);
+    });
+    </filterRemoveResources>
+
+    <saveUpdatedCollection>
+    if (removedResources.length > 0) {
+      dataStore.__saveDataStore(collectionName, existingResources, (err) => {
+        if (err) {
+          callback(err);
+        }
+        else {
+          callback(null, removedResources);
+        }
+      });
+    }
+    else {
+      callback(null, []);
+    }
+    </saveUpdatedCollection>
+  });
+}
+</removeResources>
+
+<initializeStorage>
+function(callback) {
+    var _this = this
+
+    var initStorage = function() {
+        var obj = JSON.stringify([])
+        var _set = {}
+        _set[_this.key] = obj
+        storage.set(_set)
+
+        obj = JSON.parse(obj)
+
+        return obj
+    }
+
+    <getStorage>
+    storage.get(this.key, function(items) {
+        var obj
+        if (Object.keys(items).length > 0) {
+            for (itemKey in items) {
+                obj = items[itemKey]
+                if (obj) {
+                    obj = JSON.parse(obj)
+                }
+
+                if (obj === null || typeof obj === 'undefined') {
+                    obj = initStorage()
+                } 
+                
+                if (callback) {
+                    callback(obj)
+                }
+            }
+        } else {
+            obj = initStorage()
+            callback(obj)
+        }
+    })
+    </getStorage>
+}
+</initializeStorage>
+
+<processTextContent>
+function( doc, text ){
+    <normalizeText>
+    text = text.replace( /&nbsp;/g, ' ') ;    
+    text = modules.utils.collapseWhiteSpace( text );
+    </normalizeText>
+
+    <decodeEntities>
+    text = modules.domUtils.decodeEntities( doc, text );  
+    </decodeEntities>
+
+    <replaceDash>
+    text = text.replace( '–', '-' );  
+    </replaceDash>
+
+    <trimText>
+    return modules.utils.trim( text );
+    </trimText>
+}
+</processTextContent>
+
+<resolveObjectPaths>
+function includePaths(object, pathsRemaining) {
+    debugPrint('INCLUDE', { object, pathsRemaining });
+    const path = pathsRemaining.shift();
+    <resolveTarget>
+    const target = object && object[path];
+    </resolveTarget>
+
+    <includeTargetPath>
+    if (target) {
+        if (Array.isArray(target)) {
+            object[path] = target.map(pointer => {
+                const fetched = fetchObjectByPointer(pointer);
+                includePaths(fetched, _.cloneDeep(pathsRemaining));
+                return fetched;
+            });
+        } else {
+            if (object[path].__type === 'Pointer') {
+                object[path] = fetchObjectByPointer(target);
+            }
+            includePaths(object[path], pathsRemaining);
+        }
+    }
+    </includeTargetPath>
+
+    return object;
+}
+</resolveObjectPaths>
+
+<inlineFileHandling>
+function inlineFileRegHandle(regFiles, buildInfo, options, reqModuleJS, file) {        
+    var content = '';
+    <checkRegFiles>
+    if(regFiles && regFiles.length) {
+        var destMP = {'.js':options.jsDestPath,'.css':options.cssDestPath};
+        for(var j=0;j<regFiles.length;j++) {
+            var jp = regFiles[j].trim().replace(/(^['"]*)|(['"]*$)/g, '');               
+            if(!jp) continue;
+            </checkRegFiles>
+
+            <determineFilePath>
+            if(jp.indexOf('?') > -1) jp = jp.substr(0, jp.indexOf('?'));
+            if(jp[0] == '/') {
+                var filepath = path.join(options.destPath, jp);
+            }
+            else if(jp[0] != '.') { 
+                var ext = path.extname(jp).toLowerCase();
+                var dest = destMP[ext] || options.destPath;
+                var filepath = path.join(dest, jp);
+                </determineFilePath>
+
+                <handleFileSystemChecks>
+                if(!fs.existsSync(filepath)) {                        
+                    filepath = path.join(options.dest, jp); 
+                }
+                if(!fs.existsSync(filepath) && options.destPath) {                        
+                    filepath = path.join(options.destPath, jp); 
+                }
+                               
+                if(!fs.existsSync(filepath)) {
+                    console.log(filepath + ' not exists, check dest path!');
+                    filepath = path.join(path.dirname(file.path), jp); 
+                }
+                </handleFileSystemChecks>
+            }
+            else {
+                <handleRelativePath>
+                var filepath = path.join(options.dest, jp);
+                </handleRelativePath>
+            }
+            
+            <readInlineContent>
+            content += readInlineContent(filepath, buildInfo, reqModuleJS, options) + '\n';
+            </readInlineContent>
+        }
+    }
+    return content;
+}
+</inlineFileHandling>
+
+<getNormalizedPath>
+function getAbsolutePath(url) {
+    <resolveAbsolutePath>
+    if (!path.isAbsolute(url)) {
+        url = path.join(__dirname, url);
+    }
+    </resolveAbsolutePath>
+    
+    <normalizePath>
+    return path.normalize(url)
+    </normalizePath>
+}
+</getNormalizedPath>
+```

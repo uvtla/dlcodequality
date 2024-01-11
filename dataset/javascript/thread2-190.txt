@@ -1,0 +1,270 @@
+```javascript
+<Client>
+function Client(settings, callback) {
+  this.debug('new Client', settings.url); // Part of logging, can be considered part of the construction responsibility
+
+  <mixinDependencies>
+  require('object-emitter').mixin(this); 
+  require('object-settings').mixin(this);
+  </mixinDependencies>
+
+  <configureSettings>
+  this.set(Client.defaults).set(settings);
+  </configureSettings>
+
+  <parseAndSetURL>
+  this.set('hostname', this.common.parseURL(this.get('url')).hostname);
+  this.set('auth', this.common.parseURL(this.get('url')).auth);
+  this.set('blog', this.get('blog') || this.get('blogId'));
+  </parseAndSetURL>
+
+  <defineProperties>
+  Object.defineProperties(this, {
+    __client: {
+      value: this.common.createClient({
+        url: settings.url,
+        username: settings.username,
+        password: settings.password,
+        blogId: self.get('blog')
+      }),
+      enumerable: false,
+      configurable: true,
+      writable: false
+    },
+    __queue: {
+      value: [],
+      enumerable: false,
+      configurable: true,
+      writable: false
+    }
+  });
+  </defineProperties>
+
+  <detectAndListMethods>
+  this.detectBlog(function (err, blog, response) {
+    if (err) {
+      return self.onceReady.call(self, err);
+    }
+
+    self.set('blogs', response);
+
+    self.listMethods(self.onceReady.bind(self));
+
+    if (_.isFunction(callback)) {
+      self.once('connected', callback);
+    }
+
+    self.nextTick(self.emit, 'ready', null, self);
+  });
+  </detectAndListMethods>
+
+  return this;
+}
+</Client>
+
+<separate>
+function separate(from, to) {
+  from = this.toDate(from);
+  to = this.toDate(to);
+  if (!from || !to) {
+    return null;
+  }
+  return separateFn(from, to, this.startMonth);
+}
+</separate>
+
+<maybeMkdir>
+function maybeMkdir(path, opts, callback) {
+  if (typeof opts === 'function') {
+    callback = opts;
+    opts = null;
+  }
+
+  fs.exists(path, function (exists) {
+    <deleteIfNeeded>
+    if (opts && opts.purge) {
+      rimraf.sync(path);
+    } else {
+      if (exists) {
+        return callback && callback();
+      }
+    }
+    </deleteIfNeeded>
+
+    <attemptDirectoryCreation>
+    (function tryMkdir() {
+      fs.mkdir(path, function (err) {
+        if (err) {
+          debug('error maybeMkdir, will try again ' + path + ': ' + err);
+          return tryMkdir();
+        }
+
+        return callback(null);
+      });
+    })();
+    </attemptDirectoryCreation>
+  });
+}
+</maybeMkdir>
+
+<__deserializeIntVar>
+function __deserializeIntVar(buffer, start, options) {
+  const dataBuff = new Uint8Array(buffer);
+
+  <validateIntVarSize>
+  if (dataBuff[start] > 127) {
+    throw new Error("Cannot support IntVar whose size is greater than 127 bytes");
+  }
+  </validateIntVarSize>
+
+  <deserializeIntVar>
+  let index = 0, data_size = dataBuff[start], end = start + 1;
+  const result_buffer = new Uint8Array(data_size);
+  while (data_size-- > 0) {
+    result_buffer[index] = dataBuff[end];
+    index++; end++;
+  }
+  </deserializeIntVar>
+
+  <createIntVar>
+  let data = new IntVar(result_buffer);
+  return { anchor: end, value: data };
+  </createIntVar>
+}
+</__deserializeIntVar>
+
+<getPythonCode>
+function getPythonCode(options) {
+  var pythonCode = [],
+      internalPylint = !options.externalPylint,
+      pylintPath = path.join(__dirname, 'lib'),
+      initHook = options.initHook;
+  delete options.initHook;
+
+  <appendInitHook>
+  if (initHook) {
+    pythonCode.push(initHook);
+  }
+  </appendInitHook>
+
+  <configureInternalPylint>
+  if (internalPylint) {
+    pythonCode.push('import sys', 'sys.path.insert(0, r"' + pylintPath + '")');
+  }
+  </configureInternalPylint>
+
+  <runPylint>
+  pythonCode.push('import pylint', 'pylint.run_pylint()');
+  delete options.externalPylint;
+  </runPylint>
+
+  return pythonCode.join('; ');
+}
+</getPythonCode>
+
+<readTokenFile>
+function readTokenFile(tokenFile) {
+  return new Promise((resolve, reject) => {
+    <readFile>
+    fs.readFile(tokenFile, 'utf8', (err, token) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(token.slice(0, 40));
+    });
+    </readFile>
+  });
+}
+</readTokenFile>
+
+<authenticate>
+function authenticate(name, pass, fn) {
+  <logAuthenticationAttempt>
+  if (!module.parent) console.log('authenticating %s:%s', name, pass);
+  </logAuthenticationAttempt>
+
+  <findUser>
+  var user = users[name];
+  </findUser>
+
+  <validateUserAndPassword>
+  if (!user) return fn(new Error('cannot find user'));
+
+  
+  hash({ password: pass, salt: user.salt }, function (err, pass, salt, hash) {
+    if (err) return fn(err);
+    if (hash === user.hash) return fn(null, user)
+    fn(new Error('invalid password'));
+  });
+  </validateUserAndPassword>
+}
+</authenticate>
+
+<encodeHtml>
+function (html) {
+  return html.toString()
+    .replace(/&/gmi, '&amp;')
+    .replace(/"/gmi, '&quot;')
+    .replace(/>/gmi, '&gt;')
+    .replace(/</gmi, '&lt;')
+}
+</encodeHtml>
+
+<addTree>
+function addTree(zip, src) {
+  const srcN = path.normalize(src);
+
+  <readAndAddFiles>
+  return fse
+    .readdirAsync(srcN)
+    .map(name => {
+      <getFileInfo>
+      const srcPath = path.join(srcN, name);
+
+      return fse.statAsync(srcPath).then(stat => {
+        <handleDirectory>
+        if (stat.isDirectory()) {
+          return addTree(zip.folder(name), srcPath);
+        } else {
+        </handleDirectory>
+
+        <addFileToZip>
+          const opts = { date: stat.mtime, unixPermissions: stat.mode };
+          return fse
+            .readFileAsync(srcPath)
+            .then(data => zip.file(name, data, opts));
+        </addFileToZip>
+      });
+    })
+    .then(() => zip); 
+  </readAndAddFiles>
+}
+</addTree>
+
+<syncCollections>
+function(to) {
+  <registerEventListeners>
+  to.listenTo(this, "add", function(model) {
+    this.add(model);
+  });
+  to.listenTo(this, "remove", function(model) {
+    this.remove(model);
+  });
+  to.listenTo(this, "reset", function(collection, options) {
+    _.each(options.previousModels, function(model) {
+      this.remove(model);
+    }, this);
+    collection.each(function(model) {
+      this.add(model);
+    }, this);
+  });
+  </registerEventListeners>
+
+  <synchronizeInitialModels>
+  this.each(function(model) {
+    to.add(model);
+  });
+  </synchronizeInitialModels>
+}
+</syncCollections>
+```

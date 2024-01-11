@@ -1,0 +1,230 @@
+```javascript
+<mkitem>
+function mkitem(expr, key, val) {
+  var item = {}
+  item[expr.key] = key
+  if (expr.pos) item[expr.pos] = val
+  return item
+}
+</mkitem>
+
+<Validation>
+function (Vue) {
+  var ValidityGroup = Group(Vue);
+
+  var Validation = function Validation (options) {
+    if ( options === void 0 ) options = {};
+
+    this._result = {};
+    this._host = options.host;
+    this._named = Object.create(null);
+    this._group = Object.create(null);
+    this._validities = Object.create(null);
+    this._beginDestroy = false;
+    Vue.util.defineReactive(this._host, '$validation', this._result);
+  };
+
+  Validation.prototype.register = function register (
+    field,
+    validity,
+    options
+  ) {
+    if ( options === void 0 ) options = {};
+
+    <ensureValidityManager>
+    if (!this._validityManager) {
+      this._validityManager = new Vue(ValidityGroup);
+      this._watchValidityResult();
+    }
+    </ensureValidityManager>
+
+    <registerValidity>
+    if (this._validities[field]) {
+      return
+    }
+    this._validities[field] = validity;
+    </registerValidity>
+
+    <manageGroupAndNamedValidity>
+    // similar logic repeated for managing group and named validities
+    var named = options.named;
+    var group = options.group;
+    // snipped for brevity...
+    </manageGroupAndNamedValidity>
+  };
+
+  // Other methods excluded for brevity...
+
+  return Validation
+}
+</Validation>
+
+<findDataByFlavor>
+function(dataFlavor){
+  for (var i = 0; i < this.data.length; i++){
+    var tempdata = this.data[i];
+    if (tempdata.dataFlavor === dataFlavor){
+      return tempdata.val;
+    }
+  }
+}
+</findDataByFlavor>
+
+<groupContribs>
+function _groupContribs (contribs) {
+  let groups = new Map()
+  groups.set('NOGROUP', [])
+  for (let contrib of contribs) {
+    let groupId = contrib.group
+    if (groupId) {
+      if (!groups.has(groupId)) {
+        groups.set(groupId, [])
+      }
+      groups.get(groupId).push(contrib)
+    } else {
+      groups.get('NOGROUP').push(contrib)
+    }
+  }
+  return groups
+}
+</groupContribs>
+
+<scroll>
+function scroll(comp, destOffset = 0, times = 20, propName = 'scrollTop') {
+  if (!comp || !comp.dom) throw new Error('invalid params')
+  if (typeof times !== 'number' || times <= 0) times = 1
+
+  destOffset = destOffset < 0 ? 0 : destOffset
+
+  const dom = comp.dom
+  const delta = destOffset - dom[propName]
+  
+  const unit = ~~(delta / times)
+  const env = _.getEnv()
+
+  <domManipulationForNodejs>
+  if (env === 'nodejs') {
+    for (let i = 0; i < times; i++) {
+      setTimeout(() => {
+        if (i === times - 1) dom[propName] = destOffset
+        else dom[propName] += unit
+        dom.dispatchEvent(new Event('scroll', {bubbles: true, cancelable: false}))
+      }, 0)
+    }
+  } else {
+  </domManipulationForNodejs>
+    <domManipulationForBrowser>
+    dom[propName] = destOffset
+    </domManipulationForBrowser>
+  }
+}
+</scroll>
+
+<initModule>
+function initModule(forge) {
+  forge.pki = forge.pki || {};
+  var oids = forge.pki.oids = forge.oids = forge.oids || {};
+
+  <setupOids>
+  // Mapping of numerous OIDs to their respective string representation
+  oids['1.2.840.113549.1.1.1'] = 'rsaEncryption';
+  // ...more OIDs mapping skipped for brevity...
+  </setupOids>
+}
+</initModule>
+
+<functionWithNoNameAndVisibleToggle>
+function () {
+  if (!this.visible) {
+    <addChildToGameWorld>
+    me.game.world.addChild(this, Infinity);
+    </addChildToGameWorld>
+
+    <registerPointerEvent>
+    me.input.registerPointerEvent("pointerdown", this, this.onClick.bind(this));
+    </registerPointerEvent>
+
+    <setVisibilityAndRepaint>
+    this.visible = true;
+    me.game.repaint();
+    </setVisibilityAndRepaint>
+  }
+}
+</functionWithNoNameAndVisibleToggle>
+
+<taskSchedulingFunction>
+function(started_time) {
+  <initializeTimers>
+  var now = new Date().getTime();
+  this._started_time = started_time || now;
+  this._end_time = this._started_time + this._duration;
+  </initializeTimers>
+
+  <taskScheduling>
+  if (now < this._end_time) {
+    this._is_running = true;
+    Lava.Cron.acceptTask(this);
+    this.onTimer(now);
+  } else {
+    this.onTimer(this._end_time);
+  }
+  </taskScheduling>
+}
+</taskSchedulingFunction>
+
+<attributeTransferFunction>
+function (source, destination, attrs) {
+  <validateSourceAndDestination>
+  if (!Node.isElement(source) || !Node.isElement(destination)) return;
+  </validateSourceAndDestination>
+  <transferAttributes>
+  Arr.each(attrs, function (attr) {
+    transferOne(source, destination, attr);
+  });
+  </transferAttributes>
+}
+</attributeTransferFunction>
+
+<callHookFunction>
+function callHook(name, getArgument, handleResult, output) {
+  getArgument = getArgument || defaultGetArgument;
+  handleResult = handleResult || defaultHandleResult;
+
+  var logger = output.getLogger();
+  var plugins = output.getPlugins();
+
+  <logHookCall>
+  logger.debug.ln('calling hook "' + name + '"');
+  </logHookCall>
+
+  <setupContextForCall>
+  var context = Api.encodeGlobal(output);
+  </setupContextForCall>
+
+  return timing.measure(
+    'call.hook.' + name,
+
+    <handleArgumentAndGetResult>
+    Promise(getArgument(output))
+    
+    .then(function(arg) {
+      return Promise.reduce(plugins, function(prev, plugin) {
+        var hook = plugin.getHook(name);
+        if (!hook) {
+          return prev;
+        }
+        return hook.call(context, prev);
+      }, arg);
+    })
+    </handleArgumentAndGetResult>
+
+    <handleAndDecodeResult>
+    .then(function(result) {
+      output = Api.decodeGlobal(output, context);
+      return handleResult(output, result);
+    })
+    </handleAndDecodeResult>
+  );
+}
+</callHookFunction>
+```

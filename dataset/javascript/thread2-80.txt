@@ -1,0 +1,208 @@
+<pre>
+<prepend>
+function prepend(element, content) {
+    
+    if (isString(content)) {
+        return element.insertAdjacentHTML('afterBegin', content);
+    } else {
+        return element.insertBefore(normalizeContent(content), element.firstChild);
+    }
+    
+}
+</prepend>
+
+<configureEndpoint>
+function (ravelInstance, resource, methodType, methodName) {
+    <deriveSubpath>
+    let subpath = '';
+    if (methodName === 'get' || methodName === 'put' || methodName === 'delete') {
+        subpath = '/:id';
+    }
+    </deriveSubpath>
+    
+    <invokeOrReportNotImplemented>
+    if (typeof resource[methodName] === 'function') {
+        
+        mapping(methodType, subpath)(
+            Object.getPrototypeOf(resource),
+            methodName,
+            {
+                value: resource[methodName].bind(resource)
+            }
+        );
+    } else {
+        
+        mapping(
+            methodType,
+            subpath,
+            httpCodes.NOT_IMPLEMENTED,
+            true
+        )(Object.getPrototypeOf(resource).constructor, undefined);
+    }
+    </invokeOrReportNotImplemented>
+}
+</configureEndpoint>
+
+<interpolate>
+function interpolate(t) {
+
+    var A = Math.sin(d - (t *= d)) / sd,
+        B = Math.sin(t) / sd,
+        x = A * cy0 * cx0 + B * cy1 * cx1,
+        y = A * cy0 * sx0 + B * cy1 * sx1,
+        z = A * sy0       + B * sy1;
+    return [
+        Math.atan2(y, x) / d3_geo_radians,
+        Math.atan2(z, Math.sqrt(x * x + y * y)) / d3_geo_radians
+    ];
+
+}
+</interpolate>
+
+<removeEventListeners>
+function (types, listener) {
+
+    types = utils.trim(types).split(/\s+/);
+    for (var i = 0, ti; ti = types[i++];) {
+        utils.removeItem(getListener(this, ti) || [], listener);
+    }
+    
+}
+</removeEventListeners>
+
+<getSourceType>
+function(source) {
+    
+    if (source === null) {
+      return Augmented.Utility.TransformerType.xNull;
+    } else if (typeof source === 'string') {
+      return Augmented.Utility.TransformerType.xString;
+    } else if (typeof source === 'number') {
+      return Augmented.Utility.TransformerType.xNumber;
+    } else if (typeof source === 'boolean') {
+      return Augmented.Utility.TransformerType.xBoolean;
+    } else if (Array.isArray(source)) {
+      return Augmented.Utility.TransformerType.xArray;
+    } else if (typeof source === 'object') {
+      return Augmented.Utility.TransformerType.xObject;
+    }
+    
+}
+</getSourceType>
+
+<stopContainer>
+function(cid) {
+    
+    <findAndBindContainer>
+    return findContainerThrows(cid)
+    .bind({})
+    .then(function(container) {
+      this.container = container;
+    })
+    </findAndBindContainer>
+    
+    <checkIfRunning>
+    .then(function() {
+      return isRunning(cid);
+    })
+    </checkIfRunning>
+    
+    <attemptToStopContainer>
+    .then(function(isRunning) {
+      var self = this;
+      if (isRunning) {
+        return Promise.fromNode(function(cb) {
+          self.container.stop(cb);
+        });
+      }
+    })
+    </attemptToStopContainer>
+    
+    <handleStopContainerError>
+    .catch(function(err) {
+      throw new VError(err, 'Error stopping container %s.', cid);
+    });
+    </handleStopContainerError>
+
+}
+</stopContainer>
+
+<decodeMessage>
+function (message, payloadType, encoding) {
+    return module.exports.decode(message.payload, payloadType, encoding)
+}
+</decodeMessage>
+
+<findElementIndex>
+function findElementIndex(tableData, rowIndex, colIndex) {
+    
+    const cellData = tableData[rowIndex][colIndex];
+
+    rowIndex = util.isExisty(cellData.rowMergeWith) ? cellData.rowMergeWith : rowIndex;
+    colIndex = util.isExisty(cellData.colMergeWith) ? cellData.colMergeWith : colIndex;
+
+    return tableData[rowIndex][colIndex].elementIndex;
+    
+}
+</findElementIndex>
+
+<_fnAddColumn>
+function _fnAddColumn(oSettings, nTh) {
+
+    <addColumnInitialization>
+    var oDefaults = DataTable.defaults.columns;
+    var iCol = oSettings.aoColumns.length;
+    var oCol = $.extend({}, DataTable.models.oColumn, oDefaults, {
+        "sSortingClass": oSettings.oClasses.sSortable,
+        "sSortingClassJUI": oSettings.oClasses.sSortJUI,
+        "nTh": nTh ? nTh : document.createElement('th'),
+        "sTitle": oDefaults.sTitle ? oDefaults.sTitle : nTh ? nTh.innerHTML : '',
+        "aDataSort": oDefaults.aDataSort ? oDefaults.aDataSort : [iCol],
+        "mDataProp": oDefaults.mDataProp ? oDefaults.oDefaults : iCol
+    });
+    oSettings.aoColumns.push(oCol);
+    </addColumnInitialization>
+    
+    <configurePreSearchColumns>
+    if (oSettings.aoPreSearchCols[iCol] === undefined || oSettings.aoPreSearchCols[iCol] === null) {
+        oSettings.aoPreSearchCols[iCol] = $.extend({}, DataTable.models.oSearch);
+    } else {
+        var oPre = oSettings.aoPreSearchCols[iCol];
+        
+        if (oPre.bRegex === undefined) {
+            oPre.bRegex = true;
+        }
+        
+        if (oPre.bSmart === undefined) {
+            oPre.bSmart = true;
+        }
+        
+        if (oPre.bCaseInsensitive === undefined) {
+            oPre.bCaseInsensitive = true;
+        }
+    }
+    </configurePreSearchColumns>
+    
+    <finalizeColumnOptions>
+    _fnColumnOptions(oSettings, iCol, null);
+    </finalizeColumnOptions>
+
+}
+</_fnAddColumn>
+
+<iterateOverCallbacks>
+function iterateOverCallbacks(bucket, args) {
+
+    bucket.forEach(function iterator(callback) {
+        
+        nextTick(function queuedCallback() {
+            callback.apply(null, args);
+        });
+        
+    });
+    
+}
+</iterateOverCallbacks>
+</pre>
+
+Each function has been annotated with SRP tags. The tags encapsulate the different responsibilities or code blocks which potentially violate the Single Responsibility Principle. It is worth noting that determining whether a function violates SRP can vary depending on how responsibilities are interpreted within the broader context of an application's architecture.

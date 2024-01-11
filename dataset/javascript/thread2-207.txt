@@ -1,0 +1,359 @@
+```javascript
+<getHeaderElement>
+function(theadCell) {
+    var elTh;    
+    if (theadCell instanceof YAHOO.widget.Column) {
+        var oColumn = theadCell;
+        <getColumnHeader>
+        elTh = oColumn.getThEl();
+        </getColumnHeader>
+        if(elTh) {
+            return elTh;
+        }
+    }    
+    else {
+        <getDomElement>
+        var el = Dom.get(theadCell);
+        </getDomElement>
+
+        if(el && (el.ownerDocument == document)) {            
+            if(el.nodeName.toLowerCase() != "th") {                
+                <findAncestor>
+                elTh = Dom.getAncestorByTagName(el,"th");
+                </findAncestor>
+            }
+            else {
+                elTh = el;
+            }
+
+            return elTh;
+        }
+    }
+    return null;
+}
+</getHeaderElement>
+
+<readYml>
+function readYml(file, fn) {
+
+  var m;
+  <initializeApi>
+  var api = {};
+  </initializeApi>
+  <safeLoadYaml>
+  var resource = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
+  </safeLoadYaml>
+  <iteratePaths>
+  var paths = Object.keys(resource.paths);
+  _.each(paths, function(path) {
+    <handleApiPrefix>
+    if (options.apiPrefix && path.indexOf(options.apiPrefix) === 0){
+        path = path.replace(options.apiPrefix, "");
+    }
+    </handleApiPrefix>
+    <assignApiProperties>
+    api.resourcePath = path;
+    api.description = resource.description || "";
+    descriptor.paths[path] = resource.paths[path];
+    </assignApiProperties>
+
+    <mergeDefinitions>
+    if (descriptor.definitions && Object.keys(descriptor.definitions).length) {
+      m = _.merge(descriptor.definitions, resource.definitions);
+      descriptor.definitions = m;
+    } else {
+      descriptor.definitions = resource.definitions;
+    }
+    </mergeDefinitions>
+  });
+  </iteratePaths>
+
+  <callCallback>
+  fn();
+  </callCallback>
+}
+</readYml>
+
+<compileRegularHoliday>
+function compileRegularHoliday(value) {
+  if (typeof value === 'function') {
+    return value;
+  } else if (typeof value === 'string') {
+    <convertStringToHolidays>
+    return stringToRegularHolidays(value);
+    </convertStringToHolidays>
+  } else if (typeof value === 'number' &&  1 <= value && value <= 31) {
+    <constructNumberBasedHoliday>
+    var regular = {week: {}, day: {}, xweek:{}};
+    regular.day[value] = true;
+    return regular;
+    </constructNumberBasedHoliday>
+  } else {
+    <defaultHolidayStructure>
+    return {week: {}, day: {}, xweek:{}};
+    </defaultHolidayStructure>
+  }
+}
+</compileRegularHoliday>
+
+<RTCOutboundRTPStreamStats>
+function RTCOutboundRTPStreamStats(rTCOutboundRTPStreamStatsDict){
+  <checkInstance>
+  if(!(this instanceof RTCOutboundRTPStreamStats))
+    return new RTCOutboundRTPStreamStats(rTCOutboundRTPStreamStatsDict)
+  </checkInstance>
+
+  <checkProperties>
+  <checkPacketsSent>
+  checkType('int', 'rTCOutboundRTPStreamStatsDict.packetsSent', rTCOutboundRTPStreamStatsDict.packetsSent, {required: true});
+  </checkPacketsSent>
+  <checkBytesSent>
+  checkType('int', 'rTCOutboundRTPStreamStatsDict.bytesSent', rTCOutboundRTPStreamStatsDict.bytesSent, {required: true});
+  </checkBytesSent>
+  <checkTargetBitrate>
+  checkType('float', 'rTCOutboundRTPStreamStatsDict.targetBitrate', rTCOutboundRTPStreamStatsDict.targetBitrate, {required: true});
+  </checkTargetBitrate>
+  <checkRoundTripTime>
+  checkType('float', 'rTCOutboundRTPStreamStatsDict.roundTripTime', rTCOutboundRTPStreamStatsDict.roundTripTime, {required: true});
+  </checkRoundTripTime>
+  </checkProperties>
+
+  <callParentConstructor>
+  RTCOutboundRTPStreamStats.super_.call(this, rTCOutboundRTPStreamStatsDict)
+  </callParentConstructor>
+
+  <defineProperties>
+  Object.defineProperties(this, {
+    packetsSent: {
+      writable: true,
+      enumerable: true,
+      value: rTCOutboundRTPStreamStatsDict.packetsSent
+    },
+    bytesSent: {
+      writable: true,
+      enumerable: true,
+      value: rTCOutboundRTPStreamStatsDict.bytesSent
+    },
+    targetBitrate: {
+      writable: true,
+      enumerable: true,
+      value: rTCOutboundRTPStreamStatsDict.targetBitrate
+    },
+    roundTripTime: {
+      writable: true,
+      enumerable: true,
+      value: rTCOutboundRTPStreamStatsDict.roundTripTime
+    }
+  })
+  </defineProperties>
+}
+</RTCOutboundRTPStreamStats>
+
+<getConfigPath>
+function getConfigPath(configPaths) {
+  let conf = null;
+  <iterateConfigPaths>
+  some(configPaths, configPath => {
+    if (!configPath) return;
+    
+    <composeConfigPath>
+    const compiledConfigPath = template(configPath)(process.env);
+    let resolvedConfigPath = resolve(process.cwd(), compiledConfigPath);
+    const resolvedName = fileExists(resolvedConfigPath);
+    </composeConfigPath>
+
+    <checkResolvedConfigPath>
+    if (resolvedConfigPath && resolvedName) {
+      conf = resolvedName;
+    }
+    </checkResolvedConfigPath>
+
+    return conf;
+  });
+  </iterateConfigPaths>
+
+  <returnConfigPath>
+  return conf;
+  </returnConfigPath>
+}
+</getConfigPath>
+
+<sectionSpaces>
+function (req, res) {
+  let sectionId = req.query.oveSectionId;
+  if (sectionId === undefined) {  
+    <logAndSendAllSpaces>
+    log.debug('Returning parsed result of ' + Constants.SPACES_JSON_FILENAME);
+    Utils.sendMessage(res, HttpStatus.OK, JSON.stringify(server.spaces));
+    </logAndSendAllSpaces>
+  } else if (!server.state.get('sections[' + sectionId + ']')) {
+    <logAndSendEmptySuccess>
+    log.debug('Unable to produce list of spaces for section id:', sectionId);
+    Utils.sendEmptySuccess(res);
+    </logAndSendEmptySuccess>
+  } else {
+    <logAndSendSectionSpaces>
+    log.debug('Returning parsed result of ' + Constants.SPACES_JSON_FILENAME + ' for section id:', sectionId);
+    Utils.sendMessage(res, HttpStatus.OK, JSON.stringify(server.state.get('sections[' + sectionId + '][spaces]')));
+    </logAndSendSectionSpaces>
+  }
+}
+</sectionSpaces>
+
+<parseSearchString>
+function parseSearchString(str) {
+
+    <replaceXTyesInTeq>
+    str = tia.cU.replaceXTypesInTeq(str);
+    </replaceXTyesInTeq>
+
+    <defineRegex>
+    var re = /&(\w|\d|_|-)+/g;
+    </defineRegex>
+
+    <initializeSearchData>
+    var searchData = [];
+    var prevLastIndex = 0;
+    var query;
+    </initializeSearchData>
+
+    <extractAndStoreQueries>
+    while (true) {
+      var reResult = re.exec(str);
+
+      if (reResult === null) {
+        <handleLastQuery>
+        query = str.slice(prevLastIndex).trim();
+        if (query) {
+          searchData.push({
+            query: query,
+          });
+        }
+        </handleLastQuery>
+        return searchData;
+      }
+
+      <handleMatchedQueries>
+      query = str.slice(prevLastIndex, reResult.index).trim();
+      var reference = str.slice(reResult.index + 1, re.lastIndex).trim();
+      prevLastIndex = re.lastIndex;
+
+      if (query) {
+        searchData.push({
+          query: query,
+        });
+      }
+
+      searchData.push({
+        reference: reference,
+      });
+      </handleMatchedQueries>
+    }
+    </extractAndStoreQueries>
+  }
+</parseSearchString>
+
+<slide15>
+function slide15() {
+		
+    <createNewSlide>
+    var slide = pptx.addNewSlide();
+    slide.addNotes('API Docs: https://...');
+    slide.addTable( [ [{ text:'Chart Examples: Bubble Charts', options:gOptsTextL },gOptsTextR] ], gOptsTabOpts );
+    </createNewSlide>
+
+    <defineChartData>
+    var arrDataBubble1 = [
+        { name:'X-Axis',    values:[0.3,0.6,0.9,1.2,1.5,1.7] },
+        { name:'Y-Value 1', values:[1.3, 9, 7.5, 2.5, 7.5,  5], sizes:[1,4,2,3,7,4] },
+        { name:'Y-Value 2', values:[  5, 3,   2,   7,   2, 10], sizes:[9,7,9,2,4,8] }
+    ];
+    var arrDataBubble2 = [
+        { name:'X-Axis',   values:[1, 2, 3, 4, 5, 6] },
+        { name:'Airplane', values:[33, 20, 51, 65, 71, 75], sizes:[10,10,12,12,15,20] },
+        { name:'Train',    values:[99, 88, 77, 89, 99, 99], sizes:[20,20,22,22,25,30] },
+        { name:'Bus',      values:[21, 22, 25, 49, 59, 69], sizes:[11,11,13,13,16,21] }
+    ];
+    </defineChartData>
+
+    <createBubbleChartOptions>
+    var optsChartBubble1 = { ... };
+    var optsChartBubble2 = { ... };
+    var optsChartBubble3 = { ... };
+    var optsChartBubble4 = { ... };
+    </createBubbleChartOptions>
+    
+    <addChartsToSlide>
+    slide.addText( '.', { ... } );
+    slide.addChart( pptx.charts.BUBBLE, arrDataBubble1, optsChartBubble1 );
+    slide.addChart( pptx.charts.BUBBLE, arrDataBubble2, optsChartBubble2 );
+    slide.addChart( pptx.charts.BUBBLE, arrDataBubble1, optsChartBubble3 );
+    slide.addChart( pptx.charts.BUBBLE, arrDataBubble2, optsChartBubble4 );
+    </addChartsToSlide>
+}
+</slide15>
+
+<getTangentLine>
+function(t) {
+    <checkDifferentiability>
+    if (!this.isDifferentiable()) return null;
+    </checkDifferentiability>
+
+    <clampValue>
+    if (t < 0) t = 0;
+    else if (t > 1) t = 1;
+    </clampValue>
+
+    <calculateSkeletonPoints>
+    var skeletonPoints = this.getSkeletonPoints(t);
+    </calculateSkeletonPoints>
+
+    <constructTangentLine>
+    var p1 = skeletonPoints.startControlPoint2;
+    var p2 = skeletonPoints.dividerControlPoint1;
+    var tangentStart = skeletonPoints.divider;
+    var tangentLine = new Line(p1, p2);
+    tangentLine.translate(tangentStart.x - p1.x, tangentStart.y - p1.y); 
+    </constructTangentLine>
+
+    <returnTangentLine>
+    return tangentLine;
+    </returnTangentLine>
+}
+</getTangentLine>
+
+<adjustConnectedBlocks>
+function(e) {
+    <identifyConnectedBlocks>
+    var blockA = this.getInputTargetBlock('THEN');
+    var blockB = this.getInputTargetBlock('ELSE');
+    var parentConnection = this.outputConnection.targetConnection;
+    </identifyConnectedBlocks>
+
+    <checkCompatibility>
+    if ((blockA || blockB) && parentConnection) {
+      for (var i = 0; i < 2; i++) {
+        var block = (i == 1) ? blockA : blockB;
+        if (block && !block.outputConnection.checkType_(parentConnection)) {
+          <handleIncompatibleBlock>
+          Blockly.Events.setGroup(e.group);
+          if (parentConnection === this.prevParentConnection_) {
+            this.unplug();
+            parentConnection.getSourceBlock().bumpNeighbours_();
+          } else {
+            block.unplug();
+            block.bumpNeighbours_();
+          }
+          Blockly.Events.setGroup(false);
+          </handleIncompatibleBlock>
+        }
+      }
+    }
+    </checkCompatibility>
+
+    <storePreviousParentConnection>
+    this.prevParentConnection_ = parentConnection;
+    </storePreviousParentConnection>
+}
+</adjustConnectedBlocks>
+```

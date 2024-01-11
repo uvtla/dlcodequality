@@ -1,0 +1,280 @@
+```javascript
+<buildWebpack>
+function buildWebpack(config, previousFileSizes) {
+  console.log('Creating an optimized production build...');
+
+  let compiler = webpack(config);
+  return new Promise((resolve, reject) => {
+    <runWebpackCompiler>
+    compiler.run((err, stats) => {
+      let messages;
+      if (err) {
+        <handleWebpackError>
+        if (!err.message) {
+          return reject(err);
+        }
+        messages = formatWebpackMessages({
+          errors: [err.message],
+          warnings: [],
+        });
+        </handleWebpackError>
+      } else {
+        <formatWebpackMessages>
+        messages = formatWebpackMessages(
+          stats.toJson({ all: false, warnings: true, errors: true })
+        );
+        </formatWebpackMessages>
+      }
+      <processWebpackMessages>
+      if (messages.errors.length) {
+        
+        <limitErrorMessages>
+        if (messages.errors.length > 1) {
+          messages.errors.length = 1;
+        }
+        </limitErrorMessages>
+        return reject(new Error(messages.errors.join('\n\n')));
+      }
+      </processWebpackMessages>
+      <handleCIWarnings>
+      if (
+        process.env.CI &&
+        (typeof process.env.CI !== 'string' ||
+          process.env.CI.toLowerCase() !== 'false') &&
+        messages.warnings.length
+      ) {
+        console.log(
+          chalk.yellow(
+            '\nTreating warnings as errors because process.env.CI = true.\n' +
+              'Most CI servers set it automatically.\n'
+          )
+        );
+        return reject(new Error(messages.warnings.join('\n\n')));
+      }
+      </handleCIWarnings>
+
+      const resolveArgs = {
+        stats,
+        previousFileSizes,
+        warnings: messages.warnings,
+      };
+      <writeStatsJson>
+      if (writeStatsJson) {
+        return bfj
+          .write(paths.appBuild + '/bundle-stats.json', stats.toJson())
+          .then(() => resolve(resolveArgs))
+          .catch(error => reject(new Error(error)));
+      }
+      </writeStatsJson>
+
+      return resolve(resolveArgs);
+    });
+    </runWebpackCompiler>
+  });
+}
+</buildWebpack>
+
+<BINDING_anchor>
+function BINDING_anchor($scope, key, element, getControl, bindings) {
+  <watchBinding>
+        bindings.push($scope.$watch(key, function (newValue, oldValue) {
+            <updateAnchorBinding>
+            newValue = typeof newValue === "string" ? select(newValue, element) : newValue;
+            oldValue = typeof oldValue === "string" ? select(oldValue, element) : oldValue;
+            if (oldValue && oldValue._anchorClick) {
+                oldValue.removeEventListener("click", oldValue._anchorClick);
+                oldValue._anchorClick = null;
+            }
+            if (newValue && !newValue._anchorClick) {
+                newValue._anchorClick = function () { getControl().show(); };
+                newValue.addEventListener("click", newValue._anchorClick);
+            }
+            </updateAnchorBinding>
+            return newValue;
+        }));
+        </watchBinding>
+        var anchor = $scope[key];
+        return typeof anchor === "string" ? select(anchor, element) : anchor;
+    }
+</BINDING_anchor>
+
+<updateResizeLine>
+function updateResizeLine( cell, uetable ) {
+
+  <calculateLinePosition>
+        var line = getResizeLineByUETable.call( this ),
+            table = uetable.table,
+            styles = {
+                top: domUtils.getXY( table ).y + 'px',
+                left: domUtils.getXY( cell).x + cell.offsetWidth - cellBorderWidth + 'px',
+                display: 'block',
+                height: table.offsetHeight + 'px'
+            };
+        </calculateLinePosition>
+
+  <applyStylesToLine>
+        utils.extend( line.style, styles );
+        </applyStylesToLine>
+
+    }
+</updateResizeLine>
+
+<isServerHtmlFileExt>
+function isServerHtmlFileExt(filePath) {
+  <checkFilePath>
+        if (!filePath) {
+            return false;
+        }
+        </checkFilePath>
+
+  <determineServerHtmlFileType>
+        return (_serverHtmlFileExts.indexOf(LanguageManager.getLanguageForPath(filePath).getId()) !== -1);
+        </determineServerHtmlFileType>
+    }
+</isServerHtmlFileExt>
+
+<readCard>
+function readCard() {
+  <scardReadCallback>
+	pcsc.scardRead( function(evt) {
+		if ( evt ) {
+			
+			<processReaderType>
+			evt.reader.type = getType(evt.reader.name);
+			</processReaderType>
+
+			<processCardInformation>
+			if ( evt.card && evt.card.ATR ) {
+				var item = getItem(evt.card.ATR);
+				if (item && item.name) evt.card.name = item.name;
+				
+			}
+			</processCardInformation>
+
+			<emitReaderStateChange>
+			evt.name = 'readerStateChange';
+			process.send(evt);
+			</emitReaderStateChange>
+		}
+	});
+  </scardReadCallback>
+}
+</readCard>
+
+<removeViews>
+function (rootNode, viewKey) {
+  <findAllViews>
+            var views = this.getList('view', rootNode);
+            var self = this;
+            </findAllViews>
+
+  <removeEachView>
+            _.each(views, function (view) {
+                view.remove();
+            });
+            </removeEachView>
+
+            return this;
+        }
+</removeViews>
+
+<trollStdout>
+function trollStdout(opts, msg) {
+  <trollForStatusInApp>
+  var app = _.get(opts, 'app');
+  if (app && msg) {
+    app.trollForStatus(msg);
+  }
+  </trollForStatusInApp>
+}
+</trollStdout>
+
+<rotateZ>
+function rotateZ(out, a, b, c){
+  <prepareRotationParameters>
+    var bx = b[0]
+    var by = b[1]
+    var px = a[0] - bx
+    var py = a[1] - by
+    var sc = Math.sin(c)
+    var cc = Math.cos(c)
+    </prepareRotationParameters>
+
+  <performRotation>
+    out[0] = bx + px * cc - py * sc
+    out[1] = by + px * sc + py * cc
+    out[2] = a[2]
+    </performRotation>
+  
+    return out
+}
+</rotateZ>
+
+<syncEvent>
+function syncEvent(emitters, eventName, context, callback) {
+  var thisKey = '';
+  <initializeEventListener>
+  var eventListener = getListener(eventName, context);
+  </initializeEventListener>
+  <attachListeners>
+  emitters.forEach(function (item) {
+    thisKey += '_' + item.constructor.name;
+    item.on(eventName, eventListener);
+  });
+  </attachListeners>
+  <setUpContextKey>
+  context[thisKey] = {emittersLength: emitters.length};
+  </setUpContextKey>
+  
+  <getListener>
+  function getListener(eventName, context) {
+    return function listener () {
+      <trackEventOccurrence>
+      var argsKey = '_' + eventName + Array.prototype.slice.call(arguments).join('_');
+      var elements = context[thisKey];
+      if (typeof elements[argsKey] === 'undefined') {
+        elements[argsKey] = 0;
+        return;
+      }
+      else if (elements[argsKey] < elements.emittersLength-2){
+        elements[argsKey] = elements[argsKey] + 1;
+        return;
+      }
+      delete elements[argsKey];
+      </trackEventOccurrence>
+      <invokeCallback>
+      callback.apply(context, Array.prototype.slice.call(arguments));
+      </invokeCallback>
+    };
+  }
+  </getListener>
+}
+</syncEvent>
+
+<Hub>
+function Hub() {
+  <logHubInstantiation>
+        log.info("instantiate hub");
+        </logHubInstantiation>
+        
+  <initializeHub>
+        var self = this;
+        
+        Hub.super_.call(self);
+        
+        self._subscribers = {};
+        
+        self._transport = undefined;
+        self._closed = false;
+        </initializeHub>
+        
+  <setUpCloseListener>
+        self.once('close', function handleClosed() {
+            self._closed = true;
+        });
+        </setUpCloseListener>
+        
+        return undefined;
+    }
+</Hub>
+```

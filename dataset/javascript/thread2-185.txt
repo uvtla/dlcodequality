@@ -1,0 +1,97 @@
+Here are the annotations for the provided JavaScript functions:
+
+Function 1: There are no distinct responsibilities to annotate as it's a concise function returning window dimensions.
+
+Function 2: Compliant with SRP.
+<formatURL>
+function formatURL(httpsOptions) {
+  // ...
+}
+</formatURL>
+
+Function 3: Compliant with SRP.
+<replace>
+function replace(searchValue, replaceValue) {
+      // ...
+}
+</replace>
+
+Function 4: Compliant with SRP.
+<getWriter>
+function getWriter(input) {
+  // ...
+}
+</getWriter>
+
+Function 5: SRP violation due to multiple responsibilities (accessing a current event, handling dynamic keys, and attaching/detaching event handlers).
+<getCurrentValue>
+function getCurrentValue(stream, key) {
+	// ...
+	<getEvent>
+	if (stream._currentEvent && stream._currentEvent.type === key) {
+		// ...
+	} else {
+		// ...
+		<handleDynamicKeys>
+		var names = keyNames[key];
+		if (!names) {
+			// ...
+		}
+		var VALUE,
+			valueHandler = function(value) {
+				// ...
+			};
+		stream[names.on](valueHandler);
+		stream[names.off](valueHandler);
+		</handleDynamicKeys>
+	}
+	</getEvent>
+}
+</getCurrentValue>
+
+Function 6: Compliant with SRP.
+<getMedia>
+function getMedia() {
+	// ...
+}
+</getMedia>
+
+Function 7: Compliant with SRP.
+<gamma>
+function gamma(x) {
+      // ...
+}
+</gamma>
+
+Function 8: Compliant with SRP.
+<validateCallback>
+function( tmp, self ) {
+      // ...
+}
+</validateCallback>
+
+Function 9: Compliant with SRP.
+<isModuleExportsStatement>
+function isModuleExportsStatement(expression) {
+    // ...
+}
+</isModuleExportsStatement>
+
+Function 10: SRP violation due to handling both the blocking of pointer events on touchmove and the unblocking on touchend.
+<cancelPointerOnScroll>
+function cancelPointerOnScroll() {
+    // ...
+    <blockPointer>
+        function blockPointer() {
+            // ...
+            <unblockPointer>
+            function unblockPointer() {
+                // ...
+            }
+            </unblockPointer>
+            // ...
+        }
+    </blockPointer>
+    // ...
+}
+</cancelPointerOnScroll>

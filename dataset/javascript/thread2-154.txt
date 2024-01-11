@@ -1,0 +1,236 @@
+```javascript
+<setAttribute>
+function setAttribute(element, name, value) {
+  assertType(element, Node, false, 'Invalid element specified'); // Validation of input
+  <setAttributeValue>
+  if (value === undefined || value === null || value === false)
+    element.removeAttribute(name);
+  else if (value === true)
+    element.setAttribute(name, '');
+  else
+    element.setAttribute(name, value);
+  </setAttributeValue>
+  <setDirty>
+  if (name === 'disabled' && element.setDirty)
+    element.setDirty(DirtyType.STATE);
+  </setDirty>
+}
+</setAttribute>
+
+<isTargetPath>
+function isTargetPath(srcPath, pathTest) {
+  return !srcPath ||
+    (Array.isArray(pathTest) ? pathTest : [pathTest]).some(function(test) {
+      return test && (test instanceof RegExp ? test.test(srcPath) : srcPath.indexOf(test) === 0);
+    });
+}
+</isTargetPath>
+
+<debugLoggerStart>
+function debugLoggerStart(logger, str) {
+    console.log();
+    console.log();
+    logger.debug("======================= [%s Start] =======================", str);
+}
+</debugLoggerStart>
+
+<replaceTableNames>
+function replaceTableNames(sql, identifiers, sequelize) {
+	const {queryInterface} = sequelize;
+	_.forIn(identifiers, (model, identifier) => { // Iterate over identifiers and replace in SQL
+		const tableName = model.getTableName();
+		sql = sql.replace(
+			new RegExp(`\\*${identifier}(?![a-zA-Z0-9_])`, 'g'), // Build regex pattern and replace
+			tableName.schema ? tableName.toString() : queryInterface.quoteIdentifier(tableName) // Handle schema existence
+		);
+	});
+	return sql; // Return the modified SQL statement
+}
+</replaceTableNames>
+
+<makeOpportunities>
+function makeOpportunities(agent) {
+    <groups>
+    let groups = function (id) {
+        if (id === undefined) {
+            return agent.request('get_opportunities_groups', undefined); // Fetch groups when no ID
+        }
+        else {
+            return new GroupImpl(agent, id); // Instantiate group implementation with ID
+        }
+    };
+    </groups>
+    <tasks>
+    let tasks = function (id) {
+        if (id === undefined) {
+            return agent.request('get_opportunities_tasks', undefined); // Fetch tasks when no ID
+        }
+        else {
+            return new TaskImpl(agent, id); // Instantiate task implementation with ID
+        }
+    };
+    </tasks>
+    return { groups, tasks }; // Return an object with groups and tasks functions
+}
+</makeOpportunities>
+
+<el>
+function el(tag, attrs) {
+  var n = el.air(create(tag)); // Create an element
+  if(attrs && n.attr) {
+    return n.attr(attrs); // Set attributes if provided
+  }
+  return n; // Return the created element
+}
+</el>
+
+<anonymousFunction>
+function () {
+    <dec3>
+    function dec3 (v) {
+      return Math.floor(v * 1000) / 1000; // Round decimal to 3 places
+    }
+    </dec3>
+    <paramInitialization>
+    var params = [];
+    var usingPreset = this.data.preset != 'none' ? this.presets[this.data.preset] : false;
+    </paramInitialization>
+    <presetSelection>
+    if (usingPreset) {
+      params.push('preset: ' + this.data.preset);
+    }
+    </presetSelection>
+    <schemaIteration>
+    for (var i in this.schema) {
+      <presetChecks>
+      if (i == 'preset' || (usingPreset && usingPreset[i] === undefined)) {
+        continue;
+      }
+      </presetChecks>
+      var def = usingPreset ? usingPreset[i] : this.schema[i].default;
+      <parameterGeneration>
+      var data = this.data[i];
+      var type = this.schema[i].type;
+      if (type == 'vec3') {
+        var coords = def;
+        if (typeof(def) == 'string') {
+          def = def.split(' ');
+          coords = {x: def[0], y: def[1], z: def[2]};
+        }
+        if (dec3(coords.x) != dec3(data.x) || dec3(coords.y) != dec3(data.y) || dec3(coords.z) != dec3(data.z)) {
+          params.push(i + ': ' + dec3(data.x) + ' ' + dec3(data.y) + ' ' + dec3(data.z));
+        }
+      }
+      else {
+        if (def != data) {
+          if (this.schema[i].type == 'number') {
+            data = dec3(data);
+          }
+          params.push(i + ': ' + data);
+        }
+      }
+      </parameterGeneration>
+    }
+    </schemaIteration>
+    console.log('%c' + params.join('; '), 'color: #f48;font-weight:bold'); // Output the formatted parameters
+}
+</anonymousFunction>
+
+<RenderManager>
+function RenderManager(generator, config, logger) {
+        events.EventEmitter.call(this);
+
+        this._generator = generator;
+        this._config = config;
+        this._logger = logger;
+
+        this._svgRenderers = {};
+        this._pixmapRenderers = {};
+
+        this._componentsByDocument = {};
+        this._pending = {};
+        this._working = {};
+
+        this._renderedAssetCount = 0;
+}
+</RenderManager>
+
+<gulpSassMonster>
+function gulpSassMonster (opts = {}, sync = false) {
+	<readBuffer>
+	function readBuffer (file, ...args) {
+		let cb = args[1];
+		<notSupportedFileCheck>
+		let notSupported = notSupportedFile(file, pluginError, {
+			silent: true
+		});
+		if (Array.isArray(notSupported)) {
+			let status = notSupported.shift();
+			if (status === 'isEmpty') {
+				file.extname = '.css';
+				return cb(null, file);
+			}
+			return cb(notSupported[0], notSupported[1]);
+		}
+		</notSupportedFileCheck>
+		<setupOptions>
+		const options = setupOptions(opts, file);
+		</setupOptions>
+		<renderSass>
+		if (sync) {
+			try {
+				let result = sass.renderSync(options);
+				pushFile(file, result, options, cb);
+			} catch (error) {
+				return cb(errorHandler(error, file));
+			}
+		} else {
+			sass.render(options, (error, result) => {
+				if (error) {
+					error = errorHandler(error, file);
+					return cb(error);
+				}
+				pushFile(file, result, options, cb);
+			});
+		}
+		</renderSass>
+	}
+	</readBuffer>
+	return through2.obj(readBuffer);
+}
+</gulpSassMonster>
+
+<buildLambdaSecurityGroup>
+function buildLambdaSecurityGroup({ name = 'LambdaExecutionSecurityGroup' } = {}) {
+  return {
+    [name]: {
+      Type: 'AWS::EC2::SecurityGroup',
+      Properties: {
+        GroupDescription: 'Lambda Execution Group',
+        VpcId: {
+          Ref: 'VPC',
+        },
+        Tags: [
+          {
+            Key: 'Name',
+            Value: {
+              'Fn::Join': [
+                '-',
+                [
+                  {
+                    Ref: 'AWS::StackName',
+                  },
+                  'lambda-exec',
+                ],
+              ],
+            },
+          },
+        ],
+      },
+    },
+  };
+}
+</buildLambdaSecurityGroup>
+```
+
+Please note that simple variable assignments and single line statements do not count as separate responsibilities, so they are not tagged unless they form part of a larger coherent block of instructions that serve a specific identifiable purpose within the function.

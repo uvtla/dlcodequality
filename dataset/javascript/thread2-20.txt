@@ -1,0 +1,186 @@
+<function(module, exports)>
+function(module, exports) {
+
+    'use strict';
+    
+    exports.__esModule = true;
+    exports['default'] = {
+      data: function data() {
+        return {
+          counter: 0,
+          name: 'zyy'
+        };
+      },
+    
+      methods: {
+        greet: function greet() {
+          alert('Hello ' + this.name);
+        },
+        say: function say(msg) {
+          alert(msg);
+        },
+        warn: function warn(msg, event) {
+          if (event) {
+            event.preventDefault();
+          }
+          alert(msg);
+        }
+      }
+    };
+    module.exports = exports['default'];
+
+ }
+</function(module, exports)>
+
+<function(name, fn)>
+function(name, fn) {
+    _.storeAPI[name] = fn;
+    for (var api in _.apis) {
+        _.apis[api][name] = fn;
+    }
+}
+</function(name, fn)>
+
+<function(name)>
+function(name) {
+    if (!this._states.hasOwnProperty(name))
+      throw new Error('unknown state "'+name+'"')
+
+    var extraArgs = _.toArray(arguments).slice(1)
+    this.currentState = name
+    this._callCallbacks(this._states[name].enter, extraArgs)
+}
+</function(name)>
+
+<function titlecase>
+function titlecase() {
+  return function(data, render) {
+    var text = render(data);
+    if (text.length === 0) {
+      return text;
+    }
+
+    return text[0].toUpperCase() + text.substring(1);
+  };
+}
+</function titlecase>
+
+<function intersectViewportAbove>
+function intersectViewportAbove([entry]) {
+    updateDirection();
+    const { isIntersecting, target } = entry;
+    const index = getIndex(target);
+    const ss = stepStates[index];
+
+    if (
+      isIntersecting &&
+      direction === 'down' &&
+      ss.direction !== 'down' &&
+      ss.state !== 'enter'
+    ) {
+      notifyStepEnter(target, 'down');
+      notifyStepExit(target, 'down');
+    }
+}
+</function intersectViewportAbove>
+
+<function processCodeMark>
+function processCodeMark(markTypes) {
+  const isInlineCode = markTypes.includes('inlineCode');
+  <filterMarks>
+  const filteredMarkTypes = isInlineCode ? without(markTypes, 'inlineCode') : markTypes;
+  </filterMarks>
+  
+  <defineTextNodeType>
+  const textNodeType = isInlineCode ? 'inlineCode' : 'html';
+  </defineTextNodeType>
+  
+  return { filteredMarkTypes, textNodeType };
+}
+</function processCodeMark>
+
+<function processItems>
+function processItems ( items, values, guid, counter ) {
+    if ( counter === void 0 ) counter = 0;
+
+    return items.map( function ( item ) {
+        if ( item.type === TEXT ) {
+            return item.template;
+        }
+
+        if ( item.fragment ) {
+            if ( item.fragment.iterations ) {
+                return item.fragment.iterations.map( function ( fragment ) {
+                    return processItems( fragment.items, values, guid, counter );
+                }).join( '' );
+            } else {
+                return processItems( item.fragment.items, values, guid, counter );
+            }
+        }
+
+        var placeholderId = "" + guid + "-" + (counter++);
+        var model = item.model || item.newModel;
+
+        values[ placeholderId ] = model ?
+            model.wrapper ?
+                model.wrapper.value :
+                model.get() :
+            undefined;
+
+        return '${' + placeholderId + '}';
+    }).join( '' );
+}
+</function processItems>
+
+<function(sx, sy, duration, easing, delay, callback)>
+function(sx, sy, duration, easing, delay, callback) {
+    return this.animate(new ScaleAnimator(sx, sy), duration, easing, delay, callback);
+}
+</function(sx, sy, duration, easing, delay, callback)>
+
+<function getGPUAggregationParams>
+function getGPUAggregationParams({boundingBox, cellSize, worldOrigin}) {
+  const {yMin, yMax, xMin, xMax} = boundingBox;
+  
+  <computeOrigins>
+  const originX = alignToCell(xMin - worldOrigin[0], cellSize[0]) + worldOrigin[0];
+  const originY = alignToCell(yMin - worldOrigin[1], cellSize[1]) + worldOrigin[1];
+  </computeOrigins>
+
+  <setupGrid>
+  const gridTransformMatrix = new Matrix4().translate([-1 * originX, -1 * originY, 0]);
+  const gridOrigin = [originX, originY];
+  const width = xMax - xMin + cellSize[0];
+  const height = yMax - yMin + cellSize[1];
+  const gridSize = [Math.ceil(width / cellSize[0]), Math.ceil(height / cellSize[1])];
+  </setupGrid>
+
+  return {
+    gridOrigin,
+    gridSize,
+    width,
+    height,
+    gridTransformMatrix
+  };
+}
+</function getGPUAggregationParams>
+
+<function getTweenVal>
+function getTweenVal(pos, units, begin, end, k, i, v) {
+    if (k == 'transform') {
+      v = {}
+      for (var t in begin[i][k]) {
+        v[t] = (t in end[i][k]) ? Math.round(((end[i][k][t] - begin[i][k][t]) * pos + begin[i][k][t]) * thousand) / thousand : begin[i][k][t]
+      }
+      return v
+    } else if (typeof begin[i][k] == 'string') {
+      return nextColor(pos, begin[i][k], end[i][k])
+    } else {
+      
+      v = Math.round(((end[i][k] - begin[i][k]) * pos + begin[i][k]) * thousand) / thousand
+      
+      if (!(k in unitless)) v += units[i][k] || 'px'
+      return v
+    }
+}
+</function getTweenVal>

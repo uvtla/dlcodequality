@@ -1,0 +1,241 @@
+<function_spawnProcessAndPipeOutput>
+function(args, options, cb) {
+    <processArguments>
+    args = !_.isArray(args) ? [args] : args;
+    args = options && args.concat(helper.optsToArgs(options)) || args;
+    </processArguments>
+    
+    <spawnChildProcess>
+    var child = grunt.util.spawn({
+        cmd: "node",
+        args: args
+    }, function (error, result, code) {
+        cb(error);
+    });
+    </spawnChildProcess>
+
+    <pipeToParentProcess>
+    child.stdout.pipe(process.stdout);
+    child.stderr.pipe(process.stderr);
+    </pipeToParentProcess>
+}
+</function_spawnProcessAndPipeOutput>
+
+<function_pixelToleranceCheck>
+function(pixel1, pixel2, tolerance) {
+    <checkTolerance>
+    var passes = true;
+
+    if (tolerance != null && pixel1 && pixel2) {
+        var dist = pixel1.distanceTo(pixel2);
+        if (dist > tolerance) {
+            passes = false;
+        }
+    }
+    </checkTolerance>
+    return passes;
+}
+</function_pixelToleranceCheck>
+
+<function_unsubscribeFromChannel>
+function(channel, fn, context) {
+    <checkChannelExistence>
+    if (!channels[channel]) return;
+    </checkChannelExistence>
+
+    <unsubscribeLoop>
+    var subscription;
+    for (var i = 0; i < channels[channel].length; i++) {
+        subscription = channels[channel][i];
+        if (subscription.fn === fn && subscription.context === context) {
+            channels[channel].splice(i, 1);
+            i--;
+        }
+    }
+    </unsubscribeLoop>
+}
+</function_unsubscribeFromChannel>
+
+<function_validateAndPerformAfterAction>
+function() {
+    <validateUnknownAttributes>
+    var key, unknownAttrs = [];
+    for (key in obj) {
+        if (!self.validators.hasOwnProperty(key))
+            unknownAttrs.push(key);
+    }
+    if (unknownAttrs.length)
+        self._merge(validationErrors, 'unknown attributes [' + unknownAttrs.join(', ') + ']', prefix);
+    </validateUnknownAttributes>
+
+    <afterValidationAction>
+    if (isValid && self.after) {
+        try {
+            self.after.call(obj);
+        } catch (err) {
+            if (!_handleError(err)) return done(err);
+        }
+    }
+    </afterValidationAction>
+    done(null, validationErrors);
+}
+</function_validateAndPerformAfterAction>
+
+<function_bindMethodToScope>
+function bind(scope, method) {
+    <argumentPreparation>
+    var args = slice.call(arguments, 2);
+    </argumentPreparation>
+
+    <validateAndResolveMethod>
+    if (typeof method === 'string') {
+        method = scope[method];
+    }
+    if (!method) {
+        throw new Error('Proxy: method `' + method + '` does not exist');
+    }
+    </validateAndResolveMethod>
+
+    <methodBinding>
+    return function () {
+        return method.apply(scope, concat.apply(args, arguments));
+    };
+    </methodBinding>
+}
+</function_bindMethodToScope>
+
+<function_updateTagWithValidationAndCleanup>
+function updateTag(tag, tagData) {
+    <validateTagAndMacAddress>
+    if (!tag) return;
+    if (tagData.mac && (tag.wirelessTagManager.mac !== tagData.mac)) {
+        throw new Error("expected tag " + tag.uuid
+            + " to be with tag manager " + tag.mac
+            + " but is reported to be with " + tagData.mac);
+    }
+    </validateTagAndMacAddress>
+
+    <cleanupTagProperties>
+    managerProps.forEach((k) => { delete tagData[k] });
+    </cleanupTagProperties>
+    
+    <assignTagData>
+    tag.data = tagData;
+    </assignTagData>
+}
+</function_updateTagWithValidationAndCleanup>
+
+<function_initiateSessionAndUpdateFileReceiver>
+function(changes, cb) {
+    <logAndGetState>
+    var self = this;
+    this._log('info', 'Initiating incoming session');
+    this.state = 'pending';
+    </logAndGetState>
+
+    <prepareAndStartReceiver>
+    this.pc.isInitiator = false;
+    var desc = changes.contents[0].application;
+    this.receiver = new FileTransfer.Receiver({ hash: desc.offer.hash.algo });
+    this.receiver.on('progress', function (received, size) {
+        self._log('info', 'Receive progress ' + received + '/' + size);
+    });
+    this.receiver.on('receivedFile', function (file) {
+        self.receivedFile = file;
+        self.maybeReceivedFile();
+    });
+    this.receiver.metadata = desc.offer;
+    </prepareAndStartReceiver>
+
+    <updateApplicationTypeAndHandleOffer>
+    changes.contents[0].application = {
+        applicationType: 'datachannel'
+    };
+    this.pc.handleOffer({
+        type: 'offer',
+        jingle: changes
+    }, function (err) {
+        if (err) {
+            self._log('error', 'Could not create WebRTC answer');
+            return cb({ condition: 'general-error' });
+        }
+        cb();
+    });
+    </updateApplicationTypeAndHandleOffer>
+}
+</function_initiateSessionAndUpdateFileReceiver>
+
+<function_generatePasswordFromDateAndSeed>
+function genPassOfDay(d, s = DEFAULT_SEED) {
+    <validateInputs>
+    if (!(d instanceof Date)) {
+        throw new TypeError('Date is not a Date instance');
+    }
+    if (typeof s !== 'string') {
+        throw new TypeError('Seed is not a String instance');
+    }
+    if (s.length < 1) {
+        throw new Error('Seed min length: 1');
+    }
+    </validateInputs>
+
+    <generatePassword>
+    const seed = s.repeat(10);
+    const year = d.getFullYear() % 100;
+    const month = d.getMonth() + 1;
+    const dayOfMonth = d.getDate();
+    const dayOfWeek = d.getDay() === 0 ? 6 : d.getDay() - 1;
+    
+    const l1 = TABLE1[dayOfWeek].slice(0);
+    // ... rest of password generation...
+    </generatePassword>
+    
+    <encodePassword>
+    return l5.map(i => ALPHANUM[i]).join('');
+    </encodePassword>
+}
+</function_generatePasswordFromDateAndSeed>
+
+<function_defaultWrapperForChart>
+function defaultWrapper(_) {
+    <generateDefaultChartData>
+    switch (_) {
+        case 'title': return {
+            enable: false,
+            text: 'Write Your Title',
+            className: 'h4',
+            css: {
+                width: scope.options.chart.width + 'px',
+                textAlign: 'center'
+            }
+        };
+        case 'subtitle': return {
+            enable: false,
+            text: 'Write Your Subtitle',
+            css: {
+                width: scope.options.chart.width + 'px',
+                textAlign: 'center'
+            }
+        };
+        case 'caption': return {
+            enable: false,
+            text: 'Figure 1. Write Your Caption text.',
+            css: {
+                width: scope.options.chart.width + 'px',
+                textAlign: 'center'
+            }
+        };
+    }
+    </generateDefaultChartData>
+}
+</function_defaultWrapperForChart>
+
+<function_returnValidationError>
+function invalid(res, statusCode, data) {
+    return res.status(data
+        ? statusCode
+        : status.VALIDATION_FAILED).json(data || statusCode || {
+        message: 'Validation Failed'
+    });
+}
+</function_returnValidationError>

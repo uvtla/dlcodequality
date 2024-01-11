@@ -1,0 +1,807 @@
+<transformHexAlpha>
+function transformHexAlpha(string, source, decl) {
+    return recurse(string);
+
+    function recurse(input) {
+        <findHexa>
+        var hexa_pos = input.indexOf('hexa');
+        var subs = input.substring(hexa_pos);
+        </findHexa>
+
+        <parseHexOpacity>
+        var h = HEX_RE.exec(subs);
+        var o = OPACITY_RE.exec(subs);
+        </parseHexOpacity>
+
+        <validateInputs>
+        var i_h = INV_HEX_RE.exec(subs);
+        var i_o = INV_OPACITY_RE.exec(subs);
+
+        if(i_h !== null){
+            throw decl.error('Invalid hex color: ' + i_h[0], { plugin: 'postcss-color-hexa' });
+        }
+
+        if(i_o !== null){
+            throw decl.error('Invalid opacity: ' + i_o[0], { plugin: 'postcss-color-hexa' });
+        }
+        </validateInputs>
+
+        <replaceHexAlpha>
+        if (!h) {
+            return input;
+        }
+
+        var rgb = hexToRgb(h[0]);
+        var rgb_chars = [rgb.r, rgb.g, rgb.b];
+        var hexa = '';
+
+        if (o) {
+            rgb_chars.push(o[0]);
+            hexa = 'rgba(' + rgb_chars.join(', ') + ')';
+        } else {
+            hexa = 'rgb(' + rgb_chars.join(', ') + ')';
+        }
+
+        var result = input.replace(HEX_ALPHA_RE, hexa);
+
+        if (result.indexOf('hexa') === -1) {
+            return result;
+        } else {
+            return recurse(result);
+        }
+        </replaceHexAlpha>
+    }
+}
+</transformHexAlpha>
+
+<clean>
+function clean(code) {
+
+    try {
+        const ast = babylon.parse(code, {
+            sourceType: 'module',
+            plugins: [
+                'jsx',
+                'flow'
+            ]
+        });
+
+        <transformAst>
+        const cleanAst = strip(ast).program;
+        const resultCode = generate(cleanAst, {}).code;
+        </transformAst>
+
+        <replaceMarkers>
+        return resultCode.replace(/(\/\*\$ | \#\*\/)/g, '');
+        </replaceMarkers>
+
+    } catch (e) {
+        console.log(code);
+        throw e;
+    }
+}
+</clean>
+
+<resizeWidget>
+function resizeWidget(propagate) {          
+    var cfg = this._cfg, domElt = this.getDom();
+
+    if (!domElt) {
+        return;
+    }
+
+    <calculateSizeConf>
+    var widthConf = this._getWidthConf();
+    var heightConf = this._getHeightConf();
+    </calculateSizeConf>
+
+    <applySizeConstraints>
+    if (this._changedContainerSize || this._sizeConstraints) { 
+        if (this._changedContainerSize) {
+            
+            var width = cfg.widthMaximized || cfg.width;
+            var height = cfg.heightMaximized || cfg.height;
+            var constrainedWidth = ariaUtilsMath.normalize(width, widthConf.min, widthConf.max);
+            var constrainedHeight = ariaUtilsMath.normalize(height, heightConf.min, heightConf.max);
+
+            domElt.style.width = width > -1 ? constrainedWidth + "px" : "";
+            domElt.style.height = height > -1 ? constrainedHeight + "px" : "";
+            if (this._frame) { 
+                var frameWidth = width > -1 ? constrainedWidth : -1;
+                var frameHeight = height > -1 ? constrainedHeight : -1;
+                this._frame.resize(frameWidth, frameHeight);
+            }
+        }
+
+        var changed = ariaUtilsSize.setContrains(domElt, widthConf, heightConf);
+        if (changed && this._frame) {
+            this._frame.resize(changed.width, changed.height);
+            
+            if (domElt.parentNode && propagate) {
+                <delegateContentChange>
+                aria.utils.Delegate.delegate(aria.DomEvent.getFakeEvent('contentchange', domElt.parentNode));
+                </delegateContentChange>
+            }
+        }
+        this._changedContainerSize = changed;
+    }
+    </applySizeConstraints>
+}
+</resizeWidget>
+
+<isMouseOnNode>
+function isMouseOnNode(node, e){
+    if (node){
+        <calculateBoundaries>
+        var currMousePos = e.position || e.cyPosition;
+        var topLeft = {
+            x: (node.position("x") - node.width() / 2 - parseFloat(node.css('padding-left'))),
+            y: (node.position("y") - node.height() / 2 - parseFloat(node.css('padding-top')))};
+        var bottomRight = {
+            x: (node.position("x") + node.width() / 2 + parseFloat(node.css('padding-right'))),
+            y: (node.position("y") + node.height() / 2+ parseFloat(node.css('padding-bottom')))};
+        </calculateBoundaries>
+
+        <checkPosition>
+        if (currMousePos.x >= topLeft.x && currMousePos.y >= topLeft.y &&
+            currMousePos.x <= bottomRight.x && currMousePos.y <= bottomRight.y){
+            return true;
+        }
+        </checkPosition>
+    }
+    return false;
+}
+</isMouseOnNode>
+
+<generateCmds>
+function generateCmds(paths) {
+
+    var appends = [];
+
+    <gatherOptions>
+    if (grunt.option("quiet") || config.quiet) {
+        appends.push("--quiet");
+    }
+
+    if (grunt.option("verbose") || config.verbose) {
+        appends.push("--verbose");
+    }
+
+    if (grunt.option("rules") || config.rules) {
+        var rules = _.isString(config.rules) ? config.rules.split(",") : config.rules;
+        appends.push("--rules=" + rules.join(","));
+    }
+
+    if (grunt.option("dryRun") || config.dryRun) {
+        appends.push("--dry-run");
+    }
+
+    if (grunt.option("diff") || config.diff) {
+        appends.push("--diff");
+    }
+
+    if (grunt.option("allowRisky") || config.allowRisky) {
+        appends.push("--allow-risky yes");
+    }
+
+    if (grunt.option("usingCache") || config.usingCache) {
+        appends.push("--using-cache " + config.usingCache);
+    }
+
+    if (grunt.option("configfile") || config.configfile) {
+        appends.push("--config=" + config.configfile);
+    }
+    </gatherOptions>
+
+    <constructCmds>
+    var bin = path.normalize(config.bin),
+        append = appends.join(" "),
+        cmds = [];
+
+    if (paths.length) {
+        cmds = _.map(paths, function(thePath) {
+            return bin + " fix " + thePath + " " + append;
+        });
+    }
+
+    if (grunt.option("configfile") || config.configfile) {
+        cmds.push(bin + " fix " + append);
+    }
+    </constructCmds>
+
+    return cmds;
+}
+</generateCmds>
+
+<getId>
+function getId(id) {
+    id = id + "";
+    <checkIdFormat>
+    if (id && id.indexOf("+") != -1) {
+        if (Aria.testMode) {
+            return this.$getAutoId(id);
+        }
+        return null;
+    }
+    </checkIdFormat>
+    return this.$getId(id);
+}
+</getId> 
+
+<hasKeyValue>
+function hasKeyValue(key, value) {
+    return function(obj) {
+        return isUndefined(value) ? <checkKeyExists>has(obj, key)</checkKeyExists> && obj[key] === value : <compareValues>areSVZ(value, obj[key])</compareValues>;
+    };
+}
+</hasKeyValue>
+
+<ValidationFailed>
+function ValidationFailed(reason) {
+  Error.captureStackTrace(this, this.constructor);
+  this.type = 'bad_request';
+  this.statusCode = 400;
+  this.message = 'Request validation failed';
+  <storeReason>
+  this.reason = reason;
+  </storeReason>
+}
+</ValidationFailed>
+
+<initOnClick>
+function initOnClick() {
+    var clicks = document.querySelectorAll('[data-nctr]');
+
+    for (var i = 0; i < clicks.length; i++) {
+        <attachEventListeners>
+        var tag = clicks[i];
+        if (tag.addEventListener) {
+            tag.addEventListener("click", clickTrack, false);
+        } else {
+            if (tag.attachEvent) {
+                tag.attachEvent("onclick", clickTrack);
+            }
+        }
+        </attachEventListeners>
+    }
+}
+</initOnClick>
+
+<readBody>
+function readBody(options) {
+    var opts = options || {};
+    assert.object(opts, 'opts');
+
+    <defineMaxSize>
+    var maxBodySize = opts.maxBodySize || 0;
+    </defineMaxSize>
+
+    function readBody(req, res, next) {
+        <checkIfRead>
+        if (req._readBody) {
+            next();
+            return;
+        } else {
+            req._readBody = true;
+        }
+        </checkIfRead>
+
+        <checkConditions>
+        if ((req.getContentLength() === 0 && !req.isChunked()) ||
+            req.contentType() === 'multipart/form-data' ||
+            req.contentType() === 'application/octet-stream') {
+            next();
+            return;
+        }
+        </checkConditions>
+
+        var bodyWriter = createBodyWriter(req);
+
+        <initializeVariables>
+        var bytesReceived = 0;
+        var digest;
+        var gz;
+        var hash;
+        var md5;
+
+        var unsupportedCompression;
+        </initializeVariables>
+
+        <setupHash>
+        if ((md5 = req.headers['content-md5'])) {
+            hash = crypto.createHash('md5');
+        }
+        </setupHash>
+
+        function done() {
+            <cleanUp>
+            bodyWriter.end();
+            </cleanUp>
+
+            <checkUnsupportedCompression>
+            if (unsupportedCompression) {
+                var error = unsupportedCompression + ' not supported';
+                next(new UnsupportedMediaTypeError(error));
+                return;
+            }
+            </checkUnsupportedCompression>
+
+            <checkBodySize>
+            if (maxBodySize && bytesReceived > maxBodySize) {
+                var msg = 'Request body size exceeds ' + maxBodySize;
+                var err;
+
+                if (PayloadTooLargeError !== undefined) {
+                    err = new PayloadTooLargeError(msg);
+                } else {
+                    err = new RequestEntityTooLargeError(msg);
+                }
+
+                next(err);
+                return;
+            }
+            </checkBodySize>
+
+            <verifyBodyContent>
+            if (!req.body.length) {
+                next();
+                return;
+            }
+            </verifyBodyContent>
+
+            <validateMD5>
+            if (hash && md5 !== (digest = hash.digest('base64'))) {
+                next(new BadDigestError(MD5_MSG, md5, digest));
+                return;
+            }
+            </validateMD5>
+
+            next();
+        }
+
+        <setupEncodingHandlers>
+        if (req.headers['content-encoding'] === undefined) {
+            req.once('end', done);
+        } else if (req.headers['content-encoding'] === 'gzip') {
+            gz = zlib.createGunzip();
+            gz.on('data', bodyWriter.write);
+            gz.once('end', done);
+            req.once('end', gz.end.bind(gz));
+        } else {
+            unsupportedCompression = req.headers['content-encoding'];
+            res.setHeader('Accept-Encoding', 'gzip');
+            req.once('end', done);
+        }
+        </setupEncodingHandlers>
+
+        <onDataReceived>
+        req.on('data', function onRequestData(chunk) {
+            if (maxBodySize) {
+                bytesReceived += chunk.length;
+
+                if (bytesReceived > maxBodySize) {
+                    return;
+                }
+            }
+
+            if (hash) {
+                hash.update(chunk, 'binary');
+            }
+
+            if (gz) {
+                gz.write(chunk);
+            } else {
+                bodyWriter.write(chunk);
+            }
+        });
+        </onDataReceived>
+
+        req.once('error', next);
+        req.resume();
+    }
+
+    return (readBody);
+}
+</readBody><CannotParseTreeError>
+function CannotParseTreeError(errors){
+  superError.call(
+    this,
+    'CannotParseTreeError',
+    util.format('Could not parse the tree for metadata; errors: %s', JSON.stringify(errors))
+  );
+  <storeErrors>
+  this.errors = errors;
+  </storeErrors>
+}
+</CannotParseTreeError>
+
+<get>
+function get(key, def) {
+  <handleArrayKeys>
+  if (Array.isArray(key)) {
+    return AsyncStorage.multiGet(key)
+      .then((values) => values.map(([_, value]) => {
+        return useDefault(def, value) ? def : parse(value)
+      }))
+      .then(results => Promise.all(results))
+  }
+  </handleArrayKeys>
+  <handleSingleKey>
+  return AsyncStorage.getItem(key).then(value => useDefault(def, value) ? def : parse(value))
+  </handleSingleKey>
+}
+</get>
+
+<set>
+function set(tree, i, item) {
+	<validateIndex>
+	var len = tree.size;
+	if (i < 0 || len < i) {
+		throw new Error("Index " + i + " out of range!");
+	}
+	</validateIndex>
+	<handleNewItem>
+	if (i === len) return push(item, tree);
+	</handleNewItem>
+	<updateTail>
+	var offset = (0, _util.tailOffset)(tree);
+	if (i >= offset) {
+		var newTail = (0, _util.createLeafFrom)(tree.tail);
+		newTail[i - offset] = item;
+		return new Tree(tree.size, tree.root, newTail);
+	}
+	</updateTail>
+	<updateRoot>
+	var newRoot = (0, _util.setRoot)(i, item, tree.root);
+	return new Tree(tree.size, newRoot, tree.tail);
+	</updateRoot>
+}
+</set>
+
+<setAggregationLevel>
+function(aDimensionName) {
+	this._oAggregationLevel = {};
+	<handleUndefinedDimension>
+	if (!aDimensionName) {
+		aDimensionName = this._oQueryResult.getAllDimensionNames();
+	}
+	</handleUndefinedDimension>
+	<addToAggregation>
+	this.addToAggregationLevel(aDimensionName);
+	this._oSelectedPropertyNames = null; 
+	</addToAggregation>
+}
+</setAggregationLevel>
+
+<akaya>
+function akaya(server, pluginOptions) {
+  <decorateServer>
+  server.decorate('server', 'aka', serverDecorator.bind(this, server))
+  </decorateServer>
+  <decorateRequest>
+  server.decorate('request', 'aka', function (id, params = {}, options = {}) {
+    options = joi.attempt(options, internals.scheme.options)
+
+    const path = server.aka(id, params)
+    let protocol
+
+    <handleRelativePath>
+    if (options.rel) {
+      return path
+    }
+    </handleRelativePath>
+
+    <determineProtocol>
+    switch (options.secure) {
+      case true:
+        protocol = 'https'
+        break
+      case false:
+        protocol = 'http'
+        break
+      default:
+        protocol = this.headers['x-forwarded-proto'] || server.info.protocol
+    }
+    </determineProtocol>
+
+    return `${protocol}://` + path;
+  })
+  </decorateRequest>
+}
+</akaya>
+
+<searchPath>
+function searchPath(newValue) {
+  <checkInput>
+  if (!newValue || newValue.length < 2) {
+    return undefined;
+  }
+  </checkInput>
+
+  <createRegexp>
+  var regexp = new RegExp(LxUtils.escapeRegexp(newValue), 'ig');
+  </createRegexp>
+
+  <performSearch>
+  return _searchPath(lxSelect.choices, regexp);
+  </performSearch>
+}
+</searchPath>
+
+<_removeEvent>
+function _removeEvent(type, handler) {
+	<initializeVariables>
+    var userHandlerList = null, eventId = this._EVNET_UID, isRemoveAll = handler === undefined;
+    userHandlerList = USER_HANDLER_CACHE[eventId][type];
+    </initializeVariables>
+    
+    <checkRemoveSingleHandler>
+    if (!isRemoveAll) {
+        isRemoveAll = true;
+        Utils.each(userHandlerList, function removeKityEvent(fn, index) {
+            if (fn === handler) {
+                <deleteHandler>
+                delete userHandlerList[index];
+                </deleteHandler>
+            } else {
+                isRemoveAll = false;
+            }
+        });
+    }
+    </checkRemoveSingleHandler>
+    
+    <removeAllHandlers>
+    if (isRemoveAll) {
+        deleteDomEvent(this.node, type, INNER_HANDLER_CACHE[eventId][type]);
+        delete USER_HANDLER_CACHE[eventId][type];
+        delete INNER_HANDLER_CACHE[eventId][type];
+    }
+    </removeAllHandlers>
+
+    return this;
+}
+</_removeEvent>
+
+<destroyTile>
+function () {
+	<clearIntervals>
+    if (this.hatchInterval) clearInterval(this.hatchInterval); 
+    </clearIntervals>
+    <clearCanvas>
+    if (this.cvsDiv) {
+        this.clear();
+    }
+    </clearCanvas>
+    <callParentDestroy>
+    OpenLayers.Tile.prototype.destroy.call(this);
+    </callParentDestroy>
+}
+</destroyTile>
+
+<deactivateControl>
+function() {
+	<determineDeactivation>
+    var deactivated = false;
+    if(OpenLayers.Control.prototype.deactivate.apply(this, arguments)) {
+        <removeFeatures>
+        this.layer.removeFeatures(this.handles);
+        this.rotate && this.layer.removeFeatures(this.rotationHandles);
+        this.layer.removeFeatures([this.box]);
+        </removeFeatures>
+        <deactivateDragControl>
+        this.dragControl.deactivate();
+        </deactivateDragControl>
+        deactivated = true;
+    }
+    </determineDeactivation>
+    return deactivated;
+}
+</deactivateControl>
+
+<Snap>
+function Snap(w, h) {
+	<handleElement>
+    if (w) {
+        if (w.tagName) {
+            return wrap(w);
+        }
+        if (w instanceof Element) {
+            return w;
+        }
+        if (h == null) {
+            <querySelector>
+            w = glob.doc.querySelector(w);
+            </querySelector>
+            return wrap(w);
+        }
+    }
+    </handleElement>
+    <setDefaultSize>
+    w = w == null ? "100%" : w;
+    h = h == null ? "100%" : h;
+    </setDefaultSize>
+    <createPaper>
+    return new Paper(w, h);
+    </createPaper>
+}
+</Snap><updateItems>
+function() {
+    var animated = false;
+    <updateEachItem>
+    for (var i = 0; i < this._items.length; i++) {
+        animated = this._items[i].update() || animated;
+    }
+    </updateEachItem>
+    return animated;
+}
+</updateItems>
+
+<isCursorKilled>
+function isCursorKilled(cursor, callback) {
+  <checkCursorState>
+  if (cursor.s.killed) {
+    <notifyCursor>
+    setCursorNotified(cursor, callback);
+    </notifyCursor>
+    return true;
+  }
+  </checkCursorState>
+  return false;
+}
+</isCursorKilled>
+
+<destroyControl>
+function() {
+    <removeLayerIfExists>
+    if(this.active && this.layers) {
+        this.map.removeLayer(this.layer);
+    }
+    </removeLayerIfExists>
+    <applyParentDestroy>
+    OpenLayers.Control.prototype.destroy.apply(this, arguments);
+    </applyParentDestroy>
+    <destroyLayer>
+    if(this.layers) {
+        this.layer.destroy();
+    }
+    </destroyLayer>
+}
+</destroyControl>
+
+<filterMap>
+function(array, fun) {
+    <checkArray>
+    if (!isSeq(array)) throw new TypeError("expected an array as the first argument");
+    </checkArray>
+    <performFilterMap>
+    return _.filter(_.map(array, function(e) {
+      return fun(e);
+    }), existy);
+    </performFilterMap>
+}
+</filterMap>
+
+<_scrollTo>
+function _scrollTo(scrollTo, targetElement, tooltipLayer) {
+    <skipScrolling>
+    if (!this._options.scrollToElement) return;
+    </skipScrolling>
+
+    <determineRectangle>
+    var rect = scrollTo === 'tooltip' ? tooltipLayer.getBoundingClientRect() : targetElement.element.getBoundingClientRect();
+    </determineRectangle>
+
+    <scrollIfNeeded>
+    if (!_elementInViewport(targetElement.element)) {
+        var winHeight = _getWinSize().height;
+        var top = rect.bottom - (rect.bottom - rect.top);
+        var bottom = rect.bottom - winHeight;
+
+        if (top < 0 || targetElement.element.clientHeight > winHeight) {
+            <scrollUp>
+            window.scrollBy(
+                0,
+                rect.top - (winHeight / 2 - rect.height / 2) - this._options.scrollPadding
+            );
+            </scrollUp>
+        } else {
+            <scrollDown>
+            window.scrollBy(
+                0,
+                rect.top - (winHeight / 2 - rect.height / 2) + this._options.scrollPadding
+            );
+            </scrollDown>
+        }
+    }
+    </scrollIfNeeded>
+}
+</_scrollTo>
+
+<mapObject>
+function(object, callback) {
+    <injectValues>
+    return inject(object, [], function(memo, key, value){
+      memo.push(callIterator(callback, key, value))
+    })
+    </injectValues>
+}
+</mapObject>
+
+<checkArguments>
+function(payload) {
+    <reduceToUltimateTruth>
+    return _.reduce(payload, function(ultimateTruth, arg) {
+      return ultimateTruth || _.includes(arg, '-') || _.includes(arg, '--');
+    }, false);
+    </reduceToUltimateTruth>
+}
+</checkArguments>
+
+<encode>
+function encode(data, buffer, offset) {
+  <collectBuffers>
+  var buffers = []
+  var result = null
+  encode._encode(buffers, data)
+  result = Buffer.concat(buffers)
+  </collectBuffers>
+  <trackEncodedBytes>
+  encode.bytes = result.length
+  </trackEncodedBytes>
+  <copyToBuffer>
+  if (Buffer.isBuffer(buffer)) {
+    result.copy(buffer, offset)
+    return buffer
+  }
+  </copyToBuffer>
+  return result
+}
+</encode>
+
+<setTag>
+function setTag(ifd, tag, value) {
+    var offset, length, tagOffset, valueOffset = 0;
+
+    <convertTagName>
+    if (typeof(tag) === 'string') {
+        var tmpTags = tags[ifd.toLowerCase()];
+        for (var hex in tmpTags) {
+            if (tmpTags[hex] === tag) {
+                tag = hex;
+                break;
+            }
+        }
+    }
+    </convertTagName>
+    offset = offsets[ifd.toLowerCase() + 'IFD'];
+    length = data.SHORT(offset);
+
+    <findTagOffset>
+    for (var i = 0; i < length; i++) {
+        tagOffset = offset + 12 * i + 2;
+        if (data.SHORT(tagOffset) == tag) {
+            valueOffset = tagOffset + 8;
+            break;
+        }
+    }
+    </findTagOffset>
+
+    <writeValue>
+    if (!valueOffset) {
+        return false;
+    }
+    data.LONG(valueOffset, value);
+    </writeValue>
+    return true;
+}
+</setTag>
+
+<verifyToken>
+function verify(token, sign, options) {
+  return function (done) {
+    <performVerification>
+    _jsonwebtoken2['default'].verifySync(token, sign, options, done);
+    </performVerification>
+  };
+}
+</verifyToken>

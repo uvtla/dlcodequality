@@ -1,0 +1,262 @@
+Below I have annotated each function regarding SRP compliance or violations using the guidelines provided. Note that some functions may involve external context or assumptions about their wider usage or related code, which cannot be evaluated from the snippet alone.
+
+Function 1: Compliant
+<publishChanges>
+function publishChanges (eventName, stateId) {
+      var subscriptions = instanceSubscriptions[instanceId];
+
+      if(!subscriptions) return;
+
+      subscriptions.forEach(function (response) {
+        response.write('event: ' + eventName +'\n');
+        response.write('data: ' + stateId + '\n\n');
+      });
+}
+</publishChanges>
+
+Function 2: Compliant
+<FieldDescriptor>
+function(json){
+    if(!(this instanceof FieldDescriptor)){
+      return new FieldDescriptor(json);
+    }
+
+    if(FieldDescriptor.isInstance(json)){
+      return json;
+    }
+
+    this.init(json);
+}
+</FieldDescriptor>
+
+Function 3: Compliant
+<setContent>
+function(_content){
+    if(_content === undefined){
+        if(!this[0]) throw Error("内部节点为空，无法完成get操作");
+        return this[0].value;
+    }
+    return this._$forEach(function(_node){
+        _node.value = _content;
+    });
+    return this;
+}
+</setContent>
+
+Function 4: Compliant
+<getModuleInfos>
+function () {
+    var self = this,
+        runtime = self.runtime;
+    return S.map(self.getNormalizedRequires(), function (r) {
+        return Utils.createModuleInfo(runtime, r);
+    });
+}
+</getModuleInfos>
+
+Function 5: Non-Compliant
+<iScrollService>
+function iScrollService($rootScope, iScrollSignals) {
+    var _state = {
+        useIScroll: defaultOptions.directive.initiallyEnabled,
+        autoDetectedUseNativeScroll: useNativeScroll
+    };
+
+    <manageIScrollState>
+    function _disable(signalOnly) {
+        if (!signalOnly) {
+            _state.useIScroll = false;
+        }       
+        $rootScope.$emit(iScrollSignals.disabled);
+    }
+
+    function _enable(signalOnly) {
+        if (!signalOnly) {
+            _state.useIScroll = true;
+        }       
+        $rootScope.$emit(iScrollSignals.enabled);
+    }
+
+    function _toggle(signalOnly) {
+        (_state.useIScroll ^ signalOnly) ?  
+            _disable(signalOnly) : _enable(signalOnly);
+    }
+    </manageIScrollState>
+
+    <emitRefreshSignal>
+    function _refresh(name) {
+        $rootScope.$emit(iScrollSignals.refresh, name);
+    }
+    </emitRefreshSignal>
+
+    return {
+        defaults: defaultOptions,
+        state: _state,
+        versionCompare: versionCompare,
+        platform: platform,
+        enable: _enable,
+        disable: _disable,
+        toggle: _toggle,
+        refresh: _refresh
+    };
+}
+</iScrollService>
+
+Function 6: Non-Compliant
+<parseAttr>
+function parseAttr() {
+    if ( reader.eof() ) {
+        return 0;
+    }
+
+    reader.skipBlank();
+    let oPos = {};
+    oPos.start = reader.getPos();
+
+    <keyExtraction>
+    let key = '', val = '';
+    ...
+    if ( key == '' ) {
+        return 0;
+    }
+    </keyExtraction>
+
+    oPos.end = reader.getPos();
+    <createAttributeNameToken>
+    let token = { type: options.TypeAttributeName, text: unescape(key), pos: oPos };
+    tokens.push(token);
+    </createAttributeNameToken>
+
+    reader.skipBlank();
+    oPos = {};
+    oPos.start = reader.getPos();
+
+    ...
+    </keyExtraction>
+
+    <valueExtraction>
+    reader.skipBlank();
+    oPos = {};
+    oPos.start = reader.getPos();
+    ...
+    while ( /[^\s\/>]/.test(reader.getCurrentChar()) ) {
+        val += reader.readChar();
+    }
+    </valueExtraction>
+
+    <handleParseErrors>
+    if ( val.trim() == '' ) {
+        let text = File.read(file);
+        ...
+        throw Err.cat('missing attribute value', 'file=' + file, new Err( {text, start, end} ));
+    }
+    </handleParseErrors>
+
+    <createAttributeValueToken>
+    oPos.end = reader.getPos();
+    token = { type: options.TypeAttributeValue, text: unescape(val), pos: oPos };
+    tokens.push(token);
+    </createAttributeValueToken>
+
+    return 1;
+}
+</parseAttr>
+
+Function 7: Non-Compliant
+<installPackages>
+async function installPackages(environment) {
+    const cwdBefore = process.cwd();
+    <buildUnreleasedPackages>
+    await buildUnreleasedPackages();
+    </buildUnreleasedPackages>
+    
+    <changeAndCleanDirectory>
+    process.chdir(path.resolve(__dirname, '../environments', environment));
+    console.log('🗑️  Removing packages for ' + environment);
+    await rimrafAsync('package-lock.json');
+    await rimrafAsync('node_modules');
+    </changeAndCleanDirectory>
+
+    <installEnvironmentPackages>
+    console.log('💿  Installing packages for ' + environment);
+    await execAsync('npm install');
+    </installEnvironmentPackages>
+
+    <restoreWorkingDirectory>
+    process.chdir(cwdBefore);
+    </restoreWorkingDirectory>
+}
+</installPackages>
+
+Function 8: Non-Compliant
+<outDist>
+function outDist(buildDir, nowVersion, devDir) {
+    ...
+
+    <prepareStaticDirectories>
+    let distStaticDir = `${config.distDir}/${config.staticDir}/${buildDir}/${nowVersion}`,
+        staticURL     = '',
+        buildName     = path.basename(buildDir),
+        styleType     = config.styleType === 'scss' ? 'scss' : 'css';
+
+    ...
+    </prepareStaticDirectories>
+
+    <copyImages>
+    fs.readdir(`${devDir}/js`, (err) => {
+        ...
+            task.src(`${devDir}/js*.*`)
+            .pipe(printMes('image'))
+            .pipe(task.dest(`${distStaticDir}/images/`));
+    });
+    </copyImages>
+
+    ...
+    
+    <copyFontsAndCompileStyles>
+    task.src(`${devDir}/font/*.*`)
+        ...
+        fs.readdir(`${devDir}/${styleType}`, (err) => {
+            ...
+        });
+    </copyFontsAndCompileStyles>
+
+    <processHtmlAndFinalize>
+    task.src(`${devDir}/*.html`)
+        ...
+        .pipe(touch());
+    </processHtmlAndFinalize>
+}
+</outDist>
+
+Function 9: Compliant
+<handleMultiSelectEvents>
+function (event) {
+    this.$AutoComplete._dom_onclick.call(this, event);
+    var element = event.target;
+    if (element.className === "closeBtn") {
+        this._removeMultiselectValue(element, event);
+        this._textInputField.focus();
+    }
+    if (element.className.indexOf("xMultiAutoComplete_Option_Text") != -1) {
+        var highlightedSuggestions = this.getHighlight();
+        var index = this._getIndexFromNode(element.parentNode);
+        if (this.controller.freeText && ariaUtilsJson.equals(highlightedSuggestions, [index])) {
+            this._editMultiselectValue(element);
+        } else {
+            this.highlightOption(index);
+        }
+    }
+    this.__resizeInput();
+}
+</handleMultiSelectEvents>
+
+Function 10: Compliant
+<lookahead>
+function _lookahead(expr) {
+    var state = this.bt.current_state(),
+        ans = expr.call(this);
+    this.bt.restore(state);
+    return ans
+}
+</lookahead>

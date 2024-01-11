@@ -1,0 +1,185 @@
+```
+<function1>
+function(opts) {
+  <EventEmitterSetup>
+  EventEmitter.call(this);</EventEmitterSetup>
+  
+  <OptionsSetup>
+  this.opts = opts;
+  this.servers = {}; 
+  this.serversMap = {}; 
+  this.onlines = {}; 
+  this.mailboxFactory = opts.mailboxFactory || defaultMailboxFactory;</OptionsSetup>
+
+  <HookSetup>
+  this.befores = [];
+  this.afters = [];</HookSetup>
+
+  <PendingSetup>
+  this.pendings = {};
+  this.pendingSize = opts.pendingSize || constants.DEFAULT_PARAM.DEFAULT_PENDING_SIZE;</PendingSetup>
+
+  <ConnectingSetup>
+  this.connecting = {};</ConnectingSetup>
+
+  <MailboxesSetup>
+  this.mailboxes = {};</MailboxesSetup>
+
+  <StateSetup>
+  this.state = STATE_INITED;</StateSetup>
+}
+</function1>
+
+<function2>
+function split_lines_by_child_nodes(lines) {
+  <NodeEntryLinesCalculation>
+  const node_entry_lines = lines.map((line, index) => {
+    return { tabs: line.tabs, index }
+  })
+  .filter(line => line.tabs === 0)
+  .map(line => line.index)</NodeEntryLinesCalculation>
+
+  <NodeEndingLinesCalculation>
+  const node_ending_lines = node_entry_lines.map(line_index => line_index - 1)
+  node_ending_lines.shift()
+  node_ending_lines.push(lines.length - 1)</NodeEndingLinesCalculation>
+
+  <ZipOperation>
+  const from_to = zip(node_entry_lines, node_ending_lines)</ZipOperation>
+
+  <SplittingLines>
+  return from_to.map(from_to => lines.slice(from_to[0], from_to[1] + 1))</SplittingLines>
+}
+</function2>
+
+<function3>
+function (simulated) {
+  <EventProcessing>
+  var processingEventQueue = eventQueue;
+  eventQueue = null;
+  if (simulated) {
+    forEachAccumulated_1(processingEventQueue, executeDispatchesAndReleaseSimulated);
+  } else {
+    forEachAccumulated_1(processingEventQueue, executeDispatchesAndReleaseTopLevel);
+  }</EventProcessing>
+  
+  <InvariantCheck>
+  !!eventQueue ? invariant(false, 'processEventQueue(): Additional events were enqueued while processing an event queue. Support for this has not yet been implemented.') : void 0;</InvariantCheck>
+  
+  <ErrorRethrowing>
+  ReactErrorUtils_1.rethrowCaughtError();</ErrorRethrowing>
+}
+</function3>
+
+<function4>
+function mimeTypeFromFilename(filename) {
+  <MimeTypeCalculation>
+  var ext = filename.split(".").pop().toLowerCase();
+  return mime.lookup(filename) || "application/octet-stream";</MimeTypeCalculation>
+}
+</function4>
+
+<function5>
+function UMLAttributeView() {
+  <LabelViewExtension>
+  LabelView.apply(this, arguments);</LabelViewExtension>
+  
+  <AttributeViewInit>
+  this.selectable = Core.SK_YES;
+  this.sizable = Core.SZ_NONE;
+  this.movable = Core.MM_NONE;
+  this.parentStyle = true;
+  this.horizontalAlignment = Graphics.AL_LEFT;</AttributeViewInit>
+}
+</function5>
+
+<function6>
+function initHeight(carousel, index) {
+  <ImageLoadingSetup>
+  let newImage = new Image()
+  newImage.src = carousel.querySelectorAll('.mip-carousel-slideBox')[index].querySelector('img').src
+  newImage.onload = () => {
+    [...carousel.querySelectorAll('.mip-placeholder')].map(value => value.parentNode.removeChild(value))
+    changeCarouselHeight(carousel, index, 0)
+  }</ImageLoadingSetup>
+}
+</function6>
+
+<function7>
+function toTypeRef(type) {
+  <TypeReferenceConversion>
+  if (!type) {
+    return (0, _typeOf.typeOf)(type);
+  } else if (type.constructor === String || type instanceof Function) {
+    return type;
+  }
+
+  return (0, _typeOf.typeOf)(type);</TypeReferenceConversion>
+}
+</function7>
+
+<function8>
+function add(data, unfilteredOptions) {
+  
+  
+  
+  
+  let options = this.filterOptions(unfilteredOptions, 'add', {extraAllowedProperties: ['id']});
+
+  <AddPostFunctionCreation>
+  const addPost = (() => {
+    return ghostBookshelf.Model.add.call(this, data, options)
+      .then((post) => {
+        return this.findOne({
+          status: 'all',
+          id: post.id
+        }, _.merge({transacting: options.transacting}, unfilteredOptions));
+      });
+  });</AddPostFunctionCreation>
+
+  <TransactionCheck>
+  if (!options.transacting) {
+    return ghostBookshelf.transaction((transacting) => {
+      options.transacting = transacting;
+
+      return addPost();
+    });
+  }</TransactionCheck>
+
+  <ExecuteAddPost>
+  return addPost();</ExecuteAddPost>
+}
+</function8>
+
+<function9>
+function getModel(app, name, Model) {
+  <MongooseClientRetrieval>
+  const mongooseClient = app.get('mongoose');
+  assert(mongooseClient, 'mongoose client not set by app');</MongooseClientRetrieval>
+  
+  <ModelNameCheck>
+  const modelNames = mongooseClient.modelNames();
+  if (modelNames.includes(name)) {
+    return mongooseClient.model(name);
+  } else {
+    assert(Model && typeof Model === 'function', 'Model function not privided.');
+    return Model(app, name);
+  }</ModelNameCheck>
+}
+</function9>
+
+<function10>
+function _toggleLivePreviewMultiBrowser(value) {
+  <PreferenceToggle>
+  var val = _togglePref(PREF_MULTIBROWSER, value);</PreferenceToggle>
+
+  <CommandStateUpdate>
+  CommandManager.get(Commands.TOGGLE_LIVE_PREVIEW_MB_MODE).setChecked(val);</CommandStateUpdate>
+      
+  <ProjectSettingsAvailability>
+  CommandManager.get(Commands.FILE_PROJECT_SETTINGS).setEnabled(!val);</ProjectSettingsAvailability>
+}
+</function10>
+```
+
+The annotations provide a visual breakdown of the responsibilities within each function. Functions 1, 2, 3, 6, 8, and 9 have been segmented into multiple parts due to the identification of different responsibilities that could potentially be managed by separate functions or objects to better adhere to the Single Responsibility Principle. Functions 4, 5, 7, and 10 are compliant with SRP as written, with a single cohesive responsibility.

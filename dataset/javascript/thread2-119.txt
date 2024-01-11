@@ -1,0 +1,125 @@
+<reduceProperties>
+function reduceProperties(map, callback, initial) {
+        var result = initial;
+        for (var key in map) {
+            result = callback(result, map[key], String(key));
+        }
+        return result;
+}
+</reduceProperties>
+
+<correctUV>
+function correctUV(uv, vector, azimuth) {
+  if ((azimuth < 0) && (uv.x === 1)) uv = new THREE.Vector2(uv.x - 1, uv.y);
+  if ((vector.x === 0) && (vector.z === 0)) uv = new THREE.Vector2(azimuth / 2 / Math.PI + 0.5, uv.y);
+  return uv.clone();
+}
+</correctUV>
+
+<couldContainTypeParameters>
+function couldContainTypeParameters(type) {
+  return !!(
+    type.flags & 16384 ||
+    type.flags & 131072 && ts.forEach(type.typeArguments, couldContainTypeParameters) ||
+    type.flags & 2097152 && type.symbol && type.symbol.flags & (8192 | 2048 | 32) ||
+    type.flags & 1572864 && couldUnionOrIntersectionContainTypeParameters(type)
+  );
+}
+</couldContainTypeParameters>
+
+<make>
+function make(code) {
+  try {
+    var jailInitializationCode = LoopStopInjector.inject(code);
+    jailInitializationCode = tryToCoverWindow(jailInitializationCode);
+    var parameters = jailEnvironment.getNames();
+    parameters.push(jailInitializationCode);
+    var f = Function.apply(null, parameters);
+    return new f(jailEnvironment.getValues());
+  } catch (err) {
+    console.error("While we were trying to make a jail some problem caused:", err);
+  }
+}
+</make>
+
+<function>
+function(arg) {
+  var navigationInformation = arg.navigationInformation;
+  var direction = navigationInformation.direction;
+  var origin = navigationInformation.origin;
+  var reverse = (direction === 'forward' && origin === 'popup') || (direction === 'backward' && origin === 'browser');
+  if (loop) {
+      reverse = !reverse;
+  }
+  ariaTemplatesNavigationManager.focusFirst(element, reverse);
+}
+</function>
+
+<function>
+function (key, array, index, fnEqual) {
+  var idx = Arrays.indexOf(key, array, index, fnEqual);
+  if (idx >= 0)
+      array.splice(idx, 1);
+  return idx;
+}
+</function>
+
+<function>
+function (cipherParams) {
+  var ciphertext = cipherParams.ciphertext;
+  var salt = cipherParams.salt;
+  if (salt) {
+      var wordArray = WordArray.create([0x53616c74, 0x65645f5f]).concat(salt).concat(ciphertext);
+  } else {
+      var wordArray = ciphertext;
+  }
+  var openSSLStr = wordArray.toString(Base64);
+  openSSLStr = openSSLStr.replace(/(.{64})/g, '$1\n');
+  return openSSLStr;
+}
+</function>
+
+<mapBoard>
+function mapBoard(board, func) {
+    return board.map(function (col) {
+        return col.map(function (p) {
+            return func(p);
+        });
+    });
+}
+</mapBoard>
+
+<function>
+function (node, fn) {
+  var count = 0, first = node.firstChild;
+  fn = fn || function () {
+    return 1;
+  };
+  while (first) {
+    if (fn(first)) {
+        count++;
+    }
+    first = first.nextSibling;
+  }
+  return count;
+}
+</function>
+
+<combineBuffers>
+function combineBuffers(types, opts) {
+  var size = -1;
+  var i, l, type;
+  for (i = 0, l = types.length; i < l; i++) {
+    type = types[i];
+    if (type.typeName === 'bytes') {
+      return type;
+    }
+    if (size === -1) {
+      size = type.size;
+    } else if (type.size !== size) {
+      size = -2;
+    }
+  }
+  return size < 0 ? Type.forSchema('bytes', opts) : types[0];
+}
+</combineBuffers>

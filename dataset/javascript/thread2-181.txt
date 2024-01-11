@@ -1,0 +1,388 @@
+```javascript
+<executeQueuedTasks>
+function executeQueuedTasks () {
+  <queueProcessing>
+  setTimeout(() => {
+    if (!executing && (queue.test.length || queue.build.length)) {
+      executing = true;
+      const task = (queue.test.length ? queue.test.splice(0, 1)[0] : queue.build.splice(0, 1)[0]);
+      <taskExecution>
+      gulp.series([task])(() => {
+        executing = false;
+        executeQueuedTasks();
+      });
+      </taskExecution>
+    }
+  }, 250);
+  </queueProcessing>
+  
+  <logStatus>
+  if (!executing && !(queue.test.length || queue.build.length)) {
+    console.log();
+    console.log(`> WATCHER(S) DONE PROCESSING - WAITING FOR CHANGES ...`.green);
+    console.log();
+  }
+  </logStatus>
+}
+</executeQueuedTasks>
+
+<addButtonCommand>
+function( editor ) {
+  var order = 0;
+  <defineCommand>
+  var addButtonCommand = function( buttonName, buttonLabel, commandName, styleDefiniton ) {
+    if ( !styleDefiniton )
+      return;
+
+    var style = new CKEDITOR.style( styleDefiniton ),
+      forms = contentForms[ commandName ];
+
+    forms.unshift( style );
+
+    editor.attachStyleStateChange( style, function( state ) {
+      !editor.readOnly && editor.getCommand( commandName ).setState( state );
+    } );
+
+    editor.addCommand( commandName, new CKEDITOR.styleCommand( style, {
+      contentForms: forms
+    } ) );
+
+    if ( editor.ui.addButton ) {
+      editor.ui.addButton( buttonName, {
+        label: buttonLabel,
+        command: commandName,
+        toolbar: 'basicstyles,' + ( order += 10 )
+      } );
+    }
+  };
+  </defineCommand>
+
+  <initializeContentForms>
+  var contentForms = {
+    // ...
+  };
+  </initializeContentForms>
+  
+  <configureCommands>
+  config = editor.config,
+  lang = editor.lang.basicstyles;
+
+  addButtonCommand( 'Bold', lang.bold, 'bold', config.coreStyles_bold );
+  // ... additional commands ...
+  </configureCommands>
+
+  <setKeystrokes>
+  editor.setKeystroke( [
+    [ CKEDITOR.CTRL + 66 , 'bold' ],
+    [ CKEDITOR.CTRL + 73 , 'italic' ],
+    [ CKEDITOR.CTRL + 85 , 'underline' ]
+    ] );
+  </setKeystrokes>
+}
+</addButtonCommand>
+
+<measureUploadBandwidth>
+function measureUploadBandwidth(url, payload) {
+  <initializeUpload>
+  var xhr = new XMLHttpRequest(),
+    resultPromise = new OT.$.RSVP.Promise(function(resolve, reject) {
+    <uploadProgress>
+    var startTs,
+      lastTs,
+      lastLoaded;
+    xhr.upload.addEventListener('progress', function(evt) {
+      if (!startTs) {
+        startTs = Date.now();
+      }
+      lastLoaded = evt.loaded;
+    });
+    </uploadProgress>
+    <uploadComplete>
+    xhr.addEventListener('load', function() {
+      lastTs = Date.now();
+      resolve(1000 * 8 * lastLoaded / (lastTs - startTs));
+    });
+    </uploadComplete>
+    xhr.addEventListener('error', function(e) {
+      reject(e);
+    });
+    xhr.addEventListener('abort', function() {
+      reject();
+    });
+    xhr.open('POST', url);
+    xhr.send(payload);
+  });
+  </initializeUpload>
+
+  return {
+    promise: resultPromise,
+    <abortOperation>
+    abort: function() {
+      xhr.abort();
+    }
+    </abortOperation>
+  };
+}
+</measureUploadBandwidth>
+
+<Database>
+function Database(pg) {
+  <initializeDatabase>
+  this.pg = pg;
+  this.defaults = pg.defaults;
+  this.connect = this.connect.bind(this);
+  this.end = this.end.bind(this);
+  </initializeDatabase>
+}
+</Database>
+
+<cleanConditionally>
+function cleanConditionally(e, tag) {
+  <setupToRemoveTags>
+  var tagsList = e.getElementsByTagName(tag);
+  var curTagsLength = tagsList.length;
+
+  for (var i = curTagsLength - 1; i >= 0; i--) {
+    var weight = getClassWeight(tagsList[i]);
+
+    dbg("Cleaning Conditionally " + tagsList[i] + " (" + tagsList[i].className + ":" + tagsList[i].id + ")" + ((typeof tagsList[i].readability != 'undefined') ? (" with score " + tagsList[i].readability.contentScore) : ''));
+
+    if (weight < 0) {
+      tagsList[i].parentNode.removeChild(tagsList[i]);
+    } else if (getCharCount(tagsList[i], ',') < 10) {
+      // ...
+  </setupToRemoveTags>
+  </cleanConditionally>
+
+  <evaluateAndRemove>
+      // ... calculations involving 'p', 'img', 'li', 'input', 'embedCount' ...
+      
+      var toRemove = false;
+      // ... conditions to determine if the current tag should be removed ...
+
+      if (toRemove) {
+        tagsList[i].parentNode.removeChild(tagsList[i]);
+      }
+  </evaluateAndRemove>
+}
+</cleanConditionally>
+
+<updateBinding>
+function (binding, subpath, newValue) {
+  <resolveArguments>
+  var args = Util.resolveArgs(
+    arguments,
+    function (x) { return x instanceof Binding ? 'binding' : null; }, '?subpath', 'newValue'
+  );
+  </resolveArguments>
+  return this.update(args.binding, args.subpath, Util.constantly(args.newValue));
+}
+</updateBinding>
+
+<processText>
+function processText(text, filename, options) {
+
+  <initializeVariables>
+  var filePath,
+      messages,
+      stats;
+
+  if (filename) {
+      filePath = path.resolve(filename);
+  }
+  </initializeVariables>
+
+  filename = filename || "<text>";
+  <lintFile>
+  debug("Linting " + filename);
+  messages = bemlint.verify(text, lodash.assign(Object.create(null), {
+      filename: filename
+  }, options));
+  </lintFile>
+
+  <calculateStatistics>
+  stats = calculateStatsPerFile(messages);
+  </calculateStatistics>
+
+  <generateResult>
+  var result = {
+      filePath: filename,
+      messages: messages,
+      errorCount: stats.errorCount,
+      warningCount: stats.warningCount
+  };
+  </generateResult>
+
+  return result;
+}
+</processText>
+
+<processArgs>
+function processArgs(...args) {
+  let Cmd
+  let opts
+  let callback
+
+  <parseArguments>
+  switch( args.length ) {
+  default: throw new Error('Need arguments')
+  case 1: Cmd = args[0]; opts = {}; break;
+  case 2:
+      Cmd = args[0]
+      if( typeof args[1] === 'object' ) {
+          opts = args[1]
+      } else if( typeof args[1] === 'function' ) {
+          callback = args[1]
+          opts = {}
+      } else {
+          throw new Error('Second argument cannot be anything but an object or a function')
+      }
+      break;
+  case 3: [Cmd, opts, callback] = args; break;
+  }
+  </parseArguments>
+
+  <setupExecutionOptions>
+  let createOpts = Object.assign({Cmd, AttachStdin: false, AttachStdout: false, AttachStderr: false})
+  let execOpts = {Detach: true, hijack: false}
+
+  if( opts.stdin || opts.stdout || opts.stderr ) {
+      execOpts.hijack = true
+      execOpts.Detach = false
+  }
+  </setupExecutionOptions>
+  
+  <assignSpecialOptions>
+  if( opts.stdin ) {
+      createOpts.AttachStdin = true
+      execOpts.stdin = true
+  }
+  
+  if( opts.stdout ) {
+      createOpts.AttachStdout = true
+  }
+  
+  if( opts.stderr ) {
+      createOpts.AttachStderr = true
+  }
+  </assignSpecialOptions>
+  
+  <validateLiveOption>
+  if( opts.live ) {
+      if( execOpts.Detach ) {
+          const err = new Error('The live option requires that you also pass stdout, stderr, or stdin.')
+          if( !callback ) {
+              return Promise.reject(err)
+          }
+          return callback(err)
+      }
+  }
+  </validateLiveOption>
+  
+  <mergeAdditionalOptions>
+  if( opts.createOpts ) {
+      Object.assign(createOpts, opts.createOpts)
+  }
+  
+  if( opts.execOpts ) {
+      Object.assign(execOpts, opts.execOpts)
+  }
+  </mergeAdditionalOptions>
+
+  <invokeExecProcess>
+  if( !callback ) {
+      return new Promise((resolve, reject) =>
+          processExec.call(this, opts, createOpts, execOpts, (err, results) => err ? reject(err, results) : resolve(results))
+      )
+  }
+  
+  return processExec.call(this, opts, createOpts, execOpts, callback)
+  </invokeExecProcess>
+}
+</processArgs>
+
+<executeInSeries>
+function executeInSeries(callbacks, args, context, done) {
+  <sequenceExecution>
+  var nbArguments = args.length;
+  callbacks = callbacks.slice(0);
+  </sequenceExecution>
+
+  <recursiveIterator>
+  var iterator = function(callbacks, args) {
+      if (!callbacks.length) {
+          return typeof done === 'function' ? done() : true;
+      }
+
+      var callback = callbacks.shift();
+      <invokeCallback>
+      callback.apply(context, args);
+      </invokeCallback>
+
+      // Detect whether to continue iteratively or to invoke the next function asynchronously
+      if (callback.length === nbArguments) {
+          iterator(callbacks, args, done);
+      }
+  };
+  </recursiveIterator>
+
+  <extendArgsWithCallback>
+  args.push(function(){
+      iterator(callbacks, args, done);
+  });
+  </extendArgsWithCallback>
+
+  iterator(callbacks, args, done);
+}
+</executeInSeries>
+
+<prepBuildFiles>
+function prepBuildFiles(root) {
+  <readProjectProperties>
+  var propertiesObj = readProjectProperties(path.join(PLATFORM_DIR, 'project.properties'));
+  var subProjects = propertiesObj.libs;
+  </readProjectProperties>
+  
+  <generateBuildGradle>
+  var buildGradle = fs.readFileSync(path.join(PLATFORM_DIR, 'plugin-build.gradle'), 'utf-8');
+  var depsList = '';
+  subProjects.forEach(function (p) {
+      var libName = p.replace(/[/\\]/g, ':').replace(name + '-', '');
+      depsList += 'debugCompile project(path: "' + libName + '", configuration: "debug")\n';
+      depsList += 'releaseCompile project(path: "' + libName + '", configuration: "release")\n';
+  });
+  </generateBuildGradle>
+  
+  <mapSystemLibrariesToMaven>
+  var SYSTEM_LIBRARY_MAPPINGS = [
+      // Mapping definitions...
+  ];
+  propertiesObj.systemLibs.forEach(function (p) {
+      var mavenRef;
+      
+      // ...
+      if (!mavenRef) {
+          throw new error('Unsupported system library (does not work with gradle): ' + p);
+      }
+      depsList += 'compile "' + mavenRef + '"\n';
+  });
+  </mapSystemLibrariesToMaven>
+  
+  <updateBuildGradleDependencies>
+  buildGradle = buildGradle.replace(/(SUB-PROJECT DEPENDENCIES START)[\s\S]*(\/\/ SUB-PROJECT DEPENDENCIES END)/, '$1\n' + depsList + '    $2');
+  </updateBuildGradleDependencies>
+  
+  <includeGradleExtensions>
+  var includeList = '';
+  propertiesObj.gradleIncludes.forEach(function (includePath) {
+      includeList += 'apply from: "$projectDir/../../platforms/android/' + includePath + '"\n';
+  });
+  buildGradle = buildGradle.replace(/(PLUGIN GRADLE EXTENSIONS START)[\s\S]*(\/\/ PLUGIN GRADLE EXTENSIONS END)/, '$1\n' + includeList + '$2');
+  </includeGradleExtensions>
+  
+  <writeUpdatedBuildGradle>
+  fs.writeFileSync(path.join(PLATFORM_DIR, 'plugin-build.gradle'), buildGradle);
+  </writeUpdatedBuildGradle>
+}
+</prepBuildFiles>
+```

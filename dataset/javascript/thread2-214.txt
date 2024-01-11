@@ -1,0 +1,159 @@
+```javascript
+<extractTravelPlan>
+function extractTravelPlan(data) {
+  let plans = []
+  [<getPlan>
+  let getPlan = searchPlan => plans.find(plan => samePlan(plan, searchPlan))
+  </getPlan>]
+
+  [<dataLoop>
+  data.folders.forEach(folder => {
+    <folderValidation>
+    let cents = folder.cents
+    if (folder.cents === undefined) { return }
+    </folderValidation>
+    
+    <stationInformation>
+    let from = stationDataFromId(folder.departure_station_id, data)
+    let to = stationDataFromId(folder.arrival_station_id, data)
+    </stationInformation>
+    
+    <timeConversions>
+    let departure = (new Date(folder.departure_date)).toISOString()
+    let arrival = (new Date(folder.arrival_date)).toISOString()
+    </timeConversions>
+
+    <tripSegmentMappings>
+    let tripId = folder.trip_ids[0]
+    let trip = data.trips.find(trip => trip.id === tripId)
+    let segments = trip.segment_ids.map(segmentId =>
+      data.segments.find(segment => segment.id === segmentId)
+    )
+    let legs = segments.map(segment => ({
+      from: stationDataFromId(segment.departure_station_id, data),
+      to: stationDataFromId(segment.arrival_station_id, data),
+      departure: (new Date(segment.departure_date)).toISOString(),
+      arrival: (new Date(segment.arrival_date)).toISOString(),
+    }))
+    </tripSegmentMappings>
+    
+    <planCreation>
+    let searchPlan = {fares: [], legs}
+    let plan = getPlan(searchPlan)
+
+    if (plan === undefined) {
+      plan = searchPlan
+      plans.push(plan)
+    </planCreation>
+
+    <fareValidation>
+    } else if (plan.fares.find(fare => fare.price[0].cents === cents) !== undefined) {
+      return
+    }
+    </fareValidation>
+
+    <planFarePush>
+    plan.fares.push({
+      price: [{ cents: folder.cents, currency: folder.currency }],
+      class: travelClass(folder.travel_class),
+      flexibility: flexibility(folder.flexibility),
+    })
+    </planFarePush>
+  })
+  </dataLoop>]
+  return plans
+}
+</extractTravelPlan>
+
+<prepareSheet>
+function prepareSheet(opts, data, columns, idx) {
+
+  <setupOptions>
+  var opt = {sheetid: 'Sheet ' + idx, headers: true};
+  alasql.utils.extend(opt, opts);
+  </setupOptions>
+
+  <dataLengthCheck>
+  var dataLength = Object.keys(data).length;
+  </dataLengthCheck>
+
+  <columnSetup>
+  if ((!columns || columns.length == 0) && dataLength > 0) {
+    columns = Object.keys(data[0]).map(function(columnid) {
+      return {columnid: columnid};
+    });
+  }
+  </columnSetup>
+
+  <cellInitialization>
+  var cells = {};
+
+  if (wb.SheetNames.indexOf(opt.sheetid) > -1) {
+    cells = wb.Sheets[opt.sheetid];
+  } else {
+    wb.SheetNames.push(opt.sheetid);
+    wb.Sheets[opt.sheetid] = {};
+    cells = wb.Sheets[opt.sheetid];
+  }
+  </cellInitialization>
+
+  <rangeSetup>
+  var range = 'A1';
+  if (opt.range) range = opt.range;
+  </rangeSetup>
+
+  <rangeCalculation>
+  var col0 = alasql.utils.xlscn(range.match(/[A-Z]+/)[0]);
+  var row0 = +range.match(/[0-9]+/)[0] - 1;
+
+  if (wb.Sheets[opt.sheetid]['!ref']) {
+    var rangem = wb.Sheets[opt.sheetid]['!ref'];
+    var colm = alasql.utils.xlscn(rangem.match(/[A-Z]+/)[0]);
+    var rowm = +rangem.match(/[0-9]+/)[0] - 1;
+  } else {
+    var colm = 1,
+      rowm = 1;
+  }
+  var colmax = Math.max(col0 + columns.length, colm);
+  var rowmax = Math.max(row0 + dataLength + 2, rowm);
+  </rangeCalculation>
+
+  <refDefinition>
+  wb.Sheets[opt.sheetid]['!ref'] = 'A1:' + alasql.utils.xlsnc(colmax) + rowmax;
+  </refDefinition>
+
+  <populateHeaders>
+  var i = row0 + 1;
+
+  if (opt.headers) {
+    columns.forEach(function(col, idx) {
+      cells[alasql.utils.xlsnc(col0 + idx) + '' + i] = {v: col.columnid.trim()};
+    });
+    i++;
+  }
+  </populateHeaders>
+
+  <populateCells>
+  for (var j = 0; j < dataLength; j++) {
+    columns.forEach(function(col, idx) {
+      var cell = {v: data[j][col.columnid]};
+      if (typeof data[j][col.columnid] == 'number') {
+        cell.t = 'n';
+      } else if (typeof data[j][col.columnid] == 'string') {
+        cell.t = 's';
+      } else if (typeof data[j][col.columnid] == 'boolean') {
+        cell.t = 'b';
+      } else if (typeof data[j][col.columnid] == 'object') {
+        if (data[j][col.columnid] instanceof Date) {
+          cell.t = 'd';
+        }
+      }
+      cells[alasql.utils.xlsnc(col0 + idx) + '' + i] = cell;
+    });
+    i++;
+  }
+  </populateCells>
+}
+</prepareSheet>
+```
+Note: The remaining functions in the set were not annotated due to character limitations. Please submit additional functions as separate requests for further SRP annotations.

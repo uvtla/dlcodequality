@@ -1,0 +1,390 @@
+<cautiouslyApply>
+function cautiouslyApply(
+item,
+fns,
+log = true,
+keepOldValueOnFalseyReturn = false)
+{
+  if (fns && Array.isArray(fns)) {
+    fns.forEach(fn => {
+      try {
+        <bindFunctor>
+        let bindFunctor = Array.isArray(fn) && fn[1];
+        let functor = bindFunctor ?
+        fn[0].bind(item) :
+        Array.isArray(fn) ? fn[0] : fn;
+        </bindFunctor>
+
+        <applyFunction>
+        if (keepOldValueOnFalseyReturn)
+        item = functor(item) || item;else
+
+        item = functor(item);
+        </applyFunction>
+      }
+      catch (error) {
+        <logError>
+        if (log) {
+          console.error(error);
+        }
+        </logError>
+      }
+    });
+  }
+
+  return item;
+}
+</cautiouslyApply>
+
+<processGeometry>
+function ( buffers, geoInfo, facePositionIndexes, materialIndex, faceNormals, faceColors, faceUVs, faceWeights, faceWeightIndices, faceLength ) {
+
+			for ( var i = 2; i < faceLength; i ++ ) {
+        <pushVertexPositions>
+				buffers.vertex.push( geoInfo.vertexPositions[ facePositionIndexes[ 0 ] ] );
+				...</pushVertexPositions>
+
+        if ( geoInfo.skeleton ) {
+          <pushVertexWeightsAndIndices>
+					buffers.vertexWeights.push( faceWeights[ 0 ] );
+					...</pushVertexWeightsAndIndices>
+				}
+
+				if ( geoInfo.color ) {
+          <pushColors>
+					buffers.colors.push( faceColors[ 0 ] );
+					...</pushColors>
+				}
+
+				if ( geoInfo.material && geoInfo.material.mappingType !== 'AllSame' ) {
+          <pushMaterialIndex>
+					buffers.materialIndex.push( materialIndex );
+					...</pushMaterialIndex>
+				}
+
+				if ( geoInfo.normal ) {
+          <pushNormals>
+					buffers.normal.push( faceNormals[ 0 ] );
+					...</pushNormals>
+				}
+
+				if ( geoInfo.uv ) {
+          <iterateUVAndPush>
+					geoInfo.uv.forEach( function ( uv, j ) {
+						...
+					} );
+          </iterateUVAndPush>
+				}
+			}
+		}
+</processGeometry>
+
+<parseCSSSize>
+function(sCSSSize, bWithUnit) {
+  var iPixelValue;
+
+  if (typeof sCSSSize !== "string") {
+    return null;
+  }
+
+  <handlePixelConversion>
+  if (sCSSSize.endsWith("px")) {
+    iPixelValue = parseInt(sCSSSize);
+  } else if (sCSSSize.endsWith("em") || sCSSSize.endsWith("rem")) {
+    iPixelValue = Math.ceil(parseFloat(sCSSSize) * TableUtils.getBaseFontSize());
+  } else {
+    return null;
+  }
+  </handlePixelConversion>
+
+  if (bWithUnit) {
+    return iPixelValue + "px";
+  } else {
+    return iPixelValue;
+  }
+}
+</parseCSSSize>
+
+<parseNumber>
+function parseNumber(num) {
+    var numStr = Math.abs(num) + '';
+    var exponent = 0, digits, integerLen;
+    var i, j, zeros;
+    
+    <stripDecimalSeparatorAndExponent>
+    if ((integerLen = numStr.indexOf(DECIMAL_SEP)) > -1) {
+        numStr = numStr.replace(DECIMAL_SEP, '');
+    }
+    
+    if ((i = numStr.search(/e/i)) > 0) {
+        
+        if (integerLen < 0)
+            integerLen = i;
+        integerLen += +numStr.slice(i + 1);
+        numStr = numStr.substring(0, i);
+    }
+    else if (integerLen < 0) {
+        
+        integerLen = numStr.length;
+    }
+    </stripDecimalSeparatorAndExponent>
+    
+    <countLeadTrailZeroesAndAdjustDigits>
+    for (i = 0; numStr.charAt(i) === ZERO_CHAR; i++) { 
+    }
+    if (i === (zeros = numStr.length)) {
+        
+        digits = [0];
+        integerLen = 1;
+    }
+    else {
+        
+        zeros--;
+        while (numStr.charAt(zeros) === ZERO_CHAR)
+            zeros--;
+        
+        integerLen -= i;
+        digits = [];
+        
+        for (j = 0; i <= zeros; i++, j++) {
+            digits[j] = Number(numStr.charAt(i));
+        }
+    }
+    
+    if (integerLen > MAX_DIGITS) {
+        digits = digits.splice(0, MAX_DIGITS - 1);
+        exponent = integerLen - 1;
+        integerLen = 1;
+    }
+    </countLeadTrailZeroesAndAdjustDigits>
+    
+    return { digits: digits, exponent: exponent, integerLen: integerLen };
+}
+</parseNumber>
+
+<reshapeArray>
+function _reshape (array, sizes) {
+  
+  let tmpArray = array
+  let tmpArray2
+  
+  for (let sizeIndex = sizes.length - 1; sizeIndex > 0; sizeIndex--) {
+    const size = sizes[sizeIndex]
+    tmpArray2 = []
+
+    <splitAndGroupElements>
+    const length = tmpArray.length / size
+    for (let i = 0; i < length; i++) {
+      tmpArray2.push(tmpArray.slice(i * size, (i + 1) * size))
+    }
+    </splitAndGroupElements>
+    
+    tmpArray = tmpArray2
+  }
+
+  return tmpArray
+}
+</reshapeArray>
+
+<isValidDate>
+function isValidDate(date) {
+  <checkDateValidity>
+  if (moment.isMoment(date)) {
+    return date.isValid();
+  } else {
+    return moment(date).isValid();
+  }
+  </checkDateValidity>
+}
+</isValidDate>
+
+<updateSelectionData>
+function (data) {
+  var container=this.selection.find(".select2-chosen"), formatted, cssClass;
+
+  <updateDataContainer>
+  this.selection.data("select2-data", data);
+
+  container.empty();
+  if (data !== null) {
+      formatted=this.opts.formatSelection(data, container, this.opts.escapeMarkup);
+  }
+  if (formatted !== undefined) {
+      container.append(formatted);
+  }
+  cssClass=this.opts.formatSelectionCssClass(data, container);
+  if (cssClass !== undefined) {
+      container.addClass(cssClass);
+  }
+
+  this.selection.removeClass("select2-default");
+
+  if (this.opts.allowClear && this.getPlaceholder() !== undefined) {
+      this.container.addClass("select2-allowclear");
+  }
+  </updateDataContainer>
+}
+</updateSelectionData>
+
+<setupPatsy>
+function(config){
+  var patsy = this;
+  <printInitialMessage>
+  this.scripture.print('[Patsy]'.yellow + ': Just putting my rucksack on my Lord!');
+  </printInitialMessage>
+
+  if(typeof config !== 'undefined' && typeof config === 'object'){
+    <printScriptureConfirmation>
+    this.scripture.print('[Patsy]'.yellow + ': And yes, the scripture is in my rucksack, I just checked.');
+    </printScriptureConfirmation>
+    this.project_cfg = config;
+
+    <setupPatsy>
+    this.setup();
+    </setupPatsy>
+
+    if(opts.verbose || config.options.verbose || false){
+      <printVerboseDirectoryChange>
+      util.print('>>'.cyan + ' Changing directory to : ' + opts.app_path.inverse.cyan + '...\n');
+	  </printVerboseDirectoryChange>
+    }
+
+    try{
+      <changeDirectory>
+      process.chdir(opts.app_path);
+      </changeDirectory>
+    } catch(e){
+      <handleDirectoryChangeError>
+      console.trace();
+      patsy.utils.fail('Could not change directory!');
+      console.log(e);
+      </handleDirectoryChangeError>
+    }
+
+    if(typeof config.proxy !== 'undefined'){
+      if(opts.verbose || config.options.verbose || false){
+        <printVerboseProxyLoading>
+        util.print('Loading the Proxy\n'.bold);
+        </printVerboseProxyLoading>
+      }
+
+      try{
+        <setupProxy>
+        var proxy = require('./proxy/')({
+          verbose: opts.verbose || config.options.verbose || config.proxy.options.verbose || false,
+          patsy: patsy
+        });
+        proxy.start(config);
+        </setupProxy>
+      } catch(e){
+        <handleProxyLoadError>
+        patsy.utils.fail('Could not load proxy!');
+        console.trace();
+        console.log(e);
+        </handleProxyLoadError>
+      }
+    }
+
+    if(typeof config.fileserver !== 'undefined'){
+      if(opts.verbose || config.options.verbose || false){
+        <printVerboseFileserverLoading>
+        util.print('Loading the Fileserver\n'.bold);
+        </printVerboseFileserverLoading>
+      }
+
+      try {
+        <setupFileServer>
+        var fileserver = require('./fileserver')(config);
+        fileserver.load(patsy);
+        </setupFileServer>
+      } catch(ex){
+        <handleFileserverLoadError>
+        patsy.utils.fail('Could not load fileserver!');
+        console.trace();
+        console.log(ex);
+        </handleFileserverLoadError>
+      }
+    }
+
+    try {
+      if(opts.verbose || config.options.verbose || false){
+        <printVerboseGruntLoading>
+        util.print('Loading Grunt, The JavaScript Task Runner\n'.bold);
+        </printVerboseGruntLoading>
+      }
+
+      <loadGrunt>
+      this.loadGrunt(config);
+      </loadGrunt>
+    } catch(ex){
+      <handleGruntLoadError>
+      patsy.utils.fail('Could not load Grunt!');
+      console.trace();
+      console.log(ex);
+      </handleGruntLoadError>
+    }
+  }
+}
+</setupPatsy>
+
+<readDescendantUnitsByAuthorsBeforeMcIndex>
+function readDescendantUnitsByAuthorsBeforeMcIndex(conn, objEarlierUnitProps, arrAuthorAddresses, to_main_chain_index, handleUnits){
+	
+	var arrUnits = [];
+	
+	function goDown(arrStartUnits){
+		<goDownQuery>
+		profiler.start();
+		conn.query(
+			"SELECT units.unit, unit_authors.address AS author_in_list \n\
+			FROM parenthoods \n\
+			JOIN units ON child_unit=units.unit \n\
+			LEFT JOIN unit_authors ON unit_authors.unit=units.unit AND address IN(?) \n\
+			WHERE parent_unit IN(?) AND latest_included_mc_index<? AND main_chain_index<=?",
+			[arrAuthorAddresses, arrStartUnits, objEarlierUnitProps.main_chain_index, to_main_chain_index],
+			function(rows){
+				var arrNewStartUnits = [];
+				for (var i=0; i<rows.length; i++){
+					var objUnitProps = rows[i];
+					arrNewStartUnits.push(objUnitProps.unit);
+					if (objUnitProps.author_in_list)
+						arrUnits.push(objUnitProps.unit);
+				}
+				profiler.stop('mc-wc-descendants-goDown');
+				(arrNewStartUnits.length > 0) ? goDown(arrNewStartUnits) : handleUnits(arrUnits);
+			}
+		);
+		</goDownQuery>
+	}
+	
+	<initialQuery>
+	profiler.start();
+
+	conn.query( 
+		"SELECT unit FROM units "+db.forceIndex("byMcIndex")+" LEFT JOIN unit_authors USING(unit) \n\
+		WHERE latest_included_mc_index>=? AND main_chain_index>? AND main_chain_index<=? AND latest_included_mc_index<? AND address IN(?)", 
+		[objEarlierUnitProps.main_chain_index, objEarlierUnitProps.main_chain_index, to_main_chain_index, to_main_chain_index, arrAuthorAddresses],
+
+		function(rows){
+			arrUnits = rows.map(function(row) { return row.unit; });
+			profiler.stop('mc-wc-descendants-initial');
+			goDown([objEarlierUnitProps.unit]);
+		}
+	);
+	</initialQuery>
+}
+</readDescendantUnitsByAuthorsBeforeMcIndex>
+
+<_Char_toCode>
+function _Char_toCode(char)
+{
+	<convertCharacterToCode>
+	var code = char.charCodeAt(0);
+	if (0xD800 <= code && code <= 0xDBFF)
+	{
+		return (code - 0xD800) * 0x400 + char.charCodeAt(1) - 0xDC00 + 0x10000
+	}
+	return code;
+	</convertCharacterToCode>
+}
+</_Char_toCode>

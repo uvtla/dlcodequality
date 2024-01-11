@@ -1,0 +1,176 @@
+```javascript
+<selectControlElements>
+function selectControlElements() {
+  editor.on('click', function (e) {
+    var target = e.target;
+
+    if (/^(IMG|HR)$/.test(target.nodeName) && dom.getContentEditableParent(target) !== "false") {
+      e.preventDefault();
+      editor.selection.select(target);
+      editor.nodeChanged();
+    }
+
+    if (target.nodeName == 'A' && dom.hasClass(target, 'mce-item-anchor')) {
+      e.preventDefault();
+      selection.select(target);
+    }
+  });
+}
+</selectControlElements>
+
+<syncOptions>
+function(syncOptions, serverResponses) {
+  const syncs = [];
+  if (syncOptions.iframeEnabled) {
+    for (var index = 0; index < serverResponses.length; index++) {
+      if (serverResponses[index].body && serverResponses[index].body.trackingPixel) {
+        syncs.push({
+          type: 'iframe',
+          url: serverResponses[index].body.trackingPixel
+        });
+      }
+    }
+  }
+  return syncs;
+}
+</syncOptions>
+
+<swsReqResStats>
+function swsReqResStats(apdex_threshold) {
+  this.requests=0;                
+  this.responses=0;               
+  this.errors=0;                  
+  this.info=0;                    
+  this.success=0;                 
+  this.redirect=0;                
+  this.client_error=0;            
+  this.server_error=0;            
+  this.total_time=0;              
+  this.max_time=0;                
+  this.avg_time=0;                
+  this.total_req_clength=0;       
+  this.max_req_clength=0;         
+  this.avg_req_clength=0;         
+  this.total_res_clength=0;       
+  this.max_res_clength=0;         
+  this.avg_res_clength=0;         
+  this.req_rate=0;                
+  this.err_rate=0;                
+  this.apdex_threshold = typeof apdex_threshold !== 'undefined' ? apdex_threshold : 50;   
+  this.apdex_satisfied = 0;       
+  this.apdex_tolerated = 0;       
+  this.apdex_score = 0;           
+  
+}
+</swsReqResStats>
+
+<toArray>
+function toArray(target) {
+  return new Promise((resolve) => {
+    const arr = []
+
+    target.each((index, element) => {
+      arr.push(cheerio(element))
+
+      if (target.length - 1 === index) {
+        resolve(arr)
+      }
+    })
+  })
+}
+</toArray>
+
+<dynamicArrayOperations>
+function(initial) {
+  return {
+    a: initial || [],
+    
+    s: function() {
+      for (var i$3 = 0; i$3 < arguments.length; ++i$3)
+        this.a.push(arguments[i$3]);
+      return this;
+    },
+    
+    i: function(list) {
+      if (Array.isArray(list)) {
+        this.a.push.apply(this.a, list);
+      } else {
+        for (var __$0 = (list)[Symbol.iterator](), __$1; __$1 = __$0.next(), !__$1.done;)
+          { var item$0 = __$1.value; this.a.push(item$0); }
+      }
+      return this;
+    }
+  };
+}
+</dynamicArrayOperations>
+
+<getStyle>
+function(node, att, style) {
+  style = style || node.style;
+  var CUSTOM_STYLES = Y_DOM.CUSTOM_STYLES,
+      val = '';
+
+  if (style) {
+    if (att in CUSTOM_STYLES) {
+      if (CUSTOM_STYLES[att].get) {
+        return CUSTOM_STYLES[att].get(node, att, style); 
+      } else if (typeof CUSTOM_STYLES[att] === 'string') {
+        att = CUSTOM_STYLES[att];
+      }
+    }
+    val = style[att];
+    if (val === '') { 
+      val = Y_DOM[GET_COMPUTED_STYLE](node, att);
+    }
+  }
+  return val;
+}
+</getStyle>
+
+<getNodePointerData>
+function (node) {
+  var data = {},
+      names = self.getPointerNames(node),
+      i;
+  for (i = 0; i < names.length; i++) {
+    data[names[i]] = self.getPointerPath(node, names[i]);
+  }
+  return data;
+}
+</getNodePointerData>
+
+<scan$2>
+function scan$2(accumulator, seed) {
+  var hasSeed = false;
+  if (arguments.length >= 2) {
+    hasSeed = true;
+  }
+  return this.lift(new ScanOperator(accumulator, seed, hasSeed));
+}
+</scan$2>
+
+<generateTransactionRequest>
+function generateTransactionRequest(signer, transaction, options) {
+  let iou = {
+    amt: transaction.amount,
+    cur: transaction.currency,
+    sub: signer.address,
+    aud: transaction.destination,
+    nce: String(Math.floor(Math.random() * 1000000000))
+  };
+  return createTransactionRequestStatement(signer, iou, options);
+}
+</generateTransactionRequest>
+
+<forEach>
+function forEach(callbackfn ) {
+  anInstance(this, C, 'forEach');
+  var f = ctx(callbackfn, arguments.length > 1 ? arguments[1] : undefined, 3)
+      , entry;
+  while (entry = entry ? entry.n : this._f) {
+    f(entry.v, entry.k, this);
+    while (entry && entry.r) entry = entry.p;
+  }
+}
+</forEach>
+```

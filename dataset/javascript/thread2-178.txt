@@ -1,0 +1,145 @@
+```javascript
+function (e) {
+  var ret = e.originalEvent || e;
+  
+  if (ret.pageX === UNDEFINED) { 
+    ret.pageX = e.pageX;
+    ret.pageY = e.pageY;
+  }
+  
+  return ret;
+}
+
+function filter(obj, predicate) {
+  return composeObject(entries(obj).filter(([key, value]) => predicate(value, key)));
+}
+
+function projectConfigAddPaths(config) {
+  config.paths.src[TASK_NAME]  = config.dirs.src  + '/images/';
+  config.paths.dest[TASK_NAME] = config.dirs.dest + '/images/';
+
+  return config;
+}
+
+function (event) {
+  var self = this;
+
+  event.monologued = false;
+  event.recorded_at = new Date();
+  <eventInsertion>
+  self.events.insert(event, function (err) {
+    <eventRemoval>
+    if (!err) {
+      _.delay(function () {
+        self.events.remove({
+          event_id: event.event_id
+        });
+      }, 60000);
+    }
+    </eventRemoval>
+  });
+  </eventInsertion>
+}
+
+function(){
+	if(!this.puzzle.execConfig('allowempty')){
+		var bd = this.board;
+		if(bd.linegraph.ltotal[0]!==(!bd.borderAsLine ? bd.cell : bd.cross).length){ return;}
+		this.failcode.add("brNoLine");
+	}
+}
+
+function () {
+  var cond = argsToArray(arguments).map(function (s) {
+    <stringToIdentifierConversion>
+    return isString(s) && s !== '' ? this.stringToIdentifier(s) : s;
+    </stringToIdentifierConversion>
+  }, this);
+  return this._filter.apply(this, ["having"].concat(cond));
+}
+
+function(action, azulfile, options, strings) {
+  var db = Database.create(azulfile[env]);
+  var migrator = db.migrator(path.resolve(options.migrations));
+  var message = '';
+  var batches = '';
+  <migrationManagement>
+  return migrator[action]()
+  .tap(function(migrations) {
+    batches = _(migrations).pluck('batch').unique().join(', ');
+  })
+  .then(function(migrations) {
+    message += migrations.length ?
+      chalk.magenta(strings.intro, 'migrations, batch', batches, '\n') :
+      chalk.magenta(strings.none, '\n');
+    migrations.forEach(function(migration) {
+      message += chalk.cyan(migration.name, '\n');
+    });
+    message += chalk.gray(_.capitalize(env), 'environment\n');
+    process.stdout.write(message);
+  })
+  .catch(function(e) {
+    message += chalk.red(strings.action, 'failed.', e);
+    process.stderr.write(message);
+    process.exit(1);
+  })
+  .finally(function() { db.disconnect(); });
+  </migrationManagement>
+}
+
+function parse(args) {
+  const cliArgs = [];
+  const nodeArgs = [];
+  <argParsing>
+  for (const arg of args) {
+    if (NODE_FLAGS.test(arg)) {
+      nodeArgs.push(arg);
+    } else {
+      cliArgs.push(arg);
+    }
+  }
+  </argParsing>
+
+  return {
+    cliArgs,
+    nodeArgs
+  };
+}
+
+function(eventName, callback) {
+  var allCallbacks = lib$rsvp$events$$callbacksFor(this), callbacks;
+
+  callbacks = allCallbacks[eventName];
+  <callbackManagement>
+  if (!callbacks) {
+    callbacks = allCallbacks[eventName] = [];
+  }
+
+  if (lib$rsvp$events$$indexOf(callbacks, callback) === -1) {
+    callbacks.push(callback);
+  }
+  </callbackManagement>
+}
+
+function (oPathValue, sEdmType) {
+  var vValue = oPathValue.value;
+  <typeHandling>
+  if (sEdmType === "String") {
+    if (rI18n.test(vValue)) { 
+      return {
+        ignoreTypeInPath : true,
+        result : "binding",
+        type : "Edm.String",
+        value : vValue.slice(1, -1) 
+      };
+    }
+  }
+  </typeHandling>
+
+  return {
+    result : "constant",
+    type : mType2Type[sEdmType],
+    value : vValue
+  };
+}
+```

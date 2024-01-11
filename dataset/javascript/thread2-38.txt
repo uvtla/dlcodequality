@@ -1,0 +1,331 @@
+<applyToClient>
+function applyToClient(client, method) {
+  <getMethod>
+  var _method = '_' + method
+  if (client[_method]) {
+  </getMethod>
+    <executeMethod>
+    var arr = client[_method] || []
+    while (arr.length) {
+      client[method].apply(client, arr.shift())
+    }
+    </executeMethod>
+    <cleanup>
+    delete client[_method]
+    </cleanup>
+  }
+}
+</applyToClient>
+
+<toBufferGeometry>
+function toBufferGeometry(geometry, doBuffer) {
+  <checkDoBuffer>
+  if (!doBuffer) { return geometry; }
+  </checkDoBuffer>
+  
+  <createBufferGeometry>
+  var bufferGeometry = new THREE.BufferGeometry().fromGeometry(geometry);
+  bufferGeometry.metadata = {type: geometry.type, parameters: geometry.parameters || {}};
+  </createBufferGeometry>
+
+  <disposeOriginalGeometry>
+  geometry.dispose();
+  </disposeOriginalGeometry>
+  
+  return bufferGeometry;
+}
+</toBufferGeometry>
+
+<detectPoseInRealTime>
+function detectPoseInRealTime(video, net) {
+  <setupCanvas>
+  const canvas = document.getElementById('output');
+  const ctx = canvas.getContext('2d');
+  
+  const flipHorizontal = true;
+
+  canvas.width = videoWidth;
+  canvas.height = videoHeight;
+  </setupCanvas>
+
+  <poseDetectionFrame>
+  async function poseDetectionFrame() {
+    <handleArchitectureChange>
+    if (guiState.changeToArchitecture) {
+      guiState.net.dispose();
+      guiState.net = await posenet.load(+guiState.changeToArchitecture);
+      guiState.changeToArchitecture = null;
+    }
+    </handleArchitectureChange>
+
+    <startStats>
+    stats.begin();
+    </startStats>
+
+    <estimatePoses>
+    const imageScaleFactor = guiState.input.imageScaleFactor;
+    const outputStride = +guiState.input.outputStride;
+
+    let poses = [];
+    let minPoseConfidence;
+    let minPartConfidence;
+    switch (guiState.algorithm) {
+      case 'single-pose':
+        const pose = await guiState.net.estimateSinglePose(
+            video, imageScaleFactor, flipHorizontal, outputStride);
+        poses.push(pose);
+        minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
+        minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
+        break;
+      case 'multi-pose':
+        poses = await guiState.net.estimateMultiplePoses(
+            video, imageScaleFactor, flipHorizontal, outputStride,
+            guiState.multiPoseDetection.maxPoseDetections,
+            guiState.multiPoseDetection.minPartConfidence,
+            guiState.multiPoseDetection.nmsRadius);
+        minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
+        minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
+        break;
+    }
+    </estimatePoses>
+
+    <drawCanvas>
+    ctx.clearRect(0, 0, videoWidth, videoHeight);
+    </drawCanvas>
+
+    <showVideo>
+    if (guiState.output.showVideo) {
+      ctx.save();
+      ctx.scale(-1, 1);
+      ctx.translate(-videoWidth, 0);
+      ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+      ctx.restore();
+    }
+    </showVideo>
+
+    <drawPoses>
+    poses.forEach(({score, keypoints}) => {
+      if (score >= minPoseConfidence) {
+        if (guiState.output.showPoints) {
+          drawKeypoints(keypoints, minPartConfidence, ctx);
+        }
+        if (guiState.output.showSkeleton) {
+          drawSkeleton(keypoints, minPartConfidence, ctx);
+        }
+        if (guiState.output.showBoundingBox) {
+          drawBoundingBox(keypoints, ctx);
+        }
+      }
+    });
+    </drawPoses>
+
+    <endStats>
+    stats.end();
+    </endStats>
+
+    requestAnimationFrame(poseDetectionFrame);
+  }
+  </poseDetectionFrame>
+
+  poseDetectionFrame();
+}
+</detectPoseInRealTime>
+
+<configureCarousel>
+function configureCarousel(clip, attr) {
+            <initializeVariables>
+            var carousel = this,
+                config   = carousel.CONFIG,
+                cssClass = carousel.CLASSES,
+                isVertical,
+                rows,
+                cols,
+                size;
+            </initializeVariables>
+
+            <determineContext>
+            isVertical = carousel.get("isVertical");
+            rows       = carousel._rows;
+            cols       = carousel._cols;
+            clip       = clip || carousel._clipEl;
+            attr       = attr || (isVertical ? "height" : "width");
+            size       = parseFloat(Dom.getStyle(clip, attr), 10);
+            size = JS.isNumber(size) ? size : 0;
+            </determineContext>
+
+            <calculateSize>
+            if (isVertical) {
+                size += getDimensions(carousel._carouselEl, "height") +
+                        getStyle(carousel._navEl, "height");
+            } else {
+                size += getDimensions(carousel._carouselEl, "width");
+            }
+            </calculateSize>
+
+            <applyMinWidth>
+            if (!isVertical) {
+                if (size < config.HORZ_MIN_WIDTH) {
+                    size = config.HORZ_MIN_WIDTH;
+                    carousel.addClass(cssClass.MIN_WIDTH);
+                }
+            }
+            </applyMinWidth>
+
+            <setStyle>
+            carousel.setStyle(attr,  size + "px");
+            </setStyle>
+
+            <setSizeForDimension>
+            if (isVertical) {
+                size = getCarouselItemSize.call(carousel, "width"); 
+                if(cols) { 
+                    size = size * cols; 
+                }
+                Dom.setStyle(carousel._carouselEl, "width", size + "px");
+                if (size < config.VERT_MIN_WIDTH) {
+                    size = config.VERT_MIN_WIDTH;
+                    carousel.addClass(cssClass.MIN_WIDTH);
+                }
+                carousel.setStyle("width",  size + "px");
+            } else {
+                if(rows) { 
+                    size = getCarouselItemSize.call(carousel, "height");
+                    size = size * rows;
+                    Dom.setStyle(carousel._carouselEl, "height", size + "px");
+                }
+            }
+            </setSizeForDimension>
+}
+</configureCarousel>
+
+<_unquoteArgs>
+function _unquoteArgs(args) {
+  <unquoteArrayArguments>
+  for (var i = 0; i < args.length; i++) {
+    if (_isQuoted(args[i])) args[i] = _unquote(args[i]);
+  }
+  </unquoteArrayArguments>
+}
+</_unquoteArgs>
+
+<SemanticPopupDisplay>
+function SemanticPopupDisplay(SemanticPopupDisplayLink) {
+  <configuration>
+  return {
+    restrict: 'A',
+    scope: {
+      
+      smPopupDisplay: '@',
+      
+      smPopupDisplaySettings: '=',
+      smPopupDisplayOnInit: '=',
+      
+      smPopupDisplayOnCreate: '=',
+      smPopupDisplayOnRemove: '=',
+      smPopupDisplayOnShow: '=',
+      smPopupDisplayOnVisible: '=',
+      smPopupDisplayOnHide: '=',
+      smPopupDisplayOnHidden: '='
+    },
+    link: SemanticPopupDisplayLink
+  };
+  </configuration>
+}
+</SemanticPopupDisplay>
+
+<serviceCall>
+function serviceCall(req, res, next) {
+  <registerPushDevice>
+  Q(pushService.registerPushDevice(req.body)).then(res.json.bind(res), next).done();
+  </registerPushDevice>
+}
+</serviceCall>
+
+<generateSetupToken>
+function generateSetupToken(tokenPath) {
+  <createDirectory>
+  mkdirp.sync(path.dirname(tokenPath))
+  </createDirectory>
+
+  <generateToken>
+  var token = crypto.randomBytes(256).toString('hex')
+  </generateToken>
+  
+  <writeTokenToFile>
+  try {
+    fs.writeFileSync(tokenPath, token, 'utf8')
+  } catch (e) {
+    throw new Error('Unable to save setup token to ' + tokenPath)
+  }
+  </writeTokenToFile>
+  
+  return token
+}
+</generateSetupToken>
+
+<formatter>
+function formatter(options) {
+  <composeLogLine>
+  const line = [
+    new Date().toISOString(),
+    options.level
+  ]
+  </composeLogLine>
+
+  <appendMessage>
+  if (options.message !== undefined) line.push(options.message)
+  </appendMessage>
+
+  <appendMeta>
+  if (options.meta && Object.keys(options.meta).length) line.push(JSON.stringify(options.meta))
+  </appendMeta>
+
+  return line.join(' ')
+}
+</formatter>
+
+<UNavLayoutTab>
+function UNavLayoutTab(tab, tabs, panels, layout) {
+
+  <selectTab>
+  function selectTab() {
+    var href = tab.href.split('#')[1];
+    var panel = layout._content.querySelector('#' + href);
+    layout._resetTabState(tabs);
+    layout._resetPanelState(panels);
+    u.addClass(tab, layout._CssClasses.IS_ACTIVE);
+    u.addClass(panel, layout._CssClasses.IS_ACTIVE);
+  }
+  </selectTab>
+
+  <setupRippleEffect>
+  var rippleContainer = document.createElement('span');
+  u.addClass(rippleContainer, 'u-ripple');
+  tab.appendChild(rippleContainer);
+  new URipple(tab)
+  </setupRippleEffect>
+  
+  <bindClickEvent>
+  u.on(tab,'click', function (e) {
+    if (tab.getAttribute('href').charAt(0) === '#') {
+      e.preventDefault();
+      selectTab();
+    }
+  });
+
+  tab.show = selectTab;
+  </bindClickEvent>
+
+  <activateOnClick>
+  u.on(tab,'click', function (e) {
+    e.preventDefault();
+    var href = tab.href.split('#')[1];
+    var panel = layout._content.querySelector('#' + href);
+    layout._resetTabState(tabs);
+    layout._resetPanelState(panels);
+    u.addClass(tab, layout._CssClasses.IS_ACTIVE);
+    u.addClass(panel, layout._CssClasses.IS_ACTIVE);
+  });
+  </activateOnClick>
+}
+</UNavLayoutTab>

@@ -1,0 +1,263 @@
+```javascript
+<getRgbAColor>
+function getRgbAColor(color, opacity) {
+  <colorCacheLookup>
+  const id = color + '&' + opacity;
+  if (colorCache[id]) {
+    return colorCache[id];
+  }
+  </colorCacheLookup>
+
+  <domManipulation>
+  const div = document.createElement('div');
+  div.style.background = color;
+  document.body.appendChild(div);
+  const computedColor = window.getComputedStyle(div).backgroundColor;
+  document.body.removeChild(div);
+  </domManipulation>
+
+  <colorValidation>
+  if (!rgbReg.test(computedColor)) {
+    return color;
+  }
+  </colorValidation>
+
+  <colorCacheAssignment>
+  return (colorCache[id] = `rgba(${
+    extractRgbColor.exec(computedColor)[1]
+  }, ${opacity})`);
+  </colorCacheAssignment>
+}
+</getRgbAColor>
+
+<unnamedArcFunction>
+function (x, y, w, h, options) { // Function has no name, which makes referencing it difficult.
+  <calculateGeometry>
+  var start = options.start,
+      end = options.end,
+      radius = options.r || w || h,
+      innerRadius = options.innerR,
+      cosStart = mathCos(start),
+      sinStart = mathSin(start),
+      cosEnd = mathCos(end),
+      sinEnd = mathSin(end),
+      ret;
+
+  if (end - start === 0) { 
+    return ['x'];
+  }
+  </calculateGeometry>
+
+  <constructPathData>
+  ret = [
+    'wa', 
+    // ...other elements ommited for brevity
+  ];
+
+  if (options.open && !innerRadius) {
+    ret.push(
+      'e',
+      'M',
+      x,
+      y
+    );
+  }
+
+  ret.push(
+    // ...other elements ommited for brevity
+  );
+
+  ret.isArc = true;
+  </constructPathData>
+  
+  return ret;
+}
+</unnamedArcFunction>
+
+<stagger>
+function stagger(val, params) {
+  <initializeParameters>
+  if ( params === void 0 ) params = {};
+  // ...other initializations ommited for brevity
+  </initializeParameters>
+
+  <calculateStaggerFunction>
+  return function (el, i, t) {
+    // ...function body omitted for brevity
+  }
+  </calculateStaggerFunction>
+}
+</stagger>
+
+<highchartsAxisRender>
+function () {
+  <initializeState>
+  var axis = this,
+      // ...other initializations ommited for brevity
+  </initializeState>
+
+  <cleanupInactiveObjects>
+  each([ticks, minorTicks, alternateBands], function (coll) {
+    // ...block content omitted for brevity
+  });
+  </cleanupInactiveObjects>
+
+  <processTickPositions>
+  if (hasData || isLinked) {
+    // ...block content omitted for brevity
+  }
+  </processTickPositions>
+
+  <renderAxisLine>
+  if (lineWidth) {
+    // ...block content omitted for brevity
+  }
+  </renderAxisLine>
+
+  <renderAxisTitle>
+  if (axisTitle && showAxis) {
+    // ...block content omitted for brevity
+  }
+  </renderAxisTitle>
+
+  <renderStackLabels>
+  if (stackLabelOptions && stackLabelOptions.enabled) {
+    axis.renderStackTotals();
+  }
+  </renderStackLabels>
+
+  axis.isDirty = false;
+}
+</highchartsAxisRender>
+
+<tasks>
+function tasks(options) {
+  <initializeParametersAndTemplateSetup>
+  options = options || {};
+  var fp = path.resolve(options.template);
+  var tmpl = new utils.File({path: fp, contents: fs.readFileSync(fp)});
+  var data = {tasks: []};
+  </initializeParametersAndTemplateSetup>
+
+  <constructTaskStream>
+  return utils.through.obj(function(file, enc, next) {
+    // ...single-task processing omitted for brevity
+  }, function(next) {
+  tmpl.data = data;
+  this.push(tmpl);
+  next();
+  });
+  </constructTaskStream>
+}
+</tasks>
+
+<guessnumber>
+function guessnumber(request, response) {
+  <checkRequestBodyCondition>
+  if (request.body.result) {
+  </checkRequestBodyCondition>
+
+    <logIncomingRequest>
+    dashbot.logIncoming(request.body)
+    </logIncomingRequest>
+
+    <processAction>
+    var action = request.body.result.action;
+
+    
+    if (action == "generate_answer") {
+      // ...block content omitted for brevity
+    } else if (action == "check_guess") {
+      // ...block content omitted for brevity
+    }
+    </processAction>
+
+    return;
+  }
+}
+</guessnumber>
+
+<unnamedRemoveNodeFunction>
+function(destroy) {
+  <domNodeRemoval>
+  var node = this._node,
+      parentNode = node.parentNode;
+
+  if (parentNode) {
+      parentNode.removeChild(node);
+  }
+  </domNodeRemoval>
+
+  <conditionalDestroy>
+  if (destroy) {
+      this.destroy(true);
+  }
+  </conditionalDestroy>
+
+  return this;
+}
+</unnamedRemoveNodeFunction>
+
+<doErrorAction>
+function(_key,_event){
+  <retrieveCacheAndClear>
+  var _cch = _pcache[_key];
+  if (!_cch) return;
+  _doClearAction(_key);
+  var _conf = _cch.conf;
+  </retrieveCacheAndClear>
+
+  <manageRetryLogic>
+  if (_conf.retry>0){
+      // ...retry logic omitted for brevity
+  }else{
+      _doErrorCallback(_key,_event.code);
+  }
+  </manageRetryLogic>
+}
+</doErrorAction>
+
+<determineActualTypes>
+function _determineActualTypes(
+    env,
+    seen,
+    values
+  ) {
+  <initializeInnerFunctions>
+  var expandUnknown4 = expandUnknown (env);
+  // ...additional function definitions omitted for brevity
+  </initializeInnerFunctions>
+
+  <processValues>
+  return isEmpty (values) ?
+    [Unknown] :
+    or (Z.reduce (refine, env, values), [Inconsistent]);
+  </processValues>
+}
+</determineActualTypes>
+
+<createReader>
+function createReader(noDecode, writerType, readerType) {
+  <conditionDecodingAndResolver>
+  if (noDecode) {
+    return (function (skipper) {
+      // ...logic for non-decoding reader omitted for brevity
+    })(writerType._skip);
+  } else if (readerType) {
+    var resolver = readerType.createResolver(writerType);
+    return function (tap) { return resolver._read(tap); };
+  }
+  </conditionDecodingAndResolver>
+
+  <returnBasicReader>
+  else {
+    return function (tap) { return writerType._read(tap); };
+  }
+  </returnBasicReader>
+}
+</createReader>
+```
+
+- Some functions are not explicitly named in these examples, which makes it challenging to provide a descriptive tag. Such unnamed functions have been annotated with a descriptive placeholder based on interpretation of their functionality.
+- In several examples, the functions' bodies were long or the responsibilities had considerable details; therefore, only the beginning of such blocks is shown, with an indication that content has been omitted for brevity.
+- For the `tasks` example, the stream generation process within the function was tagged as one responsibility, although it works on each individually received file because the overarching purpose of the stream is to build up the tasks from the files, which is treated as a single concern.

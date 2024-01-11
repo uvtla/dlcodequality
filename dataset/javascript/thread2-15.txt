@@ -1,0 +1,276 @@
+```javascript
+<function>
+function(json) {
+    <argumentHandling>
+    if (arguments.length === 2) {
+        if (!(this instanceof jDoc)) {
+            return new jDoc(arguments[0], arguments[1]);
+        }
+        var list = arguments[0];
+        var index = arguments[1];
+        this._list = list;
+        this._index = index;
+    } else {
+        if (!(this instanceof jDoc)) {
+            return new jDoc(json);
+        }
+        
+        
+        this._list = (json !== null) ? [json] : [];
+        this._index = 0;
+    }
+    </argumentHandling>
+}
+</function>
+
+<registerExtension>
+function registerExtension(name, extension, options, mergeConfig) {
+  var params = name;
+
+  <constructParams>
+  if (!isObject(name)) {
+    params = {};
+    params[name] = {
+      extension: extension,
+      options: options
+    };
+  }
+  </constructParams>
+
+  <extensionsIteration>
+  each(params, function (v, name) {
+    if (v) {
+      var _extension = v.extension,
+          _options3 = v.options;
+
+      <updateExtensions>
+      if (_extension) {
+        extensions[name] = _extension;
+      } else if (!mergeConfig) {
+        extensions[name] = v;
+      }
+      </updateExtensions>
+
+      <mergeOrUpdateConfig>
+      if (mergeConfig) {
+        if (!extensionConfig[name]) {
+          extensionConfig[name] = _config();
+        }
+
+        assign(extensionConfig[name], _options3);
+      } else {
+        extensionConfig[name] = _config(_options3);
+      }
+      </mergeOrUpdateConfig>
+    }
+  }, false);
+  </extensionsIteration>
+}
+</registerExtension>
+
+<angle2String>
+function angle2String (angleObj) {
+    <convertUnits>
+	let deg = angleObj.deg;
+	if (angleObj.unit && angleObj.unit !== "deg") {
+		
+		deg = (deg * angleUnitMap[angleObj.unit] / 360);
+	}
+    </convertUnits>
+
+    <formatDegrees>
+	
+	deg = parseFloat(deg.toFixed(4));
+	if (deg === 0) {
+		
+		deg = "0";
+	} else {
+		
+		deg += angleObj.unit || "deg";
+	}
+    </formatDegrees>
+	return deg;
+}
+</angle2String>
+
+<isEqual>
+function isEqual( left , right , like , oneWay ) {
+    <setupRuntime>
+	var runtime = {
+		leftStack: [] ,
+		rightStack: [] ,
+		like: !! like ,
+		oneWay: !! oneWay
+	} ;
+    </setupRuntime>
+
+    <executeComparison>
+	return isEqual_( runtime , left , right ) ;
+    </executeComparison>
+}
+</isEqual>
+
+<oschina>
+function oschina(repo, clone) {
+    <initializeURL>
+	let url;
+
+	
+	clone = true;
+
+	if (clone)
+		url = addProtocol(repo.host) + '/' + repo.owner + '/' + repo.name;
+		
+	else
+		url = addProtocol(repo.host) + '/' + repo.owner + '/' + repo.name + '/repository/archive/' + repo.checkout;
+    </initializeURL>
+
+    <returnResult>
+	return {url, clone};
+    </returnResult>
+}
+</oschina>
+
+<getWebpackSizes>
+async function getWebpackSizes() {
+  <ensureBuildDirectory>
+  await fse.mkdirp(path.join(__dirname, 'build'));
+  </ensureBuildDirectory>
+
+  <generateStats>
+  const configPath = path.join(__dirname, 'webpack.config.js');
+  const statsPath = path.join(__dirname, 'build', 'stats.json');
+  await exec(`webpack --config ${configPath} --json > ${statsPath}`);
+  </generateStats>
+
+  <processStats>
+  const stats = await fse.readJSON(statsPath);
+  const assets = new Map(stats.assets.map(asset => [asset.name, asset]));
+  </processStats>
+
+  <calculateSizes>
+  return Object.entries(stats.assetsByChunkName).map(([chunkName, assetName]) => {
+    const parsedSize = assets.get(assetName).size;
+    const gzipSize = assets.get(`${assetName}.gz`).size;
+    return [chunkName, { parsed: parsedSize, gzip: gzipSize }];
+  });
+  </calculateSizes>
+}
+</getWebpackSizes>
+
+<anonymousShaderProgram>
+function (gl) {
+    <shaderSources>
+    var vertexShaderSource = ...,
+        fragmentShaderSource = ...;
+    </shaderSources>
+    
+    <initializeProgram>
+    GpuProgram.call(this, gl, vertexShaderSource, fragmentShaderSource);
+    </initializeProgram>
+
+    <assignShaderAttributes>
+    
+    this.vertexPointLocation = this.attributeLocation(gl, "vertexPoint");
+    
+    this.vertexTexCoordLocation = this.attributeLocation(gl, "vertexTexCoord");
+    </assignShaderAttributes>
+
+    <assignUniformLocations>
+    
+    this.mvpMatrixLocation = this.uniformLocation(gl, "mvpMatrix");
+    
+    this.colorLocation = this.uniformLocation(gl, "color");
+    
+    this.modulateColorLocation = this.uniformLocation(gl, "modulateColor");
+    
+    this.texSamplerMatrixLocation = this.uniformLocation(gl, "texSamplerMatrix");
+    this.texMaskMatrixLocation = this.uniformLocation(gl, "texMaskMatrix");
+    this.texSamplerLocation = this.uniformLocation(gl, "texSampler");
+    this.opacityLocation = this.uniformLocation(gl, "opacity");
+    </assignUniformLocations>
+
+    <overwriteDefaultLocation>
+    
+    this.vertexPointLocation = -1;
+    </overwriteDefaultLocation>
+}
+</anonymousShaderProgram>
+
+<init>
+function init(opts) {
+    <initializeDefaults>
+	if (!opts) opts = {}
+	var result = {}
+	for (var p in settings) {
+		result[p] = settings[p]
+		if (opts[p] != null) settings[p] = opts[p]
+	}
+    </initializeDefaults>
+	return result
+}
+</init>
+
+<itemsFunction>
+function(items, obj1, obj2, obj3) {
+    <filterUndefinedItems>
+		items = _.reduce(_.filter(_.pairs(items), 
+			function(pair) { 
+				return typeof pair[1] !== 'undefined';
+			}),
+			function(target, pair) { 
+				target[pair[0]] = pair[1];
+				return target;
+			}, {}) || {};
+    </filterUndefinedItems>
+
+    <extendWithArguments>
+		return _.extend.apply(null, [items].concat(_.rest(arguments)));
+    </extendWithArguments>
+}
+</itemsFunction>
+
+<_validateLibraryFiles>
+function _validateLibraryFiles(repo, libraryName) {
+    <initialSetup>
+	const results = {
+		valid: true
+	};
+
+	const directory = repo.libraryDirectory(libraryName);
+    </initialSetup>
+
+    <defineRequiredFiles>
+	const requiredFiles = {
+		'README.md': /^README/i,
+		'LICENSE': /^LICENSE/i,
+	};
+    </defineRequiredFiles>
+
+    <mainSourceValidation>
+	return _mainSourceName(repo, libraryName)
+		.then((mainSourceName) => {
+			requiredFiles['main header'] = new RegExp('src[/\\\\][A-Za-z0-9][A-Za-z0-9-_\+]*.h', 'i');
+		})
+    </mainSourceValidation>
+    
+    <filePresenceValidation>
+		.then(() => _libraryFiles(directory))
+		.then((files) => {
+			for (const [requiredFile, filenamePattern] of Object.entries(requiredFiles)) {
+				if (!files.find((f) => f.match(filenamePattern))) {
+					results.valid = false;
+					results.errors = Object.assign({}, results.errors, {
+						[requiredFile]: 'is missing'
+					});
+				}
+			}
+
+			if (!results.valid) {
+				throw new ValidationFailed(results);
+			}
+		});
+    </filePresenceValidation>
+}
+</_validateLibraryFiles>
+```

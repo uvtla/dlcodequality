@@ -1,0 +1,301 @@
+```javascript
+<isTablet>
+function isTablet(mockUserAgent) {
+  var userAgent = mockUserAgent || window.navigator.userAgent;
+  return /ipad|Nexus (7|9)|xoom|sch-i800|playbook|tablet|kindle/i.test(userAgent);
+}
+</isTablet>
+
+<_add_table_row>
+function _add_table_row(item, color, prefix, suffix){
+  
+  <constructOutputRepresentation>
+  var out_rep = bbopx.noctua.type_to_span(item, color);
+  if( prefix ){ out_rep = prefix + out_rep; }
+  if( suffix ){ out_rep = out_rep + suffix; }
+  </constructOutputRepresentation>
+  
+  <createTableRowString>
+  var trstr = null;
+  if( color ){
+      trstr = '<tr class="bbop-mme-stack-tr" ' +
+    'style="background-color: ' + color +
+    ';"><td class="bbop-mme-stack-td">' + out_rep + '</td></tr>';   
+  }else{
+      trstr = '<tr class="bbop-mme-stack-tr">' +
+    '<td class="bbop-mme-stack-td">' + out_rep + '</td></tr>';   
+  }
+  </createTableRowString>
+  
+  <addToNodeStackTable>
+  enode_stack_table.add_to(trstr);
+  </addToNodeStackTable>
+</_add_table_row>
+
+<createTrackBuffer>
+function (chords, settings) {
+  
+  <makeChordEvents>
+  var chordEvents = makeChordEvents(chords, settings);
+  </makeChordEvents>
+
+  <setPatches>
+  var setPatches = _.reduce(_.range(0xf), function (buffer, channel) {
+    return Buffer.concat([buffer, makePatchEvent(channel, settings.chordPatch)]);
+  }, new Buffer(0));
+  </setPatches>
+
+  <calculateLengthAndReturnBuffer>
+  var length = setPatches.length + chordEvents.length + trackFooter.length;
+  return Buffer.concat([trackHeader, padNumber(length, 4), setPatches, chordEvents, trackFooter]);
+  </calculateLengthAndReturnBuffer>
+}
+</createTrackBuffer>
+
+<clearErrorMessages>
+function(el) {
+      
+  <collectErrorMessages>
+  var _errorMessages = {};
+  if (typeof el === 'undefined' || (el.length > 1 && el[0].type !== 'checkbox')) {
+    _errorMessages = this.form.querySelectorAll('.' + this.options.errorTemplateClass);
+  } else {
+    _errorMessages = this.parents(el[0]).querySelectorAll('.' + this.options.errorTemplateClass);
+  }
+  </collectErrorMessages>
+  
+  <closeErrorMessages>
+  for (var i = 0, _lengthErrorMessages = _errorMessages.length; i < _lengthErrorMessages; i++) {
+    this.window.close.call(this, _errorMessages[i]);
+  }
+  </closeErrorMessages>
+  
+  this.handler = false;
+}
+</clearErrorMessages>
+
+<extendRouter>
+function (methods) {
+  
+  <configureRouter>
+  this.lazyRouter();
+  this.router.method(methods);
+  </configureRouter>
+  
+  <defineMethodFunctions>
+  utils.arrayify(methods).forEach(function (method) {
+    this.define(method, function(path) {
+      var route = this.router.route(path);
+      var args = [].slice.call(arguments, 1);
+      route[method].apply(route, args);
+      return this;
+    }.bind(this));
+  }.bind(this));
+  </defineMethodFunctions>
+</extendRouter>
+
+<parseJavaScriptVariable>
+function parseJavaScriptVariable(body) {
+  
+  <initializeVariablesAndSelectors>
+  let res;
+  let jsonString = '';
+  const $ = cheerio.load(body);
+  </initializeVariablesAndSelectors>
+
+  <extractQuakeInfoJson>
+  $('script').each(function (i, elem) {
+    if (/(VI\.quakeInfo = .+);/.test($(this).text())) {
+      jsonString = $(elem).html().match(/(VI\.quakeInfo = )(.+);/)[2];
+    }
+  });
+  </extractQuakeInfoJson>
+  
+  <normalizeJsonString>
+  const resString = jsonString.replace(/(:\'[-0-9]\d*)(,)(\d*)/g, '$1.$3');
+  </normalizeJsonString>
+
+  <convertDatesAndParseJson>
+  const regexDate = /(\'t\':)new Date\((([0-9.,-]+),([0-9.,-]+),([0-9.,-]+),([0-9.,-]+),([0-9.,-]+),([0-9.,-]+))\)(,\'a\')/g;
+  const dateReplace = (match, p1, p2, p3, p4, p5, p6, p7, p8, p9) => {
+    const parsedDate = new Date(
+      parseInt(p3, 10),
+      parseInt(p4.split('-')[0], 10) - 1, parseInt(p5, 10),
+      parseInt(p6, 10),
+      parseInt(p7, 10),
+      parseInt(p8, 10)
+    );
+    return `${p1}\\${parsedDate.toISOString()}\\${p9}`;
+  };
+  try {
+    res = JSON.parse(resString.replace(regexDate, dateReplace).replace(/\'/g, '"'));
+  } catch (ex) {
+    return JSON.parse([{ error: 'Error parsing source.' }]);
+  }
+  </convertDatesAndParseJson>
+  
+  <constructResultFields>
+  const resFields = [];
+  res.forEach((element) => {
+    const tmpRow = {};
+    tmpRow.timestamp = element.t;
+    tmpRow.latitude = element.lat;
+    tmpRow.longitude = element.lon;
+    tmpRow.depth = element.dep;
+    tmpRow.size = element.s;
+    tmpRow.quality = element.q;
+    tmpRow.humanReadableLocation = `${element.dL} km ${element.dD} af ${element.dR}`;
+    resFields.push(tmpRow);
+  });
+  </constructResultFields>
+
+  return resFields;
+}
+</parseJavaScriptVariable>
+
+<resizeTableColumns>
+function(oColumn) {
+    
+    var allKeys = this._oColumnSet.keys,
+        allKeysLength = allKeys.length,
+        elRow = this.getFirstTrEl();
+
+    
+    if (ua.ie) {
+        this._setOverhangValue(1);
+    }
+
+    if (allKeys && elRow && (elRow.childNodes.length === allKeysLength)) {
+        
+        var sWidth = this.get("width");
+        if (sWidth) {
+            this._elHdContainer.style.width = "";
+            this._elBdContainer.style.width = "";
+        }
+        this._elContainer.style.width = "";
+        
+        
+        if (oColumn && lang.isNumber(oColumn.getKeyIndex())) {
+            this._validateColumnWidth(oColumn, elRow.childNodes[oColumn.getKeyIndex()]);
+        }
+        
+        
+        else {
+            var elTd, todos = [], thisTodo, i, len;
+            for (i = 0; i < allKeysLength; i++) {
+                oColumn = allKeys[i];
+                
+                
+                if (!oColumn.width && !oColumn.hidden && oColumn._calculatedWidth) {
+                    todos[todos.length] = oColumn;
+                }
+            }
+            
+            
+            this._elTbody.style.display = "none";
+            for (i = 0, len = todos.length; i < len; i++) {
+                this._setColumnWidth(todos[i], "auto", "visible");
+            }
+            this._elTbody.style.display = "";
+            
+            todos = [];
+
+            
+            for (i = 0; i < allKeysLength; i++) {
+                oColumn = allKeys[i];
+                elTd = elRow.childNodes[i];
+                
+                
+                if (!oColumn.width && !oColumn.hidden) {
+                    var elTh = oColumn.getThEl();
+
+                    
+                    if (elTh.offsetWidth !== elTd.offsetWidth) {
+                        var elWider = (elTh.offsetWidth > elTd.offsetWidth) ?
+                                oColumn.getThLinerEl() : elTd.firstChild;
+                
+                
+                        
+                        var newWidth = Math.max(0,
+                            (elWider.offsetWidth -(parseInt(Dom.getStyle(elWider,"paddingLeft"),10)|0) - (parseInt(Dom.getStyle(elWider,"paddingRight"),10)|0)),
+                            oColumn.minWidth);
+                            
+                        var sOverflow = 'visible';
+                        
+                        
+                        if ((oColumn.maxAutoWidth > 0) && (newWidth > oColumn.maxAutoWidth)) {
+                            newWidth = oColumn.maxAutoWidth;
+                            sOverflow = "hidden";
+                        }
+                
+                        todos[todos.length] = [oColumn, newWidth, sOverflow];
+                    }
+                }
+            }
+            
+            this._elTbody.style.display = "none";
+            for (i = 0, len = todos.length; i < len; i++) {
+                thisTodo = todos[i];
+                
+                this._setColumnWidth(thisTodo[0], thisTodo[1]+"px", thisTodo[2]);
+                thisTodo[0]._calculatedWidth = thisTodo[1];
+            }
+            this._elTbody.style.display = "";
+        }
+    
+        
+        if (sWidth) {
+            this._elHdContainer.style.width = sWidth;
+            this._elBdContainer.style.width = sWidth;
+        }
+    }
+    
+    <syncAndRestoreScroll>
+    this._syncScroll();
+    this._restoreScrollPositions();
+    </syncAndRestoreScroll>
+}
+</resizeTableColumns>
+
+<getQualifiedName>
+function(namespaceContext) {
+    var canonicalPrefix = namespaceContext ? namespaceContext.getPrefix(this.namespaceURI, this.prefix) : this.prefix;
+    return this.prefix + (this.prefix === '' ? '' : ':') + this.localPart;
+}
+</getQualifiedName>
+
+<GENERATE_ENUM>
+function GENERATE_ENUM(name, spec, parent) {
+  return GENERATE_DOC(spec.description + '\n'
+    + '@property ' + name + '\n'
+    + '@type Enum ' + spec.type + '\n'
+    + '@for ' + (parent ? parent : 'common') + '\n');
+}
+</GENERATE_ENUM>
+
+<initializeRadioButton>
+function initialize() {
+      if (!rgCtrl) {
+        throw 'RadioButton: No RadioGroupController could be found.';
+      }
+
+      <addRadioButtonRender>
+      rgCtrl.add(render);
+      </addRadioButtonRender>
+      
+      <observeValueAttribute>
+      attr.$observe('value', render);
+      </observeValueAttribute>
+
+      <setupElementInteractions>
+      element
+        .on('click', listener)
+        .on('$destroy', function() {
+          rgCtrl.remove(render);
+        });
+      </setupElementInteractions>
+}
+</initializeRadioButton>
+```
+
+In these annotations, individual responsibilities are tagged within each function. The main function tag encompasses the entire function if it meets SRP, or it wraps around nested tags that represent sub-responsibilities within the function that could potentially violate SRP. Simple variable declarations or one-liner expressions have not been tagged as distinct responsibilities unless they significantly change the purpose or behavior of the function.

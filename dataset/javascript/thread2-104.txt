@@ -1,0 +1,296 @@
+```javascript
+<encoding>
+function encoding(req, res) {
+  <findRawKey>
+  var obj = req.db.getRawKey(req.args[0], req);
+  </findRawKey>
+  <returnNullOnUndefined>
+  if(obj === undefined) return res.send(null, null);
+  </returnNullOnUndefined>
+  <sendEncodingResponse>
+  res.send(null, getEncoding(
+    req.db.getType(req.args[0]), obj.v, this.state.conf));
+  </sendEncodingResponse>
+}
+</encoding>
+
+<shareFile>
+function shareFile(metadata) {
+  <createSharedLinkWithSettings>
+  return dropbox.sharingCreateSharedLinkWithSettings({
+    path: metadata.path_display || metadata.path_lower
+  }).then(
+  </createSharedLinkWithSettings>
+  <processDropboxResult>
+    result => ({
+      ...result,
+      folder_link: KEPLER_DROPBOX_FOLDER_LINK,
+      url: overrideUrl(result.url)
+    })
+  </processDropboxResult>
+  );
+}
+</shareFile>
+
+<modifyUIOnError>
+function() {
+    <configureHtmlBridge>
+    var htmlBridge = _getHtmlBridge(_flashState.bridge);
+    if (htmlBridge) {
+      htmlBridge.removeAttribute("title");
+      htmlBridge.style.left = "0px";
+      htmlBridge.style.top = "-9999px";
+      htmlBridge.style.width = "1px";
+      htmlBridge.style.height = "1px";
+    }
+    </configureHtmlBridge>
+    <resetCurrentElementClasses>
+    if (_currentElement) {
+      _removeClass(_currentElement, _globalConfig.hoverClass);
+      _removeClass(_currentElement, _globalConfig.activeClass);
+      _currentElement = null;
+    }
+    </resetCurrentElementClasses>
+}
+</modifyUIOnError>
+
+<wnBuild>
+function wnBuild(classes,parent)
+{
+  <preliminaryChecks>
+  self=this;
+
+  if (!parent.getModulePath || !parent.getClassName || !parent.npmPath)
+    { return false; }
+  </preliminaryChecks>
+
+  <initialization>
+  buildStart=+new Date;
+
+  
+  this.parent = parent;
+
+  
+  this.classesPath = {};
+  
+  this.classesCode = {};
+  
+  this.classesBuild = {};
+  
+  this.classesObject = {};
+  
+  this.classesCompiler = {};
+  
+  this.classes = {};
+  
+  this.paramTypes = {};
+
+  
+  this.prototypeSource = {};
+  
+  this.compiledProtoSource = {};
+  
+  this.vmProtoScript = {};
+
+  
+  this.modulePath = parent.getModulePath() || '.';
+  this.npmPath = parent.npmPath || [];
+  this.moduleClass = parent.getClassName() || 'WNS';
+  </initialization>
+
+  <manageSourcesAndLoadModules>
+  this.loadedModules = {
+    q: q,
+    lodash: lodash
+  };
+
+  for (c in classes)
+  {
+    if (_.isString(classes[c]))
+      this.addSource(c,classes[c],true);
+    else if (_.isArray(classes[c]))
+    {
+      for (l in classes[c])
+        this.addSource(c,classes[c][l],true);
+    }
+  }
+
+  this.load();
+  </manageSourcesAndLoadModules>
+}
+</wnBuild>
+
+<handlePatterns>
+function(language, patterns, bypass) {
+  <adjustParameters>
+  if (arguments.length == 1) {
+      patterns = language;
+      language = DEFAULT_LANGUAGE;
+  }
+  </adjustParameters>
+  
+  <setPatternsAndBypass>
+  bypass_defaults[language] = bypass;
+  language_patterns[language] = patterns.concat(language_patterns[language] || []);
+  </setPatternsAndBypass>
+}
+</handlePatterns>
+
+<castDuration>
+function castDuration(format, value) {
+  <validateAndTransform>
+  if (!moment.isDuration(value)) {
+    if (!isString(value)) {
+      return ERROR
+    }
+    try {
+      if (!value.startsWith('P')) {
+        return ERROR
+      }
+      value = moment.duration(value)
+      if (!value.as('milliseconds')) {
+        return ERROR
+      }
+    } catch (error) {
+      return ERROR
+    }
+  }
+  </validateAndTransform>
+  <returnValidValue>
+  return value
+  </returnValidValue>
+}
+</castDuration>
+
+<directiveSetup>
+function() {
+  return {
+    restrict: 'A',
+    require: '?ngModel',
+    <linkFunction>
+    link: function(scope, elm, attr, ctrl) {
+      if (!ctrl) return;
+
+      var maxlength = -1;
+      <observeMaxLength>
+      attr.$observe('maxlength', function(value) {
+        var intVal = toInt(value);
+        maxlength = isNaN(intVal) ? -1 : intVal;
+        ctrl.$validate();
+      });
+      </observeMaxLength>
+      <validators>
+      ctrl.$validators.maxlength = function(modelValue, viewValue) {
+        return (maxlength < 0) || ctrl.$isEmpty(viewValue) || (viewValue.length <= maxlength);
+      };
+      </validators>
+    }
+    </linkFunction>
+  };
+}
+</directiveSetup>
+
+<completeTask>
+function (result, cb) {
+  <initializeSelf>
+  var self = this;
+  </initializeSelf>
+  <respondActivityTaskCompleted>
+  this.swfClient.respondActivityTaskCompleted({
+      result: stringify(result),
+      taskToken: this.config.taskToken
+  }, function (err) {
+      <onDoneCallback>
+      if (self.onDone) {
+          self.onDone();
+      }
+      </onDoneCallback>
+      <callCallback>
+      if (cb) {
+          cb(err);
+      }
+      </callCallback>
+
+  });
+  </respondActivityTaskCompleted>
+}
+</completeTask>
+
+<granularity>
+function granularity(granularity) {
+  <validationAndReturnObject>
+  if (utils.isObject(granularity)) {
+    return granularity
+  }
+  </validationAndReturnObject>
+  <validationAndReturnString>
+  else if (typeof granularity === 'string' && ~GRANULARITIES.indexOf(granularity)) {
+    return granularity
+  }
+  </validationAndReturnString>
+
+  <errorHandling>
+  if (!formatters.hasOwnProperty(granularity)) {
+    throw new FieldError('Bad granularity type: ' + granularity)
+  }
+  </errorHandling>
+
+  <applyFormatters>
+  var args = utils.args(arguments, 1)
+    , spec = {
+      type: granularity
+    }
+
+  formatters[granularity].apply(spec, args)
+  </applyFormatters>
+
+  <returnSpec>
+  return spec
+  </returnSpec>
+}
+</granularity>
+
+<Client>
+function Client(token, options) {
+  <initializeProperties>
+  this.token = token;
+  this.options = options;
+  </initializeProperties>
+
+  <setupRequestDefaults>
+  this.requestOptions = this.options && this.options.requestOptions || {};
+  this.request = this.options && this.options.request || request;
+  this.promise = this.options && this.options.promise || Promise;
+  this.decamelizeKeys = this.options ? this.options.decamelizeKeys : true;
+
+  var version = require('../../package.json').version;
+  this.requestDefaults = {
+    headers: {
+      'User-Agent': 'digitalocean-node/' + version,
+      'Content-Type': 'application/json'
+    }
+  };
+  </setupRequestDefaults>
+
+  <initializeAPIs>
+  this.version = 'v2';
+  this.host = 'api.digitalocean.com';
+
+  this.account = new Account(this);
+  this.actions = new Action(this);
+  this.volumes = new Volume(this);
+  this.certificates = new Certificate(this);
+  this.domains = new Domain(this);
+  this.droplets = new Droplet(this);
+  this.floatingIps = new FloatingIp(this);
+  this.firewalls = new Firewall(this);
+  this.images = new Image(this);
+  this.loadBalancers = new LoadBalancer(this);
+  this.regions = new Region(this);
+  this.sizes = new Size(this);
+  this.snapshots = new Snapshot(this);
+  this.tags = new Tag(this);
+  </initializeAPIs>
+}
+</Client>
+```

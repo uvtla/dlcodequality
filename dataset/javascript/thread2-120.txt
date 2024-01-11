@@ -1,0 +1,220 @@
+```javascript
+<parseResourceId>
+function(id_string) {
+    id_string = id_string.trim();
+    <regexMatch>
+    var match = this._locator_regex.exec(id_string),
+        result;
+    </regexMatch>
+
+    <validateMatch>
+    if (!match || match[2].indexOf('$') != -1) Lava.t("Malformed resource id: " + id_string);
+    </validateMatch>
+
+    <buildResult>
+    result = {
+        locator_type: this.locator_types[id_string[0]],
+        locator: match[1],
+        name: match[2]
+    };
+    </buildResult>
+
+    return result;
+}
+</parseResourceId>
+
+<addEventCrossBrowser>
+function(element, type, handler) {
+    <determineEventCompatibility>
+    if(element.addEventListener) {
+      addEvent = function(element, type, handler) {
+        element.addEventListener(type, handler, false);
+      };
+    } else if(element.attachEvent) {
+      addEvent = function(element, type, handler) {
+        element.attachEvent('on' + type, handler);
+      };
+    } else {
+      addEvent = function(element, type, handler) {
+        element['on' + type] = handler;
+      };
+    }
+    </determineEventCompatibility>
+    <attachEvent>
+    addEvent(element, type, handler);
+    </attachEvent>
+}
+</addEventCrossBrowser>
+
+<initializePanel>
+function Panel(options) {
+  <createPanelLayout>
+  var panelLayout = options.layoutConfig;
+  var viewLayouts = createLayout(panelLayout.view.views);
+  </createPanelLayout>
+  
+  <assignPanelMethods>
+  this.getPosition = panelLayout.getPosition;
+  this.views = _.map(viewLayouts, function (viewLayout) {
+    viewLayout.getPosition = wrapGetPosition(viewLayout.getPosition, panelLayout.getPosition);
+    return options.creator(viewLayout);
+  });
+  </assignPanelMethods>
+}
+</initializePanel>
+
+<handleRequestStateChange>
+function () {
+    <checkReadyState>
+    if (req.readyState !== 4) return;
+    </checkReadyState>
+    
+    <processResponse>
+    if (req.status === 200) successCb(null, JSON.parse(req.responseText));
+    else {
+      <buildErrorResponse>
+      var err = { error: 'Sorry, an error ocurred on the server' };
+      </buildErrorResponse>
+
+      <handleError>
+      if (errorCb && typeof errorCb === 'function') return errorCb(err);
+      successCb(err, null);
+      </handleError>
+    }
+    </processResponse>
+}
+</handleRequestStateChange>
+
+<setupTestEnvironment>
+function runMain () {
+    <setTitle>
+    setTitle('Apache Cordova Plugin Tests');
+    </setTitle>
+
+    <createActionButtons>
+    createActionButton('Auto Tests', setMode.bind(null, 'auto'));
+    createActionButton('Manual Tests', setMode.bind(null, 'manual'));
+    createActionButton('Reset App', location.reload.bind(location));
+    if (/showBack/.exec(location.hash)) {
+        createActionButton('Back', function () {
+            history.go(-1);
+        });
+    }
+    </createActionButtons>
+
+    <setupWinJSErrorHandler>
+    if (isWin && typeof WinJS !== 'undefined') {
+        var app = WinJS.Application;
+        app.addEventListener('error', function (err) { 
+            return true;
+        });
+    }
+    </setupWinJSErrorHandler>
+}
+</setupTestEnvironment>
+
+<checkPaddedArgument>
+function isPaddedArgument (node) {
+    <determineParentArray>
+    var parentArray = node.parent().arguments ? node.parent().arguments : node.parent().elements;
+    var idx = parentArray.indexOf(node);
+    </determineParentArray>
+
+    <checkArgumentPadding>
+    if (idx === 0) { 
+      if (prePreChar === '(' && preChar === '(' && postChar === ')') { 
+        return true;
+      }
+    } else if (idx === parentArray.length - 1) { 
+      if (preChar === '(' && postChar === ')' && postPostChar === ')') { 
+        return true;
+      }
+    } else { 
+      if (preChar === '(' && postChar === ')') { 
+        return true;
+      }
+    }
+    </checkArgumentPadding>
+    return false;
+}
+</checkPaddedArgument>
+
+<parseBasicAuth>
+function parseAuthorization(header) {
+  <extractAndDecodeToken>
+  var token = header.split(/\s/).pop();
+  var decoded = new Buffer(token, 'base64').toString();
+  </extractAndDecodeToken>
+
+  <splitCredentials>
+  var components = decoded.split(':');
+  if (components.length !== 2) {
+    return false;
+  } else {
+    return {
+      user: components[0],
+      password: components[1]
+    };
+  }
+  </splitCredentials>
+}
+</parseBasicAuth>
+
+<replaceQuoteCharacters>
+function all(node) {
+  <normalizeBackticks>
+  backticks(node);
+  </normalizeBackticks>
+
+  <convertQuotes>
+  if (node.value === backtick) {
+    node.value = openingSingleQuote;
+  } else if (node.value === singleQuote) {
+    node.value = closingSingleQuote;
+  }
+  </convertQuotes>
+}
+</replaceQuoteCharacters>
+
+<appendAngularAttributes>
+function applyAngularAttributesToParentElement(html, demo) {
+  var tmp;
+  
+  <filterAndSelectElement>
+  angular.forEach(angular.element(html), function(it,key){
+    if ((it.nodeName != "SCRIPT") && (it.nodeName != "#text")) {
+      tmp = angular.element(it);
+    }
+  });
+  </filterAndSelectElement>
+
+  <applyAttributes>
+  tmp.addClass(demo.id);
+  tmp.attr('ng-app', 'MyApp');
+  </applyAttributes>
+  return tmp[0].outerHTML;
+}
+</appendAngularAttributes>
+
+<executeShellCatCommand>
+function bin(argv) {
+  <checkArguments>
+  if (!argv[2]) {
+    console.error("url is required");
+    console.error("Usage : cat <url>");
+    process.exit(-1);
+  }
+  </checkArguments>
+  
+  <performCatOperation>
+  shell.cat(argv[2], function(err, res, uri) {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log(res);
+    }
+  });
+  </performCatOperation>
+}
+</executeShellCatCommand>
+```

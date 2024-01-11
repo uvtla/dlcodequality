@@ -1,0 +1,199 @@
+```javascript
+<setNodeAttributes>
+function (node, attrs) {
+        for (var attr in attrs) {
+            if(attrs.hasOwnProperty(attr)){
+                var value = attrs[attr];
+                switch (attr) {
+                    case 'class':
+                        node.className = value;
+                        break;
+                    case 'style' :
+                        node.style.cssText = node.style.cssText + ";" + value;
+                        break;
+                    case 'innerHTML':
+                        node[attr] = value;
+                        break;
+                    case 'value':
+                        node.value = value;
+                        break;
+                    default:
+                        node.setAttribute(attrFix[attr] || attr, value);
+                }
+            }
+        }
+        return node;
+}
+</setNodeAttributes>
+
+<renderCanvas>
+function (clip) {
+    var canvas = this.canvas;
+    var context = canvas.getContext('2d');
+    morpheus.CanvasUtil.resetTransform(context);
+    var width = this.getUnscaledWidth();
+    var height = this.getUnscaledHeight();
+    context.clearRect(0, 0, width, height);
+    if (this.prePaint) {
+      morpheus.CanvasUtil.resetTransform(context);
+      context.translate(this.offset.x, this.offset.y);
+      this.prePaint(clip, context);
+    }
+    morpheus.CanvasUtil.resetTransform(context);
+    if (this.offscreenCanvas) {
+      if (this.invalid) {
+        var oc = this.offscreenCanvas.getContext('2d');
+        morpheus.CanvasUtil.resetTransform(oc);
+        context.translate(this.offset.x, this.offset.y);
+        oc.clearRect(0, 0, width, height);
+        this.draw(clip, oc);
+      }
+      if (width > 0 && height > 0) {
+        context.drawImage(this.offscreenCanvas, 0, 0, width, height);
+      }
+    } else {
+      this.draw(clip, context);
+    }
+    if (this.postPaint) {
+      morpheus.CanvasUtil.resetTransform(context);
+      context.translate(this.offset.x, this.offset.y);
+      this.postPaint(clip, context);
+    }
+    this.lastClip = clip;
+    this.invalid = false;
+  }
+</renderCanvas>
+
+<filterArrayInPlace>
+function filterInPlace (arr, pred) {
+  var idx = 0;
+  for (var ii = 0; ii < arr.length; ++ii) {
+    if (pred(arr[ii])) {
+      arr[idx] = arr[ii];
+      ++idx;
+    }
+  }
+  arr.length = idx;
+}
+</filterArrayInPlace>
+
+<escapeRegExpCharacter>
+function escapeRegExpCharacter(ch, previousIsBackslash) {
+        
+        if ((ch & ~1) === 0x2028) {
+            return (previousIsBackslash ? 'u' : '\\u') + ((ch === 0x2028) ? '2028' : '2029');
+        } else if (ch === 10 || ch === 13) {  
+            return (previousIsBackslash ? '' : '\\') + ((ch === 10) ? 'n' : 'r');
+        }
+        return String.fromCharCode(ch);
+}
+</escapeRegExpCharacter>
+
+<setupClients>
+function setupClients(clientList, mixinConf) {
+    var i, len, cache;
+
+    cache = {};
+    
+    <resolveClientList>
+    if ('string' === typeof clientList) {
+        switch (clientList) {
+        case 'all':
+            clientList = this.clients.id.getAllKeys();
+            break;
+
+        case 'players':
+            clientList = this.clients.player.id.getAllKeys();
+            break;
+
+        case 'admins':
+            clientList = this.clients.admin.id.getAllKeys();
+            break;
+        }
+    }
+    </resolveClientList>
+
+    
+    i = -1, len = clientList.length;
+    for ( ; ++i < len ; ) {
+        this.setupClient(clientList[i], mixinConf, cache);
+    }
+}
+</setupClients>
+
+<stringifyArray>
+function stringifyArray( arr, indent ) {
+  var hasMoreThanOneItem = arr.length > 1;
+  if ( hasMoreThanOneItem ) {
+    var out = '[';
+    arr.forEach( function( itm, idx ) {
+      if ( idx > 0 )
+        out += ",";
+      out += "\n" + indent + itm;
+    });
+    return out + "]";
+  } else {
+    return "[" + ( arr.length == 1 ? arr[0] : '' ) + "]";
+  }
+}
+</stringifyArray>
+
+<applyGradientsToCSSValue>
+function insertGradientsIntoCSSValue(gradients, value, options) {
+		
+		
+		options = options || {};
+		gradients = utils.clone(gradients);
+		gradients.reverse().forEach(function(item, i) {
+			var suffix = !i && options.placeholder ? options.placeholder : '';
+			var str = options.oldWebkit ? item.gradient.stringifyOldWebkit(options) : item.gradient.stringify(options);
+			value = utils.replaceSubstring(value, str + suffix, item.matchedPart);
+		});
+
+		return value;
+}
+</applyGradientsToCSSValue>
+
+<omitFromObject>
+function omit(object, predicate, thisArg) {
+      if (typeof predicate == 'function') {
+        predicate = lodash.createCallback(predicate, thisArg, 3);
+        return pick(object, negate(predicate));
+      }
+      var omitProps = baseFlatten(arguments, true, false, 1),
+          length = omitProps.length;
+
+      while (length--) {
+        omitProps[length] = String(omitProps[length]);
+      }
+      return pick(object, baseDifference(keysIn(object),  omitProps));
+}
+</omitFromObject>
+
+<calculateRectangleOverlap>
+function rectshift(a, b) {
+	if(a.x > b.x + b.width ||
+		a.x + a.width < b.x ||
+		a.y > b.y + b.height ||
+		a.y + a.height < b.y) {
+		return 0;
+	} else {
+		var overlap = b.x + b.width - a.x;
+		return overlap;
+	}
+}
+</calculateRectangleOverlap>
+
+<formatInstallationProgress>
+function InstalationProgress(library, step, finished) {
+  var fillSpaces = ' '.repeat(15 - library.length)
+  if (finished) {
+    return chalk.cyan.dim(' > ') + chalk.yellow.dim(library) + fillSpaces + chalk.green('Installed')
+  } else {
+    return chalk.cyan(' > ') + chalk.yellow(library) + fillSpaces+ chalk.blue(step)
+  }
+}
+</formatInstallationProgress>
+```
+
+Each annotated function is enclosed within tags indicating the singular responsibility they adhere to. The functions were individually analyzed to ensure they each perform only one specific task aligning with the Single Responsibility Principle.

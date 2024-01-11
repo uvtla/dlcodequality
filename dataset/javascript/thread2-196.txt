@@ -1,0 +1,256 @@
+Function 1: Checks if a directory path exists by normalizing the path and using the filesystem access.
+
+```javascript
+function isExist(dir) {
+  <normalizePath>
+  dir = path.normalize(dir);
+  </normalizePath>
+  try {
+    <checkAccess>
+    fs.accessSync(dir, fs.R_OK);
+    </checkAccess>
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+```
+
+Function 2: Handles the removal of an element, logs an error if caught, and processes writing and removal operations.
+
+```javascript
+function remove(elem) {
+        <triggerHandler>
+        try {
+            $(exports).triggerHandler('remove', [elem]);
+        } catch (err) {
+            console.error(err);
+        }
+        </triggerHandler>
+        <writeAndPushOperation>
+        var writer = new Writer();
+        elem.save(writer);
+        _currentOperation.ops.push({op: OP_REMOVE, arg: writer.current});
+        </writeAndPushOperation>
+    }
+```
+
+Function 3: Adds event listeners and adjusts settings specific to a UI component known as Flounder. This function might be part of a larger object or class since there is usage of `this`.
+
+```javascript
+<addEventListeners>
+function(module,exports,__webpack_require__){"use strict";
+// A lot of individual responsibilities exist scattered throughout this function which handles different aspects like touch listeners, option listeners, key listeners, etc., making it non-compliant with SRP.
+...
+}</addEventListeners>
+```
+
+Function 4: Collects data from a device and processes linking, reading, and error handling.
+
+```javascript
+function innerCollectDeviceData(infoToCache) {
+        <deferredSetup>
+        var defered = q.defer();
+        self.dataCollectionDefered = defered;
+        </deferredSetup>
+        
+        <logging>
+        self.log('Collecting Data from a handle', self.handle);
+        </logging>
+        
+        <flagSet>
+        self.openedByScanner = true;
+        </flagSet>
+
+        <handleSetup>
+        var deviceHandle = self.handle;
+        </handleSetup>
+        
+        <openParametersExtraction>
+        var dt = self.openParameters.deviceType;
+        var ct = self.openParameters.connectionType;
+        var id = self.openParameters.identifier;
+        </openParametersExtraction>
+
+        <deviceCuratorSetup>
+        self.curatedDevice = new device_curator.device();
+        </deviceCuratorSetup>
+        
+        <deviceLinking>
+        self.curatedDevice.linkToHandle(deviceHandle, dt, ct, id)
+        </deviceLinking>
+        .then(function finishedLinkingHandle(res) {
+            <finishedLinkingHandle>
+            self.log('Finished linking to a handle', deviceHandle, self.curatedDevice.savedAttributes.connectionTypeName);
+            </finishedLinkingHandle>
+            
+            <timeoutSetup>
+            var collectionTimeout = setTimeout(deviceHandleDataCollectionTimeout, DEVICE_DATA_COLLECTION_TIMEOUT);
+            </timeoutSetup>
+            
+            <linkEvents>
+            linkToCuratedDeviceEvents();
+            </linkEvents>
+            
+            <logReading>
+            console.log('reading multiple...', deviceHandle);
+            </logReading>
+            
+            <deviceRead>
+            self.curatedDevice.iReadMultiple(infoToCache)
+            </deviceRead>
+            .then(function finishedCollectingData(results) {
+                <handleDataCollectionSuccess>
+                clearTimeout(collectionTimeout);
+                self.log('Collecting data from a handle', deviceHandle);
+                printCollectedDeviceData(results);
+                saveCollectedDeviceData(results);
+                stopCollectingDeviceData();
+                </handleDataCollectionSuccess>
+            }, function(err) {
+                <handleDataCollectionError>
+                self.log('Error collecting data from a handle', deviceHandle, err);
+                stopCollectingDeviceData();
+                </handleDataCollectionError>
+            });
+        }, function errorLinkingHandle(err) {
+            <handleLinkingError>
+            console.error('Error linking to handle...');
+            defered.resolve();
+            </handleLinkingError>
+        });
+        return defered.promise;
+    }
+```
+
+Function 5: Sets properties related to the dimension constraints of a scrolling component.
+
+```javascript
+function(clientWidth, clientHeight, contentWidth, contentHeight, continueScrolling) {
+    var self = this;
+
+    <inputValidation>
+    if (!clientWidth && !clientHeight && !contentWidth && !contentHeight) {
+      return;
+    }
+    </inputValidation>
+
+    <setClientProperties>
+    if (clientWidth === +clientWidth) {
+      self.__clientWidth = clientWidth;
+    }
+
+    if (clientHeight === +clientHeight) {
+      self.__clientHeight = clientHeight;
+    }
+
+    if (contentWidth === +contentWidth) {
+      self.__contentWidth = contentWidth;
+    }
+
+    if (contentHeight === +contentHeight) {
+      self.__contentHeight = contentHeight;
+    }
+    </setClientProperties>
+
+    <computeAndResize>
+    self.__computeScrollMax();
+    self.__resizeScrollbars();
+    </computeAndResize>
+
+    <continueScroll>
+    if (!continueScrolling) {
+      self.scrollTo(self.__scrollLeft, self.__scrollTop, true, null, true);
+    }
+    </continueScroll>
+
+  }
+```
+
+Function 6: A helper function to find an element within an event.
+
+```javascript
+function findElementInEvent(e, selector) {
+            <findElement>
+            var el = $(e.target);
+            if (!el.is(selector)) {
+                if (typeof selector === 'string') {
+                    el = el.parents(selector);
+                }
+                else if (selector.nodeType) {
+                    var found;
+                    el.parents().each(function (index, _el) {
+                        if (_el === selector) found = selector;
+                    });
+                    if (!found) return undefined;
+                    else return selector;
+                }
+            }
+            if (el.length === 0) {
+                return undefined;
+            }
+            return el[0];
+            </findElement>
+        }
+```
+
+Function 7: Obtains the constraint dimension from a DOM node based on provided CSS property values.
+
+```javascript
+function getConstraintDimension(domNode, maxStyle, percentageProperty) {
+		<dimensionCalculation>
+		var view = document.defaultView;
+		var parentNode = helpers$1._getParentNode(domNode);
+		var constrainedNode = view.getComputedStyle(domNode)[maxStyle];
+		var constrainedContainer = view.getComputedStyle(parentNode)[maxStyle];
+		var hasCNode = isConstrainedValue(constrainedNode);
+		var hasCContainer = isConstrainedValue(constrainedContainer);
+		var infinity = Number.POSITIVE_INFINITY;
+
+		if (hasCNode || hasCContainer) {
+			return Math.min(
+				hasCNode ? parseMaxStyle(constrainedNode, domNode, percentageProperty) : infinity,
+				hasCContainer ? parseMaxStyle(constrainedContainer, parentNode, percentageProperty) : infinity);
+		}
+
+		return 'none';
+		</dimensionCalculation>
+	}
+```
+
+Function 8: A complex function that appears to load and process models represented in JSON format.
+
+```javascript
+function(model_ids){
+<modelProcessing>
+    // There are multiple responsibilities within this function related to logging, data loading, graph rendering, event handling, etc., making it non-compliant with SRP.
+...
+</modelProcessing>
+}
+```
+
+Function 9: Swaps properties between two objects.
+
+```javascript
+function(other) {
+    <swapProperties>
+    var temp;
+    temp = other.id; other.id = this.id; this.id = temp;
+    temp = other.width; other.width = this.width; this.width = temp;
+    temp = other.height; other.height = this.height; this.height = temp;
+    </swapProperties>
+  }
+```
+
+Function 10: Dispatches a 'show' event on an element with provided detail.
+
+```javascript
+function dispatchShow_(element, detail) {
+    <dispatchEvent>
+    element.dispatchEvent(new CustomEvent('show', {
+      bubbles: true,
+      detail: detail
+    }));
+    </dispatchEvent>
+  }
+```

@@ -1,0 +1,542 @@
+<hasOwnEvent>
+function hasOwnEvent(moduleObject, moduleOption) {
+    moduleOption = defaultOption(moduleOption);
+    return moduleObject.hasOwnProperty(moduleOption.event) && (moduleObject[moduleOption.event] instanceof Event);
+}
+</hasOwnEvent>
+
+<register>
+function register(componentPath, tagName, cache) {
+  <inputValidation>
+  if (typeof componentPath === 'object') {
+    const definition = componentPath
+    return jComponent.register(definition)
+  }
+
+  if (typeof componentPath !== 'string') {
+    throw new Error('componentPath must be a string')
+  }
+
+  if (!tagName || typeof tagName !== 'string') {
+    tagName = 'main' 
+  }
+  </inputValidation>
+
+  <loadComponent>
+  const oldLoad = nowLoad
+  const component = nowLoad = {
+    tagName,
+    json: _.readJson(`${componentPath}.json`),
+  }
+
+  if (!component.json) {
+    throw new Error(`invalid componentPath: ${componentPath}`)
+  }
+  </loadComponent>
+
+  <processDependencies>
+  const usingComponents = component.json.usingComponents || {}
+  const usingComponentKeys = Object.keys(usingComponents)
+  for (let i = 0, len = usingComponentKeys.length; i < len; i++) {
+    const key = usingComponentKeys[i]
+    const usingPath = path.join(path.dirname(componentPath), usingComponents[key])
+    const id = register(usingPath, key, cache)
+    usingComponents[key] = id
+  }
+  </processDependencies>
+
+  <compileComponent>
+  component.wxml = compile.getWxml(componentPath, cache.options, usingComponents)
+  component.wxss = wxss.getContent(`${componentPath}.wxss`)
+  </compileComponent>
+
+  <execComponentScript>
+  _.runJs(componentPath)
+  </execComponentScript>
+
+  <compileStylesheet>
+  cache.wxss.push(wxss.compile(component.wxss, {
+    prefix: tagName,
+    ...cache.options,
+  }))
+  </compileStylesheet>
+
+  nowLoad = oldLoad
+
+  return component.id
+}
+</register>
+
+<Inliner>
+function Inliner(source, options, callback) {
+  var inliner = this;
+  events.EventEmitter.call(this);
+
+  <parseArguments>
+  if (typeof source !== 'string') {
+    callback = options;
+    options = source;
+  }
+
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
+
+  if (!options) {
+    options = {};
+  }
+
+  if (options.url) {
+    this.url = options.url;
+  }
+
+  if (options.filename) {
+    this.filename = options.filename;
+  }
+
+  if (options.source) {
+    this.source = options.source;
+  } else {
+    this.source = source;
+  }
+  </parseArguments>
+
+  <processHeaders>
+  if (options.header) {
+    options.headers = options.header;
+    delete options.header;
+  }
+  
+  if (options.headers && !Array.isArray(options.headers)) {
+    options.headers = [options.headers];
+  }
+
+  if (options.headers && Array.isArray(options.headers)) {
+    options.headers = options.headers.reduce(function (acc, curr) {
+       
+      if (typeof curr === 'string') {
+        var parts = curr.split(':').map(function (s) {
+          return s.trim();
+        });
+        acc[parts[0]] = parts[1];
+      } else {
+        var key = Object.keys(curr);
+        acc[key] = curr[key];
+      }
+      return acc;
+    }, {});
+  }
+  </processHeaders>
+
+  <assignOptions>
+  this.headers = options.headers || {};
+
+  this.callback = function wrapper(error, res) {
+    
+    inliner.callback = function noop() {
+      
+      inliner.emit('error', 'callback fired again');
+    };
+
+    callback(error, res);
+  };
+  this.options = assign({}, Inliner.defaults(), options);
+  this.jobs = {
+    total: 0,
+    todo: 0,
+    tasks: tasks,
+    add: this.addJob.bind(this),
+    breakdown: {},
+    done: {},
+  };
+  </assignOptions>
+
+  <initializeJobTasks>
+  Object.keys(this.jobs.tasks).forEach(function (key) {
+    
+    this.jobs.breakdown[key] = 0;
+    this.jobs.done[key] = this.completeJob.bind(this, key);
+  }.bind(this));
+  </initializeJobTasks>
+
+  this.isFile = options.useStdin || false;
+
+  <errorHandling>
+  this.on('error', function localErrorHandler(event) {
+    
+    inliner.callback(event);
+  });
+  </errorHandling>
+
+  <prepareInlining>
+  if (this.source) {
+    if (typeof setImmediate === 'undefined') {
+      global.setImmediate = function setImmediatePolyfill(fn) {
+        
+        setTimeout(fn, 0);
+      };
+    }
+    this.promise = new Promise(function (resolve) {
+      
+      global.setImmediate(function () {
+        resolve(inliner.main());
+      });
+    });
+  } else {
+    
+    this.promise = Promise.reject(new Error('No source to inline'));
+  }
+  </prepareInlining>
+
+  return this;
+}
+</Inliner>
+
+<searchBar_checkSearchResultPage>
+function searchBar_checkSearchResultPage(searchTerm) {
+    <retrieveTargetInfo>
+    var targetUrl = this._bss.currentEngine.getSubmission(searchTerm, null).uri;
+    var currentUrl = this._controller.tabs.activeTabWindow.document.location.href;
+    </retrieveTargetInfo>
+
+    <extractDomainName>
+    var domainName = targetUrl.host.replace(/.+\.(\w+)\.\w+$/gi, "$1");
+    var index = currentUrl.indexOf(domainName);
+    </extractDomainName>
+
+    <assertDomain>
+    this._controller.assertJS("subject.URLContainsDomain == true",
+                              {URLContainsDomain: currentUrl.indexOf(domainName) != -1});
+    </assertDomain>
+
+    <assertSearchTerm>
+    this._controller.assertJS("subject.URLContainsText == true",
+                              {URLContainsText: currentUrl.toLowerCase().indexOf(searchTerm.toLowerCase()) != -1});
+    </assertSearchTerm>
+  }
+</searchBar_checkSearchResultPage>
+
+<formatValue>
+function() {
+    <handlePercentFormat>
+		if (format === 'percent') {
+			return {
+				value: value,
+				format: 'PERCENT',
+				percent: value / 100
+			}
+		}
+    </handlePercentFormat>
+    <handleTimeFormat>
+		else if (format === 'time') {
+			var elapse = (Date.now() - startTime) / 1000;
+			var otime = endValue - elapse;
+			var percent = elapse / endValue;
+			
+			var time = Math.max(0, Math.round(otime));
+			var hours = (time / 3600) >> 0;
+			var minutes = ((time - (hours * 3600)) / 60) >> 0;
+			var seconds = time - (hours * 3600) - (minutes * 60);
+			if (seconds < 10 && minutes) seconds = '0' + seconds;
+			
+			if (minutes) {
+				return {
+					value: minutes,
+					format: 'MINUTES',
+					percent: percent
+				};
+			} else {
+				return {
+					value: seconds,
+					format: 'SECONDS',
+					percent: percent
+				};
+			}
+		}
+    </handleTimeFormat>
+}
+</formatValue>
+
+<nodeExtent>
+function nodeExtent(graph, attribute) {
+  <validateGraphInput>
+  if (!isGraph(graph))
+    throw new Error('graphology-metrics/extent: the given graph is not a valid graphology instance.');
+  </validateGraphInput>
+
+  <prepareAttributeList>
+  var attributes = [].concat(attribute);
+  </prepareAttributeList>
+
+  <initializeResults>
+  var results = {};
+
+  for (a = 0; a < attributes.length; a++) {
+    key = attributes[a];
+
+    results[key] = [Infinity, -Infinity];
+  }
+  </initializeResults>
+
+  <calculateExtents>
+  var nodes = graph.nodes(),
+      node,
+      data,
+      value,
+      key,
+      a,
+      i,
+      l;
+
+  for (i = 0, l = nodes.length; i < l; i++) {
+    node = nodes[i];
+    data = graph.getNodeAttributes(node);
+
+    for (a = 0; a < attributes.length; a++) {
+      key = attributes[a];
+      value = data[key];
+
+      if (value < results[key][0])
+        results[key][0] = value;
+
+      if (value > results[key][1])
+        results[key][1] = value;
+    }
+  }
+  </calculateExtents>
+
+  <returnResults>
+  return typeof attribute === 'string' ? results[attribute] : results;
+  </returnResults>
+}
+</nodeExtent>
+
+<loadCollection>
+function (value, options, callback) {
+    
+    var done = function (err, collection) {
+        <handleErrors>
+        if (err) {
+            return callback(err);
+        }
+        </handleErrors>
+
+        <validateCollection>
+        if (!_.isObject(collection)) {
+            return callback(new Error(COLLECTION_LOAD_ERROR_MESSAGE));
+        }
+        </validateCollection>
+
+        <instantiateCollection>
+        collection = new Collection(Collection.isCollection(collection) ? collection.toJSON() : collection);
+        </instantiateCollection>
+
+        <finalizeCallback>
+        callback(null, collection);
+        </finalizeCallback>
+    };
+
+    <processDirectCollections>
+    if (_.isObject(value)) {
+        return processCollection(value, done);
+    }
+    </processDirectCollections>
+
+    <loadExternalCollection>
+    externalLoader('collection', value, options, function (err, data) {
+        if (err) {
+            return done(err);
+        }
+        if (!_.isObject(data)) {
+            return done(new Error(COLLECTION_LOAD_ERROR_MESSAGE));
+        }
+
+        return processCollection(data, done);
+    });
+    </loadExternalCollection>
+}
+</loadCollection>
+
+<isMyTurn>
+function isMyTurn(game, from) {
+    <checkGameStatus>
+    if (game.score.ended)
+        return false;
+    </checkGameStatus>
+    <getCurrentPosition>
+    from = Board.getPositionFromBoard(game.board, from);
+    </getCurrentPosition>
+    <determineTurn>
+    return isWhiteTurn(game) ? Position.hasWhitePiece(from) : Position.hasBlackPiece(from);
+    </determineTurn>
+}
+</isMyTurn>
+
+<createFunction>
+function createFunction(name, func, core, useCoreAPI) {
+  <parseFunction>
+  var beginBody = -1;
+  var funcParams = '';
+  var params = [];
+  var paramsClean = [];
+  var funcBody = '';
+  var header = '';
+  var action = null;
+  var isArrowFunction = true;
+  var isOneLine = false;
+  var functionName = name;
+
+  if (functionName.indexOf('.') !== -1) {
+    functionName = name.split('.')[name.split('.').length - 1];
+  }
+
+  if (func.trim().indexOf('function') === 0) {
+    isArrowFunction = false;
+  }
+  </parseFunction>
+
+  <extractFunctionParameters>
+  if (isArrowFunction) {
+    beginBody = func.indexOf('=>');
+
+    header = func.substring(0, beginBody);
+    header = header.replace('=>', '');
+
+    if (header.indexOf('(') !== -1) {
+      funcParams = header
+        .split('(')[1]
+        .replace(')', '')
+        .trim();
+    } else {
+      funcParams = header.trim();
+    }
+
+    params = funcParams.split(',');
+    params.forEach(function(param) {
+      paramsClean.push(param.trim());
+    });
+    </extractFunctionParameters>
+
+    <extractFunctionBody>
+    funcBody = func.substring(beginBody + 2, func.length).trim();
+
+    if (funcBody.indexOf('{') === 0) {
+      funcBody = funcBody.substring(1, funcBody.lastIndexOf('}')).trim();
+    }
+
+    if (funcBody.indexOf('\n') === -1) {
+      isOneLine = true;
+    }
+
+    if (isArrowFunction && isOneLine && funcBody.indexOf('return ') === -1) {
+      funcBody = 'return ' + funcBody;
+    }
+    </extractFunctionBody>
+  } else {
+    <handleNonArrowFunction>
+    beginBody = func.indexOf('{');
+    header = func.substring(0, beginBody);
+
+    funcParams = header
+      .split('(')[1]
+      .replace(')', '')
+      .trim();
+
+    params = funcParams.split(',');
+    params.forEach(function(param) {
+      paramsClean.push(param.trim());
+    });
+
+    funcBody = func.substring(beginBody + 1);
+    funcBody = funcBody.substring(0, funcBody.lastIndexOf('}')).trim();
+    </handleNonArrowFunction>
+  }
+
+  <replaceThisAlias>
+  funcBody = funcBody.replace(/_this/g, 'this');
+  </replaceThisAlias>
+
+  <finalizeParams>
+  if (paramsClean[0] === '') {
+    paramsClean = [];
+  }
+  </finalizeParams>
+
+  <insertCoreAPI>
+  if (useCoreAPI) {
+    paramsClean.push('$component');
+    paramsClean.push('$db');
+    paramsClean.push('$metamodel');
+    paramsClean.push('$workflow');
+    paramsClean.push('$behavior');
+    paramsClean.push('$state');
+    paramsClean.push('$log');
+    paramsClean.push('$helper');
+  }
+
+  if ($helper.isOnNode()) {
+    paramsClean.push('require');
+  }
+  </insertCoreAPI>
+
+  <createAnonymousFunction>
+  if (paramsClean[0] !== '') {
+    action = new Function(
+      '__action',
+      'return function ' +
+        functionName +
+        ' (' +
+        paramsClean.join(', ') +
+        ") { return new Function('" +
+        paramsClean.join("', '") +
+        "', __action).apply(this, arguments) };"
+    )(funcBody);
+  } else {
+    action = new Function(
+      '__action',
+      'return function ' +
+        functionName +
+        ' () { return new Function(__action).apply(this, arguments) };'
+    )(funcBody);
+  }
+  </createAnonymousFunction>
+
+  return action;
+}
+</createFunction>
+
+<rebootHandler>
+function rebootHandler(job) {
+   <handleJobStatus>
+   if (job.status.status === 'QUEUED' || isUndefined(job.status.statusDetails) || isUndefined(job.status.statusDetails.step)) {
+      <startRebootProcess>
+      job.inProgress({ operation: job.operation, step: 'initiated' }, function(err) { 
+         showJobsError(err);
+
+         var delay = (isUndefined(job.document.delay) ? '0' : job.document.delay.toString());
+         </startRebootProcess>
+
+         <executeRebootCommand>
+         
+         exec('sudo /sbin/shutdown -r +' + delay, function (err) { 
+            if (!isUndefined(err)) {
+               job.failed({ operation: job.operation, errorCode: 'ERR_SYSTEM_CALL_FAILED', errorMessage: 'unable to execute reboot, check passwordless sudo permissions on agent', 
+                            error: errorToString(err) }, showJobsError);
+            }
+         });
+         </executeRebootCommand>
+      });
+
+   
+   } else if (job.status.statusDetails.step === 'initiated') {
+      <markJobSucceeded>
+      job.succeeded({ operation: job.operation, step: 'rebooted' }, showJobsError);
+      </markJobSucceeded>
+   } else {
+      <handleUnexpectedState>
+      job.failed({ operation: job.operation, errorCode: 'ERR_UNEXPECTED', errorMessage: 'reboot job execution in unexpected state' }, showJobsError);
+      </handleUnexpectedState>
+   }   
+}
+</rebootHandler>

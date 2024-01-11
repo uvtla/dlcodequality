@@ -1,0 +1,356 @@
+Below are the annotations for the provided JavaScript functions:
+
+1.
+```javascript
+function renderWidget(out) {
+    <checkConfigurationConsistency>
+    this._checkCfgConsistency();
+    if (!this._cfgOk) {
+        return;
+    }
+    </checkConfigurationConsistency>
+
+    <generateLabelMarkup>
+    if (this.showLabel) {
+        this._labelMarkup(out);
+    }
+    </generateLabelMarkup>
+
+    <beginWidgetMarkup>
+    this._widgetMarkupBegin(out);
+    </beginWidgetMarkup>
+
+    <calculateAndRenderBarWidth>
+    var barWidth = this.__calculateBarWidth(this._cfg.currentValue);
+    out.write(['<div class="x', this._skinnableClass, '_progress_', this._cfg.sclass, '" style="width:', (barWidth >= 0 ? barWidth : "0"), '%;height:100%"></div>'].join(""));
+    </calculateAndRenderBarWidth>
+
+    <endWidgetMarkup>
+    this._widgetMarkupEnd(out);
+    barWidth = 0;
+    </endWidgetMarkup>
+}
+```
+
+2.
+```javascript
+<extendSchemaWithMergeMethod>
+function merge(schema, options) {
+    options = options || {}
+  
+    schema.method('merge', function (doc) {
+        var self = this
+        schema.eachPath(function (name) {
+            var val = nestedPath(doc, name)
+      
+            if (name !== '_id' && val !== undefined) {
+                nestedPath(self, name, val)
+            }
+        })
+        return this
+    })
+}
+</extendSchemaWithMergeMethod>
+```
+
+3.
+```javascript
+<performAutoHighlighting>
+function autoHighlight(value, options) {
+    var settings = options || {}
+    <defaultSubsetAndPrefixSetup>
+    var subset = settings.subset || languageNames
+    var prefix = settings.prefix
+    <defaultSubsetAndPrefixSetup>
+
+    <initialization>
+    var length = subset.length
+    var index = -1
+    var result
+    var secondBest
+    var current
+    var name
+    <initialization>
+
+    <defaultPrefixInitialization>
+    if (prefix === null || prefix === undefined) {
+        prefix = defaultPrefix
+    }
+    </defaultPrefixInitialization>
+
+    <inputValidation>
+    if (typeof value !== 'string') {
+        throw fault('Expected `string` for value, got `%s`', value)
+    }
+    </inputValidation>
+
+    <setupNormalization>
+    secondBest = normalize({})
+    result = normalize({})
+    <setupNormalization>
+
+    <highlightAlgorithm>
+    while (++index < length) {
+        name = subset[index]
+
+        if (!getLanguage(name)) {
+            continue
+        }
+
+        current = normalize(coreHighlight(name, value, false, prefix))
+
+        current.language = name
+
+        if (current.relevance > secondBest.relevance) {
+            secondBest = current
+        }
+
+        if (current.relevance > result.relevance) {
+            secondBest = result
+            result = current
+        }
+    }
+    <highlightAlgorithm>
+
+    <secondBestLanguageCheck>
+    if (secondBest.language) {
+        result.secondBest = secondBest
+    }
+    </secondBestLanguageCheck>
+
+    return result
+}
+</performAutoHighlighting>
+```
+
+4.
+```javascript
+<enforceElementIndentationConsistency>
+function enforceConsistentIndentation(node) {
+    <handleSingleNodeLine>
+    if (node.loc.start.line === node.loc.end.line) {
+        return;
+    }
+    </handleSingleNodeLine>
+
+    var elements = (node.type === 'ArrayExpression') ? node.elements : node.properties;
+
+    <handleLineWithElements>
+    if (elements.length > 0 && elements[0].loc.start.line === node.loc.start.line) {
+        return;
+    }
+    </handleLineWithElements>
+
+    <calculateIndents>
+    var nodeIndent = getNodeIndent(node);
+    var elementsIndent = nodeIndent + indentSize;
+    <calculateIndents>
+
+    <adjustElementIndentation>
+    if (elements.length > 0 &&
+        getNodeIndent(elements[0]) === elementsIndent + indentSize) {
+        elementsIndent = elementsIndent + indentSize;
+    }
+    </adjustElementIndentation>
+
+    <checkNodesIndentation>
+    checkNodesIndent(elements, elementsIndent, true);
+    </checkNodesIndentation>
+
+    <handleLastElementInline>
+    if (elements.length > 0) {
+        if (elements[elements.length - 1].loc.end.line === node.loc.end.line) {
+            return;
+        }
+    }
+    </handleLastElementInline>
+
+    <checkLastNodeLineIndent>
+    checkLastNodeLineIndent(node, elementsIndent - indentSize);
+    </checkLastNodeLineIndent>
+  }
+</enforceElementIndentationConsistency>
+```
+
+5.
+```javascript
+<normalizeOAuthParameters>
+function normalizeParameters (data) {
+    <encodeDataKeysAndValues>
+    var encoded = []
+    Object.keys(data).forEach(function (key) {
+        encoded[encoded.length] = [
+            encodeOAuthData(key),
+            encodeOAuthData(data[key])
+        ]
+    })
+    </encodeDataKeysAndValues>
+
+    <sortEncodedData>
+    encoded.sort(function (a, b) {
+        return (a[0] === b[0])
+            ? (a[1] < b[1])
+                ? -1
+                : 1
+            : (a[0] < b[0])
+                ? -1
+                : 1
+    })
+    </sortEncodedData>
+
+    <buildNormalizedString>
+    var normalized = ''
+    encoded.forEach(function (pair, i) {
+        normalized += pair[0]
+        normalized += '='
+        normalized += pair[1]
+        if (i < encoded.length - 1) {
+            normalized += '&'
+        }
+    })
+    </buildNormalizedString>
+
+    return normalized
+}
+</normalizeOAuthParameters>
+```
+
+6.
+```javascript
+<parseGLTFMaterialsCommon>
+function GLTFMaterialsCommonExtension( json ) {
+    this.name = EXTENSIONS.KHR_MATERIALS_COMMON;
+
+    this.lights = {};
+
+    <retrieveAndParseLights>
+    var lights = json.extensions && json.extensions[ EXTENSIONS.KHR_MATERIALS_COMMON ].lights;
+
+    for ( var lightId in lights ) {
+        <createAndConfigureLightNodes>
+        var light = lights[ lightId ];
+        var lightNode;
+        var lightParams = light[ light.type ];
+        var color = new THREE.Color().fromArray( lightParams.color );
+
+        switch ( light.type ) {
+            case "directional":
+            case "point":
+            case "spot":
+            case "ambient":
+                lightNode = createLightOfType(light.type, color, lightParams);
+                break;
+        }
+        </createAndConfigureLightNodes>
+        
+        <appendLightNodeToLights>
+        if ( lightNode ) {
+            this.lights[ lightId ] = lightNode;
+        }
+        </appendLightNodeToLights>
+    }
+    </retrieveAndParseLights>
+}
+</parseGLTFMaterialsCommon>
+```
+
+7.
+```javascript
+<processXhrResponse>
+function handleXhrResponse() {
+                
+    var status = _xhr.status === 1223 ? 204 : _xhr.status;
+    var body = null;
+                
+    <setStatusAndBody>
+    if (status !== 204) {
+        body = (typeof _xhr.response === 'undefined') ? _xhr.responseText : _xhr.response;
+        if (typeof body === 'string') {
+            body = body.replace(XSSI_PREFIX, '');
+        }
+    }
+    </setStatusAndBody>
+
+    <handleZeroStatus>
+    if (status === 0) {
+        status = body ? 200 : 0;
+    }
+    </handleZeroStatus>
+
+    <extractHeaders>
+    var headers = __WEBPACK_IMPORTED_MODULE_5__headers__["a"].fromResponseHeaderString(_xhr.getAllResponseHeaders());
+    </extractHeaders>
+
+    <configureResponseOptions>
+    var url = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__http_utils__["c"])(_xhr) || req.url;
+    var statusText = _xhr.statusText || 'OK';
+    var responseOptions = new __WEBPACK_IMPORTED_MODULE_3__base_response_options__["b"]({ body: body, status: status, headers: headers, statusText: statusText, url: url });
+    if (baseResponseOptions != null) {
+        responseOptions = baseResponseOptions.merge(responseOptions);
+    }
+    </configureResponseOptions>
+
+    <prepareAndDispatchResponse>
+    var response = new __WEBPACK_IMPORTED_MODULE_8__static_response__["a"](responseOptions);
+    response.ok = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__http_utils__["d"])(status);
+    if (response.ok) {
+        responseObserver.next(response);
+        responseObserver.complete();
+        return;
+    }
+    responseObserver.error(response);
+    </prepareAndDispatchResponse>
+}
+</processXhrResponse>
+```
+
+8.
+```javascript
+<transformSvgPathValues>
+function simplyfy(val){
+    switch(val[0]){
+        case 'z': 
+        case 'Z':
+        case 'H': 
+        case 'V': 
+        case 'T': 
+        case 'S': 
+            <performPathTransformation>
+            transformSvgCommand(val, this.pos, this.start, this.reflection);
+            </performPathTransformation>
+            break;
+    }
+    return val
+}
+</transformSvgPathValues>
+```
+
+9.
+```javascript
+<extractAgeFromResponse>
+function extractAgeFromResponse(response) {
+    const age = _.get(response, 'headers.sc-data-age', null);
+    return age ? new Date(age) : null;
+}
+</extractAgeFromResponse>
+```
+
+10.
+```javascript
+<combineStatisticalData>
+function combine(statsObjects) {
+    let result = create();
+
+    <accumulateDataFromStatsObjects>
+    L.each(statsObjects, function(stats) {
+        // Accumulation code for various statistics such as latencies, scenarios, codes, errors, timestamps, and customStats...
+        accumulateStats(result, stats);
+    });
+    </accumulateDataFromStatsObjects>
+
+    return result;
+}
+</combineStatisticalData>
+```
+
+Note: In the last two examples (functions 8 and 10), the respective responsibilities were broad enough that the entire switch-case block and loop block were wrapped within one tag, as the transformations and accumulations were part of a single cohesive task within those functions without requiring further granular segmentation.

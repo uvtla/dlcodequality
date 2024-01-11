@@ -1,0 +1,238 @@
+```javascript
+<CodecConfiguration>
+function CodecConfiguration(codecConfigurationDict){
+  <ensureInstance>
+  if(!(this instanceof CodecConfiguration))
+    return new CodecConfiguration(codecConfigurationDict)
+  </ensureInstance>
+
+  <validateConfiguration>
+  checkType('String', 'codecConfigurationDict.name', codecConfigurationDict.name, {required: true});
+  checkType('String', 'codecConfigurationDict.properties', codecConfigurationDict.properties);
+  </validateConfiguration>
+
+  <initializeSuperClass>
+  CodecConfiguration.super_.call(this, codecConfigurationDict)
+  </initializeSuperClass>
+
+  <defineProperties>
+  Object.defineProperties(this, {
+    name: {
+      writable: true,
+      enumerable: true,
+      value: codecConfigurationDict.name
+    },
+    properties: {
+      writable: true,
+      enumerable: true,
+      value: codecConfigurationDict.properties
+    }
+  })
+  </defineProperties>
+}
+</CodecConfiguration>
+
+<HandleNodePositioning>
+function(node, type, s) {
+  <createComplexCoordinateFunction>
+    var $C = function(a, b) { 
+        return function(){
+          return node.pos.add(new Complex(a, b));
+        }; 
+      };
+  </createComplexCoordinateFunction>
+  
+  <initialVariables>
+  var dim = this.node;
+  var w = node.getData('width');
+  var h = node.getData('height');
+  </initialVariables>
+
+  <nodePositioningLogic>
+    if(type == 'begin') {
+        // ... logic for begin type
+    } else if(type == 'end') {
+        // ... logic for end type
+    } else throw "align: not implemented";
+  </nodePositioningLogic>
+}
+</HandleNodePositioning>
+
+<RecordJumpDefinition>
+function _recordJumpDef(event, selectionObj) {
+    
+  <checkForJumpsInProgress>
+    if (jumpInProgress || (event.target && event.target.document._refreshInProgress)) {
+        return;
+    }
+  </checkForJumpsInProgress>
+    
+  <initializeForwardStack>
+  jumpForwardStack = [];
+  </initializeForwardStack>
+  <manageCaptureTimer>
+    if (captureTimer) {
+        window.clearTimeout(captureTimer);
+        captureTimer = null;
+    }
+  </manageCaptureTimer>
+    
+  <captureJumpEvent>
+    if (selectionObj.origin !== "+move" && (!window.event || window.event.type !== "input")) {
+        // ...logic to capture the current edit position and validate commands
+    } else {
+        activePosNotSynced = true;
+    }
+  </captureJumpEvent>
+}
+</RecordJumpDefinition>
+
+<UpdateComponentView>
+function() {
+    <prepareViewStyles>
+    var styles = {},
+        viewOptions = component.get('viewOptions'),
+        title = viewOptions.get('title') || '',
+        background = viewOptions.get('background'),
+        css = component.get('css');
+    for (var selector in css) {
+      styles['#' + component.id + ' ' + selector] = css[selector];
+    }
+    $.styleSheet(styles, 'nm-cv-css-' + component.id);
+    </prepareViewStyles>
+    
+    <updateComponentCssClasses>
+    t.$('.nm-cv')
+      .toggleClass('background', background === true)
+      .toggleClass('title', title.length > 0);
+    t.$('.nm-cv-title span').text(title);
+    </updateComponentCssClasses>
+  }
+</UpdateComponentView>
+
+<DoneCallbackWrapper>
+function done(err) {
+  <initialChecks>
+    var ms = self.timeout();
+    if (self.timedOut) {
+      return;
+    }
+
+    if (finished) {
+      return multiple(err);
+    }
+  </initialChecks>
+
+  <finalizeCallback>
+    self.clearTimeout();
+    self.duration = new Date() - start;
+    finished = true;
+    if (!err && self.duration > ms && self._enableTimeouts) {
+      err = self._timeoutError(ms);
+    }
+    fn(err);
+  </finalizeCallback>
+}
+</DoneCallbackWrapper>
+
+<GetRelativeXCoordinate>
+function getCanvasClickRelativeXCoordinate(canvasElement, event) {
+  <calculateRelativeX>
+  let x;
+  if (event.pageX) {
+    x = event.pageX;
+  } else {
+    x = event.clientX + document.body.scrollLeft +
+        document.documentElement.scrollLeft;
+  }
+  x -= canvasElement.offsetLeft;
+  return x / canvasElement.width;
+  </calculateRelativeX>
+}
+</GetRelativeXCoordinate>
+
+<WriteDiagnostics>
+function diagnostics() {
+    <processArguments>
+    var args = Array.prototype.slice.call(arguments, 0);
+
+    write.call(write, options, process(args, options));
+    </processArguments>
+    return true;
+  }
+</WriteDiagnostics>
+
+<FindAndReplaceInObject>
+function findAndReplace(target, find, replaceWith, config) {
+  <handleInvalidCasesAndStartReplacement>
+    if (config === void 0) { config = { onlyPlainObjects: false }; }
+    if ((config.onlyPlainObjects === false && !isAnyObject(target)) ||
+        (config.onlyPlainObjects === true && !isPlainObject(target))) {
+        if (target === find)
+            return replaceWith;
+        return target;
+    }
+  </handleInvalidCasesAndStartReplacement>
+  <recursiveReplacement>
+    return Object.keys(target)
+        .reduce(function (carry, key) {
+        var val = target[key];
+        carry[key] = findAndReplace(val, find, replaceWith, config);
+        return carry;
+    }, {});
+  </recursiveReplacement>
+}
+</FindAndReplaceInObject>
+
+<HashInput>
+function hash(input, algo, type){
+    
+  <ensureInputFormat>
+    if (typeof input !== 'string' && !(input instanceof Buffer)){
+        input = JSON.stringify(input);
+    }
+  </ensureInputFormat>
+
+  <initializeHash>
+    var sum = _crypto.createHash(algo);
+  </initializeHash>
+
+  <updateHashWithInput>
+    sum.update(input);
+  </updateHashWithInput>
+
+  <outputHash>
+    if (type && type.toLowerCase().trim() == 'binary'){
+        return sum.digest();
+    }else if (type==='base64-urlsafe'){
+        return base64urlsafe(sum.digest('base64'));
+    }else{
+        return sum.digest(type);
+    }
+  </outputHash>
+}
+</HashInput>
+
+<CheckForClassNames>
+function (domObject, toCheck) {
+    <processClassNames>
+        var
+            classNames,
+            len,
+            idx;
+        if ("string" === typeof toCheck) {
+            toCheck = [toCheck];
+        }
+        _gpfAssert(toCheck instanceof Array, "Expected array");
+        classNames = domObject.className.split(" ");
+        len = toCheck.length;
+        for (idx = 0; idx < len; ++idx) {
+            if (undefined !== gpf.test(classNames, toCheck[idx])) {
+                return true;
+            }
+        }
+        return false;
+    </processClassNames>
+}
+</CheckForClassNames>
+```

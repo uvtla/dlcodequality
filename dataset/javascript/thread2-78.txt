@@ -1,0 +1,299 @@
+```javascript
+<hasPositionByBoardSize>
+function hasPositionByBoardSize(boardSize, position) {
+    return position && position.x >= 0 && position.y >= 0 && boardSize.y > position.y && boardSize.x > position.x;
+}
+</hasPositionByBoardSize>
+
+<createEntityAndHandleResponse>
+function(params, callback) {
+    <setDefaultCallback>
+    callback = callback || function() {};
+    </setDefaultCallback>
+    
+    var that = this;
+
+    <makePostRequestAndProcessResponse>
+    var req = this.post("", params, function(err, response) {
+        if (err) {
+            callback(err);
+        }
+        else {
+            var props = response.data.entry;
+            <normalizeProps>
+            if (utils.isArray(props)) {
+                props = props[0];
+            }
+            </normalizeProps>
+            
+            <instantiateAndLoadEntity>
+            var entity = that.instantiateEntity(props);
+            entity._load(props);
+            </instantiateAndLoadEntity>
+
+            <fetchEntity>
+            if (that.fetchOnEntityCreation) {
+                entity.fetch(function() {
+                    if (req.wasAborted) {
+                        return; 
+                    }
+                    else {
+                        callback.apply(null, arguments);
+                    }
+                });
+            }
+            else {                   
+                callback(null, entity);
+            }
+            </fetchEntity>
+        }
+    });
+    </makePostRequestAndProcessResponse>
+    
+    return req;
+}
+</createEntityAndHandleResponse>
+
+<resetRendererState>
+function (renderer) {
+    renderer.__currentFrameBuffer = null;
+
+    var _gl = renderer.gl;
+
+    _gl.bindFramebuffer(GL_FRAMEBUFFER, null);
+    this._boundRenderer = null;
+
+    this._cache.use(renderer.__uid__);
+
+    <setViewport>
+    var viewport = this._cache.get('viewport');
+    if (viewport) {
+        renderer.setViewport(viewport);
+    }
+    </setViewport>
+
+    <updateMipmap>
+    this.updateMipmap(renderer);
+    </updateMipmap>
+}
+</resetRendererState>
+
+<createDatabaseSchema>
+async function createSchema() {
+    <dropExistingTables>
+    await knex.schema
+        .dropTableIfExists('Person_Movie')
+        .dropTableIfExists('Animal')
+        .dropTableIfExists('Movie')
+        .dropTableIfExists('Person');
+    </dropExistingTables>
+
+    <createNewTables>
+    await knex.schema
+        .createTable('Person', table => {
+            table.increments('id').primary();
+            table
+                .integer('parentId')
+                .unsigned()
+                .references('id')
+                .inTable('Person');
+            table.string('firstName');
+            table.string('lastName');
+            table.integer('age');
+            table.json('address');
+        })
+        .createTable('Movie', table => {
+            table.increments('id').primary();
+            table.string('name');
+        })
+        .createTable('Animal', table => {
+            table.increments('id').primary();
+            table
+                .integer('ownerId')
+                .unsigned()
+                .references('id')
+                .inTable('Person');
+            table.string('name');
+            table.string('species');
+        })
+        .createTable('Person_Movie', table => {
+            table.increments('id').primary();
+            table
+                .integer('personId')
+                .unsigned()
+                .references('id')
+                .inTable('Person')
+                .onDelete('CASCADE');
+            table
+                .integer('movieId')
+                .unsigned()
+                .references('id')
+                .inTable('Movie')
+                .onDelete('CASCADE');
+        });
+    </createNewTables>
+}
+</createDatabaseSchema>
+
+<writePreferencesForPlatforms>
+function run(context) {
+    <readConfigurationPreferences>
+    const preferences = configPreferences.read(context);
+    </readConfigurationPreferences>
+
+    const platforms = context.opts.cordova.platforms;
+
+    <setPreferencesForPlatforms>
+    platforms.forEach(platform => {
+      if (platform === ANDROID) {
+        androidManifest.writePreferences(context, preferences);
+      }
+      if (platform === IOS) {
+        iosDevelopmentTeam.addDevelopmentTeam(preferences);
+      }
+    });
+    </setPreferencesForPlatforms>
+}
+</writePreferencesForPlatforms>
+
+<createDefaultLogger>
+function createDefaultLogger(options) {
+    const ConsoleLogger = require('./console'),
+          consoleLogger = new ConsoleLogger(options),
+          
+    <combineConfigWithDefaults>
+    config = _.mergeWith({
+        name: 'logger',
+        streams: [
+            {
+                level: options && options.level || 'trace',
+                type: 'raw',
+                stream: consoleLogger
+            }
+        ]
+    }, options, function (a, b) {
+        return _.isArray(a) ? a.concat(b) : undefined;
+    });
+    </combineConfigWithDefaults>
+
+    <setDefaultLogLevel>
+    consoleLogger.level = bunyan.resolveLevel(options && options.level || 'trace');
+    </setDefaultLogLevel>
+
+    <conditionalProblemLoggerSetup>
+    if (!options || options.problemLogger || options.problemLogger === undefined) {
+        const ProblemLogger = require('./problem');
+        config.streams.push({
+            level: 'trace',
+            type: 'raw',
+            stream: new ProblemLogger(options)
+        });
+    }
+    </conditionalProblemLoggerSetup>
+
+    <createLoggerInstance>
+    const defaultLogger = bunyan.createLogger(config);
+    </createLoggerInstance>
+
+    <setLoggerLevelMethod>
+    defaultLogger.setLevel = function (nameOrNum) {
+        var level = 'trace';
+        try {
+            level = bunyan.resolveLevel(nameOrNum);
+        } catch (e) {} 
+        consoleLogger.level = level;
+        return this.level(level);
+    };
+    </setLoggerLevelMethod>
+
+    return defaultLogger;
+}
+</createDefaultLogger>
+
+<CLASSICConstructor>
+function CLASSIC( buffer, start, end ) {
+  <constructorValidation>
+  if( !(this instanceof CLASSIC) )
+    return new CLASSIC( buffer, start, end )
+  </constructorValidation>
+
+  <callSuperConstructor>
+  MBR.call( this, buffer, start, end )
+  </callSuperConstructor>
+}
+</CLASSICConstructor>
+
+<metalsmithPlugin>
+function plugin(options) {
+    return function(files, metalsmith, done) {
+        <processFiles>
+        Object.keys(files).forEach(function(file) {
+            var data = files[file];
+            data.contents = new Buffer(special(data.contents.toString()));
+        });
+        </processFiles>
+        
+        done();
+    }
+}
+</metalsmithPlugin>
+
+<findCommonPrefix>
+function findCommonPrefix(extractDir, callback) {
+    <readDirectory>
+    fs.readdir(extractDir, function (err, files) {
+        ignoredFolders.forEach(function (folder) {
+            var index = files.indexOf(folder);
+            if (index !== -1) {
+                files.splice(index, 1);
+            }
+        });
+        </readDirectory>
+        
+        <processFilesAndInvokeCallback>
+        if (err) {
+            callback(err);
+        } else if (files.length === 1) {
+            var name = files[0];
+            if (fs.statSync(path.join(extractDir, name)).isDirectory()) {
+                callback(null, name);
+            } else {
+                callback(null, "");
+            }
+        } else {
+            callback(null, "");
+        }
+        </processFilesAndInvokeCallback>
+    });
+}
+</findCommonPrefix>
+
+<createGenerateDocs>
+function createGenerateDocs(inPath, outPath) {
+    <validateArguments>
+    if (!inPath) {
+        throw new Error('Input path(s) argument is required');
+    }
+
+    if (!outPath) {
+        throw new Error('Output path argument is required');
+    }
+    </validateArguments>
+
+    <setupJsDocConfig>
+    const jsDocConfig = {
+        opts: {
+            destination: outPath,
+        },
+    };
+    </setupJsDocConfig>
+
+    return function generateDocs(done) {
+        <generateDocumentation>
+        gulp.src(inPath, { read: false })
+            .pipe(jsdoc(jsDocConfig, done));
+        </generateDocumentation>
+    };
+}
+</createGenerateDocs>
+```

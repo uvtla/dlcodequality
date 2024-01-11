@@ -1,0 +1,209 @@
+```javascript
+<hasGreenkeeper>
+function hasGreenkeeper (options) {
+  const config = options.data.root.config
+  <showBadgeDetermination>
+  const showBadge = !!(config && config.badges && config.badges.greenkeeper) 
+  if (showBadge && !githubRepo(options)) {
+    throw new Error('Greenkeeper badge should be enabled, but no github-repo was found.')
+  }
+  </showBadgeDetermination>
+  return showBadge
+}
+</hasGreenkeeper>
+
+<calculatePosition>
+function (config) {
+  var nbChoices, position = -1;
+  nbChoices = this.choicesList.length;
+
+  if (lang.isNumber(config.position) && config.position >= 0 && config.position < nbChoices) {
+    position = parseInt(config.position, 10);
+  } else if (!lang.isUndefined(config.value)) {
+    position = inputEx.indexOf(config.value, this.choicesList, function (value, opt) {
+      return opt.value === value;
+    });
+  } else if (lang.isString(config.label)) {
+    position = inputEx.indexOf(config.label, this.choicesList, function (label, opt) {
+      return opt.label === label;
+    });
+  }
+  return position;
+}
+</calculatePosition>
+
+<loadEndpoints>
+function loadEndpoints(endpoints, options, auth) {
+	if (Array.isArray(endpoints)) {
+		endpoints.forEach(function(endpoint) {
+			<authenticationFilter>
+      if (auth !== Boolean(endpoint.authenticated)) {
+				return;
+			}
+			</authenticationFilter>
+      <conditionalLoading>
+      const conditional = endpoint.hasOwnProperty("ifProp");
+			if (conditional && options.configParams.get(endpoint.ifProp) || !conditional) {
+				tryLoadRouter(endpoint, options);
+			}
+      </conditionalLoading>
+		});
+	}
+}
+</loadEndpoints>
+
+<writeParamsForRequestHeaders>
+function writeParamsForRequestHeaders(entry, out, consumedParams) {
+  <validateParams>
+    const params = entry.params;
+    if (!(typeof params.line === 'string') ||
+        !(params.headers instanceof Array)) {
+      return;
+    }
+  </validateParams>
+  <writeHeaderLines>
+    const lineWithoutCRLF = params.line.replace(/\r\n$/g, '');
+    out.writeArrowIndentedLines([lineWithoutCRLF].concat(params.headers));
+  </writeHeaderLines>
+  <markConsumedParams>
+    consumedParams.line = true;
+    consumedParams.headers = true;
+  </markConsumedParams>
+}
+</writeParamsForRequestHeaders>
+
+<checkForDynamicPage>
+function _checkForDynamicPage(uri, { _dynamic }) {
+  if (!_dynamic || typeof _dynamic !== 'boolean') {
+    return bluebird.reject(new Error('Page is not dynamic and requires a url'));
+  }
+  return bluebird.resolve(_dynamic);
+}
+</checkForDynamicPage>
+
+<buildSegmentList>
+function() {
+    var node
+      , segs = []
+      , star;
+
+    star = this.accept('*');
+    if (star) segs.push(new nodes.Literal('*'));
+
+    while (true) {
+      <handleInterpolation>
+      if (this.accept('{')) {
+        this.state.push('interpolation');
+        segs.push(this.expression());
+        this.expect('}');
+        this.state.pop();
+      }
+      </handleInterpolation>
+      <handleDashesAndIdents>
+      else if (node = this.accept('-')){
+        segs.push(new nodes.Literal('-'));
+      } else if (node = this.accept('ident')){
+        segs.push(node.val);
+      }
+      </handleDashesAndIdents>
+      else {
+        break;
+      }
+    }
+    if (!segs.length) this.expect('ident');
+    return segs;
+}
+</buildSegmentList>
+
+<normalizeRoute>
+function normalize(route) {
+  const normalized = { ...route };
+  <validateRoutePath>
+  if (is.not.array(normalized.path) && is.not.string(normalized.path)) {
+    throw new Error("The route's path must be a String or [String]");
+  }
+  </validateRoutePath>
+  <normalizeMethod>
+  if (is.array(normalized.method)) {
+    for (let method of normalized.method) {
+      method = clean(method);
+    }
+  }
+  if (is.string(normalized.method)) {
+    normalized.method = clean(normalized.method);
+  }
+  </normalizeMethod>
+  return normalized;
+}
+</normalizeRoute>
+
+<parseCloudFunction>
+function(name, data, options) {
+  options = options || {};
+
+  <makeRequest>
+  var request = Parse._request({
+    route: "functions",
+    className: name,
+    method: 'POST',
+    useMasterKey: options.useMasterKey,
+    data: Parse._encode(data, null, true)
+  });
+  </makeRequest>
+  <handleResponse>
+  return request.then(function(resp) {
+    return Parse._decode(null, resp).result;
+  })._thenRunCallbacks(options);
+  </handleResponse>
+}
+</parseCloudFunction>
+
+<splitStyleProperty>
+function splitStyleProperty(property) {
+  var token = /((?:[^"']|".*?"|'.*?')*?)([(,)]|$)/g;
+  <recursiveSplit>
+  var recurse = function () {
+      var array = [];
+      for (;;) {
+          var result = token.exec(property);
+          if (result[2] === "(") {
+              var str = result[1].trim() + "(" + recurse().join(",") + ")";
+              result = token.exec(property);
+              str += result[1];
+              array.push(str);
+          } else {
+              array.push(result[1].trim());
+          }
+          if (result[2] !== ",") {
+              return array;
+          }
+      }
+  };
+  </recursiveSplit>
+  return (recurse());
+}
+</splitStyleProperty>
+
+<mapHitDetection>
+function(evt) {
+  if (evt instanceof MapBrowserEvent && !evt.dragging) {
+    <pixelDetermination>
+    const pixel = map.getEventPixel(evt.originalEvent);
+    </pixelDetermination>
+    <layerQuerying>
+    const queryable = function(layer) {
+      const visible = layer.get('visible');
+      const sourceids = layer.get('querySourceIds');
+      return visible && !!sourceids;
+    };
+    </layerQuerying>
+    <hitDetection>
+    const hit = map.forEachLayerAtPixel(pixel, () => true, undefined, queryable);
+    </hitDetection>
+    <cursorUpdate>
+    map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+    </cursorUpdate>
+  }
+}
+</mapHitDetection>
+```

@@ -1,0 +1,362 @@
+```javascript
+<createIndexes>
+function createIndexes(coll, indexSpecs, options, callback) {
+  <checkCapabilities>
+  const capabilities = coll.s.topology.capabilities();
+
+  
+  for (let i = 0; i < indexSpecs.length; i++) {
+    <buildIndexSpec>
+    if (indexSpecs[i].name == null) {
+      const keys = [];
+
+      
+      <checkCollationSupport>
+      if (indexSpecs[i].collation && capabilities && !capabilities.commandsTakeCollation) {
+        return callback(new MongoError('server/primary/mongos does not support collation'));
+      }</checkCollationSupport>
+
+      <generateIndexName>
+      for (let name in indexSpecs[i].key) {
+        keys.push(`${name}_${indexSpecs[i].key[name]}`);
+      }
+
+      
+      indexSpecs[i].name = keys.join('_');
+    }</generateIndexName>
+  }</buildIndexSpec>
+
+  <setDefaultReadPreference>
+  options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
+  </setDefaultReadPreference>
+
+  
+  <executeIndexCommand>
+  executeCommand(
+    coll.s.db,
+    {
+      createIndexes: coll.s.name,
+      indexes: indexSpecs
+    },
+    options,
+    callback
+  );
+  </executeIndexCommand>
+}
+</createIndexes>
+
+<loadNextDomain>
+function(n) {
+		"use strict";
+
+		<checkDomainLimit>
+		if (this._maxDomainReached || n === 0) {
+			return false;
+		}
+		</checkDomainLimit>
+
+		<loadNewDomainAndAdjustBound>
+		var bound = this.loadNewDomains(this.NAVIGATE_RIGHT, this.getDomain(this.getNextDomain(), n));
+		</loadNewDomainAndAdjustBound>
+
+		<postLoadActions>
+		this.afterLoadNextDomain(bound.end);
+		this.checkIfMaxDomainIsReached(this.getNextDomain().getTime(), bound.start);
+		</postLoadActions>
+
+		return true;
+	}
+</loadNextDomain>
+
+<loadConfiguration>
+function(config, environment) {
+  
+  <initialConfigSetup>
+  if (config == null)
+    config = process.cwd() + (windows ? '\\' : '/');
+  </initialConfigSetup>
+
+  <processConfigParameter>
+  if (typeof config == 'string') {
+    <checkIfConfigIsDirectory>
+    var isDir = (!windows && config.substr(config.length - 1, 1) == '/') || (windows && config.substr(config.length - 1, 1) == '\\');
+    </checkIfConfigIsDirectory>
+
+    <setDefaultAppDir>
+    defaultConfig.appDir = isDir ? path.resolve(config) : path.dirname(path.resolve(config));
+    defaultConfig.require.server.paths['$'] = defaultConfig.appDir;
+    </setDefaultAppDir>
+
+    
+    <loadConfigFromFile>
+    if (isDir && fs.existsSync(path.resolve(config, 'zest.cson')) || config.substr(config.length - 4, 4) == 'cson')
+      return loadConfig(getCSONConfigFile(isDir ? path.resolve(config, 'zest.cson') : path.resolve(config)), environment);
+    
+    else
+      return loadConfig(getJSONConfigFile(isDir ? path.resolve(config, 'zest.json') : path.resolve(config)), environment);
+    </loadConfigFromFile>
+  }
+  </processConfigParameter>
+
+  <ensureConfigurationNotAlreadySet>
+  if (setConfig)
+    throw 'Configuration has already been set. Start a new server instance for alternative configuration.';
+  setConfig = true;
+  </ensureConfigurationNotAlreadySet>
+  
+  <deepPrependConfiguration>
+  function deepPrepend(a, b) {
+    for (var p in b) {
+      if (b[p] instanceof Array) {
+        a[p] = a[p] || [];
+        a[p] = b[p].concat(a[p]);
+      }
+      else if (typeof b[p] == 'object' && b[p] !== null && a[p] !== null) {
+        a[p] = a[p] || {};
+        deepPrepend(a[p], b[p]);
+      }
+      else if (a[p] === undefined)
+        a[p] = b[p];
+    }
+  }
+  
+  deepPrepend(config, defaultConfig);
+  </deepPrependConfiguration>
+
+  <prepareOutConfig>
+  var outConfig = config.environments[environment || config.environment];
+  </prepareOutConfig>
+
+  <validateOutConfig>
+  if (typeof outConfig == 'undefined')
+    throw 'No configuration provided for environment "' + environment + '".';
+  </validateOutConfig>
+
+  <cleanupOutConfig>
+  delete config.environments;
+  </cleanupOutConfig>
+
+  <mergeConfiguration>
+  deepPrepend(outConfig, config);
+  </mergeConfiguration>
+
+  <setupRequireConfig>
+  var requireConfig = {
+    server: outConfig.require.server,
+    client: outConfig.require.client,
+    build: outConfig.require.build
+  };
+  delete outConfig.require.server;
+  delete outConfig.require.client;
+  delete outConfig.require.build;
+  
+  deepPrepend(requireConfig.server, outConfig.require);
+  deepPrepend(requireConfig.client, outConfig.require);
+  deepPrepend(requireConfig.build, outConfig.require);
+  
+  outConfig.require = requireConfig;
+  </setupRequireConfig>
+
+  <setBaseUrls>
+  outConfig.require.server.baseUrl = path.resolve(outConfig.appDir, outConfig.publicDir, outConfig.baseDir);
+  outConfig.require.client.baseUrl = '/' + outConfig.baseDir;
+  </setBaseUrls>
+
+  <setTypeAttribute>
+  if (outConfig.typeAttribute && outConfig.typeAttribute != 'component') {
+    var clientConfig = (outConfig.require.client.config = outConfig.require.client.config || {});
+    clientConfig['zest/render'] = clientConfig['zest/render'] || {};
+    clientConfig['zest/render'].typeAttribute = outConfig.typeAttribute;
+  }
+  </setTypeAttribute>
+  
+  return outConfig;
+}
+</loadConfiguration>
+
+<Director>
+function Director () {
+    <checkForExistingInstance>
+    if (Director._instance) {
+        throw new Error('Director instance already exists')
+    }
+    </checkForExistingInstance>
+
+    <initialSetup>
+    this.sceneStack = []
+    this.window   = parent.window
+    this.document = this.window.document
+    </initialSetup>
+
+    <makePropertiesReadonly>
+    util.makeReadonly(this, 'canvas context sceneStack winSize isReady document window container isTouchScreen isMobile'.w)
+    </makePropertiesReadonly>
+}
+</Director>
+
+<createTransactionResponse>
+function createTransactionResponse(response, body) {
+  <constructTransactionResponseStructure>
+  const transactionRes = {
+    statusCode: response.statusCode,
+    headers: Object.assign({}, response.headers),
+  };
+  </constructTransactionResponseStructure>
+  <encodeTransactionResponseBody>
+  if (Buffer.byteLength(body || '')) {
+    transactionRes.bodyEncoding = detectBodyEncoding(body);
+    transactionRes.body = body.toString(transactionRes.bodyEncoding);
+  }
+  </encodeTransactionResponseBody>
+  return transactionRes;
+}
+</createTransactionResponse>
+
+<assignDepthsAt>
+function assignDepthsAt(i) {
+    
+    <getElementsAtDepth>
+    var eles = depths[i];
+    </getElementsAtDepth>
+
+    <processElementsForDepthAssignment>
+    for (var j = 0; j < eles.length; j++) {
+      var _ele2 = eles[j];
+
+      <removeNullElements>
+      if (_ele2 == null) {
+        eles.splice(j, 1);
+        j--;
+        continue;
+      }
+      </removeNullElements>
+
+      <setElementInfo>
+      setInfo(_ele2, {
+        depth: i,
+        index: j
+      });
+      </setElementInfo>
+    }
+    </processElementsForDepthAssignment>
+}
+</assignDepthsAt>
+
+<closeItemView>
+function(){
+    if (this.isClosed){ return; }
+
+    <triggerCloseEvents>
+    this.triggerMethod('item:before:close');
+    </triggerCloseEvents>
+
+    <performClose>
+    Marionette.View.prototype.close.apply(this, slice(arguments));
+    </performClose>
+
+    <triggerClosedEvent>
+    this.triggerMethod('item:closed');
+    </triggerClosedEvent>
+}
+</closeItemView>
+
+<convertPointToPolarCoordinates>
+function (point) {
+        <calculateCartesianDifference>
+        var dx = point[0] - this.cx;
+        var dy = point[1] - this.cy;
+        </calculateCartesianDifference>
+
+        <defineAngleExtents>
+        var angleAxis = this.getAngleAxis();
+        var extent = angleAxis.getExtent();
+        var minAngle = Math.min(extent[0], extent[1]);
+        var maxAngle = Math.max(extent[0], extent[1]);
+        </defineAngleExtents>
+
+        <inverseAngleIfNecessary>
+        angleAxis.inverse
+            ? (minAngle = maxAngle - 360)
+            : (maxAngle = minAngle + 360);
+        </inverseAngleIfNecessary>
+
+        <calculateRadialDistance>
+        var radius = Math.sqrt(dx * dx + dy * dy);
+        </calculateRadialDistance>
+
+        <normalizeDirectionComponents>
+        dx /= radius;
+        dy /= radius;
+        </normalizeDirectionComponents>
+
+        <calculateRadian>
+        var radian = Math.atan2(-dy, dx) / Math.PI * 180;
+        </calculateRadian>
+
+        <fitRadianWithinAngleRange>
+        var dir = radian < minAngle ? 1 : -1;
+        while (radian < minAngle || radian > maxAngle) {
+            radian += dir * 360;
+        }
+        </fitRadianWithinAngleRange>
+
+        return [radius, radian];
+    }
+</convertPointToPolarCoordinates>
+
+<get_path>
+function get_path(context, path) {
+	var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+	<findNodeByPath>
+	var node = get_node_by_path(context, path, options);
+	</findNodeByPath>
+
+	<retrieveNodeProperties>
+	return node_type(node) == NodeTypes.NODE ? get_all_node_props(context, node, options) : node;
+	</retrieveNodeProperties>
+}
+</get_path>
+
+<indexOf>
+function ( target, value ) {
+    <polyfillIndexOf>
+    if ( typeof Array.prototype.indexOf === 'function' ) {
+        this.indexOf = function ( target, value ) {
+            <useBuiltInIndexOf>
+            if ( this.is(target) ) {
+                return target.indexOf( value );
+            } else {
+                throw new Error('[ixBand] "indexOf()" ' + MSG_NOT_ARRAY);
+            }
+            </useBuiltInIndexOf>
+        };
+    } else {
+        this.indexOf = function ( target, value ) {
+            <implementIndexOfManually>
+            if ( this.is(target) ) {
+                var tArray = target,
+                    aryNum = tArray.length,
+                    result = -1, i;
+    
+                for ( i = 0; i < aryNum; ++i ) {
+                    if ( tArray[i] === value ) {
+                        result = i;
+                        break;
+                    }
+                }
+                return result;
+            } else {
+                throw new Error('[ixBand] "indexOf()" ' + MSG_NOT_ARRAY);
+            }
+            </implementIndexOfManually>
+        };
+    }
+    </polyfillIndexOf>
+
+    return this.indexOf( target, value );
+}
+</indexOf>
+```
+
+The function annotations above illustrate a balanced approach between over-segmenting and under-segmenting to help identify responsibilities that may violate the Single Responsibility Principle (SRP). The annotations provide a clearer structure for each function, marking sections of code that perform specific, separate purposes within the context of each function's overall responsibility.

@@ -1,0 +1,203 @@
+<buildProcessOptions>
+function buildProcessOptions(processes, logRoot, cmdOptions) {
+  <createOptionObjects>
+  return _.flatten(_.map(_.keys(processes), function(procKey) {
+    var concurrentCount = parser.parseConcurrencyOpts(cmdOptions)[procKey] || 1;
+    var command = processes[procKey];
+    return _.map(_.range(concurrentCount), function(index) {
+      return {
+        port: cmdOptions.port,
+        app: cmdOptions.app,
+        appName: getProcessName(cmdOptions.app, procKey, index),
+        environmentVar: getEnvOpts(command, cmdOptions),
+        processCommand: command,
+        processName: procKey,
+        logRoot: logRoot,
+        directory: parser.cmdWorkingDir(cmdOptions),
+        user: cmdOptions.user,
+        num: index
+      };
+    });
+  }));
+  </createOptionObjects>
+}
+</buildProcessOptions>
+
+<anonymousEventTrigger>
+function(el, attrName, oldValue) {
+  <triggerAttributesEvent>
+  if (can.data(can.$(el), "canHasAttributesBindings")) {
+    return setImmediate(function() {
+      can.trigger(el, {
+          type: "attributes",
+          attributeName: attrName,
+          target: el,
+          oldValue: oldValue,
+          bubbles: false
+        }, []);
+    });
+  }
+  </triggerAttributesEvent>
+}
+</anonymousEventTrigger>
+
+<fromWylie>
+function fromWylie(str, warns) {
+  <initializeTranslationVariables>
+  var out = '', line = 1, units = 0, i = 0
+  if (opt.fix_spacing) { str = str.replace(/^\s+/, '') }
+  </initializeTranslationVariables>
+  <tokenization>
+  var tokens = splitIntoTokens(str);
+  </tokenization>
+  <translateTokens>
+  ITER:while (tokens[i] != null) {
+    // ... (translation logic and iteration over tokens) ...
+  }
+  </translateTokens>
+  <outputValidation>
+  if (units == 0) warn(warns, "No Tibetan characters found!");
+  </outputValidation>
+  return out
+}
+</fromWylie>
+
+<isKeyNotMatch>
+function isKeyNotMatch (expect, actual) {
+  <compareKeys>
+  if (Array.isArray(expect)) {
+    return expect.indexOf(actual) === -1
+  } else {
+    return expect !== actual
+  }
+  </compareKeys>
+}
+</isKeyNotMatch>
+
+<webidAndPubKeyToAddress>
+function webidAndPubKeyToAddress(webid, pubKey, testnet) {
+  <parsePublicKey>
+  if (typeof(pubKey) === 'string') {
+    pubKey = new bitcore.HDPublicKey(pubKey)
+  }
+  </parsePublicKey>
+  <computeHash>
+  var hash = sha2(webid)
+  var ints = hashToInts(hash)
+  </computeHash>
+  <deriveAddress>
+  var dep2 = pubKey.derive(ints[0]).derive(ints[1]).derive(ints[2]).derive(ints[3])
+  </deriveAddress>
+  <createAddress>
+  if (testnet) {
+    var address2 = new bitcore.Address(dep2.publicKey, bitcore.Networks.testnet)
+  } else {
+    var address2 = new bitcore.Address(dep2.publicKey)
+  }
+  </createAddress>
+  return address2
+}
+</webidAndPubKeyToAddress>
+
+<DeviceGuider>
+function DeviceGuider(deviceLoader) {
+  <initialize>
+  var self = this;
+  EventEmitter2.call(this, {
+    wildcard: true,
+    delimiter: ':',
+    maxListeners: 1000 
+  });
+  </initialize>
+  <setupLogging>
+  if (this.log) {
+    // ... (wrapped log function) ...
+  } else if (DeviceGuider.prototype.log) {
+    // ... (wrapped log function using prototype) ...
+  } else {
+    var debug = require('debug')(this.constructor.name);
+    this.log = function(msg) {
+      debug(msg);
+    };
+  }
+  </setupLogging>
+  <initializeState>
+  // ... (initializing state object and methods) ...
+  </initializeState>
+  <registerDeviceEvents>
+  // ... (setup event listeners for deviceLoader) ...
+  </registerDeviceEvents>
+}
+</DeviceGuider>
+
+<termShieldConstructor>
+function(doc, confclass, linker, in_argument_hash, add_ons){
+    
+    <initialize>
+    this._is_a = 'bbop-widget-set.term_shield';
+    var anchor = this;
+    </initialize>
+    
+    <setupLogging>
+    // ... (Logging setup) ...
+    </setupLogging>
+
+    <processDocument>
+    var txt = 'Nothing here...';
+    if( doc && confclass ){
+      // ... (processes the document and creates a table structure for display) ...
+    }
+    var div = new html.tag('div', {'generate_id': true});
+    var div_id = div.get_id();
+    </processDocument>
+
+    <appendToBody>
+    // ... (appending the div to the body) ...
+    </appendToBody>
+
+    <createDialog>
+    // ... (creation and setup of dialog) ...
+    </createDialog>
+
+    return dia; // Variable 'dia' is presumably declared and used inside createDialog; this is implied, but not directly visible in the code snippet.
+}
+</termShieldConstructor>
+
+<castSlice>
+function castSlice(array, start, end) {
+  <sliceArray>
+  var length = array.length;
+  end = end === undefined$1 ? length : end;
+  return (!start && end >= length) ? array : baseSlice(array, start, end);
+  </sliceArray>
+}
+</castSlice>
+
+<isNumeric>
+function isNumeric(input) {
+  <checkNumeric>
+  return input !== undefined
+    && input !== null
+    && (typeof input === 'number' || parseInt(input, 10) == input);
+  </checkNumeric>
+}
+</isNumeric>
+
+<rule>
+function rule(type = 'multi', terms = [], roles = []) {
+  <incrementGeneration>
+  generation += 1;
+  </incrementGeneration>
+  <generateRule>
+  return {
+    type: 'rule',
+    generation,
+    rule: {
+      type,
+      terms,
+      roles,
+    },
+  };
+  </generateRule>
+}
+</rule>

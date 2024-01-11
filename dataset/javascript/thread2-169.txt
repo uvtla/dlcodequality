@@ -1,0 +1,452 @@
+```javascript
+<watch>
+function watch (specs, handler, options) {
+  <validateSpecs>
+  const err = fileOptions.validate(specs)
+  if (err) {
+    return Promise.reject(err)
+  }
+  </validateSpecs>
+
+  <normalizeSpecs>
+  const normalisedSpecs = fileOptions.normalize(specs)
+  </normalizeSpecs>
+
+  const events = new EventEmitter()
+
+  <optionsInitialization>
+  const opts = options || {}
+  const dir = opts.dir || '.'
+  const fileReader = opts.fileReader || readAsFile
+  const loader = opts.loader || defaultLoader
+  const buildConcurrency = opts.concurrency || 1
+  const resolveRoot = path.resolve(opts.resolveRoot || process.cwd())
+  </optionsInitialization>
+
+  <stateInitialization>
+  const fileInfos = {}
+  const affectedFiles = {}
+  const affectedFilesInverse = {}
+  </stateInitialization>
+
+  <linkingLoader>
+  function linkingLoader (filename, parentFilename) {
+    <fileLinking>
+    if (parentFilename) {
+      const file = path.relative(dir, filename)
+      affectedFiles[file] = affectedFiles[file] || new Set()
+      affectedFiles[file].add(parentFilename)
+
+      affectedFilesInverse[parentFilename] = affectedFilesInverse[parentFilename] || new Set()
+      affectedFilesInverse[parentFilename].add(file)
+      watchFile(file)
+    }
+    </fileLinking>
+    return loader(filename, parentFilename)
+  }
+  </linkingLoader>
+
+  <unlinkFile>
+  function unlinkFile (filename) {
+    delete affectedFiles[filename] 
+
+    <updateAffectedFiles>
+    if (affectedFilesInverse[filename]) {
+      affectedFilesInverse[filename].forEach((affectorFilename) => {
+        affectedFiles[affectorFilename].delete(filename)
+        if (affectedFiles[affectorFilename].size === 0) {
+          delete affectedFiles[affectorFilename]
+        }
+      })
+
+      delete affectedFilesInverse[filename]
+    }
+    </updateAffectedFiles>
+  }
+  </unlinkFile>
+
+  <watchEventsSetup>
+  const inlinedWatcher = chokidar.watch([], {cwd: dir})
+  inlinedWatcher.on('change', (filename) => {
+    const files = Array.from(getSourceFileObjs(filename))
+    Promise.all(files.map((fileInfo) => handleFile(fileInfo, {rootCause: 'change', cause: 'change'})))
+      .then(() => events.emit('change', filename))
+      .catch(handleFileFailure)
+  })
+
+  inlinedWatcher.on('unlink', (filename) => {
+    const files = Array.from(getSourceFileObjs(filename))
+    unlinkFile(filename)
+    Promise.all(files.map((fileInfo) => handleFile(fileInfo, {rootCause: 'delete', cause: 'change'})))
+      .then(() => events.emit('delete', filename))
+      .catch(handleFileFailure)
+  })
+  </watchEventsSetup>
+
+  <watchFile>
+  function watchFile (filename) {
+    inlinedWatcher.add(filename)
+  }
+  </watchFile>
+
+  <getSourceFileObjs>
+  function getSourceFileObjs (filename, collectorSet) {
+    const results = collectorSet || new Set()
+    if (affectedFiles[filename]) {
+      affectedFiles[filename].forEach((affectedFilename) => {
+        if (fileInfos[affectedFilename]) {
+          results.add(fileInfos[affectedFilename])
+        }
+        getSourceFileObjs(affectedFilename, results)
+      })
+    }
+    return results
+  }
+  </getSourceFileObjs>
+
+  <workHandler>
+  function workHandler (work) {
+    fileInfos[work.fileInfo.src] = work.fileInfo
+    return fileReader(work.fileInfo, { loader: linkingLoader, resolveRoot })
+      .then(file => handler(undefined, file, work.cause))
+      .catch((err) => {
+        if (err instanceof ParseError) {
+          return handler(err, new File({info: work.fileInfo, content: undefined}), work.cause)
+        } else {
+          throw err
+        }
+      })
+      .then((res) => work.resolve(res))
+      .catch((err) => work.reject(err))
+  }
+  </workHandler>
+
+  <workQueueInitialization>
+  const workQueue = new WorkQueue(workHandler, {})
+  </workQueueInitialization>
+
+  <handleFile>
+  function handleFile (fileInfo, cause) {
+    return new Promise((resolve, reject) => {
+      workQueue.add({fileInfo: fileInfo, cause: cause, resolve: resolve, reject: reject})
+    })
+  }
+  </handleFile>
+
+  <handleFileFailure>
+  function handleFileFailure (err) {
+    events.emit('error', err)
+  }
+  </handleFileFailure>
+
+  <build>
+  function build () {
+    return Promise.all(w.files())
+      .map((fileInfo) => {
+        return handleFile(fileInfo, {rootCause: 'build', cause: 'build'})
+      }, {concurrency: buildConcurrency})
+  }
+  </build>
+
+  <watcherSetup>
+  const w = new Watcher(normalisedSpecs, opts)
+
+  w.on('add', (fileInfo) => {
+    return handleFile(fileInfo, {rootCause: 'add', cause: 'add'})
+      .then(() => events.emit('add', fileInfo.src))
+      .catch(handleFileFailure)
+  })
+
+  w.on('change', (fileInfo) => {
+    return handleFile(fileInfo, {rootCause: 'change', cause: 'change'})
+      .then(() => events.emit('change', fileInfo.src))
+      .catch(handleFileFailure)
+  })
+
+  w.on('remove', (fileInfo) => {
+    unlinkFile(fileInfo.src)
+    events.emit('delete', fileInfo.src)
+  })
+  </watcherSetup>
+
+  return w._promise.then(() => ({build: build, events: events}))
+}
+</watch>
+
+<inspect>
+function inspect(stringsOrOpts, ...values) {
+  <conditionCheck>
+  if (Array.isArray(stringsOrOpts)) {
+    return DEFAULT_INSPECT(stringsOrOpts, ...values);
+  }
+  </conditionCheck>
+  return inspector(stringsOrOpts);
+}
+</inspect>
+
+<getMetadata>
+function getMetadata ($) {
+  <imageExtraction>
+  const image = ($('figure[representativeofpage=true] img').attr('src') ||
+                 $('meta[property="og:image"]').attr('content') ||
+                 '')
+  </imageExtraction>
+
+  <dateExtraction>
+  const dateStr = ($('meta[property="article:modified_time"]').attr('content') ||
+                   $('meta[property="article:published_time"]').attr('content') ||
+                   $('meta[name="DC.date.issued"]').attr('content') ||
+                   $('meta[property=date]').attr('content') ||
+                   $('.news-body-date time').attr('datetime') ||
+                   '').replace(' ', '')
+  </dateExtraction>
+
+  <publishedDateConversion>
+  const publishedDate = new Date(dateStr)
+  </publishedDateConversion>
+
+  <authorExtraction>
+  const author = ($('meta[name=author]').attr('content') ||
+                  $('[itemprop=articleBody] .data [itemprop=author] [itemprop=name]').text().trim() ||
+                  $('article .news-author [itemprop=author] [itemprop=name]').text().trim() ||
+                  $('article [itemprop=name]').text().trim() ||
+                  $('.main [itemprop=author]').text().trim() ||
+                  $('.cuerpo-articulo [href^="/autor"]').text().trim() ||
+                  $('.news-info-box-author [itemprop=author]').text().trim() ||
+                  $('#content address.dateline small').text().trim() ||
+                  $('article .info .thirdparty-logo').text().trim() ||
+                  $('article .info .name.fn').text().trim() ||
+                  $('.detalleFullTexto .author a').text().trim() ||
+                  '')
+  </authorExtraction>
+
+  <titleExtraction>
+  const title = ($('meta[property="og:title"]').attr('content') ||
+                 '')
+  </titleExtraction>
+
+  return {
+    image,
+    publishedDate,
+    source: {
+      author
+    },
+    title
+  }
+}
+</getMetadata>
+
+<iid>
+function iid(instance, id) {
+  if (id)
+    <formatWithId>
+    return fmt('svc %d.%d', instance, id);
+    </formatWithId>
+  <formatWithInstance>
+  return fmt('svc %d.%d', instance.serverServiceId, instance.id);
+  </formatWithInstance>
+}
+</iid>
+
+<ReuseS3Object>
+function ReuseS3Object(fileUpload, awsKey) {
+  this.awsKey = awsKey;
+
+  <logAttempt>
+  fileUpload.info('will attempt to verify existence of the file');
+  </logAttempt>
+
+  <requestSetup>
+  var request = {
+    method: 'HEAD',
+    path: '',
+    x_amz_headers: fileUpload.xAmzHeadersCommon,
+    success404: true,
+    step: 'head_object'
+  };
+  </requestSetup>
+
+  <initSignedS3AWSRequestWithRetryLimit>
+  SignedS3AWSRequestWithRetryLimit.call(this, fileUpload, request);
+  </initSignedS3AWSRequestWithRetryLimit>
+}
+</ReuseS3Object>
+
+<function-changingState>
+function (stateName) {
+  this.$Frame.changeState.call(this, stateName);
+  <computeSize>
+  this._computeSize();
+  </computeSize>
+  var cfg = this._cfg, cssPrefix = this._cssPrefix;
+  var parentSpan = this._domElt;
+  <parentSpanClass>
+  parentSpan.className = ['xFixedHeightFrame_w ', cssPrefix, 'w'].join("");
+  </parentSpanClass>
+  var curSpan;
+  <curSpanClass1>
+  curSpan = domUtils.getDomElementChild(parentSpan, 0);
+  curSpan.className = ['xFixedHeightFrame_bme ', cssPrefix, 'b ', cssPrefix, 'bkgA'].join("");
+  </curSpanClass1>
+  curSpan = domUtils.getDomElementChild(parentSpan, this._mainContentIndex);
+  <curSpanClass2>
+  curSpan.className = ['xFixedHeightFrame_bme ', cssPrefix, 'm ', cssPrefix, 'bkgB'].join("");
+  </curSpanClass2>
+  curSpan = domUtils.getDomElementChild(curSpan, 0);
+  var sizeInfo = {
+    className : ['xFrameContent ', cssPrefix, 'c ', cfg.cssClass].join("")
+  };
+  <appendInnerSizeInfo>
+  this._appendInnerSizeInfo(sizeInfo);
+  </appendInnerSizeInfo>
+  <curSpanStyle>
+  curSpan.style.width = sizeInfo.width;
+  curSpan.style.height = sizeInfo.height;
+  </curSpanStyle>
+  <curSpanClass3>
+  curSpan.className = sizeInfo.className;
+  </curSpanClass3>
+  curSpan = domUtils.getDomElementChildReverse(parentSpan, 0);
+  <curSpanClass4>
+  curSpan.className = ['xFixedHeightFrame_bme ', cssPrefix, 'e ', cssPrefix, 'bkgA'].join("");
+  </curSpanClass4>
+}
+</function-changingState>
+
+<PluginInitializationError>
+function PluginInitializationError (message, module) {
+    this.message = message;
+    this.stack = new Error().stack;
+    this.module = module;
+}
+</PluginInitializationError>
+
+<substitute>
+function substitute(str, variables) {
+  <compilationCheck>
+  if (!cache[str]) {
+    <tryCompilation>
+    try {
+      <injectVariables>
+      cache[str] =  new Function("obj",
+        "var p=[],print=function(){p.push.apply(p,arguments);};" +
+        "with(obj){p.push('" +
+        str.replace(/[\r\t\n]/g, " ")
+        .split("<%").join("\t")
+        .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+        .replace(/\t=(.*?)%>/g, "',$1,'")
+        .split("\t").join("');")
+        .split("%>").join("p.push('")
+        .split("\r").join("\\'") +
+        "');}return p.join('');");
+      </injectVariables>
+    } catch(e) {
+      grunt.fail.fatal("Failed to compile template:\n" + str);
+    }
+    </tryCompilation>
+  }
+  </compilationCheck>
+  <executeTemplate>
+  return cache[str](variables || {});
+  </executeTemplate>
+}
+</substitute>
+
+<generateListItem>
+function generateListItem(result, hasBlankLine) {
+  <contentCreation>
+  const content = [result[3]];
+  if (hasBlankLine) {
+    content.unshift('\n');
+  }
+  </contentCreation>
+
+  <returnListItem>
+  return {
+    type: 'ListItem',
+    checked: result[2] === '[x]' ? true : (result[2] === '[ ]' ? false : undefined), 
+    content,
+    children: []
+  };
+  </returnListItem>
+}
+</generateListItem>
+
+<runProgram>
+async function runProgram() {
+  <commandParsing>
+  const args = minimist(process.argv.slice(2));
+  </commandParsing>
+
+  <prefixInterception>
+  if (args.prefix) {
+    intercept(function(txt) {
+      return `[${pkg.name}]\n${txt}`;
+    });
+  }
+  </prefixInterception>
+
+  <checkForUpdates>
+  let latest = await latestVersion(pkg.name, { version: `>${pkg.version}` })
+                      .catch(error => pkg.version);
+  if (semver.gt(latest, pkg.version)) {
+    process.stderr.write(chalk.default.white(`\n     Update available `));
+    process.stderr.write(chalk.default.grey(`${pkg.version}`));
+    process.stderr.write(chalk.default.white(` -> `));
+    process.stderr.write(chalk.default.greenBright(`${latest}\n`));
+    process.stderr.write(chalk.default.white(`     Run `));
+    process.stderr.write(chalk.default.blueBright(`npm i -g ${pkg.name} `));
+    process.stderr.write(chalk.default.white(`to update.\n`));
+  }
+  </checkForUpdates>
+
+  <versionCheck>
+  if (args.version || args.v) {
+    process.stdout.write(pkg.version);
+    return 0;
+  }
+  </versionCheck>
+
+  <helpCheck>
+  if (args.h || args.help) {
+    help(process.stdout);
+    return 0;
+  }
+  </helpCheck>
+
+  <folderProcessing>
+  if (args.f || args.folder) {
+    let inputDir = args.f.trim();
+    let outputDir = (args.o || args.out_folder) ? args.o.trim() : "./";
+    if (outputDir.substr(0, 2) === "./") {
+      outputDir = path.resolve(process.cwd(), outputDir.substr(2))
+    }
+    const len = await processFiles(inputDir, outputDir);
+    process.stdout.write(chalk`{green Successfully wrote ${len} files}\n`);
+    return len;
+  }
+  </folderProcessing>
+
+  <fileProcessing>
+  else {
+    const fileContents = await getInput(args);
+    if (fileContents) {
+      const activities = await chatdown(fileContents, args);
+      const writeConfirmation = await writeOut(activities, args);
+
+      if (typeof writeConfirmation === 'string') {
+        process.stdout.write(chalk`{green Successfully wrote file:} {blue ${writeConfirmation}}\n`);
+      }
+      return 0;
+    }
+    else {
+      help();
+      return -1;
+    }
+  }
+  </fileProcessing>
+}
+</runProgram>
+```
+
+Most functions have been annotated with responsibilities which might encompass either a single line or a whole block of code. It's important to distinguish cohesive tasks within a function which contributes to the overall goal the function serves. There are some one-liner or very simple statements included in the responsibilities because they contribute to a distinct part of the overall task; these are still essential elements in the larger responsibilities marked in the functions.

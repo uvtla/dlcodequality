@@ -1,0 +1,258 @@
+<createPkgConfigPathObj>
+function createPkgConfigPathObj(path) {
+</createPkgConfigPathObj>
+  <calculateLengthAndRegex>
+  var lastWildcard = path.lastIndexOf('*');
+  var length = Math.max(lastWildcard + 1, path.lastIndexOf('/'));
+  return {
+    length: length,
+    regEx: new RegExp('^(' + path.substr(0, length).replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^\\/]+') + ')(\\/|$)'),
+    wildcard: lastWildcard != -1
+  };
+  </calculateLengthAndRegex>
+
+<setCssProperty>
+function setCssProperty(cssStyle, propName, sanitizedValue) {
+  <callMethodToSetProperty>
+  genericMethodCall(
+      Methods.SET_PROPERTY, cssStyle,
+      cssStyle.setProperty ? 'setProperty' : 'setAttribute',
+      [propName, sanitizedValue]);
+  </callMethodToSetProperty>
+}
+</setCssProperty>
+
+<adaptForRouter>
+function adaptForRouter(val, key) {
+  <parseAndAdaptRoute>
+  key = key.split(/\s+/);
+  if (typeof val === 'string' || typeof val === 'function' || Array.isArray(val)) {
+    val = {
+      path: key[0],
+      method: key[1],
+      controller: val
+    };
+  } else if (typeof val === 'object') {
+    if (!val.path) {
+      val.path = key[0];
+    }
+    if (!val.method) {
+      val.method = key[1];
+    }
+  } else {
+    throw new Error(`Problem with route "${key}"`);
+  }
+  </parseAndAdaptRoute>
+  return val;
+}
+</adaptForRouter>
+
+<anonymousCallbackFunction>
+function () {
+  <checkAndFire>
+  if (!this.__fired) {
+    this.__fired = true;
+    var self = this;
+    </checkAndFire>
+    <executeCallbacks>
+    nextTick(function () {
+      var cbs = self.__errors.length ? self.__errorCbs : self.__cbs,
+          len = cbs.length, i,
+          results = self.__errors.length ? self.__errors : self.__results;
+      for (i = 0; i < len; i++) {
+          spreadArgs(cbs[i], [results]);
+      }
+    });
+    </executeCallbacks>
+  }
+}
+</anonymousCallbackFunction>
+
+<FCGeneralEdgeView>
+function FCGeneralEdgeView() {
+  <applyEdgeViewStyle>
+  type.EdgeView.apply(this, arguments);
+  this.tailEndStyle = Core.ES_FLAT;
+  this.headEndStyle = Core.ES_SOLID_ARROW;
+  this.lineMode = Core.LM_SOLID;
+  </applyEdgeViewStyle>
+
+  <setupNameLabel>
+  this.nameLabel = new type.EdgeLabelView();
+  this.nameLabel.hostEdge = this;
+  this.nameLabel.edgePosition = Core.EP_MIDDLE;
+  this.nameLabel.distance = 15;
+  this.nameLabel.alpha = Math.PI / 2;
+  this.addSubView(this.nameLabel);
+  </setupNameLabel>
+}
+</FCGeneralEdgeView>
+
+<parseFormattedValue>
+function (formattedValue, model) {
+  <parseAndReturnRawValue>
+  var tokens = formattedValue.split(this.symbol);
+  if (tokens && tokens[0] && tokens[1] === "" || tokens[1] == null) {
+    var rawValue = NumberFormatter.prototype.toRaw.call(this, tokens[0]);
+    if (_.isUndefined(rawValue)) return rawValue;
+    return rawValue / this.multiplier;
+  }
+  </parseAndReturnRawValue>
+}
+</parseFormattedValue>
+
+<OpenLayersBatchAction>
+function(features, options) {
+  <setupOptionsAndTypes>
+  options = OpenLayers.Util.applyDefaults(options, this.options);
+  var types = {};
+  types[OpenLayers.State.INSERT] = [];
+  types[OpenLayers.State.UPDATE] = [];
+  types[OpenLayers.State.DELETE] = [];
+  </setupOptionsAndTypes>
+
+  <prepareFeatureLists>
+  var feature, list, requestFeatures = [];
+  for(var i=0, len=features.length; i<len; ++i) {
+    feature = features[i];
+    list = types[feature.state];
+    if(list) {
+      list.push(feature);
+      requestFeatures.push(feature); 
+    }
+  }
+  </prepareFeatureLists>
+
+  <determineNumberOfRequests>
+  var nRequests = (types[OpenLayers.State.INSERT].length > 0 ? 1 : 0) +
+      types[OpenLayers.State.UPDATE].length +
+      types[OpenLayers.State.DELETE].length;
+  </determineNumberOfRequests>
+
+  <setupCallbackFunctions>
+  var success = true;
+  var finalResponse = new OpenLayers.Protocol.Response({
+    reqFeatures: requestFeatures        
+  });
+  
+  function insertCallback(response) {
+    var len = response.features ? response.features.length : 0;
+    var fids = new Array(len);
+    for(var i=0; i<len; ++i) {
+      fids[i] = response.features[i].fid;
+    }   
+    finalResponse.insertIds = fids;
+    callback.apply(this, [response]);
+  }
+
+  function callback(response) {
+    this.callUserCallback(response, options);
+    success = success && response.success();
+    nResponses++;
+    if (nResponses >= nRequests) {
+      if (options.callback) {
+        finalResponse.code = success ? 
+            OpenLayers.Protocol.Response.SUCCESS :
+            OpenLayers.Protocol.Response.FAILURE;
+        options.callback.apply(options.scope, [finalResponse]);
+      }    
+    }
+  }
+  </setupCallbackFunctions>
+
+  <performBatchActions>
+  var queue = types[OpenLayers.State.INSERT];
+  if(queue.length > 0) {
+    resp.push(this.create(
+        queue, OpenLayers.Util.applyDefaults(
+            {callback: insertCallback, scope: this}, options.create
+        )
+    ));
+  }
+  queue = types[OpenLayers.State.UPDATE];
+  for(var i=queue.length-1; i>=0; --i) {
+    resp.push(this.update(
+        queue[i], OpenLayers.Util.applyDefaults(
+            {callback: callback, scope: this}, options.update
+        ))
+    ));
+  }
+  queue = types[OpenLayers.State.DELETE];
+  for(var i=queue.length-1; i>=0; --i) {
+    resp.push(this["delete"](
+        queue[i], OpenLayers.Util.applyDefaults(
+            {callback: callback, scope: this}, options["delete"]
+        ))
+    ));
+  }
+  return resp;
+  </performBatchActions>
+}
+</OpenLayersBatchAction>
+
+<tableize>
+function tableize(tableData) {
+  <createAndPopulateTable>
+  var table = new Table({
+    head: Object.keys(tableData[0]),
+    chars: {'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': ''},
+    style: { 'padding-left': 0, 'padding-right': 0 }
+  });
+
+  _.each(tableData, function(row, index) {
+    table.push(_.values(row));
+  });
+  </createAndPopulateTable>
+  return table;
+}
+</tableize>
+
+<asyncResolve>
+function asyncResolve(resolveParams, resolveOptions) {
+  <setupRoutingRestriction>
+  router.allowPageChange = false;
+  var resolvedAsModal = false;
+  </setupRoutingRestriction>
+  <handleContext>
+  if (resolveOptions && resolveOptions.context) {
+    if (!route.context) { route.context = resolveOptions.context; }
+    else { route.context = Utils.extend({}, route.context, resolveOptions.context); }
+    options.route.context = route.context;
+  }
+  </handleContext>
+  <loadModalRoutes>
+  ('popup popover sheet loginScreen actions customModal panel').split(' ').forEach(function (modalLoadProp) {
+    if (resolveParams[modalLoadProp]) {
+      resolvedAsModal = true;
+      var modalRoute = Utils.extend({}, route, { route: resolveParams });
+      router.allowPageChange = true;
+      router.modalLoad(modalLoadProp, modalRoute, Utils.extend(options, resolveOptions));
+    }
+  });
+  </loadModalRoutes>
+  <loadNonModalRoute>
+  if (resolvedAsModal) { return; }
+  router.load(resolveParams, Utils.extend(options, resolveOptions), true);
+  </loadNonModalRoute>
+}
+</asyncResolve>
+
+<setNestedPropertyValue>
+function (row, prop, value) {
+  <checkAndSetNestedProperty>
+  if (typeof prop === 'string' && prop.indexOf('.') > -1) {
+    var sliced = prop.split(".");
+    var out = priv.settings.data[row];
+    for (var i = 0, ilen = sliced.length - 1; i < ilen; i++) {
+      out = out[sliced[i]];
+    }
+    out[sliced[i]] = value;
+  }
+  </checkAndSetNestedProperty>
+  <setDirectPropertyValue>
+  else {
+    priv.settings.data[row][prop] = value;
+  }
+  </setDirectPropertyValue>
+}
+</setNestedPropertyValue>

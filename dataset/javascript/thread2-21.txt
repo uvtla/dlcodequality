@@ -1,0 +1,269 @@
+<unregisterSelectedItemWatcher>
+function unregisterSelectedItemWatcher (cb) {
+    var i = selectedItemWatchers.indexOf(cb);
+    if (i !== -1) {
+      selectedItemWatchers.splice(i, 1);
+    }
+}
+</unregisterSelectedItemWatcher>
+
+<isSymbolTerm>
+function isSymbolTerm(node, symbolName) {
+  if (Node.PolynomialTerm.isPolynomialTerm(node)) {
+    const polyTerm = new Node.PolynomialTerm(node);
+    if (polyTerm.getSymbolName() === symbolName) {
+      return true;
+    }
+  }
+  return false;
+}
+</isSymbolTerm>
+
+<loadReporter>
+function loadReporter(reporterPath) {
+    var reporter;
+    reporterPath = reporterPath || 'checkstyle';
+    if (!fs.existsSync(path.resolve(reporterPath))) {
+        try {
+            reporter = require('./lib/reporters/' + reporterPath);
+        } catch (e) {
+            try {
+                reporter = require('jscs/lib/reporters/' + reporterPath);
+            }
+            catch (e) {
+                reporter = null;
+            }
+        }
+    } else {
+        try {
+            reporter = require(path.resolve(reporterPath));
+        } catch (e) {
+            reporter = null;
+        }
+    }
+    return reporter;
+}
+</loadReporter>
+
+<calculateUnitRatios>
+function calculateUnitRatios () {
+    var sameRatioIndicators = {
+        myParent: element.parentNode || document.body, 
+        position: CSS.getPropertyValue(element, "position"), 
+        fontSize: CSS.getPropertyValue(element, "fontSize") 
+    },
+    samePercentRatio = ((sameRatioIndicators.position === callUnitConversionData.lastPosition) && (sameRatioIndicators.myParent === callUnitConversionData.lastParent)),                        
+    sameEmRatio = (sameRatioIndicators.fontSize === callUnitConversionData.lastFontSize);
+
+    callUnitConversionData.lastParent = sameRatioIndicators.myParent;
+    callUnitConversionData.lastPosition = sameRatioIndicators.position;
+    callUnitConversionData.lastFontSize = sameRatioIndicators.fontSize;
+
+    var measurement = 100,
+        unitRatios = {};
+
+    if (!sameEmRatio || !samePercentRatio) {
+        var dummy = Data(element).isSVG ? document.createElementNS("http://www.w3.org/2000/svg", "rect") : document.createElement("div");
+
+        Velocity.init(dummy);
+        sameRatioIndicators.myParent.appendChild(dummy);
+
+        $.each([ "overflow", "overflowX", "overflowY" ], function(i, property) {
+            Velocity.CSS.setPropertyValue(dummy, property, "hidden");
+        });
+        Velocity.CSS.setPropertyValue(dummy, "position", sameRatioIndicators.position);
+        Velocity.CSS.setPropertyValue(dummy, "fontSize", sameRatioIndicators.fontSize);
+        Velocity.CSS.setPropertyValue(dummy, "boxSizing", "content-box");
+
+        $.each([ "minWidth", "maxWidth", "width", "minHeight", "maxHeight", "height" ], function(i, property) {
+            Velocity.CSS.setPropertyValue(dummy, property, measurement + "%");
+        });
+        Velocity.CSS.setPropertyValue(dummy, "paddingLeft", measurement + "em");
+
+        unitRatios.percentToPxWidth = callUnitConversionData.lastPercentToPxWidth = (parseFloat(CSS.getPropertyValue(dummy, "width", null, true)) || 1) / measurement; 
+        unitRatios.percentToPxHeight = callUnitConversionData.lastPercentToPxHeight = (parseFloat(CSS.getPropertyValue(dummy, "height", null, true)) || 1) / measurement; 
+        unitRatios.emToPx = callUnitConversionData.lastEmToPx = (parseFloat(CSS.getPropertyValue(dummy, "paddingLeft")) || 1) / measurement; 
+
+        sameRatioIndicators.myParent.removeChild(dummy);
+    } else {
+        unitRatios.emToPx = callUnitConversionData.lastEmToPx;
+        unitRatios.percentToPxWidth = callUnitConversionData.lastPercentToPxWidth;
+        unitRatios.percentToPxHeight = callUnitConversionData.lastPercentToPxHeight;
+    }
+
+    if (callUnitConversionData.remToPx === null) {
+        callUnitConversionData.remToPx = parseFloat(CSS.getPropertyValue(document.body, "fontSize")) || 16; 
+    }
+
+    if (callUnitConversionData.vwToPx === null) {
+        callUnitConversionData.vwToPx = parseFloat(window.innerWidth) / 100; 
+        callUnitConversionData.vhToPx = parseFloat(window.innerHeight) / 100; 
+    }
+
+    unitRatios.remToPx = callUnitConversionData.remToPx;
+    unitRatios.vwToPx = callUnitConversionData.vwToPx;
+    unitRatios.vhToPx = callUnitConversionData.vhToPx;
+
+    if (Velocity.debug >= 1) console.log("Unit ratios: " + JSON.stringify(unitRatios), element);
+
+    return unitRatios;
+}
+</calculateUnitRatios>
+
+<translate>
+function translate(element, properties, constraints) {
+  let elements = [].concat(element);
+  let n = elements.length;
+
+  if (properties) {
+    <validateProperties>
+    if (!assert(properties.x === undefined || !isNaN(properties.x), 'X property must be a number.')) return null;
+    if (!assert(properties.y === undefined || !isNaN(properties.y), 'Y property must be a number.')) return null;
+    if (!assert(properties.z === undefined || !isNaN(properties.z), 'Z property must be a number.')) return null;
+    </validateProperties>
+
+    let units = properties.units || 'px';
+
+    <validateConstraints>
+    if (constraints) {
+      if (!assert(constraints.x === undefined || !isNaN(constraints.x), 'X constraint must be a number.')) return null;
+      if (!assert(constraints.y === undefined || !isNaN(constraints.y), 'Y constraint must be a number.')) return null;
+      if (!assert(constraints.z === undefined || !isNaN(constraints.z), 'Z constraint must be a number.')) return null;
+    }
+    </validateConstraints>
+
+    <calculateTranslations>
+    let x = (constraints && (constraints.x !== undefined)) ? Math.min(properties.x, constraints.x) : properties.x;
+    let y = (constraints && (constraints.y !== undefined)) ? Math.min(properties.y, constraints.y) : properties.y;
+    let z = (constraints && (constraints.z !== undefined)) ? Math.min(properties.z, constraints.z) : properties.z;
+    </calculateTranslations>
+
+    let translateX = (properties.x !== undefined) ? 'translateX(' + x + units + ')' : null;
+    let translateY = (properties.y !== undefined) ? 'translateY(' + y + units + ')' : null;
+    let translateZ = (properties.z !== undefined) ? 'translateZ(' + z + units + ')' : null;
+    let transforms = '';
+
+    <combineTransforms>
+    if (translateX) transforms += (transforms === '') ? translateX : ' ' + translateX;
+    if (translateY) transforms += (transforms === '') ? translateY : ' ' + translateY;
+    if (translateZ) transforms += (transforms === '') ? translateZ : ' ' + translateZ;
+    </combineTransforms>
+
+    <applyTransforms>
+    for (let i = 0; i < n; i++) {
+      elements[i].style.transform = transforms;
+    }
+    </applyTransforms>
+
+    let t = {};
+
+    <createTranslationObject>
+    if (translateX) t.x = x;
+    if (translateY) t.y = y;
+    if (translateZ) t.z = z;
+    </createTranslationObject>
+
+    return t;
+  }
+  else {
+    <resetTransforms>
+    for (let j = 0; j < n; j++) {
+      elements[j].style.transform = 'translateX(0) translateY(0) translateZ(0)';
+    }
+    </resetTransforms>
+
+    return {
+      x: 0,
+      y: 0,
+      z: 0
+    };
+  }
+}
+</translate>
+
+<_eachArrayReverse>
+function _eachArrayReverse(arry, fn) {
+  let ret = true
+  <iterateArrayReverse>
+  for (let i = arry.length - 1; i >= 0; i--) {
+    ret = fn(arry[i], i, arry)
+    if (ret === false) {
+      break
+    }
+  }
+  </iterateArrayReverse>
+  return ret
+}
+</_eachArrayReverse>
+
+<cleanupExtension>
+function(oExtension) {
+  if (oExtension._cleanupInfo) {
+    oExtension._cleanupInfo.cell.attr(oExtension._cleanupInfo.attr);
+    oExtension._cleanupInfo = null;
+  }
+}
+</cleanupExtension>
+
+<compareByName>
+function (a, b) {
+    <checkNamesExist>
+    if (!a.name || !b.name) {
+        return 0;
+    }
+    </checkNamesExist>
+    <toLowerCaseNames>
+    var an = a.name.toLowerCase(),
+        bn = b.name.toLowerCase(),
+    </toLowerCaseNames>
+    <compareNames>
+    ret = 0;
+
+    if (an < bn) {
+        ret = -1;
+    }
+    if (an > bn) {
+        ret = 1;
+    }
+    </compareNames>
+    return ret;
+}
+</compareByName>
+
+<redirect>
+function redirect(ctx, url, status) {
+  <handleJSON>
+  if (ctx.accepts('html', 'json') === 'json') {
+    ctx.set('Location', url);
+    ctx.status = 401;
+    ctx.body = {
+      error: '401 Unauthorized'
+    };
+    return;
+  }
+  </handleJSON>
+  return ctx.redirect(url, status);
+}
+</redirect>
+
+<collect>
+function collect(p, files, matches) {
+  if (!files) files = []
+
+  matches = matches || <defaultMatcher>function (p) {
+    return p.match(/\.js$/)
+  }</defaultMatcher>
+
+  <traverseFileSystem>
+  if (fs.statSync(p).isDirectory()) {
+    fs.readdirSync(p).forEach(function (item) {
+      collect(path.join(p, item), files, matches)
+    })
+  } else if (matches(p)) {
+    files.push(p)
+  }
+  </traverseFileSystem>
+
+  return files
+}
+</collect>

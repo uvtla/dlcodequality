@@ -1,0 +1,269 @@
+<object>simplify
+```javascript
+function simplify(folds) {
+    if (!folds) {
+        return;
+    }
+    var res = {}, range;
+    Object.keys(folds).forEach(function (line) {
+        range = folds[line];
+        res[line] = Array.isArray(range) ? range : [
+            [range.from.line, range.from.ch],
+            [range.to.line, range.to.ch]
+        ];
+    });
+    return res;
+}
+```
+</object>
+
+<build>
+```javascript
+function build() {
+  console.log('Creating an optimized production build...');
+  webpack(config).run((err) => {
+    if (err) {
+      console.error('Failed to create a production build. Reason:');
+      console.error(err.message || err);
+      process.exit(1);
+    }
+
+    console.log(chalk.green('Compiled successfully.'));
+    console.log();
+
+    copyToDistFolder();
+
+    const openCommand = process.platform === 'win32' ? 'start' : 'open';
+    const homepagePath = require(paths.appPackageJson).homepage;
+    const publicPath = config.output.publicPath;
+
+    if (homepagePath && homepagePath.indexOf('.github.io/') !== -1) {
+      console.log(`The project was built assuming it is hosted at ${chalk.green(publicPath)}.`);
+      // Instructions for deployment on GitHub Pages omitted for brevity
+    } else if (publicPath !== '/') {
+      console.log(`The project was built assuming it is hosted at ${chalk.green(publicPath)}.`);
+      // Instructions for general deployment omitted for brevity
+    } else {
+      console.log('The project was built assuming it is hosted at the server root.');
+      if (homepagePath) {
+        // Instructions for specifying homepage omitted for brevity
+      } else {
+        // Instructions for GitHub Pages deployment omitted for brevity
+      }
+      console.log(`The ${chalk.cyan('dist')} folder is ready to be deployed.`);
+      console.log('You may also serve it locally with a static server:');
+      // Instructions for local server setup omitted for brevity
+    }
+  });
+}
+```
+</build>
+
+<anonymousFunction>
+```javascript
+function(name, parentName, parentAddress) {
+  if (typeof parentName == 'object')
+    parentName = parentName.name;
+
+  var loaderObj = this;
+
+  return Promise.resolve(loaderObj.normalize(name, parentName))
+  .then(function(name) {
+    var loader = loaderObj._loader;
+
+    if (loader.modules[name])
+      return loader.modules[name].module;
+
+    return loader.importPromises[name] || createImportPromise(loaderObj, name,
+      loadModule(loader, name, {})
+      .then(function(load) {
+        delete loader.importPromises[name];
+        return load.module.module;
+      }));
+  });
+}
+```
+</anonymousFunction>
+
+<reference>
+```javascript
+function reference(node, index, parent) {
+    var definition = definitions(node.identifier)
+    var replacement
+    var image
+
+    if (definition) {
+      image = node.type === 'imageReference'
+
+      replacement = {
+        type: image ? 'image' : 'link',
+        url: definition.url,
+        title: definition.title
+      }
+
+      if (image) {
+        replacement.alt = node.alt
+      } else {
+        replacement.children = node.children
+      }
+
+      parent.children[index] = replacement
+    }
+}
+```
+</reference>
+
+<updateDatabaseRegExps>
+```javascript
+function() {
+    for (var i = 0; i < databaseLen; i++) {
+        var databaseName = database["field" + i];
+        databaseName.regExp = createReg(databaseName);
+    }
+}
+```
+</updateDatabaseRegExps>
+
+<addEventListenerShim>
+```javascript
+function(target, eventType, callback) {
+    if (target.addEventListener) {
+      target.addEventListener(eventType, callback, false);
+      return {
+        remove: function() {
+          target.removeEventListener(eventType, callback, false);
+        }
+      };
+    } else if (target.attachEvent) {
+      target.attachEvent('on' + eventType, callback);
+      return {
+        remove: function() {
+          target.detachEvent('on' + eventType, callback);
+        }
+      };
+    }
+}
+```
+</addEventListenerShim>
+
+<OneSignal>
+```javascript
+function OneSignal(keys){
+  if (!keys) return
+  this.name = "onesignal"
+  this.keys = keys
+
+  this.send = function(data, callback) {
+    var context = this;
+    var onesignalStat;
+    var deviceType = getOneSignalDeviceType(data.deviceType);
+    var notification = getOneSignalNotificationObject(deviceType, context.keys.app_id, data.deviceToken, data.message);
+
+    request( getOneSignalRegisterOptions(context.keys.app_id, deviceType, data.deviceToken), function(err, result) {
+      if (err) {
+        onesignalStat = new OneSignalErrorStatus(err);
+        debug("-_-_ FAILED with onesignal _-_-");
+        debug(err);
+        debug(onesignalStat);
+        return callback(onesignalStat);
+      } else if (result.statusCode != 200) {
+        onesignalStat = new OneSignalErrorStatus(result.body);
+        debug("-_-_ FAILED with onesignal _-_-");
+        debug(onesignalStat);
+        return callback(onesignalStat);
+      }
+
+      request( getOneSignalSendOptions(context.keys.api_key, notification), function(err, result) {
+        if (err) {
+          onesignalStat = new OneSignalErrorStatus(err);
+          debug("-_-_ FAILED with onesignal _-_-");
+          debug(err);
+          debug(onesignalStat);
+          return callback(onesignalStat);
+        } else if (result.statusCode != 200) {
+          onesignalStat = new OneSignalErrorStatus(result.body);
+          debug("-_-_ FAILED with onesignal _-_-");
+          debug(onesignalStat);
+          return callback(onesignalStat);
+        } else {
+          onesignalStat = new OneSignalSuccessStatus(result.body);
+          debug("-_-_ sent with onesignal _-_-");
+          result.service = context;
+          result.status = onesignalStat;
+          debug(result);
+          return callback(null, result);
+        }
+      })
+    });
+  }
+}
+```
+</OneSignal>
+
+<retryRequestIfAuthRequired>
+```javascript
+function (auth, response, done) {
+    if (auth.get(DISABLE_RETRY_REQUEST) || !response) {
+        return done(null, true);
+    }
+
+    var code,
+        realm,
+        nonce,
+        qop,
+        opaque,
+        authHeader,
+        authParams = {};
+
+    code = response.code;
+    authHeader = _getDigestAuthHeader(response.headers);
+
+    if ((code === 401 || code === 403) && authHeader) {
+        nonce = _extractField(authHeader.value, nonceRegex);
+        realm = _extractField(authHeader.value, realmRegex);
+        qop = _extractField(authHeader.value, qopRegex);
+        opaque = _extractField(authHeader.value, opaqueRegex);
+
+        authParams.nonce = nonce;
+        authParams.realm = realm;
+        opaque && (authParams.opaque = opaque);
+        qop && (authParams.qop = qop);
+
+        if (authParams.qop || auth.get(QOP)) {
+            authParams.clientNonce = randomString(8);
+            authParams.nonceCount = ONE;
+        }
+
+        if (_.every(authParams, function (value, key) { return auth.get(key); })) {
+            return done(null, true);
+        }
+
+        auth.set(authParams);
+
+        return done(null, false);
+    }
+
+    done(null, true);
+}
+```
+</retryRequestIfAuthRequired>
+
+<isImmutable>
+```javascript
+function isImmutable(value) {
+    return value == null || isBoolean(value) || isNumber(value) || isString(value);
+}
+```
+</isImmutable>
+
+<getFromWeakMap>
+```javascript
+function get(key) {
+    if (isObject(key)) {
+        var data = getWeak(key);
+        if (data === true) return uncaughtFrozenStore(this).get(key);
+        return data ? data[this._i] : undefined;
+    }
+}
+```
+</getFromWeakMap>

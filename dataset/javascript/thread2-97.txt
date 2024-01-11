@@ -1,0 +1,308 @@
+1.
+
+<argsToArray>
+function argsToArray(args) {
+    if (_.isArray(args[0]))
+      return args[0];
+    else if (typeof args[0] == 'string' && args[0].indexOf(',') > -1)
+      return _.invoke(args[0].split(','), 'trim');
+    else
+      return _.toArray(args);
+}
+</argsToArray>
+
+2.
+
+<_globals>
+function _globals (options) {
+  options.hash.scope = 'global'
+  return _identifiers(options).filter(function (identifier) {
+    if (identifier.kind === 'external') {
+      return identifier.description && identifier.description.length > 0
+    } else {
+      return true
+    }
+  })
+}
+</_globals>
+
+3.
+
+<anonymous>
+function () {
+        var range = this._model.get('range');
+
+        <normalizeRange>
+        var rg = range;
+
+        if (zrUtil.isArray(rg) && rg.length === 1) {
+            rg = rg[0];
+        }
+
+        if (/^\d{4}$/.test(rg)) {
+            range = [rg + '-01-01', rg + '-12-31'];
+        }
+
+        if (/^\d{4}[\/|-]\d{1,2}$/.test(rg)) {
+
+            var start = this.getDateInfo(rg);
+            var firstDay = start.date;
+            firstDay.setMonth(firstDay.getMonth() + 1);
+
+            var end = this.getNextNDay(firstDay, -1);
+            range = [start.formatedDate, end.formatedDate];
+        }
+
+        if (/^\d{4}[\/|-]\d{1,2}[\/|-]\d{1,2}$/.test(rg)) {
+            range = [rg, rg];
+        }
+        </normalizeRange>
+
+        <validateAndCorrectOrder>
+        var tmp = this._getRangeInfo(range);
+
+        if (tmp.start.time > tmp.end.time) {
+            range.reverse();
+        }
+        </validateAndCorrectOrder>
+
+        return range;
+    }
+</anonymous>
+
+4.
+
+<Cli>
+function Cli(argv) {
+  <loadModules>
+  var Cucumber = require('cucumber');
+  var Command = require('commander').Command;
+  var path = require('path');
+  </loadModules>
+
+  <collectFunction>
+  function collect(val, memo) {
+    memo.push(val);
+    return memo;
+  }
+  </collectFunction>
+
+  <getProgramFunction>
+  function getProgram() {
+    <defineProgramParameters>
+    var program = new Command(path.basename(argv[1]));
+    // ... options setup ...
+    </defineProgramParameters>
+  
+    <helpEvent>
+    program.on('--help', function () {
+      console.log('  For more details please visit https://...');
+    });
+    </helpEvent>
+
+    return program;
+  }
+  </getProgramFunction>
+
+  <getConfigurationFunction>
+  function getConfiguration() {
+    var program = getProgram();
+    program.parse(argv);
+    var profileArgs = Cucumber.Cli.ProfilesLoader.getArgs(program.profile);
+    <mergeProfileArgs>
+    if (profileArgs.length > 0) {
+      var fullArgs = argv.slice(0, 2).concat(profileArgs).concat(argv.slice(2));
+      program = getProgram();
+      program.parse(fullArgs);
+    }
+    </mergeProfileArgs>
+    var configuration = Cucumber.Cli.Configuration(program.opts(), program.args);
+    return configuration;
+  }
+  </getConfigurationFunction>
+
+  <cliExecution>
+  var self = {
+    run: function run(callback) {
+      var configuration = getConfiguration();
+      var runtime = Cucumber.Runtime(configuration);
+      var formatters = [createIpcFormatter()].concat(configuration.getFormatters());
+      formatters.forEach(function (formatter) {
+        runtime.attachListener(formatter);
+      });
+      try {
+        runtime.start(callback);
+      } catch (e) {
+        console.log(e.stack || e)
+        callback(false)
+      }
+    }
+  };
+  </cliExecution>
+
+  return self;
+}
+</Cli>
+
+5.
+
+<addInteraction>
+function addInteraction() {
+  let value = typeSelect.value;
+
+  <validateInteractionType>
+  if (value !== 'None') {
+    let geometryFunction;
+    if (value === 'Square') {
+      value = 'Circle';
+      geometryFunction = createRegularPolygon(4);
+    } else if (value === 'Box') {
+      value = 'Circle';
+      geometryFunction = createBox();
+    } else if (value === 'Star') {
+      value = 'Circle';
+      geometryFunction = function(coordinates, geometry) {
+        <generateStarGeometry>
+        const center = coordinates[0];
+        const last = coordinates[1];
+        const dx = center[0] - last[0];
+        const dy = center[1] - last[1];
+        const radius = Math.sqrt(dx * dx + dy * dy);
+        const rotation = Math.atan2(dy, dx);
+        const newCoordinates = [];
+        const numPoints = 12;
+        for (let i = 0; i < numPoints; ++i) {
+          const angle = rotation + i * 2 * Math.PI / numPoints;
+          const fraction = i % 2 === 0 ? 1 : 0.5;
+          const offsetX = radius * fraction * Math.cos(angle);
+          const offsetY = radius * fraction * Math.sin(angle);
+          newCoordinates.push([center[0] + offsetX, center[1] + offsetY]);
+        }
+        newCoordinates.push(newCoordinates[0].slice());
+        if (!geometry) {
+          geometry = new Polygon([newCoordinates]);
+        } else {
+          geometry.setCoordinates([newCoordinates]);
+        }
+        </generateStarGeometry>
+        return geometry;
+      };
+    }
+    </validateInteractionType>
+
+    <addDrawInteraction>
+    draw = new Draw({
+      source: source,
+      type: value,
+      geometryFunction: geometryFunction
+    });
+    map.addInteraction(draw);
+    </addDrawInteraction>
+  }
+}
+</addInteraction>
+
+6.
+
+<EventStatics>
+function EventStatics (msg){
+        <createJob>
+        var job =
+                { dispatcher: self
+                , evtcount: self.evtcount ++
+                , msg : msg
+                };
+        </createJob>
+
+        <enqueueJob>
+        QJhandle.push (job, QJcallback);
+        </enqueueJob>
+}
+</EventStatics>
+
+7.
+
+<updateListData>
+function(data) {
+        this.$leftListBody.find(':checkbox').bizCheckbox('destroy');
+        this.$rightListBody.find(':checkbox').bizCheckbox('destroy');
+        this.$leftListBody.empty();
+        this.$rightListBody.empty();
+        this.$main.find('.biz-transfer-list-header :checkbox').bizCheckbox('uncheck');
+        
+        <handleNoContent>
+        if (data.length === 0) {
+            this.$leftListBody.html('<li class="biz-transfer-list-content-item">' + this.options.noContent + '</li>');
+        }
+        </handleNoContent>
+
+        <addItemsToList>
+        this.addItems(data);
+        </addItemsToList>
+}
+</updateListData>
+
+8.
+
+<getOwnerAndRepo>
+function getOwnerAndRepo(url) {
+  <parseGitUrl>
+  let match = url.match(/^git@github\.com:(.*)\.git$/);
+  match = match || url.match(/^git\+https:\/\/github\.com\/(.*)\.git$/);
+  </parseGitUrl>
+
+  <extractRepositoryDetails>
+  const gitUrlBase = match && match[1];
+  return (gitUrlBase || url).split('/');
+  </extractRepositoryDetails>
+}
+</getOwnerAndRepo>
+
+9.
+
+<initTbodyElOverride>
+function(elTable) {
+    SDT.superclass._initTbodyEl.call(this, elTable);
+
+    <adjustTableMargin>
+    elTable.style.marginTop = (this._elTbody.offsetTop > 0) ?
+            "-"+this._elTbody.offsetTop+"px" : 0;
+    </adjustTableMargin>
+}
+</initTbodyElOverride>
+
+10.
+
+<fitContentToBounds>
+function(bounds, anchor, immediately) {
+        <resolveAnchorPoint>
+        anchor = anchor || $.Placement.CENTER;
+        var anchorProperties = $.Placement.properties[anchor];
+        </resolveAnchorPoint>
+
+        <setupAspectRatio>
+        var aspectRatio = this.contentAspectX;
+        var xOffset = 0;
+        var yOffset = 0;
+        var displayedWidthRatio = 1;
+        var displayedHeightRatio = 1;
+        </setupAspectRatio>
+
+        <handleClipping>
+        if (this._clip) {
+            aspectRatio = this._clip.getAspectRatio();
+            displayedWidthRatio = this._clip.width / this.source.dimensions.x;
+            displayedHeightRatio = this._clip.height / this.source.dimensions.y;
+            // Offset calculations...
+        }
+        </handleClipping>
+
+        <performLayout>
+        if (bounds.getAspectRatio() > aspectRatio) {
+            // Layout for height-based scaling...
+        } else {
+            // Layout for width-based scaling...
+        }
+        </performLayout>
+}
+</fitContentToBounds>

@@ -1,0 +1,247 @@
+<parseOne>
+function parseOne(p){
+	var p = path.resolve(p);
+	if(root === null){
+		root = p;
+	}
+	var firstInclude = hasIncludes(p);
+	var r;
+	
+	<parseFileIncludes>
+	if(firstInclude){
+		r = parseFirstIncludes(p,getContent(p));
+		CTS[p] = r;
+		r = parseOne(p);
+	</parseFileIncludes> 
+	else {
+		r = getContent(p);
+	}
+	return r;
+}
+</parseOne>
+
+<destroyComponents>
+function destroy ( ) {
+	<cleanupCSS>
+    for ( var key in options.cssClasses ) {
+        if ( !options.cssClasses.hasOwnProperty(key) ) { continue; }
+        removeClass(scope_Target, options.cssClasses[key]);
+    }
+	</cleanupCSS>
+
+	<removeChildElements>
+    while (scope_Target.firstChild) {
+        scope_Target.removeChild(scope_Target.firstChild);
+    }
+	</removeChildElements>
+
+    delete scope_Target.noUiSlider;
+}
+</destroyComponents>
+
+<_fireResume>
+function _fireResume()
+{
+	<executePluginCallback>
+    exec(
+            function ()
+            {
+                window.console.log(JS_HANDLE
+                        + ": fired resume event to native plugin");
+            },
+            _logError,
+            CDV_HANDLE,
+            CDV_HANDLE_ACTIONS.APP_RESUMED,
+            []
+    );
+	</executePluginCallback>
+}
+</_fireResume>
+
+<tinf_inflate_uncompressed_block>
+function tinf_inflate_uncompressed_block(d) {
+  var length, invlength;
+  var i;
+  
+  <alignBitCount>
+  while (d.bitcount > 8) {
+    d.sourceIndex--;
+    d.bitcount -= 8;
+  }
+  </alignBitCount>
+
+  <calculateLengths>
+  length = d.source[d.sourceIndex + 1];
+  length = 256 * length + d.source[d.sourceIndex];
+
+  invlength = d.source[d.sourceIndex + 3];
+  invlength = 256 * invlength + d.source[d.sourceIndex + 2];
+  </calculateLengths>
+
+  <verifyLengthConsistency>
+  if (length !== (~invlength & 0x0000ffff))
+    return TINF_DATA_ERROR;
+  </verifyLengthConsistency>
+
+  <adjustSourceIndex>
+  d.sourceIndex += 4;
+  </adjustSourceIndex>
+
+  <copyData>
+  for (i = length; i; --i)
+    d.dest[d.destLen++] = d.source[d.sourceIndex++];
+  </copyData>
+
+  <resetBitcount>
+  d.bitcount = 0;
+  </resetBitcount>
+
+  return TINF_OK;
+}
+</tinf_inflate_uncompressed_block>
+
+<initializeProviders>
+function() {
+	<invokeInitialization>
+	this._providers.forEach(function(info) {
+		var provider = info.provider;
+		if (typeof provider.initialize === "function") {
+			provider.initialize();
+		}
+	});
+	</invokeInitialization>
+}
+</initializeProviders>
+
+<readFileData>
+function read (url, data, config, callback) {
+  <initializeFileSchema>
+  var schema = new Schema(config, this.plugins);
+  var rootFile = new File(schema);
+  schema.files.push(rootFile);
+  </initializeFileSchema>
+
+  <resolveFileURL>
+  if (url) {
+    
+    url = schema.plugins.resolveURL({ to: url });
+
+    
+    rootFile.url = stripHash(url);
+  }
+  </resolveFileURL>
+
+  <handleProvidedData>
+  if (data) {
+    
+    rootFile.data = data;
+    rootFile[__internal].state = STATE_READ;
+    safeCall(parseFile, rootFile, callback);
+  </handleProvidedData>
+  <fetchFileData>
+  else {
+    
+    safeCall(readFile, rootFile, callback);
+  }
+  </fetchFileData>
+}
+</readFileData>
+
+<makeRequest>
+function request(endpoint, params, cb) {
+	<logRequest>
+	debug('request', endpoint, params);
+	</logRequest>
+	<executeRequestAndFormatResponse>
+	return r(getPath(endpoint, params))
+		.then(format)
+		.nodeify(cb);
+	</executeRequestAndFormatResponse>
+}
+</makeRequest>
+
+<_each>
+function _each(array, func) {
+	<iterateAndApplyFunction>
+    for (var i = 0, l = array.length; i < l; i++) {
+        func(array[i]);
+    }
+	</iterateAndApplyFunction>
+}
+</_each>
+
+<createSelectorsManager>
+function createSelectorsManager() {
+    var selectors = {};
+
+	<manageSelectors>
+    return {
+        addSelector: addSelector,
+        executeSelector: executeSelector
+    };
+	</manageSelectors>
+
+    
+    function addSelector(prefix, selector) {
+        if (selector !== undefined) {
+            selectors[prefix] = selector;
+        }
+        return selectors[prefix];
+    }
+
+    
+    function executeSelector(source, sourceKey, targetKey,
+        sourceKeys, overrideKeys) {
+
+        for (var prefix in selectors) {
+            <matchAndExecuteSelector>
+            if (sourceKey.indexOf(prefix) === 0) {
+
+                
+                sourceKey = sourceKey.substring(prefix.length);
+
+                
+                selectors[prefix]({
+                    source: source,
+                    sourceKey: sourceKey,
+                    targetKey: targetKey ? targetKey : sourceKey,
+                    sourceKeys: sourceKeys,
+                    overrideKeys: overrideKeys
+                });
+
+                return true;
+            }
+            </matchAndExecuteSelector>
+        }
+        return false;
+    }
+}
+</createSelectorsManager>
+
+<initializeNotification>
+function Notification(icon) {
+
+	<validateIcon>
+    if (util.isNullOrUndefined(icon)) {
+        throw new IllegalArgumentException();
+    }
+	</validateIcon>
+
+	<setNotificationProperties>
+    this.mTitle = null;
+    this.mBody = null;
+    this.mIcon = icon;
+    this.mSound = "default"; 
+    this.mBadge = null;
+    this.mTag = null;
+    this.mColor = null;
+    this.mClickAction = null;
+    this.mBodyLocKey = null;
+    this.mBodyLocArgs = null; 
+    this.mTitleLocKey = null;
+    this.mTitleLocArgs = null; 
+	</setNotificationProperties>
+
+    this.mBuilded = false;
+}
+</initializeNotification>

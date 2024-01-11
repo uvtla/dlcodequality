@@ -1,0 +1,233 @@
+<formatSql>
+function formatSql(sqlText, options = {}) {
+    <buildCommandExecution>
+    let command = buildCommand(options);
+    
+    let formatted = child_process_1.execSync(command, {
+        encoding: "utf8",
+        input: sqlText
+    });
+    </buildCommandExecution>
+    return formatted;
+}
+</formatSql>
+
+<generate>
+function generate(schema) {
+  <validateSchema>
+  const ret = [];
+  if (!validate(schema)) {
+    return ret;
+  }
+  </validateSchema>
+
+  <generateValidSample>
+  const fullSample = jsf(schema);
+  if (!fullSample) {
+    return ret;
+  }
+
+  ret.push({
+    valid: true,
+    data: fullSample,
+    message: 'should work with all required properties'
+  });
+  </generateValidSample>
+
+  <generateSamples>
+  ret.push(...generateFromRequired(schema));
+  ret.push(...generateFromRequired(schema, false));
+  ret.push(...generateForTypes(schema));
+  </generateSamples>
+
+  return ret;
+}
+</generate>
+
+<indexesOf>
+function indexesOf(a, elt) {
+  <findIndexes>
+  var ret = [], index = 0;
+  while ((index = a.indexOf(elt, index)) !== -1) {
+    ret.push(index++);
+  }
+  </findIndexes>
+  return ret;
+}
+</indexesOf>
+
+<createTask>
+function createTask(gulp, options, taskFile){
+    <prepareTask>
+	var fn;
+	var extension = path.extname(taskFile);
+	var filename = path.basename(taskFile, extension);
+	var task = require(taskFile)(gulp, options.data, loadGulpConfig.util, filename);
+    </prepareTask>
+
+    <registerTask>
+	if(Array.isArray(task)){
+		fn = isFunction(task[task.length - 1]) ? task.pop() : void(0);
+		gulp.task(filename, task, fn);
+	}else if(isString(task)){
+		gulp.task(filename, [task]);
+	}else if(isFunction(task)){
+		gulp.task(filename, task);
+	}else if(isExotic(task)){
+		keys(task).map(mapTaskObject.bind(this, filename, task)).forEach(function(task){
+			if(task.cmds){
+				if(isFunction(task.fn)){
+					gulp.task(task.name, task.cmds, task.fn);
+				}else{
+					gulp.task(task.name, task.cmds);
+				}
+			}else{
+				gulp.task(task.name, task.fn);
+			}
+		});
+	}
+    </registerTask>
+}
+</createTask>
+
+<mapHandling>
+function(dx, dy, options) {
+        <applyDefaultOptions>
+        options = OpenLayers.Util.applyDefaults(options, {
+            animate: true,
+            dragging: false
+        });
+        </applyDefaultOptions>
+
+        <handleDragging>
+        if (options.dragging) {
+            if (dx != 0 || dy != 0) {
+                this.moveByPx(dx, dy);
+            }
+        } else {
+        </handleDragging>
+
+        <moveMap>
+            
+            var centerPx = this.getViewPortPxFromLonLat(this.getCachedCenter());
+            var newCenterPx = centerPx.add(dx, dy);
+
+            if (this.dragging || !newCenterPx.equals(centerPx)) {
+                var newCenterLonLat = this.getLonLatFromViewPortPx(newCenterPx);
+                if (options.animate) {
+                    this.panTo(newCenterLonLat);
+                } else {
+                    this.moveTo(newCenterLonLat);
+                    if(this.dragging) {
+                        this.dragging = false;
+                        this.events.triggerEvent("moveend");
+                    }
+                }    
+            }
+        }        
+</moveMap>
+</mapHandling>
+
+<requireInFrame>
+async function requireInFrame(tabId, frameId, modules) {
+    <getActiveTabId>
+	if (typeof tabId !== 'number') { tabId = (await getActiveTabId()); }
+	</getActiveTabId>
+
+    <requireModules>
+	return (await Frame.get(tabId, frameId || 0)).request('require', modules);
+    </requireModules>
+}
+</requireInFrame>
+
+<_same_hash>
+function _same_hash(hash1, hash2){
+    <compareHashes>
+	var same_p = true;
+	for( var k1 in hash1 ){
+	    if( typeof hash2[k1] === 'undefined' ||
+		hash1[k1] !== hash2[k1] ){
+		same_p = false;
+		break;
+	    }
+	}
+	if( same_p ){
+	    for( var k2 in hash2 ){
+		if( typeof hash1[k2] === 'undefined' ||
+		    hash2[k2] !== hash1[k2] ){
+		    same_p = false;
+		    break;
+		}
+	    }
+	}
+	return same_p;
+    </compareHashes>
+}
+</_same_hash>
+
+<updateChildBounds>
+function updateChildBounds() {
+    <initializeBounds>
+         this.childBounds.pos.set(Infinity, Infinity);
+         this.childBounds.resize(-Infinity, -Infinity);
+    </initializeBounds>
+
+    <computeChildBounds>
+         var childBounds;
+         for (var i = this.children.length, child; i--, child = this.children[i];) {
+           if (child.isRenderable) {
+             if (child instanceof me.Container) {
+               childBounds = child.childBounds;
+             } else {
+               childBounds = child.getBounds();
+             } 
+             if (childBounds !== null) {
+               this.childBounds.union(childBounds);
+             }
+           }
+         }
+    </computeChildBounds>
+
+    <returnBounds>
+         return this.childBounds;
+    </returnBounds>
+}
+</updateChildBounds>
+
+<textureBinding>
+function(unit) {
+	<activateTexture>
+		var gl = this.gl;
+		if (unit || unit === 0)
+			gl.activeTexture(gl.TEXTURE0 + unit);
+	</activateTexture>
+	<bindTexture>
+		gl.bindTexture(this.target, this.id);
+	</bindTexture>
+}
+</textureBinding>
+
+<_render>
+function() {
+      <setupRender>
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      </setupRender>
+      <renderElements>
+      return _c(
+        "div",
+        {
+          staticClass: "d-none",
+          staticStyle: { display: "none" },
+          attrs: { "aria-hidden": "true" }
+        },
+        [
+          _c("div", { ref: "title" }, [_vm._t("title")], 2),
+          _vm._v(" "),
+          _c("div", { ref: "content" }, [_vm._t("default")], 2)
+        ]
+      )
+      </renderElements>
+}
+</_render>

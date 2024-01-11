@@ -1,0 +1,250 @@
+```javascript
+<decorateElement>
+function decorateElement(element) {
+  <checkForTabIndex>
+  const hasMissingTabIndex = Boolean(!element.getAttribute('tabindex') && element.tabIndex === -1);
+  </checkForTabIndex>
+
+  if (hasMissingTabIndex) {
+    elementsWithMissingTabIndex.push(element);
+    element.tabIndex = 0;
+  }
+}
+</decorateElement>
+```
+
+```javascript
+<appendChildrenToElements>
+function(children) {
+  return this.each(function(index, el) {
+    children.each(function(index, child) {
+      el.appendChild(child);
+    });
+  });
+}
+</appendChildrenToElements>
+```
+
+```javascript
+<manageTableDimensions>
+function () {
+  var r, c, rlen, clen, emptyRows = 0, emptyCols = 0, recreateRows = false, recreateCols = false, val;
+
+  <DOMselection>
+  var $tbody = $(priv.tableBody);
+  </DOMselection>
+
+  <adjustRowCount>
+  var dlen = priv.settings.data.length;
+  while (self.rowCount < dlen) {
+    self.view.createRow();
+    recreateRows = true;
+  }
+  while (self.rowCount > dlen) {
+    self.view.removeRow();
+    recreateRows = true;
+  }
+  </adjustRowCount>
+  
+  <adjustColCount>
+  while (self.colCount < self.countCols()) {
+    self.view.createCol();
+    self.view.renderCol(self.colCount - 1);
+    recreateRows = true;
+  }
+  while (self.colCount > self.countCols()) {
+    self.view.removeCol();
+    recreateRows = true;
+  }
+  </adjustColCount>
+
+  <removeEmptyRows>
+  rows : for (r = self.countRows() - 1; r >= 0; r--) {
+    for (c = 0, clen = self.colCount; c < clen; c++) {
+      val = datamap.get(r, datamap.colToProp(c));
+      if (val !== '' && val !== null && typeof val !== 'undefined') {
+        break rows;
+      }
+    }
+    emptyRows++;
+  }
+  </removeEmptyRows>
+
+  <manageMinRows>
+  rlen = self.countRows();
+  if (rlen < priv.settings.minRows) {
+    for (r = 0; r < priv.settings.minRows - rlen; r++) {
+      datamap.createRow();
+    }
+  }
+  </manageMinRows>
+
+  ... (additional code that handles the table dimensions and selections similarly are omitted for brevity)
+
+  <updateSelectionsAfterDimensionChange>
+  if (recreateRows || recreateCols) {
+    selection.refreshBorders();
+    self.blockedCols.update();
+    self.blockedRows.update();
+  }
+  </updateSelectionsAfterDimensionChange>
+
+  return (recreateRows || recreateCols);
+}
+</manageTableDimensions>
+```
+
+```javascript
+<discardLayer>
+function discardLayer(item) {
+  if (confirm('Remove this layer?')) {
+    scene.destroyLayer(item.layer);
+    layers.remove(item);
+  }
+}
+</discardLayer>
+```
+
+```javascript
+<checkSymbolGroupStatus>
+function(e) {
+  var status = false, g = e.group;
+  if(g === PL || g === CP) {
+    status = true;
+    for(var s in e.symbols) {
+      var symbol = e.symbols[s], sg = symbol.group;
+      if(sg === FN || sg === EX || sg === CB) { status = false;}
+      else {
+        if(sg === PL || sg === CP) status = __.isLinear(symbol);
+        else {
+          if(symbol.group !== N && symbol.power.toString() !== '1') { status = false; break; }
+        }
+      }
+    }
+  }
+  else if(g === S && e.power === 1) status = true;
+  return status;
+}
+</checkSymbolGroupStatus>
+```
+
+```javascript
+<registerShaderProgram>
+function(compName, shader) {
+  <getShaderProgram>
+  this.program = this._drawLayer.getProgramWrapper(compName, shader);
+  </getShaderProgram>
+  
+  <registerEntity>
+  this.program.registerEntity(this);
+  </registerEntity>
+  
+  this.ready = true;
+}
+</registerShaderProgram>
+```
+
+```javascript
+<parseQueryString>
+function parseQueryString(string) {
+  return _.transform(_.toString(string).split('&'), (result, segment) => {
+    const split = segment.split('=');
+    result[decodeURIComponent(split[0])] = decodeURIComponent(split[1]);
+  }, {});
+}
+</parseQueryString>
+```
+
+```javascript
+<detachPhysicsEvents>
+function( world ){
+
+  <removePhysicsListeners>      
+  world.off('integrate:positions', this.behave, this);
+  </removePhysicsListeners>
+
+  <removePointerEvents>
+  if ( window.PointerEvent ) {
+
+    this.el.removeEventListener('pointerdown', this.grab);
+    window.removeEventListener('pointermove', this.move);
+    window.removeEventListener('pointerup', this.release);
+
+  } else {
+
+    this.el.removeEventListener('mousedown', this.grab);
+    this.el.removeEventListener('touchstart', this.grab);
+
+    window.removeEventListener('mousemove', this.move);
+    window.removeEventListener('touchmove', this.move);
+
+    window.removeEventListener('mouseup', this.release);
+    window.removeEventListener('touchend', this.release);
+
+  }
+  </removePointerEvents>
+}
+</detachPhysicsEvents>
+```
+
+```javascript
+<getBoundingVisibleRect>
+function getBoundingVisibleRect(el) {
+  
+  <calculateRectangle>
+  const rect = getBoundingRect(el);
+  </calculateRectangle>
+
+  <adjustRectForViewportScale>
+  const scale = getPageScaleFactor();
+  const visualViewportX = chrome.gpuBenchmarking.visualViewportX();
+  const visualViewportY = chrome.gpuBenchmarking.visualViewportY();
+  rect.top = (rect.top - visualViewportY) * scale;
+  rect.left = (rect.left - visualViewportX) * scale;
+  rect.width *= scale;
+  rect.height *= scale;
+  </adjustRectForViewportScale>
+
+  <adjustRectWithinWindowConstraints>
+  const windowHeight = getWindowHeight();
+  const windowWidth = getWindowWidth();
+  
+  rect.top = clamp(0, rect.top, windowHeight);
+  rect.left = clamp(0, rect.left, windowWidth);
+  rect.height = clamp(0, rect.height, windowHeight - rect.top);
+  rect.width = clamp(0, rect.width, windowWidth - rect.left);
+  </adjustRectWithinWindowConstraints>
+
+  return rect;
+}
+</getBoundingVisibleRect>
+```
+
+```javascript
+<retrieveAndProcessMultipleIhales>
+function f_tahta_ihale_takip_tumu(_tahta_id) {
+  return f_tahta_ihale_takip_idler(_tahta_id)
+    .then(function (_ihale_idler) {
+      if (_ihale_idler && _ihale_idler.length > 0) {
+        
+        <dbQueryOptions>
+        var opts = {};
+        opts.bArrKalemleri = true;
+        opts.bYapanKurum = true;
+        opts.bTakip = true;
+        </dbQueryOptions>
+
+        <ihaleDBRetrieval>
+        var db_ihale = require("./db_ihale");
+
+        return db_ihale.f_db_ihale_id(_ihale_idler, _tahta_id, opts);
+        </ihaleDBRetrieval>
+      } else {
+        return [];
+      }
+    });
+}
+</retrieveAndProcessMultipleIhales>
+```
+
+In all these annotations, I've only tagged lines or blocks of code with distinct, identifiable responsibilities, following the balanced SRP approach, avoiding over-segmenting and under-segmenting. Each tagged responsibility represents a specific purpose within the function.

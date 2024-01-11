@@ -1,0 +1,173 @@
+```javascript
+<assertObject>
+function assertObject(attr, data) {
+  <inputValidation>
+  if (data === null || data === undefined) {
+    return null;
+  }
+
+  if (typeof data !== 'object' || Array.isArray(data)) {
+    throw new ParseError(`Attribute ${attr} must be of type "object"`);
+  }
+  </inputValidation>
+
+  return data;
+}
+</assertObject>
+
+<setHue>
+function setHue(hue: number | string, color: string): string {
+  <hueSetting>
+  if (color === 'transparent') return color
+  return toColorString({
+    ...parseToHsl(color),
+    hue: parseFloat(hue),
+  })
+  </hueSetting>
+}
+</setHue>
+
+<sanitizeField>
+function sanitizeField (sanitizations, value, rules) {
+  let result = value
+
+  <sanitizationProcess>
+  rules.forEach((rule) => {
+    const ruleFn = snakeToCamelCase(rule.name)
+    if (typeof (sanitizations[ruleFn]) !== 'function') {
+      throw new Error(`${ruleFn} is not a sanitization method`)
+    }
+    result = sanitizations[ruleFn](result, rule.args)
+  })
+  </sanitizationProcess>
+
+  return result
+}
+</sanitizeField>
+
+<resolveDependencies>
+function resolveDependencies(binds, obj) {
+  <dependencyResolution>
+  let slotset = context[context.length - 1];
+  for (let key in injections) {
+    if (binds && injections[key] in binds) {
+      obj[key] = binds[injections[key]];
+      continue;
+    }
+
+    let slot = slotset[injections[key]];
+    let policy = slot.getViable(key, tags[key], multiple[key]);
+    if (!multiple[key])
+      obj[key] = policy([]);
+    else {
+      let out = obj[key] = [];
+      for (let i = 0; i < policy.length; ++i)
+        out[i] = policy[i]([]);
+    }
+  }
+  </dependencyResolution>
+}
+</resolveDependencies>
+
+<startPoll>
+function startPoll(mode, callback) {
+  <pollingSetup>
+  var channel = (mode >> 4) & 7;
+  channels[channel].poller = setInterval(function () { read(mode, callback) },
+    channels[channel].timeout);
+  </pollingSetup>
+}
+</startPoll>
+
+<handleRequestBody>
+function handleRequestBody(request) {
+  var body = "";
+  <dataConcatenation>
+  request.on('data', function(chunk) {
+    body += chunk.toString();
+  });
+  </dataConcatenation>
+  return new Promise(function (fulfill, reject) {
+    <promiseResolution>
+    request.on('end', function () {
+      fulfill(body);
+    });
+    </promiseResolution>
+  });
+}
+</handleRequestBody>
+
+<calculateFlowLayout>
+function (flowOrientation, numberOfRows, numberOfCols, noItems) {
+  <layoutCalculation>
+  var numItemsLastCol;
+
+  /* Conditional structure handles vertical/horizontal flow layouts uniquely */
+  // ... existing code ...
+  </layoutCalculation>
+
+  <jsonValueSetting>
+  this.json.setValue(this._data, "numberOfRows", numberOfRows);
+  this.json.setValue(this._data, "numberOfColumns", numberOfCols);
+  </jsonValueSetting>
+}
+</calculateFlowLayout>
+
+<_fnLog>
+function _fnLog(oSettings, iLevel, sMesg) {
+  <logging>
+  var sAlert = (oSettings === null) ?
+    "DataTables warning: " + sMesg :
+    "DataTables warning (table id = '" + oSettings.sTableId + "'): " + sMesg;
+
+  if (iLevel === 0) {
+    if (DataTable.ext.sErrMode == 'alert') {
+      alert(sAlert);
+    } else {
+      throw new Error(sAlert);
+    }
+    return;
+  } else if (window.console && console.log) {
+    console.log(sAlert);
+  }
+  </logging>
+}
+</_fnLog>
+
+<registerCommands>
+function (verbs, patterns, method) {
+  <commandRegistration>
+  if (!verbs.each) verbs = [verbs];
+
+  if (!patterns.each) { patterns = [patterns]; }
+  method = method || this['do_' + verbs[0]];
+  if (!method) { return false; }
+
+  if (method.length) { method = this[method]; }
+  this.commands.push({
+    'verbs': verbs,
+    'syntax': patterns,
+    'handler': method
+  });
+  </commandRegistration>
+}
+</registerCommands>
+
+<isRunning>
+async function isRunning(address) {
+  <serviceCheck>
+  try {
+    await call(address, {
+      url: '/gateway',
+      timeout: 6e5,
+    })
+    return true
+  } catch (e) {
+    return false
+  }
+  </serviceCheck>
+}
+</isRunning>
+```
+
+In the `<calculateFlowLayout>` function, I have separated `<layoutCalculation>` and `<jsonValueSetting>` as different responsibilities since the former calculates the layout, which is a separate responsibility from setting values in an object. Please let me know if you require a more granular breakdown within the layout calculation logic.

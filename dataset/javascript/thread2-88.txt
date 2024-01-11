@@ -1,0 +1,151 @@
+<equalsColors>
+function equalsColors(c1,c2){
+  for (var i = 0; i < 4; i++) {
+    if(c1[i] !== c2[i])
+      return false;
+  }
+  return true;
+}
+</equalsColors>
+
+<sn_api_datum_datumDate>
+function sn_api_datum_datumDate(d) {
+	if ( d ) {
+		if ( d.date ) {
+			return d.date;
+		} else if ( d.localDate ) {
+			return sn.format.dateTimeFormat.parse(d.localDate +(d.localTime ? ' ' +d.localTime : ' 00:00'));
+		} else if ( d.created ) {
+			return sn.format.timestampFormat.parse(d.created);
+		}
+	}
+	return null;
+}
+</sn_api_datum_datumDate>
+
+<preheatANode>
+function preheatANode(aNode) {
+    var stack = [];
+    <recordHotspotData>
+    function recordHotspotData(expr, notContentData) {
+        var refs = analyseExprDataHotspot(expr);
+        if (refs.length) {
+            for (var i = 0, len = stack.length; i < len; i++) {
+                if (!notContentData || i !== len - 1) {
+                    var data = stack[i].hotspot.data;
+                    if (!data) {
+                        data = stack[i].hotspot.data = {};
+                    }
+                    each(refs, function (ref) {
+                        data[ref] = 1;
+                    });
+                }
+            }
+        }
+    }
+    </recordHotspotData>
+
+    <analyseANodeHotspot>
+    function analyseANodeHotspot(aNode) {
+        // ...[Several responsibilities included in this function related to analysing nodes]...
+    }
+    </analyseANodeHotspot>
+
+    <conditionalNodeAnalysis>
+    if (aNode) {
+        analyseANodeHotspot(aNode);
+    }
+    </conditionalNodeAnalysis>
+}
+</preheatANode>
+
+<isNativeFunction>
+function isNativeFunction(f) {
+	  var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+	  var funcMatchString = Function.prototype.toString.call(Object.prototype.hasOwnProperty)
+	    .replace(reRegExpChar, '\\$&')
+	    .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?');
+	  var reIsNative = RegExp('^' + funcMatchString + '$');
+	  return isObject(f) && reIsNative.test(f);
+}
+</isNativeFunction>
+
+<createApiClass>
+function createApiClass(vow, ApiError) {
+    <sendAjaxRequest>
+    function sendAjaxRequest(url, data, execOptions) {
+        // ... [Details of the AJAX Request handling] ...
+    }
+    </sendAjaxRequest>
+        
+    <Api>
+    function Api(basePath, options) {
+        // ...[Api instance setup and configuration]...
+    }
+
+    Api.prototype = {
+        constructor: Api,
+
+        // ...[several methods that handle execution of API requests]...
+    };
+
+    return Api;
+    </Api>
+}
+</createApiClass>
+
+<Dropping>
+function Dropping(duration, metas) {
+    _super.call(this, Infinity, metas);
+    this._r = [];
+    this._n = [];
+    this._g = null;
+    this._f = null;
+}
+</Dropping>
+
+<onchange>
+function onchange (parent, prefix) {
+  <onChangeHandler>
+  return function (ary) {
+    // ...[Event handling and propagation code]...
+  }
+  </onChangeHandler>
+}
+</onchange>
+
+<TourCMS>
+function TourCMS(options) {
+  <optionsSetup>
+  this.options = {
+    // ...[Default options setup]...
+  };
+
+  if(typeof options !== 'undefined') {
+    // ...[Options configuration based on user input]...
+  }
+  </optionsSetup>
+}
+</TourCMS>
+
+<report>
+function report(node, startOffset, character) {
+    context.report({
+        node,
+        loc: sourceCode.getLocFromIndex(sourceCode.getIndexFromLoc(node.loc.start) + startOffset),
+        message: "Unnecessary escape character: \\{{character}}.",
+        data: { character }
+    });
+}
+</report>
+
+<associativity>
+function associativity(f) {
+    return forAll(_.Int, _.Int, _.Int).satisfy(function(a, b, c) {
+      var x = f(a).concat(f(b)).concat(f(c));
+      var y = f(a).concat(f(b).concat(f(c)));
+
+      return x.isEqual(y);
+    });
+  }
+</associativity>

@@ -1,0 +1,331 @@
+<decode>
+function decode(encoded, stack) {
+    if (!stack) stack = [];
+
+    <handleUndefinedNullBooleanNumberString>
+    if (encoded === undefined) return undefined;
+    if (encoded === null) return null;
+    var type = typeof(encoded);
+    if (type === 'boolean') return encoded;
+    if (type === 'number') return encoded;
+    if (type === 'string') return encoded;
+    </handleUndefinedNullBooleanNumberString>
+
+    <handleObjectType>
+    if (type === 'object') {
+
+      <handleSpecialObjects>
+      if (isBufferOrView(encoded)) return encoded;
+      if (encoded instanceof Date) return encoded;
+      if (encoded instanceof RegExp) return encoded;
+      </handleSpecialObjects>
+
+      <handleEncodedErrors>
+      if (encoded["!$error$!"] != null) {
+        return new RemoteError(encoded["!$error$!"]);
+      }
+      </handleEncodedErrors>
+
+      <handleEncodedFunctions>
+      if (encoded["!$function$!"] != null) {
+        return eval('(' + encoded["!$function$!"] + ')');
+      }
+      </handleEncodedFunctions>
+
+      <handleEncodedNative>
+      if (encoded["!$native$!"] != null) {
+        return receiveNative(encoded["!$native$!"]);
+      }
+      </handleEncodedNative>
+
+      <handleEncodedProxy>
+      if (encoded["!$proxyId$!"] != null) {
+        return getProxy(encoded["!$proxyId$!"]);
+      }
+      </handleEncodedProxy>
+
+      <handleStandardDecode>
+      return copy(encoded, encoded, stack, decode);
+      </handleStandardDecode>
+    }
+    </handleObjectType>
+
+    throw new TypeError("Error decoding " + type + ": " + JSON.stringify(encoded));
+}
+</decode>
+
+<addDirective>
+function addDirective(tDirectives, name, location, maxPriority) {
+  var match = false;
+  if (hasDirectives.hasOwnProperty(name)) {
+    for(var directive, directives = $injector.get(name + Suffix),
+        i = 0, ii = directives.length; i<ii; i++) {
+      <tryAddDirective>
+      try {
+        directive = directives[i];
+        if ( (maxPriority === undefined || maxPriority > directive.priority) &&
+             directive.restrict.indexOf(location) != -1) {
+          tDirectives.push(directive);
+          match = true;
+        }
+      } catch(e) { $exceptionHandler(e); }
+      </tryAddDirective>
+    }
+  }
+  return match;
+}
+</addDirective>
+
+<pickup>
+function pickup () {
+    var str = '', pos;
+    var len, dict;
+
+    <handleArguments>
+    if (arguments.length === 1) {
+        dict = arguments[0];
+        len = 1;
+    } else if (arguments.length === 2) {
+        len = arguments[0];
+        dict = arguments[1];
+    } else {
+        return string();
+    }
+    </handleArguments>
+
+    <generateRandomString>
+    for (var i=0; i< len; i++) {
+        pos = dice(dict.length - 1);
+        str += dict.substring(pos, pos + 1);
+    }
+    </generateRandomString>
+
+    return str;
+}
+</pickup>
+
+<classify>
+function classify (s) {
+    const keys = {
+        ak: 'account_pubkey',
+        ok: 'oracle_pubkey'
+    }
+
+    <validateAndClassifyHash>
+    if (!s.match(/^[a-z]{2}_.+/)) {
+        throw Error('Not a valid hash')
+    }
+    const klass = s.substr(0, 2)
+    if (klass in keys) {
+        return keys[klass]
+    } else {
+        throw Error(`Unknown class ${klass}`)
+    }
+    </validateAndClassifyHash>
+}
+</classify>
+
+<pathFilter>
+function pathFilter(filter){
+    if (isFunction(filter)) {
+        return filter;
+    } else if (isString(filter)) {
+        return function (entryInfo) {
+            return minimatch(entryInfo.path, filter.trim());
+        };
+    } else if (filter && Array.isArray(filter)) {
+        if (filter) filter = filter.map(function (f) {
+            return f.trim();
+        });
+
+        <returnFilterCondition>
+        return allNegated(filter) ?
+            function (entryInfo) {
+                return filter.every(function (f) {
+                    return minimatch(entryInfo.path, f);
+                });
+            }
+            :
+            function (entryInfo) {
+                return filter.some(function (f) {
+                    return minimatch(entryInfo.path, f);
+                });
+            };
+        </returnFilterCondition>
+    }
+}
+</pathFilter>
+
+<anonymousFunction>
+function() {
+    if (this.peek() != '[') {
+        return 0;
+    }
+    var startpos = this.pos;
+    var nest_level = 0;
+    if (this.label_nest_level > 0) {
+        <handleLabelNesting>
+        this.label_nest_level--;
+        return 0;
+        </handleLabelNesting>
+    }
+    this.pos++;  
+    var c;
+    <parseLinkLabel>
+    while ((c = this.peek()) && (c != ']' || nest_level > 0)) {
+        switch (c) {
+            case '`':
+                this.parseBackticks([]);
+                break;
+            case '<':
+                this.parseAutolink([]) || this.parseHtmlTag([]) || this.parseString([]);
+                break;
+            case '[':  
+                nest_level++;
+                this.pos++;
+                break;
+            case ']':  
+                nest_level--;
+                this.pos++;
+                break;
+            case '\\':
+                this.parseEscaped([]);
+                break;
+            default:
+                this.parseString([]);
+        }
+    }
+    if (c === ']') {
+        this.label_nest_level = 0;
+        this.pos++; 
+        return this.pos - startpos;
+    } else {
+        if (!c) {
+            this.label_nest_level = nest_level;
+        }
+        this.pos = startpos;
+        return 0;
+    }
+    </parseLinkLabel>
+}
+</anonymousFunction>
+
+<bindEventListeners>
+function bindEventListeners(instanceData) {
+    var eventDelegates = instanceData.eventDelegates,
+        moduleBehaviors = getBehaviors(instanceData);
+
+    <createMainEventDelegate>
+    createAndBindEventDelegate(eventDelegates, instanceData.element, instanceData.instance);
+    </createMainEventDelegate>
+
+    <bindEventToModuleBehaviors>
+    for (var i = 0; i < moduleBehaviors.length; i++) {
+        createAndBindEventDelegate(eventDelegates, instanceData.element, moduleBehaviors[i]);
+    }
+    </bindEventToModuleBehaviors>
+}
+</bindEventListeners>
+
+<encodeHeader>
+function encodeHeader(doc, result) {
+    doc.startElement('header').writeAttribute('xsi:type', 'n2:APIResponseHeader');
+
+    <writeErrorCode>
+    doc.startElement('errorCode').writeAttribute('xsi:type', 'n2:APIErrorEnum');
+    doc.text(result.header.errorCode);
+    doc.endElement();
+    </writeErrorCode>
+
+    <writeMinorErrorCode>
+    doc.startElement('minorErrorCode').writeAttribute('xsi:null', '1');
+    doc.endElement();
+    </writeMinorErrorCode>
+
+    <writeSessionToken>
+    doc.startElement('sessionToken').writeAttribute('xsi:type', 'xsd:string');
+    doc.text(result.header.sessionToken);
+    doc.endElement();
+    </writeSessionToken>
+
+    <writeTimestamp>
+    doc.startElement('timestamp').writeAttribute('xsi:type', 'xsd:dateTime');
+    doc.text(result.header.timestamp.toISOString());
+    doc.endElement();
+    </writeTimestamp>
+
+    doc.endElement(); 
+    return;
+}
+</encodeHeader>
+
+<mergeOptions>
+function mergeOptions(pluginOptions) {
+    <setDefaultOptions>
+    const defaultOptions = {
+        config: null,
+        debug: false,
+        css: {
+            file_types: ['.css', '.less', '.sass', '.scss'],
+        },
+        html: {
+            file_types: ['.html'],
+        },
+        js: {
+            file_types: ['.js', '.json'],
+        },
+    };
+    </setDefaultOptions>
+
+    <loadConfigurationFiles>
+    const explorer = cosmiconfig('jsbeautify');
+    let explorerResult;
+    if (pluginOptions && pluginOptions.config) {
+        explorerResult = explorer.loadSync(path.resolve(pluginOptions.config));
+    } else {
+        explorerResult = explorer.searchSync();
+    }
+    let fileOptions;
+    if (explorerResult) {
+        fileOptions = explorerResult.config;
+    }
+    </loadConfigurationFiles>
+
+    <mergeOptionsWithDefaults>
+    const finalOptions = mergeWith({}, defaultOptions, fileOptions, pluginOptions, (objValue, srcValue) => {
+        if (Array.isArray(objValue)) {
+            return objValue.concat(srcValue);
+        }
+        return undefined;
+    });
+    </mergeOptionsWithDefaults>
+
+    <handleDebugLogging>
+    if (finalOptions.debug) {
+        if (fileOptions) {
+            log(`File options:\n${JSON.stringify(fileOptions, null, 2)}`);
+        }
+        log(`Final options:\n${JSON.stringify(finalOptions, null, 2)}`);
+    }
+    </handleDebugLogging>
+
+    <cleanupOptions>
+    delete finalOptions.config;
+    delete finalOptions.debug;
+    </cleanupOptions>
+
+    return finalOptions;
+}
+</mergeOptions>
+
+<Menu>
+function Menu(funct, enabled)
+{
+    <initializeEventSource>
+    mxEventSource.call(this);
+    </initializeEventSource>
+
+    this.funct = funct;
+    this.enabled = (enabled != null) ? enabled : true;
+}
+</Menu>

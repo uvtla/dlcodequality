@@ -1,0 +1,410 @@
+```javascript
+<parseDSV2ChartData>
+function parseDSV2ChartData(code, delimiter) {
+  
+  <trimCode>
+  code = trimKeepingTabs(code);
+  </trimCode>
+
+  <setDelimiter>
+  csv.COLUMN_SEPARATOR = delimiter || detectDelimiter(code);
+  </setDelimiter>
+
+  <parseCSV>
+  let dsv = csv.parse(code);
+  </parseCSV>
+
+  <trimValues>
+  dsv = dsv.map(arr => arr.map(val => val.trim()));
+  </trimValues>
+
+  <detectLegends>
+  const hasLegends = dsv[0].filter((v, i) => i > 0).reduce((hasNaN, item) => hasNaN || !isNumeric(item), false);
+  const legends = hasLegends ? dsv.shift() : [];
+  </detectLegends>
+
+  <detectCategories>
+  const hasCategories = dsv.slice(1).reduce((hasNaN, row) => hasNaN || !isNumeric(row[0]), false);
+  const categories = hasCategories ? dsv.map(arr => arr.shift()) : [];
+  if (hasCategories) {
+    legends.shift();
+  }
+  </detectCategories>
+
+  <parseNumericalData>
+  dsv = dsv[0].map((t, i) => dsv.map(x => parseFloat(x[i])));
+  </parseNumericalData>
+
+  <createSeries>
+  const series = dsv.map((data, i) => hasLegends ? {
+    name: legends[i],
+    data
+  } : {
+    data
+  });
+  </createSeries>
+
+  return {
+    categories,
+    series
+  };
+}
+</parseDSV2ChartData>
+
+<activateEditables>
+function(name) {
+  var i;
+  if (this.$editables.length) {
+    
+    <checkByName>
+    if (angular.isString(name)) {
+      for(i=0; i<this.$editables.length; i++) {
+        if (this.$editables[i].name === name) {
+          this.$editables[i].activate();
+          return;
+        }
+      }
+    }
+    </checkByName>
+
+    <checkByError>
+    for(i=0; i<this.$editables.length; i++) {
+      if (this.$editables[i].error) {
+        this.$editables[i].activate();
+        return;
+      }
+    }
+    </checkByError>
+
+    <activateFirst>
+    this.$editables[0].activate();
+    </activateFirst>
+  }
+}
+</activateEditables>
+
+This function cannot be evaluated without knowing the context where it is used and the rest of the codebase. A function name was not provided which makes it difficult to determine its single responsibility.
+  
+<numberLines>
+function numberLines(node, startLineNum, isPreformatted) {
+  <initialSetup>
+  var nocode = /(?:^|\s)nocode(?:\s|$)/;
+  var lineBreak = /\r\n?|\n/;
+
+  var document = node.ownerDocument;
+
+  var li = document.createElement('li');
+  while (node.firstChild) {
+    li.appendChild(node.firstChild);
+  }
+  var listItems = [li];
+  </initialSetup>
+
+  <walkNodes>
+  function walk(node) {
+    <visitElementNodes>
+    var type = node.nodeType;
+    if (type == 1 && !nocode.test(node.className)) {  
+      if ('br' === node.nodeName.toLowerCase()) {
+        breakAfter(node);
+        
+        if (node.parentNode) {
+          node.parentNode.removeChild(node);
+        }
+      } else {
+        for (var child = node.firstChild; child; child = child.nextSibling) {
+          walk(child);
+        }
+      }
+    }
+    </visitElementNodes>
+    else if ((type == 3 || type == 4) && isPreformatted) {  
+      <splitTextNode>
+      var text = node.nodeValue;
+      var match = text.match(lineBreak);
+      if (match) {
+        var firstLine = text.substring(0, match.index);
+        node.nodeValue = firstLine;
+        var tail = text.substring(match.index + match[0].length);
+        if (tail) {
+          var parent = node.parentNode;
+          parent.insertBefore(
+            document.createTextNode(tail), node.nextSibling);
+        }
+        breakAfter(node);
+        if (!firstLine) {
+          
+          node.parentNode.removeChild(node);
+        }
+      }
+      </splitTextNode>
+    }
+  }
+  </walkNodes>
+
+  <generateListItems>
+  function breakAfter(lineEndNode) {
+    
+    
+    while (!lineEndNode.nextSibling) {
+      lineEndNode = lineEndNode.parentNode;
+      if (!lineEndNode) { return; }
+    }
+
+    function breakLeftOf(limit, copy) {
+      
+      
+      var rightSide = copy ? limit.cloneNode(false) : limit;
+      var parent = limit.parentNode;
+      if (parent) {
+        
+        
+        var parentClone = breakLeftOf(parent, 1);
+        
+        
+        var next = limit.nextSibling;
+        parentClone.appendChild(rightSide);
+        for (var sibling = next; sibling; sibling = next) {
+          next = sibling.nextSibling;
+          parentClone.appendChild(sibling);
+        }
+      }
+      return rightSide;
+    }
+
+    var copiedListItem = breakLeftOf(lineEndNode.nextSibling, 0);
+
+    
+    for (var parent;
+         
+         (parent = copiedListItem.parentNode) && parent.nodeType === 1;) {
+      copiedListItem = parent;
+    }
+    
+    listItems.push(copiedListItem);
+  }
+  </generateListItems>
+
+  <walkAndSplit>
+  for (var i = 0;  
+       i < listItems.length;  
+       ++i) {
+    walk(listItems[i]);
+  }
+  </walkAndSplit>
+
+  <configureLineNumbers>
+  if (startLineNum === (startLineNum|0)) {
+    listItems[0].setAttribute('value', startLineNum);
+  }
+
+  var ol = document.createElement('ol');
+  ol.className = 'linenums';
+  var offset = Math.max(0, ((startLineNum - 1 )) | 0) || 0;
+  for (var i = 0, n = listItems.length; i < n; ++i) {
+    li = listItems[i];
+    
+    
+    
+    li.className = 'L' + ((i + offset) % 10);
+    if (!li.firstChild) {
+      li.appendChild(document.createTextNode('\xA0'));
+    }
+    ol.appendChild(li);
+  }
+  </configureLineNumbers>
+
+  node.appendChild(ol);
+}
+</numberLines>
+
+<exampleScripts>
+function exampleScripts() {
+  <gulpWebpackPipeline>
+  return gulp.src( './examples/index.js' )
+    .pipe( webpackStream( {
+      module: {
+        <webpackConfiguration>
+        rules: [ {
+          use: [ {
+            loader: 'babel-loader?cacheDirectory=true',
+            options: {
+              presets: [ [ 'env', {
+                targets: {
+                  browsers: config.supportedBrowsers
+                },
+                debug: true
+              } ] ]
+            }
+          } ],
+          exclude: /node_modules/
+        } ]
+        </webpackConfiguration>
+      },
+      output: {
+        <webpackOutput>
+        filename: 'example.js'
+        </webpackOutput>
+      },
+    }, webpack ) )
+    .pipe( gulp.dest( config.BUILD ) );
+  </gulpWebpackPipeline>
+}
+</exampleScripts>
+
+<adjustEventPosition>
+function(evt) {
+  <calculatePosition>
+  var pos = OpenLayers.Util.pagePosition(this.map.viewPortDiv);
+  evt.xy.x -= pos[0];
+  evt.xy.y -= pos[1];
+  </calculatePosition>
+}
+</adjustEventPosition>
+
+<initI18n>
+function _init () {
+  if (_locale) return
+
+  <configureI18n>
+  i18nL.configure({
+    directory: appRoot + '/locales',
+    defaultLocale: 'en'
+  })
+  </configureI18n>
+
+  <setAndReloadLocale>
+  watch(api.settings.obs.get('patchwork.lang'), currentLocale => {
+    currentLocale = currentLocale || navigator.language
+    var locales = i18nL.getLocales()
+
+    
+    if (locales.indexOf(currentLocale) !== -1) {
+      i18nL.setLocale(currentLocale)
+    } else {
+      i18nL.setLocale(getSimilar(locales, currentLocale))
+    }
+
+    
+    
+    if (_locale) {
+      electron.remote.getCurrentWebContents().reloadIgnoringCache()
+    }
+  })
+  </setAndReloadLocale>
+
+  _locale = true
+}
+</initI18n>
+
+<flattenDepth>
+function flattenDepth(array, depth) {
+  <flattenArray>
+  var length = array ? array.length : 0;
+  if (!length) {
+    return [];
+  }
+  depth = depth === undefined ? 1 : toInteger(depth);
+  return baseFlatten(array, depth);
+  </flattenArray>
+}
+</flattenDepth>
+
+<wrapPorts>
+function wrap() {
+  var ports = this.compiledModule.ports;
+
+  <setupEmitters>
+  var incomingEmitter = new EventEmitter();
+  var outgoingEmitter = new EventEmitter();
+  </setupEmitters>
+
+  var emit = incomingEmitter.emit.bind(incomingEmitter);
+
+  <managePortSubscriptions>
+  Object.keys(ports).forEach(function(key) {
+    outgoingEmitter.addListener(key, function() {
+      var args = Array.prototype.slice.call(arguments)
+
+      ports[key].send.apply(ports[key], args);
+    });
+
+    if (ports[key].subscribe) {
+      ports[key].subscribe(function() {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(key);
+
+        emit.apply(incomingEmitter, args);
+      });
+    }
+  });
+  </managePortSubscriptions>
+
+  <overrideEmitMethod>
+  incomingEmitter.emit = outgoingEmitter.emit.bind(outgoingEmitter);;
+  </overrideEmitMethod>
+
+  this.emitter = incomingEmitter;
+  this.ports = this.compiledModule.ports;
+}
+</wrapPorts>
+
+<createArbiter>
+function create () {
+    
+    var
+      <topicsInitialization>
+      topics = createNode(''),
+      </topicsInitialization>
+      <optionsInitialization>
+      options = {
+        persist: false,
+        sync: false,
+        preventBubble: false,
+        latch: 0.9999999999999999,
+        settlementLatch: false,
+        semaphor: Infinity,
+        updateAfterSettlement: false
+      },
+      </optionsInitialization>
+      <arbiterInitialization>
+      arbiter = {
+        _topics: topics,
+        options: options,
+        version: 'v1.0.0',
+        id: mkGenerator(),
+        create: create
+      };
+      </arbiterInitialization>
+
+    <setupArbiterFunctions>
+    arbiter.subscribe = partial1(subscribeDispatcher, arbiter);
+    arbiter.publish = partial1(publish, arbiter);
+    arbiter.unsubscribe = partial1(unsubscribe, arbiter);
+    arbiter.resubscribe = partial1(resubscribe, arbiter);
+    arbiter.removePersisted = partial1(removePersistedDispatcher, arbiter);
+    </setupArbiterFunctions>
+
+    return arbiter;
+  }
+</createArbiter>
+
+<pushInUnicode>
+function pushInUnicode(cat, elt) {
+  <manageUnicodeEntries>
+  if (!unicode.hasOwnProperty(cat)) {
+    unicode[cat] = {
+      unicode: [],
+      ranges: []
+    };
+  }
+
+  if (Array.isArray(elt)) {
+    unicode[cat].ranges.push(elt);
+  } else {
+    unicode[cat].unicode.push(elt);
+  }
+  </manageUnicodeEntries>
+}
+</pushInUnicode>
+```

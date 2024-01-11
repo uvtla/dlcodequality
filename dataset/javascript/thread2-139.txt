@@ -1,0 +1,243 @@
+<walkObject>
+function walkObject (prefix, object, leaves) {
+  Object.keys(object).forEach((key) => {
+    const value = object[key]
+    const fullPrefix = (prefix) ? prefix + '.' + key : key
+    <walkDecision>
+    if (__.isObject(value) && !__.isArray(value)) {
+      walkObject(fullPrefix, value, leaves)
+    } else {
+      leaves[fullPrefix] = value
+    }
+    </walkDecision>
+  })
+}
+</walkObject>
+
+<WebsocketConnection>
+function WebsocketConnection(socket, url) {
+  this.socket = socket;
+  this.url = url;
+
+  this.deferreds = {};
+  this.nextRequestId = 0;
+
+  <bindMethods>
+  this.onReply = this.onReply.bind(this);
+  this.onEvent = this.onEvent.bind(this);
+  </bindMethods>
+}
+</WebsocketConnection>
+
+<byteaddsub>
+function byteaddsub(a, avlen, b, bvlen, m, reuse) {
+  
+  <variableInitialization>
+  var alength; 
+  var blength; 
+  var ap; 
+  var bp; 
+  var maxarr; 
+  var reb; 
+  var quickm; 
+  var digit; 
+  var op=0; 
+  var dp90=0; 
+  var newarr; 
+  var i=0;
+  </variableInitialization>
+
+  
+  <arraySetup>
+  alength=a.length; 
+  blength=b.length; 
+  ap=avlen-1; 
+  bp=bvlen-1; 
+  maxarr=bp;
+  </arraySetup>
+
+  <determineMaxArrayLengthAndReuse>
+  if (maxarr<ap)
+   maxarr=ap;
+  reb=null; 
+  if (reuse)
+   if ((maxarr+1)==alength)
+    reb=a; 
+  if (reb==null){
+   reb=this.createArrayWithZeros(maxarr+1); 
+   }
+  </determineMaxArrayLengthAndReuse>
+
+  <quickModeCheck>
+  quickm=false; 
+  if (m==1)
+   quickm=true; 
+  else
+   if (m==(-1))
+    quickm=true; 
+  </quickModeCheck>
+
+  <digitOperation>
+  digit=0; 
+  {op=maxarr;op:for(;op>=0;op--){
+   //... (rest of digitOperation code)
+  </digitOperation>
+
+  <newArrayCreationOrReuse>
+  if (digit==0)
+   return reb; 
+  newarr=null;
+  if (reuse)
+   if ((maxarr+2)==a.length)
+    newarr=a; 
+  if (newarr==null)
+   newarr=new Array(maxarr+2);
+  </newArrayCreationOrReuse>
+
+  <finalArrayFormation>
+  newarr[0]=digit; 
+  {var $24=maxarr+1;i=0;i:for(;$24>0;$24--,i++){
+    newarr[i+1]=reb[i];
+    }
+   }
+  </finalArrayFormation>
+
+  return newarr;
+}
+</byteaddsub>
+
+<ParamController>
+function ParamController(model, idName, paramName, router) {
+  var modelName = model.modelName.toLowerCase();
+
+  <assignRoutersAndNames>
+  if (typeof idName === 'function') {
+    router = idName;
+    idName = modelName + 'Id';
+  }
+
+  if (typeof paramName === 'function') {
+    router = paramName;
+    paramName = modelName + 'Param';
+  }
+  </assignRoutersAndNames>
+
+  <initializeCrudController>
+  CrudController.call(this, model, idName);
+  </initializeCrudController>
+
+  <setDefaultParamName>
+  if (!paramName) {
+    paramName = modelName + 'Param';
+  }
+  </setDefaultParamName>
+
+  <setInstanceVariables>
+  this.paramName = String(paramName);
+  this.paramString = ':' + this.paramName;
+  </setInstanceVariables>
+
+  <registerRequestParameter>
+  router.param(this.paramName, this.registerRequestParameter);
+  </registerRequestParameter>
+}
+</ParamController>
+
+<onExec>
+function onExec( error ) {
+	<errorHandling>
+	if ( error ) {
+		debug( 'Error encountered while attempting to convert %s: %s', inFile, error.message );
+		return done( error );
+	}
+	</errorHandling>
+	<successHandling>
+	debug( 'Successfully converted input file: %s', inFile );
+	unlink( inFile, onRemove );
+	</successHandling>
+}
+</onExec>
+
+<anonymousFunction1>
+function() {
+    <validationMessagesAggregation>
+    const messages = [];
+    if (this.validationMessages && this.validationMessages.errors) {
+      const l = this.validationMessages.errors.length;
+      var i = 0;
+      for (i = 0; i < l; i++) {
+        messages.push(this.validationMessages.errors[i].message + " from " + this.validationMessages.errors[i].dataPath);
+      }
+    }
+    </validationMessagesAggregation>
+    return messages;
+  }
+</anonymousFunction1>
+
+<digest>
+function digest(message) {
+    return message.id || sha1(serializeNodes(message.nodes).join('') + ("[" + message.meaning + "]"));
+}
+</digest>
+
+<anonymousFunction2>
+function() {
+    <removeChildAndCleanup>
+    var parent = this.getParent();
+
+    if(parent && parent.children) {
+        parent.children.splice(this.index, 1);
+        parent._setChildrenIndices();
+        delete this.parent;
+    }
+
+    this._clearSelfAndDescendantCache(STAGE);
+    this._clearSelfAndDescendantCache(ABSOLUTE_TRANSFORM);
+    this._clearSelfAndDescendantCache(VISIBLE);
+    this._clearSelfAndDescendantCache(LISTENING);
+    this._clearSelfAndDescendantCache(ABSOLUTE_OPACITY);
+    </removeChildAndCleanup>
+
+    return this;
+}
+</anonymousFunction2>
+
+<templateReplacer>
+function (text, replacements) {
+    'use strict';
+    <replacementProcessing>
+    var keys = getKeysFromTemplate(text),
+        len = keys.length,
+        i = 0,
+        key,
+        value;
+    while (i < len) {
+        key = keys[i];
+        if (key.indexOf('.') !== -1) {
+            value = getNestedValue(replacements, key);
+        } else {
+            value = replacements[key];
+        }
+        if (value) {
+            text = text.split('{' + key + '}').join(value);
+        }
+        i += 1;
+    }
+    </replacementProcessing>
+    return text;
+}
+</templateReplacer>
+
+<canContainTag>
+function( tag ) {
+	<containmentCheck>
+	if ( tag in CKEDITOR.dtd.$block ) {
+		var inter = this.contains( CKEDITOR.dtd.$intermediate );
+		holder = inter || ( this.root.equals( this.block ) && this.block ) || this.blockLimit;
+		return !!holder.getDtd()[ tag ];
+	}
+	</containmentCheck>
+
+	return true;
+}
+</canContainTag>

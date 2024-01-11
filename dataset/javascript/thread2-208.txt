@@ -1,0 +1,351 @@
+<requestUnfinishedPastUnitsOfPrivateChains>
+function requestUnfinishedPastUnitsOfPrivateChains(arrChains, onDone){
+	<lockMutex>
+	mutex.lock(["private_chains"], function(unlock){
+	</lockMutex>
+		<finishSubroutine>
+		function finish(){
+			unlock();
+			if (onDone)
+				onDone();
+		}
+		</finishSubroutine>
+		<findUnfinishedPastUnits>
+		privatePayment.findUnfinishedPastUnitsOfPrivateChains(arrChains, true, function(arrUnits){
+			if (arrUnits.length === 0)
+				return finish();
+			</findUnfinishedPastUnits>
+			<logActivity>
+			breadcrumbs.add(arrUnits.length+" unfinished past units of private chains");
+			</logActivity>
+			<requestHistory>
+			requestHistoryFor(arrUnits, [], finish);
+			</requestHistory>
+		});
+	});
+}
+</requestUnfinishedPastUnitsOfPrivateChains>
+
+<initialLocalTemplatePromise>
+function initialLocalTemplatePromise() {
+  <setup>
+  const self = this;
+  </setup>
+
+  <newPromise>
+  return new Promise((resolve, reject) => {
+    console.time("初始化本地模板用时:");
+
+    <defineAjaxTasks>
+    let ajaxPreloadPromiseTasks = [];
+
+    $(this.bodyDOM).find("div[ct-data-role='page']").each(function () {
+      self.templateDB[this.getAttribute("id")] = this.outerHTML;
+      
+      ajaxPreloadPromiseTasks.push(AjaxPreloadPromise.call(self, this));
+      this.parentNode.removeChild(this);
+    });
+    </defineAjaxTasks>
+
+    <resolveAllPromises>
+    Promise.all(ajaxPreloadPromiseTasks).then(() => {
+      console.timeEnd("初始化本地模板用时:");
+      resolve();
+    }).catch((error) => {
+      reject(error);
+    });
+    </resolveAllPromises>
+  });
+  </newPromise>
+}
+</initialLocalTemplatePromise>
+
+<validateCoercionName>
+function(cName){
+	<validationCheck>
+        if(validate.isEmpty(cName)){
+            validateParams._warn('ignoring invalid coercion name: ' + cName);
+        }
+        </validationCheck>
+        <getCoercionFunction>
+        if(validate.isFunction(validateParams.coercions[cName])){
+            return validateParams.coercions[cName];
+        }else{
+            validateParams._warn("no coercion named '" + cName + "' defined - ignoring");
+        }
+        return undefined;
+        </getCoercionFunction>
+}
+</validateCoercionName>
+
+<_links>
+function _links (term) {
+	<checkAndBuildLinks>
+    return term.links ? `
+    <ul class='links'>
+      ${Object.keys(term.links).reduce((acc, val) => { return `${acc}<li>${term.links[val].toLink(val)}</li>` }, '')}
+    </ul>` : ''
+    </checkAndBuildLinks>
+}
+</_links>
+
+<broadcast>
+function broadcast(connections, packet) {
+	<broadcastPacket>
+    var i = connections.length;
+    while (i--) {
+        connections[i].write(packet);
+        flush(connections[i]);
+    }
+    </broadcastPacket>
+}
+</broadcast>
+
+<stringify>
+function stringify(jCal) {
+	<preprocessData>
+    if (typeof jCal[0] == "string") {
+      
+      jCal = [jCal];
+    }
+    </preprocessData>
+
+    <stringifyComponents>
+    var i = 0;
+    var len = jCal.length;
+    var result = '';
+
+    for (; i < len; i++) {
+      result += stringify.component(jCal[i]) + LINE_ENDING;
+    }
+    </stringifyComponents>
+
+    <returnResult>
+    return result;
+    </returnResult>
+}
+</stringify>
+
+<generateTimeseries>
+async function* generateTimeseries(
+    lineDescriptors, revisions, levelOfDetail) {
+  <setupReaders>
+  const readers = [];
+  const timeseriesesByLine = [];
+  </setupReaders>
+
+  <createTimeseriesDescriptors>
+  for (const lineDescriptor of lineDescriptors) {
+    const fetchDescriptors = ChartTimeseries.createFetchDescriptors(
+        lineDescriptor, levelOfDetail);
+    const timeserieses = new Array(fetchDescriptors.length);
+    timeseriesesByLine.push({lineDescriptor, timeserieses});
+
+    for (let fetchIndex = 0; fetchIndex < fetchDescriptors.length;
+      ++fetchIndex) {
+      readers.push((async function* () {
+        const request = new TimeseriesRequest({
+          ...fetchDescriptors[fetchIndex],
+          ...revisions,
+        });
+
+        for await (const timeseries of request.reader()) {
+          
+          
+          timeserieses[fetchIndex] = timeseries;
+          yield {};
+        }
+      })());
+    }
+  }
+  </createTimeseriesDescriptors>
+
+  <yieldFilteredResults>
+  for await (const {results, errors} of new BatchIterator(readers)) {
+    const filtered = filterTimeseriesesByLine(timeseriesesByLine);
+    yield {timeseriesesByLine: filtered, errors};
+  }
+  </yieldFilteredResults>
+}
+</generateTimeseries>
+
+<transferAsset>
+function transferAsset (commandOptions, { srcAccountId, destAccountId, assetId, description, amount }) {
+  <executeTransferCommand>
+  return command(
+    commandOptions,
+    txHelper.addCommand(
+      txHelper.emptyTransaction(),
+      'transferAsset',
+      {
+        srcAccountId,
+        destAccountId,
+        assetId,
+        description,
+        amount
+      }
+    )
+  )
+  </executeTransferCommand>
+}
+</transferAsset>
+
+<LatheBufferGeometry>
+function LatheBufferGeometry( points, segments, phiStart, phiLength ) {
+
+	<superCall>
+	BufferGeometry.call( this );
+
+	this.type = 'LatheBufferGeometry';
+
+	this.parameters = {
+		points: points,
+		segments: segments,
+		phiStart: phiStart,
+		phiLength: phiLength
+	};
+	</superCall>
+
+	<setupInitialConfig>
+	segments = Math.floor( segments ) || 12;
+	phiStart = phiStart || 0;
+	phiLength = phiLength || Math.PI * 2;
+
+	
+	phiLength = _Math.clamp( phiLength, 0, Math.PI * 2 );
+	</setupInitialConfig>
+
+
+	<initializeBuffers>
+	var indices = [];
+	var vertices = [];
+	var uvs = [];
+	</initializeBuffers>
+
+	<generateVerticesAndUVs>
+	var base;
+	var inverseSegments = 1.0 / segments;
+	var vertex = new Vector3();
+	var uv = new Vector2();
+	var i, j;
+
+	
+	for ( i = 0; i <= segments; i ++ ) {
+
+		var phi = phiStart + i * inverseSegments * phiLength;
+
+		var sin = Math.sin( phi );
+		var cos = Math.cos( phi );
+
+		for ( j = 0; j <= ( points.length - 1 ); j ++ ) {
+
+			
+			vertex.x = points[ j ].x * sin;
+			vertex.y = points[ j ].y;
+			vertex.z = points[ j ].x * cos;
+
+			vertices.push( vertex.x, vertex.y, vertex.z );
+
+			
+			uv.x = i / segments;
+			uv.y = j / ( points.length - 1 );
+
+			uvs.push( uv.x, uv.y );
+
+
+		}
+
+	}
+	</generateVerticesAndUVs>
+
+	<generateIndices>
+	for ( i = 0; i < segments; i ++ ) {
+
+		for ( j = 0; j < ( points.length - 1 ); j ++ ) {
+
+			base = j + i * points.length;
+
+			var a = base;
+			var b = base + points.length;
+			var c = base + points.length + 1;
+			var d = base + 1;
+
+			
+			indices.push( a, b, d );
+			indices.push( b, c, d );
+
+		}
+
+	}
+	</generateIndices>
+
+	<setGeometryAttributes>
+	this.setIndex( indices );
+	this.addAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+	this.addAttribute( 'uv', new Float32BufferAttribute( uvs, 2 ) );
+	</setGeometryAttributes>
+
+	<computeNormals>
+	this.computeVertexNormals();
+	</computeNormals>
+
+	<adjustWrappedNormals>
+	if ( phiLength === Math.PI * 2 ) {
+
+		var normals = this.attributes.normal.array;
+		var n1 = new Vector3();
+		var n2 = new Vector3();
+		var n = new Vector3();
+
+		
+		base = segments * points.length * 3;
+
+		for ( i = 0, j = 0; i < points.length; i ++, j += 3 ) {
+
+			
+			n1.x = normals[ j + 0 ];
+			n1.y = normals[ j + 1 ];
+			n1.z = normals[ j + 2 ];
+
+			
+			n2.x = normals[ base + j + 0 ];
+			n2.y = normals[ base + j + 1 ];
+			n2.z = normals[ base + j + 2 ];
+
+			
+			n.addVectors( n1, n2 ).normalize();
+
+			
+			normals[ j + 0 ] = normals[ base + j + 0 ] = n.x;
+			normals[ j + 1 ] = normals[ base + j + 1 ] = n.y;
+			normals[ j + 2 ] = normals[ base + j + 2 ] = n.z;
+
+		}
+
+	}
+	</adjustWrappedNormals>
+}
+</LatheBufferGeometry>
+
+<mobileNavigationBackOnClickComponent>
+function mobileNavigationBackOnClickComponent() {
+  <defineComponent>
+  return {
+    require: '^^gmfMobileNav',
+    restrict: 'A',
+    scope: false,
+    
+    <componentLinkFunction>
+    link: (scope, element, attrs, navCtrl) => {
+      element.on('click', () => {
+        if (!navCtrl) {
+          throw new Error('Missing navCtrl');
+        }
+        navCtrl.backIfActive(element[0]);
+      });
+    }
+    </componentLinkFunction>
+  };
+  </defineComponent>
+}
+</mobileNavigationBackOnClickComponent>

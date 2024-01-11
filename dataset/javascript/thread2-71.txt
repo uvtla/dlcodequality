@@ -1,0 +1,177 @@
+```javascript
+function () {
+  <removeChildNodes>
+  var element = this.element,
+      childNodes = element.childNodes,
+      i = childNodes.length;
+
+  while (i--) {
+    element.removeChild(childNodes[i]);
+  }
+  </removeChildNodes>
+}
+
+function init(opts) {
+  <validateAndInitialize>
+  if (!opts || !opts.appData) throw new Error(path.basename(__filename)+ ':' + arguments.callee.name + ': bad opts argument')
+
+  var apiOpts = opts.apiOpts || {}
+  state.apiConfigs = apiOpts.apiMap || {}
+  if (Array.isArray(apiOpts.path)) state.apiPath = apiOpts.path
+
+  state.deployFolder = opts.appData.launchFolder
+  </validateAndInitialize>
+}
+
+function(sChangeReason) {
+  <updateStateAndNotifyControl>
+  this._bLoading = false;
+  this._updateTriggerDelayed(false);
+  this._oControl.onAfterPageLoaded(this.getInfo(), sChangeReason);
+  </updateStateAndNotifyControl>
+  
+  <updateBusyIndicator>
+  if (this._oControl.setEnableBusyIndicator) {
+    this._oControl.setEnableBusyIndicator(this._bParentEnableBusyIndicator);
+  }
+  </updateBusyIndicator>
+}
+
+function getLetterTime(timeString) {
+  <parseTimeToSeconds>
+  var totalSeconds = 0;
+  var timeValues = {
+    's': 1,
+    'm': 1 * 60,
+    'h': 1 * 60 * 60,
+    'd': 1 * 60 * 60 * 24,
+    'w': 1 * 60 * 60 * 24 * 7,
+  };
+  var timePairs;
+
+  timeString = timeString.replace(/([smhdw])/g, ' $1 ').trim();
+  timePairs = timeString.split(' ');
+
+  for (var i = 0; i < timePairs.length; i += 2) {
+    totalSeconds += parseInt(timePairs[i], 10) *
+      timeValues[timePairs[i + 1] || 's'];
+  }
+  return totalSeconds;
+  </parseTimeToSeconds>
+}
+
+function send() {
+  <sendEvent>
+  var args = slice.call(arguments), events = this.events, handled;
+
+  if (!this.__isCurrent__) {
+    throw new Error('State#send: attempted to send an event to a state that is not current: ' + this);
+  }
+
+  if (this === this.root()) {
+    trace.call(this, 'State: [EVENT]  : ' + args[0]);
+  }
+
+  handled = this.concurrent ? sendConcurrent.apply(this, arguments) :
+    sendClustered.apply(this, arguments);
+
+  if (!handled && typeof events[args[0]] === 'function') {
+    this.__isSending__ = true;
+    handled = !!events[args[0]].apply(this, args.slice(1));
+    this.__isSending__ = false;
+  }
+
+  if (!this.superstate) { transition.call(this); }
+
+  return handled;
+  </sendEvent>
+}
+
+function cleanUpAST(ast) {
+  <transformAST>
+  return walk(ast, function(node, replace) {
+    if (node.type === 'Block') {
+      var lastIdx = 0;
+      var newNodes = [];
+      node.nodes.forEach(function(innerNode, i) {
+        if (innerNode.type === 'Block' && !innerNode.yield) {
+          if (i > 0) newNodes = newNodes.concat(node.nodes.slice(lastIdx, i));
+          lastIdx = i + 1;
+          newNodes = newNodes.concat(cleanUpAST(innerNode).nodes);
+        }
+      });
+      node.nodes = newNodes.concat(node.nodes.slice(lastIdx));
+    }
+  });
+  </transformAST>
+}
+
+function getPreviousVisibleNode(self) {
+  <computePreviousVisibleNode>
+  var prev = self.prev();
+  if (!prev) {
+      prev = self.get('parent');
+  } else {
+      prev = getLastVisibleDescendant(prev);
+  }
+  return prev;
+  </computePreviousVisibleNode>
+}
+
+function isNewExpressionWithParens(newExpression) {
+  <checkParenthesisInNewExpression>
+  const lastToken = sourceCode.getLastToken(newExpression);
+  const penultimateToken = sourceCode.getTokenBefore(lastToken);
+
+  return newExpression.arguments.length > 0 || astUtils.isOpeningParenToken(penultimateToken) && astUtils.isClosingParenToken(lastToken);
+  </checkParenthesisInNewExpression>
+}
+
+function(fn) {
+  <mapFunctionOverMatrix>
+  var els = [], i = this.elements.length, nj = this.elements[0].length, j;
+  while (i--) { j = nj;
+            els[i] = [];
+            while (j--) {
+              els[i][j] = fn(this.elements[i][j], i + 1, j + 1);
+            }
+          }
+  return Matrix$b.create(els);
+  </mapFunctionOverMatrix>
+}
+
+function getInheritedCollectionNames(node) {
+  <collectInheritedCollections>
+  var names = [],
+      startNode = node,
+      actualNode = node,
+      endNode,
+      inverseOverlays,
+      name,
+      target;
+
+  while (startNode) {
+      actualNode = self.getBase(startNode);
+      endNode = self.getBase(getInstanceRoot(startNode));
+      target = '';
+      if (actualNode && endNode) {
+          while (actualNode && actualNode !== self.getParent(endNode)) {
+              inverseOverlays = innerCore.getInverseOverlayOfNode(actualNode);
+              if (inverseOverlays[target]) {
+                  for (name in inverseOverlays[target]) {
+                      if (names.indexOf(name) === -1) {
+                          names.push(name);
+                      }
+                  }
+              }
+              target = CONSTANTS.PATH_SEP + self.getRelid(actualNode) + target;
+              actualNode = self.getParent(actualNode);
+          }
+      }
+      startNode = self.getBase(startNode);
+  }
+
+  return names;
+  </collectInheritedCollections>
+}
+```

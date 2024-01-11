@@ -1,0 +1,277 @@
+```javascript
+<isValueEqualOrBooleanAttribute>
+function(name, value) {
+  if (name == value) {
+    return true;
+  }
+
+  <getBooleanAttributes>
+  var boolAttrs = prefs.get('profile.booleanAttributes');
+  if (!value && boolAttrs) {
+    boolAttrs = new RegExp(boolAttrs, 'i');
+    return boolAttrs.test(name);
+  }
+  </getBooleanAttributes>
+
+  return false;
+}
+</isValueEqualOrBooleanAttribute>
+```
+
+```javascript
+<setupDataAndPrint>
+async function setup () {
+
+  debugger;
+  <setAndGetAppData_store1>
+  store1.setAppData('aaa', {x: 1, y: 1});
+  let d = store1.getAppData();
+  prtUtil.printObj(d, 'After first set');
+  </setAndGetAppData_store1>
+
+  <setAndGetAppData_store2>
+  store2.setAppData('aaa', {x: 2, y: 2});
+  d = store2.getAppData();
+  prtUtil.printObj(d, 'After first set');
+  </setAndGetAppData_store2>
+
+  <getAndPrintAppData_store1>
+  d = store1.getAppData();
+  prtUtil.printObj(d, 'After first set');
+  </getAndPrintAppData_store1>
+  
+  return 'completed';
+}
+</setupDataAndPrint>
+```
+
+```javascript
+<filterSourceByBlacklist>
+function skip (source, blacklist) {
+  <validateSource>
+  if (isNil(source)) {
+    throw _makeTypeErrorFor(source, "object");
+  }
+  </validateSource>
+
+  <createResultObject>
+  var result = {};
+  var props = make(blacklist, []);
+
+  for (var key in source) {
+    if (!(key in props)) {
+      result[key] = source[key];
+    }
+  }
+  </createResultObject>
+
+  return result;
+}
+</filterSourceByBlacklist>
+```
+
+```javascript
+<triggerBeforeGetFeatureInfoEvent>
+function(evt) {
+  this.events.triggerEvent("beforegetfeatureinfo", {xy: evt.xy});
+  <requestDataOnHover>
+  this.request(evt.xy, {hover: true});
+  </requestDataOnHover>
+}
+</triggerBeforeGetFeatureInfoEvent>
+```
+
+```javascript
+<decodeAndAssignParameters>
+function readInit(message, tokens) {
+  var i;
+  message.parameters = {};
+  for (i = 0; i < tokens.length; i = i + 4) {
+    message.parameters[protocol.decodeString(tokens[i + 1])] = protocol.decodeString(tokens[i + 3]);
+  }
+}
+</decodeAndAssignParameters>
+```
+
+```javascript
+<categorizeTweetData>
+function(tweet, streamChannels) {
+  <initializeTweetProperties>
+  tweet.$channels = {};
+  tweet.$keywords = [];
+  </initializeTweetProperties>
+  
+  <setupSearchingData>
+  var i, j, k;
+  var lowerCasedSearch = [];
+  var keywordsFound = [], tmpKeywords;
+  </setupSearchingData>
+
+  <prepareSearchContextFromTweet>
+  var tweetText = tweet.truncated ? tweet.extended_tweet.full_text : tweet.text;
+  lowerCasedSearch.push(tweetText.toLowerCase());
+  if(tweet.user && tweet.user.screen_name){
+    lowerCasedSearch.push(tweet.user.screen_name.toLowerCase());
+  }
+  if(tweet.entities && tweet.entities.urls && tweet.entities.urls.length > 0){
+    for(i=0; i<tweet.entities.urls.length; i++){
+      if(tweet.entities.urls[i].display_url){
+        lowerCasedSearch.push(tweet.entities.urls[i].display_url.toLowerCase());
+      }
+      if(tweet.entities.urls[i].expanded_url){
+        lowerCasedSearch.push(tweet.entities.urls[i].expanded_url.toLowerCase());
+      }
+    }
+  }
+  </prepareSearchContextFromTweet>
+
+  <matchKeywordsAndAssignToChannels>
+  for(var channel in streamChannels.channelsKeywordsLowerCasedRegExp) {
+    keywordsFound = [];
+    for(j=0; j<lowerCasedSearch.length; j++) {
+      tmpKeywords = lowerCasedSearch[j].match(streamChannels.channelsKeywordsLowerCasedRegExp[channel]);
+      if(tmpKeywords !== null) {
+        keywordsFound = keywordsFound.concat(tmpKeywords);
+      }
+    }
+    if(keywordsFound.length > 0) {
+      tweet.$channels[channel] = [];
+      for(k=0; k<keywordsFound.length; k++) {
+        if(tweet.$channels[channel].indexOf(keywordsFound[k]) === -1) {
+          tweet.$channels[channel].push(keywordsFound[k]);
+        }
+        if(tweet.$keywords.indexOf(keywordsFound[k]) === -1) {
+          tweet.$keywords.push(keywordsFound[k]);
+        }
+      }
+    }
+  }
+  </matchKeywordsAndAssignToChannels>
+  
+  return streamChannels;
+}
+</categorizeTweetData>
+```
+
+```javascript
+<submitAuthenticationData>
+function(authData, background) {
+  <validateCompletionDeferred>
+  if (!this._completionDeferred) {
+    throw new Error("submitAuthDict() called before attemptAuth()");
+  }
+  </validateCompletionDeferred>
+
+  <prepareAndRequestAuthentication>
+  const auth = {
+    session: this._data.session,
+  };
+  utils.extend(auth, authData);
+
+  this._doRequest(auth, background);
+  </prepareAndRequestAuthentication>
+}
+</submitAuthenticationData>
+```
+
+```javascript
+<buildDependencyGraph>
+function createDependencyGraph(pool, moduleNames, indegreeOnly) {
+  <initializeGraph>
+  const graph = Object.create(null);
+  </initializeGraph>
+
+  <processModuleDependencies>
+  const promises = moduleNames.map( (moduleName) => {
+    return pool.getModuleInfo(moduleName)
+      .then( (module) => {
+        let node = graph[moduleName];
+        if ( node == null ) {
+          node = new GraphNode(moduleName, indegreeOnly);
+          graph[moduleName] = node;
+        }
+        const p = module.dependencies.map( function(dep) {
+          if ( module.isConditionalDependency(dep) ) {
+            return;
+          }
+          return pool.getModuleInfo(dep).then( (depModule) => {
+            if ( moduleNames.indexOf(dep) >= 0 ) {
+              let depNode = graph[dep];
+              if ( depNode == null ) {
+                depNode = new GraphNode(dep, indegreeOnly);
+                graph[dep] = depNode;
+              }
+              node.outgoing.push(depNode);
+              if ( indegreeOnly ) {
+                depNode.indegree++;
+              } else {
+                depNode.incoming.push(node);
+              }
+            }
+          }, (erro) => null);
+        });
+        return Promise.all(p);
+      }, (err) => {
+        log.error("module %s not found in pool", moduleName);
+      });
+  });
+  </processModuleDependencies>
+
+  <finalizeGraphCreation>
+  return Promise.all(promises).then(function() {
+    return graph;
+  });
+  </finalizeGraphCreation>
+}
+</buildDependencyGraph>
+```
+
+```javascript
+<normalizeBaseStringUri>
+function baseStringUri(uri) {
+  <parseUri>
+  var parsed = url.parse(uri);
+  </parseUri>
+
+  <removeDefaultPortsFromUri>
+  if (parsed.protocol === 'https:/') {
+    parsed.host = parsed.host.replace(/:443$/, '');
+  } else if (parsed.protocol === 'http:/') {
+    parsed.host = parsed.host.replace(/:80$/, '');
+  }
+  </removeDefaultPortsFromUri>
+
+  <formatNormalizedUri>
+  return url.format({
+    protocol: parsed.protocol,
+    host: parsed.host,
+    auth: parsed.auth,
+    pathname: parsed.pathname
+  });
+  </formatNormalizedUri>
+}
+</normalizeBaseStringUri>
+```
+
+```javascript
+<addObserver>
+function(key, fn) {
+  <setupObservers>
+  var attrs = this,
+      $$observers = (attrs.$$observers || (attrs.$$observers = {})),
+      listeners = ($$observers[key] || ($$observers[key] = []));
+  </setupObservers>
+
+  <registerListener>
+  listeners.push(fn);
+  $rootScope.$evalAsync(function() {
+    if (!listeners.$$inter) {
+      fn(attrs[key]);
+    }
+  });
+  </registerListener>
+  
+  return fn;
+}
+</addObserver>
+```

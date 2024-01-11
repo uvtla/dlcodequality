@@ -1,0 +1,237 @@
+```javascript
+<mapUrlChangeHandlersToProps>
+function mapUrlChangeHandlersToProps(props) {
+  return {
+    onChangeFoo: (value) => replaceInUrlQuery('fooInUrl', encode(UrlQueryParamTypes.number, value)),
+    onChangeBar: (value) => replaceInUrlQuery('bar', value),
+  }
+}
+</mapUrlChangeHandlersToProps>
+
+<newVisState>
+function newVisState(state, percentage, previous) {
+    if (previous) {
+      delete previous.previous;
+    }
+
+    return {
+      code: state[0],
+      state: state[1],
+      percentage: percentage,
+      previous: previous || {},
+      fullyvisible: state[0] === STATES.FULLY_VISIBLE[0],
+      visible: state[0] === STATES.VISIBLE[0] ||
+      state[0] === STATES.FULLY_VISIBLE[0],
+      hidden: state[0] === STATES.HIDDEN[0]
+    };
+}
+</newVisState>
+
+<Program>
+function Program(gl, codes, includes) {
+    if (!typeof codes.vert === 'string') {
+        throw Error('[tfw.webgl.Program] Missing attribute `vert` in argument `codes`!');
+    }
+    if (!typeof codes.frag === 'string') {
+        throw Error('[tfw.webgl.Program] Missing attribute `frag` in argument `codes`!');
+    }
+
+    codes = parseIncludes(codes, includes);
+
+    <createAndLinkShaders>
+    var shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, getVertexShader(gl, codes.vert));
+    gl.attachShader(shaderProgram, getFragmentShader(gl, codes.frag));
+    gl.linkProgram(shaderProgram);
+    </createAndLinkShaders>
+
+    this.program = shaderProgram;
+    Object.freeze(this.program);
+
+    this.use = function() {
+        gl.useProgram(shaderProgram);
+    };
+    this.use();
+
+    <setupAttributes>
+    var index, item;
+    var attribs = {};
+    var attribsCount = gl.getProgramParameter(shaderProgram, gl.ACTIVE_ATTRIBUTES);
+    for (index = 0; index < attribsCount; index++) {
+        item = gl.getActiveAttrib(shaderProgram, index);
+        attribs[item.name] = gl.getAttribLocation(shaderProgram, item.name);
+        this['$' + item.name] = attribs[item.name];
+    }
+    Object.freeze(attribs);
+    this.attribs = attribs;
+    </setupAttributes>
+
+    <setupUniforms>
+    var uniforms = {};
+    var uniformsCount = gl.getProgramParameter(shaderProgram, gl.ACTIVE_UNIFORMS);
+    for (index = 0; index < uniformsCount; index++) {
+        item = gl.getActiveUniform(shaderProgram, index);
+        uniforms[item.name] = gl.getUniformLocation(shaderProgram, item.name);
+        Object.defineProperty(this, '$' + item.name, {
+            set: createUniformSetter(gl, item, uniforms[item.name]),
+            get: createUniformGetter(item),
+            enumerable: true,
+            configurable: true
+        });
+    }
+    Object.freeze(uniforms);
+    this.uniforms = uniforms;
+    </setupUniforms>
+}
+</Program>
+
+<webpackModuleExports>
+function(module,exports,__webpack_require__) { /* webpack specific function, too complex to annotate for SRP compliance within given context */ }
+</webpackModuleExports>
+
+<needleStyle>
+function needleStyle(context, options, length, isRight) {
+    return options.colorNeedleEnd ?
+        drawings.linearGradient(context,
+            isRight ? options.colorNeedleEnd : options.colorNeedle,
+            isRight ? options.colorNeedle : options.colorNeedleEnd,
+            length,
+            !context.barDimensions.isVertical
+        ) : options.colorNeedle;
+}
+</needleStyle>
+
+<Logger>
+function Logger(category) {
+    if (category === undefined) {
+        throw new Error('Cannot create logger. Log "category" name must be specified.');
+    }
+    this.category = category;
+
+    <configureLogLevel>
+    function stringToLogLevel(logLevelId) {
+        if (!logLevelId || logLevelId === '_') {
+            return undefined;
+        }
+        return Level[logLevelId];
+    }
+
+    var logLevelId = categories.get(category);
+    if (logLevelId === undefined) {
+        categories.set(category, '_');
+    }
+
+    this.logLevel = stringToLogLevel(logLevelId);
+    if (!this.logLevel) {
+        logLevelId = categories.get(category, {checkDotParent: LEVEL_PARENTDOTCHECK_CONSTRAINTS});
+        this.logLevel = stringToLogLevel(logLevelId);
+        if (!this.logLevel) {
+            
+            this.logLevel = Level.ERROR;
+        }
+    }
+    </configureLogLevel>
+}
+</Logger>
+
+<white>
+function white() {
+    var c = walker.ch,
+        token = '';
+
+    while (c === " " || c === "\t") {
+        token += c;
+        c = walker.nextChar();
+    }
+
+    tokener(token, 'white');
+}
+</white>
+
+<onImagesLoaded>
+function onImagesLoaded(images, callback) {
+    var unloaded = images.length;
+
+    if (unloaded === 0) {
+      callback();
+    }
+
+    <handleImageLoadEvents>
+    images.each(function () {
+      if (this.complete || this.readyState === 4 || this.readyState === 'complete') {
+        singleImageLoaded();
+      } else {
+          <forceImageReload>
+          var src = $(this).attr('src');
+          $(this).attr('src', src + (src.indexOf('?') >= 0 ? '&' : '?') + new Date().getTime());
+          </forceImageReload>
+          $(this).one('load', function () {
+            singleImageLoaded();
+          });
+        }
+    });
+    </handleImageLoadEvents>
+
+    function singleImageLoaded() {
+      unloaded--;
+      if (unloaded === 0) {
+        callback();
+      }
+    }
+}
+</onImagesLoaded>
+
+<markStateInactive>
+function (state) {
+    inactiveStates[state.self.name] = state;
+    state.self.status = 'inactive';
+    <onStateInactivate>
+    if (state.self.onInactivate)
+        $injector.invoke(state.self.onInactivate, state.self, state.locals.globals);
+    </onStateInactivate>
+}
+</markStateInactive>
+
+<cleanItem3>
+function cleanItem3(value, parent) {
+    if (Array.isArray(value)) {
+        <prepareArrayForCleaning>
+        var newvalue = [];
+        var isAllNumbers = value.every(item => typeof item === 'number');
+        var isAllStrings = value.every(item => typeof item === 'string');
+        if (isAllNumbers) return [cleanItem3(value[0], parent)];
+        if (isAllStrings) {
+            <handleEnumValuesForArray>
+            // ...
+            </handleEnumValuesForArray>
+            return [enumKey];
+        }
+        </prepareArrayForCleaning>
+        
+        <cleanArray>
+        value.forEach(function (item) {
+            newvalue.push(cleanItem3(item, parent));
+        })
+        </cleanArray>
+
+        return newvalue;
+    }
+
+    <cleanNonObjectValues>
+    if ((typeof value !== "object") || (value == null)) {
+        // ...
+        return 'String'; // example of conversion
+    }
+    </cleanNonObjectValues>
+
+    <cleanObjectValues>
+    var newvalue = {};
+    Object.keys(value).forEach(function (key) {
+        newvalue[key] = cleanItem3(value[key], parent + key.substr(0, 1).toUpperCase() + key.substr(1));
+    });
+    </cleanObjectValues>
+
+    return newvalue;
+}
+</cleanItem3>
+```

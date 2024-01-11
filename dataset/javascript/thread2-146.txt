@@ -1,0 +1,461 @@
+```javascript
+<Connection>
+function Connection(device) {
+  <setUpEventEmitter>
+  var self = this;
+
+  EventEmitter2.call(this, {
+    wildcard: true,
+    delimiter: ':',
+    maxListeners: 1000,
+  });
+  </setUpEventEmitter>
+
+  <configureLoggingMechanism>
+  if (this.log) {
+    this.log = _.wrap(this.log, function (func, msg) {
+      func(self.constructor.name + ': ' + msg);
+    });
+  } else if (Connection.prototype.log) {
+    Connection.prototype.log = _.wrap(Connection.prototype.log, function (func, msg) {
+      func(self.constructor.name + ': ' + msg);
+    });
+    this.log = Connection.prototype.log;
+  } else {
+    var debug = require('debug')(this.constructor.name);
+    this.log = function (msg) {
+      debug(msg);
+    };
+  }
+  </configureLoggingMechanism>
+
+  <initializeProperties>
+  this.taskQueue = [];
+  this.commandQueue = [];
+  this.isTaskRunning = false;
+  
+  this.id = uuid();
+  this.device = device;
+  
+  this.attributes = { id: this.id, device: this.device };
+
+  this.set('state', 'disconnect');
+  </initializeProperties>
+
+  <setupDeviceEventHandlers>
+  this.device.on('open', this.openHandle = function (callback) {
+    <handleDeviceOpenEvent>
+    if (self.log)
+      self.log('connecting connection with id ' + self.id);
+  
+    <powerManagementSetup>
+    if (pm) {
+      pm.on('wake', self.wakeHandler = function () {
+        if (self.log) self.log('waking up');
+        if (self.onWakeUp) {
+          self.onWakeUp();
+        }
+      });
+      pm.on('sleep', self.sleepHandler = function () {
+        if (self.log) self.log('going to sleep');
+        if (self.onSleep) {
+          self.onSleep();
+        }
+      });
+    }
+    </powerManagementSetup>
+
+    self.set('state', 'connecting');
+    self.device.emit('connecting', self.device);
+    self.emit('connecting', self);
+    
+    if (self.onConnecting) {
+      self.onConnecting(function (err) {
+        if (err) {
+          if (self.log) self.log('could not connect connection with id ' + self.id);
+          self.close(function () {
+            if (callback) callback(err, self);
+          });
+        } else {
+          if (self.log) self.log('connect connection with id ' + self.id);
+          self.device.emit('connect', self.device);
+          self.set('state', 'connect');
+          self.emit('connect', self);
+          if (callback) callback(null, self);
+        }
+      });
+    } else {
+      if (self.log) self.log('connect connection with id ' + self.id);
+      self.device.emit('connect', self.device);
+      self.set('state', 'connect');
+      self.emit('connect', self);
+      if (callback) callback(null, self);
+    }
+    </handleDeviceOpenEvent>
+  });
+
+  this.device.on('closing', this.closingHandle = function (callback) {
+    self.close(callback);
+  });
+
+  this.device.on('close', this.closeHandle = function (callback) {
+    <handleDeviceCloseEvent>
+    if (self.log) self.log('disconnect connection with id ' + self.id);
+    self.device.emit('disconnect', self.device);
+    self.set('state', 'disconnect');
+    self.emit('disconnect', self);
+    self.removeAllListeners();
+    self.removeAllListeners('connect');
+    self.removeAllListeners('connecting');
+    self.removeAllListeners('disconnect');
+    self.removeAllListeners('disconnecting');
+    self.device.removeListener('open', self.openHandle);
+    self.device.removeListener('closing', self.closingHandle);
+    self.device.removeListener('close', self.closeHandle);
+    if (self.device && self.device.connection) {
+      delete self.device.connection;
+      delete self.device;
+    }
+
+    if (pm) {
+      if (self.wakeHandler) pm.removeListener('wake', self.wakeHandler);
+      if (self.sleepHandler) pm.removeListener('sleep', self.sleepHandler);
+    }
+
+    if (self.taskQueue) {
+      self.taskQueue = [];
+    }
+    if (self.commandQueue) {
+      self.commandQueue = [];
+    }
+    </handleDeviceCloseEvent>    
+  });
+  </setupDeviceEventHandlers>
+}
+</Connection>
+
+<BLETransport>
+function BLETransport(opts) {
+  <checkInstance>
+  if (!(this instanceof BLETransport)) {
+    return new BLETransport(opts);
+  }
+  </checkInstance>
+
+  <initializeController>
+  this.configuration = opts.configuration;
+  this.controller = Controllers[this.configuration.controller];
+  if (!this.controller) {
+    throw new Error("No valid BLE controller defined");
+  }
+  </initializeController>
+}
+</BLETransport>
+
+<generateSlug>
+function generateSlug(title) {
+  <validateTitle>
+  if (typeof title !== 'string') {
+    throw new Error('title is not a string');
+  }
+  </validateTitle>
+
+  <sanitizeSlug>
+  title = title || '';
+  title = title.toLowerCase().replace(/[\W]/g, '-').replace(/[-]{2,}/g, '-');
+  </sanitizeSlug>
+
+  <returnSlug>
+  return title;
+  </returnSlug>
+}
+</generateSlug>
+
+<mxGraphExportToXML>
+function (graph, scale, cells, x0, y0) {
+  <initializeDefaults>
+  x0 = x0 != null ? x0 : 0;
+  y0 = y0 != null ? y0 : 0;
+  scale = scale != null ? scale : 1;
+  </initializeDefaults>
+
+  <prepareCellsForExport>
+  if (cells == null) {
+    var model = graph.getModel();
+    cells = [model.getRoot()];
+  }
+  </prepareCellsForExport>
+
+  <disableEventsAndBackupState>
+  var view = graph.getView();
+  var eventsEnabled = view.isEventsEnabled();
+  view.setEventsEnabled(false);
+
+  var drawPane = view.drawPane;
+  var overlayPane = view.overlayPane;
+  </disableEventsAndBackupState>
+
+  <createTemporaryDOM>
+  if (graph.dialect == mxConstants.DIALECT_SVG) {
+    
+    view.drawPane = document.createElementNS(mxConstants.NS_SVG, 'g');
+    view.canvas.appendChild(view.drawPane);
+
+    
+    view.overlayPane = document.createElementNS(mxConstants.NS_SVG, 'g');
+    view.canvas.appendChild(view.overlayPane);
+  } else {
+    
+    view.drawPane = view.drawPane.cloneNode(false);
+    view.canvas.appendChild(view.drawPane);
+
+    
+    view.overlayPane = view.overlayPane.cloneNode(false);
+    view.canvas.appendChild(view.overlayPane);
+  }
+  </createTemporaryDOM>
+
+  <setGraphViewState>
+  
+  var translate = view.getTranslate();
+  view.translate = new mxPoint(x0, y0);
+  </setGraphViewState>
+
+  <exportToXML>
+  var result = null;
+  var temp = new mxTemporaryCellStates(graph.getView(), scale, cells);
+
+  try {
+    var enc = new mxCodec();
+    result = enc.encode(graph.getView());
+  } finally {
+    temp.destroy();
+    view.translate = translate;
+    view.canvas.removeChild(view.drawPane);
+    view.canvas.removeChild(view.overlayPane);
+    view.drawPane = drawPane;
+    view.overlayPane = overlayPane;
+    view.setEventsEnabled(eventsEnabled);
+  }
+  </exportToXML>
+
+  <returnResult>
+  return result;
+  </returnResult>
+}
+</mxGraphExportToXML>
+
+<scrapeAll>
+function scrapeAll(query, scrapeDetails) {
+  <coWrapper>
+  return co(function* () {
+    <setDefaultScrapeDetails>
+    scrapeDetails = scrapeDetails === undefined ? true : scrapeDetails;
+    </setDefaultScrapeDetails>
+
+    <initialPageScrape>
+    const scrapeURL = makeUrl(SCRAPE_URL, query);
+    const search = yield scrapeSearchPage(scrapeURL);
+    </initialPageScrape>
+
+    <initializeCards>
+    var cards = search.cards;
+    var i;
+    </initializeCards>
+
+    <scrapeAdditionalPages>
+    for (i = 2; i <= search.numPages; i++) {
+      const scrapeURL = makeUrl(Url.resolve(SCRAPE_URL, i.toString()), query);
+      const results = yield scrapeSearchPage(scrapeURL);
+      cards = cards.concat(results.cards);
+    }
+    </scrapeAdditionalPages>
+
+    <scrapeCardsDetails>
+    if (scrapeDetails) {
+      for (i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        _.assign(card, yield scrapeCard(card.url));
+      }
+    }
+    </scrapeCardsDetails>
+
+    <returnCards>
+    return cards;
+    </returnCards>
+  })();
+  </coWrapper>
+}
+</scrapeAll>
+
+<addToScopeList>
+function (item, disabled) {
+  <pushToList>
+  scope.List.push({
+    value: $sce.trustAsHtml(item.value),
+    title: item.title,
+    liClass: disabled ? scope.disabledClass : '',
+    action: function () {
+      if (!disabled) {
+        internalAction(scope, item.page);
+      }
+    },
+  });
+  </pushToList>
+}
+</addToScopeList>
+
+<createPackageContents>
+function (options, dir, callback) {
+  <logCreationStart>
+  options.logger('Creating contents of package');
+  </logCreationStart>
+
+  <runCreationTasks>
+  async.parallel(
+    [
+      async.apply(createDesktop, options, dir),
+      async.apply(createIcon, options, dir),
+      async.apply(createCopyright, options, dir),
+      async.apply(createApplication, options, dir),
+    ],
+    function (err) {
+      <creationCallback>
+      callback(err, dir);
+      </creationCallback>
+    }
+  );
+  </runCreationTasks>
+}
+</createPackageContents>
+
+<returns>
+function returns(error, html, cb) {
+  <setupCallback>
+  var fn = typeof cb === 'function';
+  </setupCallback>
+
+  <handleError>
+  if (error) {
+    debug('Error received: %s', error.message);
+
+    if (fn) cb(error);
+    return minimize.emit('error', error);
+  }
+  </handleError>
+
+  <returnOrCallback>
+  if (fn) return cb(null, html);
+  return html;
+  </returnOrCallback>
+}
+</returns>
+
+<getDeclarationDeps>
+function getDeclarationDeps($ast, declaration, scope) {
+  <checkScope>
+  if (scope !== SCOPE_EXPLICIT) {
+    return {};
+  }
+  </checkScope>
+
+  <findDependentParentNodes>
+  const depParentNodes = $ast(declaration).parents((node) => {
+    if (node.node.type === 'mixin') {
+      return true;
+    } else if (node.node.type === 'atrule') {
+      const atruleIdentNode = $ast(node).children('atkeyword').children('ident');
+      return atruleIdentNode.length() > 0 && atruleIdentNode.first().value() === 'function';
+    } else {
+      return false;
+    }
+  });
+  </findDependentParentNodes>
+
+  <bailIfNoDependencies>
+  if (depParentNodes.length() === 0) {
+    return {};
+  }
+  </bailIfNoDependencies>
+
+  <getLastDependentParentNode>
+  const depParentNode = depParentNodes.last();
+  const depKeywordNode = depParentNode.children('atkeyword').children('ident');
+
+  if (depKeywordNode.length() === 0) {
+    return {};
+  }
+  </getLastDependentParentNode>
+
+  <getAtKeywordAndValidate>
+  const atKeyword = depKeywordNode.first().value();
+
+  if (!DEP_HOST[atKeyword]) {
+    return {};
+  }
+  </getAtKeywordAndValidate>
+
+  <extractDependencyHostNode>
+  const depHostNode = DEP_HOST[atKeyword](depParentNode);
+  const atKeywordIdentifierNode = depHostNode.children('ident');
+  </extractDependencyHostNode>
+
+  <validateIdentifierNode>
+  if (atKeywordIdentifierNode.length() === 0) {
+    return {};
+  }
+  </validateIdentifierNode>
+
+  <retrieveAndPrepareArgumentsCount>
+  const atIdentifier = atKeywordIdentifierNode.first().value();
+  const argumentsNode = depHostNode.children('arguments');
+
+  const requiredArgsCount = argumentsNode.children('variable').length();
+  const optionalArgsCount = argumentsNode.children('declaration').length();
+  const totalArgsCount = requiredArgsCount + optionalArgsCount;
+  </retrieveAndPrepareArgumentsCount>
+
+  <returnDependencies>
+  if (!DEP_KEYWORDS[atKeyword]) {
+    return {};
+  }
+
+  return {
+    [DEP_KEYWORDS[atKeyword]]: {
+      name: atIdentifier,
+      argsCount: {
+        total: totalArgsCount,
+        required: requiredArgsCount,
+        optional: optionalArgsCount,
+      },
+    },
+  };
+  </returnDependencies>
+}
+</getDeclarationDeps>
+
+<processStripeTransfer>
+function (transfer, cb) {
+  <findOrCreateTransfer>
+  Transfer.findOrCreate(transfer.id, transfer).exec(function (err, foundTransfer) {
+    if (err) return cb(err);
+    if (foundTransfer.lastStripeEvent > transfer.lastStripeEvent) return cb(null, foundTransfer);
+    if (foundTransfer.lastStripeEvent == transfer.lastStripeEvent)
+      return Transfer.afterStripeTransferCreated(foundTransfer, function (err, transfer) {
+        return cb(err, transfer);
+      });
+    </findOrCreateTransfer>
+
+    <updateTransfer>
+    Transfer.update(foundTransfer.id, transfer).exec(function (err, updatedTransfers) {
+      if (err) return cb(err);
+      if (!updatedTransfers) return cb(null, null);
+      Transfer.afterStripeTransferCreated(updatedTransfers[0], function (err, transfer) {
+        cb(err, transfer);
+      });
+    });
+    </updateTransfer>
+  });
+}
+</processStripeTransfer>
+```

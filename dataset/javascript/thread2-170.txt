@@ -1,0 +1,311 @@
+<sendFrame>
+function sendFrame(socket, _frame) {
+  <prepareFrame>
+  var frame = _frame;
+  if (!_frame.hasOwnProperty('toString')) {
+    frame = new Frame({
+      'command': _frame.command,
+      'headers': _frame.headers,
+      'body': _frame.body
+    });
+  }
+  </prepareFrame>
+  
+  socket.send(frame.toStringOrBuffer());
+  return true;
+}
+</sendFrame>
+
+<DHT>
+function DHT (seeds, onConnect, onUpdate) {
+  var l_map = {};
+  var l_dht = undefined;
+
+  <initializeDHTNetwork>
+  if (seeds instanceof Array) {
+    l_dht = kademlia({
+      address: '127.0.0.1',
+      port: 65535,
+      seeds: seeds,
+      storage: levelup('./store/dht_db')
+    });
+    l_dht.on('connect', function () {
+      LOG.warn('DHT connected...', 'SR.DHT');
+      UTIL.safeCall(onConnect);
+    });
+  }
+  else
+    UTIL.safeCall(onConnect);
+  </initializeDHTNetwork>
+  
+  <setKeyValue>
+  this.set = function (key, value, onDone) {
+    if (!l_dht) {
+      l_map[key] = value;
+      return UTIL.safeCall(onDone, true);
+    }
+
+    l_dht.put(key, value, function (err) {
+      if (err) {
+        LOG.error(err, 'SR.DHT');
+        UTIL.safeCall(onDone, false);
+      }
+      else
+        UTIL.safeCall(onDone, true);
+    });
+  };
+  </setKeyValue>
+
+  <getKeyValue>
+  this.get = function (key, onDone) {
+    if (!l_dht) {
+      if (l_map.hasOwnProperty(key))
+        UTIL.safeCall(onDone, l_map[key]);
+      else
+        UTIL.safeCall(onDone);
+      return;
+    }
+
+    l_dht.get(key, function (err, value) {
+      if (err) {
+        LOG.error(err, 'SR.DHT');
+        UTIL.safeCall(onDone);        
+      }
+      else {
+        if (value === 'DELETED') {
+          delete l_map[key];
+          return UTIL.safeCall(onDone);
+        }
+        l_map[key] = value;
+        UTIL.safeCall(onDone, value);
+      }
+    });
+  };
+  </getKeyValue>
+
+  <deleteKeyValue>
+  this.delete = function (key, onDone) {
+    if (!l_dht) {
+      if (l_map.hasOwnProperty(key)) {
+        delete l_map[key];
+        UTIL.safeCall(onDone, true);
+      }
+      else {
+        UTIL.safeCall(onDone, false);
+      }
+      return;
+    }
+
+    l_dht.put(key, 'DELETED', function (err) {
+      if (err) {
+        LOG.error(err, 'SR.DHT');
+        UTIL.safeCall(onDone, false);
+      }
+      else
+        UTIL.safeCall(onDone, true);
+    });
+  }
+  </deleteKeyValue>
+}
+</DHT>
+
+<populatePropertyFor>
+function populatePropertyFor (documents, next) {
+  <populateDocuments>
+  if (this._mongooseOptions.lean) {
+    asArray(documents).forEach(function(doc) {
+      paths.forEach(function(path) {
+        try {
+          const splitted = path.path.split('.');
+          const key      = splitted.shift();
+          const insert   = { values: path.enumValues };
+          const value    = doc[key];
+
+          insert.value = determineValue(splitted, value);
+          doc[key]     = nest(splitted, insert);
+        } catch (error) { return next(error); }
+      });
+    });
+  }
+  </populateDocuments>
+
+  next();
+}
+</populatePropertyFor>
+
+<runExec>
+function runExec(container) {
+  <setupExecOptions>
+  var options = {
+    Cmd: ['bash', '-c', 'echo test $VAR'],
+    Env: ['VAR=ttslkfjsdalkfj'],
+    AttachStdout: true,
+    AttachStderr: true
+  };
+  </setupExecOptions>
+
+  <executeCommand>
+  container.exec(options, function(err, exec) {
+    if (err) return;
+    exec.start(function(err, stream) {
+      if (err) return;
+      <streamOutput>
+      container.modem.demuxStream(stream, process.stdout, process.stderr);
+      </streamOutput>
+
+      <inspectExec>
+      exec.inspect(function(err, data) {
+        if (err) return;
+        console.log(data);
+      });
+      </inspectExec>
+    });
+  });
+  </executeCommand>
+}
+</runExec>
+
+<existing>
+function(existing) {
+  <setupInstance>
+  var self = this;
+  var relationKey = this._name + 'Relation';
+  var methods = this._captureOverrides();
+  </setupInstance>
+  
+  return _.transform(methods, function(result, method, key) {
+    <configureMethod>
+    var name = self.template(key);
+    var include = !method.optional || !existing[name];
+    if (include) {
+      result[name] = method(relationKey);
+    }
+    </configureMethod>
+  }, <initializeCommonMethods>this._commonInstanceMethods()</initializeCommonMethods>);
+}
+</existing>
+
+<copyFilesToOutputDirectory>
+function(cfg, callback) {
+  <setupPaths>
+  var files = cfg.input_files;
+  var outputPath = cfg.output_dir;
+  </setupPaths>
+
+  <processFiles>
+  if (files.length > 0) {
+    new gear.Queue({registry: taskRegistry})
+    .log(formatLog('Copying files:', files))
+    .copyFiles({input: files, output: outputPath}, callback)
+    .log(formatLog('Copied files to: ', outputPath))
+    .run(callback);
+  } else {
+    callback();
+  }
+  </processFiles>
+}
+</copyFilesToOutputDirectory>
+
+<initMeScroll>
+function initMeScroll(mescrollId, options) {
+  <setupScrollMessages>
+  var htmlContent = '<p class="downwarp-tip">↓ 下拉刷新 ↓</p>';
+  htmlContent += '<img class="downwarp-progress" src="option/mescroll-progress.png"/>';
+  htmlContent += '<img class="downwarp-slogan" src="option/mescroll-slogan.png"/>';
+  var htmlLoading = '<img class="upwarp-progress mescroll-rotate" src="option/mescroll-progress.png"/><img class="upwarp-slogan" src="option/mescroll-slogan.png"/>';
+  var htmlNodata = '<img class="upwarp-nodata" src="option/mescroll-nodata.png"/>';
+  </setupScrollMessages>
+
+  <configureOptions>
+  var myOption={
+    down:{
+      htmlContent: htmlContent, 
+      inOffset: function(mescroll) { mescroll.downTipDom.innerHTML = "↓ 下拉刷新 ↓"; mescroll.downProgressDom.classList.remove("mescroll-rotate"); },
+      outOffset: function(mescroll) { mescroll.downTipDom.innerHTML = "↑ 释放更新 ↑"; },
+    },
+    up:{
+      htmlLoading: htmlLoading, 
+      htmlNodata: htmlNodata, 
+      empty: { icon: "option/mescroll-empty.png", tip: "亲,暂无相关商品~", btntext: "去逛逛 >", btnClick: function(){ alert("点击了按钮,具体逻辑自行实现"); } },
+      toTop: { src: "option/mescroll-totop.png" }
+    }
+  }
+  options=MeScroll.extend(options,myOption);
+  </configureOptions>
+
+  <createMeScrollInstance>
+  return new MeScroll(mescrollId,options);
+  </createMeScrollInstance>
+}
+</initMeScroll>
+
+<forumPost>
+function forumPost (jar, args, res) {
+  <handleRedirect>
+  if (res.statusCode === 302) {
+    var redirect = res.headers.location;
+    if (redirect.indexOf('/Forum/ShowPost.aspx') === 0) {
+      var post = parseInt(redirect.match(/\d+$/)[0], 10);
+      if (args.postId && post === parseInt(args.postId, 10)) {
+        throw new Error('Post is locked');
+      } else {
+        return post;
+      }
+    } else {
+      throw getForumError({location: redirect, append: 'Forum post failed'});
+    }
+  }
+  </handleRedirect>
+  <handleSuccess>
+  else if (res.statusCode === 200) {
+    var $ = parser.load(res.body);
+    var found = $('.validationWarningSmall');
+    var errors = [];
+    for (var i = 0; i < found.length; i++) {
+      var warning = $(found[i]);
+      if (warning.css('display') !== 'none') {
+        errors.push(warning.text());
+      }
+    }
+    throw new Error('Forum post failed, known issues: ' + JSON.stringify(errors));
+  }
+  </handleSuccess>
+  <handleFailure>
+  else {
+    throw new Error('Forum post failed, verify that you are allowed to make posts and the message and subject are permitted');
+  }
+  </handleFailure>
+}
+</forumPost>
+
+<setGlobalEval>
+function setGlobalEval( elems, refElements ) {
+  <processElements>
+  var elem,
+    i = 0;
+  for ( ; (elem = elems[i]) != null; i++ ) {
+    jQuery._data( elem, "globalEval", !refElements || jQuery._data( refElements[i], "globalEval" ) );
+  }
+  </processElements>
+}
+</setGlobalEval>
+
+<triggerOrSetProperty>
+function(struct, prop, value) {
+  <invokeOrAssign>
+  if (gui.Type.isFunction(struct[prop])) {
+    if (this.spirit.life.ready) {
+      struct[prop](value);
+    } else {
+      this.spirit.life.add(gui.LIFE_READY, this);
+      this._onready = this._onready || [];
+      this._onready.push(function() {
+        struct[prop](value);
+      });
+    }
+  } else {
+    struct[prop] = value;
+  }
+  </invokeOrAssign>
+}
+</triggerOrSetProperty>

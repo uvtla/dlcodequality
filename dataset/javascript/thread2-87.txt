@@ -1,0 +1,307 @@
+```javascript
+<overlaps>
+function overlaps(rect) {
+  return rect.left < this.getWidth() && rect.right > 0 && rect.top < this.getHeight() && rect.bottom > 0;
+}
+</overlaps>
+
+<option>
+function option(name, type) {
+  <initializeOptionName>
+  if (name[TYPICAL_TYPE]) {
+    type = name;
+    name = `${type.name}Option`;
+  }
+  </initializeOptionName>
+
+  <developmentAssertions>
+  if (__DEV__) {
+    assert(typeof name === 'string', `option()'s name must be a string`);
+    assert(type[TYPICAL_TYPE], `option()'s type must be a type`);
+  }
+  </developmentAssertions>
+
+  const api = this;
+
+  <defineOptionFunction>
+  function Option(value, context) {
+    if (Context.isRequired(context)) {
+      return Context.with(value, Option, context, api);
+    }
+
+    return value == null ? context.toValue(value) : type(value, context);
+  }
+  </defineOptionFunction>
+
+  return decorate(Option, name, option, type);
+}
+</option>
+
+<extract>
+function extract(config){
+  <configNormalizationAndSetup>
+  var options = command.norm(config);
+  var inputFilename = options.file;
+  var flow = new Flow(options, 'extract');
+  var fconsole = flow.console;
+
+  fconsole.enabled = !options.silent && options.target == 'log';
+  </configNormalizationAndSetup>
+
+  <initialConsoleLogs>
+  fconsole.start('Extract with ' + utils.getToolsId());
+  fconsole.log('Base path: ', options.base);
+  fconsole.log('Index file:', options.file);
+  fconsole.log('Plugins:   ', flow.plugins ? flow.plugins.join(', ') : 'NONE');
+  fconsole.log('Target:    ', options.target);
+  fconsole.endl();
+  </initialConsoleLogs>
+
+  <checkFileExistence>
+  if (!fs.existsSync(inputFilename) || !fs.statSync(inputFilename).isFile())
+    flow.exit('Input file ' + inputFilename + ' not found');
+  </checkFileExistence>
+
+  <initializeProcessing>
+  fconsole.start('\nInit\n====\n');
+  flow.indexFile = flow.files.add({
+    filename: path.basename(inputFilename)
+  });
+  </initializeProcessing>
+
+  <prepareHandlers>
+  var handlers = extractHandlers(flow.options).concat([
+    require('./misc/stat'),
+    {
+      'app-profile': require('./target/appProfile'),
+      'input-graph': require('./target/inputGraph'),
+      'css-usage': require('./target/cssUsage')
+    }[flow.options.target],
+    flow.options.target == 'log' ? require('./misc/summary') : null
+  ]).filter(Boolean);
+  </prepareHandlers>
+
+  <setupAsyncProcessing>
+  var taskCount = 0;
+  var timing = flow.timing = [];
+  var time;
+  var resolve = function(){};
+  var result = new Promise(function(resolve_){
+    resolve = resolve_;
+  });
+  </setupAsyncProcessing>
+
+  <utilityFunctions>
+  function repeat(str, count){
+    return new Array(count + 1).join(str);
+  }
+  function asyncTaskStart(){
+    taskCount++;
+  }
+  function asyncTaskDone(){
+    taskCount--;
+    nextHandler();
+  }
+  </utilityFunctions>
+
+  <asyncProcessingLoop>
+  function nextHandler(){
+    if (!taskCount)
+    {
+      if (handlers.length)
+      {
+        var timeDiff = process.hrtime(time.time);
+        time.time = parseInt(timeDiff[0] * 1e3 + timeDiff[1] / 1e6, 10);
+        timing.push(time);
+      }
+      process.nextTick(runHandler);
+    }
+  }
+  function runHandler(){
+    if (!handlers.length)
+      return resolve(flow);
+    var handler = handlers.shift();
+    var title = handler.handlerName || 'Untitled handler';
+    var skipped = typeof handler.skip == 'function' ? handler.skip(flow) : false;
+    fconsole.resetDeep();
+    if (title)
+      fconsole.log('\n' + title + '\n' + repeat('=', title.length) + '\n');
+    fconsole.incDeep();
+    if (skipped)
+    {
+      fconsole.log('Skipped.');
+      fconsole.log(skipped);
+      process.nextTick(runHandler);
+    }
+    else
+    {
+      time = {
+        name: title,
+        time: process.hrtime()
+      };
+      handler(flow, asyncTaskStart, asyncTaskDone);
+      nextHandler();
+    }
+  }
+  process.nextTick(runHandler);
+  </asyncProcessingLoop>
+
+  <outputResult>
+  if (isChildProcess)
+  {
+    result.then(function(flow){
+      process.send({
+        data: flow.result
+      });
+    });
+  }
+  else
+  {
+    if (!options.silent && options.target != 'log')
+      result.then(function(flow){
+        console.log(flow.result);
+      });
+    return result;
+  }
+  </outputResult>
+}
+</extract>
+
+<_key__name__event__cleared>
+function(_key,_name,_event,_cleared){
+  var _cch = _pcache[_key];
+  if (!_cch) return;
+  var _conf = _cch.conf,
+      _func = _conf[_name]||_f,
+      _extr = _conf.extra;
+  if (!!_cleared){
+      delete _pcache[_key];
+  }
+  _event.data = _extr;
+  _func(_event);
+}
+</_key__name__event__cleared>
+
+<generateCheckerboardTexture>
+function (size, unitSize, color1, color2) {
+  size = size || 512;
+  unitSize = unitSize || 64;
+  color1 = color1 || 'black';
+  color2 = color2 || 'white';
+
+  var repeat = Math.ceil(size / unitSize);
+
+  var canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = color2;
+  ctx.fillRect(0, 0, size, size);
+
+  ctx.fillStyle = color1;
+  for (var i = 0; i < repeat; i++) {
+      for (var j = 0; j < repeat; j++) {
+          var isFill = j % 2 ? (i % 2) : (i % 2 - 1);
+          if (isFill) {
+              ctx.fillRect(i * unitSize, j * unitSize, unitSize, unitSize);
+          }
+      }
+  }
+
+  var texture = new Texture2D({
+      image: canvas,
+      anisotropic: 8
+  });
+
+  return texture;
+}
+</generateCheckerboardTexture>
+
+<dump>
+function dump(opts) {
+  if(typeof opts.dump !== "string") {
+    throw new Error("no input file");
+  }
+  
+  var bundle = new Bundle(opts.dump);
+
+  if(opts._.length > 0 || opts.b) {
+    var symbol = opts._[0] || opts.b;
+    process.stdout.write(bundle.load(symbol, true), (opts.b ? "base64" : "utf8"));
+    return;
+  }
+
+  console.log("SYMBOLS:");
+  for(var symbol in bundle.symbols()) {
+    var sym = bundle.symbol(symbol);	
+    var flag = sym.flag;
+    if(flag === "") {
+      flag = " ";
+    }
+    
+    console.log(util.format("  [%s] %s", flag, symbol));
+  }
+  
+  console.log("\nPATHS-MAP:");
+  for(var path in bundle.map()) {
+    console.log(util.format("  %s -> %s", path, bundle.resolve(path)));
+  }
+  
+  console.log("\nAUTORUNS:");
+  bundle.autoruns().forEach(function(autorun) {
+    console.log(util.format("  %s", autorun));
+  });
+}
+</dump>
+
+<toDefault>
+function toDefault(val, def) {
+  if (is_1.isValue(val) && !(is_1.isEmpty(val) && !is_1.isEmpty(def)))
+    return val;
+  return is_1.isValue(def) ? def : null;
+}
+</toDefault>
+
+<getPathDirectory>
+function getPathDirectory(length, parts) {
+  if (!parts) {
+    return '';
+  }
+  return parts
+    .slice(length)
+    .filter(part => part !== '')
+    .join(path.sep);
+}
+</getPathDirectory>
+
+<getPathFilename>
+function (path, base) {
+  let filename;
+  let start = path.substr(0, 2);
+  if (path.charAt(0) === '/') {
+    filename = path;
+  } else if (start == './' || start == '..' || path == '.') {
+    filename = lpath.resolve(base, path);
+  } else {
+    throw new Error(`Cannot watch path '${path}'  (not a relative or absolute path)`);
+  }
+  return filename;
+}
+</getPathFilename>
+
+<filterNonDefaultEvents>
+function(event_names) {
+  var i = 0,
+      count = event_names.length,
+      result = [];
+  for (; i < count; i++) {
+    if (Lava.schema.system.DEFAULT_EVENTS.indexOf(event_names[i]) == -1) {
+      result.push(event_names[i]);
+    }
+  }
+  return result;
+}
+</filterNonDefaultEvents>
+```
+
+Please note that some functions were assessed as compliant with SRP and are wholly enclosed in tags without inner segmentation. Functions that may appear to have multiple responsibilities are tagged to signify potentially distinct responsibilities within the scope of the overarching functionality that the function provides. These designated sections highlight different stages of a process, separate algorithms, or different types of operations (e.g., validation, calculation, object construction, etc.), as per SRP annotation guidelines.

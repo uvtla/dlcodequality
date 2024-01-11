@@ -1,0 +1,218 @@
+<removeKeybindings>
+function removeKeybindings(bindings, method) {
+  if (!bindings) return;
+  <inputValidation>
+  if (typeof bindings === 'string' && !method) 
+    console.warn('removeKeybindings requires method as second arg');
+  </inputValidation>
+  
+  <removeMethodInvocation>
+  if (typeof bindings === 'string') return removeMethod(bindings, method);
+  Object.keys(bindings).forEach((key) => removeMethod(key, bindings[key]));
+  </removeMethodInvocation>
+}
+</removeKeybindings>
+
+<RPCBase>
+function RPCBase() {
+  
+  <ctorCheck>
+  if (!(this instanceof RPCBase))
+    return new RPCBase();
+  </ctorCheck>
+
+  <eventEmitterCall>
+  EventEmitter.call(this);
+  </eventEmitterCall>
+
+  <initializeProperties>
+  this.logger = Logger.global;
+  this.calls = Object.create(null);
+  this.mounts = [];
+  this.locker = new Lock();
+  </initializeProperties>
+}
+</RPCBase>
+
+<lookup>
+function lookup(pageRef) {
+  
+  <clonePage>
+  const page = deepClone(artifactsByRef.pages[pageRef]);
+  </clonePage>
+  
+  <removeDisabledItemsFromPage>
+  removeDisabledItems(page);
+  </removeDisabledItemsFromPage>
+  
+  return page;
+}
+</lookup>
+
+<anonymousSetElementValue>
+function() {
+  var self = this,
+  
+  <mapItemValues>
+  val = $.map(self.items(), function(item) {
+    return self.options.itemValue(item).toString();
+  });
+  </mapItemValues>
+
+  <setElementValue>
+  self.$element.val(val, true);
+  </setElementValue>
+
+  <triggerElementChange>
+  if (self.options.triggerChange)
+    self.$element.trigger('change');
+  </triggerElementChange>
+}
+</anonymousSetElementValue>
+
+<typescriptSource>
+function typescriptSource() {
+  <sourceFileCollection>
+  return gulp.src([
+    
+    "./src/helper/*.ts",
+    "./src/BasicCollection.ts",
+    "./src/OrderedCollection.ts",
+    "./src/CollectionStatic.ts",
+    "./src/internal/Collection.ts",
+    "./src/internal/MinHeap.ts",
+    "./src/internal/OrderedCollection.ts",
+    "./src/module.ts"
+  ])
+  </sourceFileCollection>
+
+  <removeImports>
+  .pipe(replace(/import\s[^;]+;/ig, ""))
+  </removeImports>
+
+  <removeExportPrefix>
+  .pipe(replace(/export\s(\w+\s__)/ig, "$1"))
+  </removeExportPrefix>
+  
+  <concatenateAndSave>
+  .pipe(concat("linq.ts"))
+  .pipe(gulp.dest("./build"));
+  </concatenateAndSave>
+}
+</typescriptSource>
+
+<isCrossOrigin>
+function isCrossOrigin(pageLocation, ajaxHost) {
+
+  <defineDefaultPort>
+  function defaultPort(protocol) {
+    return {'http:':80, 'https:':443}[protocol];
+  }
+  </defineDefaultPort>
+  
+  <definePortOfLocation>
+  function portOf(location) {
+    return location.port || defaultPort(location.protocol||pageLocation.protocol);
+  }
+  </definePortOfLocation>
+
+  <determineCrossOriginStatus>
+  return !!(  (ajaxHost.protocol  && (ajaxHost.protocol  != pageLocation.protocol)) ||
+              (ajaxHost.host      && (ajaxHost.host      != pageLocation.host))     ||
+              (ajaxHost.host      && (portOf(ajaxHost) != portOf(pageLocation)))
+         );
+  </determineCrossOriginStatus>
+}
+</isCrossOrigin>
+
+<Sender>
+function Sender(prefix) {
+  
+  <validatePrefix>
+  if (!prefix) {
+    throw new Error(enplug.classes.Transport.prototype.TAG + 'Senders must specify a method prefix.');
+  }
+  </validatePrefix>
+
+  <initializeProperties>
+  this.prefix = prefix;
+  this.novalidate = false;
+  this.transport = new enplug.classes.Transport(window, prefix);
+  </initializeProperties>
+}
+</Sender>
+
+<calculateIndices>
+function() {
+  this.indices = {};
+
+  <populateIndices>
+  for (var i = 0, l = this.keys.length; i < l; i++) {
+    this.indices[this.keys[i]] = i;
+  }
+  </populateIndices>
+
+  return this;
+}
+</calculateIndices>
+
+<registerEffect>
+function registerEffect(suffix, animation) {
+  
+  <handleSuffixAsObject>
+  if (_.isObject(suffix)) {
+    animation = suffix;
+    suffix = '';
+  }
+  </handleSuffixAsObject>
+
+  <effectKeyCreation>
+  var key = 'VelocityHelper.animation.' + effectCounter++ + suffix;
+  </effectKeyCreation>
+
+  <serverShimCheck>
+  if (Velocity.velocityReactServerShim) {
+    return key;
+  }
+  </serverShimCheck>
+
+  <registerEffectValidation>
+  if (Velocity.RegisterEffect === undefined) {
+    throw "Velocity.RegisterEffect not found. You need to require 'velocity-animate/velocity.ui' at a top level for UI Pack.";
+  }
+  </registerEffectValidation>
+
+  <registerEffectImplementation>
+  Velocity.RegisterEffect(key, animation);
+  </registerEffectImplementation>
+
+  return key;
+}
+</registerEffect>
+
+<computeLongitudeDelta>
+function(distance, latitude) {
+  
+  <convertToRadians>
+  var radians = degreesToRadians(latitude);
+  </convertToRadians>
+
+  <calculateDelta>
+  var num = Math.cos(radians) * g_EARTH_EQ_RADIUS * Math.PI / 180;
+  var denom = 1 / Math.sqrt(1 - g_E2 * Math.sin(radians) * Math.sin(radians));
+  var deltaDeg = num * denom;
+  </calculateDelta>
+
+  <handleSmallDelta>
+  if (deltaDeg < g_EPSILON) {
+    return distance > 0 ? 360 : 0;
+  }
+  </handleSmallDelta>
+  
+  <computeDegreeDistance>
+  else {
+    return Math.min(360, distance / deltaDeg);
+  }
+  </computeDegreeDistance>
+}
+</computeLongitudeDelta>

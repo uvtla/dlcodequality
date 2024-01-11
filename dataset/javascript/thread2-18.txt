@@ -1,0 +1,329 @@
+```javascript
+<genericEventTrigger>
+function() {
+    this.lastError = null;
+    var errors = [],
+        len = this.subscribers.length;
+    var args = [].slice.call(arguments, 0), ret = true, i, rebuild = false;
+
+    <checkFireOnce>
+    if (this.fireOnce) {
+        if (this.fired) {
+            return true;
+        } else {
+            this.firedWith = args;
+        }
+    }
+    this.fired = true;
+    </checkFireOnce>
+
+    <earlyExitConditions>
+    if (!len && this.silent) {
+        return true;
+    }
+    </earlyExitConditions>
+
+    var subs = this.subscribers.slice();
+
+    <notifySubscribersLoop>
+    for (i = 0; i < len; ++i) {
+        var s = subs[i];
+        if (!s) {
+            rebuild = true;
+        } else {
+            ret = this.notify(s, args);
+            if (false === ret) {
+                if (!this.silent) {
+                }
+                break;
+            }
+        }
+    }
+    </notifySubscribersLoop>
+
+    return (ret !== false);
+}
+</genericEventTrigger>
+
+<printToPDF>
+function (jsonObj, cb) {
+    <checkPlugin>
+    if ($bc_$4.pN) {
+    </checkPlugin>
+
+        try {
+            var params = jsonObj || {};
+            params['callback'] = params['callback'] || $bc_$4._get_callback(function (obj) {
+                cb && cb(obj);
+            }, true);
+            params['marginsType'] = params['marginsType'] || 0;
+            params['pageSize'] = params['pageSize'] || 'A4';
+            params['printBackground'] = params['printBackground'] || false;
+            params['printSelectionOnly'] = params['printSelectionOnly'] || false;
+            params['landscape'] = params['landscape'] || false;
+            params['filePath'] = params['filePath'] || ($bc_$4.pN.path.tempDir() + '/' + Date.now() + '.pdf');
+
+            <overrideParameters>
+            for (var key in jsonObj) {
+                if (jsonObj.hasOwnProperty(key)) {
+                    params[key] = jsonObj[key];
+                }
+            }
+            </overrideParameters>
+
+            <printPDF>
+            return $bc_$4.pN.window.printToPDF(JSON.stringify(params))
+            </printPDF>
+        } catch (e) {
+            <handleError>
+            console.error(e);
+            </handleError>
+        }
+    }
+}
+</printToPDF>
+
+<createUpwardable>
+function make(x, options = {}) {
+    var { debug = DEBUG_ALL } = options;
+    var u;
+
+    debug = DEBUG && debug;
+
+    <initializeUpwardable>
+    if (x === undefined) u = makeUndefined();
+    else if (x === null) u = makeNull();
+    else {
+        u = Object(x);
+        if (!is(u)) {
+            add(u, debug);
+            defineProperty(u, 'change', { value: change });
+        }
+    }
+    </initializeUpwardable>
+
+    <debugNewUpwardable>
+    if (debug) console.debug(...channel.debug("Created upwardable", u._upwardableId, "from", x));
+    </debugNewUpwardable>
+
+    return u;
+}
+</createUpwardable>
+
+<updateNodeClasses>
+function(ctx) {
+    var $ariaElem,
+        node = ctx.node,
+        tree = ctx.tree,
+        opts = ctx.options,
+        hasChildren = node.hasChildren(),
+        isLastSib = node.isLastSibling(),
+        aria = opts.aria,
+        cn = opts._classNames,
+        cnList = [],
+        statusElem = node[tree.statusClassPropName];
+
+    if (!statusElem || tree._enableUpdate === false) {
+        <earlyExit>
+        return;
+        </earlyExit>
+    }
+
+    if (aria) {
+        <setupAriaElem>
+        $ariaElem = $(node.tr || node.li);
+        </setupAriaElem>
+    }
+
+    <buildClassList>
+    cnList.push(cn.node);
+    if (tree.activeNode === node) {
+        cnList.push(cn.active);
+    }
+    if (tree.focusNode === node) {
+        cnList.push(cn.focused);
+    }
+    if (node.expanded) {
+        cnList.push(cn.expanded);
+    }
+    if (aria) {
+        if (hasChildren !== false) {
+            $ariaElem.attr("aria-expanded", Boolean(node.expanded));
+        } else {
+            $ariaElem.removeAttr("aria-expanded");
+        }
+    }
+    if (node.folder) {
+        cnList.push(cn.folder);
+    }
+    if (hasChildren !== false) {
+        cnList.push(cn.hasChildren);
+    }
+    if (isLastSib) {
+        cnList.push(cn.lastsib);
+    }
+    if (node.lazy && node.children == null) {
+        cnList.push(cn.lazy);
+    }
+    if (node.partload) {
+        cnList.push(cn.partload);
+    }
+    if (node.partsel) {
+        cnList.push(cn.partsel);
+    }
+    if (FT.evalOption("unselectable", node, node, opts, false)) {
+        cnList.push(cn.unselectable);
+    }
+    if (node._isLoading) {
+        cnList.push(cn.loading);
+    }
+    if (node._error) {
+        cnList.push(cn.error);
+    }
+    if (node.statusNodeType) {
+        cnList.push(cn.statusNodePrefix + node.statusNodeType);
+    }
+    if (node.selected) {
+        cnList.push(cn.selected);
+        if (aria) {
+            $ariaElem.attr("aria-selected", true);
+        }
+    } else if (aria) {
+        $ariaElem.attr("aria-selected", false);
+    }
+    if (node.extraClasses) {
+        cnList.push(node.extraClasses);
+    }
+    </buildClassList>
+
+    <assignClassesToStatusElem>
+    statusElem.className = cnList.join(" ");
+    </assignClassesToStatusElem>
+
+    <updateLastSiblingClass>
+    if (node.li) {
+        $(node.li).toggleClass(cn.lastsib, isLastSib);
+    }
+    </updateLastSiblingClass>
+}
+</updateNodeClasses>
+
+<childNodesModifiedEventHandler>
+function(delta) {
+    <callNodeModifiedEvent>
+    events.childNodesModified.call(this, delta);
+    </callNodeModifiedEvent>
+
+    var array;
+    if (array = delta.inserted) {
+        <processInsertedNodes>
+        for (var i = 0, child; child = array[i++];) {
+            child.groupId_ = child.delegate ? child.delegate.basisObjectId : child.data.id;
+            this.map_[child.groupId_] = child;
+        }
+        </processInsertedNodes>
+
+        <reinsertNodes>
+        if (this.dataSource && this.nullGroup.first) {
+            var parentNode = this.owner;
+            var nodes = arrayFrom(this.nullGroup.nodes);
+            for (var i = nodes.length; i-- > 0;) {
+                parentNode.insertBefore(nodes[i], nodes[i].nextSibling);
+            }
+        }
+        </reinsertNodes>
+    }
+}
+</childNodesModifiedEventHandler>
+
+<recursiveKeyPathCheck>
+function(obj, parts) {
+    if (parts.length === 0) {
+        <baseCaseReturn>
+        return true;
+        </baseCaseReturn>
+    }
+
+    var key = parts.shift();
+
+    if (!_(obj).has(key)) {
+        <returnFalseIfKeyNotFound>
+        return false;
+        </returnFalseIfKeyNotFound>
+    } else {
+        <recursiveCheck>
+        return hasKeyPath(obj[key], parts);
+        </recursiveCheck>
+    }
+}
+</recursiveKeyPathCheck>
+
+<initiateReadingMoreData>
+function maybeReadMore(stream, state) {
+    if (!state.readingMore) {
+        <setReadingMoreFlag>
+        state.readingMore = true;
+        </setReadingMoreFlag>
+        <callReadMoreNextTick>
+        nextTick(maybeReadMore_, stream, state);
+        </callReadMoreNextTick>
+    }
+}
+</initiateReadingMoreData>
+
+<calculateSlope>
+function getSlope(aT, aA1, aA2) {
+    <computeIntermediateValues>
+    return 3.0 * a(aA1, aA2) * aT * aT + 2.0 * b(aA1, aA2) * aT + c(aA1);
+    </computeIntermediateValues>
+}
+</calculateSlope>
+
+<readEnvFile>
+function getFile(envPath) {
+    envPath = typeof envPath !== 'undefined' && envPath != '' ? envPath : '.env';
+
+    try {
+        <cacheEnvFile>
+        if (cached.file == null) {
+            envFilePath = path.resolve(process.cwd(), envPath);
+            cached.file = fs.readFileSync(envFilePath, { encoding: 'utf8' })
+        }
+        </cacheEnvFile>
+
+        <returnCachedFile>
+        return cached.file;
+        </returnCachedFile>
+
+    } catch (e) {
+        <handleError>
+        return { error: e }
+        </handleError>
+    }
+}
+</readEnvFile>
+
+<tokenizeParenthesis>
+function() {
+    var captures;
+    if (captures = /^([()])([ \t]*)/.exec(this.str)) {
+        var paren = captures[1];
+        <updateStateAndCaptureWhitespace>
+        this.skip(captures);
+        </updateStateAndCaptureWhitespace>
+        if (')' == paren) {
+            <resetIsURLFlag>
+            this.isURL = false;
+            </resetIsURLFlag>
+        }
+        <createTokenWithSpace>
+        var tok = new Token(paren, paren);
+        tok.space = captures[2];
+        return tok;
+        </createTokenWithSpace>
+    }
+}
+</tokenizeParenthesis>
+```
+
+The basis of the annotations above is to encapsulate blocks of code that serve a distinct purpose within the functions. This allows us to isolate responsibilities which adhere to or violate SRP; for example, reading configuration from a file or generating a list of CSS classes based on certain conditions are specific, self-contained responsibilities, while others might be part of standard procedure within the function's main responsibility (such as checking if a plugin is loaded before continuing execution).

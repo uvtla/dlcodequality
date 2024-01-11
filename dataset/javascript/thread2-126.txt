@@ -1,0 +1,502 @@
+```javascript
+<_submitRequest>
+function _submitRequest(params, callback) {
+    var self = this;
+    var TaskId = params.TaskId;
+    <checkRunningTask>
+    if (TaskId && !self._isRunningTask(TaskId)) return;
+    </checkRunningTask>
+    <processIncomingParams>
+    var bucket = params.Bucket;
+    var region = params.Region;
+    var object = params.Key;
+    var method = params.method || 'GET';
+    var url = params.url;
+    var body = params.body;
+    var json = params.json;
+    var rawBody = params.rawBody;
+    </processIncomingParams>
+    <handleReadStream>
+    var readStream;
+    if (body && typeof body.pipe === 'function') {
+        readStream = body;
+        body = null;
+    }
+    </handleReadStream>
+    <constructURL>
+    url = url || getUrl({
+        ForcePathStyle: self.options.ForcePathStyle,
+        protocol: self.options.Protocol,
+        domain: self.options.Domain,
+        bucket: bucket,
+        region: region,
+        object: object,
+    });
+    if (params.action) {
+        url = url + '?' + params.action;
+    }
+    </constructURL>
+    <prepareRequestOptions>
+    var opt = {
+        method: method,
+        url: url,
+        headers: params.headers,
+        qs: params.qs,
+        body: body,
+        json: json,
+    };
+    </prepareRequestOptions>
+    <setAuthorizationHeaders>
+    opt.headers.Authorization = params.AuthData.Authorization;
+    params.AuthData.Token && (opt.headers['token'] = params.AuthData.Token);
+    params.AuthData.ClientIP && (opt.headers['clientIP'] = params.AuthData.ClientIP);
+    params.AuthData.ClientUA && (opt.headers['clientUA'] = params.AuthData.ClientUA);
+    params.AuthData.XCosSecurityToken && (opt.headers['x-cos-security-token'] = params.AuthData.XCosSecurityToken);
+    </setAuthorizationHeaders>
+    <configureRequestOptions>
+    opt.headers && (opt.headers = util.clearKey(opt.headers));
+    opt = util.clearKey(opt);
+    var Ip = this.options.Ip;
+    if (Ip) {
+        opt.url = opt.url.replace(/^(https?:\/\/)([^\/]+)/, function (str, pre, Host) {
+            opt.headers.Host = Host;
+            return pre + Ip;
+        });
+    }
+    if (this.options.StrictSsl !== true) {
+        opt.strictSSL = this.options.StrictSsl;
+    }
+    if (this.options.Proxy) {
+        opt.proxy = this.options.Proxy;
+    }
+    if (this.options.Timeout) {
+        opt.timeout = this.options.Timeout;
+    }
+    if (this.options.KeepAlive) {
+        opt.forever = true;
+    }
+    </configureRequestOptions>
+    <preSendEmit>
+    self.emit('before-send', opt);
+    var sender = REQUEST(opt);
+    var retResponse;
+    var hasReturned;
+    </preSendEmit>
+    <setupCallback>
+    var cb = function (err, data) {
+        TaskId && self.off('inner-kill-task', killTask);
+        if (hasReturned) return;
+        hasReturned = true;
+        var attrs = {};
+        retResponse && retResponse.statusCode && (attrs.statusCode = retResponse.statusCode);
+        retResponse && retResponse.headers && (attrs.headers = retResponse.headers);
+        if (err) {
+            err = util.extend(err || {}, attrs);
+            callback(err, null);
+        } else {
+            data = util.extend(data || {}, attrs);
+            callback(null, data);
+        }
+        if (sender) {
+            sender.removeAllListeners && sender.removeAllListeners();
+            sender = null;
+        }
+    };
+    </setupCallback>
+    <xml2JsonConversion>
+    var xml2json = function (body) {
+        try {
+            json = util.xml2json(body) || {};
+        } catch (e) {
+            json = body || {};
+        }
+        return json;
+    };
+    </xml2JsonConversion>
+    <registerErrorEventHandler>
+    sender.on('error', function (err) {
+        cb({error: err});
+    });
+    </registerErrorEventHandler>
+    <processResponse>
+    sender.on('response', function (response) {
+        retResponse = response;
+        var responseContentLength = response.headers['content-length'] || 0;
+        var chunkList = [];
+        var statusCode = response.statusCode;
+        var statusSuccess = Math.floor(statusCode / 100) === 2; // 2xx status code check
+        if (statusSuccess && params.outputStream) {
+            sender.on('end', function () {
+                    cb(null, {});
+            });
+        } else if (responseContentLength >= process.binding('buffer').kMaxLength && opt.method !== 'HEAD') {
+            cb({error: 'file size large than ' + process.binding('buffer').kMaxLength + ', please use "Output" Stream to getObject.'});
+        } else {
+            var dataHandler = function (chunk) {
+                chunkList.push(chunk);
+            };
+            var endHandler = function () {
+                var json;
+                try {
+                    var body = Buffer.concat(chunkList);
+                } catch (e) {
+                    cb({error: e});
+                    return;
+                }
+                var bodyStr = body.toString();
+                if (statusSuccess) {
+                    if (rawBody) {
+                        cb(null, {body: body});
+                    } else if (body.length) {
+                        json = xml2json(body.toString());
+                        if (json && json.Error) {
+                            cb({error: json.Error});
+                        } else {
+                            cb(null, json);
+                        }
+                    } else {
+                        cb(null, {});
+                    }
+                } else {
+                    bodyStr && (json = xml2json(bodyStr));
+                    cb({error: json && json.Error || response.statusMessage || 'statusCode error'});
+                }
+                chunkList = null;
+            };
+            sender.on('data', dataHandler);
+            sender.on('end', endHandler);
+        }
+    });
+    </processResponse>
+    <manageDataTask>
+    var killTask = function (data) {
+        if (data.TaskId === TaskId) {
+            sender && sender.abort && sender.abort();
+            self.off('inner-kill-task', killTask);
+        }
+    };
+    TaskId && self.on('inner-kill-task', killTask);
+    </manageDataTask>
+    <handleProgressEvents>
+    if (params.onProgress && typeof params.onProgress === 'function') {
+        var contentLength = opt.headers['Content-Length'];
+        var time0 = Date.now();
+        var size0 = 0;
+        sender.on('drain', function () {
+            var time1 = Date.now();
+            var loaded = 0;
+            try {
+                loaded = sender.req.connection.bytesWritten - sender.req._header.length;
+            } catch (e) {}
+            var total = contentLength;
+            var speed = parseInt((loaded - size0) / ((time1 - time0) / 1000) * 100) / 100;
+            var percent = total ? (parseInt(loaded / total * 100) / 100) : 0;
+            time0 = time1;
+            size0 = loaded;
+            params.onProgress({
+                loaded: loaded,
+                total: total,
+                speed: speed,
+                percent: percent,
+            });
+        });
+    }
+
+    if (params.onDownloadProgress && typeof params.onDownloadProgress === 'function') {
+        var time0 = Date.now();
+        var size0 = 0;
+        var loaded = 0;
+        var total = 0;
+        sender.on('response', function (res) {
+            total = res.headers['content-length'];
+            sender.on('data', function (chunk) {
+                loaded += chunk.length;
+                var time1 = Date.now();
+                var speed = parseInt((loaded - size0) / ((time1 - time0) / 1000) * 100) / 100;
+                var percent = total ? (parseInt(loaded / total * 100) / 100) : 0;
+                time0 = time1;
+                size0 = loaded;
+                params.onDownloadProgress({
+                    loaded: loaded,
+                    total: total,
+                    speed: speed,
+                    percent: percent,
+                });
+            });
+        });
+    }
+    </handleProgressEvents>
+    <handleStreams>
+    if (readStream) {
+        readStream.on('error', function (err) {
+            sender && sender.abort && sender.abort();
+            cb(err);
+        });
+        readStream.pipe(sender);
+    }
+    if (params.outputStream) {
+        params.outputStream.on('error', function (err) {
+            sender && sender.abort && sender.abort();
+            cb(err)
+        });
+        sender.pipe(params.outputStream);
+    }
+    </handleStreams>
+    return sender;
+}
+</_submitRequest>
+
+<retrieveImage>
+function(id, callback) {
+    var self = this;
+    <makeRequestOptions>
+    var requestOptions = {
+        uri: '/images/' + id
+    };
+    </makeRequestOptions>
+    <makeAuthorizedRequest>
+    self.authorizedRequest(requestOptions, function(err, res, body) {
+        if (err || !body.image) {
+            callback(err);
+            return;
+        }
+        callback(err, new rackspace.Image(self, body.image));
+    });
+    </makeAuthorizedRequest>
+}
+</retrieveImage>
+
+<LayoutConstructor>
+function( config, parent ) {
+    var typeErrorMsg, contentItem;
+    <validateConfigType>
+    if( typeof config.type !== 'string' ) {
+        throw new lm.errors.ConfigurationError( 'Missing parameter \'type\'', config );
+    }
+    if( !this._typeToItem[ config.type ] ) {
+        typeErrorMsg = 'Unknown type \'' + config.type + '\'. ' +
+            'Valid types are ' + lm.utils.objectKeys( this._typeToItem ).join( ',' );
+        throw new lm.errors.ConfigurationError( typeErrorMsg );
+    }
+    </validateConfigType>
+    <adjustConfigForComponents>
+    if( config.type === 'component' && !( parent instanceof lm.items.Stack ) && !!parent ) {
+        config = {
+            type: 'stack',
+            isClosable: config.isClosable,
+            width: config.width,
+            height: config.height,
+            content: [ config ]
+        };
+    }
+    </adjustConfigForComponents>
+    <createContentItem>
+    contentItem = new this._typeToItem[ config.type ]( this, config, parent );
+    </createContentItem>
+    return contentItem;
+}
+</LayoutConstructor>
+
+<moveCarousel>
+function move (wrapBox, startIdx, endIdx, Duration) {
+    <earlyReturnCheck>
+    if (!wrapBox) {
+      return
+    }
+    
+    if (eleWidth !== ele.clientWidth) {
+      eleWidth = ele.clientWidth
+    }
+    </earlyReturnCheck>
+    <calculateMovingParameters>
+    imgIndex = endIdx
+    let endPosition = -eleWidth * endIdx
+    if (Duration) {
+      translateFn(endPosition, '0ms', wrapBox)
+      wrapBox.style.transitionDuration = '0ms'
+    } else {
+      translateFn(endPosition, '300ms', wrapBox)
+      wrapBox.style.transitionDuration = '300ms'
+    }
+    
+    let posIdxObj = resetPosAndIdx(imgIndex, childNum, eleWidth, endPosition)
+    curGestureClientx = posIdxObj.endPos
+    endIdx = posIdxObj.endIndex
+    imgIndex = endIdx
+    </calculateMovingParameters>
+    <updateIndicators>
+    if (dotItems.length > 0) {
+      changeIndicatorStyle(dotItems[startIdx - 1], dotItems[endIdx - 1], carouselParas.activeitem)
+    }
+    
+    if (curGestureClientx !== endPosition) {
+      setTimeout(function () {
+        translateFn(curGestureClientx, '0ms', wrapBox)
+        btnLock.stop = 1
+      }, 400)
+    }
+    </updateIndicators>
+    <finalizeMove>
+    btnLock.stop = 1
+    indicatorChange(imgIndex)
+    viewer.eventAction.execute('switchCompleted', ele, {
+      currIndex: imgIndex,
+      currCarouselItem: childNodes[imgIndex],
+      carouselChildrenLength: childNum
+    })
+    
+    prerenderSetSrc(childNodes, imgIndex, NUM, arraySrc)
+    
+    if (autoHeight) {
+      let time = 0.3
+      if (Duration) time = 0
+      changeCarouselHeight(wrapBox.parentNode.parentNode, imgIndex, time)
+    }
+    </finalizeMove>
+}
+</moveCarousel>
+
+<getSSRRenderer>
+function (ComponentClass) {
+    var renderer = ComponentClass.__ssrRenderer;
+    <createRendererFunction>
+    if (!renderer) {
+        var code = compileJSSource(ComponentClass);
+        renderer = (new Function('return ' + code))();
+        ComponentClass.__ssrRenderer = renderer;
+    }
+    </createRendererFunction>
+    return renderer;
+}
+</getSSRRenderer>
+
+<initializeStateAction>
+function (state, action) {
+    <cleanInitialState>
+    if (state) {
+      let initialValue = state.value || {}
+      if (state.baseModel) {
+        initialValue = recursiveClean(initialValue, state.baseModel)
+        state.baseModel = getDereferencedModelSchema(state.baseModel)
+        state.model = evaluateConditions(state.baseModel, initialValue, undefined, initialValue)
+        
+        state.value = undefined
+      }
+      if (state.view && !state.baseView) {
+        state.baseView = state.view
+      }
+      </cleanInitialState>
+      <evaluateInitialView>
+      if (state.baseView) {
+        state.view = evaluateViewConditions(state.baseView, initialValue)
+      }
+      </evaluateInitialView>
+    }
+    <setNewState>
+    const newState = initialState(state || {})
+    newState.lastAction = 'INIT'
+    newState.value = immutable(newState.value)
+    </setNewState>
+    return newState
+}
+</initializeStateAction>
+
+<createBatchMethod>
+function createBatchMethod(name) {
+    var batch = this;
+    <addProxyFunctionToBatch>
+    batch[name] = proxy;
+    function proxy() {
+        var args = toArray(arguments)
+            , context = batch.__context__;
+        <deferCrossTickExecution>
+        if (!context) {
+            batch.__context__ = context = []
+            process.nextTick(exec.bind(null, batch))
+        }
+        </deferCrossTickExecution>
+        context.push([name, args]);
+        return batch;
+    }
+    </addProxyFunctionToBatch>
+}
+</createBatchMethod>
+
+<SpriteBatchNodeConstructor>
+function SpriteBatchNode (opts) {
+    SpriteBatchNode.superclass.constructor.call(this, opts);
+    <processOptions>
+    var file         = opts.file
+      , url          = opts.url
+      , textureAtlas = opts.textureAtlas
+      , texture      = opts.texture;
+    </processOptions>
+    <initializeTextureAtlas>
+    if (url || file || texture) {
+        this.ready = url ? false : true;
+        textureAtlas = new TextureAtlas({url: url, file: file, texture: texture});
+        <waitUntilAtlasLoaded>
+        if (!this.ready) {
+            events.addListenerOnce(textureAtlas, 'load', function () {
+                    this.ready = true;
+            }.bind(this));
+        }
+        </waitUntilAtlasLoaded>
+    }
+    </initializeTextureAtlas>
+    <setTextureAtlas>
+    this.textureAtlas = textureAtlas;
+    </setTextureAtlas>
+    <attachOpacityPropertyListener>
+    events.addPropertyListener(this, 'opacity', 'change', function () {
+        for (var i = 0, len = this.children.length; i < len; i++) {
+            var child = this.children[i];
+            child.opacity = this.opacity;
+        }
+    }.bind(this));
+    </attachOpacityPropertyListener>
+}
+</SpriteBatchNodeConstructor>
+
+<renderSequence>
+function render(src, meta, block) {
+    var newSrc = [src];
+    <modifyExamples>
+    getExamples(meta).forEach(function(example, i){
+        if (i === 0) {
+            newSrc = [];
+        }
+        var lines = example.split('\n');
+        lines.forEach(function(line) {
+            var regex = new RegExp(block, 'g');
+            line = line.replace(regex, src.split('\n'));
+            newSrc.push(line);
+        });
+    });
+    </modifyExamples>
+    return newSrc.join('\n')
+}
+</renderSequence>
+
+<formatErrorReports>
+function formatter (fail) {
+    <mapErrorsToStructuredFormat>
+    return fail.map(function oops (err) {
+        return {
+                line: err.line
+            , column: err.character
+            , message: err.reason
+            , ref: err
+        };
+    });
+    </mapErrorsToStructuredFormat>
+}
+</formatErrorReports>
+```
+
+Notes:
+
+- The `renderSequence` function is compliant as the process is coherently modifying examples, which collectively serves the single responsibility of rendering the sequence.
+- The `formatErrorReports` function is also compliant, as the mapping step is a cohesive action to transform errors into a structured format.
+- In most cases, integral setup steps, parameter processing, or configuration steps haven't been segmented because they contribute to a single cohesive responsibility (e.g., initializing a `SpriteBatchNode` or setting up `initialValue` in the state action). They've been annotated only if they've reflected a distinctly separate responsibility.
+- The `createBatchMethod` function is close to the edge; the proxy batch creation and cross-tick execution are inherently tied together but embody a distinct setup of a delayed batch operation execution, justifying the split.

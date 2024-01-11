@@ -1,0 +1,416 @@
+```javascript
+<checkFileExists>
+function checkFileExists(filename, callback) {
+  <checkFsExists>
+  if (fs.exists !== undefined) {
+    fs.exists(filename, callback);
+  </checkFsExists> 
+  else {
+    <performFsStat>
+    fs.stat(filename, function (err) {
+      callback(!err);
+    });
+    </performFsStat> 
+  }
+}
+</checkFileExists>
+
+<_getUpdateInformation>
+function _getUpdateInformation(force, dontCache, _versionInfoUrl) {
+  <handleViewState>
+  var lastInfoURLFetchTime = PreferencesManager.getViewState("lastInfoURLFetchTime");
+  </handleViewState>
+  
+  <initializeResult>
+  var result = new $.Deferred();
+  </initializeResult>
+
+  <determineFetchData>
+  var fetchData = false;
+  var data;      
+  if (force) {
+    fetchData = true;
+  }
+  data = PreferencesManager.getViewState("updateInfo");
+  if (!data) {
+    fetchData = true;
+  }
+  if ((new Date()).getTime() > lastInfoURLFetchTime + ONE_DAY) {
+    fetchData = true;
+  }
+  </determineFetchData>
+  
+  <performFetchData>
+  if (fetchData) {
+    <initializeLookupPromiseAndLocale>
+    var lookupPromise = new $.Deferred(),
+        localVersionInfoUrl;    
+    var locale = brackets.getLocale().toLowerCase();
+    </initializeLookupPromiseAndLocale>
+    
+    <performLocaleCheckAndFetch>
+    if (locale !== "en" && locale !== "en-us") {
+      localVersionInfoUrl = _versionInfoUrl || _getVersionInfoUrl();
+      <performAjaxHead>
+      $.ajax({
+        url: localVersionInfoUrl,
+        cache: false,
+        type: "HEAD"
+      })
+      </performAjaxHead>
+      .fail(function (jqXHR, status, error) {
+        <handleFailLocaleFallback>
+        var tmpUrl = _getVersionInfoUrl(brackets.getLocale(), true);
+        if (tmpUrl !== localVersionInfoUrl) {
+          <performSecondaryAjaxHead>
+          $.ajax({
+            url: tmpUrl,
+            cache: false,
+            type: "HEAD"
+          })
+          </performSecondaryAjaxHead>
+          .fail(function (jqXHR, status, error) {
+            localVersionInfoUrl = _getVersionInfoUrl("en");
+          })
+          .done(function (jqXHR, status, error) {
+            localVersionInfoUrl = tmpUrl;
+          })
+          .always(function (jqXHR, status, error) {
+            lookupPromise.resolve();
+          });
+        } else {
+          localVersionInfoUrl = _getVersionInfoUrl("en");
+          lookupPromise.resolve();
+        }
+        </handleFailLocaleFallback>
+      })
+      .done(function (jqXHR, status, error) {
+        lookupPromise.resolve();
+      });
+    } else {
+      localVersionInfoUrl = _versionInfoUrl || _getVersionInfoUrl("en");
+      lookupPromise.resolve();
+    }
+    </performLocaleCheckAndFetch>
+    
+    <handleLookupPromiseResolution>
+    lookupPromise.done(function () {
+      <performFinalDataFetch>
+      $.ajax({
+        url: localVersionInfoUrl,
+        dataType: "json",
+        cache: false
+      })
+      </performFinalDataFetch>
+      .done(function (updateInfo, textStatus, jqXHR) {
+        <cacheUpdateInfoAndResolve>
+        if (!dontCache) {
+          lastInfoURLFetchTime = (new Date()).getTime();
+          PreferencesManager.setViewState("lastInfoURLFetchTime", lastInfoURLFetchTime);
+          PreferencesManager.setViewState("updateInfo", updateInfo);
+        }
+        result.resolve(updateInfo);
+        </cacheUpdateInfoAndResolve>
+      })
+      .fail(function (jqXHR, status, error) {
+        <handleFailedFetchRequest>
+        if (!jqXHR.responseText) {
+          result.reject();
+          return;
+        }
+        try {
+          data = JSON.parse(jqXHR.responseText);
+          result.resolve(data);
+        } catch (e) {
+          result.reject();
+        }
+        </handleFailedFetchRequest>
+      });
+    });
+    </handleLookupPromiseResolution>
+  } else {
+    <resolveWithData>
+    result.resolve(data);
+    </resolveWithData>
+  }
+  </performFetchData>
+  
+  <returnPromise>
+  return result.promise();
+  </returnPromise>
+}
+</_getUpdateInformation>
+
+<ConstructorFunction>
+function (deps) {
+  <validateDependencies>
+  if (!deps.layerGroupModel) throw new Error('layerGroupModel is required');
+  if (!deps.layersCollection) throw new Error('layersCollection is required');
+  if (!deps.dataviewsCollection) throw new Error('dataviewsCollection is required');
+  </validateDependencies>
+
+  <assignDependencies>
+  this._layerGroupModel = deps.layerGroupModel;
+  this._layersCollection = deps.layersCollection;
+  this._dataviewsCollection = deps.dataviewsCollection;
+  </assignDependencies>
+}
+</ConstructorFunction>
+
+<ImageTransformationFunction>
+function(src,dst,opt){
+  <initializeVariables>
+  var srcPixels = src.data,
+      dstPixels = dst.data,
+      xSize = src.width,
+      ySize = src.height,
+      xMid = opt.polarCenterX || xSize/2,
+      yMid = opt.polarCenterY || ySize/2,
+      i, x, y, r=0,g=0,b=0,a=0;
+  var rad, rMax = Math.sqrt( xMid*xMid + yMid*yMid );
+  x = xSize - xMid;
+  y = ySize - yMid;
+  rad = Math.sqrt( x*x + y*y );
+  rMax = (rad > rMax)?rad:rMax;
+  var rSize = ySize,
+      tSize = xSize,
+      radius, theta;
+  var conversion = 360/tSize*Math.PI/180, sin, cos;
+  </initializeVariables>
+
+  <performTransformation>
+  for( theta=0; theta<tSize; theta+=1 ){
+      sin = Math.sin(theta*conversion);
+      cos = Math.cos(theta*conversion);
+      for( radius=0; radius<rSize; radius+=1 ){
+          x = Math.floor(xMid+rMax*radius/rSize*cos);
+          y = Math.floor(yMid+rMax*radius/rSize*sin);
+          i = (y*xSize + x)*4;
+          r = srcPixels[i+0];
+          g = srcPixels[i+1];
+          b = srcPixels[i+2];
+          a = srcPixels[i+3];
+          i = (theta + radius*xSize) * 4;
+          dstPixels[i+0] = r;
+          dstPixels[i+1] = g;
+          dstPixels[i+2] = b;
+          dstPixels[i+3] = a;
+      }
+  }
+  </performTransformation>
+}
+</ImageTransformationFunction>
+
+<getValueHandler>
+function getValueHandler (value, localHandlers, globalHandlers) {
+  <retrieveHandler>
+  return _getValueHandler(value, localHandlers) || _getValueHandler(value, globalHandlers);
+  </retrieveHandler>
+}
+</getValueHandler>
+
+<getArrayFromCache>
+function( renderer, n ) {
+  <initializeCache>
+  var r = arrayCacheI32[ n ];
+  </initializeCache>
+
+  <allocateTextureUnits>
+  if ( r === undefined ) {
+    r = new Int32Array( n );
+    arrayCacheI32[ n ] = r;
+  }
+  for ( var i = 0; i !== n; ++ i )
+    r[ i ] = renderer.allocTextureUnit();
+  </allocateTextureUnits>
+
+  <returnArray>
+  return r;
+  </returnArray>
+}
+</getArrayFromCache>
+
+<ResponsiveDataTableConstructor>
+function ( settings, opts ) {
+  <checkDataTableVersion>
+  if ( ! DataTable.versionCheck || ! DataTable.versionCheck( '1.10.1' ) ) {
+    throw 'DataTables Responsive requires DataTables 1.10.1 or newer';
+  }
+  </checkDataTableVersion>
+
+  <initializeSettings>
+  this.s = {
+    dt: new DataTable.Api( settings ),
+    columns: []
+  };
+  </initializeSettings>
+
+  <preventMultipleInitializations>
+  if ( this.s.dt.settings()[0].responsive ) {
+    return;
+  }
+  </preventMultipleInitializations>
+
+  <configureDetailsOption>
+  if ( opts && typeof opts.details === 'string' ) {
+    opts.details = { type: opts.details };
+  }
+  </configureDetailsOption>
+
+  <setResponsiveOptions>
+  this.c = $.extend( true, {}, Responsive.defaults, DataTable.defaults.responsive, opts );
+  settings.responsive = this;
+  </setResponsiveOptions>
+
+  <callConstructor>
+  this._constructor();
+  </callConstructor>
+}
+</ResponsiveDataTableConstructor>
+
+<buildDomWrapper>
+function buildDomWrapper(el, options) {
+  <initializeDOMBuildingVariables>
+  let html = '';
+  let chart100percentWide = '';
+  let rangeChart = '';
+  </initializeDOMBuildingVariables>
+
+  <configureChartStyles>
+  if (options.legend.position === 'top' || options.legend.position === 'bottom') {
+    chart100percentWide = 'c3-chart-100-percent';
+  }
+  if (options.range) {
+    rangeChart = 'keen-dataviz-range';
+  }
+  let container = `<div class="c3-chart ${chart100percentWide} ${rangeChart}"></div>`;
+  let align = 'horizontal';
+  if (options.legend.position === 'left' || options.legend.position === 'right') {
+    align = 'vertical';
+  }
+  </configureChartStyles>
+
+  <buildLegendContainer>
+  if (options.legend && options.legend.show) {
+    if (options.legend.position === 'top' || options.legend.position === 'left') {
+      container = `<div class="keen-c3-legend keen-c3-legend-${align} keen-c3-legend-${options.legend.position}"></div>${container}`;
+    } else {
+      container = `${container}<div class="keen-c3-legend keen-c3-legend-${align} keen-c3-legend-${options.legend.position}"></div>`;
+    }
+  }
+  </buildLegendContainer>
+
+  <buildHtmlStructure>
+  if(!options.react){
+    html += `<div class="${options.theme}">`;
+  }
+  if (options.title && options.showTitle) {
+    html += `<div class="keen-dataviz-title ${options.theme}-title">${options.title}</div>`;
+  }
+  html += `<div class="keen-dataviz-rendering keen-dataviz-rendering-${align} ${options.theme}-rendering ${options.theme}-rendering-${align}">${container}</div>`;
+  if (options.notes) {
+    html += `<div class="keen-dataviz-notes ${options.theme}-notes">${options.notes}</div>`;
+  }
+  if(!options.react){
+    html += '</div>';
+  }
+  el.innerHTML = html;
+  </buildHtmlStructure>
+}
+</buildDomWrapper>
+
+<performSaveOperation>
+function () {
+  <initializeSaveOperation>
+  this.saveOperation = {};
+  this.saveOperation.entity = this.ctrl.editor.getPlainValue();
+  this.saveOperation.oldEntity = this.ctrl.editor.getOldValue();
+  </initializeSaveOperation>
+  
+  <setupChangeBuffer>
+  var me =this;
+  var args = arguments;
+  this.ctrl.editor.bufferChange(function() {
+    <execInheritedBufferChange>
+    me.inherited(args);
+    </execInheritedBufferChange>
+  });
+  </setupChangeBuffer>
+}
+</performSaveOperation>
+
+<getTooltipPosition>
+function (boxWidth, boxHeight, point) {
+  <initializeTooltipContext>
+  var chart = this.chart,
+    distance = this.distance,
+    ret = {},
+    swapped,
+    first = ['y', chart.chartHeight, boxHeight, point.plotY + chart.plotTop],
+    second = ['x', chart.chartWidth, boxWidth, point.plotX + chart.plotLeft],
+    preferFarSide = point.ttBelow || (chart.inverted && !point.negative) || (!chart.inverted && point.negative),
+  </initializeTooltipContext>
+
+  <definePositionCalculations>
+  firstDimension = function (dim, outerSize, innerSize, point) {
+      var roomLeft = innerSize < point - distance,
+        roomRight = point + distance + innerSize < outerSize,
+        alignedLeft = point - distance - innerSize,
+        alignedRight = point + distance;
+      if (preferFarSide && roomRight) {
+          ret[dim] = alignedRight;
+      } else if (!preferFarSide && roomLeft) {
+          ret[dim] = alignedLeft;
+      } else if (roomLeft) {
+          ret[dim] = alignedLeft;
+      } else if (roomRight) {
+          ret[dim] = alignedRight;
+      } else {
+          return false;
+      }
+  },
+  secondDimension = function (dim, outerSize, innerSize, point) {
+      if (point < distance or point > outerSize - distance) {
+          return false;
+      } else if (point < innerSize / 2) {
+          ret[dim] = 1;
+      } else if (point > outerSize - innerSize / 2) {
+          ret[dim] = outerSize - innerSize - 2;
+      } else {
+          ret[dim] = point - innerSize / 2;
+      }
+  },
+  swap = function (count) {
+      var temp = first;
+      first = second;
+      second = temp;
+      swapped = count;
+  },
+  run = function () {
+      if (firstDimension.apply(0, first) !== false) {
+          if (secondDimension.apply(0, second) === false && !swapped) {
+              swap(true);
+              run();
+          }
+      } else if (!swapped) {
+          swap(true);
+          run();
+      } else {
+          ret.x = ret.y = 0;
+      }
+  };
+  </definePositionCalculations>
+  
+  <executePositioning>
+  if (chart.inverted || this.len > 1) {
+      swap();
+  }
+  run();
+  </executePositioning>
+
+  <returnTooltipPosition>
+  return ret;
+  </returnTooltipPosition>
+}
+</getTooltipPosition>
+```

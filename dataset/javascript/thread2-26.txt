@@ -1,0 +1,261 @@
+Below are SRP annotations for the provided JavaScript functions:
+
+```javascript
+<_set>
+function _set(obj, key, val) {
+    <validation>
+    if (arguments.length !== 3 || !is_1.isObject(obj) || (!is_1.isArray(key) && !is_1.isString(key)))
+        return null;
+    </validation>
+    
+    <splitKey>
+    var props = string_1.split(key);
+    </splitKey>
+    
+    <propInitialization>
+    var prop = props.shift();
+    var match = matchIndex(prop);
+    var next = obj[prop];
+    </propInitialization>
+    
+    <prepareNextValue>
+    if (!is_1.isValue(next) && !match)
+        next = obj[prop] = {};
+    if (match) {
+        if (!obj[match.name])
+            obj[match.name] = [];
+        next = obj[match.name][match.index];
+    }
+    </prepareNextValue>
+    
+    <recursiveSetValue>
+    if (props.length > 0) {
+        _set(next, props, val);
+    }
+    </recursiveSetValue>
+    <setFinalValue>
+    else {
+        if (match)
+            obj[match.name][match.index] = val;
+        else
+            obj[prop] = val;
+    }
+    </setFinalValue>
+    
+    return obj;
+}
+</_set>
+
+<_takeDrop>
+function _takeDrop(arrayCase, generalCase) {
+    <takeDropFunctionFactory>
+    return function(n) {
+      return function(xs) {
+        <validation>
+        if (n < 0) return Nothing;
+        </validation>
+
+        <processArray>
+        if (Array.isArray (xs)) {
+          return n <= xs.length ? Just (arrayCase (n, xs)) : Nothing;
+        }
+        </processArray>
+
+        <generalCaseProcessing>
+        var m = Z.reduce (function(m, x) {
+          return Z.map (function(pair) {
+            var n = pair.fst;
+            var xs = pair.snd;
+            return Pair (n - 1) (generalCase (n, xs, x));
+          }, m);
+        }, Just (Pair (n) (Z.empty (xs.constructor))), xs);
+
+        return Z.map (Pair.snd, Z.reject (B (gt (0)) (Pair.fst), m));
+        </generalCaseProcessing>
+      };
+    };
+    </takeDropFunctionFactory>
+}
+</_takeDrop>
+
+<findRefObjectsByWildcardNamespace>
+function findRefObjectsByWildcardNamespace (ref, components) {
+  <refSplitting>
+  const [ type ] = ref.split(':')
+  </refSplitting>
+
+  <objectsRetrieval>
+  const objects = components[type]
+  </objectsRetrieval>
+  
+  return objects ? Object.values(objects) : null
+}
+</findRefObjectsByWildcardNamespace>
+
+<startColumnResize>
+function(e) {
+    <startWidthCapture>
+    this.startWidth = this.headCellLiner.offsetWidth;
+    this.startX = YAHOO.util.Event.getXY(e)[0];
+    </startWidthCapture>
+    
+    <calculatePadding>
+    this.nLinerPadding = (parseInt(YAHOO.util.Dom.getStyle(this.headCellLiner,"paddingLeft"),10)|0) +
+            (parseInt(YAHOO.util.Dom.getStyle(this.headCellLiner,"paddingRight"),10)|0);
+    </calculatePadding>
+}
+</startColumnResize>
+
+<addRoutes>
+function addRoutes( app ) {
+  <routerSetup>
+  router.get( '/', dbRequestHandler )
+  </routerSetup>
+  
+  <appMiddleware>
+  app.use( router )
+  app.use( express.static( 'public' ) )
+  </appMiddleware>
+}
+</addRoutes>
+
+<logicOperationBlocklyBlock>
+function() {
+  <blockSetup>
+    var OPERATORS =
+        [[Blockly.Msg.LOGIC_OPERATION_AND, 'AND'],
+         [Blockly.Msg.LOGIC_OPERATION_OR, 'OR']];
+    this.setHelpUrl(Blockly.Msg.LOGIC_OPERATION_HELPURL);
+    this.setColour(Blockly.Blocks.logic.HUE);
+    this.setOutput(true, 'Boolean');
+    this.appendValueInput('A')
+        .setCheck('Boolean');
+    this.appendValueInput('B')
+        .setCheck('Boolean')
+        .appendField(new Blockly.FieldDropdown(OPERATORS), 'OP');
+    this.setInputsInline(true);
+  </blockSetup>
+    
+  <tooltipSetup>
+    var thisBlock = this;
+    this.setTooltip(function() {
+      var op = thisBlock.getFieldValue('OP');
+      var TOOLTIPS = {
+        'AND': Blockly.Msg.LOGIC_OPERATION_TOOLTIP_AND,
+        'OR': Blockly.Msg.LOGIC_OPERATION_TOOLTIP_OR
+      };
+      return TOOLTIPS[op];
+    });
+  </tooltipSetup>
+}
+</logicOperationBlocklyBlock>
+
+<toMap>
+function toMap(keySelector, elementSelector) {
+  <keySelectorValidation>
+  if (!keySelector) return new Map(this);
+  </keySelectorValidation>
+
+  <elementSelectorDefaulting>
+  elementSelector = typeof elementSelector === 'function' ? elementSelector : i => i;
+  </elementSelectorDefaulting>
+  
+  <mapConstruction>
+  let map = new Map();
+
+  for (let item of this) {
+    let key = keySelector(item);
+    let element = elementSelector(item);
+    map.set(key, element);
+  }
+  </mapConstruction>
+
+  return map;
+}
+</toMap>
+
+<loggerInit>
+function init(o){
+  <defaultSettings>
+	opts.outputPath = dfault( o.outputPath, opts.outputPath );
+
+	opts.consoleOutput = dfault(o.consoleOutput, opts.consoleOutput );
+	opts.consoleOutputLevel = dfault(o.consoleOutputLevel, opts.consoleOutputLevel );
+	
+	opts.fileOutput = dfault(o.fileOutput, opts.fileOutput);
+	opts.fileOutputLevel= dfault(o.fileOutputLevel, opts.fileOutputLevel);
+	
+	opts.dateTimeFormat = dfault(o.dateTimeFormat, opts.dateTimeFormat );
+	opts.fileNamePrefix = dfault(o.fileNamePrefix, opts.fileNamePrefix );
+	opts.fileNameSuffix = dfault(o.fileNameSuffix, opts.fileNameSuffix );
+	opts.fileNameDateFormat = dfault(o.fileNameDateFormat, opts.fileNameDateFormat  );
+	
+	opts.verbose = dfault(o.verbose, opts.verbose ); 
+	opts.customIntro = dfault(o.customIntro, opts.customIntro );
+  </defaultSettings>
+  
+  <customIntro>
+	if(typeof opts.customIntro ==='function') 
+		opts.customIntro(require('../../package.json')); 
+	else if(opts.customIntro != null &&  opts.customIntro != false);
+  </customIntro>
+	
+  <filenameGeneration>
+	opts.filename = opts.outputPath + opts.fileNamePrefix + now().format(opts.fileNameDateFormat) + opts.fileNameSuffix +".log";
+  </filenameGeneration>
+
+  <whenTheDayEndsSetup>
+	whenTheDayEnds(); 
+  </whenTheDayEndsSetup>
+
+  <mkdirSyncCall>
+    mkdirSync(opts.outputPath);
+  </mkdirSyncCall>
+
+  <initializedFlag>
+	initialized =true;
+  </initializedFlag>
+
+  return self;
+}
+</loggerInit>
+
+<selectCallbackHandler>
+function(event, ui){
+  <preventDefaultAction>
+    if( ! anchor._fill_p ){
+	event.preventDefault();		
+    }
+  </preventDefaultAction>
+
+  <documentRetrieval>
+    var doc_to_apply = null;
+    if( ui.item ){
+	doc_to_apply = ui.item.document;
+    }
+  </documentRetrieval>
+
+  <invokeSelectCallback>
+    if( doc_to_apply && 
+	bbop.core.is_defined(anchor._list_select_callback) ){
+	anchor._list_select_callback(doc_to_apply);
+    }
+  </invokeSelectCallback>
+}
+</selectCallbackHandler>
+
+<stripQuotes>
+function stripQuotes (str) {
+  <characterCodeRetrieval>
+  var a = str.charCodeAt(0);
+  var b = str.charCodeAt(str.length - 1);
+  </characterCodeRetrieval>
+  
+  <quoteRemoval>
+  return a === b && (a === 0x22 || a === 0x27)
+    ? str.slice(1, -1)
+    : str
+  </quoteRemoval>
+}
+</stripQuotes>
+```

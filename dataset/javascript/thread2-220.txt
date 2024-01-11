@@ -1,0 +1,276 @@
+```javascript
+<decodeJson>
+function decodeJson(basePath, value) {
+    <initializeVariables>
+    var data = {},
+        path = basePath,
+        pathType = cutils.getPathDateType(path),
+        oid = cutils.getPathIdKey(path).oid,
+        rid;
+    </initializeVariables>
+
+    <parseJsonValue>
+    if (_.isBuffer(value) || _.isString(value))
+        value = JSON.parse(value);
+
+    if (!_.isPlainObject(value) || !value.e) 
+        throw new TypeError('value should be an object.');
+    </parseJsonValue>
+
+    <processDecodedValue>
+    switch (pathType) {
+        case 'object':         
+            _.forEach(value.e, function (resrc) {
+                <processResourceForObjectType>
+                // ... code block to process each resource for object type
+                </processResourceForObjectType>
+            });
+            break;
+
+        case 'instance':         
+            _.forEach(value.e, function (resrc) {
+                <processResourceForInstanceType>
+                // ... code block to process each resource for instance type
+                </processResourceForInstanceType>
+            });
+            break;
+
+        case 'resource':         
+            _.forEach(value.e, function (resrc) {
+                <processResourceForResourceType>
+                // ... code block to process each resource for resource type
+                </processResourceForResourceType>
+            });
+            break;
+
+        default:
+            break;
+     }
+     </processDecodedValue>
+    
+    return data;
+}
+</decodeJson>
+
+<_fnSaveState>
+function _fnSaveState(oSettings) {
+    <checkStateSaveRequirement>
+    if (!oSettings.oFeatures.bStateSave || oSettings.bDestroying) {
+        return;
+    }
+    </checkStateSaveRequirement>
+    
+    <prepareStateObject>
+    var i, iLen, bInfinite = oSettings.oScroll.bInfinite;
+    var oState = {
+        // object construction with state data
+    };
+    </prepareStateObject>
+
+    <storeColumnVisibility>
+    for (i = 0, iLen = oSettings.aoColumns.length; i < iLen; i++) {
+        oState.abVisCols.push(oSettings.aoColumns[i].bVisible);
+    }
+    </storeColumnVisibility>
+
+    <saveStateToCallback>
+    _fnCallbackFire(oSettings, "aoStateSaveParams", 'stateSaveParams', [oSettings, oState]);
+    
+    oSettings.fnStateSave.call(oSettings.oInstance, oSettings, oState);
+    </saveStateToCallback>
+}
+</_fnSaveState>
+
+<URI_comparison>
+function(to) {
+    <parseURI>
+    if ((to instanceof URI) === false) {
+        to = new URI(to);
+    }
+    </parseURI>
+
+    <compareURIs>
+    if (this.isAbsolute() && to.isAbsolute() && this.host === to.host && this.port === to.port &&
+        (this.scheme === to.scheme || (this.isFilePath() && to.isFilePath())) &&
+        (this.path.indexOf(to.path) === 0 && (to.path.length === this.path.length ||
+                                              (to.path.length === 1 && to.path[0] === '/') ||
+                                              this.path[to.path.length] === '/'))) {
+        return (to.path.length === 1 && to.path[0] === '/') ? this.path.substring(to.path.length)
+                                                            : this.path.substring(to.path.length + 1);
+    } else {
+        return null;
+    }
+    </compareURIs>
+}
+</URI_comparison>
+
+<Doughnut>
+function Doughnut(ctx, data, cfg) {
+    <initializeProperties>
+    var canvas = ctx.canvas;
+    this.width = canvas.width;
+    this.height = canvas.height;
+
+    this.ctx = ctx;
+    this.data = data;
+    this.cfg = cfg;
+    </initializeProperties>
+
+    <calculateDoughnutDimensions>
+    this.doughnutRadius = min([this.height / 2, this.width / 2]) - 5;
+
+    this.cutoutRadius = this.doughnutRadius * (cfg.percentageInnerCutout / 100);
+    </calculateDoughnutDimensions>
+
+    <calculateSegmentTotal>
+    var segmentTotal = 0, i = 0, d;
+    while ((d = data[i++])) {
+        segmentTotal += d.value;
+    }
+    this.segmentTotal = segmentTotal;
+    </calculateSegmentTotal>
+
+    <drawDoughnut>
+    this.draw();
+    </drawDoughnut>
+}
+</Doughnut>
+
+<resetPointer>
+function() {
+    <resetChartPointer>
+    var chart = charts[hoverChartIndex];
+    if (chart) {
+        chart.pointer.reset();
+        chart.pointer.chartPosition = null;
+    }
+    </resetChartPointer>
+}
+</resetPointer>
+
+<addPlugin>
+function addPlugin(config, pluginName, version) {
+    <checkAndToggleDefaultPlugin>
+    if (isDefaultPlugin(pluginName, version)) {
+        return togglePlugin(config, pluginName, true);
+    }
+    </checkAndToggleDefaultPlugin>
+
+    <addCustomPlugin>
+    var deps = config.getPluginDependencies();
+    var dep = PluginDependency.create(pluginName, version);
+
+    deps = deps.push(dep);
+    return config.setPluginDependencies(deps);
+    </addCustomPlugin>
+}
+</addPlugin>
+
+<cacheModification>
+function(key, value) {
+    <retrieveCache>
+    var c = getCache(this.ns);
+    </retrieveCache>
+
+    <updateCache>
+    if (arguments.length === 1 && typeof key === "object") {
+        Object.keys(key).forEach(function(k) {
+            c[k] = key[k];
+        }, this);
+    } else {
+        c[key] = value;
+    }
+    </updateCache>
+
+    <saveCache>
+    return setCache(this.ns, c);
+    </saveCache>
+}
+</cacheModification>
+
+<tryTemplateShorthand>
+async function tryTemplateShorthand(templateName: string) {
+    <checkTemplateName>
+    if (templateName.match(FILE_PROTOCOL) || templateName.match(HTTP_PROTOCOL)) {
+        return templateName;
+    }
+    </checkTemplateName>
+
+    <attemptToResolveTemplateName>
+    try {
+        const reactNativeTemplatePackage = `react-native-template-${templateName}`;
+        const response = await fetch(`https:);
+
+        if (JSON.parse(response).name) {
+            return reactNativeTemplatePackage;
+        }
+    } catch (e) {
+        // Error handling if necessary
+    }
+    </attemptToResolveTemplateName>
+
+    return templateName;
+}
+</tryTemplateShorthand>
+
+<combineClassNames>
+function combineClassNames(...classNames) {
+    <processClassNames>
+    return classNames.map((value) => {
+        if (!value) {
+            return value;
+        }
+
+        return Array.isArray(value) ?
+            combineClassNames.apply(void 0, value) :
+            value;
+    }).join(` `).replace(/ +/g, ` `).trim();
+    </processClassNames>
+}
+</combineClassNames>
+
+<getRfdData>
+function getRfdData() {
+    <logRetrieval>
+    console.log('getRfdData');
+    </logRetrieval>
+
+    <checkDaemon>
+    if (config.daemons[daemon].type === 'BidCos-RF' || config.daemons[daemon].type === 'HmIP') {
+        $('#load_grid-interfaces').show();
+        if (['BidCos-RF', 'HmIP'].includes(config.daemons[daemon].type)) {
+            $('#load_grid-rssi').show();
+        }
+        </checkDaemon>
+
+        const currentDaemon = daemon;
+        <retrieveListInterfaces>
+        rpcAlert(daemon, 'listBidcosInterfaces', [], (err, data) => {
+            if (daemon === currentDaemon) {
+                listInterfaces = data || [];
+                </retrieveListInterfaces>
+
+                <retrieveListRssi>
+                if (['BidCos-RF', 'HmIP'].includes(config.daemons[daemon].type)) {
+                    rpcAlert(daemon, 'rssiInfo', [], (err, data) => {
+                        listRssi = data;
+                        $('#gbox_grid-rssi').show();
+                        initGridRssi();
+                        refreshGridRssi();
+                        getServiceMessages();
+                    });
+                } else {
+                    $('#gbox_grid-rssi').hide();
+                    getServiceMessages();
+                }
+                </retrieveListRssi>
+
+                <refreshGrid>
+                refreshGridInterfaces();
+                </refreshGrid>
+            }
+        });
+    }
+}
+</getRfdData>
+```

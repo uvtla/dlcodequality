@@ -1,0 +1,287 @@
+```javascript
+<locateConfig>
+function locateConfig(url) {
+  let configpath = '';
+
+  function check(dir) {
+    <constructPaths>
+    const urljs = path.join(dir, DEFAULT_MANIFEST.js);
+    const urljson = path.join(dir, DEFAULT_MANIFEST.json);
+    const urlpkgjson = path.join(dir, DEFAULT_MANIFEST.pkgjson);
+    let urlFinal;
+    </constructPaths>
+
+    <checkExistence>
+    if (exists((urlFinal = urljs)) || exists((urlFinal = urljson)) || exists((urlFinal = urlpkgjson))) {
+      return urlFinal;
+    }
+    </checkExistence>
+
+    return '';
+  }
+
+  <resolveConfigPath>
+  if (url) {
+    configpath = path.resolve(url);
+
+    try {
+
+      if (!path.extname(configpath).length || fs.statSync(configpath).isDirectory()) {
+        configpath = check(configpath);
+        if (!configpath) throw Error('no default found');
+      }
+    } catch (err) {
+      throw Error(strong('buddy') + ' config not found in ' + strong(path.dirname(url)));
+    }
+  </resolveConfigPath>
+
+  <huntForConfigPath>
+  else {
+    try {
+      configpath = hunt(
+        process.cwd(),
+        (resource, stat) => {
+          if (stat.isFile()) {
+            const basename = path.basename(resource);
+
+            return basename == DEFAULT_MANIFEST.js ||
+              basename == DEFAULT_MANIFEST.json ||
+              basename == DEFAULT_MANIFEST.pkgjson;
+          }
+        },
+        true
+      );
+    } catch (err) {
+      if (!configpath) throw Error(strong('buddy') + ' config not found');
+    }
+  }
+  </huntForConfigPath>
+
+  return configpath;
+}
+</locateConfig>
+
+<unknownFunctionName>
+function(branch, category, appName) {
+  if (!isBranch(branch)) {
+    throw new TypeError('Invalid branch: ' + pp(branch));
+  }
+
+  var recMap = function(node) {
+    if (isTask(node)) {
+      return [node];
+    } else if (isBranch(node)) {
+      <flattenChildren>
+      node.children = _.flatten(_.map(node.children, recMap));
+      </flattenChildren>
+
+      <sortChildren>
+      node.children.sort(compareBranchOrTask);
+      </sortChildren>
+
+      <resolveNameConflicts>
+      var nameMap = _.groupBy(node.children, getName);
+      node.children = _.map(_.values(nameMap), function(children) {
+        ...
+      });
+      </resolveNameConflicts>
+
+      <overrideChildrenIfAppName>
+      if (getName(node) === appName) {
+        ...
+      } else {
+        return [node];
+      }
+      </overrideChildrenIfAppName>
+
+    } else {
+      assert(false);
+    }
+  };
+
+  <addNodesToLines>
+  var recAdd = function(node, lines, parentName, depth) {
+    ...
+  };
+  </addNodesToLines>
+
+  <processBranch>
+  if (getName(branch) !== appName) {
+    branch = recMap(branch)[0];
+  }
+  </processBranch>
+
+  <filterByCategory>
+  var kids = _.filter(branch.children, function(child) {
+    ...
+  });
+  </filterByCategory>
+
+  if (!_.isEmpty(kids)) {
+    <formatOutput>
+    var tabSpacing = 4;
+    ...
+    lines.unshift(header);
+    return lines.join('\n');
+    </formatOutput>
+  }
+}
+</unknownFunctionName>
+
+<canTotalBeCalculatedAndIfNotWarnUser>
+function canTotalBeCalculatedAndIfNotWarnUser(item) {
+  <checkIfSummable>
+  if (canResultsBeSummed(item)) {
+    return true;
+  }
+  </checkIfSummable>
+
+  <warnUserOnChangeActive>
+  var conceptItems = item._concepts[0].items;
+  var changedActive = [];
+  ...
+  if (changedActive.length > 0) {
+    ...
+    return false;
+  }
+  </warnUserOnChangeActive>
+
+  return true;
+}
+</canTotalBeCalculatedAndIfNotWarnUser>
+
+<noFunctionName_1>
+function () {
+    var self = this;
+    if (self._stopped)
+      return;
+
+    <throwIfNotQuerying>
+    if (self._phase !== PHASE.QUERYING) {
+      self._pollQuery();
+      throw new SwitchedToQuery;
+    }
+    </throwIfNotQuerying>
+
+    <flagForRequery>
+    self._requeryWhenDoneThisQuery = true;
+    </flagForRequery>
+  }
+</noFunctionName_1>
+
+<getMetadataPage>
+function getMetadataPage(options) {
+	return new Promise(function(resolve, reject) {
+		<retrieveFiles>
+		fs.readdir(__dirname + '/../proxies/', (err, files) => {
+		...
+		</retrieveFiles>
+
+		<prepareTemplateData>
+		const templateData = {
+			metadata: options.service,
+			ejs,
+			proxies,
+			isStatic: options.isStatic,
+			root: options.root,
+			images: getFilesContent(images, 'base64'),
+			js: getFilesContent(jsFiles),
+			css: getFilesContent(cssFiles),
+		};
+		</prepareTemplateData>
+
+		<renderTemplate>
+		ejs.renderFile(
+			__dirname + '/../templates/metadata.ejs',
+			templateData,
+			{ _with: false },
+			(err, html) => {
+				...
+			}
+		);
+		</renderTemplate>
+	});
+}
+</getMetadataPage>
+
+<findInAllWorkingSets>
+function findInAllWorkingSets(fullPath) {
+    <searchWorkSets>
+    var index,
+        result = [];
+    ...
+    return result;
+    </searchWorkSets>
+}
+</findInAllWorkingSets>
+
+<noFunctionName_2>
+function(matches)
+{
+    <resolveMatchConflicts>
+    ...
+    return matches;
+    </resolveMatchConflicts>
+}
+</noFunctionName_2>
+
+<processTextNode>
+function processTextNode(node, options) {
+    options = options || {};
+
+    <collectNodeData>
+    var data = [].concat(getBasicFields(node, options)).
+        concat([
+            node.lineCount
+        ]);
+    </collectNodeData>
+
+    <optionalExtensionFields>
+    if (!options.body) {
+        data = data.concat(getExtensionFields(node, options));
+    }
+    </optionalExtensionFields>
+
+    data.node = node;
+    return data;
+}
+</processTextNode>
+
+<intValidatorWithErrors>
+function intValidatorWithErrors( n, min, max, caller, name ) {
+    <validateIntegerInRange>
+            if ( n < min || n > max || n != truncate(n) ) {
+                raise( caller, ( name || 'decimal places' ) +
+                  ( n < min || n > max ? ' out of range' : ' not an integer' ), n );
+            }
+            </validateIntegerInRange>
+
+            return true;
+        }
+</intValidatorWithErrors>
+
+<calendarWeekdayRow>
+function(html) {
+
+        <constructWeekdayRow>
+        html[html.length] = '<tr class="' + this.Style.CSS_WEEKDAY_ROW + '">';
+
+        if (this.cfg.getProperty(DEF_CFG.SHOW_WEEK_HEADER.key)) {
+            html[html.length] = '<th>&#160;</th>';
+        }
+
+        for(var i=0;i < this.Locale.LOCALE_WEEKDAYS.length; ++i) {
+            html[html.length] = '<th class="' + this.Style.CSS_WEEKDAY_CELL + '">' + this.Locale.LOCALE_WEEKDAYS[i] + '</th>';
+        }
+
+        if (this.cfg.getProperty(DEF_CFG.SHOW_WEEK_FOOTER.key)) {
+            html[html.length] = '<th>&#160;</th>';
+        }
+
+        html[html.length] = '</tr>';
+        </constructWeekdayRow>
+
+        return html;
+    }
+</calendarWeekdayRow>
+```

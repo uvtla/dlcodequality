@@ -1,0 +1,264 @@
+```javascript
+<ParserError>
+function ParserError(message, spark) {
+  <CaptureStackTrace>
+  Error.captureStackTrace(this, this.constructor);
+  </CaptureStackTrace>
+
+  <SetErrorProperties>
+  this.message = message;
+  this.name = this.constructor.name;
+  </SetErrorProperties>
+
+  if (spark) {
+    <HandleSparkError>
+    if (spark.listeners('error').length) spark.emit('error', this);
+    spark.primus.emit('log', 'error', this);
+    </HandleSparkError>
+  }
+}
+</ParserError>
+
+<log>
+function log(str) {
+  <PrepareMessage>
+  const message = str.split("::");
+  </PrepareMessage>
+
+  <ProcessFatalError>
+  if (message[0] === "fatal") {
+    message[0] = new Error(message[1]);
+    throw message[0];
+  }
+  </ProcessFatalError>
+
+  <LogMessage>
+  if (message[1]) {
+    signale[message[0]](message[1]);
+    return;
+  }
+  </LogMessage>
+
+  <LogSimpleMessage>
+  signale.log(message[0]);
+  </LogSimpleMessage>
+}
+</log>
+
+<split_trim_enumerate>
+function (text, sep) {
+  if (sep && sep.constructor == String) {
+    <PrepareSeparator>
+    sep = $.trim(sep);
+    </PrepareSeparator>
+  }
+  <SplitText>
+  var ar = text.split(sep);
+  var r = [];
+  var ae = new AtomEnumerator(ar);
+  </SplitText>
+  <EnumerateAndTrim>
+  var item;
+  while (ae.next()) {
+    item = ae.current();
+    if (item && item.constructor == String) {
+      item = $.trim(item);
+    }
+    r.push(item);
+  }
+  </EnumerateAndTrim>
+  return r;
+}
+</split_trim_enumerate>
+
+<eventValidator>
+function(evt) {
+  <RetrieveEventElements>
+  var elem = evt.currentTarget;
+  var target = evt.target || evt.originalEvent.srcElement,
+    related = evt.originalEvent.relatedTarget || evt.originalEvent.fromElement;
+  </RetrieveEventElements>
+  <CheckEventValidity>
+  if ((elem === target || contains(elem, target)) && !contains(elem, related)) {
+    return true;
+  }
+  return false;
+  </CheckEventValidity>
+}
+</eventValidator>
+
+<sendEvents>
+function (events) {
+  
+  <AssignSourceId>
+  _.each(events, function (event) {
+    if (event.sourceId === undefined) {
+      event.setSourceId(this.sourceId);
+    }
+  }, this);
+  </AssignSourceId>
+
+  <ConfigureRequest>
+  var options = {
+    data: events,
+    headers: { "Content-Type": "application/json" }
+  };
+  </ConfigureRequest>
+
+  <PostEvents>
+  this.restClient.post(this.endpointUrl + "/events", options, function (data, response) {
+    print(data);
+  });
+  </PostEvents>
+}
+</sendEvents>
+
+<Kit>
+function Kit(str, variables, forbiddenPaths) {
+  <InitializeProperties>
+  this._variables = variables || {};
+  this._forbiddenPaths = forbiddenPaths || [];
+  </InitializeProperties>
+
+  <ReadFileIfExist>
+  if (fs.existsSync(str)) {
+    this.fileContents = fs.readFileSync(str).toString();
+    this.filename = path.basename(str);
+    this._fileDir = path.dirname(str);
+    
+    <CheckInfiniteImportLoop>
+    if (this._forbiddenPaths.indexOf(str) !== -1) {
+      throw new Error('Error: infinite import loop detected. (e.g. File A imports File B, which imports File A.) You must fix this before the file can be compiled.');
+    }
+    </CheckInfiniteImportLoop>
+    this._forbiddenPaths.push(str);
+  }
+
+  <HandleInputString>
+  else {
+    this.fileContents = str.toString();
+    this.filename = '<anonymous>';
+    this._fileDir = '';
+  }
+  </HandleInputString>
+}
+</Kit>
+
+<View_setModulesViewsPath>
+function View_setModulesViewsPath(dir) {
+  <LoadModules>
+  var list, name, moduleToLoad, LoadedModule, moduleInstance;
+  if (this.isDir(dir)) {
+    list = this.readDir(dir);
+    while (true) {
+      name = list.shift();
+
+      if (!name) {
+        break;
+      }
+
+      moduleToLoad = dir + '/' + name;
+
+      <LoadModule>
+      try {
+        LoadedModule = di.load(moduleToLoad);
+      } catch (e) {
+        throw new error.HttpError(500, {path: moduleToLoad}, 'Missing module', e);
+      }
+      </LoadModule>
+
+      <AssertModuleFunction>
+      if (!Type.assert(Type.FUNCTION, LoadedModule)) {
+        throw new error.HttpError(500, {path: moduleToLoad}, 'Module must be function type');
+      }
+      </AssertModuleFunction>
+
+      <InstantiateModule>
+      moduleInstance = new LoadedModule(name);
+      </InstantiateModule>
+
+      <CheckModuleInstance>
+      if (!(moduleInstance instanceof ModuleInterface)) {
+        throw new error.HttpError(500, moduleInstance, 'Module must be instance of ModuleInterface "core/module"');
+      }
+      </CheckModuleInstance>
+
+      <AddNormalizer>
+      this.normalizers.push(moduleInstance.getViewsPath());
+
+      <AddThemePaths>
+      this.config.themes.forEach(function (name) {
+        this.paths.push(moduleInstance.getViewsPath() + name + '/');
+      }.bind(this));
+      </AddThemePaths>
+      </AddNormalizer>
+    }    
+  }
+  </LoadModules>
+}
+</View_setModulesViewsPath>
+
+<findPubMedArticle>
+function findPubMedArticle(title, callback) {
+  <BuildUri>
+  var uri = 'http://example.com/api/pubmed/search';
+  </BuildUri>
+  <RetrieveContents>
+  utils.retrieve(uri, function(err, contents) {
+    <ParseContents>
+    var $ = cheerio.load(contents);
+    var absid = $('#absid');
+    if (absid) {
+      var id = $(absid).val();
+      callback(null, id, 'http://example.com/pubmed/' + id);
+    } else {
+      callback(null, null);
+    }
+    </ParseContents>
+  });
+  </RetrieveContents>
+}
+</findPubMedArticle>
+
+<moveToLayer>
+function(bounds, zoomChanged, dragging) {
+<MoveLayer>
+        OpenLayers.Layer.prototype.moveTo.apply(this, arguments);
+</MoveLayer>
+
+        <RedrawOnZoomOrInitialDraw>
+        if (zoomChanged || !this.drawn) {
+            for(var i=0, len=this.markers.length; i<len; i++) {
+                this.drawMarker(this.markers[i]);
+            }
+            this.drawn = true;
+        }
+        </RedrawOnZoomOrInitialDraw>
+}
+</moveToLayer>
+
+<makeDateStr>
+function makeDateStr(date, sep) {
+	<DefaultSeparator>
+	if (sep === undefined) sep = true;
+	</DefaultSeparator>
+
+	<RetrieveComponents>
+	var year = date.getUTCFullYear().toString(),
+		month = padNum(date.getUTCMonth()+1),
+		day = padNum(date.getUTCDate()),
+		hours = padNum(date.getUTCHours()),
+		minutes = padNum(date.getUTCMinutes()),
+		seconds = padNum(date.getUTCSeconds());
+	</RetrieveComponents>
+
+	<FormatDateStr>
+	if (sep) {
+		return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+	} else {
+		return year + month + day + hours + minutes + seconds;
+	}
+	</FormatDateStr>
+}
+</makeDateStr>
+```

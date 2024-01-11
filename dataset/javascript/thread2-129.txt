@@ -1,0 +1,104 @@
+```javascript
+<removeValueFromArray>
+function (value) {
+  var res;
+  if (this.has(value)) {
+    res = this.items.splice(
+      x.indexOf(this.items, value),
+      1
+    );
+  }
+  return res;
+}
+</removeValueFromArray>
+
+<renderTemplate>
+function (filePath, model, cb) {
+  <callbackDefinition>
+  var callback = function (err, html) {
+    if (err) {
+      return cb(err);
+    }
+    return cb(null, html);
+  };
+  </callbackDefinition>
+  if (cache[filePath] && isProd) {
+    cache[filePath](model, callback)
+  } else {
+    saker.getView(filePath, function (err, template) {
+      if (err) {
+        return cb(err);
+      }
+      try {
+        var compiled = saker.compile(template, filePath);
+      } catch (err) {
+        return cb(err);
+      }
+      if (isProd) {
+        cache[filePath] = compiled;
+      }
+      compiled(model, callback);
+    })
+  }
+}
+</renderTemplate>
+
+<testingNodeClass>
+function (node) {
+  const parent = node.parentNode
+  return parent.classList.contains('code') && parent.nodeName === 'TD' && node.nodeName === 'PRE'
+}
+</testingNodeClass>
+
+<httpListener>
+function ShinyProxy(router, schedulerRegistry) {
+  <httpListener>
+  this.httpListener = function(req, res) {
+    ...
+    <handlingRequestPause>
+    req.pause();
+    ...
+    </handlingRequestPause>
+    <getAppSpec>
+    router.getAppSpec_p(req, res)
+    ...
+    </getAppSpec>
+  };
+  </httpListener>
+  
+  ...
+
+  <createHttpProxy>
+  function createHttpProxy(appWorkerHandle) {
+    ...
+    <configureProxy>
+    var proxy = new http_proxy.createProxyServer({
+      ...
+    });
+    ...
+    </configureProxy>
+    
+    ...
+  }
+  </createHttpProxy>
+  
+  ...
+}
+</httpListener>
+
+<getInputTypeForCommand>
+function inputTypeForCommand (cmd) {
+...
+}
+</getInputTypeForCommand>
+
+<getModulesAnswered>
+function getModulesAnswered(command, argv, globs) {
+...
+}
+</getModulesAnswered>
+```
+
+The `markExtension` function is too complex for one single annotation due to various responsibilities like initialization, handling events, and more. Please provide a breakdown of this function if you want it analyzed for SRP compliance.
+
+The `renderPartial` and `stylingContext` functions are too small for accurate SRP annotation as they seem to perform a single task, but more context might be necessary to make a definitive judgement. Please provide the entire functions if you would like a further analysis.

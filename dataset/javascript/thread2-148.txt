@@ -1,0 +1,284 @@
+```javascript
+<LeaderElection>
+function LeaderElection(client, path, id) {
+  <constructorCall>
+  EventEmitter.call(this);
+  </constructorCall>
+
+  <propertyInitialization>
+  this.client = client;
+  this.path = path;
+  this.id = id;
+  this.isLeader = false;
+  this.state = State.LATENT;
+  </propertyInitialization>
+}
+</LeaderElection>
+
+<configureContext>
+function configureContext(libOpts) {
+  <validateOptions>
+  if (isDev) validateLibOpts(libOpts);
+  </validateOptions>
+  
+  <assign libOpts properties>
+  var libName = libOpts.libName;
+  var validateContext = libOpts.validateContext;
+  var configureAppContext = libOpts.configureAppContext;
+  var configureInitialState = libOpts.configureInitialState;
+  </assign libOpts properties>
+
+  <returnContextFunction>
+  return function (appOpts) {
+    
+    <validateAppOpts>
+    if (isDev) validateAppOpts(appOpts);
+    </validateAppOpts>
+
+    <assign appOpts properties>
+    var appName = appOpts.appName;
+    var level = appOpts.level;
+    </assign appOpts properties>
+
+    <context translation related functionalities>
+    var translateBlueprintType = function translateBlueprintType(blueprintType) {
+      return cleanActionName(libName) + '_' + cleanActionName(appName) + '_' + cleanActionName(blueprintType);
+    };
+    var translateBlueprintTypes = (0, _reduxBlueprint.translateBlueprintTypesWith)(translateBlueprintType);
+    var translateBlueprints = (0, _reduxBlueprint.translateBlueprintsWith)(translateBlueprintType);
+    </context translation related functionalities>
+    
+    <construct and configure libContext>
+    var libContext = {
+      log: (0, _log.createLogger)({ libName: libName, level: level }),
+      libName: libName,
+      appName: appName,
+      translateBlueprintTypes: translateBlueprintTypes,
+      translateBlueprints: translateBlueprints
+    };
+    </construct and configure libContext>
+
+    <configure and validate appContext>
+    var appContext = configureAppContext(libContext)(appOpts);
+    if (isDev) validateContext(libContext, appContext);
+    </configure and validate appContext>
+
+    <returnExtendedContext>
+    return Object.assign(appContext, libContext, {
+      get initialState() {
+        return configureInitialState(libContext)(appContext);
+      }
+    });
+    </returnExtendedContext>
+  };
+  </returnContextFunction>
+}
+</configureContext>
+
+<constructMetaParams>
+function constructMetaParams(flags) {
+  <validateAndDefaultsFlags>
+  if (!flags || !(flags instanceof Array)) {
+    flags = [false, false, false, false];
+  }
+  </validateAndDefaultsFlags>
+
+  <flagRelatedFunctionalities>
+  var isActive = function(m) { return m[1] === true; };
+  var extractKey = function(m) { return m[0]; };
+  </flagRelatedFunctionalities>
+
+  <deriveAndReturnMetaParams>
+  return zipmap(Key.metaKeys, flags).filter(isActive).map(extractKey);
+  </deriveAndReturnMetaParams>
+}
+</constructMetaParams>
+
+<getCredit>
+function getCredit(credits, author) {
+  const credit = credits.filter(credit => {
+    <compareCreditToAuthor>
+    if (credit.email && author.email) {
+      return credit.email === author.email;
+    }
+    </compareCreditToAuthor>
+    
+    <defaultComparisonByName>
+    return credit.name === author.name;
+    </defaultComparisonByName>
+  });
+
+  <returnCreditOrFalse>
+  return credit.length > 0
+    ? credit[0]
+    : false;
+  </returnCreditOrFalse>
+}
+</getCredit>
+
+// The anonymous function provided has multiple responsibilities that are not evident without further context of the function's use. 
+// Its annotation cannot be accurately completed without more information.
+
+<Exception>
+function Exception(message, innerException) {
+  <validateMessage>
+  if (!message) {
+    <throwValidationErrorForMessage>
+    throw new Exception("Argument 'message' is required but was '" +
+      (message === null ? "null" : "undefined") + "'");
+    </throwValidationErrorForMessage>
+  }
+  if (typeof message !== 'string') {
+    <throwValidationErrorForMessageType>
+    throw new Exception("Argument 'message' must be of type 'string' but was '" + typeof message + "'");
+    </throwValidationErrorForMessageType>
+  }
+  </validateMessage>
+
+  <handleOverloading>
+  if (innerException === undefined && typeof message !== 'string') {
+    innerException = message;
+    message = innerException.message || innerException.toString();
+  }
+  </handleOverloading>
+
+  <assignProperties>
+  this.message = message;
+  this.innerException = innerException;
+  </assignProperties>
+  
+  <addToStringMethod>
+  this.toString = function () {
+    return message;
+  };
+  </addToStringMethod>
+}
+</Exception>
+
+<addItemsToCollection>
+function (items, options) {
+  <validateAndDefaultOptions>
+  options = options || {};
+  _.defaults(options, {silent: false, index: this.$items.length});
+  </validateAndDefaultOptions>
+
+  <preparationForAddingItems>
+  var index = options.index;
+  if (!_.isArray(items)) {
+    items = [items];
+  }
+  </preparationForAddingItems>
+
+  <addingItemsToCollection>
+  var item, itemIndex;
+  for (var i = 0; i < items.length; i++) {
+    item = items[i];
+    
+    <bindEventsIfBindable>
+    if (item instanceof Bindable) {
+      item.bind('change', this._onItemChange, this);
+      item.bind('*', this._onItemEvent, this);
+    }
+    </bindEventsIfBindable>
+    
+    <insertItems>
+    itemIndex = index + i;
+    if (_.isUndefined(this.$items[itemIndex]) || itemIndex >= this.$items.length) {
+      this.$items[itemIndex] = item;
+    } else {
+      this.$items.splice(itemIndex, 0, item);
+    }
+    </insertItems>
+
+    <triggerAddIfNotSilent>
+    if (options.silent !== true) {
+      this.trigger('add', {item: item, index: itemIndex});
+    }
+    </triggerAddIfNotSilent>
+  }
+  </addingItemsToCollection>
+}
+</addItemsToCollection>
+
+<processResultsWithCallback>
+function(err, results) {
+  <handleError>
+  if (err) {
+    callback(err);
+    return;
+  }
+  </handleError>
+
+  <parseAndCalculateFrequencies>
+  var keyFrequency = parseInt(results[0]);
+  var docFrequency = parseInt(results[1]);
+  var keyDocFrequency = results[2];
+  </parseAndCalculateFrequencies>
+
+  <processIdSpecificResults>
+  if (id && results.length == 4) {
+    keyFrequency = parseInt(results[3]);
+  }
+  </processIdSpecificResults>
+
+  <computeTFIDF>
+  var tf = 1 + (Math.log(keyFrequency) / Math.LN10);
+  var idf = Math.log(docFrequency / keyDocFrequency) / Math.LN10;
+  </computeTFIDF>
+
+  <prepareResultAndCallback>
+  var result = {};
+  result.key = key;
+  result.rawtf = keyFrequency;
+  result.df = keyDocFrequency;
+  result.n = docFrequency;
+  result.idf = idf;
+  result.tf = tf;
+  result.tfidf = tf * idf;
+  callback(null, result);
+  </prepareResultAndCallback>
+}
+</processResultsWithCallback>
+
+<tv4_validate>
+function tv4_validate(typename, query) {
+  <getIdAndSchema>
+  var id = getSchemaIDFromTypename(typename);
+  var schema = tv4.getSchema(id);
+  </getIdAndSchema>
+
+  <handleMissingSchema>
+  if (schema == null) {
+    var error = { code: 0, message: 'Schema not found', dataPath: '', schemaPath: id };
+    return { valid: false, missing: [], errors: [error] };
+  }
+  </handleMissingSchema>
+
+  <validateQueryAgainstSchema>
+  var report = tv4.validateMultiple(query, schema);
+  return report;
+  </validateQueryAgainstSchema>
+}
+</tv4_validate>
+
+<destroyLayers>
+function() {
+  <destroyLayersAndEvents>
+  if (this.layers || this.map) {
+    var i, layers = this.layers || this.map.layers;
+    for (i = layers.length - 1; i >= 0; --i) {
+      this.removeLayer({layer: layers[i]});
+    }
+  }
+  if (this.map) {
+    this.map.events.un({
+      addlayer: this.addLayer,
+      removeLayer: this.removeLayer,
+      scope: this
+    });
+  }
+  OpenLayers.Control.prototype.destroy.apply(this, arguments);
+  </destroyLayersAndEvents>
+}
+</destroyLayers>
+```

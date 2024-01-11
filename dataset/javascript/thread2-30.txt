@@ -1,0 +1,341 @@
+```javascript
+<updateState>
+function (name, value, oldValue) {
+    <handleSelectedIndex>
+    if (name === "selectedIndex") {
+        this._domElt.selectedIndex = value;
+        this.setValueInDataModel();
+        if (!this.isIndexValid(value)) {
+            this.setIndexInDataModel();
+        }
+    } </handleSelectedIndex>
+    <handleValueUpdate>
+    else if (name === "value") {
+        this._domElt.selectedIndex = this.getIndex(value);
+        this.setIndexInDataModel();
+        
+        if (this._domElt.selectedIndex === -1) {
+            this.setValueInDataModel();
+        }
+    } </handleValueUpdate>
+    <handleDisabled>
+    this.onDisabledBind(name, value, oldValue);
+    </handleDisabled>
+}
+</updateState>
+
+<createShaderProgram>
+function createShaderProgram(gl, shaders) {
+  <createProgram>
+  const program = gl.createProgram();
+
+  for (let i = 0; i < shaders.length; i++) {
+    gl.attachShader(program, shaders[i]);
+  }
+
+  gl.linkProgram(program);
+  </createProgram>
+
+  <checkLinkStatus>
+  const linked = gl.getProgramParameter(program, gl.LINK_STATUS);
+  if (!linked) {
+    <handleLinkError>
+    const lastError = gl.getProgramInfoLog(program);
+    console.error('Error in program linking:', lastError);
+    gl.deleteProgram(program);
+    return null;
+    </handleLinkError>
+  }
+  </checkLinkStatus>
+
+  <finalizeProgram>
+  program.shaders = shaders;
+  gl.useProgram(program);
+  </finalizeProgram>
+
+  return program;
+}
+</createShaderProgram>
+
+<constructorPathHandler>
+function PathHandler() {
+  _classCallCheck(this, PathHandler);
+  <initializeProperties>
+  this.shapes = [];
+  this.firstX = null;
+  this.firstY = null;
+  this.lastX = null;
+  this.lastY = null;
+  this.lastCommand = null;
+  </initializeProperties>
+}
+</constructorPathHandler>
+
+<constructorScatteredFilesTransport>
+function ScatteredFilesTransport(logger, config = {}) {
+    CommonTransport.call(this, logger, config);
+    <configDefaults>
+    if (typeof config.path !== 'string') { config.path = __dirname; }
+    </configDefaults>
+
+    <initializeProperties>
+    this.color = !!config.color;
+    this.indent = config.indent === undefined ? true : !!config.indent;
+    this.includeIdMeta = !!config.includeIdMeta;
+    this.includeCommonMeta = config.includeCommonMeta === undefined ? true : !!config.includeCommonMeta;
+    this.includeUserMeta = config.includeUserMeta === undefined ? true : !!config.includeUserMeta;
+    this.path = config.path;
+    this.streams = {};
+    </initializeProperties>
+}
+</constructorScatteredFilesTransport>
+
+<cloneRetryOptions>
+function cloneRetryOptions(options, defaults) {
+    if (options === false) {
+        return (false);
+    }
+
+    <inputValidation>
+    assert.optionalObject(options, 'options.retry');
+    assert.optionalNumber(r.minTimeout, 'options.retry.minTimeout');
+    assert.optionalNumber(r.maxTimeout, 'options.retry.maxTimeout');
+    assert.optionalNumber(r.retries, 'options.retry.retries');
+    assert.optionalObject(defaults, 'defaults');
+    </inputValidation>
+    var r = options || {};
+    var normalizedDefaults = defaults || {};
+
+    <setResolvedOptions>
+    return ({
+        minTimeout: r.minTimeout || normalizedDefaults.minTimeout || 1000,
+        maxTimeout: r.maxTimeout || normalizedDefaults.maxTimeout || Infinity,
+        retries: r.retries || normalizedDefaults.retries || 4
+    });
+    </setResolvedOptions>
+}
+</cloneRetryOptions>
+
+<twitterClickHandler>
+function twitterClickHandler() {
+    <initiateRequest>
+    var url = $twitter.attr('href')
+    $
+        .get(url)
+        .success(function(data) {
+            <handleSuccess>
+            $spin.hide();
+            var sorted = [];
+            var thumbs = "";
+
+            if (data.error) {
+                console.dir(data.error)
+                alert(data.error_message)
+                return false;
+            }
+
+            $.each(data.media, function(i, el) {
+                thumbs += "<img data-standard-resolution='"
+                        + el.full_url
+                        + "' src='" + el.thumb_url + "' />";
+            });
+            </handleSuccess>
+
+            <updateDOM>
+            $oneUpTwitterWrapper.before(thumbs);
+            $photoPickerTwitter.show();
+            wireTwitterGalleryPicker();
+            progressToNextStep($stepOne, function() {
+                $stepTwo.slideDown(333);
+            });
+            </updateDOM>
+            </handleError>
+        })
+        .error(function(e, b) {
+            $spin.hide();
+            if (e.status === 400) alert(e.responseText || 'Bad request.');
+            if (e.status === 401) alert(e.responseText || 'Unauthorized request.');
+            if (e.status === 402) alert(e.responseText || 'Forbidden request.');
+            if (e.status === 403) alert(e.responseText || 'Forbidden request.');
+            if (e.status === 404) alert(e.responseText || 'Images were not found.');
+            if (e.status === 405) alert(e.responseText || 'That method is not allowed.');
+            if (e.status === 408) alert(e.responseText || 'The request timed out. Try again.');
+            if (e.status === 500) alert(e.responseText || 'Something went really wrong.');
+        })
+    </initiateRequest>
+
+    return false
+}
+</twitterClickHandler>
+
+<organizationalChartNodeCreation>
+function (data) {
+    var that = this;
+    var opts = this.options;
+    <constructNodeDiv>
+    var level = data.level;
+    if (data.children) {
+        $.each(data.children, function(index, child) {
+            child.parentId = data.id;
+        });
+    }
+    var $nodeDiv = $('<div' + (opts.draggable ? ' draggable="true"' : '') + (data[opts.nodeId] ? ' id="' + data[opts.nodeId] + '"' : '') + (data.parentId ? ' data-parent="' + data.parentId + '"' : '') + '>')
+        .addClass('node ' + (data.className || '') + (level > opts.visibleLevel ? ' slide-up' : ''));
+    if (opts.nodeTemplate) {
+        $nodeDiv.append(opts.nodeTemplate(data));
+    } else {
+        $nodeDiv.append('<div class="title">' + data[opts.nodeTitle] + '</div>')
+            .append(typeof opts.nodeContent !== 'undefined' ? '<div class="content">' + (data[opts.nodeContent] || '') + '</div>' : '');
+    }
+    </constructNodeDiv>
+    <processDataForNode>
+    var nodeData = $.extend({}, data);
+    delete nodeData.children;
+    $nodeDiv.data('nodeData', nodeData);
+    </processDataForNode>
+    <addExtraFeaturesToNode>
+    var flags = data.relationship || '';
+    if (opts.verticalLevel && level >= opts.verticalLevel) {
+        if ((level + 1) > opts.verticalLevel && Number(flags.substr(2, 1))) {
+            var icon = level + 1 > opts.visibleLevel ? 'plus' : 'minus';
+            $nodeDiv.append('<i class="toggleBtn fa fa-' + icon + '-square"></i>');
+        }
+    } else {
+        if (Number(flags.substr(0, 1))) {
+            $nodeDiv.append('<i class="edge verticalEdge topEdge fa"></i>');
+        }
+        if (Number(flags.substr(1, 1))) {
+            $nodeDiv.append('<i class="edge horizontalEdge rightEdge fa"></i>' +
+                '<i class="edge horizontalEdge leftEdge fa"></i>');
+        }
+        if (Number(flags.substr(2, 1))) {
+            $nodeDiv.append('<i class="edge verticalEdge bottomEdge fa"></i>')
+                .children('.title').prepend('<i class="fa ' + opts.parentNodeSymbol + ' symbol"></i>');
+        }
+    }
+    </addExtraFeaturesToNode>
+
+    <nodeEventBindings>
+    $nodeDiv.on('mouseenter mouseleave', this.nodeEnterLeaveHandler.bind(this));
+    $nodeDiv.on('click', this.nodeClickHandler.bind(this));
+    $nodeDiv.on('click', '.topEdge', this.topEdgeClickHandler.bind(this));
+    $nodeDiv.on('click', '.bottomEdge', this.bottomEdgeClickHandler.bind(this));
+    $nodeDiv.on('click', '.leftEdge, .rightEdge', this.hEdgeClickHandler.bind(this));
+    $nodeDiv.on('click', '.toggleBtn', this.toggleVNodes.bind(this));
+    </nodeEventBindings>
+
+    <bindDragAndDrop>
+    if (opts.draggable) {
+        this.bindDragDrop($nodeDiv);
+        this.touchHandled = false;
+        this.touchMoved = false;
+        this.touchTargetNode = null;
+    }
+    </bindDragAndDrop>
+    
+    <executeCustomCreateNode>
+    if (opts.createNode) {
+        opts.createNode($nodeDiv, data);
+    }
+    </executeCustomCreateNode>
+
+    return $nodeDiv;
+}
+</organizationalChartNodeCreation>
+
+<taskAutomation>
+function() {
+    <loadDependencies>
+    var jxBin = require('jxcore').findpath();
+    </loadDependencies>
+
+    <packageInfo>
+    var pkgName = 'kbox-' + common.kalabox.pkgType;
+    </packageInfo>
+    <shellOptions>
+    var shellOpts = {
+      execOptions: {
+        cwd: 'build/cli',
+        maxBuffer: 20 * 1024 * 1024
+      }
+    };
+    </shellOptions>
+
+    <defineIncludePatterns>
+    var jxAddPatterns = common.files.jxAdd;
+    </defineIncludePatterns>
+    <defineExcludePatterns>
+    var jxSlimPatterns = common.files.jxSlim;
+    </defineExcludePatterns>
+    
+    <createCommandString>
+    var jxCmd = [
+      jxBin,
+      'package',
+      'bin/kbox.js',
+      pkgName,
+      '--add "' + jxAddPatterns.join(',') + '"',
+      '--slim "' + jxSlimPatterns.join(',') + '"',
+      '--native'
+    ].join(' ');
+    </createCommandString>
+
+    <composeCommands>
+    var cmd = [];
+    cmd.push(npmInstallCmd());
+    cmd.push(jxCmd);
+    </composeCommands>
+
+    <platformSpecificCommands>
+    if (platform !== 'win32') {
+      cmd.push('chmod +x ' + pkgName);
+      cmd.push('sleep 2');
+    }
+    </platformSpecificCommands>
+
+    <assembleTaskResult>
+    return {
+      options: shellOpts,
+      command: cmd.join(' && ')
+    };
+    </assembleTaskResult>
+}
+</taskAutomation>
+
+<configurationFileMonitoring>
+function(provider, name, path, data, dbg) {
+    dbg = dbg || debug;
+    <initializeProperties>
+    this._provider = provider;
+    this._name = name;
+    this._path = path;
+    this._err = null;
+    this._data = data;
+    this._lock = null;
+    this._queue = [];
+    this._ready = false;
+    </initializeProperties>
+
+    <createLegendProperty>
+    Object.defineProperty(this, 'legend', {
+        get: function() {
+            return this._path;
+        }
+    });
+    </createLegendProperty>
+}
+</configurationFileMonitoring>
+
+<queuedExecution>
+function() {
+    <conditionalExecution>
+    if (concurrentQueries < concurrentLimit) {
+        gaExecuteQuery.apply(this, arguments);
+    } else {
+        var args = Array.prototype.slice.call(arguments);
+        queryQueue.push(args);
+    }
+    </conditionalExecution>
+}
+</queuedExecution>
+```

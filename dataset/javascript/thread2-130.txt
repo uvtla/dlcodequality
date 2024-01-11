@@ -1,0 +1,209 @@
+<function1>
+function (number) {
+        var q = $q.defer();
+        $window.push.setApplicationIconBadgeNumber(function () {
+          q.resolve();
+        }, number);
+        return q.promise;
+}
+</function1>
+
+<function2>
+function(key, sig, log) {
+	gui.Broadcast.$target = this;
+	gui.Broadcast.dispatchGlobal(edb.BROADCAST_SCRIPT_INVOKE, {
+		key: key,
+		sig: sig,
+		log: log
+	});
+}
+</function2>
+
+<startTagInColumnGroup>
+function startTagInColumnGroup(p, token) {
+    var tn = token.tagName;
+
+    <DetermineAppropriateAction>
+    if (tn === $.HTML)
+        startTagInBody(p, token);
+    else if (tn === $.COL)
+        p._appendElement(token, NS.HTML);
+    else if (tn === $.TEMPLATE)
+        startTagInHead(p, token);
+    else
+        tokenInColumnGroup(p, token);
+    </DetermineAppropriateAction>
+}
+</startTagInColumnGroup>
+
+<function4>
+function( world ){
+    var intg = world.integrator();
+
+    <CheckIntegratorCompatibility>
+    if (intg && intg.name.indexOf('verlet') < 0){
+        throw 'The rigid constraint manager needs a world with a "verlet" compatible integrator.';
+    }
+    </CheckIntegratorCompatibility>
+
+    world.on('integrate:positions', this.resolve, this);
+}
+</function4>
+
+<function5>
+function( source ) {
+	var obj = {},
+		name;
+
+	<CopyProperties>
+	for ( name in source )
+		obj[ name ] = source[ name ];
+	</CopyProperties>
+
+	return obj;
+}
+</function5>
+
+<function6>
+function(input, callback) {
+            
+    var md, line = null, length = 0;
+
+    <ParseInput>
+    for(;;) {
+        if((md = input.match(this.lineRE))) {
+            if(line && line.indexOf('QUOTED-PRINTABLE') != -1 && line.slice(-1) == '=') {
+                line = line.slice(0,-1) + md[1];
+                length = md[0].length;
+            } else {
+                if(line) {
+                    this.lexLine(line, callback);   
+                }
+                line = md[1];
+                length = md[0].length;
+            }
+        } else if((md = input.match(this.foldedLineRE))) {
+            if(line) {
+                line += md[1];
+                length = md[0].length;
+            } else {
+                
+            }
+        } else {
+            console.error("Unmatched line: " + line);
+        }
+        
+        input = input.slice(length);
+
+        if(! input) {
+            break;
+        }
+    }
+    </ParseInput>
+
+    <FinalLineProcessing>
+    if(line) {
+        
+        this.lexLine(line, callback);
+    }
+    
+    line = null;
+    </FinalLineProcessing>
+}
+</function6>
+
+<filterFolder>
+function filterFolder(posts) {
+    var reFolder = new RegExp(folder);
+    return posts.filter(function filterPosts(post) {
+        return reFolder.test(post.source.substr(0, post.source.lastIndexOf(path.sep)));
+    });
+}
+</filterFolder>
+
+<function8>
+function(raw_blocks) {
+	var result = this.asBlocks(this.compileTemplate(raw_blocks));
+	if (result.length != 1) Lava.t("Expected: exactly one view, got either several or none.");
+	if (result[0].type != 'view' && result[0].type != 'widget') Lava.t("Expected: view, got: " + result[0].type);
+	return result[0];
+}
+</function8>
+
+<function9>
+function( fn ){
+    var _p = this._private;
+    var pass = _p.pass[0];
+
+    return this.map( fn ).then(function( include ){
+        var ret = [];
+
+        <CompileResults>
+        for( var i = 0; i < pass.length; i++ ){
+            var datum = pass[i];
+            var incDatum = include[i];
+
+            if( incDatum ){
+                ret.push( datum );
+            }
+        }
+        </CompileResults>
+
+        return ret;
+    });
+}
+</function9>
+
+<loadTMXLevel>
+function loadTMXLevel(levelId, container, flatten, setViewportBounds) {
+    var level = levels[levelId];
+
+    <InitializeContainer>
+    var autoSort = container.autoSort;
+    container.autoSort = false;
+
+    var levelBounds = level.getBounds();
+
+    if (setViewportBounds) {
+        
+        me.game.viewport.setBounds(
+            0, 0,
+            Math.max(levelBounds.width, me.game.viewport.width),
+            Math.max(levelBounds.height, me.game.viewport.height)
+        );
+    }
+    </InitializeContainer>
+
+    <AddLevelToContainer>
+    me.utils.resetGUID(levelId, level.nextobjectid);
+    container.anchorPoint.set(0, 0);
+    level.addTo(container, flatten);
+    container.sort(true);
+    container.autoSort = autoSort;
+    container.resize(levelBounds.width, levelBounds.height);
+    </AddLevelToContainer>
+
+    <SetContainerPosition>
+    function resize_container() {
+        
+        container.pos.set(
+            Math.max(0, ~~((me.game.viewport.width - levelBounds.width) / 2)),
+            Math.max(0, ~~((me.game.viewport.height - levelBounds.height) / 2)),
+            0
+        );
+    }
+    </SetContainerPosition>
+
+    <AdjustViewport>
+    if (setViewportBounds) {
+        resize_container();
+
+        
+        if (onresize_handler) {
+            me.event.unsubscribe(onresize_handler);
+        }
+        onresize_handler = me.event.subscribe(me.event.VIEWPORT_ONRESIZE, resize_container);
+    }
+    </AdjustViewport>
+}
+</loadTMXLevel>

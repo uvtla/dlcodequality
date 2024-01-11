@@ -1,0 +1,232 @@
+```javascript
+<toArrayReducer>
+function toArrayReducer(arr, item, index) {
+    if (index === 0) {
+        return [item];
+    }
+    arr.push(item);
+    return arr;
+}
+</toArrayReducer>
+
+<_sanitizeHtml>
+function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
+    var inertBodyElement = null;
+    try {
+        <initializeSanitizer>
+        inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
+        </initializeSanitizer>
+
+        <handleUntrustedHTML>
+        var unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
+        inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        </handleUntrustedHTML>
+
+        <mXSSEliminationLoop>
+        var mXSSAttempts = 5;
+        var parsedHtml = unsafeHtml;
+        do {
+            if (mXSSAttempts === 0) {
+                throw new Error('Failed to sanitize html because the input is unstable');
+            }
+            mXSSAttempts--;
+            unsafeHtml = parsedHtml;
+            parsedHtml = inertBodyElement.innerHTML;
+            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        } while (unsafeHtml !== parsedHtml);
+        </mXSSEliminationLoop>
+
+        <finalizeSanitization>
+        var sanitizer = new SanitizingHtmlSerializer();
+        var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
+        if (isDevMode() && sanitizer.sanitizedSomething) {
+            console.warn('WARNING: sanitizing HTML stripped some content (see http:
+        }
+        return safeHtml;
+        </finalizeSanitization>
+    }
+    finally {
+        <cleanup>
+        if (inertBodyElement) {
+            var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
+            while (parent_1.firstChild) {
+                parent_1.removeChild(parent_1.firstChild);
+            }
+        }
+        </cleanup>
+    }
+}
+</_sanitizeHtml>
+
+<handleTypedefProperties>
+function(e) {
+    if (e.doclet.kind == 'typedef' && e.doclet.properties) {
+      properties[e.doclet.longname] = e.doclet.properties;
+    }
+  }
+</handleTypedefProperties>
+
+<endOperations>
+function endOperations(group) {
+  let ops = group.ops
+  for (let i = 0; i < ops.length; i++) 
+    endOperation_R1(ops[i])
+  for (let i = 0; i < ops.length; i++) 
+    endOperation_W1(ops[i])
+  for (let i = 0; i < ops.length; i++) 
+    endOperation_R2(ops[i])
+  for (let i = 0; i < ops.length; i++) 
+    endOperation_W2(ops[i])
+  for (let i = 0; i < ops.length; i++) 
+    endOperation_finish(ops[i])
+}
+</endOperations>
+
+<formSubmission>
+function(url, options, fn){
+        var r = request.post(url, fn);
+        var form = r.form();
+        form.append('field', options.field);
+        <fileStreamAppending>
+        form.append('files', fs.createReadStream(options.filepath));
+        </fileStreamAppending>
+        return form;
+    }
+</formSubmission>
+
+<initializeDatabase>
+function(db) {
+		var types_uuid = uuid();
+		debug.assert(types_uuid).is('uuid');
+		return db.query('CREATE SEQUENCE types_seq')
+			.query([
+				'CREATE TABLE IF NOT EXISTS types (',
+				"	id uuid PRIMARY KEY NOT NULL default uuid_generate_v5('"+types_uuid+"', nextval('types_seq'::regclass)::text),",
+				'	name text,',
+				'	schema json,',
+				'	validator text,',
+				'	meta json,',
+				'	created timestamptz NOT NULL default now(),',
+				'	modified timestamptz NOT NULL default now(),',
+				'	CHECK (check_javascript(validator))',
+				')'].join('\n'))
+			.query(	'ALTER SEQUENCE types_seq OWNED BY types.id');
+	}
+</initializeDatabase>
+
+<getScript>
+function getScript(url, async, cb) {
+    if (typeof async === 'function') {
+      cb = async;
+      async = false;
+    }
+
+    <createScriptElement>
+    var el = document.createElement('script');
+    el.type = 'text/javascript';
+    el.src = url;
+    if (async)
+      el.async = true;
+    </createScriptElement>
+
+    <scriptLoadEventHandler>
+    el.onload = el.onreadystatechange = function() {
+      if ((!this.readyState ||
+            this.readyState == 'loaded' ||
+            this.readyState == 'complete')) {
+        el.onload = el.onreadystatechange = null;
+
+        artoo.mountNode.removeChild(el);
+
+        if (typeof cb === 'function')
+          cb();
+      }
+    };
+    </scriptLoadEventHandler>
+
+    <appendScriptElement>
+    artoo.mountNode.appendChild(el);
+    </appendScriptElement>
+  }
+</getScript>
+
+<enable_job>
+function enable_job(jobName, customParams, callback) {
+      <parseArguments>
+      var _doArgs41 = doArgs(arguments, ['string', ['object', {}], 'function']);
+      var _doArgs42 = _slicedToArray(_doArgs41, 3);
+      jobName = _doArgs42[0];
+      customParams = _doArgs42[1];
+      callback = _doArgs42[2];
+      </parseArguments>
+
+      var self = this;
+      <sendEnableRequest>
+      doRequest({
+        method: 'POST',
+        urlPattern: [JOB_ENABLE, jobName],
+        noparse: true
+      }, customParams, function (error, data) {
+        if (error) {
+          callback(error, data);
+          return;
+        }
+        self.job_info(jobName, customParams, callback);
+      });
+      </sendEnableRequest>
+    }
+</enable_job>
+
+<setTransitionProperties>
+function setTransitionProperties() {
+        <assignTransitionProperties>
+        PermTransitionProperties.toState = toState;
+        PermTransitionProperties.toParams = toParams;
+        PermTransitionProperties.fromState = fromState;
+        PermTransitionProperties.fromParams = fromParams;
+        PermTransitionProperties.options = options;
+        </assignTransitionProperties>
+      }
+</setTransitionProperties>
+
+<resizeWrapper>
+function( element ) {
+            
+            element = $.getElement( element );
+
+            <createWrappers>
+            var wrappers = [
+                $.makeNeutralElement( 'div' ),
+                $.makeNeutralElement( 'div' ),
+                $.makeNeutralElement( 'div' )
+            ];
+            </createWrappers>
+
+            <applyStyles>
+            $.extend(wrappers[0].style, {
+                display: "table",
+                height: "100%",
+                width: "100%"
+            });
+            $.extend(wrappers[1].style, {
+                display: "table-row"
+            });
+            $.extend(wrappers[2].style, {
+                display: "table-cell",
+                verticalAlign: "middle",
+                textAlign: "center"
+            });
+            </applyStyles>
+
+            <appendWrappers>
+            wrappers[0].appendChild(wrappers[1]);
+            wrappers[1].appendChild(wrappers[2]);
+            wrappers[2].appendChild(element);
+            </appendWrappers>
+
+            return wrappers[0];
+        }
+</resizeWrapper>
+```
+
+Most of the functions have been tagged with single responsibility indicating that they are SRP compliant. However, some functions are tagged with internal responsibilities, as they include distinct coherent blocks of code serving specific separate purposes which may or may not be signs of SRP violation depending on the context and granularity of responsibilities within the context of the application's architecture.

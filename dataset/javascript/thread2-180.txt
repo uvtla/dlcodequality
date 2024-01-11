@@ -1,0 +1,257 @@
+```javascript
+<function>
+function (options) {
+    <validation>
+    if (!isStringValid(options.key)) {
+        throw new TypeError('Unable to load data, a key is not a non-empty string.');
+    }
+
+    if (!isStringValid(options.urlTemplate)) {
+        throw new TypeError('Unable to load data, a urlTemplate is not a non-empty string.');
+    }
+
+    var errorHandler = options.loadFailureHandler;
+    if (errorHandler !== undefined) {
+        if (!angular.isString(errorHandler)) {
+            throw new Error('Unable to load data, a loadFailureHandler is not a string.');
+        } else errorHandler = $injector.get(errorHandler);
+    }
+    </validation>
+
+    <setup>
+    var loaders = [],
+        tables = [],
+        deferred = $q.defer();
+
+    function addTablePart(table) {
+        tables.push(table);
+    }
+    </setup>
+
+    <data-loading>
+    for (var part in parts) {
+        if (hasPart(part) && parts[part].isActive) {
+            loaders.push(
+              parts[part]
+                .getTable(options.key, $q, $http, options.urlTemplate, errorHandler)
+                .then(addTablePart)
+            );
+        }
+    }
+
+    if (loaders.length) {
+        $q.all(loaders).then(
+          function () {
+              var table = {};
+              for (var i = 0; i < tables.length; i++) {
+                  deepExtend(table, tables[i]);
+              }
+              deferred.resolve(table);
+          },
+          function () {
+              deferred.reject(options.key);
+          }
+        );
+    } else {
+        deferred.resolve({});
+    }
+    </data-loading>
+
+    return deferred.promise;
+}
+</function>
+
+<function>
+function(type, name, value) {
+    <initial-processing>
+    if (type === 'text' && value == null) {
+      value = name;
+      name = undefined;
+    }
+    </initial-processing>
+
+    <check-animateAttribute>
+    if (name === this.animateAttribute) {
+      return;
+    }
+    </check-animateAttribute>
+
+    <binder-setup>
+    var binder = this.getBinder(type, name), binders = this.binders[type];
+
+    if (!binder) {
+      var toMatch = (type === 'text') ? value : name;
+      binders._wildcards.some(function(wildcardBinder) {
+        if (toMatch.match(wildcardBinder.expression)) {
+          binder = wildcardBinder;
+          return true;
+        }
+      });
+    }
+
+    if (binder &&
+        type === 'attribute' &&
+        binder.prototype.onlyWhenBound &&
+        !this.binders[type]._delimitersOnlyInDefault &&
+        !this.isBound(type, value)) {
+      return;
+    }
+
+    if (!binder && value && (type === 'text' || this.isBound(type, value))) {
+      binder = this.getBinder(type, '__default__');
+    }
+    </binder-setup>
+
+    return binder;
+}
+</function>
+
+<initialize-iconpicker>
+function (element, options) {
+    this.$element = $(element);
+    this.options  = $.extend({}, Iconpicker.DEFAULTS, this.$element.data());
+    this.options  = $.extend({}, this.options, options);
+}
+</initialize-iconpicker>
+
+<add-empty-line>
+function addEmptyLineAfter(
+  node,
+  newline
+)  {
+  <add-line-logic>
+  const after = _.last(node.raws.after.split(";"));
+
+  if (!/\r?\n/.test(after)) {
+    node.raws.after = node.raws.after + _.repeat(newline, 2);
+  } else {
+    node.raws.after = node.raws.after.replace(/(\r?\n)/, `${newline}$1`);
+  }
+  </add-line-logic>
+
+  return node;
+}
+</add-empty-line>
+
+<MutationSigner-constructor>
+function MutationSigner(privateKey) {
+    this.publicKey = ByteBuffer.wrap(privateKey.publicKey.toBuffer());
+    <signer-setup>
+    this._signer = bitcore.crypto.ECDSA().set({
+        endian: "big",
+        privkey: privateKey.privateKey
+    });
+    </signer-setup>
+}
+</MutationSigner-constructor>
+
+<possible-moves>
+function() {
+
+    var step = this.step;
+    var cost = this.cost();
+    var diagonalCost = this.diagonalCost();
+
+    return [
+        { offsetX: step  , offsetY: 0     , cost: cost },
+        { offsetX: step  , offsetY: step  , cost: diagonalCost },
+        { offsetX: 0     , offsetY: step  , cost: cost },
+        { offsetX: -step , offsetY: step  , cost: diagonalCost },
+        { offsetX: -step , offsetY: 0     , cost: cost },
+        { offsetX: -step , offsetY: -step , cost: diagonalCost },
+        { offsetX: 0     , offsetY: -step , cost: cost },
+        { offsetX: step  , offsetY: -step , cost: diagonalCost }
+    ];
+}
+</possible-moves>
+
+<forEach>
+function forEach(object, iterator, thisp) {
+    if (object) {
+        <handle-array>
+        if (object.forEach) {
+            object.forEach(iterator, thisp);
+            return;
+        }
+        </handle-array>
+
+        <validation>
+        if (!(iterator instanceof Function)) {
+            throw new TypeError('iterator should be a Function');
+        }
+        </validation>
+
+        <iteration>
+        var key, length;
+
+        if (isString(object)) {
+            length = object.length;
+            for (key = 0; key < length; key += 1) {
+                iterator.call(thisp, object[key], key, object);
+            }
+            return;
+        }
+
+        for (key in object) {
+            if (object.hasOwnProperty(key)) {
+                iterator.call(thisp, object[key], key, object);
+            }
+        }
+        </iteration>
+    }
+}
+</forEach>
+
+<get-indent>
+function getTopLevelIndentByTemplateTag(templateTag) {
+    const baseIndentText = getActualLineIndentText(
+        templateTag.loc.start.line
+    )
+    return new ExpectedIndent(
+        baseIndentText,
+        options.indentSize * options.startIndent
+    )
+}
+</get-indent>
+
+<history-management>
+function(state, title, url) {
+  var t = document.title;
+  <store-last-title>
+  if (lastTitle != null) {
+    document.title = lastTitle;
+  }
+  </store-last-title>
+  <push-history>
+  historyPushState && fastFixChrome(historyPushState, arguments);
+  </push-history>
+  <change-state>
+  changeState(state, url);
+  </change-state>
+  <restore-title>
+  document.title = t;
+  lastTitle = title;
+  </restore-title>
+}
+</history-management>
+
+<container-configuration>
+function(raw_tag) {
+
+    var container_config = {
+        type: 'Element',
+        tag_name: raw_tag.name
+    };
+
+    <static-attributes>
+    if ('attributes' in raw_tag) this._parseContainerStaticAttributes(container_config, raw_tag.attributes);
+    </static-attributes>
+    <control-attributes>
+    if ('x' in raw_tag) this._parseContainerControlAttributes(container_config, raw_tag.x);
+    </control-attributes>
+
+    return container_config;
+
+}
+</container-configuration>
+```

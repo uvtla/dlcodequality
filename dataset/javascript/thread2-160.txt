@@ -1,0 +1,329 @@
+```javascript
+<saveBase64Strings>
+function saveBase64Strings(dbPath, list, save) {
+  return bluebird.all(_.map(list, function (item, itemName) {
+    return save(dbPath + buf.encode(itemName), item);
+  }));
+}
+</saveBase64Strings>
+
+<validateNode>
+function validateNode(opts: Options) {
+    <validationSetup>
+    const isRow = node => node.type === opts.typeRow; 
+    const isCell = node => node.type === opts.typeCell;
+    const countCells = row => row.nodes.count(isCell);
+    </validationSetup>
+
+    <nodeValidation>
+    return node => {
+        if (node.type !== opts.typeTable) {
+            return undefined;
+        }
+
+        const rows = node.nodes.filter(isRow);
+        const maxColumns = Math.max(
+            1,
+            rows.map(countCells).max()
+        );
+        const rowsMissingColumns = rows.filter(
+            row => countCells(row) < maxColumns
+        );
+
+        if (rowsMissingColumns.isEmpty()) {
+            return undefined;
+        }
+
+        return change => {
+            rowsMissingColumns.forEach(row => {
+                const numberOfCellsToAdd = maxColumns - row.nodes.size;
+                const cells = Array.from({ length: numberOfCellsToAdd }).map(
+                    () => createCell(opts)
+                );
+                cells.forEach(cell =>
+                    change.insertNodeByKey(row.key, row.nodes.size, cell, {
+                        normalize: false
+                    })
+                );
+            });
+        };
+    };
+    </nodeValidation>
+}
+</validateNode>
+
+<SortableTable>
+function SortableTable(oTable, oSortTypes) {
+  <initialization>
+  this.sortTypes = oSortTypes || [];
+  this.sortColumn = null;
+  this.descending = null;
+  var oThis = this;
+  this._headerOnclick = function (e) {
+    oThis.headerOnclick(e);
+  };
+  if (oTable) {
+    this.setTable(oTable);
+    this.document = oTable.ownerDocument || oTable.document;
+  }
+  else {
+    this.document = document;
+  }
+  </initialization>
+
+  <eventSetup>
+  var win = this.document.defaultView || this.document.parentWindow;
+  this._onunload = function () {
+    oThis.destroy();
+  };
+  if (win && typeof win.attachEvent != "undefined") {
+    win.attachEvent("onunload", this._onunload);
+  }
+  </eventSetup>
+}
+</SortableTable>
+
+<getSites>
+function getSites(data) {
+  <handleMobileSitesFallback>
+  if (!data['mobileSites'].length) {
+    data['mobileSites'] = data['sites'];
+  }
+  </handleMobileSitesFallback>
+
+  <initialSiteProcessing>
+  var sites = (isMobileScreen ? data['mobileSites'] : data['sites']).slice(0);
+  var disabled = data['disabled'];
+  if (typeof sites == 'string') {
+    sites = sites.split(/\s*,\s*/);
+  }
+  if (typeof disabled == 'string') {
+    disabled = disabled.split(/\s*,\s*/);
+  }
+  if (runningInWeChat) {
+    disabled.push('wechat');
+  }
+  </initialSiteProcessing>
+
+  <removeDisabledSites>
+  disabled.length && each(disabled, function (it) {
+    sites.splice(inArray(it, sites), 1);
+  });
+  </removeDisabledSites>
+  
+  return sites;
+}
+</getSites>
+
+<listen>
+function listen () {
+  <observersSetup>
+  if (typeof obs === 'function') {
+    releases.push(obs(binder.onUpdate))
+  }
+  rebindAll()
+  </observersSetup>
+
+  <itemInvalidatorsSetup>
+  Array.from(itemInvalidators.values()).forEach(function (invalidators) {
+    invalidators.forEach(function (invalidator) {
+      invalidator.release = invalidator.observable(invalidate.bind(null, invalidator))
+    })
+  })
+  </itemInvalidatorsSetup>
+
+  <additionalListenHooks>
+  if (opts && opts.onListen) {
+    var release = opts.onListen()
+    if (typeof release === 'function') {
+      releases.push(release)
+    }
+  }
+  </additionalListenHooks>
+}
+</listen>
+
+<function>
+function(id) {
+    <validateQueueState>
+    var q = queues[id];
+    q.finished = true;
+    if (q.aborted) {
+        var msg = "transaction " + id + " was aborted";
+        _fail(id, msg);
+        return;
+    }
+    </validateQueueState>
+
+    <triggerOnSuccess>
+    if (q.onSuccess) {
+        var sc=q.scope || q.win;
+        q.onSuccess.call(sc, _returnData(q));
+    }
+    </triggerOnSuccess>
+}
+</function>
+
+<function>
+function() {
+  <initializeSubscriptions>
+  if (!this.hasOwnProperty("_postalSubscriptions")) {
+    this._postalSubscriptions = {};
+  }
+  </initializeSubscriptions>
+
+  <subscribeToTopics>
+  for (var topic in this.subscriptions) {
+    if (this.subscriptions.hasOwnProperty(topic)) {
+      var callback = this.subscriptions[topic];
+      this.subscribe(topic, callback);
+    }
+  }
+  </subscribeToTopics>
+}
+</function>
+
+<destroy>
+function destroy() {
+  <initialCleanup>
+	var i,
+		parentNode = container && container.parentNode;
+	if (chart === null) {
+		return;
+	}
+  </initialCleanup>
+
+  <fireEventOnDestroy>
+	fireEvent(chart, 'destroy');
+  </fireEventOnDestroy>
+
+  <removeEventListeners>
+	removeEvent(win, '.' + containerId);
+	removeEvent(chart);
+  </removeEventListeners>
+
+  <destroyAxes>
+	i = axes.length;
+	while (i--) {
+		axes[i] = axes[i].destroy();
+	}
+  </destroyAxes>
+
+  <destroySeries>
+	i = series.length;
+	while (i--) {
+		series[i] = series[i].destroy();
+	}
+  </destroySeries>
+
+  <destroyAdditionalProperties>
+	each(['title', 'subtitle', 'seriesGroup', 'clipRect', 'credits', 'tracker'], function (name) {
+		var prop = chart[name];
+		if (prop) {
+			chart[name] = prop.destroy();
+		}
+	});
+  </destroyAdditionalProperties>
+
+  <destroyMiscComponents>
+	each([chartBackground, legend, tooltip, renderer, tracker], function (obj) {
+		if (obj && obj.destroy) {
+			obj.destroy();
+		}
+	});
+	chartBackground = legend = tooltip = renderer = tracker = null;
+  </destroyMiscComponents>
+
+  <cleanupContainer>
+	if (container) { 
+		container.innerHTML = '';
+		removeEvent(container);
+		if (parentNode) {
+			parentNode.removeChild(container);
+		}
+		container = null;
+	}
+  </cleanupContainer>
+
+  <otherCleanups>
+	clearInterval(tooltipInterval);
+	for (i in chart) {
+		delete chart[i];
+	}
+	chart = null;
+  </otherCleanups>
+}
+</destroy>
+
+<isInTailCallPosition>
+function isInTailCallPosition(node) {
+  <tailCallPositionLogic>
+    if (node.parent.type === "ArrowFunctionExpression") {
+        return true;
+    }
+    if (node.parent.type === "ReturnStatement") {
+        return !hasErrorHandler(node.parent);
+    }
+    if (node.parent.type === "ConditionalExpression" && (node === node.parent.consequent || node === node.parent.alternate)) {
+        return isInTailCallPosition(node.parent);
+    }
+    if (node.parent.type === "LogicalExpression" && node === node.parent.right) {
+        return isInTailCallPosition(node.parent);
+    }
+    if (node.parent.type === "SequenceExpression" && node === node.parent.expressions[node.parent.expressions.length - 1]) {
+        return isInTailCallPosition(node.parent);
+    }
+  </tailCallPositionLogic>
+  return false;
+}
+</isInTailCallPosition>
+
+<setTitleAndSubtitle>
+function (titleOptions, subtitleOptions, redraw) {
+  <updateChartTitleOptions>
+  var chart = this,
+    options = chart.options,
+    chartTitleOptions,
+    chartSubtitleOptions;
+  chartTitleOptions = options.title = merge(options.title, titleOptions);
+  chartSubtitleOptions = options.subtitle = merge(options.subtitle, subtitleOptions);
+  </updateChartTitleOptions>
+
+  <createOrDestroyTitles>
+  each([
+      ['title', titleOptions, chartTitleOptions],
+      ['subtitle', subtitleOptions, chartSubtitleOptions]
+  ], function (arr) {
+      var name = arr[0],
+        title = chart[name],
+        titleOptions = arr[1],
+        chartTitleOptions = arr[2];
+
+      if (title && titleOptions) {
+          chart[name] = title = title.destroy(); 
+      }
+
+      if (chartTitleOptions && chartTitleOptions.text && !title) {
+          chart[name] = chart.renderer.text(
+            chartTitleOptions.text,
+            0,
+            0,
+            chartTitleOptions.useHTML
+            )
+            .attr({
+                align: chartTitleOptions.align,
+                'class': PREFIX + name,
+                zIndex: chartTitleOptions.zIndex || 4
+            })
+            .css(chartTitleOptions.style)
+            .add();
+      }
+  });
+  </createOrDestroyTitles>
+
+  <layoutTitles>
+  chart.layOutTitles(redraw);
+  </layoutTitles>
+}
+</setTitleAndSubtitle>
+```

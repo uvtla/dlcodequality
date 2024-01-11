@@ -1,0 +1,303 @@
+```javascript
+<assertHtmlEquality>
+function(actual, expected, message) {
+  message = message || "HTML should be equal";
+  this.deepEqual(serializeHtml(actual), serializeHtml(expected), message);
+}
+</assertHtmlEquality>
+
+<prototypeCreationAndAssertion>
+function() {
+
+  var Foo = $prototype({ $static: { noop: _.noop } }),
+    Bar = $extends(Foo);
+
+  var foo = new Foo(),
+    bar = new Bar();
+
+
+  $assert(foo.constructor === Foo)
+  $assert(bar.constructor === Bar)
+
+
+  $assert(_.isTypeOf(Function, foo.constructor.noop))
+  $assert(_.isTypeOf(Meta, foo.constructor.$definition.noop))
+
+
+  $assert(Foo.isTypeOf(foo))
+  $assert(!Bar.isTypeOf(foo))
+  $assert(Bar.isTypeOf(bar))
+  $assert(Foo.isTypeOf(bar))
+
+
+  $assert(foo.isInstanceOf(Foo))
+  $assert(!foo.isInstanceOf(Bar))
+  $assert(bar.isInstanceOf(Bar))
+  $assert(bar.isInstanceOf(Foo))
+}
+</prototypeCreationAndAssertion>
+
+<configureChart>
+function($super, key, value, properties) {
+  $super(key, value, properties);
+
+  switch (key) {
+
+    case 'chart.showMarkers':
+      this.showMarkers = (value === 'true');
+      this.mapper.mapValue((value === 'true' ? this.markerRadius : 0), ["plotOptions", "line", "marker", "radius"]);
+      break;
+    default:
+
+      break;
+
+  }
+}
+</configureChart>
+
+<GB18030Decoder>
+function GB18030Decoder(options) {
+  var fatal = options.fatal;
+
+  var gb18030_first = 0x00,
+    gb18030_second = 0x00,
+    gb18030_third = 0x00;
+
+  this.handler = function(stream, bite) {
+
+    if (bite === end_of_stream && gb18030_first === 0x00 &&
+      gb18030_second === 0x00 && gb18030_third === 0x00) {
+      return finished;
+    }
+
+    if (bite === end_of_stream &&
+      (gb18030_first !== 0x00 || gb18030_second !== 0x00 ||
+        gb18030_third !== 0x00)) {
+      gb18030_first = 0x00;
+      gb18030_second = 0x00;
+      gb18030_third = 0x00;
+      decoderError(fatal);
+    }
+
+    var code_point;
+
+    if (gb18030_third !== 0x00) {
+      
+      code_point = null;
+
+      if (inRange(bite, 0x30, 0x39)) {
+        code_point = indexGB18030RangesCodePointFor(
+          (((gb18030_first - 0x81) * 10 + (gb18030_second - 0x30)) * 126 +
+            (gb18030_third - 0x81)) * 10 + bite - 0x30);
+      }
+
+      var buffer = [gb18030_second, gb18030_third, bite];
+
+      gb18030_first = 0x00;
+      gb18030_second = 0x00;
+      gb18030_third = 0x00;
+
+      if (code_point === null) {
+        stream.prepend(buffer);
+        return decoderError(fatal);
+      }
+
+      return code_point;
+    }
+
+    if (gb18030_second !== 0x00) {
+
+      if (inRange(bite, 0x81, 0xFE)) {
+        gb18030_third = bite;
+        return null;
+      }
+
+      stream.prepend([gb18030_second, bite]);
+      gb18030_first = 0x00;
+      gb18030_second = 0x00;
+      return decoderError(fatal);
+    }
+
+    if (gb18030_first !== 0x00) {
+
+      if (inRange(bite, 0x30, 0x39)) {
+        gb18030_second = bite;
+        return null;
+      }
+
+      var lead = gb18030_first;
+      var pointer = null;
+      gb18030_first = 0x00;
+
+      var offset = bite < 0x7F ? 0x40 : 0x41;
+
+      if (inRange(bite, 0x40, 0x7E) || inRange(bite, 0x80, 0xFE))
+        pointer = (lead - 0x81) * 190 + (bite - offset);
+
+      code_point = pointer === null ? null :
+        indexCodePointFor(pointer, index('gb18030'));
+
+      if (code_point === null && isASCIIByte(bite))
+        stream.prepend(bite);
+
+      if (code_point === null)
+        return decoderError(fatal);
+
+      return code_point;
+    }
+
+    if (isASCIIByte(bite))
+      return bite;
+
+    if (bite === 0x80)
+      return 0x20AC;
+
+    if (inRange(bite, 0x81, 0xFE)) {
+      gb18030_first = bite;
+      return null;
+    }
+
+    return decoderError(fatal);
+  };
+}
+</GB18030Decoder>
+
+<PathLimit>
+function PathLimit(parent, conf) {
+  this._parent = parent;
+
+  if (regPathLimit.test(conf)) {
+    conf = regPathLimit.exec(conf);
+
+    this._start = conf[1];
+    this._limit = conf[2];
+  } else {
+    this._start = conf;
+  }
+}
+</PathLimit>
+
+<initializeWindow>
+function(name, title, url, setupTemplate, setup, showDevTools) {
+
+  const window = new Window(name, title, url, setupTemplate, setup, showDevTools);
+
+  return (window == null || Object.keys(window).length === 0) ? false : window;
+}
+</initializeWindow>
+
+<expandObject>
+function expand(object, delimiter) {
+  var expanded = {};
+
+  delimiter = delimiter || '.';
+
+  forEach(object, function(value, key) {
+    var keys = key.split(delimiter),
+      current = expanded;
+
+    while (keys.length) {
+      key = keys.shift();
+
+      if (!current.hasOwnProperty(key)) {
+        if (keys.length === 0) {
+          current[key] = value;
+        } else {
+          current[key] = {};
+        }
+      }
+
+      current = current[key];
+    }
+  });
+
+  return expanded;
+}
+</expandObject>
+
+<readPartials>
+function readPartials(userDir, cwd) {
+  if (cwd) {
+    userDir = path.join(cwd, userDir);
+  } else {
+    userDir = path.join(path.dirname(process.argv[1]), userDir);
+  }
+  partials = {};
+  var filenames = fs.readdirSync(userDir);
+  for (var i = 0; i < filenames.length; i++) {
+    partials[filenames[i].slice(0, -5)] = fs.readFileSync(
+      path.join(userDir, filenames[i]), 'utf8'
+    );
+  }
+  return partials;
+}
+</readPartials>
+
+<cacheRemoveKey>
+function(key) {
+  var map = this._getMap(key, false);
+  if (map == null) {
+    return undefined;
+  }
+  var item;
+  if (map == this._objectKeys) {
+    item = key[this._metaDataName];
+    if (item) {
+      key[this._metaDataName] = item.next;
+      if (!item.next) {
+        delete key[this._metaDataName];
+      }
+    }
+  } else if (map != this._otherKeys) {
+    item = map[key];
+  } else {
+    for (var i in map) {
+      if (map.hasOwnProperty(i)) {
+        var elt = map[i];
+        if (key === elt.key) {
+          item = elt;
+          break;
+        }
+      }
+    }
+  }
+  if (item) {
+    var next = item.next;
+    map[item.index] = next;
+    if (!next) {
+      delete map[item.index];
+    }
+    item.key = null;
+    item.next = null;
+    return item.value;
+  } else {
+    return undefined;
+  }
+}
+</cacheRemoveKey>
+
+<startTagInSelectInTable>
+function startTagInSelectInTable(p, token) {
+  const tn = token.tagName;
+
+  if (
+    tn === $.CAPTION ||
+    tn === $.TABLE ||
+    tn === $.TBODY ||
+    tn === $.TFOOT ||
+    tn === $.THEAD ||
+    tn === $.TR ||
+    tn === $.TD ||
+    tn === $.TH
+  ) {
+    p.openElements.popUntilTagNamePopped($.SELECT);
+    p._resetInsertionMode();
+    p._processToken(token);
+  } else {
+    <startTagInSelect>
+    startTagInSelect(p, token);
+    </startTagInSelect>
+  }
+}
+</startTagInSelectInTable>
+```

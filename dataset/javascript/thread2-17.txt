@@ -1,0 +1,296 @@
+```javascript
+<function>
+function(model, options) {
+    <setupErrorHandling>
+    var error = options.error;
+    options.error = function(resp) {
+      if (error) error.call(options.context, model, resp, options);
+      model.trigger('error', model, resp, options);
+    };
+    </setupErrorHandling>
+}
+</function>
+
+<function report>
+function report(node) {
+    <generateMessage>
+    const message = node.parent.type === "BlockStatement" ? "Nested block is redundant." : "Block is redundant.";
+    <generateMessage>
+
+    <reportError>
+    context.report({ node, message });
+    </reportError>
+}
+</function report>
+
+<function getFileSize>
+function getFileSize(path) {
+	return new Promise(function(resolve, reject) {
+		<fileStatistics>
+		fs.stat(path, function(err, stats) {
+			if (err) {
+				if (err.code === 'ENOENT') {
+					resolve(null);
+				} else {
+					reject(err);
+				}
+				return;
+			}
+
+			resolve(stats.size);
+		});
+		</fileStatistics>
+	});
+}
+</function getFileSize>
+
+<function replaceVirtualFields>
+function replaceVirtualFields(options, model) {
+		<handleAttributes>
+		if (options.attributes) {
+			for (var i = 0; i < options.attributes.length; i++) { 
+				var fieldName = options.attributes[i],
+					field = model.attributes[fieldName];
+
+				if (!field) throw new Sequelize.VirtualFieldsError("Field '" + model.name + '.' + fieldName + "' referenced in a virtual field does not exist");
+
+				if (!(field.type instanceof Sequelize.VIRTUAL)) continue;
+				
+				addVirtualFieldOptions(options, field, fieldName);
+
+				
+				options.attributes.splice(i, 1);
+				i--;
+			}
+		} else {
+			_.forIn(model.attributes, function(field, fieldName) {
+				
+				if (field.type instanceof Sequelize.VIRTUAL) addVirtualFieldOptions(options, field, fieldName);
+			});
+		}
+		</handleAttributes>
+
+		<processIncludes>
+		var includes = options.include;
+		if (includes) {
+			_.forEach(includes, function(include, index) {
+				
+				if (patches.isModel(include)) include = includes[index] = {model: include};
+
+				
+				replaceVirtualFields(include, include.model);
+			});
+		}
+		</processIncludes>
+}
+</function replaceVirtualFields>
+
+<function parseHttpResponse>
+function parseHttpResponse(options, filesWithHash) {
+    <logging>
+    if (options.verbose) {
+        _utils.logger.info('Parsing HTTP responses...');
+    }
+    </logging>
+    var promises = [];
+
+    <iterateFilesWithHash>
+    var _iteratorNormalCompletion5 = true;
+    var _didIteratorError5 = false;
+    var _iteratorError5 = undefined;
+
+    try {
+        for (var _iterator5 = filesWithHash[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var fileWithHash = _step5.value;
+
+            if (fileWithHash.subtitlesPresent) continue;
+            var p = (0, _utils.XML2JSON)(options, fileWithHash).catch(function (err) {
+                <handleErrors>
+                if (options.verbose) {
+                    _utils.logger.info('Error in HTTP response: ', err.err);
+                }
+                </handleErrors>
+                return err.fileWithHash;
+            });
+            promises.push(p);
+        }
+    } catch (err) {
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                _iterator5.return();
+            }
+        } finally {
+            if (_didIteratorError5) {
+                throw _iteratorError5;
+            }
+        }
+    }
+    </iterateFilesWithHash>
+
+    <resolvePromises>
+    return Promise.all(promises);
+    </resolvePromises>
+}
+</function parseHttpResponse>
+
+<function init>
+function init(cb) {  
+  <validateCallback>
+  if (typeof cb !== 'function') {
+    throw O.log.error(this, 'Callback must be a function', cb);
+  }
+  </validateCallback>
+
+  <setupStream>
+  this.stream = new Readable();
+  this.stream._read = O._.noop;
+  this.stream.on('error', onError.bind(this));
+  </setupStream>
+
+  <invokeCallback>
+  cb(null, this.stream);
+  </invokeCallback>
+}
+</function init>
+
+<function>
+function (object) {
+    <deactivateInterfaces>
+    var interfaces = object.__$interfaces;
+    if (!interfaces) {
+        return;
+    }
+    for (var i in interfaces) {
+        if (interfaces.hasOwnProperty(i) && interfaces[i].$destructor) {
+            interfaces[i].$destructor();
+            interfaces[i] = null;
+        }
+    }
+    object.__$interfaces = null;
+    </deactivateInterfaces>
+}
+</function>
+
+<function>
+function (symbol, x, y, width, height, options) {
+	<createSVGorImageObject>
+	var obj,
+		symbolFn = this.symbols[symbol],
+		path = symbolFn && symbolFn(
+			mathRound(x),
+			mathRound(y),
+			width,
+			height,
+			options
+		),
+		imageElement,
+		imageRegex = /^url\((.*?)\)$/,
+		imageSrc,
+		imageSize,
+		centerImage;
+
+	if (path) {
+		obj = this.path(path);
+		extend(obj, {
+			symbolName: symbol,
+			x: x,
+			y: y,
+			width: width,
+			height: height
+		});
+		if (options) {
+			extend(obj, options);
+		}
+	} else if (imageRegex.test(symbol)) {
+		centerImage = function (img, size) {
+			if (img.element) {
+				img.attr({
+					width: size[0],
+					height: size[1]
+				});
+
+				if (!img.alignByTranslate) {
+					img.translate(
+						mathRound((width - size[0]) / 2),
+						mathRound((height - size[1]) / 2)
+					);
+				}
+			}
+		};
+		imageSrc = symbol.match(imageRegex)[1];
+		imageSize = symbolSizes[imageSrc];
+		obj = this.image(imageSrc)
+			.attr({
+				x: x,
+				y: y
+			});
+		obj.isImg = true;
+		if (imageSize) {
+			centerImage(obj, imageSize);
+		} else {
+			obj.attr({ width: 0, height: 0 });
+			imageElement = createElement('img', {
+				onload: function () {
+					centerImage(obj, symbolSizes[imageSrc] = [this.width, this.height]);
+				},
+				src: imageSrc
+			});
+		}
+	}
+	</createSVGorImageObject>
+	return obj;
+}
+</function>
+
+<function parseMultiplicative>
+function parseMultiplicative() {
+	<parseExpressionElements>
+	var token, left, right, r;
+	left = parseExponentiation();
+	token = lexer.peek();
+	</parseExpressionElements>
+
+	<processMultiplicativeOperations>
+	if (matchOp(token, '*') || matchOp(token, '/')) {
+		token = lexer.next();
+		right = parseMultiplicative();
+		if (right.subtype === 'naryOperator' || right.subtype === 'binaryOperator') {
+			r = right;
+			while (r.content[0].subtype === 'naryOperator' || r.content[0].subtype === 'binaryOperator') {
+				r = r.content[0];
+			}
+			r.content[0] = new MathLib.Expression({
+				subtype: token.value === '*' ? 'naryOperator' : 'binaryOperator',
+				content: [left, r.content[0]],
+				value: token.value,
+				name: token.value === '*' ? 'times' : 'divide'
+			});
+			return right;
+		} else {
+			return new MathLib.Expression({
+				subtype: token.value === '*' ? 'naryOperator' : 'binaryOperator',
+				value: token.value,
+				name: token.value === '*' ? 'times' : 'divide',
+				content: [left, right]
+			});
+		}
+	}
+	</processMultiplicativeOperations>
+	return left;
+}
+</function parseMultiplicative>
+
+<function>
+function (metricType, statsdKey) {
+	<normalizeStatsdKey>
+	statsdKey = statsdKey.replace(/([^a-zA-Z0-9:_])/g, '_');
+	</normalizeStatsdKey>
+	<createMetricKey>
+	return [prefixes[metricType], '_', statsdKey].join('');
+	</createMetricKey>
+}
+</function>
+```

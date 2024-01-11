@@ -1,0 +1,250 @@
+```
+<function1>
+function(model, opt) {
+    this.getConnectedLinks(model).forEach(function(link) {
+        <updateLinkProperties>
+        link.set((link.source().id === model.id ? 'source' : 'target'), { x: 0, y: 0 }, opt);
+        </updateLinkProperties>
+    });
+}
+</function1>
+
+<function2>
+function ready(fn) {
+    if (!isReady) {
+        <checkDocumentBody>
+        if (!doc.body) {
+            return defer(ready);
+        }
+        </checkDocumentBody>
+
+        <markAsReady>
+        isReady = true;
+        </markAsReady>
+
+        <executePendingCallbacks>
+        while (fn = callbacks.shift()) {
+            defer(fn);
+        }
+        </executePendingCallbacks>
+    }
+}
+</function2>
+
+<function3>
+function(event, args) {
+    WireIt.CanvasContainer.superclass.onResize.call(this, event, args);
+
+    <calculateCanvasSize>
+    var size = args[0];
+    this.canvasWidth = (size[0] - 14);
+    this.canvasHeight = (size[1] - (this.ddHandle ? 44 : 14));
+    </calculateCanvasSize>
+
+    <setCanvasRegion>
+    this.canvasEl.SetCanvasRegion(0, 0, this.canvasWidth, this.canvasHeight);
+    </setCanvasRegion>
+
+    <drawCanvas>
+    this.drawCanvas();
+    </drawCanvas>
+}
+</function3>
+
+<function4>
+function(f) {
+    var self = this;
+    <defineAfterUpdateCallback>
+    var runFAfterUpdates = function() {
+        self._afterUpdateCallbacks.push(f);
+    };
+    </defineAfterUpdateCallback>
+    var unflushedServerDocCount = 0;
+
+    <handleServerDocFlush>
+    var onServerDocFlush = function() {
+        --unflushedServerDocCount;
+        if (unflushedServerDocCount === 0) {
+            runFAfterUpdates();
+        }
+    };
+    </handleServerDocFlush>
+
+    <iterateServerDocuments>
+    _.each(self._serverDocuments, function(collectionDocs) {
+        collectionDocs.forEach(function(serverDoc) {
+            var writtenByStubForAMethodWithSentMessage = _.any(
+                serverDoc.writtenByStubs, function(dummy, methodId) {
+                    var invoker = self._methodInvokers[methodId];
+                    return invoker && invoker.sentMessage;
+                });
+            if (writtenByStubForAMethodWithSentMessage) {
+                ++unflushedServerDocCount;
+                serverDoc.flushCallbacks.push(onServerDocFlush);
+            }
+        });
+    });
+    </iterateServerDocuments>
+
+    <checkAndRunAfterUpdateCallback>
+    if (unflushedServerDocCount === 0) {
+        runFAfterUpdates();
+    }
+    </checkAndRunAfterUpdateCallback>
+}
+</function4>
+
+<function5>
+function(stackContainers, node) {
+    node.contentItems.forEach(lm.utils.fnBind(function(item) {
+        <checkItemForStack>
+        if (item.type == 'stack') {
+            stackContainers.push(item);
+        }
+        </checkItemForStack>
+        <handleNonComponentItems>
+        else if (!item.isComponent) {
+            this._findAllStackContainersRecursive(stackContainers, item);
+        }
+        </handleNonComponentItems>
+    }, this));
+}
+</function5>
+
+<function6>
+function healthcheck(node) {
+    <initializeVariables>
+    var ended = false;
+    var node_id = node.host + ':' + node.port;
+    </initializeVariables>
+
+    <createClientAndConnect>
+    var client = net.connect({
+        port: node.adminport, host: node.host
+    }, function onConnect() {
+        if (!ended) {
+            client.write('health\r\n');
+        }
+    });
+    </createClientAndConnect>
+
+    <setClientTimeout>
+    client.setTimeout(healthCheckInterval, function() {
+        client.end();
+        markNodeAsUnhealthy(node_id);
+        client.removeAllListeners('data');
+        ended = true;
+    });
+    </setClientTimeout>
+
+    <handleClientData>
+    client.on('data', function(data) {
+        if (ended) {
+            return;
+        }
+
+        var health_status = data.toString();
+        client.end();
+        ended = true;
+
+        if (health_status.indexOf('up') < 0) {
+            markNodeAsUnhealthy(node_id);
+        } else {
+            markNodeAsHealthy(node_id);
+        }
+    });
+    </handleClientData>
+
+    <handleClientError>
+    client.on('error', function(e) {
+        if (ended) {
+            return;
+        }
+
+        if (e.code !== 'ECONNREFUSED' && e.code !== 'EHOSTUNREACH' && e.code !== 'ECONNRESET') {
+            log('Error during healthcheck on node ' + node_id + ' with ' + e.code, 'ERROR');
+        }
+
+        markNodeAsUnhealthy(node_id);
+    });
+    </handleClientError>
+}
+</function6>
+
+<function7>
+function (element) {
+    <determineDisplayStyle>
+    var tagName = element.tagName.toString().toLowerCase();
+
+    if (/^(b|big|i|small|tt|abbr|acronym|cite|code|dfn|em|kbd|strong|samp|var|a|bdo|br|img|map|object|q|script|span|sub|sup|button|input|label|select|textarea)$/i.test(tagName)) {
+        return "inline";
+    } else if (/^(li)$/i.test(tagName)) {
+        return "list-item";
+    } else if (/^(tr)$/i.test(tagName)) {
+        return "table-row";
+    } else {
+        return "block";
+    }
+    </determineDisplayStyle>
+}
+</function7>
+
+<function8>
+function codeToErrorName(code) {
+    <parseCodeAndLookupStatus>
+    code = parseInt(code, 10);
+    var status = http.STATUS_CODES[code];
+    if (!status)
+        return (false);
+    </parseCodeAndLookupStatus>
+
+    <constructErrorName>
+    var pieces = status.split(/\s+/);
+    var str = '';
+    pieces.forEach(function(s) {
+        str += s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+    });
+
+    str = str.replace(/\W+/g, '');
+    if (!/\w+Error$/.test(str))
+        str += 'Error';
+
+    return (str);
+    </constructErrorName>
+}
+</function8>
+
+<function9>
+function () {
+    <initializeRouter>
+    this.router = UIComponent.getRouterFor(this);
+    this.router.attachRoutePatternMatched(this.onRouteMatched, this);
+    </initializeRouter>
+
+    <initializeComponent>
+    this._component = Component.getOwnerComponentFor(this.getView());
+    </initializeComponent>
+
+    <attachBrowserEvent>
+    this.getView().attachBrowserEvent("click", this.onJSDocLinkClick, this);
+    </attachBrowserEvent>
+
+    <addEventDelegate>
+    this.getView().addEventDelegate({
+        onBeforeFirstShow: jQuery.proxy(this._applyViewConfigurations, this)
+    });
+    </addEventDelegate>
+}
+</function9>
+
+<function10>
+function _setDisabled(_button, _value) {
+    <updateButtonWidgetState>
+    var _btnWidget = _button.data('ui-button');
+    if (_btnWidget.option('disabled') !== _value) {
+        _btnWidget.option('disabled', _value);
+    }
+    </updateButtonWidgetState>
+}
+</function10>
+```

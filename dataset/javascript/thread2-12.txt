@@ -1,0 +1,271 @@
+```javascript
+<calculateSetOperations>
+function(gt, or) {
+  var or1 = or.values[0],
+      or2 = or.values[1];
+  var difference1 = set.difference(gt, or1);
+  var difference2 = set.difference(gt, or2);
+  return set.intersection(difference1, difference2);
+}
+</calculateSetOperations>
+
+<initializeSession>
+function Session(suite) {
+  Emitter.call(this);
+  this.files = [];
+  this.suite = suite;
+  this.global = global;
+  this.context = new Context(this);
+  this.engine = new Mocha({
+    ignoreLeaks: true,
+    useColors: true,
+    timeout: suite.options.timeout || 10000,
+    reporter: suite.options.reporter
+  });
+  this.engine.suite.emit('pre-require', this.global, null, this.engine);
+}
+</initializeSession>
+
+<configureApplicationPaths>
+function configurePaths(cfg) {
+  <basePathConfigurations>
+  var sourcesBasePath = path.resolve(appPath, cfg.get('sourcesBasePath')),
+      sources = cfg.get('sources'),
+      build = cfg.get('build'),
+      buildDir = nodeEnv == 'development' ? build.baseDirNameDev : build.baseDirNameDist,
+      buildPath = path.join(path.resolve(appPath, cfg.get('buildBasePath')), buildDir);
+  </basePathConfigurations>
+
+  <uriConfigurations>
+  buildBaseUri = cfg.get('staticBaseUri') + '/' + buildDir + '/';
+  cfg.set('buildBaseUri', buildBaseUri);
+  cfg.set('cssUri', buildBaseUri + build.css.dirName + build.css.external[nodeEnv]);
+  cfg.set('jsUri', buildBaseUri + build.js.dirName + build.js.external[nodeEnv]);
+  cfg.set('testUri', buildBaseUri + build.js.dirName + 'test.js');
+  </uriConfigurations>
+
+  <pathSetters>
+  cfg.set('staticPath', path.resolve(appPath, cfg.get('staticPath')));
+  cfg.set('routesPath', path.resolve(appPath, cfg.get('routesPath')));
+  cfg.set('buildBasePath', path.resolve(appPath, cfg.get('buildBasePath')));
+  cfg.set('helpersPath', path.resolve(appPath, cfg.get('helpersPath')));
+  cfg.set('handlebarsHelpersPath', path.resolve(appPath, cfg.get('handlebarsHelpersPath')));
+  cfg.set('repoWebViewBaseUri', cfg.get('repository').replace('.git', '/') );
+  </pathSetters>
+
+  <sourcePathConfigurations>
+  keys = Object.keys(sources);
+  for (i = 0; i < keys.length; i++) {
+    key = keys[i];
+    cfg.set('sources.'+key, path.resolve(sourcesBasePath, sources[key]));
+  }
+  </sourcePathConfigurations>
+
+  <buildPathConfigurations>
+  if (build.css.inline[nodeEnv] && cfg.set('build.css.inline', path.resolve(buildPath, build.css.inline[nodeEnv])));
+  if (build.css.external[nodeEnv] && cfg.set('build.css.external', path.resolve(buildPath, build.css.external[nodeEnv])));
+  if (build.js.inline[nodeEnv] && cfg.set('build.js.inline', path.resolve(buildPath, build.js.inline[nodeEnv])));
+  if (build.js.external[nodeEnv] && cfg.set('build.js.external', path.resolve(buildPath, build.js.external[nodeEnv])));
+  cfg.set('build.spritesheets', path.resolve(buildPath, build.spriteSheets.dirName));
+  </buildPathConfigurations>
+
+  return cfg;
+}
+</configureApplicationPaths>
+
+<initializeVersion>
+function V1(domain) {
+  Version.prototype.constructor.call(this, domain, 'v1');
+  this._commands = undefined;
+  this._ratePlans = undefined;
+  this._sims = undefined;
+}
+</initializeVersion>
+
+<loadTimbits>
+function loadTimbits(callback) {
+  var folder = path.join(config.home, "/timbits");
+  var files = filteredFiles(folder, /\.(coffee|js)$/);
+  var pending = files.length;
+
+  files.forEach(function(file) {
+    var name = file.substring(0, file.lastIndexOf("."));
+    timbits.add(name, require(path.join(folder, file)), function() {
+      pending--;
+      if (pending === 0) callback();
+    });
+  });
+}
+</loadTimbits>
+
+<generateRandomBytes>
+async function(length) {
+  const buf = new Uint8Array(length);
+  <getRandomValuesBrowser>
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    window.crypto.getRandomValues(buf);
+  } else if (typeof window !== 'undefined' && typeof window.msCrypto === 'object' && typeof window.msCrypto.getRandomValues === 'function') {
+    window.msCrypto.getRandomValues(buf);
+  </getRandomValuesBrowser>
+  <getRandomValuesNode>
+  else if (nodeCrypto) {
+    const bytes = nodeCrypto.randomBytes(buf.length);
+    buf.set(bytes);
+  }
+  </getRandomValuesNode>
+  <getRandomValuesCustom>
+  else if (this.randomBuffer.buffer) {
+    await this.randomBuffer.get(buf);
+  }
+  </getRandomValuesCustom>
+  <errorNoGenerator>
+  else {
+    throw new Error('No secure random number generator available.');
+  }
+  </errorNoGenerator>
+  return buf;
+}
+</generateRandomBytes>
+
+<convertStatusToText>
+function statusToText(status) {
+  var words = [];
+
+  if (status.index=='A') {
+    words.push({
+      code: 'A',
+      color: '#00b111',
+      title: 'Added'
+    });
+  }
+
+  if (status.index=='M') {
+    words.push({
+      code: 'M',
+      color: '#9000b1',
+      title: 'Modified'
+    });
+  }
+
+  if (status.index=='R') {
+    words.push({
+      code: 'R',
+      color: '#0065b1',
+      title: 'Renamed'
+    });
+  }
+
+  if (status.index=='!') {
+    words.push({
+      code: 'I',
+      color: '#b16d00',
+      title: 'Ignored'
+    });
+  }
+
+  if (status.index=='C') {
+    words.push({
+      code: 'C',
+      color: '#b16d00',
+      title: 'Copied'
+    });
+  }
+
+  if (status.index==' ') {
+    words.push({
+      code: ' ',
+      color: '#b16d00',
+      title: 'Unmodified'
+    });
+  }
+
+  if (status.index=='D') {
+    words.push({
+      code: 'D',
+      color: '#de2d00',
+      title: 'Deleted'
+    });
+  }
+
+  return words;
+}
+</convertStatusToText>
+
+<showTooltip>
+function showTooltipBind() {
+  if (hasEnableExp && !scope.$eval(attrs[prefix + 'Enable'])) {
+    return;
+  }
+
+  prepareTooltip();
+
+  if (ttScope.popupDelay) {
+    if (!popupTimeout) {
+      popupTimeout = $timeout(show, ttScope.popupDelay, false);
+      popupTimeout.then(function (reposition) { reposition(); });
+    }
+  } else {
+    show()();
+  }
+}
+</showTooltip>
+
+<splitWord>
+function splitWord(word) {
+  Util.assert(word);
+
+  if (word.length < MAX_SAMPLE_SIZE) {
+    return [word];
+  }
+
+  let chunks = [];
+  for (let ii = 0; ii < word.length - MAX_SAMPLE_SIZE + 1; ++ii) {
+    chunks.push(word.substring(ii, ii + MAX_SAMPLE_SIZE));
+  }
+  return chunks;
+}
+</splitWord>
+
+<loadAdapter>
+function loadAdapter(type, location) {
+  <adapterInitialization>
+  var options = adapterConfig[type];
+  try {
+    var modulePath = adapterModulePath(type, options);
+
+    global.JuttleAdapterAPI = JuttleAdapterAPI;
+
+    var start = new Date();
+
+    if (!options.builtin) {
+      checkCompatible(type, modulePath, location);
+    }
+
+    var init = require(modulePath);
+
+    var loaded = new Date();
+    var adapter = init(options);
+
+    global.JuttleAdapterAPI = undefined;
+
+    if (adapter.name !== type) {
+      throw new Error('adapter name ', adapter.name, ' != type ', type);
+    }
+    var initialized = new Date();
+
+    logger.debug(adapter.name, 'adapter loaded in', (loaded - start), 'ms,', 'initialized in', (initialized - loaded), 'ms');
+
+    register(adapter.name, adapter);
+
+    return adapter;
+  }
+  </adapterInitialization>
+  <adapterErrorHandling>
+  catch (err) {
+    logger.error('error loading adapter ' + type + ': ' + err.message);
+    throw err;
+  }
+  </adapterErrorHandling>
+}
+</loadAdapter>
+```

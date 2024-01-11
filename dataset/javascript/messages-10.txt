@@ -1,0 +1,263 @@
+```javascript
+<parseContent>
+function parseContent(window, input) {
+    <nextToken>
+    function nextToken() {
+      if (!input) {
+        return null;
+      }
+      function consume(result) {
+        input = input.substr(result.length);
+        return result;
+      }
+      var m = input.match(/^([^<]*)(<[^>]+>?)?/);
+      return consume(m[1] ? m[1] : m[2]);
+    }
+    </nextToken>
+
+    <unescapeContent>
+    function unescape1(e) {
+      return ESCAPE[e];
+    }
+    function unescape(s) {
+      while ((m = s.match(/&(amp|lt|gt|lrm|rlm|nbsp);/))) {
+        s = s.replace(m[0], unescape1);
+      }
+      return s;
+    }
+    </unescapeContent>
+
+    <shouldAddElement>
+    function shouldAdd(current, element) {
+      return !NEEDS_PARENT[element.localName] ||
+             NEEDS_PARENT[element.localName] === current.localName;
+    }
+    </shouldAddElement>
+
+    <createElement>
+    function createElement(type, annotation) {
+      var tagName = TAG_NAME[type];
+      if (!tagName) {
+        return null;
+      }
+      var element = window.document.createElement(tagName);
+      element.localName = tagName;
+      var name = TAG_ANNOTATION[type];
+      if (name && annotation) {
+        element[name] = annotation.trim();
+      }
+      return element;
+    }
+    </createElement>
+
+    var rootDiv = window.document.createElement("div"),
+        current = rootDiv,
+        t,
+        tagStack = [];
+
+    while ((t = nextToken()) !== null) {
+      if (t[0] === '<') {
+        if (t[1] === "/") {
+          <handleClosingTag>
+          if (tagStack.length &&
+              tagStack[tagStack.length - 1] === t.substr(2).replace(">", "")) {
+            tagStack.pop();
+            current = current.parentNode;
+          }
+          </handleClosingTag>
+          continue;
+        }
+        var ts = parseTimeStamp(t.substr(1, t.length - 2));
+        var node;
+        if (ts) {
+          <createProcessingInstruction>
+          node = window.document.createProcessingInstruction("timestamp", ts);
+          current.appendChild(node);
+          </createProcessingInstruction>
+          continue;
+        }
+        var m = t.match(/^<([^.\s/0-9>]+)(\.[^\s\\>]+)?([^>\\]+)?(\\?)>?$/);
+        if (!m) {
+          continue;
+        }
+        <createElementFromToken>
+        node = createElement(m[1], m[3]);
+        if (!node) {
+          continue;
+        }
+        if (!shouldAdd(current, node)) {
+          continue;
+        }
+        if (m[2]) {
+          node.className = m[2].substr(1).replace('.', ' ');
+        }
+        tagStack.push(m[1]);
+        current.appendChild(node);
+        current = node;
+        </createElementFromToken>
+        continue;
+      }
+      <appendTextNode>
+      current.appendChild(window.document.createTextNode(unescape(t)));
+      </appendTextNode>
+    }
+
+    return rootDiv;
+}
+</parseContent>
+
+<parseDB>
+function parseDB(callback) {
+    pgStructure(getConfig('database.host'), getConfig('database.database'), getConfig('database.user'),
+        getConfig('database.password'), { port: getConfig('database.port'), schema: getConfig('database.schema') },
+        callback);
+}
+</parseDB>
+
+<togglePane>
+function togglePane(evt, parentIndex, indexOrKey, selectLeaf) {
+    selectLeaf = (angular.isUndefined(selectLeaf)) ? true : selectLeaf;
+    var pane = lxSelect.choicesViewSize === 'large' ? lxSelect.panes[parentIndex] : lxSelect.openedPanes[parentIndex];
+
+    if (angular.isUndefined(pane)) {
+        return;
+    }
+
+    var key = indexOrKey;
+    if (angular.isObject(pane) && angular.isNumber(indexOrKey)) {
+        key = (Object.keys(pane) || [])[indexOrKey];
+    }
+
+    if (angular.isDefined(toggledPanes[parentIndex])) {
+        var previousKey = toggledPanes[parentIndex].key;
+
+        _closePane(parentIndex);
+
+        if (previousKey === key) {
+            return;
+        }
+    }
+
+    var isLeaf = lxSelect.isLeaf(pane[key]);
+    if (isLeaf) {
+        if (selectLeaf) {
+            lxSelect.toggleChoice(pane[key], evt);
+        }
+
+        return;
+    }
+
+    _openPane(parentIndex, key, false);
+}
+</togglePane>
+
+<findAll>
+function findAll() {
+  return jp.dataDirs({ withSysPrefix: true }).then(dirs => {
+    return Promise.all(dirs
+      .map(dir => getKernelInfos(path.join(dir, 'kernels')).catch(() => {}))
+    ).then(extractKernelResources)
+  });
+}
+</findAll>
+
+<addMarker>
+function(marker) {
+    this.markers.push(marker);
+
+    if (this.opacity < 1) {
+        marker.setOpacity(this.opacity);
+    }
+
+    if (this.map && this.map.getExtent()) {
+        marker.map = this.map;
+        this.drawMarker(marker);
+    }
+}
+</addMarker>
+
+<reduce>
+function reduce(reducer, initialValue) {
+  var accumulator = initialValue;
+  var cb = makeAsync(reducer, 3);
+
+  return through.obj(
+    function transform(chunk, enc, next) {
+
+      cb(accumulator, chunk, function (err, result) {
+        accumulator = result;
+        next(err);
+      });
+    },
+    function Flush(next) {
+      this.push(accumulator);
+      next();
+    }
+  );
+}
+</reduce>
+
+<constructor>
+function (subViewCfg, parent, options) {
+    this.config = {};
+    this.clear(true);
+    this.parent = parent;
+
+    this.options = options || {};
+    this.autoInitSingletons = !!this.options.autoInitSingletons;
+    this.defaultToSingletons = this.options.defaultToSingletons;
+    this.dotNotation = (this.options.dotNotation !== undefined) ? this.options.dotNotation : true;
+
+    if (subViewCfg) {
+        this.addConfig(subViewCfg);
+    }
+}
+</constructor>
+
+<sendMessageToMaster>
+function(message) {
+    var pack = {
+      toMaster: true,
+      toWorkers: false,
+      toSource: false,
+      message: message,
+      source: process.pid
+    }
+    dispatch(pack)
+}
+</sendMessageToMaster>
+
+<checkPositiveInteger>
+function checkPositiveInteger(settings, name, where) {
+    var N;
+    N = settings[name];
+    if (!J.isInt(N, 0)) {
+        throw new Error (where + name + ' must be an' +
+                         ' integer and larger than 0. Found: ' + N);
+    }
+}
+</checkPositiveInteger>
+
+<parseJSON>
+function parseJSON (file) {
+    return new Promise(function (resolve, reject) {
+      var data = file.data;
+      if (Buffer.isBuffer(data)) {
+        data = data.toString();
+      }
+
+      if (typeof data === "string") {
+        if (data.trim().length === 0) {
+          resolve(undefined);
+        }
+        else {
+          resolve(JSON.parse(data));
+        }
+      }
+      else {
+        resolve(data);
+      }
+    });
+}
+</parseJSON>
+```

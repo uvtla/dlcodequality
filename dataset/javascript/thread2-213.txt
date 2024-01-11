@@ -1,0 +1,214 @@
+```javascript
+<hypertimer>
+function hypertimer(options) { 
+  // ... [variable declarations] ...
+  
+  <timer.config>
+  timer.config = function(options) {
+    if (options) {
+      _validateConfig(options);
+      _setConfig(options);
+    }
+    return _getConfig();
+  };
+  </timer.config>
+  
+  // ... [other methods] ...
+  
+  <timer.setTimeout>
+  timer.setTimeout = function(callback, delay) {
+    var id = idSeq++;
+    var timestamp = timer.now() + delay;
+    if (isNaN(timestamp)) {
+      throw new TypeError('delay must be a number');
+    }
+    _queueTimeout({
+      id: id,
+      type: TYPE.TIMEOUT,
+      time: timestamp,
+      callback: callback
+    });
+    _schedule();
+    return id;
+  };
+  </timer.setTimeout>
+  
+  // ... [more methods, internal function declarations, etc.] ...
+  
+  <timer_destroy>
+  timer.destroy = function () {
+    timer.clear();
+    if (client) client.destroy();
+    if (server) server.destroy();
+  };
+  </timer_destroy>
+  
+  // ... [even more internal functions] ...
+  
+  timer.config(options);  
+  timer.continue();       
+  return timer;
+}
+</hypertimer>
+```
+
+```javascript
+<fetchJSONContent>
+function() {
+  var url = this.getURL(),
+    $promise = ajax.fetch(url, Crocodoc.ASSET_REQUEST_RETRIES);
+
+  return $promise.then(processJSONContent).promise({
+    abort: $promise.abort
+  });
+}
+</fetchJSONContent>
+```
+
+```javascript
+<waitForElement>
+function(element, callback, nowait) {
+  var self = this;
+  if (!nowait) {
+    this.waitForPage(function() {
+      self.waitForElement(element, callback, true);
+    });
+  } else {
+    var loadWait = function() {
+      setTimeout(function() {
+        self.waitForElement(element, callback, true);
+      }, 100);
+    };
+    if (nowait) {
+      getPage(function(page) {
+        page.evaluate(function(element) {
+          var element = jQuery(element);
+          return ((element.length > 0) && element.is(':visible'));
+        }, function(found) {
+          if (found) {
+            self.debug('Element ' + element + ' found');
+            callback.call(self);
+          } else {
+            loadWait();
+          }
+        }, element);
+      });
+    } else {
+      loadWait();
+    }
+  }
+}
+</waitForElement>
+```
+
+```javascript
+<get_user_account_id_for_credentials>
+function get_user_account_id_for_credentials(username, password) {
+  return new Promise((resolve, reject) => {
+    dbMgr
+      .find(app_config.get("app:db_collections:user_account"), {
+        "username": username,
+        "password": auth_util.encrypt_password(password)
+      }, {"limit": 1})
+      .then((accounts) => {
+        if (accounts.length > 0) {
+          return resolve(accounts[0]._id.toString());
+        } else {
+          return reject(new Error("Account not found."));
+        }
+      }, reject);
+  });
+}
+</get_user_account_id_for_credentials>
+```
+
+```javascript
+<createAuthDetails>
+function createAuthDetails(request) {
+  var auth= { scopedUsers: {} };
+  request._connect_auth= auth;
+  if(request.session) {
+    request.session.auth= auth;
+  }
+}
+</createAuthDetails>
+```
+
+```javascript
+<activateForComponentInstance>
+function(oComponent) {
+  Log.info("CustomizingConfiguration: activateForComponentInstance('" + oComponent.getId() + "')");
+  var sComponentName = oComponent.getMetadata().getComponentName(),
+    sKey = sComponentName + "::" + oComponent.getId(),
+    oCustomizingConfig = oComponent.getManifest()["sap.ui5"] && oComponent.getManifest()["sap.ui5"]["extends"] && oComponent.getManifest()["sap.ui5"]["extends"]["extensions"];
+  mComponentConfigs[sKey] = oCustomizingConfig;
+  Log.debug("CustomizingConfiguration: customizing configuration for component '" + sKey + "' loaded: " + JSON.stringify(oCustomizingConfig));
+}
+</activateForComponentInstance>
+```
+
+```javascript
+<writeApplicationFileForMultipleApplications>
+function writeApplicationFileForMultipleApplications(application) {
+  const applicationBaseName = application[GENERATOR_NAME].baseName;
+  checkPath(applicationBaseName);
+  createFolderIfNeeded(applicationBaseName);
+  writeConfigFile(application, path.join(applicationBaseName, '.yo-rc.json'));
+}
+</writeApplicationFileForMultipleApplications>
+```
+
+```javascript
+<addControlsToMap>
+function(controls) {
+  if (!(OpenLayers.Util.isArray(controls))) {
+    controls = [controls];
+  }
+  this.controls = this.controls.concat(controls);
+  
+  for (var i = 0, len = controls.length; i < len; i++) {
+    var control = controls[i],
+      element = this.createControlMarkup(control);
+    OpenLayers.Element.addClass(element, 
+                              control.displayClass + "ItemInactive");
+    OpenLayers.Element.addClass(element, "olButton");
+    if (control.title != "" && !element.title) {
+      element.title = control.title;
+    }
+    control.panel_div = element;
+  }
+  
+  if (this.map) { 
+    this.addControlsToMap(controls);
+    this.redraw();
+  }
+}
+</addControlsToMap>
+```
+
+```javascript
+<weakMapDelete>
+function(key){
+  if(!isObject(key)) return false;
+  if(!isExtensible(key)) return frozenStore(this)['delete'](key);
+  return $has(key, WEAK) && $has(key[WEAK], this._i) && delete key[WEAK][this._i];
+}
+</weakMapDelete>
+```
+
+```javascript
+<showPreset>
+function showPreset(name, pos){
+  console.log(_colors.magenta('Preset: ' + name));
+
+  var bar = new _progress.Bar({
+    align: pos
+  }, _progress.Presets[name] || _progress.Presets.legacy);
+  
+  bar.start(200, 0);
+  bar.update(Math.floor((Math.random() * 200) + 1));
+  bar.stop();
+  console.log('');
+}
+</showPreset>
+```

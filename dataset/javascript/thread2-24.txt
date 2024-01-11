@@ -1,0 +1,254 @@
+Here are the annotations:
+
+1. 
+```
+<commitAndHide>
+function() {
+  commitColor.call($this);
+  settings.window.expandable && hide.call($this);
+  $.isFunction(commitCallback) && commitCallback.call($this, color.active, okButton);
+}
+</commitAndHide>
+```
+Despite the function having multiple actions, they all belong to the context of committing and possibly hiding a setting. Hence it does not violate SRP.
+
+2. 
+```
+<lightenColor>
+function lighten(scale) {
+  scale = me.Math.clamp(scale, 0, 1);
+  this.glArray[0] = me.Math.clamp(this.glArray[0] + (1 - this.glArray[0]) * scale, 0, 1);
+  this.glArray[1] = me.Math.clamp(this.glArray[1] + (1 - this.glArray[1]) * scale, 0, 1);
+  this.glArray[2] = me.Math.clamp(this.glArray[2] + (1 - this.glArray[2]) * scale, 0, 1);
+  return this;
+}
+</lightenColor>
+```
+This function only has one responsibility, which is to lighten a color, so it is compliant with SRP.
+
+3. 
+```
+<filterNamespaces>
+function (type) {
+  var namespaces = _emberRuntimeSystemNative_array.A(_emberRuntimeSystemNamespace.default.NAMESPACES);
+  <typeNameRegexCreation>
+  var types = _emberRuntimeSystemNative_array.A();
+  var typeSuffixRegex = new RegExp(_emberRuntimeSystemString.classify(type) + '$');
+  </typeNameRegexCreation>
+
+  namespaces.forEach(function (namespace) {
+    if (namespace !== _emberMetalCore.default) {
+      for (var key in namespace) {
+        if (!namespace.hasOwnProperty(key)) {
+          continue;
+        }
+        if (typeSuffixRegex.test(key)) {
+          <collectClassTypes>
+          var klass = namespace[key];
+          if (_emberRuntimeUtils.typeOf(klass) === 'class') {
+            types.push(_emberRuntimeSystemString.dasherize(key.replace(typeSuffixRegex, '')));
+          }
+          </collectClassTypes>
+        }
+      }
+    }
+  });
+  return types;
+}
+</filterNamespaces>
+```
+Creating the regular expression and collecting class types seem separate but are both part of the process of filtering class names based on type within namespaces.
+
+4. 
+```
+<setMobileRequest>
+function setMobile (registrationId, mobileNumber, callback) {
+  var json = {}
+  json['mobile'] = mobileNumber
+
+  var url = HOST_NAME_SSL + DEVICE_PATH + '/' + registrationId
+  return _request(this, url, JSON.stringify(json), 'POST', callback)
+}
+</setMobileRequest>
+```
+Constructing the JSON and URL request pertains to preparing the data and making the request, which is part of setting a mobile number. The function adheres to SRP.
+
+5. 
+```
+<extendObservablePrototype>
+function(module, exports, __webpack_require__) {
+  "use strict";
+  var Observable_1 = __webpack_require__(5);
+  var let_1 = __webpack_require__(484);
+  Observable_1.Observable.prototype.let = let_1.letProto;
+  Observable_1.Observable.prototype.letBind = let_1.letProto;
+}
+</extendObservablePrototype>
+```
+This function extends the `Observable` prototype with new methods, complying with SRP.
+
+6. 
+```
+<deleteIndex>
+function(spec, callback) { 
+  spec = spec || {};
+  if (!spec.ddoc) { throw new Error('index.del() must specify a "ddoc" value'); }
+  if (!spec.name) { throw new Error('index.del() must specify a "name" value'); }
+  var type = spec.type || 'json';
+  var path = encodeURIComponent(db) + '/_index/' +
+             encodeURIComponent(spec.ddoc) + '/' +
+             encodeURIComponent(type) + '/' +
+             encodeURIComponent(spec.name);
+  return nano.request({ path: path, method: 'delete' }, callback);
+}
+</deleteIndex>
+```
+Checking for required properties and forming the request path are all part of the responsibility of deleting an index. Hence, it conforms to SRP.
+
+7. 
+```
+<FormArrayInitialization>
+function FormArray(controls, validatorOrOpts, asyncValidator) {
+  var _this = _super.call(this, coerceToValidator(validatorOrOpts), coerceToAsyncValidator(asyncValidator, validatorOrOpts)) || this;
+  _this.controls = controls;
+  _this._initObservables();
+  _this._setUpdateStrategy(validatorOrOpts);
+  _this._setUpControls();
+  _this.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+  return _this;
+}
+</FormArrayInitialization>
+```
+All operations in this function are related to initializing the `FormArray`, which is a single responsibility; thus, it is SRP compliant.
+
+8. 
+```
+<setupAuthenticatedRoute>
+function authRoute(seneca, options, context, method, route, middleware, auth) {
+  const opts = {
+    failureRedirect: route.auth.fail,
+    successRedirect: route.auth.pass
+  }
+
+  const routeArgs = [route.path]
+    .concat([auth.authenticate(route.auth.strategy, opts)])
+    .concat(middleware)
+    .concat([
+      (request, reply, next) => {
+        handleRoute(seneca, options, request, reply, route, next)
+      }
+    ])
+
+  context[method].apply(context, routeArgs)
+}
+</setupAuthenticatedRoute>
+```
+This function encompasses setting up the route, including authentication and middleware, which is appropriate for a routing setup function following SRP.
+
+9. 
+```
+<initializeRegistrar>
+function Registrar(web3, ens = new ENS(web3), tld = 'eth', minLength = 7, callback) {
+  this.web3 = web3;
+  
+  this.sha3 = function sha3withZeroX(...args) {
+    const result = web3.sha3.apply(this, args);
+    if (result[1] !== 'x') {
+      return `0x${result}`;
+    }
+    return result;
+  };
+
+  this.ens = ens;
+  this.tld = tld;
+  this.minLength = minLength;
+  this.rootNode = namehash(this.tld);
+
+  const thisRegistrar = this;
+
+  ens.owner(this.tld, (err, result) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      this.address = result;
+      this.contract = this.web3.eth.contract(interfaces.registrarInterface).at(result);
+      this.contract.registryStarted((startingErr, startingDate) => {
+        thisRegistrar.registryStarted = startingDate;
+        callback(null, result);
+      });
+    }
+  });
+}
+</initializeRegistrar>
+```
+While the function is initializing the registrar and setting up properties, it also involves asynchronous calls to the blockchain. The complexity of this setup could suggest a potential SRP violation as it mixes state initialization with asynchronous network interaction.
+
+10. 
+```
+<parseArguments>
+function _class(_ref) {
+    var args = _ref.args;
+    var config = _ref.config;
+
+    _classCallCheck(this, _class);
+
+    var on = null;
+    var from = '*';
+    var cbOn = null;
+    var cbOff = null;
+    var alwaysTrigger = false;
+
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = args[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var arg = _step.value;
+
+        <interpretArgument>
+        switch (typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) {
+          case 'string':
+            if (on === null) {
+              on = arg;
+            } else {
+              from = arg;
+            }
+            break;
+          case 'function':
+            if (cbOn === null) {
+              cbOn = arg;
+            } else {
+              cbOff = arg;
+            }
+            break;
+          case 'boolean':
+            alwaysTrigger = arg;
+        }
+        </interpretArgument>
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    _extends(this, {
+      isActive: null,
+      matchesOn: parseMatchInputString(on, config.inversePrefix),
+      matchesFrom: parseMatchInputString(from, config.inversePrefix),
+      cbOn: cbOn, cbOff: cbOff, alwaysTrigger: alwaysTrigger
+    });
+  }
+</parseArguments>
+```
+This constructor function seems to be handling multiple responsibilities as it interprets argument types and extends the class with parsed arguments. It could potentially violate SRP, if these processes are considered significant and distinct enough to warrant separate handling.

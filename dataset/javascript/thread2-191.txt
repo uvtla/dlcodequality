@@ -1,0 +1,284 @@
+```javascript
+<createDocument>
+function createDocument(root, namespace) {
+    if (!root)
+      return document.implementation.createHTMLDocument();
+    else
+      return document.implementation.createDocument(
+        namespace || null,
+        root,
+        null
+      );
+}
+</createDocument>
+```
+The `createDocument` function seems compliant with the SRP as it is dedicated to only creating a document object.
+
+```javascript
+<processDocument>
+function(newDoc, oldDoc, userContext, securityInfo) {
+  <defineHelperFunctions>
+  function isValueNullOrUndefined(value) {
+    return value === void 0 || value === null;
+  }
+  
+  function isDocumentMissingOrDeleted(candidate) {
+    return isValueNullOrUndefined(candidate) || candidate._deleted;
+  }
+  
+  var typeIdValidator = {
+    type: 'string',
+    required: true,
+    mustNotBeEmpty: true,
+    immutable: true
+  };
+  
+  function simpleTypeFilter(newDoc, oldDoc, candidateDocType) {
+    // implementation...
+  }
+  
+  function padRight(value, desiredLength, padding) {
+    // implementation...
+  }
+  
+  function isValueAnInteger(value) {
+    // implementation...
+  }
+  
+  function resolveDocumentConstraint(constraintDefinition) {
+    // implementation...
+  }
+  </defineHelperFunctions>
+
+  var utils = {
+    // Object containing helper functions
+  };
+
+  var authorizationModule = importValidationFunctionFragment('./authorization-module.js')(utils);
+  var validationModule = importValidationFunctionFragment('./validation-module.js')(utils, simpleTypeFilter, typeIdValidator);
+  
+  var rawDocDefinitions = $DOCUMENT_DEFINITIONS_PLACEHOLDER$;
+  var docDefinitions;
+  if (typeof rawDocDefinitions === 'function') {
+    docDefinitions = rawDocDefinitions();
+  } else {
+    docDefinitions = rawDocDefinitions;
+  }
+
+  function getDocumentType() {
+    // implementation...
+  }
+  
+  var theDocType = getDocumentType();
+
+  if (isValueNullOrUndefined(theDocType)) {
+    // Conditional block with different responsibilities...
+  }
+
+  var theDocDefinition = docDefinitions[theDocType];
+  var customActionMetadata = {
+    // Metadata related to actions...
+  };
+
+  <processTypeIdentification>
+  if (theDocDefinition.customActions && typeof theDocDefinition.customActions.onTypeIdentificationSucceeded === 'function') {
+    theDocDefinition.customActions.onTypeIdentificationSucceeded(newDoc, oldDoc, customActionMetadata, userContext, securityInfo);
+  }
+  </processTypeIdentification>
+
+  <processAuthorization>
+  customActionMetadata.authorization = authorizationModule.authorize(newDoc, oldDoc, userContext, securityInfo, theDocDefinition);
+  </processAuthorization>
+
+  <processAfterAuthorization>
+  if (theDocDefinition.customActions && typeof theDocDefinition.customActions.onAuthorizationSucceeded === 'function') {
+    theDocDefinition.customActions.onAuthorizationSucceeded(newDoc, oldDoc, customActionMetadata, userContext, securityInfo);
+  }
+  </processAfterAuthorization>
+
+  <validateDocument>
+  validationModule.validateDoc(newDoc, oldDoc, userContext, securityInfo, theDocDefinition, theDocType);
+  </validateDocument>
+
+  <processAfterValidation>
+  if (theDocDefinition.customActions && typeof theDocDefinition.customActions.onValidationSucceeded === 'function') {
+    theDocDefinition.customActions.onValidationSucceeded(newDoc, oldDoc, customActionMetadata, userContext, securityInfo);
+  }
+  </processAfterValidation>
+}
+</processDocument>
+```
+The above function has multiple responsibilities. Each block of the process (type identification, authorization, validation) could be seen as a separate concern and potentially broken out into separate functions or modules.
+
+```javascript
+<toggleValidClass>
+function() {
+    var self = this;
+
+    if (self.filter.get("valid")) {
+      self.$el.removeClass("invalidvalid");
+      self.$el.addClass("valid");
+    }
+    else {
+      self.$el.removeClass("valid");
+      self.$el.addClass("invalid");
+    }
+}
+</toggleValidClass>
+```
+This function is compliant with the SRP as it's solely responsible for toggling the valid/invalid class based on a property's value.
+
+```javascript
+<sendTips>
+function (tips, channel) {
+    if (!this.api_key) throw new ChangeTipException(300);
+    
+    var deferred = Q.defer(),
+        params;
+    
+    params = {
+        tips: tips instanceof Array ? tips.join(",") : tips,
+        channel: channel || ''
+    };
+
+    this._send_request({}, 'tips', params, Methods.GET, deferred);
+    return deferred.promise;
+}
+</sendTips>
+```
+The `sendTips` function is primarily responsible for sending tips, which complies with SRP despite performing checks and preparation for the request.
+
+```javascript
+<createPrototypeFactory>
+function proto() {
+    var args = arguments 
+    // ... prototype creation logic ...
+    return ProtoObjectFactory;
+}
+</createPrototypeFactory>
+```
+The `proto` function handles multiple stages of prototype creation, but the overall responsibility is to create and return a new prototype factory, so it follows SRP.
+
+```javascript
+<applyTextDiff>
+function(cnt, compareResult){
+    var splitter = compareResult.splitter,
+        diff = compareResult.diff,
+        result = cnt.split(splitter);
+    // ... text diff application logic ...
+    return result.join(splitter);
+}
+</applyTextDiff>
+```
+This `applyTextDiff` function is compliant with SRP. It has a single responsibility, which is to apply a text difference to a given content string.
+
+```javascript
+<checkCookieAndUpdate>
+function checkCookie() {
+  <parseCookieValues>
+  var checkCookieValues = // parsing logic ...
+  </parseCookieValues>
+
+  if (checkCookieValues) {
+    <splitCookieValues>
+    checkCookieValues = checkCookieValues.split('?');
+    var thisID = checkCookieValues[0];
+    var thisBtnPos = checkCookieValues[1];
+    </splitCookieValues>
+    
+    <updateCookieAndDataLayer>
+    updateCookie(thisID, thisBtnPos, 'remove');
+    dataLayer_updateBasket(thisID, thisBtnPos, 'remove');
+    </updateCookieAndDataLayer>
+  }
+}
+</checkCookieAndUpdate>
+```
+The function performs several tasks related to checking, parsing cookies, and updating the state based on cookie values, which may be seen as violations of SRP.
+
+```javascript
+<generateDeploymentMetadata>
+function(changelogOptions) {
+    var self = this;
+    return this._generateChangeLog(changelogOptions)
+      .then(function(changelog) {
+        return {
+          deployMetaData: {
+            changelog: changelog,
+            summary: self.readConfig('summary'),
+            deployer: self.readConfig('deployer')
+          }
+        };
+      });
+}
+</generateDeploymentMetadata>
+```
+This function is responsible for generating deployment metadata. It does one thing: preparing metadata; hence, it is SRP compliant.
+
+```javascript
+<observeQueryResults>
+function () {
+    var self = this;
+
+    if (self._stopped)
+      return;
+    
+    <initializeQueryObservation>
+    self._needToFetch = new LocalCollection._IdMap;
+    self._currentlyFetching = null;
+    ++self._fetchGeneration;
+    self._registerPhaseChange(PHASE.QUERYING);
+    </initializeQueryObservation>
+
+    <runQuery>
+    Meteor.defer(function () {
+      self._runQuery();
+      self._doneQuerying();
+    });
+    </runQuery>
+}
+</observeQueryResults>
+```
+The `observeQueryResults` function coordinates the steps of observing query results but does not directly contain multiple responsibilities.
+
+```javascript
+<loadFileAndProcess>
+function(file, isCss) {
+    var defer = new $.Deferred();
+    $.ajax({
+      url: file.source,
+      dataType: 'text',
+      success: function(data) {
+        log('File Loaded:' + file.source);
+        onElementLoaded(file, data);
+        _bytesLoaded += file.size;
+        _files[_currentSegment].splice(0, 1);
+        updatePercentage();
+        
+        <processCSS>
+        if (isCss) {
+            if (document.createStyleSheet) {
+              try {
+                document.createStyleSheet(file.source);
+              } catch (e) {}
+            } else {
+              var css;
+              css = document.createElement('link');
+              css.rel = 'stylesheet';
+              css.type = 'text/css';
+              css.media = 'all';
+              css.href = file.source;
+              $head[0].appendChild(css);
+            }
+        }
+        </processCSS>
+
+        defer.resolve(data);
+      }
+    });
+
+    return defer.promise();
+}
+</loadFileAndProcess>
+```
+Though this function contains a nested condition for processing CSS files differently, the primary responsibility is still to load a file and handle the response, so it adheres to SRP.

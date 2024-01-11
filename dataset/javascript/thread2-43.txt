@@ -1,0 +1,271 @@
+Here are the annotations for each function based on SRP:
+
+Function 1 (SRP violation):
+```javascript
+<establishTcpConnection>
+function() {
+    that.connected = true;
+    that.tcp_connection.setKeepAlive( true );	
+    
+    <processMessageBuffer>
+    if ( that.message_buffer.length ) {
+        while( that.message_buffer.length ) {
+            that.tcp_connection.write( that.message_buffer.shift() );
+        }
+    }
+</processMessageBuffer>
+}
+</establishTcpConnection>
+```
+
+Function 2 (SRP compliant):
+```javascript
+<generateWorkerData>
+function _getWorkerData(code, lang) {
+    let options = {};
+    if (typeof lang === 'object') {
+        options = lang;
+        lang = options.language;
+    }
+
+    lang = aliases[lang] || lang;
+
+    const workerData = {
+        id: id++,
+        code,
+        lang,
+        options: _getPrismOptions(options),
+        isNode
+    };
+
+    return workerData;
+}
+</generateWorkerData>
+```
+
+Function 3 (SRP violation):
+```javascript
+<stopRouter>
+function () {
+    <checkInitialization>
+    if (!this._bIsInitialized) {
+        Log.warning("Router is not initialized. But it got stopped", this);
+    }
+    </checkInitialization>
+
+    <detachEventHandlers>
+    if (this.fnHashChanged) {
+        this.oHashChanger.detachEvent("hashChanged", this.fnHashChanged);
+    }
+
+    if (this.fnHashReplaced) {
+        this.oHashChanger.detachEvent("hashReplaced", this.fnHashReplaced);
+    }
+    </detachEventHandlers>
+
+    <fireEventAndReset>
+    if (this._matchedRoute) {
+        this._matchedRoute.fireEvent("switched");
+        this._matchedRoute = null;
+    }
+
+    this._bIsInitialized = false;
+    </fireEventAndReset>
+
+    return this;
+}
+</stopRouter>
+```
+
+Function 4 (SRP violation):
+```javascript
+<createDSVArr>
+function DSVArr (arr, options) {
+    <initializeOptions>
+    const defaultOption = {
+        firstRowHeader: true,
+    };
+    options = Object.assign({}, defaultOption, options);
+    </initializeOptions>
+
+    let header;
+    const columns = [];
+    const push = columnMajor(columns);
+
+    <processHeader>
+    if (options.firstRowHeader) {
+        header = arr.splice(0, 1)[0];
+    } else {
+        header = [];
+    }
+    </processHeader>
+
+    <populateColumns>
+    arr.forEach(field => push(...field));
+    </populateColumns>
+
+    return [header, columns];
+}
+</createDSVArr>
+```
+
+Function 5 (SRP violation):
+```javascript
+<normalizeConfiguration>
+function normalizeConf (conf) {
+    <applyEnvironmentConfigurations>
+    if (process.env.PROVIDER_URL) {
+        conf.providerURL = process.env.PROVIDER_URL
+    }
+
+    if (process.env.WEBHOOK_URL) {
+        conf.webhookURL = process.env.WEBHOOK_URL
+    }
+
+    if (process.env.AUTOSTART) {
+        conf.autostart = yn(process.env.AUTOSTART)
+    }
+
+    if (process.env.PORT) {
+        conf.port = Number(process.env.PORT)
+    }
+    </applyEnvironmentConfigurations>
+
+    <finalizeConfiguration>
+    conf.providerURL = conf.providerURL.replace(/\/+$/, '')
+    if (!conf.webhookURL) {
+        conf.webhookURL = `http:
+    }
+
+    if (conf.autostart !== false) {
+        conf.autostart = true
+    }
+    </finalizeConfiguration>
+
+    return conf
+}
+</normalizeConfiguration>
+```
+
+Function 6 (SRP compliant):
+```javascript
+<executeEachTemplate>
+function(path, templ, emptyTempl, initialiser) {
+    if (!templ)
+        throw new Error('yamvish each methods needs a template. (path : ' + path + ')');
+    templ = (typeof templ === 'string') ? y().use(templ) : templ;
+    if (emptyTempl)
+        emptyTempl = (typeof emptyTempl === 'string') ? y().use(emptyTempl) : emptyTempl;
+    return this.exec('each', [path, templ, emptyTempl, initialiser]);
+}
+</executeEachTemplate>
+```
+
+Function 7 (SRP compliant):
+```javascript
+<setImageFallbackHandler>
+function(fallbackImage, onProgress) {
+    this.onProgress = typeof onProgress === 'function' ? onProgress : null;
+    this.fallbackImage = typeof fallbackImage === 'string' || fallbackImage instanceof HTMLImageElement ? fallbackImage : null;
+}
+</setImageFallbackHandler>
+```
+
+Function 8 (SRP violation):
+```javascript
+<registerListener>
+function (trigger, callback) {
+    var self = this;
+    var id = self.nextId++;
+    
+    <addListener>
+    self.listeners[id] = {trigger: EJSON.clone(trigger), callback: callback};
+    </addListener>
+
+    <manageFactCount>
+    if (self.factName && Package.facts) {
+      Package.facts.Facts.incrementServerFact(
+        self.factPackage, self.factName, 1);
+    }
+    </manageFactCount>
+
+    <createUnregisterFunction>
+    return {
+      stop: function () {
+        if (self.factName && Package.facts) {
+          Package.facts.Facts.incrementServerFact(
+            self.factPackage, self.factName, -1);
+        }
+        delete self.listeners[id];
+      }
+    };
+    </createUnregisterFunction>
+}
+</registerListener>
+```
+
+Function 9 (SRP violation):
+```javascript
+<initializeServer>
+function Server (a, b) {
+  <handleServerSingleton>
+  if (!(this instanceof Server)) {
+    if (!arguments.length && server) return server;
+    var instance = new Server(a, b);
+    if (!server) server = instance;
+    return instance;
+  }
+  </handleServerSingleton>
+
+  <setupDebugging>
+  debug('new server', a, b);
+  
+  var self = this;
+  
+  events.EventEmitter.call(this);
+  </setupDebugging>
+
+  <defineEventHandlers>
+  this.onPublish = function (message) {
+    debug('on publish ', message.id());
+    self.exchange().publish(message);
+  };
+
+  this.onConnection = function (socket) {
+    // ... More code related to handling connections
+  };
+  </defineEventHandlers>
+
+  <additionalServerSetup>
+  this.addListener('error', this.onError);
+  this.incomming();
+  this.processing();
+  this.outgoing();
+  this.autoPropagate(true);
+  </additionalServerSetup>
+
+  <serverListening>
+  if (a) {
+    debug('we have something so we will try to listen to it');
+    this.listen(a, b);
+  }
+  </serverListening>
+}
+</initializeServer>
+```
+
+Function 10 (SRP compliant):
+```javascript
+<initializeDenseNodes>
+function DenseNodes(properties) {
+    this.id = [];
+    this.lat = [];
+    this.lon = [];
+    this.keysVals = [];
+    if (properties)
+        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+}
+</initializeDenseNodes>
+```

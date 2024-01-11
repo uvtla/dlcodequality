@@ -1,0 +1,245 @@
+Here are the annotations for the 10 provided functions:
+
+1.
+```javascript
+<getFee>
+function getFee(callback) {
+  var fee = this.remote.createTransaction()._computeFee();
+  callback(null, {fee: utils.dropsToXrp(fee)});
+}
+</getFee>
+```
+
+2.
+```javascript
+<anonymous>
+function(path, data, oldvalue, newvalue) {
+    if(!path) return;
+
+    <prepareDispatchQueue>
+    var dispatchQueue = [];
+    var scopeModifications = SpahQL.DataHelper.compare(oldvalue, newvalue, path);    
+    for(var modifiedPath in scopeModifications) {
+      var modificationData = scopeModifications[modifiedPath];
+      var currentPath = modifiedPath;
+      while(currentPath.lastIndexOf("/") >= 0) {
+        if(dispatchQueue.indexOf(currentPath) < 0) dispatchQueue.push(currentPath);
+        currentPath = (currentPath.lastIndexOf("/") == 0 && currentPath.length>1)? "/" : currentPath.substring(0, currentPath.lastIndexOf("/"));
+      }
+    }
+    dispatchQueue.sort(function(a, b) {
+      if(a == "/") return 1;
+      if(b == "/") return -1;
+      return (a.split("/").length > b.split("/").length)? -1: 1;
+    })
+    SpahQL.log("Path modified on data store, formulated the following dispatch strategy: ["+dispatchQueue.join(" -> ")+"]. Data store: ", data);
+    </prepareDispatchQueue>
+
+    <triggerCallbacks>
+    for(var i=0; i<dispatchQueue.length; i++) {
+      var dispatchPath = dispatchQueue[i];
+      var pathCallbacks = this.callbacks[dispatchPath];
+      SpahQL.log("Triggering registered path callbacks for "+dispatchPath+": "+((!pathCallbacks)? "No callbacks to trigger" : pathCallbacks.length+" callbacks to trigger"));
+      if(pathCallbacks) {
+        for(var j=0; j<pathCallbacks.length; j++) {
+          if(pathCallbacks[j][0] == data) {
+            var modifiedSubPaths = [];
+            for(var k=0; k<dispatchQueue.length; k++) {
+              if(dispatchQueue[k] != dispatchPath && (dispatchQueue[k]).indexOf(dispatchPath) == 0) {
+                modifiedSubPaths.push(
+                  dispatchQueue[k].substring(dispatchPath.length)
+                );
+              }
+            }
+            (pathCallbacks[j][1])(SpahQL.select(dispatchPath, data), dispatchPath, modifiedSubPaths);
+          }
+        }
+      }
+    }
+    </triggerCallbacks>
+}
+</anonymous>
+```
+
+3.
+```javascript
+<canFix>
+function canFix(node) {
+  const leadingComments = sourceCode.getCommentsBefore(node);
+  const lastLeadingComment = leadingComments[leadingComments.length - 1];
+  const tokenBefore = sourceCode.getTokenBefore(node);
+
+  if (leadingComments.length === 0) {
+      return true;
+  }
+
+  if (lastLeadingComment.loc.end.line === tokenBefore.loc.end.line &&
+      lastLeadingComment.loc.end.line !== node.loc.start.line) {
+      return true;
+  }
+
+  return false;
+}
+</canFix>
+```
+
+4.
+```javascript
+<setHandle>
+function setHandle (handleNumber, to, lookBackward, lookForward) {
+  <validateAndUpdateHandle>
+  to = checkHandlePosition(scope_Locations, handleNumber, to, lookBackward, lookForward);
+  if (to === false) {
+      return false;
+  }
+  updateHandlePosition(handleNumber, to);
+  </validateAndUpdateHandle>
+
+  return true;
+}
+</setHandle>
+```
+
+5.
+```javascript
+<setupNodeObserver>
+function(node, callback) {
+  <patchAndInitializeObserver>
+  common.patchNode(node);
+  if (!node.__dom.observer) {
+    node.__dom.observer = new AsyncObserver();
+  }
+  node.__dom.observer.callbacks.add(callback);
+  </patchAndInitializeObserver>
+
+  var observer = node.__dom.observer;
+
+  <returnObserverHandle>
+  return {
+    _callback: callback,
+    _observer: observer,
+    _node: node,
+    takeRecords: function takeRecords() {
+      return observer.takeRecords()
+    }
+  };
+  </returnObserverHandle>
+}
+</setupNodeObserver>
+```
+
+6.
+```javascript
+<MarkovChainStateEngine>
+function MarkovChainStateEngine(converter, entities) {
+  MarkovChainStateEngine.super_.call(this, converter);
+  this.converter = converter;
+  this.initializedForTransition = false;
+  this.transitionCountTotals = {};
+  this.transitions = {};
+  this.transitionDefinitions = {};
+
+  <addDefiningEntities>
+  var self = this;
+  if (entities) {
+    entities.forEach(function(element) {
+      self.addDefiningEntity(element);
+    });
+  }
+  </addDefiningEntities>
+}
+</MarkovChainStateEngine>
+```
+
+7.
+```javascript
+<_union>
+function _union() {
+  <prepareUnionSQL>
+  var onlyUnions = this.onlyUnions();
+  var unions = this.grouped.union;
+  if (!unions) {
+    return '';
+  }
+  var sql = '';
+  for (var i = 0, l = unions.length; i < l; i++) {
+    var union = unions[i];
+    if (i > 0) {
+      sql += ' ';
+    }
+    if (i > 0 || !onlyUnions) {
+      sql += union.clause + ' ';
+    }
+    var statement = this.formatter.rawOrFn(union.value);
+    if (statement) {
+      if (union.wrap) {
+        sql += '(';
+      }
+      sql += statement;
+      if (union.wrap) {
+        sql += ')';
+      }
+    }
+  }
+  </prepareUnionSQL>
+  return sql;
+}
+</_union>
+```
+
+8.
+```javascript
+<parse_PtgArea>
+function parse_PtgArea(blob, length, opts) {
+  var type = (blob[blob.l++] & 0x60) >> 5;
+  var area = parse_RgceArea(blob, opts.biff >= 2 && opts.biff <= 5 ? 6 : 8, opts);
+  return [type, area];
+}
+</parse_PtgArea>
+```
+
+9.
+```javascript
+<fromEventCapture>
+function fromEventCapture(element, name) {
+  <createObservableFromEvent>
+  return Observable.create((subj) => {
+    const handler = function (...args) {
+      if (args.length > 1) {
+        subj.next(args);
+      } else {
+        subj.next(args[0] || true);
+      }
+    };
+
+    element.addEventListener(name, handler, true);
+    return new Subscription(() => element.removeEventListener(name, handler, true));
+  });
+  </createObservableFromEvent>
+}
+</fromEventCapture>
+```
+
+10.
+```javascript
+<peerConnectionStateChangeHandler>
+function() {
+  var newState = _peerConnection.signalingState;
+
+  if (newState && newState !== _state) {
+    _state = newState;
+    OT.debug('PeerConnection.stateChange: ' + _state);
+
+    <handleClosedState>
+    switch(_state) {
+      case 'closed':
+        tearDownPeerConnection();
+        break;
+    }
+    </handleClosedState>
+  }
+}
+</peerConnectionStateChangeHandler>
+```
+
+Each function has been annotated with their respective single responsibility or, in certain cases, identified responsibilities within the functions that are not compliant with the SRP.

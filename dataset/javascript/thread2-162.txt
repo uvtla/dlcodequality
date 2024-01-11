@@ -1,0 +1,234 @@
+<getSubjectBarycenter>
+function getSubjectBarycenter(subject){
+
+	<calculateBarycenter>
+	var weighted_number_of_edges = 0;
+	var number_of_edges = 0;
+	for( var o = 1; o <= object_vector.length; o++ ){
+	    if( relation_matrix[object_vector[o -1].id()] &&
+		relation_matrix[object_vector[o -1].id()][subject.id()]){
+		weighted_number_of_edges += o;
+		number_of_edges++;
+	    }
+	}
+	</calculateBarycenter>
+	
+	return ( weighted_number_of_edges / number_of_edges ) -1;
+}
+</getSubjectBarycenter>
+
+<mergeSize>
+function mergeSize(size, result) {
+	<copySizeProperties>
+    if (size) {
+        if (size.hasOwnProperty("scale")) {
+            result.scale = size.scale;
+        }
+
+        if (size.hasOwnProperty("width")) {
+            result.width = size.width;
+        }
+
+        if (size.hasOwnProperty("widthUnit")) {
+            result.widthUnit = size.widthUnit;
+        }
+
+        if (size.hasOwnProperty("height")) {
+            result.height = size.height;
+        }
+
+        if (size.hasOwnProperty("heightUnit")) {
+            result.heightUnit = size.heightUnit;
+        }
+    }
+	</copySizeProperties>
+}
+</mergeSize>
+
+<copyPluginFramework>
+function (framework) {
+	<defineTargetDestinationAndCheckExistence>
+    var targetDir = framework.targetDir || '';
+    var dest = path.join(cordovaProjectWindowsPlatformDir, 'plugins', dummyPluginInfo.id, targetDir, path.basename(framework.src));
+    var copiedSuccessfully = fs.existsSync(path.resolve(dest));
+    </defineTargetDestinationAndCheckExistence>
+    expect(copiedSuccessfully).toBe(true);
+}
+</copyPluginFramework>
+
+<findMinimum>
+function min(compare, iterable, dflt = undefined) {
+
+	<initializeIteration>
+  let iterator = (0, _iter.iter)(iterable);
+  let first = iterator.next();
+	</initializeIteration>
+
+  if (first.done) return dflt;
+
+	<findSmallestElement>
+  let smallest = first.value;
+  for (let candidate of iterator) {
+    if (compare(candidate, smallest) < 0) {
+      smallest = candidate;
+    }
+  }
+	</findSmallestElement>
+
+  return smallest;
+}
+</findMinimum>
+
+<closureForExitCondition>
+function(){
+	var foundNormalContext = false;
+	return function shouldExitOnSecondNormalContext(currentScope){
+		<determineExitCondition>
+		var isNormalContext = !currentScope.isSpecial();
+		var shouldExit = isNormalContext && foundNormalContext;
+		
+		if(isNormalContext) {
+			foundNormalContext = true;
+		}
+		</determineExitCondition>
+		return shouldExit;
+	};
+}
+</closureForExitCondition>
+
+<logRequestStart>
+function(requestUrl, requestType) {
+	<buildAndLogMessage>
+    const oThis = this,
+      d = new Date(),
+      dateTime =
+        d.getFullYear() +
+        '-' +
+        (d.getMonth() + 1) +
+        '-' +
+        d.getDate() +
+        ' ' +
+        d.getHours() +
+        ':' +
+        d.getMinutes() +
+        ':' +
+        d.getSeconds() +
+        '.' +
+        d.getMilliseconds(),
+      message = "Started '" + requestType + "'  '" + requestUrl + "' at " + dateTime;
+
+    oThis.info(message);
+	</buildAndLogMessage>
+}
+</logRequestStart>
+
+<registerCommandInComponentJS>
+function () {
+	<parseParameters>
+    var params = $cs.params("register", arguments, {
+        name:      { pos: 0,     req: true  },
+        ctx:       {             def: this  },
+        func:      { pos: 1,     req: true  },
+        args:      { pos: "...", def: []    },
+        spool:     {             def: null  },
+        capturing: {             def: false },
+        spreading: {             def: false },
+        bubbling:  {             def: true  }
+    });
+	</parseParameters>
+
+	<createCommandObject>
+    var cmd = $cs.command({
+        ctx:   params.ctx,
+        func:  params.func,
+        args:  params.args,
+        wrap:  true
+    });
+	</createCommandObject>
+
+	<defineCommandListener>
+    cmd.command.listen({
+        name: "attribute:set:enabled",
+        args: [ this, params.name ],
+        func: function (comp, name, value_new, value_old) {
+            comp.publish({
+                name:      "ComponentJS:service:" + name + ":callable",
+                args:      [ value_new, value_old ],
+                capturing: false,
+                spreading: false,
+                bubbling:  false,
+                async:     true,
+                noresult:  true
+            });
+        }
+    });
+	</defineCommandListener>
+
+	<subscribeToEvent>
+    var id = this.subscribe({
+        name:      "ComponentJS:service:" + params.name,
+        ctx:       params.ctx,
+        func:      cmd,
+        noevent:   true,
+        capturing: params.capturing,
+        spreading: params.spreading,
+        bubbling:  params.bubbling,
+        exclusive: true
+    });
+	</subscribeToEvent>
+
+	<addToSpoolIfNecessary>
+    if (params.spool !== null) {
+        var info = _cs.spool_spec_parse(this, params.spool);
+        info.comp.spool(info.name, this, "unregister", id);
+    }
+	</addToSpoolIfNecessary>
+
+    return id;
+}
+</registerCommandInComponentJS>
+
+<createZone>
+function (details, callback) {
+	<createZonesAndHandleResult>
+    this.createZones([ details ], function (err, zones) {
+      if (err) {
+        return callback(err);
+      }
+
+      if (zones && zones.length === 1) {
+        return callback(err, zones[0]);
+      }
+      else {
+        return callback(new Error('Unexpected error when creating single zone'), zones);
+      }
+    });
+	</createZonesAndHandleResult>
+}
+</createZone>
+
+<getSymbolId>
+function getSymbolId(glyf, index) {
+	<generateIdentifier>
+    if (glyf.name) {
+        return glyf.name;
+    }
+
+    if (glyf.unicode && glyf.unicode.length) {
+        return 'uni-' + glyf.unicode[0];
+    }
+    return 'symbol-' + index;
+	</generateIdentifier>
+}
+</getSymbolId>
+
+<filterBySelector>
+function (selector) {
+	<applySelectorFilter>
+    if (vQ.isFunction(selector)) return this.not(this.not(selector));
+    return vQ(filter.call(this, function (element) {
+        return vQ.matches(element, selector);
+    }));
+	</applySelectorFilter>
+}
+</filterBySelector>

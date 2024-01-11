@@ -1,0 +1,283 @@
+```javascript
+<function-1>
+function(plugin, message, opt) {
+  opt = opt || {};
+  if (typeof plugin === 'object') {
+    opt = plugin;
+  } else {
+    <handleErrorOrMessage>
+    if (message instanceof Error) {
+      opt.error = message;
+    } else if (typeof message === 'object') {
+      opt = message;
+    } else {
+      opt.message = message;
+    }
+    </handleErrorOrMessage>
+    opt.plugin = plugin;
+  }
+
+  return objectAssign({
+    showStack: false,
+    showProperties: true
+  }, opt);
+}
+</function-1>
+
+<function-2>
+function (options, callback) {
+  if (options instanceof Function) {
+    callback = options;
+    options = {};
+  }
+
+  if (this.initialized) {
+    callback && callback(null, this);
+    return;
+  }
+  var self = this;
+
+  flow()
+    .seq(function (cb) {
+      <handleNewItem>
+      if (self.isNew()) {
+        cb();
+      } else {
+        self.fetch(null, cb);
+      }
+      </handleNewItem>
+    })
+    .seq(function (cb) {
+      <fetchProductType>
+      var productType = self.$.productType;
+      productType.fetch(null, cb);
+      </fetchProductType>
+    })
+    .seq(function () {
+      <setUpProductAppearanceAndView>
+      var productType = self.$.productType;
+
+      var appearance;
+
+      if (self.$.appearance) {
+        appearance = productType.getAppearanceById(self.$.appearance.$.id);
+      }
+
+      appearance = appearance || productType.getDefaultAppearance();
+
+      self.set({
+        appearance: appearance,
+        view: self.$.view || productType.getViewById(self.get("defaultValues.defaultView.id")) || productType.getDefaultView()
+      });
+      </setUpProductAppearanceAndView>
+    })
+    .seq(function (cb) {
+      <initConfigurations>
+      flow()
+        .parEach(self.$.configurations.$items, function (configuration, cb) {
+          self._setUpConfiguration(configuration);
+          options.isExample = self.get('restrictions.example');
+          configuration.init(options, cb);
+        })
+        .exec(function (err) {
+          cb(err);
+        });
+      </initConfigurations>
+    })
+    .exec(function (err) {
+      self.trigger("productInitialized");
+      self.trigger("priceChanged");
+
+      if (err) {
+        callback && callback(err);
+      } else {
+        <markAsInitialized>
+        self.initialized = true;
+        callback && callback(null, self);
+        </markAsInitialized>
+      }
+    });
+}
+</function-2>
+
+<function-3>
+function identifier (options) {
+  var result = ddata._identifier(options)
+  return result ? options.fn(result) : 'ERROR, Cannot find identifier.'
+}
+</function-3>
+
+<function-4>
+function (callback) {
+  return function (err, stdout, stderr) {
+    <handleExecutionOutcome>
+    if (err) {
+      throw err;
+    } else if (stderr) {
+      log('sync error', 'failed with the following output:');
+      console.log('\n', stderr, '\n');
+    } else {
+      log('sync', 'completed successfully');
+      log();
+      if (callback) callback();
+    }
+    </handleExecutionOutcome>
+  };
+}
+</function-4>
+
+<function-5>
+function (i1, i2, c1, c2) {
+  <calculateGeometricalPositions>
+  var pos_x0 = BABYLON.Vector3.Lerp(face_vertex_pos[0], face_vertex_pos[2], i2 / subdivisions);
+  var pos_x1 = BABYLON.Vector3.Lerp(face_vertex_pos[1], face_vertex_pos[2], i2 / subdivisions);
+  var pos_interp = (subdivisions === i2) ? face_vertex_pos[2] : BABYLON.Vector3.Lerp(pos_x0, pos_x1, i1 / (subdivisions - i2));
+  pos_interp.normalize();
+  </calculateGeometricalPositions>
+  var vertex_normal;
+  if (flat) {
+    <calculateFlatVertexNormal>
+    var centroid_x0 = BABYLON.Vector3.Lerp(face_vertex_pos[0], face_vertex_pos[2], c2 / subdivisions);
+    var centroid_x1 = BABYLON.Vector3.Lerp(face_vertex_pos[1], face_vertex_pos[2], c2 / subdivisions);
+    vertex_normal = BABYLON.Vector3.Lerp(centroid_x0, centroid_x1, c1 / (subdivisions - c2));
+    </calculateFlatVertexNormal>
+  }
+  else {
+    <calculateSmoothVertexNormal>
+    vertex_normal = new BABYLON.Vector3(pos_interp.x, pos_interp.y, pos_interp.z);
+    </calculateSmoothVertexNormal>
+  }
+  <normalizeAndCalculateTextureCoordinates>
+  vertex_normal.x /= radiusX;
+  vertex_normal.y /= radiusY;
+  vertex_normal.z /= radiusZ;
+  vertex_normal.normalize();
+  var uv_x0 = BABYLON.Vector2.Lerp(face_vertex_uv[0], face_vertex_uv[2], i2 / subdivisions);
+  var uv_x1 = BABYLON.Vector2.Lerp(face_vertex_uv[1], face_vertex_uv[2], i2 / subdivisions);
+  var uv_interp = (subdivisions === i2) ? face_vertex_uv[2] : BABYLON.Vector2.Lerp(uv_x0, uv_x1, i1 / (subdivisions - i2));
+  </normalizeAndCalculateTextureCoordinates>
+  <pushPositionNormalUV>
+  positions.push(pos_interp.x * radiusX, pos_interp.y * radiusY, pos_interp.z * radiusZ);
+  normals.push(vertex_normal.x, vertex_normal.y, vertex_normal.z);
+  uvs.push(uv_interp.x, uv_interp.y);
+  </pushPositionNormalUV>
+  
+  <pushIndices>
+  indices.push(current_indice);
+  current_indice++;
+  </pushIndices>
+}
+</function-5>
+
+<function-6>
+function (poly) {
+  if (arguments.length > 1) {
+    <convertArgumentsToPolygon>
+    var args = Array.prototype.slice.call(arguments, 0);
+    poly = new Crafty.polygon(args);
+    </convertArgumentsToPolygon>
+  }
+  
+  <shiftAndAttachPolygon>
+  poly.shift(this._x, this._y);
+  this.mapArea = poly;
+  this.attach(this.mapArea);
+  </shiftAndAttachPolygon>
+  return this;
+}
+</function-6>
+
+<function-7>
+function CBSocketWrapper(config) {
+  this.config = config;
+  var self = this;
+  
+  <manageConnectionEvents>
+  this.connected = false;
+  this.on('connect', function() {
+    self.connected = true;
+    logger.info('Connected to Continuum Bridge', self.config.cbSocket);
+  });
+  this.on('connecting', function() {
+    self.connected = false;
+    logger.info('Connecting..');
+  });
+  this.on('error', function(error) {
+    self.connected = false;
+    logger.log('Error', error);
+  });
+  this.on('disconnect', function() {
+    self.connected = false;
+    logger.info('Disconnected from Continuum Bridge:', self.config.cbSocket);
+  });
+  </manageConnectionEvents>
+}
+</function-7>
+
+<function-8>
+function findPivot(other) {
+  var p1 = _path.call(this), p2 = _path.call(other), i, len, p;
+
+  for (i = 0, len = p1.length < p2.length ? p1.length : p2.length; i < len; i++) {
+    if (p1[i] === p2[i]) { p = p1[i]; } else { break; }
+  }
+
+  if (!p) {
+    throw new Error('State#findPivot: states ' + this + ' and ' + other + ' do not belong to the same statechart');
+  }
+
+  return p;
+}
+</function-8>
+
+<function-9>
+function(onReady) {
+  var self = this;
+
+  if (APPID === 'change me') {
+    console.log('Error -- edit weatherman.js and provide the APPID for Open Weathermap.'.bold.yellow);
+  }
+
+  <loadRiveScriptFile>
+  rs.loadFile("weatherman.rive").then(function() {
+    rs.sortReplies();
+    onReady();
+  }).catch(function(err) {
+    console.error(err);
+  });
+  </loadRiveScriptFile>
+  
+  <defineSendMessage>
+  self.sendMessage = function(username, message) {
+    console.log(
+      ["[Brick Tamland]", message].join(": ").underline.green
+    );
+  };
+  </defineSendMessage>
+
+  <defineGetReply>
+  self.getReply = function(username, message, callback) {
+    return rs.reply(username, message, self);
+  }
+  </defineGetReply>
+}
+</function-9>
+
+<function-10>
+function character (n) {
+  var message = ' ' + n + ' znak';
+
+  <determinePluralSuffix>
+  if (n % 10 < 5 && n % 10 > 0 && (n % 100 < 5 || n % 100 > 19)) {
+    if (n % 10 > 1) {
+      message += 'a';
+    }
+  } else {
+    message += 'ova';
+  }
+  </determinePluralSuffix>
+
+  return message;
+}
+</function-10>
+```

@@ -1,0 +1,289 @@
+1. Function: Conditional Content Escaping or Processing
+
+```javascript
+function (txt, tag) {
+  return (typeof txt === 'string' || typeof txt === 'number') ?
+    string.esc(txt) :
+    contentText(txt, tag);
+}
+```
+This function complies with SRP, encapsulating the single responsibility of conditionally escaping or processing content based on type.
+
+---
+
+2. Function: Error Handling and Result Processing Callback
+
+```javascript
+function callback(req, res, resolve, reject, error, result, permissions, action) {
+  <handleError>
+  if (error) {
+    reqlog.error('internal server error', error);
+    if (exports.handleErrors) {
+      responseBuilder.error(req, res, 'INTERNAL_SERVER_ERROR');
+    } else {
+      reject(error);
+    }
+  } 
+  </handleError>
+  else {
+    <processResult>
+    if (Array.isArray(result)) {
+      for (var i = 0, length = result.length; i < length; i++) {
+        result[i] = filterAttributes(result[i], permissions);
+      }
+    } else {
+      result = filterAttributes(result, permissions);
+    }
+    reqlog.info(action + '.success', result);
+    resolve(result);
+    </processResult>
+  }
+  
+  <filterAttributes>
+  function filterAttributes(object, permissions) {
+    if (object) {
+      var userType = req.activeUser && req.activeUser.type || 'null';
+      for (var attribute in object._doc) {
+        if (object._doc.hasOwnProperty(attribute)) {
+          if (!permissions[attribute] || 
+            permissions[attribute][0] !== 'null' && 
+            permissions[attribute].indexOf(userType) === -1 && 
+            userType !== 'admin' 
+          ) {
+            delete object._doc[attribute];
+          }
+        }
+      }
+    }
+    return object;
+  }
+  </filterAttributes>
+}
+```
+The function violates SRP as it handles errors, processes result, and filters attributes, which are separate responsibilities.
+
+---
+
+3. Function: Parsing Selector Strings
+
+```javascript
+function parseSelector(rawSelector) {
+  const parsedSelector = tryParseSelector(rawSelector)
+
+  return {
+    rawSelector,
+    isExit: rawSelector.endsWith(":exit"),
+    parsedSelector,
+  }
+}
+```
+This function complies with SRP, dedicated solely to parsing a selector string.
+
+---
+
+4. Function: Replacing Argument Expressions
+
+```javascript
+function replaceArgsExpr(ctx, forms, expansioncode, replacements, isrestarg) {
+  // SRP Annotation is not provided for this function as it seems to involve a complex macro expansion operation that likely has single responsibility within its context. Additional context is needed for accurate SRP assessment.
+}
+```
+Without further context, it's unclear whether this function violates SRP. It seems to be handling macro expansion logic, which might be a single, albeit complex, responsibility.
+
+---
+
+5. Function: Mouse Event Handlers Removal
+
+```javascript
+function(element) {
+  <removeEventHandlers>
+  if (!(element && element.nodeType === 1)) {
+    return;
+  }
+  var mouseHandlers = _mouseHandlers[element.zcClippingId];
+  if (!(typeof mouseHandlers === "object" && mouseHandlers)) {
+    return;
+  }
+  var key, val, mouseEvents = [ "move", "leave", "enter", "out", "over" ];
+  for (var i = 0, len = mouseEvents.length; i < len; i++) {
+    key = "mouse" + mouseEvents[i];
+    val = mouseHandlers[key];
+    if (typeof val === "function") {
+      element.removeEventListener(key, val, false);
+    }
+  }
+  delete _mouseHandlers[element.zcClippingId];
+  </removeEventHandlers>
+}
+```
+This function complies with SRP, focusing solely on removing mouse event handlers for an element.
+
+---
+
+6. Function: Blob Resolution with Git and FileSystem
+
+```javascript
+async function resolveBlob(dir, ref, pathName, includeUncommitted) {
+  <resolveCommitSha>
+  const commitSha = await resolveCommit(dir, ref);
+  </resolveCommitSha>
+
+  <readCommittedObject>
+  if (!includeUncommitted) {
+    return (await git.readObject({ dir, oid: commitSha, filepath: pathName })).oid;
+  }
+  </readCommittedObject>
+
+  <handleUncommittedChanges>
+  const status = await git.status({ dir, filepath: pathName });
+  if (status.endsWith('unmodified')) {
+    return (await git.readObject({ dir, oid: commitSha, filepath: pathName })).oid;
+  }
+  if (status.endsWith('absent') || status.endsWith('deleted')) {
+    const err = new Error(`Not found: ${pathName}`);
+    err.code = git.E.TreeOrBlobNotFoundError;
+    throw err;
+  }
+  </handleUncommittedChanges>
+
+  <writeUncommittedObject>
+  const content = await fse.readFile(resolvePath(dir, pathName));
+  return git.writeObject({
+    dir,
+    object: content,
+    type: 'blob',
+    format: 'content',
+  });
+  </writeUncommittedObject>
+}
+```
+The function violates SRP as it performs several distinct actions: resolving commit SHAs, reading committed objects, handling uncommitted changes, and writing uncommitted objects.
+
+---
+
+7. Function: Element Error Handling
+
+```javascript
+function(reason, element) {
+    <popElementHandleError>
+	if (elements.length > 0) {
+		var obj = elements.pop();
+		element = element || obj.element;
+
+		obj.error.call(element, reason);
+		bigscreen.onerror(element, reason);
+	}
+	</popElementHandleError>
+}
+```
+This function is SRP compliant as it deals with the singular task of handling errors for a popped element.
+
+---
+
+8. Function: Measurement Finalization
+
+```javascript
+function finalizeMeasurement(id) {
+    <deleteActiveTest>
+    if (activeTests[id.id]) {
+        delete activeTests[id.id];
+    }
+    </deleteActiveTest>
+
+    <deleteUpdatableTest>
+    if (updatableTests[id.id]) {
+        delete updatableTests[id.id];
+    }
+    </deleteUpdatableTest>
+}
+```
+The function violates SRP by managing two different kinds of tests, which are distinct actions: deleting active tests and deleting updatable tests.
+
+---
+
+9. Function: Positioning within Safe Area Constraints
+
+```javascript
+function fitPositionIntoSafeArea(position, layouts) {
+    <fitIntoSafeArea>
+    var windowLayout = layouts.windowLayout,
+        safeAreaLayout = layouts.safeAreaLayout,
+        optionsLayout = layouts.optionsLayout;
+
+    if (!safeAreaLayout) {
+      return position;
+    }
+
+    var saX = safeAreaLayout.x,
+        saY = safeAreaLayout.y,
+        saHeight = safeAreaLayout.height,
+        saWidth = safeAreaLayout.width;
+    var oHeight = optionsLayout.height,
+        oWidth = optionsLayout.width;
+    var wWidth = windowLayout.width;
+    var top = position.top,
+        left = position.left,
+        right = position.right;
+    top = fit(top, oHeight, saY, saY + saHeight);
+    left = fit(left, oWidth, saX, saX + saWidth);
+    right = fit(right, oWidth, wWidth - saX - saWidth, saX);
+    </fitIntoSafeArea>
+    return {
+      top: top,
+      left: left,
+      right: right
+    };
+  }
+```
+This function complies with SRP, managing only the responsibility of fitting a position within the constraints of a safe area.
+
+---
+
+10. Function: Tooltip Base Model Generation
+
+```javascript
+function getBaseModel(tooltipOpts) {
+		var globalDefaults = Chart.defaults.global;
+		var getValueOrDefault = helpers.getValueOrDefault;
+
+		return {
+			<buildBaseModelProps>
+			xPadding: tooltipOpts.xPadding,
+			yPadding: tooltipOpts.yPadding,
+			xAlign: tooltipOpts.xAlign,
+			yAlign: tooltipOpts.yAlign,
+
+			bodyFontColor: tooltipOpts.bodyFontColor,
+			_bodyFontFamily: getValueOrDefault(tooltipOpts.bodyFontFamily, globalDefaults.defaultFontFamily),
+			_bodyFontStyle: getValueOrDefault(tooltipOpts.bodyFontStyle, globalDefaults.defaultFontStyle),
+			_bodyAlign: tooltipOpts.bodyAlign,
+			bodyFontSize: getValueOrDefault(tooltipOpts.bodyFontSize, globalDefaults.defaultFontSize),
+			bodySpacing: tooltipOpts.bodySpacing,
+
+			titleFontColor: tooltipOpts.titleFontColor,
+			_titleFontFamily: getValueOrDefault(tooltipOpts.titleFontFamily, globalDefaults.defaultFontFamily),
+			_titleFontStyle: getValueOrDefault(tooltipOpts.titleFontStyle, globalDefaults.defaultFontStyle),
+			titleFontSize: getValueOrDefault(tooltipOpts.titleFontSize, globalDefaults.defaultFontSize),
+			_titleAlign: tooltipOpts.titleAlign,
+			titleSpacing: tooltipOpts.titleSpacing,
+			titleMarginBottom: tooltipOpts.titleMarginBottom,
+
+			footerFontColor: tooltipOpts.footerFontColor,
+			_footerFontFamily: getValueOrDefault(tooltipOpts.footerFontFamily, globalDefaults.defaultFontFamily),
+			_footerFontStyle: getValueOrDefault(tooltipOpts.footerFontStyle, globalDefaults.defaultFontStyle),
+			footerFontSize: getValueOrDefault(tooltipOpts.footerFontSize, globalDefaults.defaultFontSize),
+			_footerAlign: tooltipOpts.footerAlign,
+			footerSpacing: tooltipOpts.footerSpacing,
+			footerMarginTop: tooltipOpts.footerMarginTop,
+
+			caretSize: tooltipOpts.caretSize,
+			cornerRadius: tooltipOpts.cornerRadius,
+			backgroundColor: tooltipOpts.backgroundColor,
+			opacity: 0,
+			legendColorBackground: tooltipOpts.multiKeyBackground,
+			displayColors: tooltipOpts.displayColors
+			</buildBaseModelProps>
+		};
+	}
+```
+This function is SRP compliant, having the single responsibility of constructing the base model for a tooltip's configuration.

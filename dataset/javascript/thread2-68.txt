@@ -1,0 +1,282 @@
+```javascript
+<setOptions>
+function(user_opts) {
+  <mergeDefaultOptions>
+  this.options = _.defaults(user_opts, this.options)
+  </mergeDefaultOptions>
+  
+  <configureInputStream>
+  process.stdin.setRawMode(true)
+  process.stdin.resume()
+  </configureInputStream>
+}
+</setOptions>
+
+<getAddResultActionToCell>
+function getAddResultActionToCell(cell) {
+    <determineActionBasedOnCell>
+    switch (where) {
+        case TableResultAction.where.Column:
+        if (cell.isColSpan) {
+            return TableResultAction.resultAction.SumSpanCount;
+        } else if(cell.isRowSpan && cell.isVirtual) {
+            return TableResultAction.resultAction.Ignore;
+        }
+        break;
+        case TableResultAction.where.Row:
+        if (cell.isRowSpan) {
+            return TableResultAction.resultAction.SumSpanCount;
+        } else if (cell.isColSpan && cell.isVirtual) {
+            return TableResultAction.resultAction.Ignore;
+        }
+        break;
+    }
+    return TableResultAction.resultAction.AddCell;
+    </determineActionBasedOnCell>
+}
+</getAddResultActionToCell>
+
+<isObservable>
+function (obj) {
+    <checkObservable>
+    return obj && (can.isArray(obj) || can.isPlainObject(obj) || (obj instanceof can.Observe));
+    </checkObservable>
+}
+</isObservable>
+
+<resetCalendars>
+function() {
+    <resetEachCalendar>
+    for (var p=0;p<this.pages.length;++p) {
+        var cal = this.pages[p];
+        cal.reset();
+    }
+    </resetEachCalendar>
+}
+</resetCalendars>
+
+<createStrictQueryParamsMiddleware>
+function strictQueryParams(options) {
+    <setupOptionsAndValidations>
+    var opts = options || {};
+    assert.optionalObject(opts, 'options');
+    assert.optionalString(opts.message, 'options.message');
+    </setupOptionsAndValidations>
+
+    <validateQueryParams>
+    function _strictQueryParams(req, res, next) {
+
+        var keyValQParams = !/(\&(?!(\w+=\w+)))/.test(req.url);
+
+        if (!keyValQParams) {
+            var msg = opts.message ? opts.message :
+                'Url query params does not meet strict format';
+            return next(new BadRequestError(msg));
+        }
+
+        return next();
+    }
+    </validateQueryParams>
+
+    return (_strictQueryParams);
+}
+</createStrictQueryParamsMiddleware>
+
+<writePageDefinitions>
+function(pagedef, pagedir){
+    <prepareAndWriteFiles>
+    var filenameBase = pagedir + pagedef.uniqueId;
+    var xmlDef = {ext: '.xml', contents: pd.xml(pagedef.body)};
+    var metaDef = {
+        ext: '.json',
+        contents: JSON.stringify(_.omit(pagedef, 'body'), null, 3)
+    };
+    _.each([xmlDef, metaDef], function(item){
+        var filename = filenameBase + item.ext;
+        grunt.file.write(filenameBase + item.ext, item.contents);
+        if(grunt.option('verbose')){
+            grunt.log.ok(filename + ' written to ' + pagedir);
+        }
+    });
+    </prepareAndWriteFiles>
+}
+</writePageDefinitions>
+
+<getChart>
+function getChart(chartName, date, cb) {
+    <handleOptionalParams>
+    if (typeof chartName === 'function') {
+        cb = chartName;
+        chartName = 'hot-100';
+        date = '';
+    }
+    
+    if (typeof date === 'function') {
+        cb = date;
+        date = '';
+    }
+    </handleOptionalParams>
+    <initializeChartData>
+    var chart = {};
+    chart.songs = [];
+    </initializeChartData>
+    <performWebRequest>
+    var requestURL = BILLBOARD_CHARTS_URL + chartName + '/' + date;
+    request(requestURL, function completedRequest(error, response, html) {
+        if (error) {
+            cb(error, null);
+            return;
+        }
+        <parseHTMLAndExtractData>
+        var $ = cheerio.load(html);
+        chart.week = yyyymmddDateFromMonthDayYearDate($('.chart-detail-header__date-selector-button')[0].children[0].data.replace(/\n/g, ''));
+        chart.previousWeek = getNeighboringChart($('.dropdown__date-selector-option '), NeighboringWeek.Previous);
+        chart.nextWeek = getNeighboringChart($('.dropdown__date-selector-option '), NeighboringWeek.Next);
+        $('.chart-list-item').each(function(index, item) {
+            var rank = index + 1;
+            chart.songs.push({
+                "rank": rank,
+                "title": getTitleFromChartItem(item),
+                "artist": getArtistFromChartItem(item),
+                "cover": getCoverFromChartItem(item, rank),
+                "position" : {
+                    "positionLastWeek": getPositionLastWeekFromChartItem(item),
+                    "peakPosition": getPeakPositionFromChartItem(item),
+                    "weeksOnChart": getWeeksOnChartFromChartItem(item)
+                }
+            });
+        });
+        </parseHTMLAndExtractData>
+        <validateAndReturnResult>
+        if (chart.songs.length > 1){
+            cb(null, chart);
+            return;
+        } else {
+            cb("Songs not found.", null);
+            return;
+        }
+        </validateAndReturnResult>
+    });
+    </performWebRequest>
+}
+</getChart>
+
+<TableNameConstructor>
+function TableName(table, schema) {
+    <enforceConstructorUsage>
+    if (!(this instanceof TableName)) {
+        return new TableName(table, schema);
+    }
+    </enforceConstructorUsage>
+    <validateParameters>
+    if (typeof table !== 'string') {
+        table = npm.assertOptions(table, ['table', 'schema']);
+        schema = table.schema;
+        table = table.table;
+    }
+    if (!npm.utils.isText(table)) {
+        throw new TypeError('Table name must be a non-empty text string.');
+    }
+    if (!npm.utils.isNull(schema)) {
+        if (typeof schema !== 'string') {
+            throw new TypeError('Invalid schema name.');
+        }
+        if (schema.length > 0) {
+            this.schema = schema;
+        }
+    }
+    </validateParameters>
+    <setTableNameAndFormat>
+    this.table = table;
+    this.name = npm.formatting.as.name(table);
+    if (this.schema) {
+        this.name = npm.formatting.as.name(schema) + '.' + this.name;
+    }
+    this[npm.formatting.as.ctf.rawType] = true;
+    </setTableNameAndFormat>
+    <finalizeInstance>
+    Object.freeze(this);
+    </finalizeInstance>
+}
+</TableNameConstructor>
+
+<parseSequence>
+function parseSequence (val) {
+    <initializeStack>
+    var stack = [];
+    </initializeStack>
+    <handleResultHelper>
+    function handleResult (result) {
+        <calculateMaxValue>
+        var max = stack.length > 0 ? Math.max.apply(Math, stack) : -1;
+        </calculateMaxValue>
+        <processResultArray>
+        if (result instanceof Array) {
+            for (var i = 0, c = result.length; i < c; i++) {
+                var value = result[i];
+                <checkValueConstraints>
+                if (value < constraints[0] || value > constraints[1]) {
+                    throw new Error(
+                        'Constraint error, got value ' + value + ' expected range ' +
+                        constraints[0] + '-' + constraints[1]
+                    );
+                }
+                </checkValueConstraints>
+                <addToStackIfGreaterThanMax>
+                if (value > max) {
+                    stack.push(value);
+                }
+                </addToStackIfGreaterThanMax>
+                <updateMaxValue>
+                max = Math.max.apply(Math, stack);
+                </updateMaxValue>
+            }
+        } else {
+            <convertAndValidateSingleResult>
+            result = +result;
+            if (result < constraints[0] || result > constraints[1]) {
+                throw new Error(
+                    'Constraint error, got value ' + result + ' expected range ' +
+                    constraints[0] + '-' + constraints[1]
+                );
+            }
+            if (field == 'dayOfWeek') {
+                result = result % 7;
+            }
+            stack.push(result);
+            </convertAndValidateSingleResult>
+        }
+    }
+    </handleResultHelper>
+    <parseCommaSeparatedValues>
+    var atoms = val.split(',');
+    if (atoms.length > 1) {
+        for (var i = 0, c = atoms.length; i < c; i++) {
+            handleResult(parseRepeat(atoms[i]));
+        }
+    } else {
+        handleResult(parseRepeat(val));
+    }
+    </parseCommaSeparatedValues>
+    <sortStack>
+    stack.sort(function(a, b) {
+        return a - b;
+    });
+    </sortStack>
+    <returnStack>
+    return stack;
+    </returnStack>
+}
+</parseSequence>
+
+<detectValueType>
+function type (value) {
+    <getTypeName>
+    const proto = toString.call(value)
+    return proto.substring(8, proto.length - 1)
+    </getTypeName>
+}
+</detectValueType>
+```
+
+In the given functions, SRP compliance varies. Functions have been wrapped with tags indicating their dedicated responsibilities. Some functions might perform multiple operations but they are still considered a single responsibility because they work towards a single purpose. If a function involves distinct, separate operations serving different purposes, those sections are individually annotated to show SRP violations within the function.

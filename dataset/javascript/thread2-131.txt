@@ -1,0 +1,266 @@
+1.
+```
+<sendMessage>
+function sendMessage(e) {
+    <inputAndValidation>
+    var txt = $('#msgtxt').val().trim();
+    if(!txt) return;
+    </inputAndValidation>
+
+    <updateDOM>
+    $('#messages').append(createMsgBox(txt));
+    </updateDOM>
+
+    <networkCommunication>
+    socket.emit('sendmsg', txt, function(evtJson) {
+        var evt = JSON.parse(evtJson),
+        reply = evt['Reply-Text'].split(' '), 
+        $elm = $('#messages').children().last().removeClass('sending');
+
+        if(reply[0] == '+OK')
+            $elm.addClass('sent').data('uuid', reply[1]);
+        else
+            $elm.addClass('failed').data('error', evt['Reply-Text']);
+    });
+    </networkCommunication>
+    
+    <clearInput>
+    $('#msgtxt').val('');
+    </clearInput>
+}
+</sendMessage>
+```
+
+2.
+```
+<calculateMatrixAndOffset>
+function calculateMatrixAndOffset({
+  viewport,
+  coordinateSystem,
+  coordinateOrigin,
+  coordinateZoom
+}) {
+  <initializeVariables>
+  const {viewMatrixUncentered} = viewport;
+  let {viewMatrix} = viewport;
+  const {projectionMatrix} = viewport;
+  let {viewProjectionMatrix} = viewport;
+  let projectionCenter;
+  let cameraPosCommon = viewport.cameraPosition;
+  let shaderCoordinateSystem = getShaderCoordinateSystem(coordinateSystem);
+  let shaderCoordinateOrigin = coordinateOrigin;
+  </initializeVariables>
+
+  <calculateShaderCoordinate>
+  if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET) {
+    if (coordinateZoom < LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD) {
+      shaderCoordinateSystem = PROJECT_COORDINATE_SYSTEM.LNG_LAT;
+    } else {
+      const lng = Math.fround(viewport.longitude);
+      const lat = Math.fround(viewport.latitude);
+      shaderCoordinateOrigin = [lng, lat];
+    }
+  }
+  if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.IDENTITY) {
+    shaderCoordinateOrigin = [Math.fround(viewport.position[0]), Math.fround(viewport.position[1])];
+  }
+  </calculateShaderCoordinate>
+
+  <applyTransformations>
+  switch (shaderCoordinateSystem) {
+    case PROJECT_COORDINATE_SYSTEM.LNG_LAT:
+      projectionCenter = ZERO_VECTOR;
+      break;
+
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+    case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
+    case PROJECT_COORDINATE_SYSTEM.IDENTITY:
+      <mathematicalTransformations>
+      const positionCommonSpace = viewport.projectPosition(shaderCoordinateOrigin, Math.pow(2, coordinateZoom));
+      cameraPosCommon = [cameraPosCommon[0] - positionCommonSpace[0], cameraPosCommon[1] - positionCommonSpace[1], cameraPosCommon[2]];
+      positionCommonSpace[2] = 0;
+      positionCommonSpace[3] = 1;
+      projectionCenter = vec4.transformMat4([], positionCommonSpace, viewProjectionMatrix);
+      viewMatrix = viewMatrixUncentered || viewMatrix;
+      viewProjectionMatrix = mat4.multiply([], projectionMatrix, viewMatrix);
+      viewProjectionMatrix = mat4.multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
+      </mathematicalTransformations>
+      break;
+
+    default:
+      <errorHandling>
+      throw new Error('Unknown projection mode');
+      </errorHandling>
+  }
+  </applyTransformations>
+
+  <returnResult>
+  return {
+    viewMatrix,
+    viewProjectionMatrix,
+    projectionCenter,
+    cameraPosCommon,
+    shaderCoordinateSystem,
+    shaderCoordinateOrigin
+  };
+  </returnResult>
+}
+</calculateMatrixAndOffset>
+```
+
+3.
+```
+<layerViewUpdate>
+function (layerCollection, options) {
+    var self = this;
+
+    var oldLayers = this._layerViews;
+    this._layerViews = {};
+
+    <findLayerView>
+    function findLayerView(layer) {
+      var lv = _.find(oldLayers, function (layerView) {
+        var m = layerView.model;
+        return m.isEqual(layer);
+      });
+      return lv;
+    }
+    </findLayerView>
+
+    <canReused>
+    function canReused(layer) {
+      return self.map.layers.find(function (m) {
+        return m.isEqual(layer);
+      });
+    }
+    </canReused>
+
+    <cleanupOldLayers>
+    for (var layer in oldLayers) {
+      var layerView = oldLayers[layer];
+      if (!canReused(layerView.model)) {
+        layerView.remove();
+      }
+    }
+    </cleanupOldLayers>
+
+    <updateLayers>
+    this.map.layers.each(function (layerModel) {
+      var layerView = findLayerView(layerModel);
+      if (!layerView) {
+        self._addLayer(layerModel, layerCollection, {
+          silent: (options && options.silent) || false,
+          index: options && options.index
+        });
+      } else {
+        layerView.setModel(layerModel);
+        self._layerViews[layerModel.cid] = layerView;
+      }
+    });
+    </updateLayers>
+}
+</layerViewUpdate>
+```
+
+4.
+```
+<TargetFactory>
+function Target(options = {}) {
+    options = clone(options);
+
+    <initializeClientAndRoom>
+    let client = new Hipchatter(options.token);
+    let room = options.room;
+    delete options.token;
+    delete options.room;
+    </initializeClientAndRoom>
+
+    <setNotificationDefaults>
+    let proto = {
+        message_format: 'html',
+        notify: false
+    };
+    for (let key in options) {
+        if (!options.hasOwnProperty(key)) {
+            break;
+        }
+        proto[key] = options[key];
+    }
+    </setNotificationDefaults>
+
+    <returnNotifierFunction>
+    return function(options, severity, date, message) {
+        let payload = clone(proto);
+
+        <setColorBasedOnSeverity>
+        if (typeof payload.color !== 'string') {
+            switch(severity) {
+                case 'info':
+                    payload.color = 'green';
+                    break;
+
+                case 'warn':
+                    payload.color = 'yellow';
+                    break;
+
+                case 'error':
+                    payload.color = 'red';
+                    break;
+
+                default:
+                    payload.color = 'gray';
+                    break;
+            }
+        }
+        </setColorBasedOnSeverity>
+
+        <formatMessage>
+        if (proto.message_format === 'html') {
+            payload.message = escape(message)
+                .replace(/\n/g, '<br/>')
+                .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+        }
+        else {
+            payload.message = message;
+        }
+        </formatMessage>
+
+        <sendMessageThroughClient>
+        client.notify(room, payload, function(err) {
+            if (err) {
+                console.log(err);
+            }
+        });
+        </sendMessageThroughClient>
+    };
+    </returnNotifierFunction>
+}
+</TargetFactory>
+```
+
+5.
+```
+<transformOptions>
+function transformOptions(options) {
+  
+  <adjustTypeOfOptions>
+  if (typeof options.ns === 'string') options.ns = [options.ns];
+  if (typeof options.fallbackLng === 'string') options.fallbackLng = [options.fallbackLng];
+  if (typeof options.fallbackNS === 'string') options.fallbackNS = [options.fallbackNS];
+  </adjustTypeOfOptions>
+
+  <updateWhitelist>
+  if (options.whitelist && options.whitelist.indexOf('cimode') < 0) options.whitelist.push('cimode');
+  </updateWhitelist>
+
+  <returnAdjustedOptions>
+  return options;
+  </returnAdjustedOptions>
+}
+</transformOptions>
+```
+
+The remaining functions are not fully provided, or lack the surrounding context to classify duties effectively. The principle of SRP requires that each function has a single responsibility, and while we have attempted to classify responsibilities within each provided function, in some cases, the lack of surrounding context and functionality makes it impossible to determine if the functions are SRP compliant.
+
+Therefore, considering SRP, we cannot accurately annotate functions 6 to 10 without further context or the entirety of the functions.

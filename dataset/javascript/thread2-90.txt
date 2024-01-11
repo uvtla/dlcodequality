@@ -1,0 +1,245 @@
+```javascript
+<calculateRpcReward>
+function (poolRecipient, recipients, rpcData) {
+
+    var reward = rpcData.coinbasevalue;
+    var rewardToPool = reward;
+
+    var txOutputBuffers = [];
+
+    if (rpcData.masternode && rpcData.superblock) {
+        <distributeMasternodeSuperblockReward>
+        if (rpcData.masternode.payee) {
+            var payeeReward = 0;
+
+            payeeReward = rpcData.masternode.amount;
+            reward -= payeeReward;
+            rewardToPool -= payeeReward;
+
+            var payeeScript = util.addressToScript(rpcData.masternode.payee);
+            txOutputBuffers.push(Buffer.concat([
+                util.packInt64LE(payeeReward),
+                util.varIntBuffer(payeeScript.length),
+                payeeScript
+            ]));
+        } else if (rpcData.superblock.length > 0) {
+            for (var i in rpcData.superblock) {
+                var payeeReward = 0;
+
+                payeeReward = rpcData.superblock[i].amount;
+                reward -= payeeReward;
+                rewardToPool -= payeeReward;
+
+                var payeeScript = util.addressToScript(rpcData.superblock[i].payee);
+                txOutputBuffers.push(Buffer.concat([
+                    util.packInt64LE(payeeReward),
+                    util.varIntBuffer(payeeScript.length),
+                    payeeScript
+                ]));
+            }
+        }
+        </distributeMasternodeSuperblockReward>
+    }
+
+    <handleExtraPayee>
+    if (rpcData.payee) {
+        var payeeReward = 0;
+
+        if (rpcData.payee_amount) {
+            payeeReward = rpcData.payee_amount;
+        } else {
+            payeeReward = Math.ceil(reward / 5);
+        }
+
+        reward -= payeeReward;
+        rewardToPool -= payeeReward;
+
+        var payeeScript = util.addressToScript(rpcData.payee);
+        txOutputBuffers.push(Buffer.concat([
+            util.packInt64LE(payeeReward),
+            util.varIntBuffer(payeeScript.length),
+            payeeScript
+        ]));
+    }
+    </handleExtraPayee>
+
+    <distributeRewardToRecipients>
+    for (var i = 0; i < recipients.length; i++) {
+        var recipientReward = Math.floor(recipients[i].percent * reward);
+        rewardToPool -= recipientReward;
+
+        txOutputBuffers.push(Buffer.concat([
+            util.packInt64LE(recipientReward),
+            util.varIntBuffer(recipients[i].script.length),
+            recipients[i].script
+        ]));
+    }
+    </distributeRewardToRecipients>
+
+    <allocatePoolReward>
+    txOutputBuffers.unshift(Buffer.concat([
+        util.packInt64LE(rewardToPool),
+        util.varIntBuffer(poolRecipient.length),
+        poolRecipient
+    ]));
+    </allocatePoolReward>
+
+    <handleWitnessCommitment>
+    if (rpcData.default_witness_commitment !== undefined) {
+        witness_commitment = new Buffer(rpcData.default_witness_commitment, 'hex');
+        txOutputBuffers.unshift(Buffer.concat([
+            util.packInt64LE(0),
+            util.varIntBuffer(witness_commitment.length),
+            witness_commitment
+        ]));
+    }
+    </handleWitnessCommitment>
+
+    return Buffer.concat([
+        util.varIntBuffer(txOutputBuffers.length),
+        Buffer.concat(txOutputBuffers)
+    ]);
+}
+</calculateRpcReward>
+
+<getPathWithQuery>
+function (encodeQuery) {
+    var path = this.getPath();
+
+    <appendQueryString>
+    if (this.query.count()) {
+        path += (QUERY_SEPARATOR + this.getQueryString(encodeQuery));
+    }
+    </appendQueryString>
+
+    return path;
+}
+</getPathWithQuery>
+
+<PaperRippleInitialization>
+function PaperRipple(cfg) {
+    if (cfg === void 0) { cfg = {}; }
+    <initializeProperties>
+    this.waves = [];
+    this.initialOpacity = cfg.initialOpacity || 0.25;
+    this.opacityDecayVelocity = cfg.opacityDecayVelocity || 0.8;
+    this.initTarget(cfg && cfg.nodeType ? cfg : cfg.target && cfg.target.nodeType ? cfg.target : null);
+    this.recenters = cfg.recenters || this.recenters;
+    this.center = cfg.center || this.center;
+    this.round = cfg.round || this.round;
+    </initializeProperties>
+}
+</PaperRippleInitialization>
+
+<loadAndRenderTemplate>
+function loadTemplate() {
+  <generateTemplateData>
+  generateData();
+  </generateTemplateData>
+
+  return new Promise(function(resolve, reject) {
+    <loadTemplateFile>
+    $.get('src/demo-template.html', function(response) {
+      template = response;
+      <renderTemplate>
+      render();
+      </renderTemplate>
+      resolve();
+    }).fail(function() {
+      reject();
+    });
+    </loadTemplateFile>
+  });
+}
+</loadAndRenderTemplate>
+
+<extractAppArguments>
+function selectAppArgs(options) {
+  return {
+    <gatherArguments>
+    name: options.name,
+    // ... (similar lines for each option property)
+    globalShortcuts: options.globalShortcuts,
+    </gatherArguments>
+  };
+}
+</extractAppArguments>
+
+<initializeComponent>
+function (name, scope) {
+    var component = components[name];
+
+    <createComponent>
+    if (component) {
+        var args = [];
+        for (var i = 0; i < component.mixins.length; ++i) {
+            args.push(this.createComponent(component.mixins[i], scope));
+        }
+        args.unshift(scope);
+        return component.creator.apply(component.creator, args);
+    }
+    </createComponent>
+
+    return null;
+}
+</initializeComponent>
+
+<copyEllipticCurvePoint>
+function ecp_copy(R, N, l) {
+    mpn_copyi(R[0], N[0], l), mpn_copyi(R[1], N[1], l), mpn_copyi(R[2], N[2], l);
+    return R;
+}
+</copyEllipticCurvePoint>
+
+<handleCompletionOnError>
+function (error) {
+    if (typeof error === 'undefined') { error = null; }
+
+    <markAsCompleted>
+    if (completed === false) {
+        completed = true;
+    </markAsCompleted>
+
+    <destroyResources>
+    writer.destroy();
+    reader.destroy();
+    </destroyResources>
+
+    return cb(error);
+}
+</handleCompletionOnError>
+
+<WriteHtmlToDocument>
+function (html) {
+    <openDocumentStream>
+    this.$.open('text/html', 'replace');
+    </openDocumentStream>
+
+    <setCustomDomainIfNeeded>
+    CKEDITOR.env.isCustomDomain() && (this.$.domain = document.domain);
+    </setCustomDomainIfNeeded>
+
+    <writeAndCloseDocument>
+    this.$.write(html);
+    this.$.close();
+    </writeAndCloseDocument>
+}
+</WriteHtmlToDocument>
+
+<eventCallbackWrapper>
+function (evt) {
+    var args = (this._apply === true && ariaUtilsType.isArray(this._args)) ? this._args.slice() : [this._args];
+    var resIndex = (this._resIndex === undefined) ? 0 : this._resIndex;
+
+    <mergeEventIntoCallbackArguments>
+    if (resIndex > -1) {
+        args.splice(resIndex, 0, evt);
+    }
+    </mergeEventIntoCallbackArguments>
+
+    return this._function.apply(this._scope, args);
+}
+</eventCallbackWrapper>
+```
+
+Note: Each function has been annotated based on its overall responsibility or distinct responsibilities. There are functions with single responsibilities, hence they are wrapped as a whole, while other functions contain multiple responsibilities indicated by internal tags.

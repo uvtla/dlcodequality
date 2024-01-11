@@ -1,0 +1,230 @@
+```javascript
+<getWidth>
+function getWidth(element) {
+  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+  return _getLength(element, 'Width', offset);
+}
+</getWidth>
+
+<bounce>
+function bounce(t) {
+  const s = 7.5625;
+  const p = 2.75;
+  let l;
+  if (t < (1 / p)) {
+    l = s * t * t;
+  } else {
+    if (t < (2 / p)) {
+      t -= (1.5 / p);
+      l = s * t * t + 0.75;
+    } else {
+      if (t < (2.5 / p)) {
+        t -= (2.25 / p);
+        l = s * t * t + 0.9375;
+      } else {
+        t -= (2.625 / p);
+        l = s * t * t + 0.984375;
+      }
+    }
+  }
+  return l;
+}
+</bounce>
+
+<arraySampleSize>
+function arraySampleSize(array, n) {
+  return shuffleSelf(copyArray(array), baseClamp(n, 0, array.length));
+}
+</arraySampleSize>
+
+<PluginInitialization>
+function(options) {
+  // Initialization and assignment of multiple plugin properties
+  this.name = options.name;
+  this.isInternal = options.isInternal;
+  // ... (many other similar assignments)
+  this.apiCalls = [];
+  this.imports = [];
+  // ... (and more)
+  this._loggerObject = options.logger;
+  this.logger = this._loggerObject; 
+  this.events = options.events;
+  // ... (even more assignments)
+  if (!Array.isArray(this.currentContext)) {
+    this.currentContext = [this.currentContext];
+  }
+  if (!Array.isArray(this.acceptedContext)) {
+    this.acceptedContext = [this.acceptedContext];
+  }
+}
+</PluginInitialization>
+
+<setUpdateStateInJSON>
+function setUpdateStateInJSON(key, value) {
+  var result = $.Deferred();
+
+  updateJsonHandler.set(key, value)
+    .done(function () {
+      result.resolve();
+    })
+    .fail(function () {
+      resetStateInFailure("AutoUpdate : Could not modify updatehelper.json");
+      result.reject();
+    });
+
+  return result.promise();
+}
+</setUpdateStateInJSON>
+
+<KO_Bind_Listener>
+function () {
+  var _data = this._dataElement().data("bind");
+  if (typeof _data == "string" && typeof ko == "object") {
+    var _vm = ko.dataFor(this._dataElement()[0]);
+    if (typeof _vm == "undefined") return true;
+    var _all = _data.split(","), _handler;
+    for (var i = 0; i < _all.length; i++) {
+      var d = _all[i].split(":");
+      if ($.trim(d[0]) == "value") {
+        _handler = $.trim(d[1]);
+        break;
+      }
+    }
+    if (_handler) {
+      this._isKO = true;
+      ko.computed(function () { this.option("value", _vm[_handler]()); }, this);
+    }
+  }
+}
+</KO_Bind_Listener>
+
+<AttachEventListeners>
+function () {
+  eventUtil.addListener(Aria.$window.document.body, "mousedown", {
+    fn : this._onMouseDown,
+    scope : this
+  });
+  eventUtil.addListener(Aria.$window.document.body, "touchstart", {
+    fn : this._onMouseDown,
+    scope : this
+  });
+}
+</AttachEventListeners>
+
+<cryptocurrencyTransfer>
+async function(senderAddr, senderPassphrase, recipient, amountInWei) {
+  const oThis = this
+    , web3Provider = web3ProviderFactory.getProvider('value', 'ws')
+    , gasPrice = coreConstants.OST_VALUE_GAS_PRICE
+    , gas = coreConstants.OST_VALUE_GAS_LIMIT;
+
+  // Validation of input parameters and addresses
+  <validationBlock>
+  if (!basicHelper.isAddressValid(senderAddr)) {
+    // ...
+    return Promise.resolve(errObj);
+  }
+  if (!basicHelper.isAddressValid(recipient)) {
+    // ...
+    return Promise.resolve(errObj);
+  }
+  if (senderAddr.equalsIgnoreCase(recipient)) {
+    // ...
+    return Promise.resolve(errObj);
+  }
+  if (!basicHelper.isNonZeroWeiValid(amountInWei)) {
+    // ...
+    return Promise.resolve(errObj);
+  }
+  </validationBlock>
+
+  // Balance check before transfer
+  <balanceCheck>
+  var bigNumAmount = basicHelper.convertToBigNumber(amountInWei);
+  const senderBalanceValidationResponse = await oThis.validateEthBalance(senderAddr, bigNumAmount);
+  if (senderBalanceValidationResponse.isFailure()) {
+    return Promise.resolve(senderBalanceValidationResponse);
+  }
+  </balanceCheck>
+
+  // Actual asynchronous transfer function
+  <asyncTransferFunction>
+  const asyncTransfer = async function() {
+    // ...
+    .catch(function(reason) {
+      // ...
+    });
+  };
+  </asyncTransferFunction>
+
+  return asyncTransfer();
+}
+</cryptocurrencyTransfer>
+
+<AndOrPredicate>
+function AndOrPredicate(op, preds) {
+  this.op = this._resolveOp(op);
+  // Handling different formats of predicates input
+  if (preds.length == 1 && Array.isArray(preds[0])) {
+    preds = preds[0];
+  }
+  // Filter and possibly map predicates
+  this.preds = preds.filter(function (pred) {
+    return pred != null;
+  }).map(function (pred) {
+    return Predicate(pred);
+  });
+  // Handling empty or single-element predicate scenarios
+  if (this.preds.length == 0) {
+    this.op = null;
+  }
+  if (this.preds.length == 1) {
+    return this.preds[0];
+  }
+}
+</AndOrPredicate>
+
+<focusControl>
+function (keyboard) {
+  var self = this, focusCtrl, keyboardNav, items;
+
+  // Initializing keyboard navigation if needed
+  if (keyboard) {
+    <keyboardNavigation>
+    keyboardNav = self.keyboardNav || self.parents().eq(-1)[0].keyboardNav;
+    if (keyboardNav) {
+      keyboardNav.focusFirst(self);
+      return;
+    }
+    </keyboardNavigation>
+  }
+
+  // Querying all focusable items and the status bar
+  items = self.find('*');
+  if (self.statusbar) {
+    <addStatusBarItems>
+    items.add(self.statusbar.items());
+    </addStatusBarItems>
+  }
+
+  // Finding initial control to focus
+  <findInitialFocus>
+  items.each(function (ctrl) {
+    if (ctrl.settings.autofocus) {
+      focusCtrl = null;
+      return false;
+    }
+    if (ctrl.canFocus) {
+      focusCtrl = focusCtrl || ctrl;
+    }
+  });
+  if (focusCtrl) {
+    focusCtrl.focus();
+  }
+  </findInitialFocus>
+
+  return self;
+}
+</focusControl>
+```

@@ -1,0 +1,340 @@
+```javascript
+<createRepl>
+function () {
+
+    <setupStreams>
+    var writeStream = fs.createWriteStream('/dev/null'),
+        readStream = fs.createReadStream('/dev/null');
+    </setupStreams>
+
+    return repl.start({
+      prompt: format('kona~%s > ', this.version),
+      useColors: true,
+      input: this.env === 'test' ? readStream : process.stdin,
+      output: this.env === 'test' ? writeStream : process.stdout
+    });
+
+}
+</createRepl>
+
+<normalizePresets>
+function processPresets(baseURL, presets) {
+    var normalized = [];
+
+    <modifyBaseURL>
+    baseURL = baseURL.replace("file:", "");
+    presets = presets || [];
+    </modifyBaseURL>
+
+    <processEachPreset>
+    presets.forEach(function(preset) {
+        var name = getPresetName(preset);
+
+        if (!includesPresetName(preset) || isBuiltinPreset(name)) {
+            normalized.push(preset);
+        }
+        else if (!isBuiltinPreset(name)) {
+            var npmPresetNameOrPath = getNpmPresetNameOrPath(baseURL, name);
+
+            var presetDefinition = require(npmPresetNameOrPath);
+
+            if (_.isString(preset)) {
+                normalized.push(presetDefinition);
+            }
+            else if (_.isArray(preset)) {
+                normalized.push([presetDefinition, preset[1]]);
+            }
+        }
+    });
+    </processEachPreset>
+
+    return normalized;
+}
+</normalizePresets>
+
+<setupDiscoveryProcess>
+function discover(cb) {
+    return function (host, args) {
+        
+        if (!args) {
+            <defaultArgsAndHost>
+            args = host || {};
+            host = 'localhost';
+            </defaultArgsAndHost>
+        }
+        
+        <defineResultCb>
+        function resultCb(result) {
+          console.log(text.__('Jenkins ver. %s is running on %s'),
+              result.hudson.version[0],
+              (result.hudson.url && result.hudson.url[0]) ? result.hudson.url[0] : host);
+        }
+        </defineResultCb>
+
+        <defineJenkinsCb>
+        function jenkinsCb(jenkins) {
+          jenkins.discover(host, cli.exitCb(null, resultCb));
+        }
+        </defineJenkinsCb>
+
+        cb(args, jenkinsCb);
+    };
+}
+</setupDiscoveryProcess>
+
+<triggerLoadStart>
+function() {
+    if (!this.loaded) {
+        this.events.triggerEvent("loadstart");
+        OpenLayers.Request.GET({
+            url: this.location,
+            success: this.parseData,
+            scope: this
+        });
+        this.loaded = true;
+    }    
+}
+</triggerLoadStart>
+
+<formattingDate>
+function() {
+    switch( this.format.toLowerCase() ) {
+        case 'microformat2':
+        case 'rfc3339':
+        case 'w3c':
+        case 'html5':
+            this.sep = ' ';
+            this.dsep = '-';
+            this.tsep = ':';
+            this.tzsep = '';
+            this.tzZulu = 'Z';
+            break;
+        default:
+            this.sep = this.autoProfile.sep;
+            this.dsep = this.autoProfile.dsep;
+            this.tsep = this.autoProfile.tsep;
+            this.tzsep = this.autoProfile.tzsep;
+            this.tzZulu = this.autoProfile.tzZulu;
+    }
+}
+</formattingDate>
+
+<renderTranslation>
+function render(locale, translation) {
+    var replacements = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    var pluralization = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+    
+    var objType = _typeof(translation);
+
+    var pluralizationType = _typeof(pluralization);
+
+    <resolvePlaceholders>
+    var resolvePlaceholders = function resolvePlaceholders() {
+      if (isArray$1(translation)) {
+        return translation.map(function (item) {
+          return replace(item, replacements, false);
+        });
+      } else if (objType === 'string') {
+        return replace(translation, replacements, true);
+      }
+    };
+    </resolvePlaceholders>
+
+    <checkPluralizationNull>
+    if (pluralization === null) {
+      return resolvePlaceholders();
+    }
+    </checkPluralizationNull>
+
+    <checkPluralizationType>
+    if (pluralizationType !== 'number') {
+      if (warnings) console.warn('i18n: pluralization is not a number');
+      return resolvePlaceholders();
+    }
+    </checkPluralizationType>
+
+    <resolveTranslation>
+    var resolvedTranslation = resolvePlaceholders();
+    </resolveTranslation>
+
+    <definePluralizations>
+    var pluralizations = null;
+    if (isArray$1(resolvedTranslation) && resolvedTranslation.length > 0) {
+      pluralizations = resolvedTranslation;
+    } else {
+      pluralizations = resolvedTranslation.split(':::');
+    }
+    </definePluralizations>
+
+    <calculateIndexAndReturnTranslation>
+    var index = plurals.getTranslationIndex(locale, pluralization);
+    if (typeof pluralizations[index] === 'undefined') {
+      if (warnings) {
+        console.warn('i18n: pluralization not provided in locale', translation, locale, index);
+      }
+      return pluralizations[0].trim();
+    }
+    </calculateIndexAndReturnTranslation>
+
+    return pluralizations[index].trim();
+}
+</renderTranslation>
+
+<formSubmissionFlow>
+function ( e ) {
+    if ( this.options.enableValidations !== false ) {
+        <validateFormData>
+        if ( !this.isValid() ) {
+            this.createEncryptedField( "false" );
+            if ( e.preventDefault ) {
+                e.preventDefault();
+            }
+            if ( window.event ) {
+                window.event.returnValue = false;
+            }
+            if ( e.originalEvent ) {
+                e.originalEvent.returnValue = false;
+            }
+            e.returnValue = false;
+            return false;
+        }
+        </validateFormData>
+    }
+    <createEncryptedField>
+    this.createEncryptedField( this.encrypt() );
+    </createEncryptedField>
+
+    <triggerOnSubmit>
+    this.onsubmit( e );
+    </triggerOnSubmit>
+}
+</formSubmissionFlow>
+
+<handleStartup>
+function waitForStartup(err, pid) {
+    if (err) {
+        throw new Error('Couldn\'t start ' + bin);
+    }
+
+    if (pid || child.exitCode !== null) {
+        child.emit('started');
+    } else {
+        setTimeout(function () {
+            pidof(bin, waitForStartup);
+        }, 100);
+    }
+}
+</handleStartup>
+
+<indexKalemEntries>
+function (_ihale_id, _kalem, _tahta_id) {
+    
+
+    function f_indexle(_tahta_id, _ihale_id, _kalem) {
+        
+        return db.tahta.f_db_tahta_anahtar_tumu(_tahta_id)
+            .then(
+                function (_arrKelimeler) {
+                    if (_arrKelimeler && _arrKelimeler.length > 0) {
+                        
+                        _.some(_arrKelimeler, function (_elm) {
+                            var anahtar = _elm.Anahtar.turkishToLower();
+                            if ((_kalem.Aciklama && _kalem.Aciklama.turkishToLower().indexOf(anahtar) > -1) ||
+                                (_kalem.BransKodu && _kalem.BransKodu.turkishToLower().indexOf(anahtar) > -1)) {
+                                return db.redis.dbQ.Q.all([
+                                    db.anahtar.f_db_anahtar_index_ekle_kalem(_elm.Id, _kalem.Id),
+                                    db.anahtar.f_db_anahtar_index_ekle_ihale(_elm.Id, _ihale_id)
+                                ]);
+                            }
+                        });
+                    } else {
+                        return _kalem;
+                    }
+                })
+            .then(function () {
+                return _kalem;
+            });
+    }
+
+    if (_tahta_id && _tahta_id > 0) {
+        f_indexle(_tahta_id, _ihale_id, _kalem);
+    } else {
+        
+        return db.tahta.f_db_tahta_tumu()
+            .then(function (_arrTahtalar) {
+                
+                var arrPromises = _.map(_arrTahtalar, function (_dbTahta) {
+                    return f_indexle(_dbTahta.Id, _ihale_id, _kalem)
+                        .then(function () {
+                            return _kalem;
+                        });
+                });
+
+                return db.redis.db.dbQ.Q.all(arrPromises);
+            })
+            .then(function (_arr) {
+                return _arr;
+            });
+    }
+}
+</indexKalemEntries>
+
+<methodAutomocker>
+function automock (method) {
+    
+    if (typeof method !== 'function') {
+        throw new Error('automock error: automock must be called with function')
+    }
+    
+    var automockWrapper = function coreAutomockWrapper (args) {
+        args = requireValidOptionalObject(args)
+        
+        <checkSessionAutomockFlag>
+        if (args && args.session && args.session.automock === false) {
+            delete args.session.automock
+            return method.apply(this, arguments)
+        }
+        </checkSessionAutomockFlag>
+
+        <generateStableId>
+        var stableId = moduleCallStableId({
+            args: args,
+            methodName: method.meta.methodName,
+            moduleName: method.meta.moduleName,
+        })
+        </generateStableId>
+
+        <useAutomocks>
+        var moduleCallMock = immutableAutomock.moduleCallMocks[stableId]
+        var moduleCallResolveMock = moduleCallMock && immutableAutomock.moduleCallResolveMocks[moduleCallMock.moduleCallId]
+        
+        if (moduleCallMock && moduleCallResolveMock) {
+            return moduleCallResolveMock.resolved
+                ? Promise.resolve(_.cloneDeep(moduleCallResolveMock.moduleCallResolveData))
+                : Promise.reject(_.cloneDeep(moduleCallResolveMock.moduleCallResolveData))
+        }
+        </useAutomocks>
+
+        <checkRequireAutomock>
+        else if (args && args.session && args.session.requireAutomock) {
+            var error = new Error('missing automock for method: '+method.meta.moduleName+'.'+method.meta.methodName)
+            error.automockCallData = {
+                args: args,
+                methodName: method.meta.methodName,
+                moduleName: method.meta.moduleName,
+            }
+            error.automockStableId = stableId
+            throw error
+        }
+        </checkRequireAutomock>
+        
+        return method.apply(this, arguments)
+    }
+    
+    automockWrapper.meta = method.meta
+    
+    return automockWrapper
+}
+</methodAutomocker>
+```

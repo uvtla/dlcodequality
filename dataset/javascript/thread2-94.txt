@@ -1,0 +1,592 @@
+1. `<FakeXMLHttpRequest>`
+```javascript
+function FakeXMLHttpRequest() {
+    this.readyState = FakeXMLHttpRequest.UNSENT;
+    this.requestHeaders = {};
+    this.requestBody = null;
+    this.status = 0;
+    this.statusText = "";
+
+    var xhr = this;
+    var events = ["loadstart", "load", "abort", "loadend"];
+
+    function addEventListener(eventName) {
+        xhr.addEventListener(eventName, function (event) {
+            var listener = xhr["on" + eventName];
+
+            if (listener && typeof listener == "function") {
+                listener(event);
+            }
+        });
+    }
+
+    for (var i = events.length - 1; i >= 0; i--) {
+        addEventListener(events[i]);
+    }
+
+    if (typeof FakeXMLHttpRequest.onCreate == "function") {
+        FakeXMLHttpRequest.onCreate(this);
+    }
+}
+```
+</FakeXMLHttpRequest>
+
+2. `<HSLA_TO_HSVA>`
+```javascript
+function HSLA_TO_HSVA() {
+    var h = this.h();
+    var s = this.s();
+    var l = this.l();
+    var a = this.a();
+
+    l *= 2;
+    s *= (l <= 1) ? l : 2 - l;
+    var v = (l + s) / 2;
+    var sv = (2 * s) / (l + s);
+    return kolor.hsva(h, sv, v, a);
+}
+```
+</HSLA_TO_HSVA>
+
+3. `<jsonDescription>`
+```javascript
+function jsonDescription(format, description) {
+  switch (format) {
+    case 'application/openapi+json':
+      if (typeof description == object) {
+        return description;
+      } else {
+        throw new Error(`application/openapi+json description ${description} is not an object`);
+      }
+    case 'application/openapi+yaml':
+      return yaml.safeLoad(description);
+    default:
+      throw new Error(`Unknown format: ${format} for ${description}`);
+  }
+}
+```
+</jsonDescription>
+
+4. `<function>`
+```javascript
+function() {
+    var t = this,
+        components = t.model.get('components');
+    components.remove(components.models);
+    t.showSettings();
+}
+```
+</function>
+
+5. `<function>`
+```javascript
+function () {
+'use strict';
+var options = {
+  config: {
+    starttag: `
+    endtag: `
+    addRootSlash: false,
+    relative: true,
+    transform: function (filepath) {
+      return '@import \'' + filepath + '\';';
+    }
+  },
+  src: './styles/style.scss',
+  files: [
+    '!./node_modules*',
+    '!./styles/style.scss',
+    '.*.scss'
+  ],
+  dest: './styles',
+  taskName: 'scss-glob-inject', 
+  dependencies: []
+};
+
+return options;
+}
+```
+</function>
+
+6. `<inventory_Ref>`
+```javascript
+function inventory$Ref ($refParent, $refKey, path, pathFromRoot, indirections, inventory, $refs, options) {
+  var $ref = $refKey === null ? $refParent : $refParent[$refKey];
+  var $refPath = url.resolve(path, $ref.$ref);
+  var pointer = $refs._resolve($refPath, options);
+  var depth = Pointer.parse(pathFromRoot).length;
+  var file = url.stripHash(pointer.path);
+  var hash = url.getHash(pointer.path);
+  var external = file !== $refs._root$Ref.path;
+  var extended = $Ref.isExtended$Ref($ref);
+  indirections += pointer.indirections;
+
+  var existingEntry = findInInventory(inventory, $refParent, $refKey);
+  if (existingEntry) {
+    
+    if (depth < existingEntry.depth || indirections < existingEntry.indirections) {
+      removeFromInventory(inventory, existingEntry);
+    }
+    else {
+      return;
+    }
+  }
+
+  inventory.push({
+    $ref: $ref,                   
+    parent: $refParent,           
+    key: $refKey,                 
+    pathFromRoot: pathFromRoot,   
+    depth: depth,                 
+    file: file,                   
+    hash: hash,                   
+    value: pointer.value,         
+    circular: pointer.circular,   
+    extended: extended,           
+    external: external,           
+    indirections: indirections,   
+  });
+
+  
+  crawl(pointer.value, null, pointer.path, pathFromRoot, indirections + 1, inventory, $refs, options);
+}
+```
+</inventory_Ref>
+
+7. `<_applyAllCallbacks>`
+```javascript
+function _applyAllCallbacks(callbacks, args) {
+    if (callbacks.length > 0) {
+        var callback = callbacks.pop();
+        try {
+            callback.apply(undefined, args);
+        } finally {
+            _applyAllCallbacks(callbacks, args);
+        }
+    }
+}
+```
+</_applyAllCallbacks>
+
+8. `<workerBoilerScript>`
+```javascript
+function workerBoilerScript() {
+
+    var postMessage = self.postMessage;
+    var structuredCloningSupport = null;
+    var toString = {}.toString;
+
+    self.console = {};
+    self.isWorker = true;
+
+    
+    ['log', 'debug', 'error', 'info', 'warn', 'time', 'timeEnd'].forEach(function(meth) {
+        self.console[meth] = function() {
+            postMessage({
+                cmd: 'console',
+                method: meth,
+                args: [].slice.call(arguments)
+            });
+        };
+    });
+
+    self.addEventListener('message', function(e) {
+
+        var data = e.data;
+
+        if (typeof data == 'string' && data.indexOf('EVAL|') === 0) {
+            eval(data.substring(5));
+            return;
+        }
+
+        if (structuredCloningSupport == null) {
+            
+            
+            structuredCloningSupport = e.data[0] === 'PING';
+
+            
+            self.postMessage(
+                structuredCloningSupport ?
+                    'pingback:structuredCloningSupport=YES' :
+                    'pingback:structuredCloningSupport=NO'
+            );
+
+            if (!structuredCloningSupport) {
+                postMessage = function(msg) {
+                    
+                    return self.postMessage(JSON.stringify(msg));
+                };
+            }
+
+            return;
+        }
+
+        if (!structuredCloningSupport) {
+            
+            data = JSON.parse(data);
+        }
+
+        var defs = data.definitions;
+        var isDeferred = false;
+        var args = data.args;
+
+        if (defs) {
+            
+            for (var i in defs) {
+                self[i] = defs[i];
+            }
+            return;
+        }
+
+        function callback() {
+            
+            returnResult({
+                args: [].slice.call(arguments)
+            });
+        }
+
+        callback.transfer = function() {
+            var args = [].slice.call(arguments);
+            var transfers = extractTransfers(args);
+            
+            returnResult({
+                args: args
+            }, transfers);
+        };
+
+        args.push(callback);
+
+        self.deferred = function() {
+            isDeferred = true;
+            var def = {};
+            function resolve(r, transfers) {
+                returnResult({
+                    isDeferred: true,
+                    action: 'resolve',
+                    args: [r]
+                }, transfers);
+                return def;
+            }
+            function reject(r, transfers) {
+                if (r instanceof Error) {
+                    
+                    var cloneableError = {
+                        message: r.message,
+                        stack: r.stack,
+                        name: r.name,
+                        code: r.code
+                    };
+                    for (var i in r) {
+                        if (r.hasOwnProperty(i)) {
+                            cloneableError[i] = r[i];
+                        }
+                    }
+                    postMessage({
+                        cmd: 'deferred_reject_error',
+                        token: data.token,
+                        error: cloneableError
+                    });
+                    return;
+                }
+                returnResult({
+                    isDeferred: true,
+                    action: 'reject',
+                    args: [r]
+                }, transfers);
+            }
+            
+            def.fulfil = def.fulfill = def.resolve = function(value) {
+                return resolve(value);
+            };
+            def.reject = function(value) {
+                return reject(value);
+            };
+            def.transferResolve = function(value) {
+                var transfers = extractTransfers(arguments);
+                return resolve(value, transfers);
+            };
+            def.transferReject = function(value) {
+                var transfers = extractTransfers(arguments);
+                return reject(value, transfers);
+            };
+            return def;
+        };
+
+        
+        var result = self[data.method].apply(self, args);
+
+        if (!isDeferred && result !== void 0) {
+            
+            returnResult({
+                args: [result]
+            });
+        }
+
+        self.deferred = function() {
+            throw new Error('Operative: deferred() called at odd time');
+        };
+
+        function returnResult(res, transfers) {
+            postMessage({
+                cmd: 'result',
+                token: data.token,
+                result: res
+            }, self.hasTransferSupport && transfers || []);
+        }
+
+        function extractTransfers(args) {
+            var transfers = args[args.length - 1];
+
+            if (toString.call(transfers) !== '[object Array]') {
+                throw new Error('Operative: callback.transfer() must be passed an Array of transfers as its last arguments');
+            }
+
+            return transfers;
+        }
+    });
+}
+```
+</workerBoilerScript>
+
+9. `<function>`
+```javascript
+function() {
+    if (node.debug) {
+      node.log('STARTING event listener');
+    }
+
+    var net = require('net');
+    var dgram = require('dgram');
+    node.inputSocket = dgram.createSocket({type:'udp4', reuseAddr: true});
+
+    node.inputSocket.on('notify', function (event) {
+      if (node.debug) {
+        node.log('Got a notification.', event)
+      }
+    });
+
+    node.inputSocket.on('message', function (msg, rinfo) {
+      
+
+      if (rinfo.address == node.address) {
+        if (node.debug) {
+          node.log("UPnP Event from [" + rinfo.address + "] --> " );
+        }
+
+        
+        msg = msg.toString().split('\r\n\r\n');
+        var header = msg[0];
+        var body = msg[1];
+
+        
+        var method = header.split('\r\n').shift().split(' ').shift().trim();
+        if (method == 'M-SEARCH'){
+          return;
+        }
+
+        
+        var arr = header.match(/[^\r\n]+/g);
+        var headerInfo = {};
+        for (var i = 1; i < arr.length; ++i){
+          var tem = arr[i].split(/:(.+)?/);
+          if (typeof(tem[1]) == 'string'){ tem[1] = tem[1].trim(); }
+          headerInfo[tem[0].toLowerCase()] = tem[1];
+        };
+        
+        
+        
+        
+
+        
+        if (method == 'NOTIFY' && headerInfo['nts'] == 'yamaha:propchange') {
+
+          var parseString = require('xml2js').parseString;
+          parseString(body, function (err, result) {
+            if (err) {
+              node.error('Failed to parse the event with error: ' + err);
+              return;
+            }
+
+            
+            var zoneName = undefined;
+            if (result.hasOwnProperty('YAMAHA_AV')) {
+              if (result.YAMAHA_AV.hasOwnProperty('Main_Zone')) {
+                zoneName = 'Main_Zone';
+              } else if (result.YAMAHA_AV.hasOwnProperty('Zone_2')) {
+                zoneName = 'Zone_2';
+              } else if (result.YAMAHA_AV.hasOwnProperty('Zone_3')) {
+                zoneName = 'Zone_3';
+              } else if (result.YAMAHA_AV.hasOwnProperty('Zone_4')) {
+                zoneName = 'Zone_4';
+              }
+            }
+            if (zoneName === undefined
+              || result.YAMAHA_AV[zoneName] === undefined
+              || result.YAMAHA_AV[zoneName][0] === undefined) {
+              if (node.debug) {
+                node.warn('Unknown event message format: ' + JSON.stringify(result));
+              }
+              return;
+            }
+
+            for (var i in result.YAMAHA_AV[zoneName][0].Property) {
+              var prop = result.YAMAHA_AV[zoneName][0].Property[i];
+              if (node.debug) {
+                node.log('Property-Change: ' + prop);
+              }
+
+              
+              
+              if (prop == 'Power') {
+
+                
+                node.sendGetCommand(zoneName + '.Power_Control.Power').then(function(value) {
+                  for (var s in node.subscriptions) {
+                    node.subscriptions[s].handler(zoneName + '.Power_Control.Power', value);
+                  }
+                }).catch(function(error) {
+                  node.error('Failed to request data from AVR with error: ' + error);
+                });
+
+              } else if (prop == 'Input') {
+
+                
+                node.sendGetCommand(zoneName + '.Input.Input_Sel').then(function(value) {
+                  for (var s in node.subscriptions) {
+                    node.subscriptions[s].handler(zoneName + '.Input.Input_Sel', value);
+                  }
+                }).catch(function(error) {
+                  node.error('Failed to request data from AVR with error: ' + error);
+                });
+
+              } else if (prop == 'Volume') {
+
+                
+                
+                node.sendGetCommand(zoneName + '.Volume.Lvl').then(function(value) {
+                  for (var s in node.subscriptions) {
+                    node.subscriptions[s].handler(zoneName + '.Volume.Lvl', value);
+                  }
+                }).catch(function(error) {
+                  node.error('Failed to request data from AVR with error: ' + error);
+                });
+                node.sendGetCommand(zoneName + '.Volume.Mute').then(function(value) {
+                  for (var s in node.subscriptions) {
+                    node.subscriptions[s].handler(zoneName + '.Volume.Mute', value);
+                  }
+                }).catch(function(error) {
+                  node.error('Failed to request data from AVR with error: ' + error);
+                });
+
+              } else if (prop == 'Play_Info') {
+
+                
+                
+                node.sendGetCommand(zoneName + '.Input.Input_Sel').then(function(value) {
+
+                  var validInputs = {
+                    'TUNER': 'Tuner', 'Napster': 'Napster', 'Spotify': 'Spotify', 'JUKE': 'JUKE', 'SERVER': 'SERVER',
+                    'NET RADIO': 'NET_RADIO', 'USB': 'USB', 'iPod_USB': 'iPod_USB', 'AirPlay': 'AirPlay'
+                  };
+
+                  if (validInputs.hasOwnProperty(value)) {
+                    node.sendGetCommand(validInputs[value] + '.Play_Info').then(function(value2) {
+                      for (var s in node.subscriptions) {
+                        node.subscriptions[s].handler(value + '.Play_Info', value2);
+                      }
+                    }).catch(function(error) {
+                      node.error('Received event Play_Info but failed to read play info of current input selection: ' + error);
+                    });
+                  } else {
+                    if (node.debug) {
+                      node.log('Received event Play_Info but do not know or support current input selection ' + value);
+                    }
+                  }
+                }).catch(function(error) {
+                  node.error('Received event Play_Info but failed to read current input selection: ' + error);
+                });
+
+              } else if (prop == 'List_Info') {
+
+                
+                
+                node.sendGetCommand(zoneName + '.Input.Input_Sel').then(function(value) {
+
+                  var validInputs = {
+                    'Napster': 'Napster', 'JUKE': 'JUKE', 'SERVER': 'SERVER',
+                    'NET RADIO': 'NET_RADIO', 'USB': 'USB', 'iPod_USB': 'iPod_USB'
+                  };
+
+                  if (validInputs.hasOwnProperty(value)) {
+                    node.sendGetCommand(validInputs[value] + '.List_Info').then(function(value2) {
+                      for (var s in node.subscriptions) {
+                        node.subscriptions[s].handler(value + '.List_Info', value2);
+                      }
+                    }).catch(function(error) {
+                      node.error('Received event List_Info but failed to read play info of current input selection: ' + error);
+                    });
+                  } else {
+                    if (node.debug) {
+                      node.log('Received event List_Info but do not know or support current input selection ' + value);
+                    }
+                  }
+                }).catch(function(error) {
+                  node.error('Received event List_Info but failed to read current input selection: ' + error);
+                });
+
+              } else {
+
+                
+                if (node.debug) {
+                  node.log('Received unsupported Property-Change via multicast: ' + prop);
+                }
+                return;
+
+              }
+            }
+          });
+        }
+      });
+
+      node.inputSocket.on('listening', function () {
+        try {
+          var address = node.inputSocket.address();
+          node.log('UDP client listening on ' + address.address + ":" + address.port);
+          node.inputSocket.setBroadcast(true)
+          node.inputSocket.setMulticastTTL(5);
+          node.inputSocket.addMembership('239.255.255.250');
+          
+          
+
+          
+
+            
+          } catch (err) {
+            node.warn('Cannot bind address for UPNP event listener. Port probably already in use. Error: ' + err);
+          }
+        });
+
+      try {
+        node.inputSocket.bind(1900);
+      }
+      catch (err) {
+        node.warn('Cannot bind address for UPNP event listener. Port probably already in use. Error: ' + err);
+      }
+    }
+```
+</function>
+
+10. `<compareCentroids>`
+```javascript
+function compareCentroids(a, b) {
+  for (let i = 0, l = a.length; i < l; i++) {
+    for (let j = 0, m = a[i].length; j < m; j++) {
+      if (a[i][j] !== b[i][j])
+        return false;
+    }
+  }
+
+  return true;
+}
+```
+</compareCentroids>

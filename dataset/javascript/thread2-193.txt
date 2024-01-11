@@ -1,0 +1,278 @@
+```javascript
+<App>
+function App(appManager, config, options) {
+    const app = this;
+    this.expressApp = Express();
+
+    <RouterSetup>
+    this.Router = function() {
+        Router.apply(this, arguments);
+    };
+    this.Router.prototype = Object.create(Router.prototype);
+    this.Router.prototype.constructor = Router;
+    this.Router.prototype.App = this;
+    </RouterSetup>
+    
+    <AppIInitialization>
+    AppI.call(this, appManager, config, options);
+    app.$normalizeConfig();
+    </AppIInitialization>
+}
+</App>
+
+<sluggable>
+function sluggable(options) {
+  <OptionDefaults>
+  options = options || {};
+  var key = options.key || 'slug'
+  var properties = _.extend({}, { type: String, lowercase: true, trim: true, unique: true }, options.properties)
+  var source = options.source || 'title';
+  </OptionDefaults>
+    
+  <SluggableFunction>
+  return function sluggable(schema) {
+    <SchemaSetup>
+    var obj = {};
+    obj[key] = properties;
+    schema.add(obj);
+    </SchemaSetup>    
+    
+    <SlugValueSetter>
+    schema.path(key).set(function(v) {
+      <Normalization>
+      v = v.toLowerCase();
+      </Normalization>
+      
+      <CharacterReplacement>
+      var from = "àáäâèéëêìíïîòóöôùúüûñç";
+      var to = "aaaaeeeeiiiioooouuuunc";
+      for (var i = 0, l = from.length; i < l; i++) {
+        v = v.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+      }
+      </CharacterReplacement>
+      
+      <SlugTransformation>
+      v = v.replace(/[^a-z0-9]/g, '').replace(/-+/g, '');
+      v = v.replace(/\s+/g, '-');
+      v = v.substr(0, 255);
+      </SlugTransformation>
+      
+      return v;
+    });
+    </SlugValueSetter>
+    
+    <SourceValueSetter>
+    schema.path(source).set(function(v) {
+      if (!this[key]) {
+        this[key] = v;
+      }
+      return v;
+    });
+    </SourceValueSetter>
+  }
+  </SluggableFunction>
+}
+</sluggable>
+
+<compareScreenshot>
+function compareScreenshot(path1, path2, compareOpts) {
+    <OptionSetup>
+    var compareOptions = _.extend({}, options, compareOpts || {});
+    </OptionSetup>
+
+    <DeferredSetup>
+    var deferred = Q.defer();
+    </DeferredSetup>
+    
+    <ImageComparison>
+    gm.compare(path1, path2, compareOptions, function (err, isEqual, equality ) {
+      if (err) { throw err; }
+      <ResultProcessing>
+      isEqual ? deferred.resolve(equality) : deferred.reject([path2, ' is not equal to ', path1, ' (tolerance:', compareOptions.tolerance, ', result:', equality, ')'].join(''));
+      </ResultProcessing>
+    });
+    </ImageComparison>
+    
+    return deferred.promise;
+}
+</compareScreenshot>
+
+<function(helper)>
+function(helper) {
+                
+    var target = {},
+        <RetrieveClientRects>
+        rects = this.__instance._$origin[0].getClientRects();
+        </RetrieveClientRects>
+
+        <OpacityAdjustment>
+        if (rects.length > 1) {
+            var opacity = this.__instance._$origin.css('opacity');
+            if (opacity == 1) {
+                this.__instance._$origin.css('opacity', 0.99);
+                rects = this.__instance._$origin[0].getClientRects();
+                this.__instance._$origin.css('opacity', 1);
+            }
+        }
+        </OpacityAdjustment>
+        
+        <SingleRectCalculation>
+        if (rects.length < 2) {
+            target.top = Math.floor(helper.geo.origin.windowOffset.left + (helper.geo.origin.size.width / 2));
+            target.bottom = target.top;
+            target.left = Math.floor(helper.geo.origin.windowOffset.top + (helper.geo.origin.size.height / 2));
+            target.right = target.left;
+        }
+        </SingleRectCalculation>
+        
+        <MultipleRectCalculation>
+        else {
+            <CalculateInitialValues>
+            var targetRect = rects[0];
+            target.top = Math.floor(targetRect.left + (targetRect.right - targetRect.left) / 2);
+            </CalculateInitialValues>
+            
+            <MiddleRectCalculation>
+            if (rects.length > 2) {
+                targetRect = rects[Math.ceil(rects.length / 2) - 1];
+            }
+            else {
+                targetRect = rects[0];
+            }
+            target.right = Math.floor(targetRect.top + (targetRect.bottom - targetRect.top) / 2);
+            </MiddleRectCalculation>
+            
+            <LastRectCalculation>
+            targetRect = rects[rects.length - 1];
+            target.bottom = Math.floor(targetRect.left + (targetRect.right - targetRect.left) / 2);
+            </LastRectCalculation>
+            
+            <CenterRectCalculation>
+            if (rects.length > 2) {
+                targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
+            }
+            else {
+                targetRect = rects[rects.length - 1];
+            }
+            target.left = Math.floor(targetRect.top + (targetRect.bottom - targetRect.top) / 2);
+            </CenterRectCalculation>
+        }
+        </MultipleRectCalculation>
+        
+        return target;
+}
+</function(helper)>
+
+<internal>
+function internal(obj) {
+  <PrivateMapInitialization>
+  if (!privateMap.has(obj)) {
+    privateMap.set(obj, {});
+  }
+  </PrivateMapInitialization>
+  <ReturnPrivateProperties>
+  return privateMap.get(obj);
+  </ReturnPrivateProperties>
+}
+</internal>
+
+<loadFromConfig>
+function loadFromConfig(router, providers, sessionStore) {
+  <SiteMapConstruction>
+  const sitesMap = siteService.sites(),
+    siteHosts = _.uniq(_.map(sitesMap, 'host'));
+  </SiteMapConstruction>
+
+  <AddHostToRouter>
+  _.each(siteHosts, hostname => {
+    const sites = _.filter(sitesMap, {host: hostname}).sort(sortByDepthOfPath);
+    addHost({
+      router,
+      hostname,
+      sites,
+      providers,
+      sessionStore
+    });
+  });
+  </AddHostToRouter>
+
+  return router;
+}
+</loadFromConfig>
+
+<addParent>
+function addParent(obj, parent) {
+  <CheckIfNode>
+  var isNode = obj && typeof obj.type === 'string';
+  var childParent = isNode ? obj : parent;
+  </CheckIfNode>
+  
+  <RecursiveParentAddition>
+  for (var k in obj) {
+    var value = obj[k];
+    if (Array.isArray(value)) {
+      value.forEach(function(v) { addParent(v, childParent); });
+    } else if (value && typeof value === 'object') {
+      addParent(value, childParent);
+    }
+  }
+  </RecursiveParentAddition>
+  
+  <DefineParentProperty>
+  if (isNode) {
+    Object.defineProperty(obj, 'parent', {
+      configurable: true,
+      writable: true,
+      enumerable: false,
+      value: parent || null
+    });
+  }
+  </DefineParentProperty>
+
+  return obj;
+}
+</addParent>
+
+<function>
+function(context, descriptor, args, stack) {
+    var opt = args[0],
+        template = args[1],
+        sod = new SOD();
+    <SecondPassExecution>
+    secondPass(template, context, sod, stack);
+    </SecondPassExecution>
+    <AddingChildren>
+    if (sod.children)
+        descriptor.children += sod.children;
+    </AddingChildren>
+}
+</function>
+
+<pollForJobs>
+function pollForJobs(state, ms) {
+    <UpdateStatusDisplay>
+    o('h1').text(state);
+    </UpdateStatusDisplay>
+    <RefreshJobsAndSetupInfiniteScroll>
+    refreshJobs(state, function () {
+        infiniteScroll();
+    });
+    </RefreshJobsAndSetupInfiniteScroll>
+    <PollingSetup>
+    if (!pollForJobs.timer) pollForJobs.timer = setTimeout(function () {
+        delete pollForJobs.timer;
+        pollForJobs(state, ms);
+    }, ms);
+    </PollingSetup>
+}
+</pollForJobs>
+
+<resolveBuild>
+function resolveBuild(schema) {
+  <RetrieveBuildPromise>
+  const build = _.get(schema, 'definition._build');
+  return isPromise(build) ? build : Promise.resolve();
+  </RetrieveBuildPromise>
+}
+</resolveBuild>
+```

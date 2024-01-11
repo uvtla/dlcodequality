@@ -1,0 +1,277 @@
+```javascript
+<removeTrailingZeros>
+function removeTrailingZeros(str) {
+  <validateInput>
+  if (typeof str != 'string') throw new Error('in removeTrailingZeros, data type mismatch'); </validateInput>
+
+  let iNonZero = -1;
+  <findLastNonZeroCharacter>
+  for (let i = str.length - 1; i >= 0; i--) {
+    if (charToVal(str[i]) != 0) {
+      iNonZero = i; 
+      break;
+    }
+  } </findLastNonZeroCharacter>
+  <removeZeros>
+  str = str.slice(0, iNonZero + 1); </removeZeros>
+
+  return str;
+}
+</removeTrailingZeros>
+
+<secondFunction>
+function (str, highlight) {
+  <initializeVariables>
+  var highlightLen = highlight.length;
+  var firstOccurrenceIdx; </initializeVariables>
+
+  <validateInput>
+  if (ariaUtilsType.isString(str) && highlightLen) { </validateInput>
+    <prepareHighlight>
+    highlight = highlight.toLowerCase();
+    var strLowerCased = str.toLowerCase(); </prepareHighlight>
+
+    <locateFirstOccurrence>
+    if (strLowerCased.indexOf(highlight) === 0) {
+      firstOccurrenceIdx = 0;
+    } else {
+      var highlightRegexSafe = highlight.replace(regExSpecials, "\\$1");
+      var regexResult = new RegExp("\\s" + highlightRegexSafe, "i").exec(strLowerCased);
+      if (!regexResult) {
+        return ariaUtilsString.escapeForHTML(str);
+      } else {
+        firstOccurrenceIdx = regexResult.index + 1; 
+      }
+    } </locateFirstOccurrence>
+
+    <formatString>
+    var a = firstOccurrenceIdx;
+    var b = firstOccurrenceIdx + highlightLen;
+    var middleOriginal = str.substring(a, b);
+    var middle = ariaUtilsString.stripAccents(middleOriginal).toLowerCase();
+    if (middle === highlight) {
+      return ariaUtilsString.escapeForHTML(str.substring(0, a)) + "<strong>" + ariaUtilsString.escapeForHTML(middleOriginal) + "</strong>" + ariaUtilsString.escapeForHTML(str.substring(b));
+    }
+    </formatString>
+  }
+
+  <handleNonHighlightCase>
+  return str ? ariaUtilsString.escapeForHTML(str) : str; </handleNonHighlightCase>
+}
+</secondFunction>
+
+<runPrintingExample>
+function runPrintingExample(fn, logName, logTable, logCode, logSeparator, logScreenShot) {
+  <definePrintExampleFunction>
+  function printExample(name, makeTable, expected, screenshot) {
+    <extractFunctionCode>
+    let code = makeTable
+      .toString()
+      .split('\n')
+      .slice(1, -2)
+      .join('\n');
+    </extractFunctionCode>
+
+    <logExample>
+    logName(name);
+    if (screenshot && logScreenShot) {
+      logScreenShot(screenshot);
+    } else {
+      logTable(makeTable().toString());
+    }
+    logCode(code);
+    logSeparator('\n'); </logExample>
+  } </definePrintExampleFunction>
+
+  <executeProvidedFunction>
+  fn(printExample); </executeProvidedFunction>
+}
+</runPrintingExample>
+
+<makeStylable>
+function makeStylable(component, className, name, hooks) {
+
+  <createStylableClass>
+  return new (
+  
+  function () {
+    function Stylable() {
+      <initializeProperties>
+      _classCallCheck(this, Stylable);
+      this.name = name;
+      this.initialClassName = className;
+      this.classNames = [className];
+      this.component = component;
+      this.styles = {};
+      this.isUgly = true; </initializeProperties>
+    }
+    </createStylableClass>
+
+    <defineStylableMethods>
+    _createClass(Stylable, [{
+      // Several methods with their own responsibilities omitted for brevity
+    }]);
+    </defineStylableMethods>
+
+    return Stylable;
+  }())();
+}
+</makeStylable>
+
+<expandIncludes>
+function expandIncludes(source, rootPath) {
+  var matcher = new RegExp("^([\t ]*)include ([^/].*);\n?", "gm");
+  var match;
+  var expanded = '';
+  var after = source;
+  var includes = [];
+  var lastIndex = 0;
+
+  <processIncludes>
+  while (match = matcher.exec(source)) {
+    <captureMatchDetails>
+    var statement = match[0];
+    var indent = match[1];
+    var filePath = path.join(rootPath, match[2])
+    includes.push(filePath);
+    </captureMatchDetails>
+
+    <expandTextBeforeMatch>
+    expanded += source.substr(lastIndex, match.index - lastIndex); </expandTextBeforeMatch>
+
+    <annotateStartOfInclude>
+    expanded += indent + "## Start Include: " + filePath + "\n"; </annotateStartOfInclude>
+
+    <readAndProcessIncludedFile>
+    try {
+      var fileContent = fs.readFileSync(filePath, 'utf8');
+      var indentedContent = singleTrailingNewline(NgindoxUtil.indentBlock(fileContent, indent));
+      expanded += expandIncludes(indentedContent, path.dirname(rootPath));
+    } catch (err) {
+      expanded += indent + "## Error: " + err + "\n";
+    } </readAndProcessIncludedFile>
+
+    <annotateEndOfInclude>
+    expanded += indent + "## End Include: " + filePath + "\n"; </annotateEndOfInclude>
+
+    <updateLastIndex>
+    lastIndex = matcher.lastIndex; </updateLastIndex>
+  }
+  </processIncludes>
+
+  <appendRemainingSource>
+  expanded += source.substr(lastIndex); </appendRemainingSource>
+
+  return expanded;
+}
+</expandIncludes>
+
+<fixupCommand>
+function fixupCommand(options, callback) {
+  <setDefaultPmBaseDir>
+  if (!options.pmBaseDir) {
+    if (fs.existsSync(path.resolve(options.cwd, '.strong-pm'))) {
+      options.pmBaseDir = '.strong-pm';
+    } else {
+      options.pmBaseDir = '.';
+    }
+  }
+  options.pmBaseDir = path.resolve(options.cwd, options.pmBaseDir); </setDefaultPmBaseDir>
+
+  <prepareExecutionScript>
+  options.execpath = process.execPath;
+  options.script = [
+    require.resolve('../bin/sl-pm'),
+    '--listen', options.pmPort,
+    '--base', options.pmBaseDir,
+    '--base-port', options.basePort,
+    '--driver', options.driver,
+  ].join(' '); </prepareExecutionScript>
+
+  <writeSeedEnvironment>
+  return writeSeedEnvironment(options, callback); </writeSeedEnvironment>
+}
+</fixupCommand>
+
+<composeProjectOptions>
+function(app) {
+  return {
+    <populateComposeProjectOptions>
+    compose: getComposeFiles(app),
+    project: app.name,
+    opts: {
+      app: app
+    } </populateComposeProjectOptions>
+  };
+}
+</composeProjectOptions>
+
+<checkKeyExists>
+function checkKeyExists(key) {
+  var scope = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'fallback';
+  <retrieveLocaleData>
+  var locale = store.state[moduleName].locale;
+  var fallback = store.state[moduleName].fallback;
+  var translations = store.state[moduleName].translations; </retrieveLocaleData>
+
+  <checkLocalTranslationExists>
+  if (translations.hasOwnProperty(locale) && translations[locale].hasOwnProperty(key)) {
+    return true;
+  } </checkLocalTranslationExists>
+
+  <strictScopeCheck>
+  if (scope == 'strict') {
+    return false;
+  } </strictScopeCheck>
+
+  <checkRegionalTranslationExists>
+  var localeRegional = locale.split('-');
+  if (localeRegional.length > 1 && translations.hasOwnProperty(localeRegional[0]) && translations[localeRegional[0]].hasOwnProperty(key)) {
+    return true;
+  } </checkRegionalTranslationExists>
+
+  <localeScopeCheck>
+  if (scope == 'locale') {
+    return false;
+  } </localeScopeCheck>
+
+  <checkFallbackTranslationExists>
+  if (translations.hasOwnProperty(fallback) && translations[fallback].hasOwnProperty(key)) {
+    return true;
+  } </checkFallbackTranslationExists>
+
+  return false;
+}
+</checkKeyExists>
+
+<makeURL>
+function makeURL(content, contentType) {
+  if (content instanceof Blob) {
+    <createBlobURL>
+    return URL.createObjectURL(content, contentType); </createBlobURL>
+  } else {
+    <convertAndCreateBlobURL>
+    return URL.createObjectURL(makeBlob(content)); </convertAndCreateBlobURL>
+  }
+}
+</makeURL>
+
+<parseHost>
+function parseHost(uri) {
+  <extractProtocolAndHost>
+  const {protocol, host} = url.parse(uri); </extractProtocolAndHost>
+
+  <validateUri>
+  assert(protocol === 'http:' || protocol === 'https:',
+    'Bad URL for location.'); </validateUri>
+
+  <concatenateProtocolAndHost>
+  return `${protocol}
+} </concatenateProtocolAndHost>
+</parseHost>
+```
+
+In the above functions:
+
+- Compliant Functions: `removeTrailingZeros`, `runPrintingExample`, `composeProjectOptions`, `checkKeyExists`, `makeURL`
+- Non-Compliant Functions: The second function **(unnamed)**, `makeStylable`, `expandIncludes`, `fixupCommand`, `parseHost`

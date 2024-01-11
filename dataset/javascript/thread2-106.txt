@@ -1,0 +1,652 @@
+```javascript
+<form>
+function form (req, modelName, callback, formDsl) {
+
+    const formFn = () => new Promise((resolve, reject) => {
+
+        const formLabels = labels(modelName);
+        const schema = get(modelName, true).schema;
+
+        if (formDsl && typeof formDsl === 'function') {
+            return resolve(pluginHelpers.formSettings(req, schema, clone(formDsl()), formLabels));
+        }
+
+        if (formDsl) {
+            return resolve(pluginHelpers.formSettings(req, schema, clone(formDsl), formLabels));
+        }
+
+        
+        get(modelName, true).getForm(req, (err, decoratedForm) => {
+
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(decoratedForm);
+
+        });
+
+    });
+
+    formFn()
+        .then((result) => callback(null, result))
+        .catch(callback);
+
+}
+</form>
+
+<store>
+function store (action) {
+    if (!action || !isPlainObject(action)) {
+      throw new Error('action parameter is required and must be a plain object')
+    }
+
+    if (!action.type || typeof action.type !== 'string') {
+      throw new Error('type property of action is required and must be a string')
+    }
+
+    if (isEmitting) {
+      throw new Error('modifiers may not emit actions')
+    }
+
+    isEmitting = true
+    var oldState = extend(state)
+    state = modifier(action, oldState)
+    var newState = extend(state)
+
+    emitter.emit(action.type, action, newState, oldState)
+    isEmitting = false
+  }
+</store>
+
+<parseInLine>
+function parseInLine(inLineElement) {
+  var childNodes = inLineElement.childNodes;
+  var ad = new Ad();
+  ad.id = inLineElement.getAttribute('id') || null;
+  ad.sequence = inLineElement.getAttribute('sequence') || null;
+
+  for (var nodeKey in childNodes) {
+    var node = childNodes[nodeKey];
+
+    switch (node.nodeName) {
+      case 'Error':
+        ad.errorURLTemplates.push(parserUtils.parseNodeText(node));
+        break;
+
+      case 'Impression':
+        ad.impressionURLTemplates.push(parserUtils.parseNodeText(node));
+        break;
+
+      case 'Creatives':
+        parserUtils.childrenByName(node, 'Creative').forEach(function (creativeElement) {
+                <parseCreativeAttributes>
+          var creativeAttributes = {
+            id: creativeElement.getAttribute('id') || null,
+            adId: parseCreativeAdIdAttribute(creativeElement),
+            sequence: creativeElement.getAttribute('sequence') || null,
+            apiFramework: creativeElement.getAttribute('apiFramework') || null
+          };
+
+          for (var creativeTypeElementKey in creativeElement.childNodes) {
+            var creativeTypeElement = creativeElement.childNodes[creativeTypeElementKey];
+            var parsedCreative = void 0;
+
+            switch (creativeTypeElement.nodeName) {
+              case 'Linear':
+                parsedCreative = parseCreativeLinear(creativeTypeElement, creativeAttributes);
+                if (parsedCreative) {
+                  ad.creatives.push(parsedCreative);
+                }
+                break;
+
+              case 'NonLinearAds':
+                parsedCreative = parseCreativeNonLinear(creativeTypeElement, creativeAttributes);
+                if (parsedCreative) {
+                  ad.creatives.push(parsedCreative);
+                }
+                break;
+
+              case 'CompanionAds':
+                parsedCreative = parseCreativeCompanion(creativeTypeElement, creativeAttributes);
+                if (parsedCreative) {
+                  ad.creatives.push(parsedCreative);
+                }
+                break;
+            }
+          }
+                </parseCreativeAttributes>
+        });
+        break;
+
+      case 'Extensions':
+        parseExtensions(ad.extensions, parserUtils.childrenByName(node, 'Extension'));
+        break;
+
+      case 'AdSystem':
+        ad.system = {
+          value: parserUtils.parseNodeText(node),
+          version: node.getAttribute('version') || null
+        };
+        break;
+
+      case 'AdTitle':
+        ad.title = parserUtils.parseNodeText(node);
+        break;
+
+      case 'Description':
+        ad.description = parserUtils.parseNodeText(node);
+        break;
+
+      case 'Advertiser':
+        ad.advertiser = parserUtils.parseNodeText(node);
+        break;
+
+      case 'Pricing':
+        ad.pricing = {
+          value: parserUtils.parseNodeText(node),
+          model: node.getAttribute('model') || null,
+          currency: node.getAttribute('currency') || null
+        };
+        break;
+
+      case 'Survey':
+        ad.survey = parserUtils.parseNodeText(node);
+        break;
+    }
+  }
+
+  return ad;
+}
+</parseInLine>
+
+<transformResponse>
+function transformResponse(transform) {
+
+  assert.ok(transform);
+  assert.ok(transform instanceof Function);
+
+  var originalStatus, originalJson, reqClosure;
+
+  return function (req, res, next) {
+    originalStatus = res.status;
+    originalJson = res.json;
+    reqClosure = req;
+    res.status = setStatus;
+    res.json = sendJson;
+    return next();
+  }
+
+  function setStatus(status) {
+    this.__status = status;
+    return this;
+  }
+
+  function sendJson(body) {
+    this.__body = body;
+    var B = new Bundle(transform, reqClosure, this);
+    originalStatus.call(this, B.status);
+    return originalJson.call(this, B.body);
+  }
+
+}
+</transformResponse>
+
+<visitReturnInFactory>
+function visitReturnInFactory(traverse, node, path, state) {
+        utils.catchup(node.range[0], state);
+        utils.move(node.argument.range[0], state);
+        utils.append('module.exports = ', state);
+        utils.catchup(node.range[1] - 1, state);
+        return false;
+    }
+</visitReturnInFactory>
+
+<unnamedFunction>
+function (f) {
+                if (f == this._filter)
+                    return;
+                this._filter = f;
+                this._filteredItems = null;
+                if (this.hasItems()) {
+                    this.onCollectionChangedInternal("refresh", -1, null);
+                }
+            }
+</unnamedFunction>
+
+<Circle3D>
+function Circle3D( x , y , z , nx , ny , nz , r ) {
+	this.center = new Vector3D( x , y , z ) ;
+	this.r = + r ;
+	this.planeNormal = new Vector3D( nx , ny , nz ).normalizeCheck() ;
+}
+</Circle3D>
+
+<strict>
+function strict(query) {
+  return foldl(function(acc, val, key) {
+    if (has.call(allowedKeys, key)) acc[key] = val;
+    return acc;
+  }, {}, utm(query));
+}
+</strict>
+
+<makeDetectable>
+function makeDetectable(options, element, callback) {
+        if (!callback) {
+            callback = element;
+            element = options;
+            options = null;
+        }
+
+        options = options || {};
+
+        <debug>
+        function debug() {
+            if (options.debug) {
+                var args = Array.prototype.slice.call(arguments);
+                args.unshift(idHandler.get(element), "Scroll: ");
+                if (reporter.log.apply) {
+                    reporter.log.apply(null, args);
+                } else {
+                    for (var i = 0; i < args.length; i++) {
+                        reporter.log(args[i]);
+                    }
+                }
+            }
+        }
+        </debug>
+
+        <isDetached>
+        function isDetached(element) {
+            function isInDocument(element) {
+                return element === element.ownerDocument.body || element.ownerDocument.body.contains(element);
+            }
+
+            if (!isInDocument(element)) {
+                return true;
+            }
+
+            
+            if (getComputedStyle(element) === null) {
+                return true;
+            }
+
+            return false;
+        }
+        </isDetached>
+
+        <isUnrendered>
+        function isUnrendered(element) {
+            
+            var container = getState(element).container.childNodes[0];
+            var style = getComputedStyle(container);
+            return !style.width || style.width.indexOf("px") === -1; 
+        }
+        </isUnrendered>
+
+        <getStyle>
+        function getStyle() {
+            
+            
+            var elementStyle            = getComputedStyle(element);
+            var style                   = {};
+            style.position              = elementStyle.position;
+            style.width                 = element.offsetWidth;
+            style.height                = element.offsetHeight;
+            style.top                   = elementStyle.top;
+            style.right                 = elementStyle.right;
+            style.bottom                = elementStyle.bottom;
+            style.left                  = elementStyle.left;
+            style.widthCSS              = elementStyle.width;
+            style.heightCSS             = elementStyle.height;
+            return style;
+        }
+        </getStyle>
+
+        <storeStartSize>
+        function storeStartSize() {
+            var style = getStyle();
+            getState(element).startSize = {
+                width: style.width,
+                height: style.height
+            };
+            debug("Element start size", getState(element).startSize);
+        }
+        </storeStartSize>
+
+        <initListeners>
+        function initListeners() {
+            getState(element).listeners = [];
+        }
+        </initListeners>
+
+        <storeStyle>
+        function storeStyle() {
+            debug("storeStyle invoked.");
+            if (!getState(element)) {
+                debug("Aborting because element has been uninstalled");
+                return;
+            }
+
+            var style = getStyle();
+            getState(element).style = style;
+        }
+        </storeStyle>
+
+        <storeCurrentSize>
+        function storeCurrentSize(element, width, height) {
+            getState(element).lastWidth = width;
+            getState(element).lastHeight  = height;
+        }
+        </storeCurrentSize>
+
+        <getExpandChildElement>
+        function getExpandChildElement(element) {
+            return getExpandElement(element).childNodes[0];
+        }
+        </getExpandChildElement>
+
+        <getWidthOffset>
+        function getWidthOffset() {
+            return 2 * scrollbarSizes.width + 1;
+        }
+        </getWidthOffset>
+
+        <getHeightOffset>
+        function getHeightOffset() {
+            return 2 * scrollbarSizes.height + 1;
+        }
+        </getHeightOffset>
+
+        <getExpandWidth>
+        function getExpandWidth(width) {
+            return width + 10 + getWidthOffset();
+        }
+        </getExpandWidth>
+
+        <getExpandHeight>
+        function getExpandHeight(height) {
+            return height + 10 + getHeightOffset();
+        }
+        </getExpandHeight>
+
+        <getShrinkWidth>
+        function getShrinkWidth(width) {
+            return width * 2 + getWidthOffset();
+        }
+        </getShrinkWidth>
+
+        <getShrinkHeight>
+        function getShrinkHeight(height) {
+            return height * 2 + getHeightOffset();
+        }
+        </getShrinkHeight>
+
+        <positionScrollbars>
+        function positionScrollbars(element, width, height) {
+            var expand          = getExpandElement(element);
+            var shrink          = getShrinkElement(element);
+            var expandWidth     = getExpandWidth(width);
+            var expandHeight    = getExpandHeight(height);
+            var shrinkWidth     = getShrinkWidth(width);
+            var shrinkHeight    = getShrinkHeight(height);
+            expand.scrollLeft   = expandWidth;
+            expand.scrollTop    = expandHeight;
+            shrink.scrollLeft   = shrinkWidth;
+            shrink.scrollTop    = shrinkHeight;
+        }
+        </positionScrollbars>
+
+        <injectContainerElement>
+        function injectContainerElement() {
+            var container = getState(element).container;
+
+            if (!container) {
+                container                   = document.createElement("div");
+                container.className         = detectionContainerClass;
+                container.style.cssText     = "visibility: hidden; display: inline; width: 0px; height: 0px; z-index: -1; overflow: hidden; margin: 0; padding: 0;";
+                getState(element).container = container;
+                addAnimationClass(container);
+                element.appendChild(container);
+
+                var onAnimationStart = function () {
+                    getState(element).onRendered && getState(element).onRendered();
+                };
+
+                addEvent(container, "animationstart", onAnimationStart);
+
+                
+                
+                getState(element).onAnimationStart = onAnimationStart;
+            }
+
+            return container;
+        }
+        </injectContainerElement>
+
+        <injectScrollElements>
+        function injectScrollElements() {
+                  
+                  <alterPositionStyles>
+            function alterPositionStyles() {
+                var style = getState(element).style;
+
+                if(style.position === "static") {
+                    element.style.position = "relative";
+
+                    var removeRelativeStyles = function(reporter, element, style, property) {
+                        function getNumericalValue(value) {
+                            return value.replace(/[^-\d\.]/g, "");
+                        }
+
+                        var value = style[property];
+
+                        if(value !== "auto" && getNumericalValue(value) !== "0") {
+                            reporter.warn("An element that is positioned static has style." + property + "=" + value + " which is ignored due to the static positioning. The element will need to be positioned relative, so the style." + property + " will be set to 0. Element: ", element);
+                            element.style[property] = 0;
+                        }
+                    };
+
+                    
+                    
+                    removeRelativeStyles(reporter, element, style, "top");
+                    removeRelativeStyles(reporter, element, style, "right");
+                    removeRelativeStyles(reporter, element, style, "bottom");
+                    removeRelativeStyles(reporter, element, style, "left");
+                }
+            }
+                  </alterPositionStyles>
+
+            <getLeftTopBottomRightCssText>
+            function getLeftTopBottomRightCssText(left, top, bottom, right) {
+                left = (!left ? "0" : (left + "px"));
+                top = (!top ? "0" : (top + "px"));
+                bottom = (!bottom ? "0" : (bottom + "px"));
+                right = (!right ? "0" : (right + "px"));
+
+                return "left: " + left + "; top: " + top + "; right: " + right + "; bottom: " + bottom + ";";
+            }
+            </getLeftTopBottomRightCssText>
+
+            debug("Injecting elements");
+
+            if (!getState(element)) {
+                debug("Aborting because element has been uninstalled");
+                return;
+            }
+
+            alterPositionStyles();
+
+            var rootContainer = getState(element).container;
+
+            if (!rootContainer) {
+                rootContainer = injectContainerElement();
+            }
+
+            
+            
+            
+            
+
+            
+            
+
+            var scrollbarWidth          = scrollbarSizes.width;
+            var scrollbarHeight         = scrollbarSizes.height;
+            var containerContainerStyle = "position: absolute; flex: none; overflow: hidden; z-index: -1; visibility: hidden; width: 100%; height: 100%; left: 0px; top: 0px;";
+            var containerStyle          = "position: absolute; flex: none; overflow: hidden; z-index: -1; visibility: hidden; " + getLeftTopBottomRightCssText(-(1 + scrollbarWidth), -(1 + scrollbarHeight), -scrollbarHeight, -scrollbarWidth);
+            var expandStyle             = "position: absolute; flex: none; overflow: scroll; z-index: -1; visibility: hidden; width: 100%; height: 100%;";
+            var shrinkStyle             = "position: absolute; flex: none; overflow: scroll; z-index: -1; visibility: hidden; width: 100%; height: 100%;";
+            var expandChildStyle        = "position: absolute; left: 0; top: 0;";
+            var shrinkChildStyle        = "position: absolute; width: 200%; height: 200%;";
+
+            var containerContainer      = document.createElement("div");
+            var container               = document.createElement("div");
+            var expand                  = document.createElement("div");
+            var expandChild             = document.createElement("div");
+            var shrink                  = document.createElement("div");
+            var shrinkChild             = document.createElement("div");
+
+            
+            
+            containerContainer.dir              = "ltr";
+
+            containerContainer.style.cssText    = containerContainerStyle;
+            containerContainer.className        = detectionContainerClass;
+            container.className                 = detectionContainerClass;
+            container.style.cssText             = containerStyle;
+            expand.style.cssText                = expandStyle;
+            expandChild.style.cssText           = expandChildStyle;
+            shrink.style.cssText                = shrinkStyle;
+            shrinkChild.style.cssText           = shrinkChildStyle;
+
+            expand.appendChild(expandChild);
+            shrink.appendChild(shrinkChild);
+            container.appendChild(expand);
+            container.appendChild(shrink);
+            containerContainer.appendChild(container);
+            rootContainer.appendChild(containerContainer);
+
+            <onExpandScroll>
+            function onExpandScroll() {
+                getState(element).onExpand && getState(element).onExpand();
+            }
+            </onExpandScroll>
+
+            <onShrinkScroll>
+            function onShrinkScroll() {
+                getState(element).onShrink && getState(element).onShrink();
+            }
+            </onShrinkScroll>
+
+            addEvent(expand, "scroll", onExpandScroll);
+            addEvent(shrink, "scroll", onShrinkScroll);
+
+            
+            
+            getState(element).onExpandScroll = onExpandScroll;
+            getState(element).onShrinkScroll = onShrinkScroll;
+        }
+        </injectScrollElements>
+
+        <registerListenersAndPositionElements>
+        function registerListenersAndPositionElements() {
+                  
+                  <updateChildSizes>
+            function updateChildSizes(element, width, height) {
+                var expandChild             = getExpandChildElement(element);
+                var expandWidth             = getExpandWidth(width);
+                var expandHeight            = getExpandHeight(height);
+                expandChild.style.width     = expandWidth + "px";
+                expandChild.style.height    = expandHeight + "px";
+            }
+                  </updateChildSizes>
+
+            <updateDetectorElements>
+            function updateDetectorElements(done) {
+                var width           = element.offsetWidth;
+                var height          = element.offsetHeight;
+
+                debug("Storing current size", width, height);
+
+                
+                
+                storeCurrentSize(element, width, height);
+
+                
+                
+
+                batchProcessor.add(0, function performUpdateChildSizes() {
+                    if (!getState(element)) {
+                        debug("Aborting because element has been uninstalled");
+                        return;
+                    }
+
+                    if (!areElementsInjected()) {
+                        debug("Aborting because element container has not been initialized");
+                        return;
+                    }
+
+                    if (options.debug) {
+                        var w = element.offsetWidth;
+                        var h = element.offsetHeight;
+
+                        if (w !== width || h !== height) {
+                            reporter.warn(idHandler.get(element), "Scroll: Size changed before updating detector elements.");
+                        }
+                    }
+
+                    updateChildSizes(element, width, height);
+                });
+
+                batchProcessor.add(1, function updateScrollbars() {
+                    if (!getState(element)) {
+                        debug("Aborting because element has been uninstalled");
+                        return;
+                    }
+
+                    if (!areElementsInjected()) {
+                        debug("Aborting because element container has not been initialized");
+                        return;
+                    }
+
+                    positionScrollbars(element, width, height);
+                });
+
+                if (done) {
+                    batchProcessor.add(2, function () {
+                        if (!getState(element)) {
+                            debug("Aborting because element has been uninstalled");
+                            return;
+                        }
+
+                        if (!areElementsInjected()) {
+                          debug("Aborting because element container has not been initialized");
+                          return;
+                        }
+
+                        done();
+                    });
+                }
+            }
+            </updateDetectorElements>
+
+            <areElementsInjected>
+            function areElementsInjected() {
+                return !!getState(element).container;
+            }
+            </areElementsInjected>
+
+            <notifyListenersIfNeeded>
+            function notifyListenersIfNeeded() {
+                function isFirstNotify() {
+                    return getState(element).lastNotifiedWidth === undefined;
+                }
+
+                debug("notifyListenersIfNeeded invoked");
+
+                var state = getState(element);
+
+                
+                if (

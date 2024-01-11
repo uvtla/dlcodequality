@@ -1,0 +1,248 @@
+```javascript
+<function_triggerEmitter>
+function() {
+	
+	var args = Array.prototype.slice.apply(arguments);
+	
+	if (typeof args[0] == 'string') {
+		args[0] = { type: args[0] };
+	}
+	
+	this.__$emitterPrivate.trigger.apply(this.__$emitterPrivate, args);
+	this.__$emitterPublic.trigger.apply(this.__$emitterPublic, args);
+	
+	return this;
+}
+</function_triggerEmitter>
+
+<function_initPlugins>
+function initPlugins(router, site) {
+  return bluebird.all(module.exports.plugins.map(plugin => {
+    <plugin_initialization>
+    return bluebird.try(() => {
+      if (typeof plugin === 'function') {
+        return plugin(router, pluginDBAdapter, publish, sites, site);
+      } else {
+        log('warn', 'Plugin is not a function');
+        return bluebird.resolve();
+      }
+    });
+    </plugin_initialization>
+  }));
+}
+</function_initPlugins>
+
+<function_getState>
+function getState (file) {
+    
+    <state_initialization>
+    var state = {};
+    state.ephemeral = getFileInfo (file + ".eph");
+    state.ready = getFileInfo (file + ".rdy");
+    state.base = getFileInfo (file);
+    state.backup = getFileInfo (file + ".bak");
+    state.tertiary = getFileInfo (file + ".bk2");
+    </state_initialization>
+
+    <state_determination>
+    if (state.ephemeral.exists) {
+        state.status = cc.SAFE_INTERVENE;
+    } else if ((state.ready.exists) || (state.tertiary.exists)) {
+        state.status = cc.SAFE_RECOVERABLE;
+    } else if (state.base.exists) {
+        state.status = cc.SAFE_NORMAL;
+    } else {
+        if (state.backup.exists) {
+            state.status = cc.SAFE_RECOVERABLE;
+        } else {
+            state.status = cc.DOES_NOT_EXIST;
+        }
+    }
+    </state_determination>
+
+    return (state);
+}
+</function_getState>
+
+<function_supportsMapAndSet>
+function supportsMapAndSet() {
+  if (typeof Symbol === 'undefined' || typeof Map === 'undefined' || typeof Set === 'undefined') {
+    return false;
+  }
+  <species_property_check>
+  var prop = Object.getOwnPropertyDescriptor(Map, Symbol.species);
+  return prop && 'get' in prop && Map[Symbol.species] === Map;
+  </species_property_check>
+}
+</function_supportsMapAndSet>
+
+<function_setNodeIndex>
+function(parentNode, reverse, ofType) {
+  parentNode._counted = true;
+  if (reverse) {
+    <reverse_idx>
+    for (var nodes = parentNode.childNodes, i = nodes.length - 1, j = 1; i >= 0; i--) {
+      var node = nodes[i];
+      if (node.nodeType == 1 && (!ofType || node._counted)) node.nodeIndex = j++;
+    }
+    </reverse_idx>
+  } else {
+    <normal_idx>
+    for (var i = 0, j = 1, nodes = parentNode.childNodes; node = nodes[i]; i++)
+      if (node.nodeType == 1 && (!ofType || node._counted)) node.nodeIndex = j++;
+    </normal_idx>
+  }
+}
+</function_setNodeIndex>
+
+<function_intersectModules>
+function intersectModules(modulesA, modulesB) {
+  const intersection = [];
+  for (const module of modulesA) {
+    <module_inclusion>
+    if (modulesB.includes(module)) {
+      intersection.push(module);
+    }
+    </module_inclusion>
+  }
+  return intersection;
+}
+</function_intersectModules>
+
+<function_<anonymous>>
+function (args) {
+    var sectionMacro = this.macro;
+    <macro_assignment>
+    if (sectionMacro) {
+        
+        if (!args.macro) {
+            args.macro = sectionMacro;
+        } else {
+            var targetMacro = args.macro;
+            if (ariaUtilsType.isObject(targetMacro) && !targetMacro.name) {
+                targetMacro.name = sectionMacro.name;
+                targetMacro.scope = sectionMacro.scope;
+                if (!targetMacro.args) {
+                    targetMacro.args = sectionMacro.args;
+                }
+            }
+        }
+    }
+    </macro_assignment>
+    
+    
+    this._domElt = null;
+}
+</function_<anonymous>>
+
+<function_<anonymous_async>>
+async function () {
+
+    const log = []
+
+    <independent_functions>
+    const a =       () => {                     log.push ('a')              }
+    const b = async () => { await __.sleep (1); log.push ('b');             }
+    const c =       () => {                     log.push ('c'); return 42   } 
+    const d =       () => {                     log.push ('d');             } 
+    </independent_functions>
+
+    <function_execution>
+    await __.each ([a, b, c], (fn, i, break_) =>
+                                __.then (fn, x => {
+                                                if (x === 42) break_ () }))
+    </function_execution>
+
+    <assertion>
+    $assert (log, ['a', 'b', 'c'])
+    </assertion>
+}
+</function_<anonymous_async>>
+
+<function_sheetifySass>
+function sheetifySass (filename, source, options, done) {
+  const sassOpts = extend({
+    data: source,
+    file: filename,
+    indentedSyntax: /\.sass$/i.test(filename)
+  }, options)
+
+  <sass_render>
+  sass.render(sassOpts, function (err, res) {
+    if (err) return done(err)
+    done(null, {
+      css: String(res.css),
+      files: res.stats.includedFiles
+    })
+  })
+  </sass_render>
+}
+</function_sheetifySass>
+
+<function_inherit>
+function inherit(target, parent) {
+	<argument_validation>
+	assertArgumentOfType('function', target, ERROR_MESSAGES.NOT_CONSTRUCTOR, 'Target', 'inherit');
+	parent = toFunction(
+		parent,
+		new TypeError(
+			msg(
+				ERROR_MESSAGES.WRONG_TYPE,
+				'Parent',
+				'inherit',
+				'non-null object or function',
+				parent === null ? 'null' : typeof parent
+			)
+		)
+	);
+	</argument_validation>
+
+	if (classIsA(target, parent)) {
+		return target;
+	}
+
+	var resultingProperties = {};
+	<property_computation>
+	var targetPrototype = target.prototype;
+	for (var propertyName in parent.prototype) {
+		
+		if (propertyName === 'constructor' || propertyName === '__proto__' || propertyName === 'toString' || propertyName.match(/^Symbol\(__proto__\)/)) {
+			continue;
+		}
+
+		var notInTarget = <notInTarget>targetPrototype[propertyName] === undefined;</notInTarget>
+		var parentHasNewerImplementation = notInTarget || <isOverrider>isOverriderOf(propertyName, parent, target);</isOverrider>
+		if (parentHasNewerImplementation) {
+			resultingProperties[propertyName] = parent.prototype[propertyName];
+		} else {
+			var areTheSame = targetPrototype[propertyName] === parent.prototype[propertyName];
+			var targetIsUpToDate = areTheSame || <isOverrider>isOverriderOf(propertyName, target, parent);</isOverrider>
+			if (targetIsUpToDate === false) {
+				
+				throw new Error(
+					msg(
+						ERROR_MESSAGES.ALREADY_PRESENT,
+						propertyName,
+						className(parent, 'parent'),
+						className(target, 'target')
+					)
+				);
+			}
+		}
+	}
+	</property_computation>
+
+	<property_assignment>
+	copy(resultingProperties, targetPrototype);
+	var multiparents = nonenum(target, '__multiparents__', []);
+	multiparents.push(parent);
+	</property_assignment>
+
+	<cache_clearing>
+	clearAssignableCache(target, parent);
+	</cache_clearing>
+
+	return target;
+}
+</function_inherit>
+```

@@ -1,0 +1,276 @@
+Below are the annotations for the provided JavaScript functions:
+
+1.
+```javascript
+<pkgPropUpd>
+function pkgPropUpd(pd, u, n, r) {
+  var v = null;
+  <determineVersion>
+  if (u && pd.oldVer !== self.version && self.version) {
+    v = self.version;
+  } else if (n && pd.oldVer !== self.next.version && self.next.version) {
+    v = self.next.version;
+  } else if (r && self.prev.version) {
+    v = self.prev.version;
+  }
+  </determineVersion>
+  <updatePackageData>
+  pd.version = v;
+  if (v && !pd.props) {
+    pd.pkg.version = v;
+    pd.propChangeCount++;
+  }
+  </updatePackageData>
+  <updatePropertiesIfPresent>
+  if (pd.props && pd.pkgParent) {
+    pd.props.forEach(function pkgProp(p) {
+      if (pd.pkgParent[p] && (!pd.pkg[p] || pd.pkgParent[p] !== pd.pkg[p])) {
+        pd.pkg[p] = pd.pkgParent[p];
+        pd.propChangeCount++;
+      }
+    });
+  }
+  </updatePropertiesIfPresent>
+  return v;
+}
+</pkgPropUpd>
+```
+
+2.
+```javascript
+<backboneModelSave>
+function(key, value, options) {
+  <prepareAttributes>
+  var attrs, current;
+  if (_.isObject(key) || key == null) {
+    attrs = key;
+    options = value;
+  } else {
+    attrs = {};
+    attrs[key] = value;
+  }
+  options = options ? _.clone(options) : {};
+  </prepareAttributes>
+  <waitOptionValidation>
+  if (options.wait) {
+    if (!this._validate(attrs, options)) return false;
+    current = _.clone(this.attributes);
+  }
+  </waitOptionValidation>
+  <silentAttributeSetting>
+  var silentOptions = _.extend({}, options, {silent: true});
+  if (attrs && !this.set(attrs, options.wait ? silentOptions : options)) {
+    return false;
+  }
+  </silentAttributeSetting>
+  <configureSuccessError>
+  var model = this;
+  var success = options.success;
+  options.success = function(resp, status, xhr) {
+    var serverAttrs = model.parse(resp, xhr);
+    if (options.wait) {
+      delete options.wait;
+      serverAttrs = _.extend(attrs || {}, serverAttrs);
+    }
+    if (!model.set(serverAttrs, options)) return false;
+    if (success) {
+      success(model, resp);
+    } else {
+      model.trigger('sync', model, resp, options);
+    }
+  };
+  options.error = Backbone.wrapError(options.error, model, options);
+  </configureSuccessError>
+  <syncData>
+  var method = this.isNew() ? 'create' : 'update';
+  var xhr = (this.sync || Backbone.sync).call(this, method, this, options);
+  if (options.wait) this.set(current, silentOptions);
+  </syncData>
+  return xhr;
+}
+</backboneModelSave>
+```
+
+3.
+```javascript
+<isChecked>
+function isChecked(token) {
+  <determineCheckedStatus>
+  var checked = false;
+  if (token.content.indexOf('[x]') === 0 || token.content.indexOf('[X]') === 0) {
+    checked = true;
+  }
+  </determineCheckedStatus>
+  return checked;
+}
+</isChecked>
+```
+
+4.
+```javascript
+<getServerModule>
+function (id) {
+  <retrieveModule>
+  var m = this.getModule('server-'+id, function (server) {
+    self.e.loadServer(server);
+  });
+  </retrieveModule>
+  <pushServerModule>
+  _serverModules.push(m);
+  </pushServerModule>
+  return m;
+}
+</getServerModule>
+```
+
+5.
+```javascript
+<detectClassMembers>
+function detect_class_members_from_array(cls, ast) {
+  <initializeMembersArray>
+  cls["members"] = [];
+  </initializeMembersArray>
+  <iterateAstElements>
+  return _.each(ast["elements"], function(el) {
+    detect_method_or_property(cls, key_value(el), el, el);
+  });
+  </iterateAstElements>
+}
+</detectClassMembers>
+```
+
+6.
+```javascript
+<getChangedBits>
+function getChangedBits({ state: prevState }, { state: nextState }) {
+  <calculateBitMask>
+  let mask = 0
+  for (let id in nextState) {
+    if (prevState[id] !== nextState[id]) {
+      mask |= NAME_BITS[id]
+    }
+  }
+  </calculateBitMask>
+  return mask
+}
+</getChangedBits>
+```
+
+7.
+```javascript
+<indexOfNode>
+function indexOfNode (host, node) {
+  <searchChildIndex>
+  const chs = host.childNodes;
+  const chsLen = chs.length;
+  for (let a = 0; a < chsLen; a++) {
+    if (chs[a] === node) {
+      return a;
+    }
+  }
+  </searchChildIndex>
+  return -1;
+}
+</indexOfNode>
+```
+
+8.
+```javascript
+<fireEvent>
+function(type) {
+  <initialSetup>
+  var typeIncluded = L.isString(type),
+      t = (typeIncluded) ? type : (type && type.type),
+      ce, ret, pre = this._yuievt.config.prefix, ce2,
+      args = (typeIncluded) ? YArray(arguments, 1, true) : arguments;
+  t = (pre) ? _getType(t, pre) : t;
+  this._monitor('fire', t, { 
+      args: args 
+  });
+  </initialSetup>
+  <getAndSetupEvent>
+  ce = this.getEvent(t, true);
+  ce2 = this.getSibling(t, ce);
+  if (ce2 && !ce) {
+      ce = this.publish(t);
+  }
+  </getAndSetupEvent>
+  <fireOrBubbleEvent>
+  if (!ce) {
+      if (this._yuievt.hasTargets) {
+          return this.bubble({ type: t }, args, this);
+      }
+      ret = true;
+  } else {
+      ce.sibling = ce2;
+      ret = ce.fire.apply(ce, args);
+  }
+  </fireOrBubbleEvent>
+  return (this._yuievt.chain) ? this : ret;
+}
+</fireEvent>
+```
+
+9.
+```javascript
+<executeAction>
+function (parsedAction, trigger, condition, action, combineArray) {
+  if (combineArray === void 0) { combineArray = null; }
+  <checkActionDetached>
+  if (parsedAction.detached)
+      return;
+  </checkActionDetached>
+  <setupActionParameters>
+  var parameters = new Array();
+  var target = null;
+  var propertyPath = null;
+  var combine = parsedAction.combine && parsedAction.combine.length > 0;
+  </setupActionParameters>
+  ...
+  <parseAndRegisterActions>
+  // This block is extensive and repetitive parsing and registering actions, thus not detailed for brevity.
+  </parseAndRegisterActions>
+  ...
+  <addChildActions>
+  for (var i = 0; i < parsedAction.children.length; i++)
+      traverse(parsedAction.children[i], trigger, condition, newAction, null);
+  </addChildActions>
+}
+</executeAction>
+```
+
+10.
+```javascript
+<bindEventListeners>
+function bindEventListeners(instanceData) {
+  <setupEventHandlersArray>
+  var i, j, type, eventHandlerName, eventHandlerFunctions, moduleBehaviors = getBehaviors(instanceData);
+  </setupEventHandlersArray>
+  <bindEventsLoop>
+  for (i = 0; i < eventTypes.length; i++) {
+    eventHandlerFunctions = [];
+    type = eventTypes[i];
+    eventHandlerName = 'on' + type;
+  </bindEventsLoop>
+  <bindInstanceEventHandlers>
+  if (instanceData.instance[eventHandlerName]) {
+    eventHandlerFunctions.push($.proxy(instanceData.instance[eventHandlerName], instanceData.instance));
+  }
+  </bindInstanceEventHandlers>
+  <bindBehaviorEventHandlers>
+  for (j = 0; j < moduleBehaviors.length; j++) {
+    if (moduleBehaviors[j][eventHandlerName]) {
+      eventHandlerFunctions.push($.proxy(moduleBehaviors[j][eventHandlerName], moduleBehaviors[j]));
+    }
+  }
+  </bindBehaviorEventHandlers>
+  <finalizeBinding>
+  if (eventHandlerFunctions.length) {
+    instanceData.eventHandlers[type] = bindEventType(instanceData.element, type, eventHandlerFunctions);
+  }
+  </finalizeBinding>
+}
+</bindEventListeners>
+```
+
+These annotations describe the segments that appear to perform specific, identifiable responsibilities within the larger function, indicating adherence to or violation of the Single Responsibility Principle. Some functions show a clear single focus, while others consist of multiple distinct responsibilities.

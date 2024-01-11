@@ -1,0 +1,260 @@
+```javascript
+<apply>
+function apply(updatedModules) {
+    module.hot.apply(APPLY_OPTIONS, function(err, renewedModules) {
+      if (err) return handleError(err);
+      <checkForUpdates>
+      if (!upToDate()) check(); </checkForUpdates>
+      <logModuleUpdates>
+      logResults(updatedModules, renewedModules); </logModuleUpdates>
+    });
+}
+</apply>
+
+<handleRequest>
+function handleRequest(body, methods, req, res, session) {
+  <initializeBatchProcess>
+  var isBatch = Array.isArray(body);
+  session = session || {};
+  session.httpRequest = req;
+  var reqs = isBatch ? body : [body]; </initializeBatchProcess>
+  <resolvePromises>
+  var p = Promise.all(setup(reqs, methods, session)).then(
+   function (result) {
+     <postProcessing>
+     if (methods.__post)
+       result = methods.__post(result, session);
+     </postProcessing>
+     <filterResult>
+     result = result.filter(function(elem){
+       var keep = !!elem.id;
+       return keep;
+     });
+     </filterResult>
+     <handleEmptyResult>
+     if (!result.length) {
+       return null;
+     }
+     <handleNonBatch>
+     if (!isBatch && result.length == 1)
+       return result[0];
+     </handleNonBatch>
+     return result;
+  });
+  </resolvePromises>
+  <sendResponse>
+  if (res) {
+    p = p.then(function(result) {
+      if (result) {
+        var rpcResponse = (methods.__stringify || JSON.stringify)(result);
+        var contentLength = Buffer.byteLength(rpcResponse);
+        res.writeHead(contentLength ? 200 : 204, {
+          'Content-Length': String(contentLength),
+          'Content-Type': 'application/json'
+        });
+        res.end(rpcResponse);
+      } else {
+        res.end();
+      }
+    });
+  }
+  </sendResponse>
+  return p;
+}
+</handleRequest>
+
+<isValidTransition>
+function isValidTransition (link, context) {
+  var isValid = true;
+  if (!(PromisePipe.envTransitions[context._env] && PromisePipe.envTransitions[context._env][link._env])) {
+    if (!isSystemTransition(link._env)) {
+      isValid = false;
+    }
+  }
+  return isValid;
+}
+</isValidTransition>
+
+<setPrimaryCryptoKeyVersion>
+async function setPrimaryCryptoKeyVersion(
+  projectId = 'your-project-id', 
+  keyRingId = 'my-key-ring', 
+  cryptoKeyId = 'my-key', 
+  version = 1234 
+) {
+  <loadKMSClient>
+  const kms = require('@google-cloud/kms');
+  const client = new kms.KeyManagementServiceClient();
+  </loadKMSClient>
+  
+  <setupRequestData>
+  const locationId = 'global';
+  const name = client.cryptoKeyPath(
+    projectId,
+    locationId,
+    keyRingId,
+    cryptoKeyId
+  );
+  const cryptoKeyVersionId = version;
+  const request = {name, cryptoKeyVersionId};
+  </setupRequestData>
+  
+  <updateCryptoKey>
+  const [cryptoKey] = await client.updateCryptoKeyPrimaryVersion(request);
+  </updateCryptoKey>
+  
+  <logCryptoKeyInfo>
+  console.log(`Set ${version} as primary version for crypto key ${cryptoKeyId}.\n`);
+  console.log(`Name: ${cryptoKey.name}:`);
+  console.log(`Created: ${new Date(cryptoKey.createTime)}`);
+  console.log(`Purpose: ${cryptoKey.purpose}`);
+  console.log(`Primary: ${cryptoKey.primary.name}`);
+  console.log(`  State: ${cryptoKey.primary.state}`);
+  console.log(`  Created: ${new Date(cryptoKey.primary.createTime)}`);
+  </logCryptoKeyInfo>
+}
+</setPrimaryCryptoKeyVersion>
+
+<RecursiveDirectiveHelperCompilePost>
+function RecursiveDirectiveHelperCompilePost(scope, element) {
+  <compileContents>
+  if (!compiledContents) {
+    compiledContents = $compile(contents);
+  }
+  
+  compiledContents(scope, function (clone) {
+    element.append(clone);
+  });
+  </compileContents>
+  
+  <applyLinkPost>
+  if (link && link.post) {
+    link.post.apply(null, arguments);
+  }
+  </applyLinkPost>
+}
+</RecursiveDirectiveHelperCompilePost>
+
+<createPlaceHolder>
+function createPlaceHolder($page, type) {
+  var placeHolders = { kittens: 'placekitten.com', bears: 'placebear.com', lorem: 'lorempixel.com',
+      bacon: 'baconmockup.com', murray: 'www.fillmurray.com'};
+  <generateGallery>
+  var gallery = '';
+  for (var i = 0; i < getRandomInt(50,100); i++) {
+    gallery += '<li class="photoClass" style="background:url(http:
+        getRandomInt(200,300) + '/' + getRandomInt(200,300) + ') 50% 50% no-repeat"></li>';
+  }
+  </generateGallery>
+  <updatePageContent>
+  $page.find('.photo-gallery').html(gallery);
+  tt.refreshScroll(); 
+  tt.scrollTo(0,0);   
+  </updatePageContent>
+}
+</createPlaceHolder>
+
+<jsonGetData>
+function jsonGetData(data, keypath, appendData = 0, delimiter = '.') {
+  <traverseToKeyPath>
+  let tmp = data,
+      ignore,
+      r;
+  keypath = keypath || [];
+  typeof keypath == 'string' && (keypath = keypath.split(delimiter));
+
+  if (!(data && keypath.length)) return r;
+  keypath.slice(0, -1).map(val => {
+    if (val && tmp && val in tmp) {
+        tmp = tmp[val];
+    } else {
+        if (appendData) {
+            tmp[val] = {};
+            tmp = tmp[val];
+        } else {
+            ignore = 1;
+        }
+    }
+  });
+  </traverseToKeyPath>
+  <returnFinalKeyValue>
+  if (!ignore && tmp && keypath && keypath.length) {
+    r = tmp[keypath.slice(-1)];
+  }
+  </returnFinalKeyValue>
+
+  return r;
+}
+</jsonGetData>
+
+<assembleMIDI>
+function (notes, settings) {
+  <createNoteEvents>
+  var noteEvents = makeNoteEvents(notes, settings);
+  </createNoteEvents>
+  <createPatchEvent>
+  var setPatch = makePatchEvent(0, settings.melodyPatch);
+  </createPatchEvent>
+  <calculateLengthAndConcatenate>
+  var length = setPatch.length + noteEvents.length + trackFooter.length;
+  return Buffer.concat([trackHeader, padNumber(length, 4), setPatch, noteEvents, trackFooter]);
+  </calculateLengthAndConcatenate>
+}
+</assembleMIDI>
+
+<renderAffix>
+function renderAffix() {
+  <determineHierarchy>
+  var hierarchy = getHierarchy();
+  </determineHierarchy>
+  if (hierarchy && hierarchy.length > 0) {
+    <buildHTMLContent>
+    var html = '<h5 class="title">In This Article</h5>'
+    html += util.formList(hierarchy, ['nav', 'bs-docs-sidenav']);
+    $("#affix").empty().append(html);
+    </buildHTMLContent>
+    <styleAffixIfNeeded>
+    if ($('footer').is(':visible')) {
+      $(".sideaffix").css("bottom", "70px");
+    }
+    </styleAffixIfNeeded>
+    <attachClickEvent>
+    $('#affix a').click(function() {
+      var scrollspy = $('[data-spy="scroll"]').data()['bs.scrollspy'];
+      var target = e.target.hash;
+      if (scrollspy && target) {
+        scrollspy.activate(target);
+      }
+    });
+    </attachClickEvent>
+  }
+}
+</renderAffix>
+
+<normalizeCmd>
+function normalizeCmd(cmd, options) {
+  <handleCommandAsObject>
+  if (cmd.cmd) {
+    options = options || {};
+    _.extend(options, cmd);
+    cmd = options.cmd;
+    delete options.cmd;
+  }
+  </handleCommandAsObject>
+  <ensureCommandStructure>
+  if (typeof(cmd) === 'string') {
+    cmd = {
+      command: cmd
+    };
+  }
+  </ensureCommandStructure>
+  <setupCommandArguments>
+  if (typeof(cmd.args) === 'undefined') {
+    cmd.args = shellParse(cmd.command);
+    cmd.command = cmd.args.shift();
+  }
+  </setupCommandArguments>
+  return cmd;
+}
+</normalizeCmd>
+```

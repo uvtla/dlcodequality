@@ -1,0 +1,317 @@
+<expandBranch>
+function(li,maxLevel) {
+  <expandElement>
+  this.expandElement(li);
+  </expandElement>
+  <subElementProcessing>
+  var sub = Dom.getChildrenBy(li, function(c) {return c.tagName == "UL";})[0].childNodes;
+  for(var j = 0 ; j < sub.length ; j++) {
+     var s = sub[j];
+     if(Dom.hasClass(s,"collapsed") && maxLevel != 0) {
+        this.expandBranch(s,maxLevel-1);
+     }
+  }
+  </subElementProcessing>
+}
+</expandBranch>
+
+<mxTerminalChange>
+function mxTerminalChange(model, cell, terminal, source)
+{
+	this.model = model;
+	this.cell = cell;
+	this.terminal = terminal;
+	this.previous = terminal;
+	this.source = source;
+}
+</mxTerminalChange>
+
+<verifySize>
+function verifySize(correctSize, filepath) {
+    return calculateSize(filepath).then(size => {
+        <sizeCheck>
+        if (size !== correctSize) {
+            throw new Error(`Incorrect file size: expected ${correctSize}, got ${size}`);
+        }
+        </sizeCheck>
+        return true;
+    });
+}
+</verifySize>
+
+<buildSymbolDisplay>
+function buildSymbolDisplay(symbol, writer, enclosingDeclaration, meaning, flags, typeFlags) {
+                var parentSymbol;
+                
+                function appendParentTypeArgumentsAndSymbolName(symbol) {
+                    <appendParentType>
+                    if (parentSymbol) {
+                        
+                        if (flags & 1 ) {
+                            if (symbol.flags & 16777216 ) {
+                                buildDisplayForTypeArgumentsAndDelimiters(getTypeParametersOfClassOrInterface(parentSymbol), symbol.mapper, writer, enclosingDeclaration);
+                            }
+                            else {
+                                buildTypeParameterDisplayFromSymbol(parentSymbol, writer, enclosingDeclaration);
+                            }
+                        }
+                        appendPropertyOrElementAccessForSymbol(symbol, writer);
+                    }
+                    else {
+                        appendSymbolNameOnly(symbol, writer);
+                    }
+                    </appendParentType>
+                    parentSymbol = symbol;
+                }
+                
+                <trackSymbol>
+                writer.trackSymbol(symbol, enclosingDeclaration, meaning);
+                </trackSymbol>
+                
+                function walkSymbol(symbol, meaning) {
+                    <walkSymbolLogic>
+                    if (symbol) {
+                        var accessibleSymbolChain = getAccessibleSymbolChain(symbol, enclosingDeclaration, meaning, !!(flags & 2 ));
+                        if (!accessibleSymbolChain ||
+                            needsQualification(accessibleSymbolChain[0], enclosingDeclaration, accessibleSymbolChain.length === 1 ? meaning : getQualifiedLeftMeaning(meaning))) {
+                            
+                            walkSymbol(getParentOfSymbol(accessibleSymbolChain ? accessibleSymbolChain[0] : symbol), getQualifiedLeftMeaning(meaning));
+                        }
+                        if (accessibleSymbolChain) {
+                            for (var _i = 0, accessibleSymbolChain_1 = accessibleSymbolChain; _i < accessibleSymbolChain_1.length; _i++) {
+                                var accessibleSymbol = accessibleSymbolChain_1[_i];
+                                appendParentTypeArgumentsAndSymbolName(accessibleSymbol);
+                            }
+                        }
+                        else {
+                            
+                            if (!parentSymbol && ts.forEach(symbol.declarations, hasExternalModuleSymbol)) {
+                                return;
+                            }
+                            
+                            if (symbol.flags & 2048  || symbol.flags & 4096 ) {
+                                return;
+                            }
+                            appendParentTypeArgumentsAndSymbolName(symbol);
+                        }
+                    }
+                    </walkSymbolLogic>
+                }
+                
+                var isTypeParameter = symbol.flags & 262144 ;
+                <typeFlagsCheck>
+                var typeFormatFlag = 128  & typeFlags;
+                </typeFlagsCheck>
+                <buildDisplay>
+                if (!isTypeParameter && (enclosingDeclaration || typeFormatFlag)) {
+                    walkSymbol(symbol, meaning);
+                    return;
+                }
+                </buildDisplay>
+                return appendParentTypeArgumentsAndSymbolName(symbol);
+}
+</buildSymbolDisplay>
+
+<_update>
+function _update(s, w, bytes) {
+  
+  <initialization>
+  var t, a, b, c, d, e, f, i;
+  </initialization>
+  
+  <lenCalculation>
+  var len = bytes.length();
+  </lenCalculation>
+  
+  <processChunks>
+  while(len >= 64) {
+    <initializeWorkingVariables>
+    a = s.h0;
+    b = s.h1;
+    c = s.h2;
+    d = s.h3;
+    e = s.h4;
+    </initializeWorkingVariables>
+    
+    <mainLoop1>
+    for(i = 0; i < 16; ++i) {
+      // Processing code omitted for brevity
+    }
+    </mainLoop1>
+    
+    <mainLoop2>
+    for(; i < 20; ++i) {
+      // Processing code omitted for brevity
+    }
+    </mainLoop2>
+    
+    <mainLoop3>
+    for(; i < 32; ++i) {
+      // Processing code omitted for brevity
+    }
+    </mainLoop3>
+    
+    <mainLoop4>
+    for(; i < 40; ++i) {
+      // Processing code omitted for brevity
+    }
+    </mainLoop4>
+    
+    <mainLoop5>
+    for(; i < 60; ++i) {
+      // Processing code omitted for brevity
+    }
+    </mainLoop5>
+    
+    <mainLoop6>
+    for(; i < 80; ++i) {
+      // Processing code omitted for brevity
+    }
+    </mainLoop6>
+    
+
+    <updateStateHash>
+    s.h0 = (s.h0 + a) | 0;
+    s.h1 = (s.h1 + b) | 0;
+    s.h2 = (s.h2 + c) | 0;
+    s.h3 = (s.h3 + d) | 0;
+    s.h4 = (s.h4 + e) | 0;
+    </updateStateHash>
+    
+    len -= 64;
+  }
+  </processChunks>
+}
+</_update>
+
+<removeFromCollectionView>
+function (key, preserveElems) {
+            var subViews = (key && (typeof key === "string" || key.cid)) ? this.get(key) : key;
+            
+            <determineLength>
+            var len;
+            len = subViews ? subViews.length : 0;
+            </determineLength>
+            
+            <removeElems>
+            if (!preserveElems) {
+                this.removeElems(subViews);
+            }
+            </removeElems>
+            
+            <triggerRemoveEvent>
+            if (len) {
+                this.trigger('remove', subViews);
+            }
+            </triggerRemoveEvent>
+            
+            <processRemoval>
+            while (subViews && subViews.length) {
+                this._remove(subViews.shift());
+            }
+            </processRemoval>
+            
+            return this;
+}
+</removeFromCollectionView>
+
+<cloneWithRaws>
+function cloneWithRaws(node) {
+  if (node.nodes) {
+    <prepareNodesForClone>
+    const oldNodes = node.nodes;
+    node.nodes = [];
+    </prepareNodesForClone>
+    
+    <performClone>
+    const clone = node.clone({ raws: node.raws });
+    node.nodes = oldNodes;
+    </performClone>
+    
+    <appendClonedChildren>
+    for (const clonedChild of oldNodes.map(cloneWithRaws)) {
+      clone.append(clonedChild);
+    }
+    </appendClonedChildren>
+    
+    return clone;
+  } else {
+    return node.clone({ raws: node.raws });
+  }
+}
+</cloneWithRaws>
+
+<StreamFormatter>
+function StreamFormatter(loggerManager, options) {
+        if (!(this instanceof StreamFormatter)) {
+            return new StreamFormatter(loggerManager, options);
+        }
+
+        <initializeStream>
+        stream.Readable.call(this, options);
+        this._buffer = [];
+        this._pushable = false;
+        this._ended = false;
+        </initializeStream>
+        
+        <handleMessageRegistration>
+        loggerManager.on("message", this._handleMessage.bind(this));
+        loggerManager.on("end", function () { this._handleMessage("END"); }.bind(this));
+        </handleMessageRegistration>
+}
+</StreamFormatter>
+
+<genAuthorizationHeaderValue>
+function genAuthorizationHeaderValue (options) {
+    <logging>
+    log(options.verbose,"Now generating Authorization header value ...");
+    </logging>
+
+    <headerParams>
+    var authHeaderParams = [];
+    authHeaderParams.push(createEncodedParam("oauth_consumer_key",options.oAuthConsumerKey));
+    authHeaderParams.push(createEncodedParam("oauth_nonce",options.oAuthNonce));
+    authHeaderParams.push(createEncodedParam("oauth_signature",options.oAuthSignature));
+    authHeaderParams.push(createEncodedParam("oauth_signature_method",options.oAuthSignatureMethod));
+    authHeaderParams.push(createEncodedParam("oauth_timestamp",options.oAuthTimestamp));
+    authHeaderParams.push(createEncodedParam("oauth_token",options.oAuthToken));
+    authHeaderParams.push(createEncodedParam("oauth_version",options.oAuthVersion));
+    </headerParams>
+    
+    <assemblyAuthHeaderValue>
+    var authHeaderValue = "OAuth ";
+    for ( var i=0; i<authHeaderParams.length; i++ ) {
+        authHeaderValue += authHeaderParams[i].key+"=\""+authHeaderParams[i].value+"\"";
+        if ( authHeaderParams[i+1] ) {
+            authHeaderValue += ", ";
+        }
+    }
+    </assemblyAuthHeaderValue>
+    
+    <loggingAuthHeaderValue>
+    log(options.verbose,"Authorization header value is: "+authHeaderValue);
+    </loggingAuthHeaderValue>
+
+    return authHeaderValue;
+}
+</genAuthorizationHeaderValue>
+
+<ParseOfflineRequest>
+function ParseOfflineRequest (requestType, options) {
+	if (!(this instanceof ParseOfflineRequest)) {
+		return new ParseOfflineRequest(requestType, options);
+	}
+
+	<initializeProperties>
+	this.requestType = requestType;
+	this.options = options;
+	</initializeProperties>
+	
+	<setRequestMethod>
+	this.requestMethod = this.httpGETPUTorPOST(requestType);
+	</setRequestMethod>
+	this.params = '';
+
+	return this;
+}
+</ParseOfflineRequest>

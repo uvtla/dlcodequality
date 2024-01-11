@@ -1,0 +1,253 @@
+```javascript
+<flip>
+function flip(obj) {
+  var result = {};
+  var keys = Object.keys(obj);
+  var len = keys.length;
+  for (var i = 0; i < len; i++) {
+    var key = keys[i];
+    result[obj[key]] = key;
+  }
+  return result;
+}
+</flip>
+
+<unnamed-uploadImage>
+function ($placeholder, file, that) {
+  $.ajax({
+    type: "post",
+    url: that.options.imagesUploadScript,
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = that.updateProgressBar;
+      return xhr;
+    },
+    cache: false,
+    contentType: false,
+    complete: function (jqxhr) {
+      that.uploadCompleted(jqxhr, $placeholder);
+    },
+    processData: false,
+    data: that.options.formatData(file)
+  });
+}
+</unnamed-uploadImage>
+
+<unnamed-generateHash>
+function(cb_) {
+    common.log.out('Hash generation: ' + base_name + '.tar.gz.sha1sum');
+    var sha1sum = require('child_process').spawn('sha1sum', 
+      [base_name + '.tar.gz'], {
+      cwd: out_path
+    });
+    var out = fs.createWriteStream(path.join(out_path, base_name + '.tar.gz.sha1sum'));
+    sha1sum.stdout.on('data', function(data) {
+      out.write(data);
+    });
+    sha1sum.stderr.on('data', function(data) {
+      console.log('stderr: ' + data);
+    });
+    sha1sum.on('close', function(code) {
+      out.end();
+      if(code !== 0) {
+        return cb_(common.err('`sha1sum` failed with code: ' + code,
+                              'auto_updater:failed_sha1sum'));
+      }
+      return cb_();
+    });
+}
+</unnamed-generateHash>
+
+<unnamed-removeIf>
+function ( obj, fn ) {
+		if ( typeof fn !== "function" ) {
+			throw new Error( label.error.invalidArguments );
+		}
+
+		var remove = [];
+
+		array.each( obj, function ( i ) {
+			if ( fn( i ) !== false ) {
+				remove.push( i );
+			}
+			else {
+				return false;
+			}
+		});
+
+		array.each( remove, function ( i ) {
+			array.remove( obj, array.index( obj, i) );
+		});
+
+		return obj;
+}
+</unnamed-removeIf>
+
+<oneBroker>
+function oneBroker(api_key) {
+  var self = this;
+  var config = {
+    url: 'https:
+    version: 'v1',
+    api_key: api_key,
+    timeoutMS: 10000
+  };
+  
+  function accountInfo(callback) {
+    var path  = '/' + config.version + '/account/info.php';
+    var params = {};
+    return apiMethod(path, params, callback);
+  }
+  function accountAddress(callback) {
+    var path  = '/' + config.version + '/account/bitcoindepositaddress.php';
+    var params = {};
+    return apiMethod(path, params, callback);
+  }
+
+  function positionList(callback) {
+    var path  = '/' + config.version + '/position/list_open.php';
+    var params = {};
+    return apiMethod(path, params, callback);
+  }
+  function positionEdit(position_id, callback) {
+    var path  = '/' + config.version + '/position/edit.php';
+    var params = { position_id: position_id };
+    return apiMethod(path, params, callback);
+  }
+  
+  function marketList(callback) {
+    var path  = '/' + config.version + '/market/list.php';
+    var params = {};
+    return apiMethod(path, params, callback);
+  }
+  function marketDetail(symbol, callback) {
+    var path  = '/' + config.version + '/market/detail.php';
+    var params = "symbol="+symbol;
+    return apiMethod(path, params, callback);
+  }
+  function marketQuotes(symbols, callback) {
+    var path  = '/' + config.version + '/market/quotes.php';
+    var params = "symbols="+symbols;
+    return apiMethod(path, params, callback);
+  }
+  
+  function apiMethod(path, params, callback) {
+    var url    = config.url + path + '?token=' + config.api_key;
+    if(params) url = url+= '&'+params;
+    return apiRequest(url, callback);
+  }
+  
+  function apiRequest(url, callback) {
+    var options = {
+      url: url,
+      method: 'GET',
+      timeout: config.timeoutMS,
+      maxAttempts: 3,
+      retryDelay: 2000,  
+      retryStrategy: request.RetryStrategies.HTTPOrNetworkError 
+    };
+
+    var req = request(options, function(error, response, body) {
+      if(typeof callback === 'function') {
+        var data;
+        if(error) {
+          callback.call(self, new Error('Error in server response: ' + JSON.stringify(error)), null);
+          return;
+        }
+        try {
+          data = JSON.parse(body);
+          if(data.error != false){
+            callback.call(self, new Error('API error.'), null);
+          } else {
+            callback.call(self,null,data.response);
+          }
+        }
+        catch(e) {
+          callback.call(self, new Error('Could unknown server response occured.'), null);
+          return;
+        }
+      }
+    });
+
+    return req;
+  }
+
+  self.accountInfo = accountInfo;
+  self.accountAddress = accountAddress;
+  self.positionList = positionList;
+  self.positionEdit = positionEdit;
+  self.marketList = marketList;
+  self.marketDetail = marketDetail;
+  self.marketQuotes = marketQuotes;
+}
+</oneBroker>
+
+<unnamed-commandExecuter>
+function(command, arg) {
+  if (!arg) {
+    arg = 'default';
+  }
+
+  if (!commands[command]) {
+    grunt.fail.fatal('Command [' + command + '] not found.');
+  }
+
+  if (typeof (commands[command]) !== 'function') {
+    if (!commands[command][arg]) {
+      grunt.fail.fatal('Argument [' + arg + '] for [' + command
+          + '] not found.');
+    }
+  }
+
+  var func = (arg) ? commands[command][arg] : commands[command];
+  if (!func) {
+    func = commands[command]; 
+  }
+
+  var options = this.options();
+  var docker = (options.docker) ? new Docker(options.docker) : null;
+  var done = this.async();
+
+  var callback = function(e) {
+    if (e) {
+      grunt.fail.warn(e);
+    }
+    done();
+  };
+
+  func.apply(this, [ grunt, docker, options, callback, arg ]);
+}
+</unnamed-commandExecuter>
+
+<normalize>
+function normalize(arr, base) {
+  for (let i = 0; i < arr.length; i++) {
+    let singlet = arr[i];
+    if (singlet >= base) {
+      arr[i] = singlet % base;
+      addNum(arr, Math.floor(singlet / base), i + 1);
+    }
+  }
+}
+</normalize>
+
+<watcherCSS>
+function watcherCSS() {
+  return gulp.watch('src/css/*.css', gulp.series(coreCSS, coreMinCSS, concatCSS, concatMinCSS, clean));
+}
+</watcherCSS>
+
+<toDate>
+function toDate(date) {
+  date = new Date(date)
+  return months[date.getMonth()] + ' ' + date.getFullYear()
+}
+</toDate>
+
+<StackTrace$$get>
+function StackTrace$$get(opts) {
+  var err = _generateError();
+  return _isShapedLikeParsableError(err) ? this.fromError(err, opts) : this.generateArtificially(opts);
+}
+</StackTrace$$get>
+```
