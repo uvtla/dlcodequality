@@ -1,0 +1,302 @@
+```javascript
+<convertToTokens>
+function convertToTokens( contents, filterParams ) {
+  <createTokens>
+  var tokens = marked.lexer( contents );
+  </createTokens>
+
+  <returnTokensIfNoFilter>
+  if ( ! filterParams ) {
+    return tokens;
+  }
+  </returnTokensIfNoFilter>
+
+  <isTokenValid>
+  function isTokenValid( token ) {
+    <checkTokenParam>
+    function checkTokenParam( valid, targetValue, key ) {
+      if ( ! valid ) {
+        return false;
+      }
+
+      if ( typeof targetValue === 'undefined' ) {
+        return true;
+      }
+
+      var tokenPropToTest = token[ key ];
+      <testTokenValue>
+      if ( isRegExp( targetValue ) ) {
+        return targetValue.test( tokenPropToTest );
+      }
+      </testTokenValue>
+
+      return tokenPropToTest === targetValue;
+    }
+    </checkTokenParam>
+
+    return reduce( filterParams, checkTokenParam, true );
+  }
+  </isTokenValid>
+
+  <filterTokens>
+  return tokens.filter( isTokenValid );
+  </filterTokens>
+}
+</convertToTokens>
+
+<resetImage>
+function resetImage() {
+  <checkCurrentScale>
+  if (currentScale == 1) return;
+  </checkCurrentScale>
+
+  <initializeVariables>
+  var node = zoomNode, left, top, trans, w, h, pos, start, end, parent, flowTag;
+  </initializeVariables>
+
+  <calculateTransformations>
+  trans = getComputedTranslate(node);
+  parent = node.parentNode;
+  w = node.clientWidth * trans.scaleX;
+  h = node.clientHeight * trans.scaleX;
+  pos = getPosition(node);
+  start = {
+      left: (1 - trans.scaleX) * trans.offsetX + pos.left + trans.translateX,
+      top: (1 - trans.scaleX) * trans.offsetY + pos.top + trans.translateY
+  };
+  end = {
+      left: start.left + w,
+      top: start.top + h
+  };
+  </calculateTransformations>
+
+  <adjustPositionBasedOnOverflow>
+  left = start.left;
+  top = start.top;
+  flowTag = overFlow(parent, {start: start, end: end});
+  switch (flowTag) {
+      case 1: ... // omitted for brevity
+  }
+  if (w < parent.clientWidth) {
+      left = pos.left - (trans.scaleX - 1) * node.clientWidth / 2;
+  }
+  if (h < parent.clientHeight) {
+      top = pos.top - (trans.scaleX - 1) * node.clientHeight / 2;
+  }
+  </adjustPositionBasedOnOverflow>
+
+  <applyTransformation>
+  node.style.webkitTransitionDuration = '100ms';
+  node.style.webkitTransform = generateTranslate(trans.translateX + left - start.left, trans.translateY + top - start.top, 0, trans.scaleX);
+  </applyTransformation>
+}
+</resetImage>
+
+<calculateDirection>
+function(course) {
+  <initializeVariables>
+  var s = this['SCALE'];
+  var k = DIRECTIONS.length;
+  </initializeVariables>
+
+  <computeDirection>
+  var dir = Math.round(course / s * k);
+  </computeDirection>
+
+  <returnDirection>
+  return DIRECTIONS[mod(dir, k)];
+  </returnDirection>
+}
+</calculateDirection>
+
+<makeCallback>
+function makeCallback(callback) {
+  <checkCallbackType>
+  if (_.isFunction(callback)) {
+    return callback;
+  }
+  </checkCallbackType>
+
+  <constructCallback>
+  var result = function() { return callback; };
+  result._callback = callback;
+  </constructCallback>
+
+  <returnConstructedCallback>
+  return result;
+  </returnConstructedCallback>
+}
+</makeCallback>
+
+<responseCreditConsume>
+function responseCreditConsume(status, credits, options){
+  
+  <initializeOptions>
+  options = options || {};
+  </initializeOptions>
+
+  <handleFailStatus>
+  if(status === 'fail'){
+    return {
+        status: status,
+        errorMessage: options.errorMessage || '',
+        credits: credits
+    };
+  }
+  </handleFailStatus>
+  
+  <handleOkStatus>
+  else if(status === 'ok'){
+    return {
+        status: status,
+        errorMessage: options.errorMessage || '',
+        bizId: options.bizId,
+        credits: credits
+    };
+  }
+  </handleOkStatus>
+  
+  <throwErrorForInvalidStatus>
+  else{
+    throw new Error('status 不存在，可选值为 ok 或 fail');
+  }
+  </throwErrorForInvalidStatus>
+}
+</responseCreditConsume>
+
+<backwardPropagation>
+function(y) {
+  <initializeVariables>
+  var N = this.layers.length;
+  </initializeVariables>
+  
+  <computeInitialLoss>
+  var loss = this.layers[N-1].backward(y); 
+  </computeInitialLoss>
+
+  <propagateBackward>
+  for(var i=N-2;i>=0;i--) { 
+    this.layers[i].backward();
+  }
+  </propagateBackward>
+
+  <returnLoss>
+  return loss;
+  </returnLoss>
+}
+</backwardPropagation>
+
+<updateValueAndFireEvent>
+function(value, sendUpdatedEvt) {
+  
+  <updateElementValue>
+  this.hiddenEl.value = value || "";
+  this.el.value  =  value || "";
+  </updateElementValue>
+
+  <updateClassFromState>
+  this.setClassFromState();
+  </updateClassFromState>
+
+  <fireUpdateEventIfNecessary>
+  if(sendUpdatedEvt !== false) {
+    this.fireUpdatedEvt();
+  }
+  </fireUpdateEventIfNecessary>
+
+}
+</updateValueAndFireEvent>
+
+<combineUsingBinaryFunction>
+function nary(binary, args) {
+  <initializeAccumulator>
+  var len = args.length;
+  var result = args[0];
+  </initializeAccumulator>
+  
+  <applyBinaryFunction>
+  for (var i = 1; i < len; ++i)
+    result = binary(result, args[i]);
+  </applyBinaryFunction>
+
+  <returnResult>
+  return result;
+  </returnResult>
+}
+</combineUsingBinaryFunction>
+
+<removeClientModelDocWithDialogConfirmation>
+function remove(form, ev) {
+  <displayDialogConfirmation>
+  var confirm = $mdDialog.confirm()
+    .title('Delete clientModelDoc ' + vm.displayName + '?')
+    .content('Do you really want to delete clientModelDoc ' + vm.displayName + '?')
+    .ariaLabel('Delete clientModelDoc')
+    .ok('Delete clientModelDoc')
+    .cancel('Cancel')
+    .targetEvent(ev);
+
+  $mdDialog.show(confirm)
+    .then(performRemove);
+  </displayDialogConfirmation>
+
+  <performRemove>
+  function performRemove() {
+    ClientModelDocService.remove(vm.clientModelDoc)
+      .then(deleteClientModelDocSuccess)
+      .catch(deleteClientModelDocCatch);
+
+    function deleteClientModelDocSuccess() {
+      Toast.show({type: 'success', text: 'ClientModelDoc ' + vm.displayName + ' deleted'});
+      vm.showList();
+    }
+
+    function deleteClientModelDocCatch(err) {
+      Toast.show({
+        type: 'warn',
+        text: 'Error while deleting clientModelDoc ' + vm.displayName,
+        link: {state: $state.$current, params: $stateParams}
+      });
+
+      if (form && err) {
+        form.setResponseErrors(err, vm.errors);
+      }
+    }
+  }
+  </performRemove>
+}
+</removeClientModelDocWithDialogConfirmation>
+
+<mine>
+function mine(data, target, min, max) {
+  <initializeNonce>
+  let nonce = min;
+  </initializeNonce>
+
+  <prepareInitialData>
+  data.writeUInt32LE(nonce, 76, true);
+  </prepareInitialData>
+
+  <miningLoop>
+  while (nonce <= max) {
+    <hashAndCompare>
+    if (rcmp(calHash(data), target) <= 0)
+      return nonce;
+    </hashAndCompare>
+
+    <incrementNonce>
+    nonce++;
+    </incrementNonce>
+
+    <updateDataWithNewNonce>
+    data.writeUInt32LE(nonce, 76, true);
+    </updateDataWithNewNonce>
+  }
+  </miningLoop>
+
+  <returnInvalidNonce>
+  return -1;
+  </returnInvalidNonce>
+}
+</mine>
+```

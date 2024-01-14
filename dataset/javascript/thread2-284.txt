@@ -1,0 +1,340 @@
+<findVariables>
+function findVariables(string, syntax, options) {
+  <preprocessing>
+  string = ignoreBlock.removeIgnoredBlocks(string);
+  </preprocessing>
+  <parserDetermination>
+  var parser = getParserForSyntax(syntax, options);
+  if (parser) {
+    return parser.findVariables(string);
+  }
+  </parserDetermination>
+  return [];
+}
+</findVariables>
+
+<coerceElementMatchingCallback>
+function coerceElementMatchingCallback(value) {
+  
+  <stringCheck>
+  if (typeof value === 'string') {
+    return element => element.element === value;
+  }
+  </stringCheck>
+
+  
+  <constructorCheck>
+  if (value.constructor && value.extend) {
+    return element => element instanceof value;
+  }
+  </constructorCheck>
+
+  return value;
+}
+</coerceElementMatchingCallback>
+
+<getHeaders>
+function getHeaders(id, uploadId) {
+        <headerInitialization>
+        var headers = {},
+        </headerInitialization>
+            <promiseSetup>
+            promise = new qq.Promise(),
+            </promiseSetup>
+            <bucketHostRetrieval>
+            bucket = options.getBucket(id),
+            host = options.getHost(id),
+            </bucketHostRetrieval>
+            <signatureConstruction>
+            signatureConstructor = getSignatureAjaxRequester.constructStringToSign
+                (getSignatureAjaxRequester.REQUEST_TYPE.MULTIPART_ABORT, bucket, host, options.getKey(id))
+                .withUploadId(uploadId);
+            </signatureConstruction>
+
+        
+        <signatureRequest>
+        getSignatureAjaxRequester.getSignature(id, {signatureConstructor: signatureConstructor}).then(promise.success, promise.failure);
+        </signatureRequest>
+
+        return promise;
+    }
+</getHeaders>
+
+<parseObject>
+function parseObject( str ) {
+	<preparsedObject>
+	var obj = parseJSON( str );
+	if ( obj instanceof Error ) {
+		return new TypeError( 'invalid value. Unable to parse string as a JSON object. Value: `' + str + '`. Error: `' + obj.message + '`.' );
+	}
+	</preparsedObject>
+	return obj;
+}
+</parseObject>
+
+<anonymousFunction1>
+function (cb) {
+      <setup>
+      var cmd = params.main.cmd;
+      var cmdStr = runner.cmdStr;
+      var opts = _.extend({ tracker: self._tracker }, params.main.opts);
+      var taskEnvs = clone(envsList);
+      var queue = opts.queue;
+
+      log.debug("envs", "Starting with queue size: " + chalk.magenta(queue || "unlimited"));
+      </setup>
+      <mapping>
+      async.mapLimit(taskEnvs, queue || Infinity, function (taskEnv, envCb) {
+        
+        
+        <taskConfiguration>
+        var taskShOpts = _.merge(clone(shOpts), { env: taskEnv });
+        var taskOpts = _.extend({ taskEnv: taskEnv }, opts);
+        </taskConfiguration>
+
+        <logging>
+        log.info("envs", "Starting " + cmdStr(cmd, taskOpts));
+        </logging>
+        <taskExecution>
+        runner.retry(cmd, taskShOpts, taskOpts, self._errOrBail(taskOpts, envCb));
+        </taskExecution>
+      }, cb);
+      </mapping>
+    }
+</anonymousFunction1>
+
+<anonymousFunction2>
+function(){
+			<setup>
+			var plugin = $(this.element).data("ui-" + this.options.pluginName) || $(this.element).data(this.options.pluginName),
+				opts = this.options,
+				actualOpts = plugin.options,
+				availOptList = opts.optionList,
+				lines = [],
+				header = opts.header || '$("#selector").' + opts.pluginName + "({",
+				footer = "});",
+				i;
+			
+			if(this.options.hideDefaults){
+				<hideDefaults>
+				availOptList = [];
+				for(i=0; i<this.options.optionList.length; i++){
+					var o = this.options.optionList[i],
+						n = o.name,
+						defVal = o.value;
+					if($.isArray(defVal)){
+						defVal = $.map(defVal, function(e){ return e.selected ? e.value : null;})[0];
+					}
+					if( actualOpts[n] !== defVal ){
+						availOptList.push(o);
+					}
+				}
+				</hideDefaults>
+			}
+			</setup>
+
+			<buildConfigLines>
+			lines.push(header);
+			for(i=0; i<availOptList.length; i++){
+				var o = availOptList[i],
+					actualVal = actualOpts[o.name],
+					line = "    " + o.name + ": ";
+				if(typeof actualVal === "string"){
+					line += '"' + actualVal + '"';
+				}else if($.isPlainObject(actualVal)){
+					line += JSON.stringify(actualVal);
+				}else{
+					line += "" + actualVal;
+				}
+				if( i < (availOptList.length - 1) ){
+					line += ",";
+				}
+				if( opts.showComments ){
+					line += " // " + o.comment;
+				}
+				lines.push(line);
+			}
+			lines.push(footer);
+			</buildConfigLines>
+
+			<renderConfig>
+			$(opts.sourceTarget).addClass("ui-configurator-source").text(lines.join("\n"));
+			this._trigger("render");
+			</renderConfig>
+		}
+</anonymousFunction2>
+
+<ending>
+function ending (count, one, some, many) {
+    <countCalculation>
+    if (count % 10 == 1 && count % 100 != 11) {
+      return one;
+    }
+
+    if (count % 10 >= 2 && count % 10 <= 4 &&
+      (count % 100 < 12 || count % 100 > 14)) {
+        return some;
+    }
+    </countCalculation>
+
+    return many;
+}
+</ending>
+
+<anonymousFunction3>
+function( targets, options, callback ) {
+	<optionCallbackAdaptation>
+	if ( typeof options === 'function' ) {
+		callback = options;
+		options = null;
+	}
+	if ( !Array.isArray( targets ) ) {
+		targets = [targets];
+	}
+	</optionCallbackAdaptation>
+	<defaultOptions>
+	options = options || {};
+	addExtraOptions( [ 'force' ], options );
+	</defaultOptions>
+	<svnCommandExecution>
+	executeSvn( [ 'unlock' ].concat( targets ), options, callback );
+	</svnCommandExecution>
+}
+</anonymousFunction3>
+
+<Store>
+function Store (options) {
+  <optionsDefaulting>
+  if ( options === void 0 ) options = {};
+  </optionsDefaulting>
+
+  <environmentVerification>
+  assert(Vue, "must call Vue.use(Vuex) before creating a store instance.");
+  assert(typeof Promise !== 'undefined', "vuex requires a Promise polyfill in this browser.");
+  </environmentVerification>
+
+  <stateInitialization>
+  var state = options.state; if ( state === void 0 ) state = {};
+  </stateInitialization>
+  <pluginInitialization>
+  var plugins = options.plugins; if ( plugins === void 0 ) plugins = [];
+  </pluginInitialization>
+  <strictModeInitialized>
+  var strict = options.strict; if ( strict === void 0 ) strict = false;
+  </strictModeInitialized>
+
+  
+  <propertyInitialization>
+  this._committing = false;
+  this._actions = Object.create(null);
+  this._mutations = Object.create(null);
+  this._wrappedGetters = Object.create(null);
+  this._modules = new ModuleCollection(options);
+  this._modulesNamespaceMap = Object.create(null);
+  this._subscribers = [];
+  this._watcherVM = new Vue();
+  </propertyInitialization>
+
+  
+  <boundFunctionSetup>
+  var store = this;
+  var ref = this;
+  var dispatch = ref.dispatch;
+  var commit = ref.commit;
+  this.dispatch = function boundDispatch (type, payload) {
+    return dispatch.call(store, type, payload)
+  };
+  this.commit = function boundCommit (type, payload, options) {
+    return commit.call(store, type, payload, options)
+  };
+  </boundFunctionSetup>
+
+  
+  <storeConfiguration>
+  this.strict = strict;
+  </storeConfiguration>
+
+  
+  
+  <moduleInstallation>
+  installModule(this, state, [], this._modules.root);
+  </moduleInstallation>
+
+  
+  
+  <storeVMReset>
+  resetStoreVM(this, state);
+  </storeVMReset>
+
+  
+  <pluginApplication>
+  plugins.concat(devtoolPlugin).forEach(function (plugin) { return plugin(this$1); });
+  </pluginApplication>
+}
+</Store>
+
+<buildNav>
+function buildNav(members) {
+    <navigationInitialization>
+    var nav = [];
+    </navigationInitialization>
+
+    <processNamespaces>
+    if (members.namespaces.length) {
+        _.each(members.namespaces, function (v) {
+            nav.push({
+                type: 'namespace',
+                longname: v.longname,
+                name: v.name,
+                members: find({
+                    kind: 'member',
+                    memberof: v.longname
+                }),
+                methods: find({
+                    kind: 'function',
+                    memberof: v.longname
+                }),
+                typedefs: find({
+                    kind: 'typedef',
+                    memberof: v.longname
+                }),
+                events: find({
+                    kind: 'event',
+                    memberof: v.longname
+                })
+            });
+        });
+    }
+    </processNamespaces>
+
+    <processClasses>
+    if (members.classes.length) {
+        _.each(members.classes, function (v) {
+            nav.push({
+                type: 'class',
+                longname: v.longname,
+                name: v.name,
+                members: find({
+                    kind: 'member',
+                    memberof: v.longname
+                }),
+                methods: find({
+                    kind: 'function',
+                    memberof: v.longname
+                }),
+                typedefs: find({
+                    kind: 'typedef',
+                    memberof: v.longname
+                }),
+                events: find({
+                    kind: 'event',
+                    memberof: v.longname
+                })
+            });
+        });
+    }
+    </processClasses>
+
+    return nav;
+}
+</buildNav>

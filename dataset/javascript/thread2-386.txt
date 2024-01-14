@@ -1,0 +1,279 @@
+Here are the annotations for the provided JavaScript functions:
+
+1. 
+
+```
+function (pageNum) {
+  var textPath = util.template(config.template.html, { page: pageNum });
+  return config.url + textPath + config.queryString;
+}
+```
+This function is compliant with SRP. It constructs a URL using the provided page number and a template configuration.
+
+
+2.
+
+```
+<getCallbackInfo>
+function getCallbackInfo(node) {
+  <checkNodeCallbackAndLexicalThis>
+  const retv = { isCallback: false, isLexicalThis: false };
+  let currentNode = node;
+  let parent = node.parent;
+
+  while (currentNode) {
+    switch (parent.type) {
+      case "LogicalExpression":
+      case "ConditionalExpression":
+        break;
+      case "MemberExpression":
+        if (parent.object === currentNode &&
+          !parent.property.computed &&
+          parent.property.type === "Identifier" &&
+          parent.property.name === "bind" &&
+          parent.parent.type === "CallExpression" &&
+          parent.parent.callee === parent
+        ) {
+          retv.isLexicalThis = (
+            parent.parent.arguments.length === 1 &&
+            parent.parent.arguments[0].type === "ThisExpression"
+          );
+          parent = parent.parent;
+        } else {
+          return retv;
+        }
+        break;
+      case "CallExpression":
+      case "NewExpression":
+        if (parent.callee !== currentNode) {
+          retv.isCallback = true;
+        }
+        return retv;
+      default:
+        return retv;
+    }
+    currentNode = parent;
+    parent = parent.parent;
+  }
+  throw new Error("unreachable");
+</checkNodeCallbackAndLexicalThis>
+}
+</getCallbackInfo>
+```
+The function getCallbackInfo is non-compliant with SRP because it has multiple responsibilities such as checking for callbacks, checking for lexical `this` usage in the context of bind, and iterating through node tree structures.
+
+3.
+
+```
+<serialize>
+function serialize(formEl, options, nodeCallback) {
+  <setupSerializationEnvironment>
+  var parent = makeElement(formEl),
+      opts = getOptions(options),
+      elements = getElements(parent, opts.skipDisabled, opts.skipReadOnly),
+      result = {},
+      el, key, textKey;
+  </setupSerializationEnvironment>
+  <processFormElements>
+  for (var i = 0, l = elements.length; i < l; i++) {
+      el = elements[i];
+      entry = null;
+      if (textKey = el.getAttribute(_defaults.attributeText)) {
+          var textEntry = getTextEntryFromInput(el, textKey);
+          if (isValidValue(textEntry.value, opts.skipFalsy))
+              saveEntryToResult(result, textEntry, opts.delimiter);
+      }
+      if (!isInput(el))
+          continue;
+      if (!(key = (el.name || opts.useIdOnEmptyName && el.id)))
+          continue;
+      var entry = getEntryFromInput(el, key);
+      if (nodeCallback)
+          entry = nodeCallback(el, entry);
+      if (entry && isValidValue(entry.value, opts.skipFalsy))
+          saveEntryToResult(result, entry, opts.delimiter);
+  }
+  </processFormElements>
+  return result;
+}
+</serialize>
+```
+The serialize function is non-compliant with SRP. The function is responsible for both setting up the serialization environment and processing form elements, which includes conditional callbacks and value checks.
+
+4.
+
+```
+function fidjWeek(date) {
+  <calculateWeekNumber>
+  var thursday = fidjDayOfSameWeek(date, 4);
+  var fourthJanuary = new Date(thursday.getFullYear(), 0, 4, 0, 0, 0, 0);
+  var thursdayOfWeek1 = fidjDayOfSameWeek(fourthJanuary, 4);
+  var nbDays = Math.round((thursday.getTime() - thursdayOfWeek1.getTime()) / 86400000);
+  </calculateWeekNumber>
+  return (1 + Math.floor(nbDays / 7));
+}
+```
+This function is compliant with SRP. It calculates and returns the week number of a given date.
+
+5.
+
+```
+<injectManifest>
+async function injectManifest(config) {
+  <handleDeprecationsAndConfigValidation>
+  const deprecationWarnings = checkForDeprecatedOptions(config);
+  const options = validate(config, injectManifestSchema);
+  if (path.normalize(config.swSrc) === path.normalize(config.swDest)) {
+    throw new Error(errors['same-src-and-dest']);
+  }
+  </handleDeprecationsAndConfigValidation>
+
+  <prepareRegexAndEntries>
+  const globalRegexp = new RegExp(options.injectionPointRegexp, 'g');
+  const {count, size, manifestEntries, warnings} = await getFileManifestEntries(options);
+  </prepareRegexAndEntries>
+
+  <readAndInjectServiceWorker>
+  let swFileContents;
+  try {
+    swFileContents = await fse.readFile(config.swSrc, 'utf8');
+  } catch (error) {
+    throw new Error(`${errors['invalid-sw-src']} ${error.message}`);
+  }
+  const injectionResults = swFileContents.match(globalRegexp);
+  assert(injectionResults, errors['injection-point-not-found'] +
+    (options.injectionPointRegexp === defaults.injectionPointRegexp ? 'workbox.precaching.precacheAndRoute([])' : options.injectionPointRegexp));
+  assert(injectionResults.length === 1, errors['multiple-injection-points'] + ` ${options.injectionPointRegexp}`);
+  const entriesString = JSON.stringify(manifestEntries, null, 2);
+  swFileContents = swFileContents.replace(globalRegexp, `$1${entriesString}$2`);
+  </readAndInjectServiceWorker>
+
+  <writeServiceWorkerFile>
+  try {
+    await fse.mkdirp(path.dirname(options.swDest));
+  } catch (error) {
+    throw new Error(errors['unable-to-make-injection-directory'] + ` '${error.message}'`);
+  }
+  await fse.writeFile(config.swDest, swFileContents);
+  </writeServiceWorkerFile>
+
+  <aggregateWarnings>
+  warnings.push(...deprecationWarnings);
+  </aggregateWarnings>
+
+  return {count, size, warnings};
+}
+</injectManifest>
+```
+The function injectManifest is non-compliant with SRP. It has several responsibilities which include handling deprecations and config validation, preparing regex and entries for the service worker, reading and injecting the service worker content, writing the service worker file, and aggregating warnings.
+
+6.
+
+```
+function () {
+  <initializePropertiesArray>
+  this.properties = []
+  for (var i = 0, j = arguments.length; i < j; i ++)
+    this.properties.push(arguments[i])
+  </initializePropertiesArray>
+}
+```
+This anonymous function is compliant with SRP as it only initializes an array with the provided arguments.
+
+7.
+
+```
+function(identifier, parent) {
+  <createNamespace>
+  var parts = identifier.split('.');
+  var i = 0;
+  parent = parent || window;
+  while (i < parts.length) {
+      parent[parts[i]] = parent[parts[i]] || {};
+      parent = parent[parts[i]];
+      i++;
+  }
+  </createNamespace>
+  return parent;
+}
+```
+This function appears to be compliant with SRP as well, as its sole responsibility is to create and return a nested namespace based on the identifier and optional parent object.
+
+8.
+
+```
+<_cleanUpTOCChildren>
+function _cleanUpTOCChildren(node) {
+  <removeInvalidChildren>
+  if (!Array.isArray(node.children)) {
+    return node;
+  }
+  if (_isExampleOrParameterLink(node)) {
+    return null;
+  }
+  const filteredChildren = node.children.reduce((accu, nd) => {
+    accu.push(_cleanUpTOCChildren(nd));
+    return accu;
+  }, []).filter(n => n);
+  if (!filteredChildren.length) {
+    return null;
+  }
+  </removeInvalidChildren>
+  
+  <returnCleanedNode>
+  return {
+    ...node,
+    children: filteredChildren
+  };
+  </returnCleanedNode>
+}
+</_cleanUpTOCChildren>
+```
+The `_cleanUpTOCChildren` function is non-compliant with SRP. It has separate responsibilities of removing invalid children nodes based on specific criteria and returning the cleaned node structure.
+
+9.
+
+```
+function ChainNode(parent, key, value) {
+  <chainNodeInitialization>
+  this._parent = parent;
+  this._key = key;
+  this._watching = value === undefined;
+  this._chains = undefined;
+  this._object = undefined;
+  this.count = 0;
+  this._value = value;
+  this._paths = {};
+  </chainNodeInitialization>
+
+  <setupWatching>
+  if (this._watching) {
+    this._object = parent.value();
+    if (this._object) {
+      addChainWatcher(this._object, this._key, this);
+    }
+  }
+  </setupWatching>
+}
+```
+The ChainNode function constructor is non-compliant with SRP, as it initializes the node and also conditionally sets up watching based on the value passed.
+
+10.
+
+```
+function (opts) {
+  <findLayerByName>
+  var layerName = opts.name,
+      layer = null
+  this.children.forEach(function (item) {
+      if (item instanceof TMXLayer && item.layerName == layerName) {
+          layer = item
+      }
+  })
+  </findLayerByName>
+  if (layer !== null) {
+      return layer
+  }
+}
+```
+This function seems compliant with SRP as its single responsibility is to find and return a layer by its name.

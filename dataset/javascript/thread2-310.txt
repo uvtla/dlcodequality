@@ -1,0 +1,648 @@
+1.
+
+<createECMA5Shims>
+function createECMA5Shims() {
+  
+  <Function.prototype.bind>
+  if (!Function.prototype.bind) {
+    var slice = Array.prototype.slice;
+    Function.prototype.bind = function bind(that) { 
+      var target = this;
+      if (typeof target.apply !== "function"
+      || typeof target.call !== "function")
+      return new TypeError();
+      var args = slice.call(arguments);
+
+      function bound() {
+
+        if (this instanceof bound) {
+
+          var self = Object.create(target.prototype);
+          target.apply(self, args.concat(slice.call(arguments)));
+          return self;
+        } else {
+          return target.call.apply(target, args.concat(slice
+            .call(arguments)));
+        }
+
+      }
+      bound.length = (typeof target === "function" ? Math.max(
+      target.length - args.length, 0) : 0);
+      return bound;
+    };
+  }
+  </Function.prototype.bind>
+
+  <Array.isArray>
+  if (!Array.isArray) {
+    Array.isArray = function isArray(obj) {
+      return Object.prototype.toString.call(obj) === "[object Array]";
+    };
+  }
+  </Array.isArray>
+
+  <Array.prototype.forEach>
+  if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function forEach(block, thisObject) {
+      var len = +this.length;
+      for ( var i = 0; i < len; i++) {
+        if (i in this) {
+          block.call(thisObject, this[i], i, this);
+        }
+      }
+    };
+  }
+  </Array.prototype.forEach>
+
+  <Array.prototype.map>
+  if (!Array.prototype.map) {
+    Array.prototype.map = function map(fun ) {
+      var len = +this.length;
+      if (typeof fun !== "function")
+        throw new TypeError();
+
+      var res = new Array(len);
+      var thisp = arguments[1];
+      for ( var i = 0; i < len; i++) {
+        if (i in this)
+          res[i] = fun.call(thisp, this[i], i, this);
+      }
+
+      return res;
+    };
+  }
+  </Array.prototype.map>
+
+  <Array.prototype.filter>
+  if (!Array.prototype.filter) {
+    Array.prototype.filter = function filter(block ) {
+      var values = [];
+      var thisp = arguments[1];
+      for ( var i = 0; i < this.length; i++)
+        if (block.call(thisp, this[i]))
+          values.push(this[i]);
+        return values;
+    };
+  }
+  </Array.prototype.filter>
+
+  <Array.prototype.every>
+  if (!Array.prototype.every) {
+    Array.prototype.every = function every(block ) {
+      var thisp = arguments[1];
+      for ( var i = 0; i < this.length; i++)
+        if (!block.call(thisp, this[i]))
+          return false;
+        return true;
+    };
+  }
+  </Array.prototype.every>
+
+  <Array.prototype.some>
+  if (!Array.prototype.some) {
+    Array.prototype.some = function some(block ) {
+      var thisp = arguments[1];
+      for ( var i = 0; i < this.length; i++)
+        if (block.call(thisp, this[i]))
+          return true;
+        return false;
+    };
+  }
+  </Array.prototype.some>
+
+  <Array.prototype.reduce>
+  if (!Array.prototype.reduce) {
+    Array.prototype.reduce = function reduce(fun ) {
+      var len = +this.length;
+      if (typeof fun !== "function")
+        throw new TypeError();
+
+      
+      if (len === 0 && arguments.length === 1)
+        throw a TypeError();
+
+      var i = 0;
+      if (arguments.length >= 2) {
+        var rv = arguments[1];
+      } else {
+        do {
+          if (i in this) {
+            rv = this[i++];
+            break;
+          }
+
+          
+          if (++i >= len)
+            throw new TypeError();
+        } while (true);
+      }
+
+      for (; i < len; i++) {
+        if (i in this)
+          rv = fun.call(null, rv, this[i], i, this);
+      }
+
+      return rv;
+    };
+  }
+  </Array.prototype.reduce>
+
+  <Array.prototype.reduceRight>
+  if (!Array.prototype.reduceRight) {
+    Array.prototype.reduceRight = function reduceRight(fun ) {
+      var len = +this.length;
+      if (typeof fun !== "function")
+        throw new TypeError();
+
+      
+      if (len === 0 && arguments.length === 1)
+        throw new TypeError();
+
+      var rv, i = len - 1;
+      if (arguments.length >= 2) {
+        rv = arguments[1];
+      } else {
+        do {
+          if (i in this) {
+            rv = this[i--];
+            break;
+          }
+
+          
+          if (--i < 0)
+            throw new TypeError();
+        } while (true);
+      }
+
+      for (; i >= 0; i--) {
+        if (i in this)
+          rv = fun.call(null, rv, this[i], i, this);
+      }
+
+      return rv;
+    };
+  }
+  </Array.prototype.reduceRight>
+
+  <Array.prototype.indexOf>
+  if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function indexOf(value ) {
+      var length = this.length;
+      if (!length)
+        return -1;
+      var i = arguments[1] || 0;
+      if (i >= length)
+        return -1;
+      if (i < 0)
+        i += length;
+      for (; i < length; i++) {
+        if (!(i in this))
+          continue;
+        if (value === this[i])
+          return i;
+      }
+      return -1;
+    };
+  }
+  </Array.prototype.indexOf>
+
+  <Array.prototype.lastIndexOf>
+  if (!Array.prototype.lastIndexOf) {
+    Array.prototype.lastIndexOf = function lastIndexOf(value) {
+      var length = this.length;
+      if (!length)
+        return -1;
+      var i = arguments[1] || length;
+      if (i < 0)
+        i += length;
+      i = Math.min(i, length - 1);
+      for (; i >= 0; i--) {
+        if (!(i in this))
+          continue;
+        if (value === this[i])
+          return i;
+      }
+      return -1;
+    };
+  }
+  </Array.prototype.lastIndexOf>
+
+  <Date.now>
+  if (!Date.now) {
+    Date.now = function now() {
+      return new Date().getTime();
+    };
+  }
+  </Date.now>
+}
+</createECMA5Shims>
+
+2.
+
+<setVersion>
+function setVersion(versionType, versionFull) {
+  versionType.version = versionFull;
+  var versionArray = versionFull.split(".");
+  if (versionArray.length > 0) {
+    versionArray = versionArray.reverse();
+    versionType.major = versionArray.pop();
+    if (versionArray.length > 0) {
+      versionType.minor = versionArray.pop();
+      if (versionArray.length > 0) {
+        versionArray = versionArray.reverse();
+        versionType.patch = versionArray.join(".");
+      } else {
+        versionType.patch = "0";
+      }
+    } else {
+      versionType.minor = "0";
+    }
+  } else {
+    versionType.major = "0";
+  }
+}
+</setVersion>
+
+3.
+
+<existsEvaluator>
+function existsEvaluator(condition, userAttributes) {
+  var userValue = userAttributes[condition.name];
+  return typeof userValue !== 'undefined' && userValue !== null;
+}
+</existsEvaluator>
+
+4.
+
+<getInitOptions>
+async function getInitOptions(args) {
+  const { debug, endpoint, host, port, profile, region } = args
+  const options = { debug, host, port, profile, region }
+  <getAWSEndpoint>
+  options.endpoint = getAWSEndpoint({ endpoint })
+  </getAWSEndpoint>
+  <getAWSCredentials>
+  options.credentials = await getAWSCredentials()
+  </getAWSCredentials>
+  return options
+}
+</getInitOptions>
+
+5.
+
+<replaceWithMultiple>
+function replaceWithMultiple(nodes) {
+  this.resync();
+
+  nodes = this._verifyNodeList(nodes);
+  t.inheritLeadingComments(nodes[0], this.node);
+  t.inheritTrailingComments(nodes[nodes.length - 1], this.node);
+  this.node = this.container[this.key] = null;
+  this.insertAfter(nodes);
+  <dangerouslyRemove>
+  if (!this.node) this.dangerouslyRemove();
+  </dangerouslyRemove>
+}
+</replaceWithMultiple>
+
+6.
+
+<main>
+function main() {
+  <windowTopSetup>
+  var topWindow = window.top;
+  var isTop = window.top === window;
+  </windowTopSetup>
+
+  <parseOptions>
+  var options = null;
+  try {
+    var optionsEl = topWindow.document.querySelector('x-wtf-options');
+    if (optionsEl) {
+      
+      options = JSON.parse(optionsEl.text);
+    }
+  } catch (e) {
+    
+  }
+  </parseOptions>
+
+  <fetchOptions>
+  if (!options) {
+    options = fetchOptions(topWindow);
+  }
+  if (!options) {
+    return;
+  }
+  </fetchOptions>
+
+  <optionElementSetup>
+  if (!optionsEl) {
+    try {
+      optionsEl = document.createElement('x-wtf-options');
+      optionsEl.text = JSON.stringify(options);
+      topWindow.document.documentElement.appendChild(optionsEl);
+    } catch (e) {
+      
+    }
+  }
+  </optionElementSetup>
+
+  <instrumentationSetup>
+  if (options['__instrumented__']) {
+    
+    if (isTop) {
+      
+      
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', chrome.extension.getURL('third_party/falafel.js'), false);
+      xhr.send();
+      var falafelSource = xhr.responseText;
+      xhr = new XMLHttpRequest();
+      xhr.open('GET', chrome.extension.getURL('wtf-process.js'), false);
+      xhr.send();
+      var processSource = xhr.responseText;
+      var blob = new Blob([
+        falafelSource,
+        processSource
+      ], {
+        type: 'application/javascript'
+      });
+      var blobUrl = URL.createObjectURL(blob);
+      options['wtf.instrumentation.blob'] = blobUrl;
+
+      injectScriptFile(chrome.extension.getURL('third_party/falafel.js'));
+      injectScriptFile(chrome.extension.getURL('wtf-process.js'));
+      injectScriptFile(chrome.extension.getURL('wtf-call-tracing.js'));
+    }
+    injectScriptFunction(function(options) {
+      
+      try {
+        window.top.wtfi.prepare(options, window);
+      } catch (e) {
+      }
+    }, [
+      options
+    ]);
+  } else {
+    
+    
+    if (isTop) {
+      var traceScriptUrl =
+        chrome.extension.getURL('wtf_trace_web_js_compiled.js');
+      injectScriptFunction(function(traceScriptUrl) {
+        window.WTF_TRACE_SCRIPT_URL = traceScriptUrl;
+      }, [traceScriptUrl]);
+      injectScriptFile(traceScriptUrl);
+    }
+    injectScriptFunction(function(options) {
+      
+      try {
+        window.top.wtf.trace.prepare(options, window);
+      } catch (e) {
+      }
+    }, [
+      options
+    ]);
+
+    if (isTop) {
+      
+      var addons = injectAddons(options['wtf.addons'] || []);
+      
+      injectScriptFunction(startTracing, [
+        addons
+      ]);
+    }
+  }
+  </instrumentationSetup>
+
+  <setupCommunication>
+  if (isTop) {
+    setupCommunications();
+  }
+  </setupCommunication>
+}
+</main>
+
+7.
+
+<ActionButton>
+function ActionButton(options, permissionConf) {
+  <initializationCheck>
+  var that = this;
+  if (!options.handlerId) {
+    throw new Error("Handler is not defined in Action button");
+  }
+
+  if (!options.actions || options.actions.length === 0) {
+    throw new Error("Actions are not defined in Action button");
+  }
+  </initializationCheck>
+
+  this.permissionConf = permissionConf;
+
+  var handlerNode = $("#" + options.handlerId);
+
+  this.handlerNode = handlerNode;
+  this.options = options
+
+  handlerNode.attr("href", "#");
+  handlerNode.addClass("btn dropdown-toggle");
+  handlerNode.attr("data-toggle", "dropdown");
+  handlerNode.html(handlerNode.html() + ' <span class="caret"><span>');
+
+  if (options.buttonType) {
+    handlerNode.addClass("btn-" + options.buttonType);
+  }
+
+  if (options.buttonSize) {
+    handlerNode.addClass("btn-" + options.buttonSize);
+  }
+
+  this._renderParent();
+  <bindingClickEvent>
+  handlerNode.click(function (e) {
+    var options = that.options;
+    if(that.permissionConf){
+      var conf = that.permissionConf;
+      var permissionActions = _.pluck(options.actions, 'permissionAction');
+      Rocket.Plugin.isActionsAuthorized(conf.modelId, conf.modelName, conf.permissionSchemaKey, permissionActions, function(response){
+        if(response.success == true){
+          that.getPermission = function(action){
+            return response[action];
+          }
+        }
+        that._render();
+        that._bindEvents();
+
+        
+        var parent = $(that.parent);
+        parent.parent().removeClass("open");
+        parent.addClass("open");
+      });
+    }else{
+      that._render();
+      that._bindEvents();
+    }
+
+  });
+  </bindingClickEvent>
+
+  that.getPermission = function(){
+    return true;
+  };
+}
+</ActionButton>
+
+8.
+
+<AudioCodecCheck>
+function(encoders, cb) {
+  var unavailable;
+  
+  <AudioCodecUnavailableCheck>
+  unavailable = self._outputs.reduce(function(cdcs, output) {
+    var acodec = output.audio.find('-acodec', 1);
+    if (acodec && acodec[0] !== 'copy') {
+      if (!(acodec[0] in encoders) || encoders[acodec[0]].type !== 'audio') {
+        cdcs.push(acodec[0]);
+      }
+    }
+
+    return cdcs;
+  }, []);
+  </AudioCodecUnavailableCheck>
+
+  <AudioCodecErrorHandling>
+  if (unavailable.length === 1) {
+    return cb(new Error('Audio codec ' + unavailable[0] + ' is not available'));
+  } else if (unavailable.length > 1) {
+    return cb(new Error('Audio codecs ' + unavailable.join(', ') + ' are not available'));
+  }
+  </AudioCodecErrorHandling>
+
+  <VideoCodecUnavailableCheck>
+  unavailable = self._outputs.reduce(function(cdcs, output) {
+    var vcodec = output.video.find('-vcodec', 1);
+    if (vcodec && vcodec[0] !== 'copy') {
+      if (!(vcodec[0] in encoders) || encoders[vcodec[0]].type !== 'video') {
+        cdcs.push(vcodec[0]);
+      }
+    }
+
+    return cdcs;
+  }, []);
+  </VideoCodecUnavailableCheck>
+
+  <VideoCodecErrorHandling>
+  if (unavailable.length === 1) {
+    return cb(new Error('Video codec ' + unavailable[0] + ' is not available'));
+  } else if (unavailable.length > 1) {
+    return cb(new Error('Video codecs ' + unavailable.join(', ') + ' are not available'));
+  }
+  </VideoCodecErrorHandling>
+
+  cb();
+}
+</AudioCodecCheck>
+
+9.
+
+<FileInput>
+function() {
+  var runtime = this.getRuntime();
+  
+  <DestroyRuntime>
+  if (runtime) {
+    runtime.exec.call(this, 'FileInput', 'destroy');
+    this.disconnectRuntime();
+  }
+  </DestroyRuntime>
+
+  <DestroyFiles>
+  if (Basic.typeOf(this.files) === 'array') {
+    
+    Basic.each(this.files, function(file) {
+      file.destroy();
+    });
+  } 
+  </DestroyFiles>
+  this.files = null;
+}
+</FileInput>
+
+10.
+
+<UpnpDevice>
+function (controlPoint, uuid, location, desc, localAddress) {
+  EventEmitter.call(this);
+
+  if (TRACE) {
+    logger.info({
+      method: "UpnpDevice",
+      uuid: uuid,
+    }, "new device object");
+  }
+  this.controlPoint = controlPoint;
+
+  <DeviceInitialization>
+  this.uuid = uuid;
+  this.udn = desc.UDN[0];
+
+  this.forgotten = false
+  this.last_seen = (new Date()).getTime();
+
+  this.location = location;
+
+  this.deviceType = desc.deviceType ? desc.deviceType[0] : null;
+  this.friendlyName = desc.friendlyName ? desc.friendlyName[0] : null;
+  this.manufacturer = desc.manufacturer ? desc.manufacturer[0] : null;
+  this.manufacturerUrl = desc.manufacturerURL ? desc.manufacturerURL[0] : null;
+  this.modelNumber = desc.modelNumber ? desc.modelNumber[0] : null;
+  this.modelDescription = desc.modelDescription ? desc.modelDescription[0] : null;
+  this.modelName = desc.modelName ? desc.modelName[0] : null;
+  this.modelUrl = desc.modelURL ? desc.modelURL[0] : null;
+  this.softwareVersion = desc.softwareVersion ? desc.softwareVersion[0] : null;
+  this.hardwareVersion = desc.hardwareVersion ? desc.hardwareVersion[0] : null;
+  this.serialNum = desc.serialNum ? desc.serialNum[0] : null;
+
+  var u = url.parse(this.location);
+  this.host = u.hostname;
+  this.port = u.port;
+
+  this.localAddress = localAddress;
+
+  this.devices = {}; 
+
+  this.services = {};
+  </DeviceInitialization>
+
+  <HandleDeviceInfo>
+  this._handleDeviceInfo(desc);
+  </HandleDeviceInfo>
+
+  if (seend[this.uuid] === undefined) {
+    seend[this.uuid] = true;
+    logger.info({
+      method: "UpnpDevice",
+      device: {
+        loction: this.location,
+        uuid: this.uuid,
+        deviceType: this.deviceType,
+        friendlyName: this.friendlyName,
+        manufacturer: this.manufacturer,
+        manufacturerUrl: this.manufacturerURL,
+        modelNumber: this.modelNumber,
+        modelDescription: this.modelDescription,
+        modelName: this.modelName,
+        modelUrl: this.modelURL,
+      }
+    }, "previously unseen UPnP device");
+  }
+  
+  
+  
+  
+  
+}
+</UpnpDevice>

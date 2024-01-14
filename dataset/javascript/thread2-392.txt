@@ -1,0 +1,240 @@
+```javascript
+<isProbExpr>
+function isProbExpr (node) {
+  return typeof(node) === 'object' && node.type === 'cond'
+    && node.test.length === 1 && typeof(node.test[0]) === 'object' && node.test[0].type === 'function' && node.test[0].funcname === 'lt' && node.test[0].args.length === 2
+    && typeof(node.test[0].args[0]) === 'object' && node.test[0].args[0].type === 'function' && node.test[0].args[0].funcname === 'random' && node.test[0].args[0].args.length === 1
+    && typeof(node.test[0].args[0].args[0]) === 'string' && node.test[0].args[0].args[0] === '1'
+}
+</isProbExpr>
+
+<putSeeds>
+function putSeeds(arrayPaths){
+  <appendTagyData>
+  arrayPaths.forEach(function(element){
+    var tagy={code:"", path:""};
+    tagy.code= element.substr(element.length-2, element.length-1);
+    tagy.path= element.substr(0, element.length-3);
+    taggies.push(tagy);
+  });
+  </appendTagyData>
+}
+</putSeeds>
+
+<setTag>
+function setTag(key, value, obj) {
+  <validationAndAssignment>
+  if (!obj || !key) return
+  var skey = removeInvalidChars(key)
+  if (value) {
+    value = String(value)
+  }
+  obj[skey] = value
+  </validationAndAssignment>
+  return obj
+}
+</setTag>
+
+<messageSending>
+function(message) {
+
+        <ensureWorkerExists>
+        if (! worker) throw new Error("Worker " + workerId + " unavailable");
+        </ensureWorkerExists>
+        
+        var deferred = new Deferred();
+
+        <encodeMessage>
+        var omsg = message;
+        var xid = message.id = lastMessageId ++;
+        message = messages.encode(message);
+        </encodeMessage>
+
+        <validationAfterEncoding>
+        if (message.id == null) {
+          console.warn("PROXIES", messages.reverseProxies);
+          throw new Error("GONZO: " + xid + " ->\n" + JSON.stringify(omsg, null, 2) + "\n ->\n" + JSON.stringify(message, null , 2));
+        }
+        </validationAfterEncoding>
+
+        <storePendingMessage>
+        pendingMessages[message.id] = deferred;
+        </storePendingMessage>
+
+        <debugLog>
+        if (debug) {
+          console.log("Sending to Worker[" + workerId + "]\n" + JSON.stringify(message, null, 2));
+        }
+        </debugLog>
+
+        <postMessage>
+        worker.postMessage(message);
+        </postMessage>
+
+        <returnPromise>
+        return deferred.promise;
+        </returnPromise>
+      }
+</messageSending>
+
+<resolveTemplate>
+function resolveTemplate(file, pathes) {
+    <readAndConcatenateFiles>
+    var filePath = file.path,
+        templateContent = '';
+
+    for(var i = 0, len = pathes.length; i < len; i ++) {
+        templateContent += fs.readFileSync(pathes[i], {encoding: 'utf-8'}) + "\r\n";
+    }
+    </readAndConcatenateFiles>
+
+    return templateContent;
+}
+</resolveTemplate>
+
+<createMarkers>
+function createMarkers() {
+  <generateMarkers>
+	var lat, lon;
+	var count = 50 + Math.round(Math.random() * 5);
+	var jitter = 0.03;
+	var markers = [];
+	for (var i = 0; i < count; i++) {
+		lat = origin_lat + (Math.random() * jitter - (jitter / 2));
+		lon = origin_lon + (Math.random() * jitter - (jitter / 2));
+		markers.push(L.marker([lat, lon], {icon: new MyIcon()}).addTo(map));
+	}
+  </generateMarkers>
+
+  <removeMarkersAfterLifetime>
+	var lifetime = 1000 + Math.round(Math.random() * 2000);
+	setTimeout(function() {
+		for (var i = 0; i < count; i++) {
+			map.removeLayer(markers[i]);
+		}
+		setTimeout(createMarkers, 10);
+	}, lifetime);
+  </removeMarkersAfterLifetime>
+}
+</createMarkers>
+
+<insert>
+function insert(argh, key, value, option) {
+  <parseValue>
+  if ('string' === typeof value && !isNaN(+value)) value = +value;
+  if (value === 'true' || value === 'false') value = value === 'true';
+  </parseValue>
+
+  <handleOptions>
+  var single = option.charAt(1) !== '-'
+    , properties = key.split('.')
+    , position = argh;
+
+  if (single && key.length > 1) return key.split('').forEach(function short(char) {
+    insert(argh, char, value, option);
+  });
+  </handleOptions>
+
+  <buildNestedProperties>
+  if (!properties.length) return argh[key] = value;
+
+  while (properties.length) {
+    var property = properties.shift();
+
+    if (properties.length) {
+      if ('object' !== typeof position[property] && !Array.isArray(position[property])) {
+        position[property] = Object.create(null);
+      }
+    } else {
+      position[property] = value;
+    }
+
+    position = position[property];
+  }
+  </buildNestedProperties>
+}
+</insert>
+
+<levelConversion>
+function(sArg, defaultLevel) {                  
+	<handleNullArg>
+	if(sArg === null) {
+		return defaultLevel;
+	}
+	</handleNullArg>
+	
+	<handleStringArg>
+	if(typeof sArg == "string") { 
+		var s = sArg.toUpperCase();
+		if(s == "ALL") {return Log4js.Level.ALL;}
+		if(s == "DEBUG") {return Log4js.Level.DEBUG;}
+		if(s == "INFO") {return Log4js.Level.INFO;}
+		if(s == "WARN") {return Log4js.Level.WARN;}
+		if(s == "ERROR") {return Log4js.Level.ERROR;}
+		if(s == "FATAL") {return Log4js.Level.FATAL;}
+		if(s == "OFF") {return Log4js.Level.OFF;}
+		if(s == "TRACE") {return Log4js.Level.TRACE;}
+		return defaultLevel;
+	}
+	</handleStringArg>
+	
+	<handleNumberArg>
+	else if(typeof sArg == "number") {
+		switch(sArg) {
+			case ALL_INT: return Log4js.Level.ALL;
+			case DEBUG_INT: return Log4js.Level.DEBUG;
+			case INFO_INT: return Log4js.Level.INFO;
+			case WARN_INT: return Log4js.Level.WARN;
+			case ERROR_INT: return Log4js.Level.ERROR;
+			case FATAL_INT: return Log4js.Level.FATAL;
+			case OFF_INT: return Log4js.Level.OFF;
+			case TRACE_INT: return Log4js.Level.TRACE;
+			default: return defaultLevel;
+		}
+	}
+	</handleNumberArg>
+	else {
+		return defaultLevel;	
+	}
+}
+</levelConversion>
+
+<manageInfrastructure>
+function (options, cb) {
+	<initializeVariables>
+	let cluster = options.infra.stack;
+	let request = getConnector(options.infra.api);
+	let project = request.project;
+	delete request.project;
+	request.zone = [];
+	</initializeVariables>
+	
+	<anyExtraFunctions>
+	// Functions like checkIfClusterisReady are omitted for brevity
+	</anyExtraFunctions>
+	
+	<updateEnvironmentRecord>
+	options.soajs.log.debug("Getting Environment Record:", options.soajs.registry.code.toUpperCase());
+	
+	if (options.soajs.registry.deployer.container.kubernetes.remote.nodes && options.soajs.registry.deployer.container.kubernetes.remote.nodes !== '') {
+		let machineIp = options.soajs.registry.deployer.container.kubernetes.remote.nodes;
+		return cb(null, machineIp);
+	}
+	// More code with conditional logic to check and update the cluster state, omitted for brevity
+	</updateEnvironmentRecord>
+}
+</manageInfrastructure>
+
+<updateDialogsList>
+function updateDialogsList(dialogId, text) {
+	<updateUnreadCount>
+    var badgeCount = $('#' + dialogId + ' .badge').html();
+    $('#' + dialogId + '.list-group-item.inactive .badge').text(parseInt(badgeCount) + 1).fadeIn(500);
+    </updateUnreadCount>
+    
+    <updateDialogText>
+    $('#' + dialogId + ' .list-group-item-text').text(text);
+    </updateDialogText>
+}
+</updateDialogsList>
+```

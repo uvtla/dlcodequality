@@ -1,0 +1,216 @@
+```javascript
+<createCloneOfSegments>
+function() {
+    var segments = this.segments;
+    var numSegments = segments.length;
+    
+    var path = new Path();
+    for (var i = 0; i < numSegments; i++) {
+        var segment = segments[i].clone();
+        path.appendSegment(segment);
+    }
+
+    return path;
+}
+</createCloneOfSegments>
+
+<panMapWhenInputsChange>
+function panMapWhenInputsChange() {
+    var lat = document.getElementById(options.latId);
+    var lng = document.getElementById(options.lngId);
+
+    <panIfValue>
+    function panIfValue() {
+        if(lat.value && lng.value) {
+            options.panMap(lat.value, lng.value);
+        };
+    }
+    </panIfValue>
+
+    $(lat).change(panIfValue);
+    $(lng).change(panIfValue);
+}
+</panMapWhenInputsChange>
+
+<initializeCollator>
+function(locale) {
+    this.intCol = (Intl && Intl.Collator) ? new Intl.Collator(locale) : new CollatorPolyfill(locale);
+}
+</initializeCollator>
+
+<setUpTransition>
+function(handleObj) {
+    var el = $(this);
+    var fired = false;
+
+    <markElementForTransition>
+    el.data("trend", true);
+    </markElementForTransition>
+
+    <calculateTransitionTime>
+    var time =
+        parseProperties(el, transitionDurationProperties) +
+        parseProperties(el, transitionDelayProperties) +
+        20;
+    </calculateTransitionTime>
+
+    <transitionCallback>
+    var cb = function(e) {
+        if (fired) return;
+        if (e && e.srcElement !== el[0]) return;
+
+        el.data("trend", false);
+
+        fired = true;
+        if (handleObj.handler) handleObj.handler();
+    };
+    </transitionCallback>
+
+    el.one(transitionEndEvents, cb);
+    el.data("trend-timeout", window.setTimeout(cb, time));
+}
+</setUpTransition>
+
+<processStylesheet>
+function (stylesheet) {
+    var sheetMedia = stylesheet.media && stylesheet.media.mediaText;
+    var sheetHost;
+
+    <checkCrossDomain>
+    if (objectFit.disableCrossDomain == 'true') {
+        sheetHost = getCSSHost(stylesheet.href);
+
+        if ((sheetHost !== window.location.host)) {
+            return [];
+        }
+    }
+    </checkCrossDomain>
+
+    <checkMediaQueries>
+    if (stylesheet.disabled) {
+        return [];
+    }
+
+    if (!window.matchMedia) {
+        if (sheetMedia && sheetMedia.length) {
+            return [];
+        }
+    }
+    else if (sheetMedia && sheetMedia.length && !window.matchMedia(sheetMedia).matches) {
+        return [];
+    }
+    </checkMediaQueries>
+
+    <getCssRulesAsArray>
+    return toArray(stylesheet.cssRules);
+    </getCssRulesAsArray>
+}
+</processStylesheet>
+
+<addLineHints>
+function addLineHints(name, content) {
+    <addHintsToLines>
+    var i = -1, lines = content.split('\n'), len = lines.length, out = [];
+    while (++i < len) {
+        out.push(lines[i] +
+            ((i % 10 === 9) ? '/* Line ' + (i + 1) + ' End */' : ''));
+    }
+    </addHintsToLines>
+    return out.join('\n');
+}
+</addLineHints>
+
+<validateOAuthTokens>
+function (req, res) {
+    var oauthQueryStateToken = req.query.state;
+    var oauthCookieStateToken = req.cookies.oauthStateToken;
+
+    <compareTokens>
+    if (!oauthQueryStateToken || (!oauthCookieStateToken)) {
+        return false;
+    } else if (oauthQueryStateToken !== oauthCookieStateToken) {
+        return false;
+    }
+    </compareTokens>
+
+    <clearCookie>
+    res.clearCookie('oauthStateToken');
+    </clearCookie>
+
+    return true;
+}
+</validateOAuthTokens>
+
+<wrapStreams>
+function wrapStreams () {
+    <wrapEachStream>
+    for (let stream of arguments) {
+        <initializeStreamText>
+        stream.textContent = "";
+        </initializeStreamText>
+
+        <setStreamEncoding>
+        stream.setEncoding("utf-8");
+        </setStreamEncoding>
+
+        <handleStreamData>
+        stream.on("data", (data) => { stream.textContent += data; });
+        </handleStreamData>
+    }
+    </wrapEachStream>
+}
+</wrapStreams>
+
+<applyDeltaActions>
+function applyDeltaActions(node, oldLocalNode, callback) {
+    var newParentPath;
+    var actions = node.actions;
+    var id = node.id;
+
+    <calculateNewParentPath>
+    if (actions.create) newParentPath = utility.getParentFromPath(actions.create.path);
+    </calculateNewParentPath>
+
+    <handleOldLocalNode>
+    if (oldLocalNode && actions.create) {/*...*/}
+    else if (oldLocalNode && actions.delete) {/*...*/}
+    else if (!oldLocalNode && actions.create) {/*...*/}
+    else {/*...*/}
+    </handleOldLocalNode>
+
+    <updateOrCreateNodes>
+    if (oldLocalNode && actions.create) {/*...*/}
+    else if (oldLocalNode && actions.delete) {/*...*/}
+    else if (!oldLocalNode && actions.create) {/*...*/}
+    </updateOrCreateNodes>
+
+    <callbackWithoutAction>
+    if (!oldLocalNode && !actions.create && !actions.delete) {
+        callback(null);
+    }
+    </callbackWithoutAction>
+}
+</applyDeltaActions>
+
+<reverseArrayLike>
+function reverse(arrayLike) {
+    <getArrayLength>
+    var len = _toArrayLength(arrayLike.length);
+    </getArrayLength>
+
+    <initializeResultArray>
+    var result = Array(len);
+    </initializeResultArray>
+
+    <reverseElements>
+    for (var i = 0, ofs = len - 1; i < len; i++) {
+        result[i] = arrayLike[ofs - i];
+    }
+    </reverseElements>
+
+    return result;
+}
+</reverseArrayLike>
+```
+
+In the `applyDeltaActions` function, actions such as comparing new and old parent paths, handling the old local node's existing data alongside actions like create and delete, updating or creating new nodes, and the callback without action are collectively annotated as `<handleOldLocalNode>` and `<updateOrCreateNodes>` due to their intimate relation with handling node updates based on a delta. However, the final `<callbackWithoutAction>` is isolated as it represents a separate branch where no action is being applied at all and the function is simply exiting with a callback.

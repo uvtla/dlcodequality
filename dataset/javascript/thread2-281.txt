@@ -1,0 +1,400 @@
+```javascript
+<convertShape>
+function convertShape (shape, tag) {
+  return templates.element({
+    'tag': tag,
+    'width': shape.width,
+    'height': shape.height,
+    'fill': shape.properties.fill
+  });
+}
+</convertShape>
+
+<Sonar>
+function Sonar(runner, options, log) {
+  Base.call(this, runner);
+  var stats = this.stats
+    , tests = []
+    , logFd
+    , self = this;
+
+  
+  <handleOptions>
+  if (typeof options === 'function') {
+    log = options;
+  }
+
+  log = log || console.log;
+  </handleOptions>
+
+  <eventListeners>
+  runner.on('pending', function(test){
+    tests.push(test);
+  });
+
+  runner.on('pass', function(test){
+    tests.push(test);
+  });
+
+  runner.on('fail', function(test){
+    tests.push(test);
+  });
+  </eventListeners>
+
+  <onEndEvent>
+  runner.on('end', function(){
+    log = fileLogger() || log;
+    log(tag('testsuite', {
+        name: 'Mocha Tests'
+      , tests: stats.tests
+      , failures: stats.failures
+      , errors: stats.failures
+      , skipped: stats.tests - stats.failures - stats.passes
+      , timestamp: (new Date).toUTCString()
+      , time: (stats.duration / 1000) || 0
+    }, false));
+
+    tests.forEach(test);
+    log('</testsuite>');
+    closeFileLogger();
+  });
+  </onEndEvent>
+
+  <testFunction>
+  function test(test) {
+    var filename = extractClassName(test);
+
+    var attrs = {
+        classname: filename || process.env.npm_package_config_mocha_sonar_reporter_classname || 'Test'
+      , name: !test.parent.fullTitle() || test.parent.fullTitle() === '' ? test.title : test.parent.fullTitle() + ' ' + test.title
+      , time: (test.duration / 1000) || 0
+    };
+
+    if ('failed' == test.state) {
+      var err = test.err;
+      attrs.message = escape(err.message);
+      log(tag('testcase', attrs, false, tag('failure', attrs, false, cdata(err.stack))));
+    } else if (test.pending) {
+      log(tag('testcase', attrs, false, tag('skipped', {}, true)));
+    } else {
+      log(tag('testcase', attrs, true) );
+    }
+  }
+  </testFunction>
+
+  <extractClassNameFunction>
+  function extractClassName(test) {
+    var relativeTestDir = process.env.npm_package_config_mocha_sonar_reporter_testdir;
+    var classnameSuffix = process.env.npm_package_config_mocha_sonar_reporter_classnameSuffix || '';
+
+    if (relativeTestDir === undefined || test.file === undefined) {
+      return undefined;
+    }
+
+    var absoluteTestDir = path.join(process.cwd(), relativeTestDir);
+
+    var relativeFilePath = path.relative(absoluteTestDir, test.file);
+
+    var suffixIndex = relativeFilePath.lastIndexOf('.');
+
+    return (suffixIndex >= 0 ? relativeFilePath.substring(0, suffixIndex) : relativeFilePath) + classnameSuffix;
+  }
+  </extractClassNameFunction>
+
+  <fileLoggerFunction>
+  function fileLogger() {
+
+    var outputfile = process.env.npm_package_config_mocha_sonar_reporter_outputfile;
+
+    if (!outputfile) {
+      return undefined;
+    }
+
+    mkdirpSync(path.dirname(outputfile));
+    logFd = fs.openSync(outputfile, 'w');
+
+    return function logFile(data) {
+      fs.writeSync(logFd, data + os.EOL);
+    }
+  }
+  </fileLoggerFunction>
+
+  <closeFileLoggerFunction>
+  function closeFileLogger() {
+    if (logFd) {
+      fs.closeSync(logFd);
+    }
+  }
+  </closeFileLoggerFunction>
+}
+</Sonar>
+
+<_rsapem_publicKeyToX509HexString>
+function _rsapem_publicKeyToX509HexString(rsaKey) {
+    var encodedIdentifier = "06092A864886F70D010101";
+    var encodedNull = "0500";
+    var headerSequence = "300D" + encodedIdentifier + encodedNull;
+
+    var keys = _rsapem_derEncodeNumber(rsaKey.n);
+    keys += _rsapem_derEncodeNumber(rsaKey.e);
+
+    var keySequence = "0030" + _rsapem_encodeLength(keys.length / 2) + keys;
+    var bitstring = "03" + _rsapem_encodeLength(keySequence.length / 2) + keySequence;
+
+    var mainSequence = headerSequence + bitstring;
+
+    return "30" + _rsapem_encodeLength(mainSequence.length / 2) + mainSequence;
+}
+</_rsapem_publicKeyToX509HexString>
+
+<_createConfig>
+function _createConfig(){
+        let file = repositoryPath + '/config.json';
+        let config = {
+            simulation: false
+        };
+        return new Promise(function(resolve, reject) {
+            jsonfile.writeFile(file, config, function (err) {
+                if(err){
+                    reject(err);
+                    return;
+                }
+                resolve();
+            });
+
+        });
+    }
+</_createConfig>
+
+<Peer>
+function Peer (opts) {
+  var self = this
+  if (!(self instanceof Peer)) return new Peer(opts)
+
+  self._id = randombytes(4).toString('hex').slice(0, 7)
+  self._debug('new peer %o', opts)
+
+  <defaultOptions>
+  opts = Object.assign({
+    allowHalfOpen: false
+  }, opts)
+  </defaultOptions>
+
+  stream.Duplex.call(self, opts)
+
+  <initializeProperties>
+  self.channelName = opts.initiator
+    ? opts.channelName || randombytes(20).toString('hex')
+    : null
+
+  self.initiator = opts.initiator || false
+  self.channelConfig = opts.channelConfig || Peer.channelConfig
+  self.config = Object.assign({}, Peer.config, opts.config)
+  self.offerOptions = opts.offerOptions || {}
+  self.answerOptions = opts.answerOptions || {}
+  self.sdpTransform = opts.sdpTransform || function (sdp) { return sdp }
+  self.streams = opts.streams || (opts.stream ? [opts.stream] : []) 
+  self.trickle = opts.trickle !== undefined ? opts.trickle : true
+  self.allowHalfTrickle = opts.allowHalfTrickle !== undefined ? opts.allowHalfTrickle : false
+  self.iceCompleteTimeout = opts.iceCompleteTimeout || ICECOMPLETE_TIMEOUT
+
+  self.destroyed = false
+  self.connected = false
+
+  self.remoteAddress = undefined
+  self.remoteFamily = undefined
+  self.remotePort = undefined
+  self.localAddress = undefined
+  self.localFamily = undefined
+  self.localPort = undefined
+  </initializeProperties>
+
+  <initializeWebRTC>
+  self._wrtc = (opts.wrtc && typeof opts.wrtc === 'object')
+    ? opts.wrtc
+    : getBrowserRTC()
+
+  if (!self._wrtc) {
+    if (typeof window === 'undefined') {
+      throw makeError('No WebRTC support: Specify `opts.wrtc` option in this environment', 'ERR_WEBRTC_SUPPORT')
+    } else {
+      throw makeError('No WebRTC support: Not a supported browser', 'ERR_WEBRTC_SUPPORT')
+    }
+  }
+  </initializeWebRTC>
+
+  <initializePeerConnection>
+  self._pcReady = false
+  self._channelReady = false
+  self._iceComplete = false 
+  self._iceCompleteTimer = null 
+  self._channel = null
+  self._pendingCandidates = []
+
+  self._isNegotiating = !self.initiator 
+  self._batchedNegotiation = false 
+  self._queuedNegotiation = false 
+  self._sendersAwaitingStable = []
+  self._senderMap = new Map()
+  self._firstStable = true
+  self._closingInterval = null
+
+  self._remoteTracks = []
+  self._remoteStreams = []
+
+  self._chunk = null
+  self._cb = null
+  self._interval = null
+
+  try {
+    self._pc = new (self._wrtc.RTCPeerConnection)(self.config)
+  } catch (err) {
+    self.destroy(err)
+  }
+  </initializePeerConnection>
+
+  <eventHandlers>
+  self._isReactNativeWebrtc = typeof self._pc._peerConnectionId === 'number'
+
+  self._pc.oniceconnectionstatechange = function () {
+    self._onIceStateChange()
+  }
+  self._pc.onicegatheringstatechange = function () {
+    self._onIceStateChange()
+  }
+  self._pc.onsignalingstatechange = function () {
+    self._onSignalingStateChange()
+  }
+  self._pc.onicecandidate = function (event) {
+    self._onIceCandidate(event)
+  }
+  </eventHandlers>
+
+  <dataChannelSetup>
+  if (self.initiator) {
+    self._setupData({
+      channel: self._pc.createDataChannel(self.channelName, self.channelConfig)
+    })
+  } else {
+    self._pc.ondatachannel = function (event) {
+      self._setupData(event)
+    }
+  }
+  </dataChannelSetup>
+
+  <streamAndTrackSetup>
+  if (self.streams) {
+    self.streams.forEach(function (stream) {
+      self.addStream(stream)
+    })
+  }
+  self._pc.ontrack = function (event) {
+    self._onTrack(event)
+  }
+  </streamAndTrackSetup>
+
+  <initiatorSetup>
+  if (self.initiator) {
+    self._needsNegotiation()
+  }
+  </initiatorSetup>
+
+  <finishEventBinding>
+  self._onFinishBound = function () {
+    self._onFinish()
+  }
+  self.once('finish', self._onFinishBound)
+  </finishEventBinding>
+}
+</Peer>
+
+<getType>
+function getType (str, typeLinks) {
+  if (str in typeLinks) {
+    return dom.create('a').class('qm-api-type-link').attr('href', typeLinks[str]).text(str)
+  } else {
+    return str
+  }
+}
+</getType>
+
+<cloneMethod>
+function() {
+  var clone = new this.constructor();
+  for (var key in this) {
+    if (key == "query") {
+      clone[key] = lib.factory.clone(this[key]);
+    } else {
+      clone[key] = this[key];
+    }
+  }
+  return clone;
+}
+</cloneMethod>
+
+<errorsAllIds>
+function errorsAllIds(state = [], { meta, type }) {
+  switch (type) {
+    <errorCases>
+    case LISTENER_ERROR:
+    case ERROR:
+      if (state.indexOf(getQueryName(meta)) !== -1) {
+        return state;
+      }
+      return [...state, getQueryName(meta)];
+    </errorCases>
+    <clearAllErrorsCase>
+    case CLEAR_ERRORS:
+      return [];
+    </clearAllErrorsCase>
+    <clearSingleErrorCase>
+    case CLEAR_ERROR:
+      return state.filter(lId => lId !== getQueryName(meta));
+    </clearSingleErrorCase>
+    <defaultCase>
+    default:
+      return state;
+    </defaultCase>
+  }
+}
+</errorsAllIds>
+
+<render_with_layout>
+function render_with_layout(template, locals, cb) {
+  <renderFile>
+  render_file(locals, function(err, str) {
+    if (err) {
+      return cb(err);
+    }
+    locals.body = str;
+  </renderFile>
+
+  var res = template(locals, handlebarsOpts);
+  <asyncDone>
+  self.async.done(function(values) {
+    Object.keys(values).forEach(function(id) {
+      res = res.replace(id, values[id]);
+    });
+
+    cb(null, res);
+  });
+  </asyncDone>
+});
+</render_with_layout>
+
+<parseParams>
+function parseParams (str) {
+  var items
+  var result = {}
+  <parseString>
+  if (str && baseExports.isString(str)) {
+    baseExports.each(str.split('&'), function (param) {
+      items = param.split('=')
+      result[decode(items[0])] = decode(items[1] || '')
+    })
+  }
+  </parseString>
+  return result
+}
+</parseParams>
+```

@@ -1,0 +1,305 @@
+```javascript
+<oaep_mgf1_str>
+function oaep_mgf1_str(seed, len, hash)
+{
+    <generateMask>
+    var mask = '', i = 0;
+
+    while (mask.length < len)
+    {
+        mask += hash(seed + String.fromCharCode.apply(String, [
+                (i & 0xff000000) >> 24,
+                (i & 0x00ff0000) >> 16,
+                (i & 0x0000ff00) >> 8,
+                i & 0x000000ff]));
+        i += 1;
+    }
+    </generateMask>
+
+    return mask;
+}
+</oaep_mgf1_str>
+
+<toastNotification>
+function(content, options) {
+        <optionConfiguration>
+        options = $.extend({}, this.options, options || {});
+        </optionConfiguration>
+
+        <toastCreation>
+        var self = this,
+            toast = this.render(options.template)
+                .addClass(options.animation)
+                .attr('role', 'note')
+                .html(content)
+                .conceal()
+                .prependTo(this.wrapper);
+        </toastCreation>
+
+        <eventFiring>
+        this.fireEvent('create', [toast]);
+        </eventFiring>
+
+        <showToast>
+        
+        setTimeout(function() {
+            self.show(toast);
+        }, 15); 
+        </showToast>
+
+        <hideToast>
+        
+        if (options.duration) {
+            setTimeout(function() {
+                self.hide(toast);
+            }, options.duration + 15);
+        }
+        </hideToast>
+    }
+</toastNotification>
+
+<lastNext>
+function lastNext(date, modifier, unit, base_date) {
+
+        <parseModifier>
+		if (!unit) {
+			return date;
+		}
+
+		
+		unit = unit.toLowerCase();
+
+		if (typeof modifier == 'string') {
+			switch (modifier) {
+				case 'next':
+					modifier = +1;
+					break;
+
+				case 'last':
+				case 'previous':
+					modifier = -1;
+					break;
+
+				case 'this':
+					modifier = 0;
+			}
+		}
+		</parseModifier>
+
+		<calculateNewDate>
+		
+		if (days[unit] != null) {
+			return lastNextDay(date, modifier, unit, base_date);
+		}
+
+		if (unit == 'month') {
+			
+			temp = date.getMonth();
+
+			date.setMonth(date.getMonth() + modifier);
+
+			
+			if (temp == date.getMonth() || temp + 1 != date.getMonth()) {
+				date.setDate(0);
+			}
+		} else {
+			Blast.Bound.Date.add(date, modifier, unit);
+		}
+		</calculateNewDate>
+
+		return date;
+	}
+</lastNext>
+
+<handleInstallationStatus>
+function handleInstallationStatus(statusObj) {
+        <errorCodeExtraction>
+        var errorCode = "",
+            errorline = statusObj.installError;
+        if (errorline) {
+            errorCode = errorline.substr(errorline.lastIndexOf(':') + 2, errorline.length);
+        }
+        </errorCodeExtraction>
+        
+        <sendAnalytics>
+        HealthLogger.sendAnalyticsData(
+            autoUpdateEventNames.AUTOUPDATE_INSTALLATION_FAILED,
+            "autoUpdate",
+            "install",
+            "fail",
+            errorCode
+        );
+        </sendAnalytics>
+    }
+</handleInstallationStatus>
+
+<ResizeController>
+function ResizeController(options) {
+  <controllerInitialization>
+  if (!(this instanceof ResizeController)) {
+    return new ResizeController(options);
+  }
+
+  Emitter.mixin(this);
+
+  options = options || {};
+  </controllerInitialization>
+
+  <setupResizeStream>
+  var resizeStream = ResizeStream.create(options);
+  Stream.onValue(resizeStream, Util.partial(this.trigger, 'resize'));
+  </setupResizeStream>
+
+  <setupDebounceStream>
+  var debounceMs = Util.getOption(options.debounceMs, 200);
+  var resizeEndStream = debounceMs <= 0 ? resizeStream : Stream.debounce(
+    debounceMs,
+    resizeStream
+  );
+  Stream.onValue(resizeEndStream, Util.partial(this.trigger, 'resizeEnd'));
+  </setupDebounceStream>
+
+  <destroyFunction>
+  this.destroy = function() {
+    Stream.close(resizeStream);
+    this.off('resize');
+    this.off('resizeEnd');
+  };
+  </destroyFunction>
+}
+</ResizeController>
+
+<importing>
+function(progressMeter, traces) {
+      <checkImportingState>
+      if (this.importing_)
+        throw new Error('Already importing.');
+      this.importing_ = true;
+      </checkImportingState>
+
+      
+      
+      
+      <initializeImportTask>
+      var importTask = new tr.b.Task(function prepareImport() {
+        progressMeter.update('I will now import your traces for you...');
+      }, this);
+      </initializeImportTask>
+      <sequentialActionProcessing>
+      var lastTask = importTask;
+      ... // The rest of the code in this function is a long sequence of dependent tasks for the import process and poses multiple responsibilities.
+      </sequentialActionProcessing>
+      return importTask;
+    }
+</importing>
+
+<forEachTypedProperty>
+function forEachTypedProperty(container, keys, types, copy, context) {
+  <processKeys>
+  let errors;
+  for (const key of keys) {
+    const element = container[key];
+    const type = types(key);
+
+    context.enter(key, container);
+    try {
+      <processElement>
+      const result = type(element, context);
+      if (context.isErrorWrapper(result)) {
+        if (!context.continueAfterError) {
+          return result;
+        }
+        errors = context.tallyErrors(errors, result);
+      } else if (copy !== void 0) {
+        copy[key] = result;
+      }
+      </processElement>
+    } finally {
+      context.exit();
+    }
+  }
+  </processKeys>
+
+  <handleErrors>
+  if (errors !== void 0) {
+    return context.wrapErrors(errors);
+  } else {
+    return context.toValue(copy || container);
+  }
+  </handleErrors>
+}
+</forEachTypedProperty>
+
+<_trim>
+function _trim(sValue, aParams) {
+	<trimString>
+        var i = 0,
+            
+            aTrims = aParams;
+
+        if (!aTrims) {
+            aTrims = [" "];
+        }
+
+        
+        while (i < aTrims.length) {
+            if (_endsWith(sValue, aTrims[i])) {
+                sValue = sValue.substring(0, sValue.length - aTrims[i].length);
+                i = 0;
+                continue;
+            }
+            i++;
+        }
+
+        
+        i = 0;
+        while (i < aTrims.length) {
+            if (_startsWith(sValue, aTrims[i])) {
+                sValue = sValue.substring(aTrims[i].length);
+                i = 0;
+                continue;
+            }
+            i++;
+        }
+	</trimString>
+
+	return sValue;
+}
+</_trim>
+
+<baseAssignValue$1>
+function baseAssignValue$1(object, key, value) {
+  <assignValueSafely>
+  if (key == '__proto__' && defineProperty) {
+    defineProperty(object, key, {
+      'configurable': true,
+      'enumerable': true,
+      'value': value,
+      'writable': true
+    });
+  } else {
+    object[key] = value;
+  }
+  </assignValueSafely>
+}
+</baseAssignValue$1>
+
+<checksDo>
+function checksDo(listChecks, cb) {
+    <processChecks>
+    if (listChecks.length === 0) {
+      return cb();
+    }
+
+    var check = listChecks.shift();
+    check.func(check.key, function () {
+      <recursiveCheck>
+      
+      
+      setImmediate(checksDo, listChecks, cb);
+      </recursiveCheck>
+    });
+    </processChecks>
+  }
+</checksDo>
+```

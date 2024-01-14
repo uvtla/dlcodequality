@@ -1,0 +1,269 @@
+Function 1:
+<flattenTree>
+function (tree) {
+    var todo = tree.slice();
+    var done = [];
+    var current;
+    while (todo.length) {
+      current = todo.pop();
+      if (current.nodes) {
+        todo = todo.concat(current.nodes);
+      } else if (current.leaf) {
+        done.push(current);
+      }
+    }
+    return done;
+}
+</flattenTree>
+
+Function 2:
+<markForRemoval>
+function markForRemoval(id, mark) {
+        if (mark) {
+            _idsToRemove[id] = true;
+        } else {
+            delete _idsToRemove[id];
+        }
+        exports.trigger("statusChange", id);
+}
+</markForRemoval>
+
+Function 3:
+<initializeSlideshow>
+function() {
+    // Setup slideshow classes and wrappers
+    pgwSlideshow.plugin.removeClass('pgwSlideshow').removeClass(pgwSlideshow.config.mainClassName);
+    pgwSlideshow.plugin.wrap('<div class="ps-list"></div>');
+    pgwSlideshow.plugin = pgwSlideshow.plugin.parent();
+    pgwSlideshow.plugin.wrap('<div class="' + pgwSlideshow.config.mainClassName + '"></div>');
+    pgwSlideshow.plugin = pgwSlideshow.plugin.parent();
+    pgwSlideshow.plugin.prepend('<div class="ps-current"><ul></ul><span class="ps-caption"></span></div>');
+    pgwSlideshow.slideCount = pgwSlideshow.plugin.find('.ps-list > ul > li').length;
+
+    // Verify slides exist
+    if (pgwSlideshow.slideCount == 0) {
+        throw new Error('pgwSlideshow - No slider item has been found');
+        return false;
+    }
+
+    // Setup controls if needed
+    if (pgwSlideshow.slideCount > 1) {
+        // Add navigation controls
+        <addNavigationControls>
+        if (pgwSlideshow.config.displayControls) {
+            pgwSlideshow.plugin.find('.ps-current').prepend('<span class="ps-prev"><span class="ps-prevIcon"></span></span>');
+            pgwSlideshow.plugin.find('.ps-current').append('<span class="ps-next"><span class="ps-nextIcon"></span></span>');
+            pgwSlideshow.plugin.find('.ps-current .ps-prev').click(function() {
+                pgwSlideshow.previousSlide();
+            });
+            pgwSlideshow.plugin.find('.ps-current .ps-next').click(function() {
+                pgwSlideshow.nextSlide();
+            });
+        }
+        </addNavigationControls>
+
+        // Add touch controls
+        <addTouchControls>
+        if (pgwSlideshow.config.touchControls) {
+            pgwSlideshow.plugin.find('.ps-current').on('touchstart', function(e) {
+                // touchstart logic
+            });
+            pgwSlideshow.plugin.find('.ps-current').on('touchmove', function(e) {
+                // touchmove logic
+            });
+            pgwSlideshow.plugin.find('.ps-current').on('touchend', function(e) {
+                pgwSlideshow.touchFirstPosition = null;
+            });
+        }
+        </addTouchControls>
+    }
+    
+    // Populate slides
+    <populateSlides>
+    var elementId = 1;
+    pgwSlideshow.plugin.find('.ps-list > ul > li').each(function() {
+        // Element creation logic
+    });
+    </populateSlides>
+
+    // Display list and set List width
+    <displayListAndSetWidth>
+    if (pgwSlideshow.config.displayList) {
+        // Display list logic
+    } else {
+        pgwSlideshow.plugin.find('.ps-list').hide();
+    }
+    </displayListAndSetWidth>
+
+    // Setup autoSlide interval
+    <setupAutoSlide>
+    if (pgwSlideshow.config.autoSlide) {
+        // autoSlide logic
+    }
+    </setupAutoSlide>
+
+    // Hide all slides initially
+    pgwSlideshow.plugin.find('.ps-current > ul > li').hide();
+
+    // Display the first element
+    displayElement(1);
+
+    // Load image and set size
+    <loadImageAndSetSize>
+    pgwSlideshow.plugin.find('.ps-current > ul > li.elt_1 img').on('load', function() {
+        setSizeClass();
+        // height calculation logic
+    });
+    </loadImageAndSetSize>
+
+    // Set initial size class and show plugin
+    setSizeClass();
+    pgwSlideshow.plugin.show();
+
+    return true;
+}
+</initializeSlideshow>
+
+Function 4:
+<reportAccessingEval>
+function reportAccessingEval(globalScope) {
+            const variable = astUtils.getVariableByName(globalScope, "eval");
+
+            if (!variable) {
+                return;
+            }
+
+            const references = variable.references;
+
+            for (let i = 0; i < references.length; ++i) {
+                const reference = references[i];
+                const id = reference.identifier;
+
+                if (id.name === "eval" && !astUtils.isCallee(id)) {
+                    report(id);
+                }
+            }
+}
+</reportAccessingEval>
+
+Function 5:
+<encodeQueryMap>
+function encodeQueryMap(map) {
+  var params = [];
+  for (var key in map) {
+    var value = map[key];
+    params.push(key + '=' + urlEncode_(value));
+  }
+  return params.join('&');
+}
+</encodeQueryMap>
+
+Function 6:
+<treeDFS>
+function treeDFS(tree, callback) {
+  for (let it of tree.slice()) {
+    callback(it, tree);
+    if (typeof it === 'object') {
+      treeDFS(it.children, callback);
+    }
+  }
+}
+</treeDFS>
+
+Function 7:
+<usePlugins>
+function usePlugins(core) {
+  var installedPlugins = [];
+  
+  // Plugin installation logic
+  core.use = function(plugin, pluginOptions) {
+    if ( pluginOptions === void 0 ) pluginOptions = {};
+
+    if (!(installedPlugins.indexOf(plugin) > -1)) {
+      plugin(core, pluginOptions);
+      installedPlugins.push(plugin);
+    }
+  };
+
+  core.installedPlugins = installedPlugins;
+
+  return core;
+}
+</usePlugins>
+
+Function 8:
+<eventHandlingWithRetry>
+function() {
+    // Cleanup and interval handling
+    if (onAvailStack.length === 0) {
+        retryCount = 0;
+        if (this._interval) {
+            // Interval cancellation logic
+        } 
+        return;
+    }
+
+    // Locking mechanism
+    if (this.locked) {
+        return;
+    }
+
+    // Browser-specific adjustments
+    if (this.isIE) {
+        // IE adjustment logic
+    }
+
+    this.locked = true;
+
+    // Execution with retry logic
+    var tryAgain = !loadComplete;
+    if (!tryAgain) {
+        tryAgain = (retryCount > 0 && onAvailStack.length > 0);
+    }
+
+    var notAvail = [];
+    var executeItem = function (el, item) {
+        // executeItem logic
+    };
+
+    // Event execution logic
+    var i, len, item, el, ready=[];
+    for (i=0, len=onAvailStack.length; i<len; i++) {
+        // Execution attempt and marking unavailable elements
+    }
+    for (i=0, len=ready.length; i<len; i++) {
+        // Execution of ready items
+    }
+
+    // Retry count management and interval handling
+    if (tryAgain) {
+        // Retry logic
+    } else {
+        // Interval cancellation logic
+    }
+
+    this.locked = false;
+}
+</eventHandlingWithRetry>
+
+Function 9:
+<setupSlideshowEventListeners>
+function _setup() {
+    slidesDOMEl.addEventListener(TRANSITION_END, onTransitionEnd)
+    containerDOMEl.addEventListener('touchstart', onTouchstart, EVENT_OPTIONS)
+    containerDOMEl.addEventListener('touchmove', onTouchmove, EVENT_OPTIONS)
+    containerDOMEl.addEventListener('touchend', onTouchend, EVENT_OPTIONS)
+
+    if (index !== 0) {
+      _translate(0)
+    }
+}
+</setupSlideshowEventListeners>
+
+Function 10:
+<getValidEnlargeable>
+function getValidEnlargeable( enlargeable ) {
+	return enlargeable && enlargeable.type == CKEDITOR.NODE_ELEMENT && enlargeable.hasAttribute( 'contenteditable' ) ?
+		null : enlargeable;
+}
+</getValidEnlargeable>

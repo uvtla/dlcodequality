@@ -1,0 +1,248 @@
+Function 1:
+```javascript
+function(evt) {
+    <eventHandling>
+    var e = {
+        target: this,
+        type: evt.type,
+        evt: evt
+    };
+    this.fire(evt.type, e);
+    </eventHandling>
+}
+```
+
+Function 2:
+```javascript
+<toggleRowSelection>
+function() {
+    var oThis = this;
+    
+    this.initContentDivEventFun();
+    
+    $('#' + this.options.id + '_header_multi_input').on('click', function(e) {
+        if(this.hasChecked){
+            oThis.setAllRowUnSelect();
+            this.hasChecked = false;
+        }else{
+            oThis.setAllRowSelect();
+            this.hasChecked = true;
+            
+        }
+    });
+}
+</toggleRowSelection>
+```
+
+Function 3:
+```javascript
+<createLegendSymbol>
+function (legend, item) {
+    var radius = pInt(legend.itemStyle.fontSize) / 2;
+    
+    item.legendSymbol = this.chart.renderer.circle(
+        radius,
+        legend.baseline - radius,
+        radius
+    ).attr({
+        zIndex: 3
+    }).add(item.legendGroup);
+    item.legendSymbol.isMarker = true;  
+    
+}
+</createLegendSymbol>
+```
+
+Function 4:
+```javascript
+<initializeSnapshotComparison>
+function( grunt, options, callback ) {
+    this.callback          = callback;
+    this.diffCount         = 0;
+    this.grunt             = grunt;
+    this.options           = options;
+    this.options.indexPath = this.getIndexPath();
+    this.pictureCount      = 0;
+
+    if ( typeof options.template === 'string' ) {
+        this.template = options.template;
+    } else if ( typeof options.template === 'object' ) {
+        this.template = options.template.name;
+    }
+
+    this.movePictures();
+    this.pictures = this.getPreparedPictures();
+}
+</initializeSnapshotComparison>
+```
+
+Function 5 - contains multiple responsibilities:
+```javascript
+function(params) {
+    <prepareEncryptionData>
+    var data = {
+        validity: 10 * 365 * 24 * 60 * 60, 
+        renew: false
+    };
+
+    if (params) {
+        if (params.keyAlgorithm != 'undefined') {
+            data.keyAlgorithm = params.keyAlgorithm;
+        }
+
+        if (parseInt(params.keySize) > 0) {
+            data.keySize = params.keySize;
+        }
+    }
+    </prepareEncryptionData>
+    
+    <performHttpRequest>
+    var httpRequestParams = {
+        url: SERVICE_ADDRESSES.SSO_ADDRESS + SERVICES_PATH.SSO_GENERATE_KEY,
+        method: 'POST',
+        data: data,
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    };
+
+    httpRequest(httpRequestParams, function(result) {
+        if (!result.hasError) {
+            try {
+                var response = JSON.parse(result.result.responseText);
+            }
+            catch (e) {
+                console.log(e);
+            }
+            </performHttpRequest>
+
+            <cacheEncryptionKey>
+            if (canUseCache) {
+                if (db) {
+                    db.users
+                        .update(userInfo.id, {keyId: response.keyId})
+                        .then(function() {
+                            getEncryptionKey({
+                                keyId: response.keyId
+                            }, function(result) {
+                                if (!result.hasError) {
+                                    cacheSecret = result.secretKey;
+                                }
+                            });
+                        })
+                        .catch(function(error) {
+                            fireEvent('error', {
+                                code: error.code,
+                                message: error.message,
+                                error: error
+                            });
+                        });
+                }
+                else {
+                    fireEvent('error', {
+                        code: 6601,
+                        message: CHAT_ERRORS[6601],
+                        error: null
+                    });
+                }
+            }
+            </cacheEncryptionKey>
+
+            <handleHttpRequestError>
+        }
+        else {
+            fireEvent('error', {
+                code: result.error,
+                message: result.error_description,
+                error: result
+            });
+        }
+        </handleHttpRequestError>
+    });
+}
+```
+
+Function 6:
+```javascript
+<createGitTagAndPush>
+function createTag() {
+    var newTagName = 'v1.0.0';
+
+    return git.tag({tag: newTagName, message: newTagName + ' release', annotated: true})
+        .then(git.push.bind(null, {tag: newTagName, remote: remote}));
+}
+</createGitTagAndPush>
+```
+
+Function 7:
+```javascript
+<initializeAssignmentHighlighter>
+function onEnter(assignment) {
+    assignment.highlighter = new Highlighter(context.environment.window.document);
+    assignment.highlighter.nodelist = assignment.conversion.matches;
+}
+</initializeAssignmentHighlighter>
+```
+
+Function 8:
+```javascript
+<dispatchPointerEnterEvent>
+function dispatchPointerEnter(currentTarget, relatedTarget, generateProxy) {
+    var commonParent = getFirstCommonNode(currentTarget, relatedTarget);
+    var node = currentTarget;
+    var nodelist = [];
+    while (node && node !== commonParent) {
+        if (checkEventRegistration(node, 'pointerenter')) 
+            nodelist.push(node);
+        node = node.parentNode;
+    }
+    while (nodelist.length > 0)
+        generateProxy(nodelist.pop());
+}
+</dispatchPointerEnterEvent>
+```
+
+Function 9:
+```javascript
+<constructMerkleTree>
+function MerkleTree(leaves, hashAlgorithm, options) {
+    if (options === void 0) { options = {}; }
+    this.hashAlgo = bufferifyFn(hashAlgorithm);
+    this.leaves = leaves.map(bufferify);
+    this.layers = [this.leaves];
+    this.isBitcoinTree = !!options.isBitcoinTree;
+    this.createHashes(this.leaves);
+}
+</constructMerkleTree>
+```
+
+Function 10:
+```javascript
+<deserializeInstance>
+function deserialize(Clazz, json) {
+    if (hasAnyNullOrUndefined(Clazz, json)) {
+        return void 0;
+    }
+    
+    if (!utils_1.isTargetType(json, 'object')) {
+        return void 0;
+    }
+    
+    var instance = new Clazz();
+    Object.keys(instance).forEach(function (key) {
+        
+        var decoratorMetaData = getJsonProperty(instance, key);
+        
+        if (decoratorMetaData && decoratorMetaData.customConverter) {
+            instance[key] = decoratorMetaData.customConverter.fromJson(json[decoratorMetaData.name || key]);
+        }
+        else {
+            instance[key] = decoratorMetaData ? mapFromJson(decoratorMetaData, instance, json, key) : json[key];
+        }
+    });
+    return instance;
+}
+</deserializeInstance>
+```
+
+The SRP compliance annotations identify whether the functions have a single responsibility or if they violate SRP by containing multiple distinct tasks that should be separated into individual functions.

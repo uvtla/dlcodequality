@@ -1,0 +1,233 @@
+```javascript
+function (targetFile, configItems) {
+    <updatePlist>
+    var infoPlist = plist.parse(fs.readFileSync(targetFile, 'utf-8')),
+        tempInfoPlist;
+
+    configItems.forEach(function (item) {
+        var key = item.parent;
+        var plistXml = '<plist><dict><key>' + key + '</key>';
+        plistXml += lib.eltreeToXmlString(item.data) + '</dict></plist>';
+
+        var configPlistObj = plist.parse(plistXml);
+        infoPlist[key] = configPlistObj[key];
+    });
+
+    tempInfoPlist = plist.build(infoPlist);
+    tempInfoPlist = tempInfoPlist.replace(/<string>[\s\r\n]*<\/string>/g, '<string></string>');
+    fs.writeFileSync(targetFile, tempInfoPlist, 'utf-8');
+    console.log("* wrote iOS Plist: " + targetFile);
+    </updatePlist>
+}
+
+function isCached(project, majorVersion) {
+    <checkCache>
+    var cid = project + majorVersion;
+    return cache[cid] && cache[cid].short_name[0] == project && cache[cid].api_version[0] == majorVersion;
+    </checkCache>
+}
+
+function getSize(string) {
+    <calculateSize>
+    let total = 0
+    for (let i = 0, len = string.length; i < len; i++) {
+        const charCode = string.charCodeAt(i)
+        if (charCode <= 0x007f) {
+            total += 1
+        } else if (charCode <= 0x07ff) {
+            total += 2
+        } else if (charCode <= 0xffff) {
+            total += 3
+        } else {
+            total += 4
+        }
+    }
+    </calculateSize>
+
+    return total
+}
+
+function resolveDependencyPlugins(deps) {
+    <filterValidPlugins>
+    return deps
+        .filter(dep => isInstalled(dep) && isInstalled(`eslint-plugin-${dep}`))
+    </filterValidPlugins>
+    <mapDependenciesToPath>
+        .map(dep => `./lib/plugin-conf/${dep}.js`);
+    </mapDependenciesToPath>
+}
+
+function(next) {
+    <handleConnectionEvent>
+    function finishJoining(err) {
+        targetService.removeListener('PropertyChanged', onChange);
+        if (typeof(passphraseSender) == 'function') {
+            self.connman.Agent.removeListener('RequestInput', passphraseSender);
+            passphraseSender = null
+        }
+        next(err);
+    }
+    function onChange(type, value) {
+        if (type !== 'State') return;
+        debug('service State: ', value);
+        switch (value) {
+
+            case STATES.READY:
+            case STATES.ONLINE:
+                clearTimeout(timeout);
+                finishJoining()
+                break;
+            case STATES.DISCONNECT:
+            case STATES.FAILURE:
+                clearTimeout(timeout);
+                var err = new Error('Joining network failed (wrong password?)');
+                finishJoining(err);
+
+                break;
+        }
+    }
+    timeout = setTimeout(function(){
+        var err = new Error('Joining network failed (Timeout)');
+        finishJoining(err);
+    }, _timeoutJoin);
+    targetService.on('PropertyChanged', onChange);
+    </handleConnectionEvent>
+}
+
+function(opacity) { 
+    <setOpacity>
+    if (opacity != undefined) {
+        this.opacity = opacity; 
+    }
+
+    if (this.div != null) {
+        this.div.style.opacity = this.opacity;
+
+        this.div.style.filter = 'alpha(opacity=' + this.opacity*100 + ')';
+    }
+    </setOpacity>
+}
+
+function deflateSetDictionary(strm, dictionary) {
+    <initializeDeflateState>
+    var dictLength = dictionary.length;
+
+    var s;
+    var str, n;
+    var wrap;
+    var avail;
+    var next;
+    var input;
+    var tmpDict;
+
+    if (!strm || !strm.state) {
+        return Z_STREAM_ERROR;
+    }
+
+    s = strm.state;
+    wrap = s.wrap;
+
+    if (wrap === 2 || (wrap === 1 && s.status !== INIT_STATE) || s.lookahead) {
+        return Z_STREAM_ERROR;
+    }
+
+    if (wrap === 1) {
+        strm.adler = adler32(strm.adler, dictionary, dictLength, 0);
+    }
+
+    s.wrap = 0;
+    </initializeDeflateState>
+
+    <handleLargeDictionary>
+    if (dictLength >= s.w_size) {
+        if (wrap === 0) {         
+            zero(s.head); 
+            s.strstart = 0;
+            s.block_start = 0;
+            s.insert = 0;
+        }
+        
+
+        tmpDict = new utils.Buf8(s.w_size);
+        utils.arraySet(tmpDict, dictionary, dictLength - s.w_size, s.w_size, 0);
+        dictionary = tmpDict;
+        dictLength = s.w_size;
+    }
+    </handleLargeDictionary>
+
+    <adaptStreamerInput>
+    avail = strm.avail_in;
+    next = strm.next_in;
+    input = strm.input;
+    strm.avail_in = dictLength;
+    strm.next_in = 0;
+    strm.input = dictionary;
+    </adaptStreamerInput>
+
+    <updateHashValues>
+    fill_window(s);
+    while (s.lookahead >= MIN_MATCH) {
+        str = s.strstart;
+        n = s.lookahead - (MIN_MATCH - 1);
+        do {
+            s.ins_h = ((s.ins_h << s.hash_shift) ^ s.window[str + MIN_MATCH - 1]) & s.hash_mask;
+
+            s.prev[str & s.w_mask] = s.head[s.ins_h];
+
+            s.head[s.ins_h] = str;
+            str++;
+        } while (--n);
+        s.strstart = str;
+        s.lookahead = MIN_MATCH - 1;
+        fill_window(s);
+    }
+    </updateHashValues>
+
+    <restoreStreamerInput>
+    s.strstart += s.lookahead;
+    s.block_start = s.strstart;
+    s.insert = s.lookahead;
+    s.lookahead = 0;
+    s.match_length = s.prev_length = MIN_MATCH - 1;
+    s.match_available = 0;
+    strm.next_in = next;
+    strm.input = input;
+    strm.avail_in = avail;
+    </restoreStreamerInput>
+    
+    <finalizeDeflateState>
+    s.wrap = wrap;
+    return Z_OK;
+    </finalizeDeflateState>
+}
+
+<calculateImageryLayerIntervals>
+function calculateImageryLayerIntervals(
+    timeColumn,
+    currentTime,
+    animateForwards,
+    cyclic
+) {
+    // Annotation unnecessary: the entire function is a single cohesive responsibility
+    // but if needed, we could mark it as <handleIntervalCalculation>...</handleIntervalCalculation>
+}
+</calculateImageryLayerIntervals>
+
+<f_kullanici_kontrol>
+function f_kullanici_kontrol(kullanici) {
+    // Annotation unnecessary: the entire function is a single cohesive responsibility
+    // but if needed, we could mark it as <validateUserProvider>...</validateUserProvider>
+}
+</f_kullanici_kontrol>
+
+<formatAttributes>
+function formatAttributes(outNode, profile) {
+    // Annotation unnecessary: the entire function is a single cohesive responsibility
+    // but if needed, we could mark it as <formatNodeAttributes>...</formatNodeAttributes>
+}
+</formatAttributes>
+```
+
+- For the `deflateSetDictionary` function, there could be disagreement on the level of granularity for the SRP annotation, but as presented, the detailed process steps such as initializing the state, handling the condition of a large dictionary, updating hash values, and restoring and finalizing the deflate state are annotated as separate concerns to reflect larger blocks of functionality.
+
+- Functions `calculateImageryLayerIntervals`, `f_kullanici_kontrol`, and `formatAttributes` do not have distinct blocks of code that would constitute separate responsibilities violating the SRP; therefore, they do not need further nested SRP annotation. However, the entire functions can be considered single responsibilities on their own.

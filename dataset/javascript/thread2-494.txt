@@ -1,0 +1,276 @@
+```javascript
+<shouldRecycleElement>
+function shouldRecycleElement(oldElement, props, tag) {
+  return (
+    !isTextNode(oldElement) &&
+    oldElement.id === "" &&
+    !nodeTypeDiffers(oldElement, tag)
+  );
+}
+</shouldRecycleElement>
+
+<buildIdentifier>
+function (aggId, cmd) {
+    <extractAggregate>
+    var aggregate = '';
+    if (dotty.exists(cmd, this.definitions.command.aggregate)) {
+      aggregate = dotty.get(cmd, this.definitions.command.aggregate);
+    }
+    </extractAggregate>
+
+    <extractContext>
+    var context = '';
+    if (dotty.exists(cmd, this.definitions.command.context)) {
+      context = dotty.get(cmd, this.definitions.command.context);
+    }
+    </extractContext>
+
+    return context + aggregate + aggId;
+}
+</buildIdentifier>
+
+<mgf>
+function mgf(y, x, n, p, clbk) {
+	var len = x.length,
+		fcn,
+		v, i;
+
+    <configurePartialFunction>
+	fcn = partial(n, p);
+    </configurePartialFunction>
+	for (i = 0; i < len; i++) {
+        <computeYValues>
+		v = clbk(x[i], i);
+		if (typeof v === 'number') {
+			y[i] = fcn(v);
+		} else {
+			y[i] = NaN;
+		}
+        </computeYValues>
+	}
+	return y;
+}
+</mgf>
+
+<_handleKeyEvent>
+function _handleKeyEvent(e) {
+    <normalizeEventKey>
+    if (typeof e.which !== 'number') {
+        e.which = e.keyCode;
+    }
+    </normalizeEventKey>
+
+    <getCharacterFromEvent>
+    var character = _characterFromEvent(e);
+    </getCharacterFromEvent>
+
+    <ignoreUnwantedKeyUp>
+    if (e.type == 'keyup' && _ignoreNextKeyup === character) {
+        _ignoreNextKeyup = false;
+        return;
+    }
+    </ignoreUnwantedKeyUp>
+
+    <delegateHandlingKeyPress>
+    self.handleKey(character, _eventModifiers(e), e);
+    </delegateHandlingKeyPress>
+}
+</_handleKeyEvent>
+
+<findAssociated>
+function findAssociated(id, next, opts) {
+    <setupSearchCondition>
+	var where = (id ? {id: id} : null);
+    </setupSearchCondition>
+
+    <setDefaultOptions>
+    opts = opts || {};
+    </setDefaultOptions>
+
+    <findModels>
+	var finding = app.models.Table
+		.find()
+		.where(where)
+		.exec(associateScores)
+    </findModels>
+
+    <associateScores>
+	var data;
+	function associateScores(err, models) {
+		<dataInitialization>
+		data = [];
+        </dataInitialization>
+
+		<handleError>
+		if (err)
+			next('Failed to retrieve data');
+        </handleError>
+
+		<prepareAsyncTasks>
+		var findTasks = [];
+		models.forEach(function (table) {
+			var task = function (cb) {
+				associateTable(table, function returnToAsync(associated) {
+					cb(null, associated);
+				});
+			};
+			findTasks.push(task);
+		});
+        </prepareAsyncTasks>
+
+		<executeAsyncTasks>
+		async.parallel(findTasks, afterAssociateScores);
+        </executeAsyncTasks>
+	}
+    </associateScores>
+
+	<processTablesAfterAssociation>
+	function afterAssociateScores(err, results) {
+		<dataAggregation>
+		data = results;
+        </dataAggregation>
+
+		<processResults>
+		processTables(opts);
+        </processResults>
+	}
+    </processTablesAfterAssociation>
+
+	<processTables>
+	function processTables() {
+		<customizeForViewing>
+		if (opts && opts.isView) {
+			_.forEach(data, function (table) {
+				table.columns = table.viewColumns || table.columns
+			})
+		}
+        </customizeForViewing>
+
+		<invokeMethodsOnData>
+		_.invokeMap(data, 'calculate', null);
+		_.invokeMap(data, 'headers', null);
+        </invokeMethodsOnData>
+
+		<associateTeamData>
+		associateTeams();
+        </associateTeamData>
+	}
+    </processTables>
+
+	<associateTeams>
+	var teams;
+	function associateTeams() {
+		<initializeTeams>
+		teams = {};
+        </initializeTeams>
+
+		<associateTablesWithTeams>
+		function associateWithTeams(teams, tableModel) {
+			_.forEach(tableModel.scores, function (teamRow) {
+				teamRow['team'] = teams[teamRow.teamId] || {};
+			});
+		}
+        </associateTablesWithTeams>
+
+		<findAndProcessTeams>
+		app.models.Team.find().exec(function (err, collection) {
+			for (var k in collection) {
+				var team = collection[k];
+				teams[team.id] = team;
+			}
+
+			afterFindTeams();
+		});
+
+		function afterFindTeams() {
+			_.forEach(data, function (tableModel) {
+				associateWithTeams(teams, tableModel);
+			});
+
+			returnData();
+		}
+        </findAndProcessTeams>
+	}
+    </associateTeams>
+
+	<returnFinalData>
+	function returnData() {
+		next(data);
+	}
+    </returnFinalData>
+}
+</findAssociated>
+
+<SessionConstructor>
+function Session(context) {
+    this.context = context
+    <linkCookies>
+    this.cookies = context.cookies
+    </linkCookies>
+    <bindUpdateFunction>
+    this.update = this.update.bind(this)
+    </bindUpdateFunction>
+}
+</SessionConstructor>
+
+<removeColumn>
+function removeColumn(values, col, colsPerRow) {
+  <remapValuesWithoutColumn>
+  var n = 0;
+  for (var i = 0, l = values.length; i < l; i++) {
+    if (i % colsPerRow !== col) values[n++] = values[i];
+  }
+  </remapValuesWithoutColumn>
+  <resizeValuesArray>
+  values.length = n;
+  </resizeValuesArray>
+}
+</removeColumn>
+
+<sortList>
+function (list) {
+    <removeDuplicates>
+    const listNoDuplicate = difference([], list);
+    </removeDuplicates>
+    <sortNumericOrLexicographic>
+    if (typeof list[0] == "number") {
+      return listNoDuplicate.sort((a, b) => a - b);
+    }
+    return listNoDuplicate.sort();
+    </sortNumericOrLexicographic>
+}
+</sortList>
+
+<writeAndEndStream>
+function next() {
+	while (array.length) {
+		<writeChunks>
+		value = array.shift();
+		if (stream.write(value) === false) {
+			return stream.once('drain', next);
+		}
+		</writeChunks>
+	}
+	<endStream>
+	stream.end();
+	</endStream>
+}
+</writeAndEndStream>
+
+<getTabIndexValue>
+function getTabIndexValue(element) {
+    <checkValidTabIndex>
+    if (!hasValidTabIndex(element)) {
+        return null;
+    }
+    </checkValidTabIndex>
+
+    <parseTabIndex>
+    var tabIndex = parseInt(element.getAttribute('tabindex'), 10);
+    </parseTabIndex>
+    <returnTabIndex>
+    return isNaN(tabIndex) ? -1 : tabIndex;
+    </returnTabIndex>
+}
+</getTabIndexValue>
+```

@@ -1,0 +1,229 @@
+<parseMLComment>
+function parseMLComment(css) {
+    var start = pos;
+
+    <findCommentEnd>
+    for (pos += 2; pos < css.length; pos++) {
+      if (css.charAt(pos) === '*' && css.charAt(pos + 1) === '/') {
+        pos++;
+        break;
+      }
+    }
+    </findCommentEnd> 
+
+    var comment = css.substring(start, pos + 1);
+    <tokenizeComment>
+    pushToken(TokenType.CommentML, comment, col);
+    </tokenizeComment>
+
+    <updateLineAndColumn>
+    var newlines = comment.split('\n');
+    if (newlines.length > 1) {
+      ln += newlines.length - 1;
+      col = newlines[newlines.length - 1].length;
+    } else {
+      col += (pos - start);
+    }
+    </updateLineAndColumn>
+  }
+</parseMLComment>
+
+<makeId>
+function makeId(length = RANDOM_CHARACTER_LENGTH) {
+    let text = "";
+    <generateId>
+    for (let i = 0; i < length; i++) {
+        text += RANDOM_CHARACTER_SOURCE.charAt(Math.floor(Math.random() * RANDOM_CHARACTER_SOURCE.length));
+    }
+    </generateId>
+
+    return text;
+}
+</makeId>
+
+<addMatchers>
+function addMatchers(sections, tree, resultSections, results, index){
+	<addWildcardAll>
+	var hasAll = getChild(tree, WILDCARD_ALL);
+	if(hasAll) addValue(resultSections.concat(WILDCARD_ALL), hasAll, results);
+	</addWildcardAll>
+
+	<checkEndCondition>
+	var isEnd = index === sections.length;
+	if(isEnd) {
+		addValue(resultSections, tree, results);
+		return;
+	}
+	</checkEndCondition>
+
+	<addWildcardOne>
+	var hasOne = getChild(tree, WILDCARD_ONE);
+	if (hasOne) addMatchers(
+		sections,
+		hasOne,
+		resultSections.concat(WILDCARD_ONE),
+		results,
+		index + 1
+	);
+	</addWildcardOne>
+
+	<addSpecificSection>
+	var section = sections[index];
+	var hasSection = getChild(tree, section);
+	if (hasSection) addMatchers(
+		sections,
+		hasSection,
+		resultSections.concat(section),
+		results,
+		index + 1
+	);
+	</addSpecificSection>
+}
+</addMatchers>
+
+<lookupCountryByIdShouldBeCalled>
+function lookupCountryByIdShouldBeCalled(q) {
+  
+  <defineHasCountryId>
+  var hasCountryId = function(result) {
+    return _.some(result.Hierarchy, (h) => { return h.hasOwnProperty('country_id');});
+  };
+  </defineHasCountryId>
+
+  <checkIfLookupCountryByIdShouldNotBeCalled>
+  if (!_.some(q.results, hasCountryId)) {
+    return false;
+  }
+
+  
+  if (q.lookupCountryByIdHasBeenCalled) {
+    return false;
+  }
+
+  
+  return !_.some(q.results, (result) => { return result.Placetype === 'country'; } );
+  </checkIfLookupCountryByIdShouldNotBeCalled>
+}
+</lookupCountryByIdShouldBeCalled>
+
+<getModulePath>
+function getModulePath (mod, useAbsolutePath) {
+  <deriveModulePath>
+  const modPath =
+    mod === 'regenerator-runtime'
+      ? 'regenerator-runtime/runtime'
+      : `core-js/modules/${mod}`
+  return useAbsolutePath ? require.resolve(modPath) : modPath
+  </deriveModulePath>
+}
+</getModulePath>
+
+<updatePositionAndDirection>
+function(){
+		var pos = this.getpos(0);
+		<checkForSamePosition>
+		if(this.prevPos.equals(pos)){ return;}
+		</checkForSamePosition>
+
+		var cell = this.prevPos.getc();
+		
+		if(!cell.isnull){
+			if(cell.qnum!==-1){
+				<determineDirection>
+				var dir = this.prevPos.getdir(pos,2);
+				if(dir!==cell.NDIR){
+					<setNewDirection>
+					cell.setQdir(cell.qdir!==dir?dir:0);
+					cell.draw();
+					</setNewDirection>
+				}
+				</determineDirection>
+			}
+		}
+		this.prevPos = pos;
+	}
+</updatePositionAndDirection>
+
+<AnnotationStyler>
+function AnnotationStyler (view, annotationModel) {
+		this._view = view;
+		this._annotationModel = annotationModel;
+		var self = this;
+		<addEventListeners>
+		this._listener = {
+			onDestroy: function(e) {
+				self._onDestroy(e);
+			},
+			onLineStyle: function(e) {
+				self._onLineStyle(e);
+			},
+			onChanged: function(e) {
+				self._onAnnotationModelChanged(e);
+			}
+		};
+		view.addEventListener("Destroy", this._listener.onDestroy); 
+		view.addEventListener("postLineStyle", this._listener.onLineStyle); 
+		annotationModel.addEventListener("Changed", this._listener.onChanged); 
+		</addEventListeners>
+	}
+ </AnnotationStyler>
+
+<checkIngredients>
+function checkIngredients(flapjack, options) {
+    options = options || {};
+
+    
+    <adjustForOptions>
+    if (flapjack && !_.isFunction(flapjack) && flapjack.client) {
+        flapjack = flapjack.client;
+    }
+    
+    else if (flapjack && options.ngType === 'factory' && !options.isClient) {
+        <getModuleInfo>
+        var moduleInfo = this.getModuleInfo(flapjack) || {};
+        if (!moduleInfo.client) { return null; }
+        </getModuleInfo>
+    }
+    </adjustForOptions>
+
+    return flapjack;
+}
+</checkIngredients>
+
+<createFiles>
+function createFiles(next) {
+    <normalizeAndParseDirectories>
+    var files = common.directories.normalize(
+      common.mixin({}, flatiron.constants.DIRECTORIES, { '#ROOT': root }),
+      JSON.parse(fs.readFileSync(path.join(scaffold, 'files.json'), 'utf8'))
+    );
+    </normalizeAndParseDirectories>
+
+    <copyFiles>
+    function copyFile(file, nextFile) {
+      app.log.info('Writing file ' + file.grey);
+      common.cpr(path.join(scaffold, file), files[file], nextFile);
+    }
+    </copyFiles>
+
+    <iterateAndCopyFiles>
+    common.async.mapSeries(Object.keys(files), copyFile, next);
+    </iterateAndCopyFiles>
+  }
+</createFiles>
+
+<RateCenterSearchAndOrdeNumbersQuery>
+function RateCenterSearchAndOrdeNumbersQuery(query) {
+	<convertToXml>
+	this.toXml = function () {
+		return {
+			"RateCenterSearchAndOrderType": {
+				"RateCenter": {_text: query.rateCenter},
+				"State": {_text: query.state},
+				"Quantity": {_text: query.quantity || 1}
+			}
+		};
+	};
+	</convertToXml>
+}
+</RateCenterSearchAndOrdeNumbersQuery>

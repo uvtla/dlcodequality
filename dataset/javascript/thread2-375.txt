@@ -1,0 +1,256 @@
+```javascript
+<lookForExternalDependencies>
+function lookForExternalDependencies(jsFiles) {
+  const
+    javascriptSources = [],
+    resources = {};
+
+  for (const jsFileName of Object.keys(jsFiles)) {
+    <Project.srcOrLibPath>
+    const depFileName = `${jsFileName}.dep`;
+    if (Project.srcOrLibPath(depFileName)) {
+    </Project.srcOrLibPath>
+      <SourceAndDependencies>
+      const depFile = new Source(Project, depFileName);
+      try {
+        const
+          json = depFile.read(),
+          dependencies = ToloframeworkPermissiveJson.parse(json);
+
+        lookForExternalDependenciesJS(dependencies.js, javascriptSources);
+
+        lookForExternalDependenciesRES(dependencies.res, resources, depFile);
+      } catch (ex) {
+        Fatal.fire(
+          `Unable to parse JSON file "${depFile.getAbsoluteFilePath()}"!\n${ex}`,
+          Project.srcOrLibPath(jsFileName)
+        );
+      }
+      </SourceAndDependencies>
+    }
+  }
+
+  return {
+    js: javascriptSources,
+    res: resources
+  };
+}
+</lookForExternalDependencies>
+
+<recursiveMerge>
+function recursiveMerge(target, src) {
+    for (var prop in src) {
+        if (src.hasOwnProperty(prop)) {
+            if (target.prototype && target.prototype.constructor === target) {
+                
+                clobber(target.prototype, prop, src[prop]);
+            } else {
+                <objectMerge>
+                if (typeof src[prop] === 'object' && typeof target[prop] === 'object') {
+                    recursiveMerge(target[prop], src[prop]);
+                } else {
+                    clobber(target, prop, src[prop]);
+                }
+                </objectMerge>
+            }
+        }
+    }
+}
+</recursiveMerge>
+
+<anonymousHideElement>
+function (element) {
+        element = $(element);
+
+        this.fireEvent('hiding', [element]);
+
+        element.transitionend(function () {
+            element.remove();
+            this.fireEvent('hidden');
+        }.bind(this)).conceal();
+    }
+</anonymousHideElement>
+
+<getTrackableFunction>
+function getTrackableFunction(obj, name, trackedFunctions) {
+  var debugName = obj.getDebugName();
+  var originalFn = obj[name];
+  var fnName = `${debugName}.${name}`;
+  var instrumentedFn = instrumentFunction(fnName, originalFn);
+  var fn = function tungstenTrackingPassthrough() {
+    
+    if (trackedFunctions[name]) {
+      return instrumentedFn.apply(this, arguments);
+    } else {
+      return originalFn.apply(this, arguments);
+    }
+  };
+  fn.original = originalFn;
+  return fn;
+}
+</getTrackableFunction>
+
+<createProgram>
+function createProgram(
+gl, shaders, opt_attribs, opt_locations, opt_errorCallback) {
+  const progOptions = getProgramOptions(opt_attribs, opt_locations, opt_errorCallback);
+  const realShaders = [];
+  const newShaders = [];
+  for (let ndx = 0; ndx < shaders.length; ++ndx) {
+    <processShaderInputs>
+    let shader = shaders[ndx];
+    if (typeof (shader) === 'string') {
+      const elem = getElementById(shader);
+      const src = elem ? elem.text : shader;
+      let type = gl[defaultShaderType[ndx]];
+      if (elem && elem.type) {
+        type = getShaderTypeFromScriptType(gl, elem.type) || type;
+      }
+      shader = loadShader(gl, src, type, progOptions.errorCallback);
+      newShaders.push(shader);
+    }
+    if (helper.isShader(gl, shader)) {
+      realShaders.push(shader);
+    }
+    </processShaderInputs>
+  }
+
+  if (realShaders.length !== shaders.length) {
+    <handleShaderError>
+    progOptions.errorCallback("not enough shaders for program");
+    deleteShaders(gl, newShaders);
+    return null;
+    </handleShaderError>
+  }
+
+  <linkAndValidateProgram>
+  const program = gl.createProgram();
+  realShaders.forEach(function (shader) {
+    gl.attachShader(program, shader);
+  });
+  if (progOptions.attribLocations) {
+    Object.keys(progOptions.attribLocations).forEach(function (attrib) {
+      gl.bindAttribLocation(program, progOptions.attribLocations[attrib], attrib);
+    });
+  }
+  let varyings = progOptions.transformFeedbackVaryings;
+  if (varyings) {
+    if (varyings.attribs) {
+      varyings = varyings.attribs;
+    }
+    if (!Array.isArray(varyings)) {
+      varyings = Object.keys(varyings);
+    }
+    gl.transformFeedbackVaryings(program, varyings, progOptions.transformFeedbackMode || gl.SEPARATE_ATTRIBS);
+  }
+  gl.linkProgram(program);
+
+  
+  const linked = gl.getProgramParameter(program, gl.LINK_STATUS);
+  if (!linked) {
+    
+    const lastError = gl.getProgramInfoLog(program);
+    progOptions.errorCallback("Error in program linking:" + lastError);
+
+    gl.deleteProgram(program);
+    deleteShaders(gl, newShaders);
+    return null;
+  }
+  </linkAndValidateProgram>
+
+  return program;
+}
+</createProgram>
+
+<collisionComponentInitialization>
+function (params) {
+        params = _.extend({
+            anchor: {
+                x: 0.5,
+                y: 0.5
+            }
+        }, params);
+
+        this.$id = 'collision';
+        this.$deps = ['position'];
+
+        this.width = params.width;
+        this.height = params.height;
+        this.anchor = params.anchor;
+    }
+</collisionComponentInitialization>
+
+<aqPrepareAndSubscribe>
+function main() {
+    aqParseOptions();
+
+    aq_queuename = 'amqpsnoop.' + Math.random() * 10000000;
+    aq_amqp = mod_amqp.createConnection(aq_broker);
+    aq_amqp.on('ready', function () {
+        aq_queue = aq_amqp.queue(aq_queuename,
+            { exclusive: true }, function () {
+                aq_queue.bind(aq_exchange, aq_routekey);
+                aq_queue.subscribe(aqReceiveMessage);
+            });
+    });
+}
+</aqPrepareAndSubscribe>
+
+<buildPack>
+function buildPack(webpackConfig, cb, spinnerText) {
+  var spinner = ora(spinnerText || 'building for uncompressed files...')
+  spinner.start()
+  webpack(webpackConfig, function (err, stats) {
+    spinner.stop()
+    if (err) {
+      throw err
+    }
+    process.stdout.write(stats.toString({
+      colors: true,
+      modules: false,
+      children: false,
+      chunks: false,
+      chunkModules: false
+    }) + '\n')
+    <callCallback>
+    cb && cb()
+    </callCallback>
+  })
+}
+</buildPack>
+
+<run>
+function run(how) {
+  <validateParameters>
+  if (!how || (how != "ping" && how != "pong")) {
+    console.log("must enter `ping` or `pong` as parameter")
+    process.exit(1)
+  }
+  </validateParameters>
+
+  <setPingPong>
+  ping = how
+  pong = (ping == "ping") ? "pong" : "ping"
+  </setPingPong>
+  <createSession>
+  ragents.createSession(options, sessionCreated)
+  </createSession>
+}
+</run>
+
+<clickOutsideHandler>
+function handler(e) {
+      if (!vNode.context) return
+
+      
+      var elements = e.path || (e.composedPath && e.composedPath())
+      elements && elements.length > 0 && elements.unshift(e.target)
+      
+      if (el.contains(e.target) || isPopup(vNode.context.popupItem, elements)) return
+
+      <callbackInvocation>
+      el.__vueClickOutside__.callback(e)
+      </callbackInvocation>
+    }
+</clickOutsideHandler>
+```

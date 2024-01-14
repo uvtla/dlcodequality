@@ -1,0 +1,383 @@
+```javascript
+<setText>
+function setText(value) {
+  value = "" + value;
+
+  <updateTextIfDifferent>
+  if (this._text !== value) {
+    <setTextFromArray>
+    if (Array.isArray(value)) {
+      this._text = value.join("\n");
+    } </setTextFromArray>
+    <setTextFromValue>
+    else {
+      this._text = value;
+    }
+    </setTextFromValue>
+
+    this.isDirty = true;
+  }
+  </updateTextIfDifferent>
+
+  return this;
+}
+</setText>
+
+<compareSets>
+function(compareSets)(set1, set2) {
+    <checkLengthEquality>
+    if(set1.length != set2.length) return false;
+    </checkLengthEquality>
+    var foundIndexMap = [];
+    <findMatchingValuesInSets>
+    for(var i=0; i < set1.length; i++) {
+      var val = set1[i];
+      for(var j=0; j < set2.length; j++) {
+        
+        <evaluateCandidates>
+        var candidate = set2[j];
+        if(this.eq(val, candidate) && (foundIndexMap.indexOf(j) < 0)) {
+          foundIndexMap.push(j);
+        }
+        </evaluateCandidates>
+      }
+    }
+    </findMatchingValuesInSets>
+    <returnComparisonResult>
+    return (foundIndexMap.length == set1.length);
+    </returnComparisonResult>
+  }
+</compareSets>
+
+<mapObjectTree>
+function mapObjectTree(obj, handler) {
+  var limit = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 10000;
+  
+  <initializeMapping>
+  var r;
+  var count = 0;
+  var stack = [{
+    value: obj
+  }];
+  </initializeMapping>
+
+  <processMapping>
+  var _loop2 = function _loop2() {
+    <checkLimit>
+    if (count >= limit) {
+      throw "mapObjectTree: limit(".concat(limit, ") reached, object may has circular reference");
+    }
+    </checkLimit>
+
+    <incrementCounter>
+    count++;
+    </incrementCounter>
+
+    <destructureShiftedValue>
+    var _stack$shift = stack.shift(),
+        value = _stack$shift.value,
+        key = _stack$shift.key,
+        parent = _stack$shift.parent,
+        newParent = _stack$shift.newParent;
+    </destructureShiftedValue>
+
+    <runHandler>
+    var t = handler(value, key, parent);
+    </runHandler>
+
+    <defineAssignment>
+    var assign = function assign(value, key, canPush) {
+      <initializeAssignedValue>
+      if (isArray(value)) {
+        value = [];
+      } else if (isObject(value)) {
+        value = {};
+      }
+      </initializeAssignedValue>
+
+      <assignValueToParentOrRoot>
+      if (parent) {
+        if (isArray(newParent) && canPush) {
+          newParent.push(value);
+        } else {
+          newParent[key] = value;
+        }
+      } else {
+        r = value;
+      }
+      </assignValueToParentOrRoot>
+
+      return value;
+    };
+    </defineAssignment>
+
+    <processTransformedValue>
+    var newVal = void 0,
+        val = void 0,
+        toDelete = void 0,
+        stop = void 0,
+        skip = void 0;
+
+    if (!t) {
+      
+      val = value;
+      newVal = assign(value, key);
+    } else {
+      var key2 = t.key,
+          _value = t.value;
+      val = _value;
+
+      if (t.delete || key2 === false) {
+        toDelete = true;
+      } else if (key2 == null) {
+        newVal = assign(_value, key, true);
+      } else if (t.hasOwnProperty('value')) {
+        newVal = assign(_value, key2);
+      }
+
+      stop = t.stop;
+      skip = t.skip;
+    }
+    </processTransformedValue>
+
+    <handleDirectives>
+    if (toDelete) {
+      return "continue";
+    }
+
+    if (skip) {
+      return "continue";
+    }
+
+    if (stop) {
+      return "break";
+    }
+    </handleDirectives>
+
+    <pushChildrenOntoStack>
+    if (isArray(val)) {
+      var len = val.length;
+
+      for (var i = 0; i < len; i++) {
+        stack.push({
+          value: val[i],
+          key: i,
+          parent: val,
+          newParent: newVal
+        });
+      }
+    } else if (isObject(val)) {
+      Object.keys(val).forEach(function (key) {
+        stack.push({
+          value: val[key],
+          key: key,
+          parent: val,
+          newParent: newVal
+        });
+      });
+    }
+    </pushChildrenOntoStack>
+  };
+  </processMapping>
+
+  <executeLoop>
+  _loop: while (stack.length > 0) {
+    var _ret = _loop2();
+
+    switch (_ret) {
+      case "continue":
+        continue;
+
+      case "break":
+        break _loop;
+    }
+  }
+  </executeLoop>
+
+  <returnResult>
+  return r;
+  </returnResult>
+}
+</mapObjectTree>
+
+<padRight>
+function padRight(x, padding) {
+  <initializeString>
+  if (x) {
+    x += '';
+  } else {
+    x = '';
+  }
+  </initializeString>
+  var buf = [];
+  <padWithZeros>
+  while (buf.length + x.length < padding) {
+    buf.push('0');
+  }
+  </padWithZeros>
+  <returnPaddedString>
+  return x + buf.join('');
+  </returnPaddedString>
+}
+</padRight>
+
+<getProperty>
+function getProperty (service, resource, action, propertySpec) {
+  const parts = propertySpec.split('.')
+  
+  <determineTargetBasedOnPrefix>
+  var target
+  switch (parts[ 0 ]) {
+    case 'action':
+      target = action
+      break;
+    case 'resource':
+      target = resource
+      break;
+    default:
+      target = service
+  }
+  </determineTargetBasedOnPrefix>
+  
+  <fetchProperty>
+  const property = parts[ 1 ]
+  return { key: property, value: target ? target[ property ] : null }
+  </fetchProperty>
+}
+</getProperty>
+
+<checkConditional>
+function checkConditional(runner, conditional) {
+  try {
+    <evaluateConditional>
+    return conditional[1].call(runner, runner.target, runner.context);
+    </evaluateConditional>
+  } catch (e) {}
+}
+</checkConditional>
+
+<handleUnauthorizedAPIResponse>
+function handleUnauthorizedAPIResponse(error) {
+    <parseErrorResponse>
+    const response = error && error.response;
+    const errorStatus = response && response.status;
+    const requestUrl = response && response.config && response.config.url;
+    const requestIsTokenRefresh = requestUrl === authenticatedAPIClient.refreshAccessTokenEndpoint;
+    </parseErrorResponse>
+
+    <logBasedOnErrorStatus>
+    switch (errorStatus) { 
+      case 401:
+        if (requestIsTokenRefresh) {
+          logInfo(`Unauthorized token refresh response from ${requestUrl}. This is expected if the user is not yet logged in.`);
+        } else {
+          logInfo(`Unauthorized API response from ${requestUrl}`);
+        }
+        break;
+      case 403:
+        logInfo(`Forbidden API response from ${requestUrl}`);
+        break;
+    }
+    </logBasedOnErrorStatus>
+
+    <rejectPromiseWithError>
+    return Promise.reject(error);
+    </rejectPromiseWithError>
+  }
+</handleUnauthorizedAPIResponse>
+
+<generateCSS>
+function(styles, elementName) {
+                    var name, value, css = '';
+
+                    <serializeStylesForElement>
+                    function serializeStyles(name) {
+                        var styleList, i, l, value;
+                        styleList = validStyles[name];
+                        if (styleList) {
+                            for (i = 0, l = styleList.length; i < l; i++) {
+                                name = styleList[i];
+                                value = styles[name];
+                                value && (css += (css.length > 0 ? ' ' : '') + name + ': ' + value + ';');
+                            }
+                        }
+                    }
+                    </serializeStylesForElement>
+
+                    <checkIfStyleIsValid>
+                    function isValid(name, elementName) {
+                        var styleMap;
+                        styleMap = invalidStyles['*'];
+                        if (styleMap && styleMap[name]) {
+                            return false;
+                        }
+                        styleMap = invalidStyles[elementName];
+                        if (styleMap && styleMap[name]) {
+                            return false;
+                        }
+                        return true;
+                    }
+                    </checkIfStyleIsValid>
+                    
+                    <applyValidStyles>
+                    if (elementName && validStyles) {
+                        
+                        serializeStyles('*');
+                        serializeStyles(elementName);
+                    } else {
+                        
+                        for (name in styles) {
+                            value = styles[name];
+                            !value || invalidStyles && !isValid(name, elementName) || (css += (css.length > 0 ? ' ' : '') + name + ': ' + value + ';');
+                        }
+                    }
+                    </applyValidStyles>
+                    <returnGeneratedCSS>
+                    return css;
+                    </returnGeneratedCSS>
+                }
+</generateCSS>
+
+<TrimArrayToBytes>
+function TrimArrayToBytes(arr) {
+    var ix, newarr;
+    
+    <findInvalidIndices>
+    var len = arr.length;
+    for (ix=0; ix<len; ix++) {
+        if (arr[ix] < 0 || arr[ix] >= 0x100) 
+            break;
+    }
+    </findInvalidIndices>
+    
+    <handleInvalidIndices>
+    if (ix == len) {
+        return arr;
+    }
+    newarr = Array(len);
+    for (ix=0; ix<len; ix++) {
+        if (arr[ix] < 0 || arr[ix] >= 0x100) 
+            newarr[ix] = 63;  
+        else
+            newarr[ix] = arr[ix];
+    }
+    </handleInvalidIndices>
+    
+    <returnTrimmedArray>
+    return newarr;
+    </returnTrimmedArray>
+}
+</TrimArrayToBytes>
+
+<setPipedTypesString>
+function setPipedTypesString(node) {
+  <checkIfTypeExists>
+  if (!node.type) { return ''; }
+  </checkIfTypeExists>
+
+  <joinTypeNames>
+  node.typesString = node.type.names.join(' | ');
+  </joinTypeNames>
+}
+</setPipedTypesString>
+```

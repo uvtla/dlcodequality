@@ -1,0 +1,260 @@
+```javascript
+<cross>
+function cross( x, y ) {
+    <inputValidation>
+    if ( !Array.isArray( x ) ) {
+        throw new TypeError( 'cross()::invalid input argument. First argument must be an array.' );
+    }
+    if ( !Array.isArray( y ) ) {
+        throw new TypeError( 'cross()::invalid input argument. Second argument must be an array.' );
+    }
+    if ( x.length !== 3 || y.length !== 3 ) {
+        throw new Error( 'cross()::invalid input argument. Input arrays must be of length 3.' );
+    }
+    </inputValidation>
+    return [
+        x[1]*y[2]-x[2]*y[1],
+        x[2]*y[0]-x[0]*y[2],
+        x[0]*y[1]-x[1]*y[0]
+    ];
+}
+</cross>
+
+<Vector>
+function Vector( x, y ) {
+    <checkInstance>
+    if ( !(this instanceof Vector) ){
+        return new Vector( x, y );
+    }
+    </checkInstance>
+
+    <initializeArray>
+    if (typedArrays){
+        this._ = new Float64Array(5);
+    } else {
+        this._ = [];
+    }
+    </initializeArray>
+
+    <assignOrCloneValues>
+    if (x && (x.x !== undefined || x._ && x._.length)){
+        this.clone( x );
+    } else {
+        this.recalc = true; 
+        this.set( x, y );
+    }
+    </assignOrCloneValues>
+}
+</Vector>
+
+<removeDuplicateAttributes>
+function removeDuplicateAttributes(attrs) {
+    var attrsNames = [],
+        res = [];
+
+    _.forEach(attrs, function (attr) {
+        if (attrsNames.indexOf(attr.name) === -1) {
+            res.push(attr);
+            attrsNames.push(attr.name);
+        }
+    });
+
+    return res;
+}
+</removeDuplicateAttributes>
+
+<printCollectedDeviceData>
+function printCollectedDeviceData(results) {
+    <defineDataToKeep>
+    var dataToKeep = {
+        'AIN0': 'val',
+        'FIRMWARE_VERSION': 'val',
+        'WIFI_IP': 'str',
+        'ETHERNET_IP': 'str',
+        'WIFI_RSSI': 'str',
+        'WIFI_VERSION': 'val',
+        'SERIAL_NUMBER': 'val',
+        'HARDWARE_INSTALLED': 'productType',
+    };
+    </defineDataToKeep>
+    
+    <processResults>
+    var vals = [];
+    results.forEach(function(result) {
+        result = result.data;
+        var data = {};
+        var keyToKeep = 'res';
+        if(dataToKeep[result.name]) {
+            keyToKeep = dataToKeep[result.name];
+        }
+        data[result.name] = result.res;
+        if(result[keyToKeep]) {
+            data[result.name] = result[keyToKeep];
+        }
+        vals.push(data);
+    });
+    </processResults>
+
+    <logDebugInformation>
+    if(DEBUG_COLLECTED_DEVICE_DATA) {
+        console.log('Connection Type', self.curatedDevice.savedAttributes.connectionTypeName);
+        console.log('Serial Number', self.curatedDevice.savedAttributes.serialNumber);
+        console.log('Read Data', self.curatedDevice.getDevice().handle,':');
+        console.log(vals);
+    }
+    </logDebugInformation>
+}
+</printCollectedDeviceData>
+
+<checkFieldsLogicallySound>
+function checkFieldsLogicallySound(indexFields, selector) {
+  var firstField = indexFields[0];
+  var matcher = selector[firstField];
+
+  <checkUndefinedMatcher>
+  if (typeof matcher === 'undefined') {
+    return true;
+  }
+  </checkUndefinedMatcher>
+
+  <checkLogicalOperator>
+  var hasLogicalOperator = Object.keys(matcher).some(function (matcherKey) {
+    return !(isNonLogicalMatcher(matcherKey));
+  });
+  </checkLogicalOperator>
+
+  <checkInvalidNeOperator>
+  var isInvalidNe = Object.keys(matcher).length === 1 &&
+    getKey(matcher) === '$ne';
+  </checkInvalidNeOperator>
+
+  return !isInvalidNe;
+}
+</checkFieldsLogicallySound>
+
+<parse_AddinUdf>
+function parse_AddinUdf(blob, length, opts) {
+    <adjustBlobPointer>
+    blob.l += 4; length -= 4;
+    </adjustBlobPointer>
+    var l = blob.l + length;
+    <parseName>
+    var udfName = parse_ShortXLUnicodeString(blob, length, opts);
+    </parseName>
+    <checkPadding>
+    var cb = blob.read_shift(2);
+    l -= blob.l;
+    if(cb !== l) throw new Error("Malformed AddinUdf: padding = " + l + " != " + cb);
+    </checkPadding>
+    blob.l += cb;
+    return udfName;
+}
+</parse_AddinUdf>
+
+<_getFieldLayoutData>
+function _getFieldLayoutData(oField){
+    var oLayoutData;
+    <switchLayout>
+    switch (this.getLayout()) {
+    case SimpleFormLayout.ResponsiveLayout:
+        oLayoutData = FormLayout.prototype.getLayoutDataForElement(oField, "sap.ui.layout.ResponsiveFlowLayoutData");
+        break;
+    case SimpleFormLayout.GridLayout:
+        oLayoutData = FormLayout.prototype.getLayoutDataForElement(oField, "sap.ui.layout.form.GridElementData");
+        break;
+    case SimpleFormLayout.ResponsiveGridLayout:
+        oLayoutData = FormLayout.prototype.getLayoutDataForElement(oField, "sap.ui.layout.GridData");
+        break;
+    case SimpleFormLayout.ColumnLayout:
+        oLayoutData = FormLayout.prototype.getLayoutDataForElement(oField, "sap.ui.layout.form.ColumnElementData");
+        break;
+    }
+    </switchLayout>
+    return oLayoutData;
+}
+</_getFieldLayoutData>
+
+<updateCellsStyle>
+function(model, cells, key, value) {
+    <checkAndBeginUpdate>
+    if (cells != null && cells.length > 0) {
+        model.beginUpdate();
+        try {
+            for (var i = 0; i < cells.length; i++) {
+                if (cells[i] != null) {
+                    var style = mxUtils.setStyle(model.getStyle(cells[i]), key, value);
+                    model.setStyle(cells[i], style);
+                }
+            }
+        } finally {
+            model.endUpdate();
+        }
+    }
+    </checkAndBeginUpdate>
+}
+</updateCellsStyle>
+
+<config>
+function config(obj) {
+    <validateObject>
+    if (!obj || typeof obj !== 'object') {
+        throw Error(decimalError + 'Object expected');
+    }
+    </validateObject>
+    
+    <setConfiguration>
+    var i, p, v,
+    ps = [
+        'precision', 1, MAX_DIGITS,
+        'rounding', 0, 8,
+        'toExpNeg', -1 / 0, 0,
+        'toExpPos', 0, 1 / 0
+    ];
+
+    for (i = 0; i < ps.length; i += 3) {
+        if ((v = obj[p = ps[i]]) !== void 0) {
+            if (mathfloor(v) === v && v >= ps[i + 1] && v <= ps[i + 2]) this[p] = v;
+            else throw Error(invalidArgument + p + ': ' + v);
+        }
+    }
+
+    if ((v = obj[p = 'LN10']) !== void 0) {
+        if (v == Math.LN10) this[p] = new this(v);
+        else throw Error(invalidArgument + p + ': ' + v);
+    }
+    </setConfiguration>
+
+    return this;
+}
+</config>
+
+<connect>
+function connect () {
+    <initializeConnection>
+    if (!alreadyConnectedOnce) {
+        if (connectedPromise === null) connection = createConnection()
+        var url = AppConfig.apiUrl + 'websocket/chat'
+        if (accessToken) {
+            token = accessToken
+            url += '?access_token=' + accessToken
+        }
+        <createSocket>
+        socket = new SockJS(url)
+        stompClient = webstomp.over(socket)
+        </createSocket>
+        
+        <logConnectionAttempt>
+        console.tron.log(`Connecting to ${url}`)
+        </logConnectionAttempt>
+        
+        <performConnection>
+        var headers = {}
+        stompClient.connect(headers, onConnect, onError)
+        </performConnection>
+        
+        alreadyConnectedOnce = true
+    }
+    </initializeConnection>
+}
+</connect>
+```

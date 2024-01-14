@@ -1,0 +1,313 @@
+```javascript
+<hex>
+function hex(s) {
+  var m = /rgba?\((\d+), (\d+), (\d+)/.exec(s),
+    c = s.split("");
+  if (m) {
+    <convertRGBtoHex>
+    s = ( m[1] << 16 | m[2] << 8 | m[3] ).toString(16);
+    while (s.length < 6)
+      s = "0" + s;
+    </convertRGBtoHex>
+  }
+  return "#" + (s.length == 6 ? s : c[1] + c[1] + c[2] + c[2] + c[3] + c[3]);
+}
+</hex>
+
+<resolveByPlugin>
+function resolveByPlugin(plugin, from, id) {
+	if (plugin.exports && plugin.exports.normalize) {
+		return plugin.exports.normalize(id, resolveId.bind(null, from));
+	}
+	return resolveId(from, id);
+}
+</resolveByPlugin>
+
+<functionQueueCount>
+<initialize>
+function(queueCount) {
+    var self = this;
+    this.queueCount = queueCount;
+    this.emitter = new EventEmitter();
+    this.processedCount = 0;
+
+    if(undefined === queueCount) {
+        this.queueCount = 1;
+    }
+</initialize>
+
+<eventListener>
+    this.emitter.on("done", function(queueId, debugStr) {
+        queueId = parseInt(queueId);
+        if(isNaN(queueId)) return;
+        if(queueId >= self.queueCount || queueId < 0) return;
+
+        if(debugStr) {
+            <debug>
+            var logStr = "( Done: ";
+            for(var i = 0; i < self.queue.length; i++) {
+                if(i !== 0) logStr += ", ";
+                logStr += "[" + self.queue[i].length + "]";
+            }
+            logStr += " )";
+            console.log(logStr);
+            </debug>
+        }
+
+        nextTick(function() {
+            self._runTask(queueId);
+        });
+    });
+</eventListener>
+
+<setQueues>
+    this.queue = [];
+    this.running = [];
+    for(var i = 0; i < this.queueCount; i++) {
+        this.queue.push([]);
+        this.running.push(false);
+    }
+</setQueues>
+
+<setupCleanup>
+    this.afterFinishCount = -1;
+    this.afterFinishLoop = false;
+    this.afterFinishProcessor = undefined;
+</setupCleanup>
+}
+</functionQueueCount>
+
+<initRead>
+function initRead (reader, file) {
+  <setInitialValues>
+    if (reader.readyState === FileReader.LOADING) {
+        throw new FileError(FileError.INVALID_STATE_ERR);
+    }
+
+    reader._result = null;
+    reader._error = null;
+    reader._progress = 0;
+    reader._readyState = FileReader.LOADING;
+  </setInitialValues>
+
+  <handleLocalURL>
+    if (typeof file.localURL === 'string') {
+        reader._localURL = file.localURL;
+    } else {
+        reader._localURL = '';
+        return true;
+    }
+  </handleLocalURL>
+
+  <triggerOnloadstart>
+    if (reader.onloadstart) {
+        reader.onloadstart(new ProgressEvent('loadstart', {target: reader}));
+    }
+  </triggerOnloadstart>
+}
+</initRead>
+
+<forwardSearch>
+function forwardSearch() {
+  <searchSetup>
+      cameFrom = open1Set.pop();
+      if (cameFrom.closed) {
+        return;
+      }
+
+      cameFrom.closed = true;
+  </searchSetup>
+
+  <evaluateNode>
+      if (cameFrom.f1 < lMin && (cameFrom.g1 + f2 - heuristic(from, cameFrom.node)) < lMin) {
+        graph.forEachLinkedNode(cameFrom.node.id, forwardVisitor);
+      }
+  </evaluateNode>
+
+  <updateOpenSet>
+      if (open1Set.length > 0) {
+        f1 = open1Set.peek().f1;
+      } 
+  </updateOpenSet>
+}
+</forwardSearch>
+
+<buildSchema>
+function buildSchema(models, typeMap) {
+  let type;
+
+  <mapAndReduceModels>
+  var _models$map$reduce = models.map(model => {
+    type = typeMap[model.modelName];
+    return {
+      query: (0, _buildQuery2.default)(model, type),
+      mutation: (0, _buildMutation2.default)(model, type)
+    };
+  }).reduce((fields, modelField) => {
+    fields.query = (0, _assign2.default)({}, fields.query, modelField.query);
+    fields.mutation = (0, _assign2.default)({}, fields.mutation, modelField.mutation);
+    return fields;
+  }, { query: {}, mutation: {} });
+  </mapAndReduceModels>
+
+  <extractQueriesAndMutations>
+  const query = _models$map$reduce.query;
+  const mutation = _models$map$reduce.mutation;
+  </extractQueriesAndMutations>
+
+  return {
+    query: query,
+    mutation: mutation
+  };
+}
+</buildSchema>
+
+<linkProcessingFunction>
+function(element) {
+  <queryAllLinks>
+  var links = element.querySelectorAll("a.xref, a.link, area"),
+      i,
+      link,
+      href,
+      startsWithHash,
+      startsWithHTTP;
+  </queryAllLinks>
+
+  <processEachLink>
+  for (i = 0; i < links.length; i++) {
+    link = links[i];
+    href = link.getAttribute("href");
+    startsWithHash = href.indexOf("#") == 0;
+    startsWithHTTP = href.indexOf("http") == 0;
+  </processEachLink>
+
+  <setExternalTargets>
+    if (startsWithHTTP) {
+      link.setAttribute('target', '_blank');
+    }
+  </setExternalTargets>
+
+  <continueIfNotHTTPorHash>
+    if (startsWithHTTP || startsWithHash) {
+      continue;
+    }
+  </continueIfNotHTTPorHash>
+
+  <rewriteHref>
+    if (href.indexOf("/docs/api/") > -1) {
+      href = href.substr(0, href.lastIndexOf(".html"));
+      href = href.substr(href.lastIndexOf('/') + 1);
+      href = "#/api/" + href;
+    } else if (href.indexOf("explored.html") > -1) { 
+      href = href.split("../").join("");
+      href = oConfig.exploredURI + href;
+    } else { 
+      href = href.substr(0, href.lastIndexOf(".html"));
+      href = "#/topic/" + href;
+    }
+  </rewriteHref>
+
+  <updateLinkHref>
+    link.setAttribute("href", href);
+  </updateLinkHref>
+}
+</linkProcessingFunction>
+
+<convertLegacyPluginSchema>
+function convertLegacyPluginSchema(schema) {
+  <initializeResult>
+    var result = {properties: {}, type: 'object'};
+  </initializeResult>
+
+  <processSchemaFields>
+    Object.keys(schema.fields).forEach(function (propertyName) {
+      result.properties[propertyName] = {
+        type: schema.fields[propertyName].type
+      };
+      if (schema.fields[propertyName].enum) {
+        result.properties[propertyName].enum = schema.fields[propertyName].enum;
+      }
+      if (schema.fields[propertyName].hasOwnProperty('default')) {
+        result.properties[propertyName].default = schema.fields[propertyName].default;
+      }
+      if (schema.fields[propertyName].hasOwnProperty('required')) {
+        result.properties[propertyName].required = schema.fields[propertyName].required;
+      }
+      if (result.properties[propertyName].type === 'table') {
+        <handleTableType>
+        result.properties[propertyName].type = 'object';
+        if (schema.fields[propertyName].schema.flexible) {
+          result.properties[propertyName].additionalProperties = convertLegacyPluginSchema(schema.fields[propertyName].schema);
+        } else {
+          result.properties[propertyName].properties = convertLegacyPluginSchema(schema.fields[propertyName].schema).properties;
+        }
+        </handleTableType>
+      }
+
+      <handleArrayType>
+      if (result.properties[propertyName].type === 'array') {
+        result.properties[propertyName].items = {type: 'string'}
+      }
+      </handleArrayType>
+    });
+  </processSchemaFields>
+
+  return result;
+}
+</convertLegacyPluginSchema>
+
+<initializeCommands>
+function initializeCommands() {
+  <getPreferences>
+    var prefs = getPreferences();
+  </getPreferences>
+
+  <registerCommands>
+    CommandManager.register(Strings.CMD_FILE_CLOSE_BELOW, closeBelow, function () {
+        handleClose(closeBelow);
+    });
+    CommandManager.register(Strings.CMD_FILE_CLOSE_OTHERS, closeOthers, function () {
+        handleClose(closeOthers);
+    });
+    CommandManager.register(Strings.CMD_FILE_CLOSE_ABOVE, closeAbove, function () {
+        handleClose(closeAbove);
+    });
+  </registerCommands>
+
+  <updateMenuItems>
+    if (prefs.closeBelow) {
+        workingSetListCmenu.addMenuItem(closeBelow, "", Menus.AFTER, Commands.FILE_CLOSE);
+    }
+    if (prefs.closeOthers) {
+        workingSetListCmenu.addMenuItem(closeOthers, "", Menus.AFTER, Commands.FILE_CLOSE);
+    }
+    if (prefs.closeAbove) {
+        workingSetListCmenu.addMenuItem(closeAbove, "", Menus.AFTER, Commands.FILE_CLOSE);
+    }
+    menuEntriesShown = prefs;
+  </updateMenuItems>
+}
+</initializeCommands>
+
+<createIconFiles>
+function (options, dir, callback) {
+  <iterateIcons>
+    async.forEachOf(options.icon, function (icon, resolution, callback) {
+      <constructIconFilePath>
+      var iconFile = path.join(dir, 'share/icons/hicolor', resolution, 'apps', options.id + '.png')
+      </constructIconFilePath>
+      
+      options.logger('Creating icon file at ' + iconFile)
+
+      <copyIconFile>
+      fs.copy(icon, iconFile, callback)
+      </copyIconFile>
+    }, function (err) {
+      <errorHandling>
+      callback(err && new Error('Error creating icon file: ' + (err.message || err)))
+      </errorHandling>
+    })
+  </iterateIcons>
+}
+</createIconFiles>
+```

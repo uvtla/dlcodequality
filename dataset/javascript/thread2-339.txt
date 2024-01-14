@@ -1,0 +1,201 @@
+```javascript
+<patchBundle>
+function patchBundle(bundle: Bundle, delta: DeltaBundle): Bundle {
+  const map = new Map(bundle.modules);
+
+  for (const [key, value] of delta.modified) {
+    map.set(key, value);
+  }
+
+  for (const [key, value] of delta.added) {
+    map.set(key, value);
+  }
+
+  for (const key of delta.deleted) {
+    map.delete(key);
+  }
+
+  const modules = Array.from(map.entries());
+
+  return {
+    pre: bundle.pre,
+    post: bundle.post,
+    modules,
+  };
+}
+</patchBundle>
+
+<getItemAtIndex>
+function (state, index) {
+  var items = this._getItems(state.choice);
+  if (index < items.length) {
+    return items[index];
+  }
+  return null;
+}
+</getItemAtIndex>
+
+<processNodeRuleWithREM>
+function processNodeRuleWithREM(nodeRule, imageReplaces, rootFontSize){
+    var img, imgKey, __url
+    _.each(nodeRule.declarations, function(e){
+        if(e.property == 'background-image'){
+            __url = __getURL(e.value)
+            img = img || imageReplaces[__url]
+            imgKey = img? __url: imgKey
+        }
+    })
+    if(!img) return
+    
+    updateNodeByMerge(nodeRule, __generatorCSSObj(img))
+
+    function __getURL(bgURL){
+        return _.trim(bgURL.split('url').join(''), '()"\'')
+    }
+    function __generatorCSSObj(img){
+        return {
+            "background-image": "url("+img.sprite+")",
+            "background-position":  "-"+img.x/rootFontSize+"rem -"+img.y/rootFontSize+"rem",
+            "-webkit-background-size": img.spriteWidth / rootFontSize + "rem",
+            "-moz-background-size": img.spriteWidth / rootFontSize + "rem",
+            "-o-background-size": img.spriteWidth / rootFontSize + "rem",
+            "background-size": img.spriteWidth / rootFontSize + "rem"
+        }
+    }
+}
+</processNodeRuleWithREM>
+
+<BIP151>
+function BIP151(cipher) {
+  if (!(this instanceof BIP151))
+    return new BIP151(cipher);
+
+  EventEmitter.call(this);
+
+  this.input = new BIP151Stream(cipher);
+  this.output = new BIP151Stream(cipher);
+
+  this.initReceived = false;
+  this.ackReceived = false;
+  this.initSent = false;
+  this.ackSent = false;
+  this.completed = false;
+  this.handshake = false;
+
+  this.pending = [];
+  this.total = 0;
+  this.waiting = 4;
+  this.hasSize = false;
+
+  this.timeout = null;
+  this.job = null;
+  this.onShake = null;
+
+  this.bip150 = null;
+}
+</BIP151>
+
+<setupBlocklyIconMenu>
+function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldIconMenu(
+            [
+              {src: Blockly.mainWorkspace.options.pathToMedia + 'icons/set-led_mystery.svg',
+                value: 'mystery', width: 48, height: 48, alt: 'Mystery'},
+              ...
+              {src: Blockly.mainWorkspace.options.pathToMedia + 'icons/set-led_white.svg',
+                value: 'white', width: 48, height: 48, alt: 'White'}
+            ]), 'CHOICE');
+    this.setOutput(true);
+    this.setColour(Blockly.Colours.looks.primary,
+        Blockly.Colours.looks.secondary,
+        Blockly.Colours.looks.tertiary
+    );
+  }
+</setupBlocklyIconMenu>
+
+<_applyChange>
+function _applyChange(oChange, oRelevantContainer, mPropertyBag, fnIterator) {
+    ...
+    
+    oChangeContent.movedElements.forEach(function (mMovedElement) {
+        ...
+        
+        if (iCurrentIndexInAggregation !== iTargetIndex) {
+            ...
+        } else {
+            ...
+        }
+
+        ...
+        
+        var oTemplate = oModifier.getBindingTemplate(oTable, ITEMS_AGGREGATION_NAME);
+
+        if (oTemplate) {
+            ...
+            oModifier.updateAggregation(oTable, ITEMS_AGGREGATION_NAME);
+        } else {
+            moveColumns(iSourceIndex, iTargetIndex);
+        }
+    }, this);
+
+    return true;
+}
+</_applyChange>
+
+<run>
+function run (answers) {
+    ls(['LICENSE', 'package.json', 'README.md', 'index.js', 'index.html', 'examples/basic/index.html', 'tests/index.test.js']).forEach(function (file) {
+      answers.aframeVersion = aframeVersion;
+      answers.npmName = `aframe-${answers.shortName}-component`;
+      fs.writeFileSync(file, nunjucks.render(file, answers));
+    });
+  }
+</run>
+
+<_fnHungarianMap>
+function _fnHungarianMap ( o ) {
+    ...
+    
+    $.each( o, function (key, val) {
+        match = key.match(/^([^A-Z]+?)([A-Z])/);
+    
+        if ( match && hungarian.indexOf(match[1]+' ') !== -1 ) {
+            ...
+    
+            if ( match[1] === 'o' ) {
+                _fnHungarianMap( o[key] );
+            }
+        }
+    } );
+    
+    o._hungarianMap = map;
+}
+</_fnHungarianMap>
+
+<runJob>
+function (jobName, param, customParams, callback) {
+    ...
+    
+    doRequest({
+        ...
+    }, customParams, callback);
+}
+</runJob>
+
+<makeTheCall>
+function makeTheCall(api, apiName, apiCall, fn) {
+  request(apiCall, function(error, response, body) {
+    if (error) {
+      ...
+    } else if (response.statusCode == 200) {
+      ...
+    } else {
+      ...
+    }
+  });
+}
+</makeTheCall>
+```
+
+The annotations are in place. Each named function is surrounded by tags that reflect the name or purpose of the function, indicating that the function has a single cohesive responsibility compliant with the SRP. If there were any violations such as a function having multiple distinct responsibilities, nested tags would be used to highlight these within the main tag of the function.

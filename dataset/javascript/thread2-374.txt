@@ -1,0 +1,452 @@
+```javascript
+<firstPass>
+function firstPass(loadedComponents, messages) {
+  <logActivity>
+  messages.heading('Reference resolution - first pass')
+  </logActivity>
+
+  <setupComponents>
+  const components = loadedComponents.blueprintComponents
+  const tymlyRefs = loadedComponents.blueprintRefs
+  </setupComponents>
+
+  <findResolutions>
+  const resolutions = findFirstPassResolutions(tymlyRefs, components)
+  </findResolutions>
+
+  <handleNoResolutions>
+  if (!resolutions) {
+    messages.subHeading('Nothing to resolve')
+    return
+  }
+  </handleNoResolutions>
+
+  <resolveResolvedComponents>
+  resolveResolutions(resolutions, components, messages)
+  </resolveResolvedComponents>
+}
+</firstPass>
+
+<xmlparser>
+function xmlparser(options) {
+
+  <configureParserOptions>
+  var parserOptions = util._extend({
+      async: false,
+      explicitArray: true,
+      normalize: true,
+      normalizeTags: true,
+      trim: true
+    }, options || {});
+  </configureParserOptions>
+
+  <returnXmlBodyParser>
+  return xmlbodyparser;
+  </returnXmlBodyParser>
+
+  
+  function xmlbodyparser(req, res, next) {
+
+    <initializeDataAndParser>
+    var data = '';
+    var parser = new xml2js.Parser(parserOptions);
+    </initializeDataAndParser>
+
+    <responseHandler>
+    var responseHandler = function (err, xml) {
+        if (err) {
+          err.status = 400;
+          return next(err);
+        }
+
+        req.body = xml || req.body;
+        req.rawBody = data;
+        next();
+    };
+    </responseHandler>
+
+    <preParseChecks>
+    if (req._body) {
+      return next();
+    }
+
+    req.body = req.body || {};
+
+    if (!hasBody(req) || !module.exports.regexp.test(mime(req))) {
+      return next();
+    }
+
+    req._body = true;
+    </preParseChecks>
+    
+    <setDataEncoding>
+    req.setEncoding('utf-8');
+    </setDataEncoding>
+    <collectDataChunks>
+    req.on('data', function (chunk) {
+      data += chunk;
+    });
+    </collectDataChunks>
+
+    <handleParserEnd>
+    parser.saxParser.onend = function() {
+      if (req.complete && req.rawBody === undefined) {
+        return responseHandler(null);
+      }
+    };
+    </handleParserEnd>
+
+    <processDataOnEnd>
+    req.on('end', function () {
+
+      
+      if (data.trim().length === 0) {
+        return next(error(411));
+      }
+
+      parser.parseString(data, responseHandler);
+
+    });
+    </processDataOnEnd>
+  }
+
+}
+</xmlparser>
+
+<unlabeledFunction>
+function(techName, techPath, bundleNode, magicNode, cmd, decls, force) {
+
+        <prepareNode>
+        var arch = this.ctx.arch,
+            node = this.useFileOrBuild(new BemDeclNode.BemDeclNode({
+                root: this.root,
+                level: this.level,
+                item: this.item,
+                techPath: techPath,
+                techName: techName,
+                cmd: cmd,
+                decls: decls,
+                force: force
+            }));
+        </prepareNode>
+
+        <checkAndSetNode>
+        if (!node) return;
+
+        
+        arch.setNode(node)
+            .addChildren(node, node.getDependencies());
+        </checkAndSetNode>
+
+        <manageParentsAndChildren>
+        bundleNode && arch.addParents(node, bundleNode);
+        magicNode && arch.addChildren(node, magicNode);
+        </manageParentsAndChildren>
+
+        <returnNode>
+        return node;
+        </returnNode>
+    }
+</unlabeledFunction>
+
+<deterministicGenerateK>
+function deterministicGenerateK(curve, hash, d, checkSig, nonce) {
+    <inputValidation>
+    enforceType("Buffer", hash);
+    enforceType(BigInteger, d);
+    </inputValidation>
+
+    <modifyHash>
+    if (nonce) {
+        hash = sha256(Buffer.concat([hash, Buffer.alloc(nonce)]));
+    }
+    </modifyHash>
+
+    <assertHashLength>
+    assert.equal(hash.length, 32, "Hash must be 256 bit");
+    </assertHashLength>
+
+    <initializeVariables>
+    var x = d.toBuffer(32);
+    var k = Buffer.alloc(32);
+    var v = Buffer.alloc(32);
+    </initializeVariables>
+
+    <prepareKAndV>
+    
+    v.fill(1);
+
+    
+    k.fill(0);
+
+    
+    k = HmacSHA256(Buffer.concat([v, new Buffer([0]), x, hash]), k);
+
+    
+    v = HmacSHA256(v, k);
+
+    
+    k = HmacSHA256(Buffer.concat([v, new Buffer([1]), x, hash]), k);
+
+    
+    v = HmacSHA256(v, k);
+
+    
+    v = HmacSHA256(v, k);
+    </prepareKAndV>
+
+    <calculateT>
+    var T = BigInteger.fromBuffer(v);
+    </calculateT>
+
+    <findValidK>
+    while (T.signum() <= 0 || T.compareTo(curve.n) >= 0 || !checkSig(T)) {
+        k = HmacSHA256(Buffer.concat([v, new Buffer([0])]), k);
+        v = HmacSHA256(v, k);
+
+        
+        v = HmacSHA256(v, k);
+
+        T = BigInteger.fromBuffer(v);
+    }
+    </findValidK>
+
+    <returnK>
+    return T;
+    </returnK>
+}
+</deterministicGenerateK>
+
+<constructAxis>
+function(properties, data) {
+            <initializeAxisConfig>
+            var axisType = data.xAxisType,
+                axisProperties = this.parseUtils.getXAxisProperties(properties),
+                orientation = (this.axesAreInverted) ? 'vertical' : 'horizontal',
+                colorScheme = this.getAxisColorScheme();
+            </initializeAxisConfig>
+            
+            <adaptAxisProperties>
+            axisProperties.chartType = properties.chart;
+            axisProperties.axisLength = $(this.renderTo).width();
+            if(axisProperties['axisTitle.text']){
+                axisProperties['axisTitle.text'] = Splunk.JSCharting.ParsingUtils.escapeHtml(axisProperties['axisTitle.text']);
+            }
+            </adaptAxisProperties>
+
+            <createDeterminedAxisType>
+            switch(axisType) {
+                case 'category':
+                    this.xAxis = new Splunk.JSCharting.CategoryAxis(axisProperties, data, orientation, colorScheme);
+                    break;
+                case 'time':
+                    this.xAxis = new Splunk.JSCharting.TimeAxis(axisProperties, data, orientation, colorScheme, this.exportMode);
+                    break;
+                default:
+                    
+                    this.xAxis = new Splunk.JSCharting.NumericAxis(axisProperties, data, orientation, colorScheme);
+                    break;
+
+            }
+            </createDeterminedAxisType>
+            <setHcConfigForAxis>
+            this.hcConfig.xAxis = this.xAxis.getConfig();
+            </setHcConfigForAxis>
+            <configureExportModeOptions>
+            if(this.exportMode && (axisType === 'time')) {
+                var xAxisMargin,
+                    spanSeries = data._spanSeries,
+                    span = (spanSeries && spanSeries.length > 0) ? parseInt(spanSeries[0], 10) : 1,
+                    secsPerDay = 60 * 60 * 24,
+                    secsPerYear = secsPerDay * 365;
+
+                if(span >= secsPerYear) {
+                    xAxisMargin = 15;
+                }
+                else if(span >= secsPerDay) {
+                    xAxisMargin = 25;
+                }
+                else {
+                    xAxisMargin = 35;
+                }
+                this.hcConfig.xAxis.title.margin = xAxisMargin;
+            }
+            </configureExportModeOptions>
+            <setDefaultAxisTitle>
+            if(typeof this.hcConfig.xAxis.title.text === 'undefined') {
+                this.hcConfig.xAxis.title.text = this.processedData.xAxisKey;
+            }
+            </setDefaultAxisTitle>
+        }
+</constructAxis>
+
+<getDomain>
+function getDomain(url) {
+    <extractDomain>
+	var domain = _.isObject(url) ? url.host : urlib.parse(url).host;
+	return domain || url;
+	</extractDomain>
+}
+</getDomain>
+
+<clientConnects>
+function clientConnects(p) {
+        <setupClientPage>
+        var pList;
+        var nPlayers;
+        var waitTime;
+        var widgetConfig;
+
+        node.remoteSetup('page', p.id, {
+            clearBody: true,
+            title: { title: 'Welcome!', addToBody: true }
+        });
+        </setupClientPage>
+
+        <initializeWidgets>
+        node.remoteSetup('widgets', p.id, {
+            destroyAll: true,
+            append: { 'WaitingRoom': {} }
+        });
+        </initializeWidgets>
+
+        <roomOpenCheck>
+        if (waitRoom.isRoomOpen()) {
+            console.log('Client connected to waiting room: ', p.id);
+
+            
+            channel.registry.markInvalid(p.id);
+            </roomOpenCheck>
+
+            <retrievePlayersData>
+            pList = waitRoom.clients.player;
+            nPlayers = pList.size();
+            </retrievePlayersData>
+
+            <calculateWaitTime>
+            if (waitRoom.START_DATE) {
+                waitTime = new Date(waitRoom.START_DATE).getTime() -
+                    (new Date().getTime());
+            }
+            else if (waitRoom.MAX_WAIT_TIME) {
+                waitTime = waitRoom.MAX_WAIT_TIME;
+            }
+            else {
+                waitTime = null; 
+            }
+            </calculateWaitTime>
+
+            <configureWaitingRoomWidget>
+            widgetConfig = waitRoom.makeWidgetConfig();
+            widgetConfig.waitTime = waitTime;
+            node.remoteSetup('waitroom', p.id, widgetConfig);
+            </configureWaitingRoomWidget>
+
+            <logConnectedPlayers>
+            console.log('NPL ', nPlayers);
+            </logConnectedPlayers>
+
+            <notifyRoom>
+            node.say('PLAYERSCONNECTED', 'ROOM', nPlayers);
+            </notifyRoom>
+
+            <scheduleRoomTimeout>
+            waitRoom.makeTimeOut(p.id, waitTime);
+            </scheduleRoomTimeout>
+
+            <dispatchOnFullRoom>
+            if (nPlayers < waitRoom.POOL_SIZE) return;
+
+            if (waitRoom.EXECUTION_MODE === 'WAIT_FOR_N_PLAYERS') {
+                waitRoom.dispatch({
+                    action: 'AllPlayersConnected',
+                    exit: 0
+                });
+            }
+            </dispatchOnFullRoom>
+        }
+        else {
+            <notifyRoomClosed>
+            node.say('ROOM_CLOSED', p.id);
+            </notifyRoomClosed>
+        }
+    }
+</clientConnects>
+
+<createPingback>
+function(req, res, body) {
+  <pingbackInstanceCheck>
+  if (!(this instanceof Pingback)) {
+    return new Pingback(req, res, body);
+  }
+  </pingbackInstanceCheck>
+  <initializePingback>
+  EventEmitter.call(this);
+
+  this.readable = true;
+  this.writable = true;
+
+  this.req = req;
+  this.res = res;
+  this.body = body = body || req.rawBody || req.body;
+  this.source = this.target = {};
+  </initializePingback>
+
+  <handleRequestBody>
+  if (body == null) {
+    if (!this.req.readable) {
+      return this.emit('error', new Error('No body.'));
+    }
+  }
+  else {
+    <processRequestBody>
+    var self = this;
+    process.nextTick(function() {
+      self._handle();
+    });
+    </processRequestBody>
+  }
+  </handleRequestBody>
+}
+</createPingback>
+
+<invokeFileUpload>
+function($placeholder) {
+			<initializeFileSelection>
+			var that = this,
+					$selectFile, files;
+
+			$selectFile = $('<input type="file" multiple="multiple">').click();
+			$selectFile.change(function () {
+				files = this.files;
+				that.uploadFiles($placeholder, files, that);
+			});
+			</initializeFileSelection>
+
+			<deselectMediumInsert>
+			$.fn.mediumInsert.insert.deselect();
+			</deselectMediumInsert>
+
+			<returnFileInputElement>
+			return $selectFile;
+			</returnFileInputElement>
+		}
+</invokeFileUpload>
+
+<codeGenerator>
+async function codeGenerator(length = 6) {
+    <generateCode>
+    const code = new Array(length)
+      .fill('0')
+      .map(() => CHARS_SET[Math.floor(random() * (charsSetLength - 1))])
+      .join('');
+    </generateCode>
+    <logGeneratedCode>
+    log('debug', `Generated a new code:`, code);
+    </logGeneratedCode>
+    <returnGeneratedCode>
+    return code;
+    </returnGeneratedCode>
+  }
+</codeGenerator>
+```

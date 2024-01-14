@@ -1,0 +1,301 @@
+```javascript
+<scaleValues>
+function (x, y) {
+  var a = this.val,
+     _x = x,
+     _y = typeof(y) === "undefined" ? _x : y;
+
+  a[0] *= _x;
+  a[1] *= _x;
+  a[3] *= _y;
+  a[4] *= _y;
+
+  return this;
+}
+</scaleValues>
+
+<savePrettyGraphSON>
+function savePrettyGraphSON(graph, filename, callback) {
+    var ByteArrayOutputStream = Tinkerpop.autoImport('ByteArrayOutputStream');
+    var stream = new ByteArrayOutputStream();
+    return Tinkerpop.GraphSONWriter.buildP()
+        .then(function (builder) {
+        return _newGraphSONMapper()
+            .then(function (mapper) { return builder.mapperP(mapper); });
+    })
+        .then(function (builder) { return builder.createP(); })
+        .then(function (writer) { return writer.writeGraphP(stream, graph); })
+        .then(function () { return stream.toStringP(); })
+        .then(function (ugly) {
+        var prettyString = _prettyGraphSONString(ugly);
+        var writeFileP = BluePromise.promisify(fs.writeFile);
+        return writeFileP(filename, prettyString);
+    })
+        .then(function () { return graph; })
+        .nodeify(callback);
+}
+</savePrettyGraphSON>
+
+<renderCell>
+function renderCell(cellData, column, rowData, rowNumber, tableData, columns, isBottomData, columnSummary) {
+var renderer = column.renderer;
+var renderOnNull = column.renderOnNull;
+
+if (!isBottomData) {
+  
+  if (cellData == null && renderOnNull !== true) {
+    return null;
+    
+  } else if (renderer != null) {
+    return renderer(cellData, { column: column, rowData: rowData, rowNumber: rowNumber, tableData: tableData, columns: columns, columnSummary: columnSummary });
+  }
+}
+
+return cellData;
+}
+</renderCell>
+
+<getRoutesForCategory>
+function (category) {
+    return _.filter($route.routes, function (route) {
+        return typeof route.category !== 'undefined' && route.category === category && isRouteVisible(route);
+    });
+}
+</getRoutesForCategory>
+
+<getGraphqlName>
+function getGraphqlName(g, iri) {
+const { prefixes } = g.config;
+const localName = getIriLocalName(iri);
+const namespaceIri = iri.slice(0, -localName.length);
+
+const prefix = Object.keys(prefixes).find(key => prefixes[key] === namespaceIri) || '';
+
+return capitalize(prefix + localName).replace(/\W/g, '_');
+}
+</getGraphqlName>
+
+<proxy>
+function proxy(options, format) {
+var tty = options.tty
+  , method = options.method
+  , re = /(%[sdj])+/g
+  , start
+  , end;
+if(arguments.length === 1) {
+  return method.apply(console, []);
+}
+var arg, i, replacing, replacements, matches, tag;
+replacing = (typeof format === 'string')
+  && re.test(format) && arguments.length > 2;
+replacements = [].slice.call(arguments, 2);
+if(format instanceof AnsiColor) {
+  replacing = true;
+  if(!replacements.length) {
+    replacements.unshift(format); format = '%s';
+  }
+}
+if(!replacing) {
+  replacements.unshift(format);
+  return method.apply(console, replacements);
+}
+matches = (format && (typeof format.match === 'function')) ?
+  format.match(re) : [];
+if(format instanceof AnsiColor) {
+  if(!tty) {
+    format = format.v;
+  }else{
+    tag = format.start(tty);
+    format = format.valueOf(tty);
+  }
+}
+
+if(tty) {
+  re = /(%[sdj])/g;
+  var fmt, result, j = 0;
+  while((result = re.exec(format))) {
+    if(j === replacements.length) {
+      break;
+    }
+    arg = replacements[j];
+    
+    fmt = result[1];
+    start = format.substr(0, result.index);
+    end = format.substr(result.index + result[0].length);
+    
+    
+    
+    if((arg instanceof AnsiColor)) {
+      
+      if(fmt === '%j') {
+        arg.v = JSON.stringify(arg.v, circular());
+      }
+      format = start + '%s' + end;
+    }
+    j++;
+  }
+}
+
+for(i = 0;i < replacements.length;i++) {
+  arg = replacements[i];
+  if(arg instanceof AnsiColor) {
+    replacements[i] = arg.valueOf(tty, tag);
+  }
+}
+replacements.unshift(format);
+return method.apply(options.scope ? options.scope : console, replacements);
+}
+</proxy>
+
+<parsePuzzleData>
+function(datastr){
+var puzzle = this.puzzle, bd = puzzle.board, pzl = pzpr.parser.parseFile(datastr, puzzle.pid);
+var filetype = this.currentType = pzl.type;
+
+bd.initBoardSize(pzl.cols, pzl.rows);
+
+<this-filever>
+this.filever = pzl.filever;
+</this-filever>
+if(filetype!==pzl.FILE_PBOX_XML){
+  this.lineseek = 0;
+  this.dataarray = pzl.body.split("\n");
+}
+else{
+  this.xmldoc = pzl.body;
+}
+
+<parse-data-switch>
+switch(filetype){
+case pzl.FILE_PZPR:
+  this.decodeData();
+  if((this.readLine()||'').match(/TrialData/)){ this.lineseek--; this.decodeTrial();}
+  break;
+
+case pzl.FILE_PBOX:
+  this.kanpenOpen();
+  break;
+
+case pzl.FILE_PBOX_XML:
+  this.kanpenOpenXML();
+  break;
+}
+</parse-data-switch>
+
+<this-metadata>
+puzzle.metadata.update(pzl.metadata);
+</this-metadata>
+if(pzl.history && (filetype===pzl.FILE_PZPR)){
+  puzzle.opemgr.decodeHistory(pzl.history);
+}
+
+<this-rebuildInfo>
+bd.rebuildInfo();
+</this-rebuildInfo>
+
+this.dataarray = null;
+}
+</parsePuzzleData>
+
+<parseSuggests>
+function _parseSuggests ($containor) {
+const suggests = []
+
+$containor.find('.typo-rel').each((index, item) => {
+  const $p = $(item)
+  const $word = $p.find('span')
+  const word = removeTagsAndSpaces($word.html())
+
+  
+  $word.remove()
+
+  const translate = removeTagsAndSpaces($p.html())
+  const suggest = new Suggest(word, translate)
+
+  debug('suggest parse object: %O', suggest)
+
+  suggests.push(suggest)
+})
+
+return suggests
+}
+</parseSuggests>
+
+<eventPipeline>
+function run(events, payload, callback)
+{
+
+
+if (!callback)
+{
+  callback = payload;
+  payload  = events;
+  events   = null;
+}
+
+<normalizeEvents-wrapper>
+events = normalizeEvents(events);
+</normalizeEvents-wrapper>
+
+<pipeline-wrapper>
+pipeline(events, payload, function(e, data, cb)
+{
+  if (!Array.isArray(this._stack[e]))
+  {
+    this.logger.debug({message: 'Reached end of the stack', event: e, data: data});
+    cb(null, payload);
+    return;
+  }
+
+  pipeline(this._stack[e], data, tryCall, cb);
+}.bind(this), callback);
+</pipeline-wrapper>
+}
+</eventPipeline>
+
+<loadAsset>
+function loadAsset (asset, varName) {
+<asset-existence-check>
+if (varName && typeof window[varName] !== 'undefined') {
+  return Promise.resolve(window[varName]);
+}
+</asset-existence-check>
+
+<asset-type-detection>
+if (typeof asset === 'string') {
+  if (/\.css$/.test(asset)) {
+    asset = { src: asset, type: 'css' };
+  } else {
+    asset = { src: asset };
+  }
+}
+</asset-type-detection>
+
+<asset-loading>
+var tag;
+if (asset.type === 'css') {
+  tag = document.createElement('link');
+  tag.setAttribute('rel', 'stylesheet');
+  tag.setAttribute('href', asset.src);
+} else {
+  tag = document.createElement('script');
+  tag.setAttribute('type', 'text/javascript');
+  tag.setAttribute('src', asset.src);
+}
+</asset-loading>
+
+<asset-onload-resolution>
+return new Promise(function (resolve) {
+  tag.async = true;
+  tag.onreadystatechange = tag.onload = function () {
+    var state = tag.readyState;
+    if (!state || /loaded|complete/.test(state)) {
+      resolve(varName ? window[varName] : undefined);
+    }
+  };
+  document.getElementsByTagName('head')[0].appendChild(tag);
+});
+</asset-onload-resolution>
+}
+</loadAsset>
+```

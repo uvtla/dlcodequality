@@ -1,0 +1,250 @@
+```javascript
+<sanitize>
+function sanitize (msg) {
+  if (typeof msg !== 'object') return null
+  if (typeof msg.value !== 'object') return null
+  if (typeof msg.value.content !== 'object') return null
+  if (typeof msg.value.timestamp !== 'number') return null
+  if (typeof msg.value.type !== 'string') return null
+  if (typeof msg.value.content.channel !== 'string') return null
+  if (typeof msg.value.content.text !== 'string') return null
+  return msg
+}
+</sanitize>
+
+<clearModifier>
+function clearModifier(event) {
+    <handleKeyCode>
+    var key = event.keyCode, k,
+        i = index(_downKeys, key);
+    
+    if (i >= 0) {
+        _downKeys.splice(i, 1);
+    }
+
+    if(key == 93 || key == 224) key = 91;
+    </handleKeyCode>
+    <updateModifiers>
+    if(key in _mods) {
+      _mods[key] = false;
+      for(k in _MODIFIERS) if(_MODIFIERS[k] == key) assignKey[k] = false;
+    }
+    </updateModifiers>
+}
+</clearModifier>
+
+<getKeyObject>
+function (key, obj) {
+  'use strict';
+  <parseKeyPath>
+  var keysArr = key.split('.'),
+      lastKeyPart = keysArr.pop(),
+      len = keysArr.length,
+      i, k, objNext;
+  for (i = 0; i < len; i += 1) {
+      k = keysArr[i];
+      objNext = obj[k];
+      if (!isObj(objNext)) {
+          objNext = obj[k] = {};
+      }
+      obj = objNext;
+  }
+  </parseKeyPath>
+  return {
+      node: obj,
+      key: lastKeyPart
+  };
+}
+</getKeyObject>
+
+<getOAuthToken>
+function (scopes, tokenUrl, OAuthSchemeKey) {
+  <prepareParams>
+  var params = {
+      'client_id': clientId,
+      'client_secret': clientSecret,
+      'scope': scopes.join(' '),
+      'grant_type': 'client_credentials'
+  };
+  </prepareParams>
+  <makeAjaxRequest>
+  $.ajax({
+      url : tokenUrl,
+      type: 'POST',
+      data: params,
+      success: function (data) {
+          onOAuthComplete(data, OAuthSchemeKey);
+      },
+      error: function () {
+          onOAuthComplete('');
+      }
+  });
+  </makeAjaxRequest>
+}
+</getOAuthToken>
+
+<mapToObject>
+function mapToObject (map, opts) {
+  const length = map.getLength();
+  const data = {};
+  <iterateMapElements>
+  for (let i = 0; i < length; i++) {
+      const key = map.getKey(i).getValue();
+      const value = getJsonValueFromSassValue(map.getValue(i), opts);
+      data[key] = value;
+  }
+  </iterateMapElements>
+  return data;
+}
+</mapToObject>
+
+<coerceQueryParamsToString>
+function coerceQueryParamsToString(queryParams) {
+  <convertQueryParams>
+  for (var key in queryParams) {
+    if (typeof queryParams[key] === 'number') {
+      queryParams[key] = '' + queryParams[key];
+    } else if (isArray(queryParams[key])) {
+      for (var i = 0, l = queryParams[key].length; i < l; i++) {
+        queryParams[key][i] = '' + queryParams[key][i];
+      }
+    }
+  }
+  </convertQueryParams>
+}
+</coerceQueryParamsToString>
+
+<Enumerable>
+function Enumerable(object) {
+  <validateEnumeratorFactory>
+  var self = this,
+      enumeratorFactory = Enumerator.enumeratorFactories[crafity.getType(object)];
+
+  if (enumeratorFactory === undefined) {
+      throw ("There is no Enumerator for an object of type '" + crafity.getType(object) + "'");
+  }
+  </validateEnumeratorFactory>
+
+  <initializeObject>
+  this.getObject = function internalGetObject() {
+      return object;
+  };
+  </initializeObject>
+  
+  <overrideBehavior>
+  this.overrideEnumerator = function overrideEnumeratorInternal(getEnumerator) {
+      self.getEnumerator = function getEnumeratorInternal() {
+          return function () {
+              return getEnumerator(self.getEnumerator());
+          };
+      };
+      return self;
+  };
+  </overrideBehavior>
+
+  <basicMethods>
+  this.getEnumerator = function getEnumeratorInternal() {
+      return enumeratorFactory.getEnumerator(self, object);
+  };
+
+  this.forEach = function forEachInternal(consumer) {
+      return crafity.Enumerable.from(consumer);
+  };
+  
+  this.selectMany = ...;
+  
+  this.recursive = ...;
+  
+  this.where = ...;
+  
+  this.take = ...;
+  
+  this.skip = ...;
+  
+  this.loop = ...;
+
+  this.aggregate = ...;
+
+  this.toArray = ...;
+
+  this.sum = ...;
+
+  this.count = ...;
+  </basicMethods>
+}
+</Enumerable>
+
+<referenceFactory>
+function referenceFactory(tree, options) {
+  <getDefinitions>
+  var definitions = getDefinitions(tree, options)
+  </getDefinitions>
+
+  return <referenceReplacement>function reference(node, index, parent) {
+      <findAndReplaceReference>
+      var definition = definitions(node.identifier)
+      var replacement
+      var image
+
+      if (definition) {
+          image = node.type === 'imageReference'
+
+          replacement = {
+              type: image ? 'image' : 'link',
+              url: definition.url,
+              title: definition.title
+          }
+
+          if (image) {
+              replacement.alt = node.alt
+          } else {
+              replacement.children = node.children
+          }
+
+          parent.children[index] = replacement
+      }
+      </findAndReplaceReference>
+  }
+  </referenceReplacement>
+}
+</referenceFactory>
+
+<refreshAnnotations>
+function() {
+  <checkAnnotationCapabilities>
+	if (!this._treeModel.getAnnotations) {
+		return;
+	}
+
+	if (this._annotationRefreshRequested) {
+		return;
+	}
+  </checkAnnotationCapabilities>
+
+  <requestAnnotationRefresh>
+	var tree = this;
+	this._annotationRefreshRequested = true;
+	setTimeout(function() {
+		tree._annotationRefreshRequested = false;
+		tree._redrawAnnotation();
+	}, 0);
+  </requestAnnotationRefresh>
+}
+</refreshAnnotations>
+
+<CompileSELF>
+function CompileSELF(node, clazz) {
+  return <transformTree>node.transform(new UglifyJS.TreeTransformer(function (node, descend) {
+      <replaceSelfReference>
+      if (node instanceof UglifyJS.AST_SymbolVar || node instanceof UglifyJS.AST_SymbolRef) {
+          var name = node.name;
+          if ('SELF' === name) {
+              return AccessNS(clazz, null, node);
+          }
+      }
+      </replaceSelfReference>
+  }))
+  </transformTree>
+}
+</CompileSELF>
+```

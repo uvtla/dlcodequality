@@ -1,0 +1,280 @@
+```javascript
+<constructor>
+function(points, parameters) {
+  parameters = defaultValue(parameters, defaultValue.EMPTY_OBJECT); // Handling default parameters
+  
+  this.points = defaultValue(points, []); // Handling default points
+  
+  this.point = undefined; // Initializing point to undefined
+  
+  // Setting object properties from parameters
+  this.id = parameters.id;
+  this.categoryName = parameters.categoryName;
+  this.name = parameters.name;
+  this.units = parameters.units;
+  this.color = parameters.color;
+  this.yAxisMin = parameters.yAxisMin;
+  this.yAxisMax = parameters.yAxisMax;
+  this.type = parameters.type;
+  this.onClick = parameters.onClick;
+  this.showAll = defaultValue(parameters.showAll, true);
+
+  this.yAxisWidth = 40; // Fixed yAxisWidth
+}
+</constructor>
+
+<getLocationFromIndex>
+function getLocationFromIndex(string, index) {
+  const lines = string.split('\n');
+  let destructure = false;
+  let idx = 0;
+  const results = [];
+  let found = [];
+
+  <handleSingleIndices>
+  if (!Array.isArray(index)) {
+    index = [index];
+    destructure = true;
+  }
+  </handleSingleIndices>
+
+  <lineProcessingLoop>
+  for (let i = 0, l = lines.length; i < l; i++) {
+    const m = index.length;
+    const line = lines[i];
+    const lineLength = line.length + 1;
+    if (!m) break;
+    
+    <locationResults>
+    for (let j = 0; j < m; j++) {
+      if (idx + lineLength > index[j]) {
+        results.push({
+          line: i + 1,
+          column: index[j] - idx
+        });
+        found.push(j);
+      }
+    }
+    </locationResults>
+
+    <updateIndex>
+    if (found.length) {
+      for (let k = 0, n = found.length; k < n; k++) {
+        index.splice(found[k] - k, 1);
+      }
+      found = [];
+    }
+    </updateIndex>
+    idx += lineLength;
+  }
+  </lineProcessingLoop>
+
+  <returnResults>
+  if (results.length) return destructure ? results[0] : results;
+  return { line: 0, column: 0 };
+  </returnResults>
+}
+</getLocationFromIndex>
+
+<drawImageWithOptions>
+function(opacity, scale, translate, compositeOperation) {
+  <processOptions>
+  var options = opacity;
+  if (!$.isPlainObject(options)) {
+    options = {
+      opacity: opacity,
+      scale: scale,
+      translate: translate,
+      compositeOperation: compositeOperation
+    };
+  }
+  if (!this.useCanvas || !this.sketchCanvas) {
+    return;
+  }
+  opacity = options.opacity;
+  compositeOperation = options.compositeOperation;
+  var bounds = options.bounds;
+  </processOptions>
+
+  <configureAndDrawImage>
+  this.context.save();
+  this.context.globalAlpha = opacity;
+  if (compositeOperation) {
+    this.context.globalCompositeOperation = compositeOperation;
+  }
+  // Rest of drawing logic omitted for brevity
+  this.context.restore();
+  </configureAndDrawImage>
+}
+</drawImageWithOptions>
+
+<handleStorage>
+function(key, value){
+    var ls = this._local.localStorage;
+    
+    <retrieveItem>
+    if( value === undefined ) {
+      return ls ? ls.getItem(key) : $.cookie(key);
+    } 
+    </retrieveItem>
+    <removeItem>
+    else if ( value === null ) {
+      if( ls ) {
+        ls.removeItem(key);
+      } else {
+        $.removeCookie(key);
+      }
+    } 
+    </removeItem>
+    <setItem>
+    else {
+      if( ls ) {
+        ls.setItem(key, value);
+      } else {
+        $.cookie(key, value, this.options.persist.cookie);
+      }
+    }
+    </setItem>
+}
+</handleStorage>
+
+<modifyURLHashParameters>
+function (oComponent, sParameterName, aValues) {
+  var oParsedHash = Utils.getParsedURLHash(sParameterName);
+
+  <handleParsedHash>
+  if (oParsedHash.params) {
+    hasher.changed.active = false;
+
+    var mTechnicalParameters = Utils.getTechnicalParametersForComponent(oComponent);
+    
+    <processParameters>
+    if (!mTechnicalParameters) {
+      this.log.warning("Component instance not provided, so technical parameters in component data and browser history remain unchanged");
+    }
+    if (aValues.length === 0) {
+      delete oParsedHash.params[sParameterName];
+      mTechnicalParameters && delete mTechnicalParameters[sParameterName];
+    } else {
+      oParsedHash.params[sParameterName] = aValues;
+      mTechnicalParameters && (mTechnicalParameters[sParameterName] = aValues);
+    }
+    </processParameters>
+    hasher.replaceHash(Utils.getUshellContainer().getService("URLParsing").constructShellHash(oParsedHash));
+    hasher.changed.active = true;
+  }
+  </handleParsedHash>
+}
+</modifyURLHashParameters>
+
+<escapeHtml>
+function escapeHtml (s, replaceDoubleQuote) {
+  <formatString>
+  if (s === 'undefined') {
+    s = ''
+  }
+  if (typeof s !== 'string') {
+    s = s + ''
+  }
+  s = s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  if (replaceDoubleQuote) {
+    return s.replace(/"/g, '&quot;')
+  }
+  </formatString>
+  return s
+}
+</escapeHtml>
+
+<parseApiResponse>
+function parse(response, opts, callback) {
+  var parser, jsonParseError, result;
+
+  <processJsonOrElse>
+  if (opts.format.toUpperCase() === 'XML') {
+    callback(null, response);
+    return;
+  }
+  if (opts.contentType && opts.contentType.indexOf('json') >= 0) {
+    try {
+      result = JSON.parse(response);
+    } catch (e) {
+      jsonParseError = e;
+    }
+    return validateAndCleanResponse(jsonParseError, { response: result });
+  }
+  </processJsonOrElse>
+
+  <parseXml>
+  parser = new xml2js.Parser({
+    mergeAttrs: true,
+    explicitArray: false
+  });
+  parser.parseString(response, validateAndCleanResponse);
+  </parseXml>
+
+  <validateAndCleanResponse>
+  function validateAndCleanResponse(err, result) {
+    // Error handling and response cleaning logic omitted for brevity
+    return callback(null, cleanedResult);
+  }
+  </validateAndCleanResponse>
+}
+</parseApiResponse>
+
+<ngModelWarning>
+function _ngModelWarning(name, type, instance, warningConfig) {
+  <emitWarning>
+  if (!Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["isDevMode"])() || warningConfig === 'never')
+      return;
+  if (((warningConfig === null || warningConfig === 'once') && !type._ngModelWarningSentOnce) ||
+      (warningConfig === 'always' && !instance._ngModelWarningSent)) {
+      ReactiveErrors.ngModelWarning(name);
+      type._ngModelWarningSentOnce = true;
+      instance._ngModelWarningSent = true;
+  }
+  </emitWarning>
+}
+</ngModelWarning>
+
+<adjustDayOfMonth>
+function adjustDayOfMonth(self) {
+  <adjustFields>
+  var fields = self.fields;
+  var year = fields[YEAR];
+  var month = fields[MONTH];
+  var monthLen = getMonthLength(year, month);
+  var dayOfMonth = fields[DAY_OF_MONTH];
+  if (dayOfMonth > monthLen) {
+      self.set(DAY_OF_MONTH, monthLen);
+  }
+  </adjustFields>
+}
+</adjustDayOfMonth>
+
+<initialiseModel>
+function initialise(model, instance, autoInitialiseModel) {
+  if (autoInitialiseModel === void 0) { autoInitialiseModel = true; }
+  if (instance) {
+    <initialiseInstance>
+    if (autoInitialiseModel && model.clean === false) {
+      initialise(model);
+    }
+    exports.console.log("initialise " + instance);
+    invoke(model.onInitialise, undefined, instance);
+    </initialiseInstance>
+  }
+  else {
+    <initialiseModelStructure>
+    exports.console.log("initialise " + model.name);
+    model.accept(new InitialiseElements(), false);
+    model.clean = true;
+    </initialiseModelStructure>
+  }
+}
+</initialiseModel>
+```
+
+In reviewing the above functions, I have annotated blocks that represent distinct responsibilities according to the definition provided. Responsibilities are larger, conceptual blocks of logic rather than simple one-liners or basic assignments. Each annotated section performs a task that contributes to the overall responsibility of the function.

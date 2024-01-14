@@ -1,0 +1,282 @@
+```javascript
+<calculateInverseHyperbolicCosine>
+function() {
+  
+  var a = this['re'];
+  var b = this['im'];
+
+  if (this['isZero']()) {
+    return Complex['INFINITY'];
+  }
+
+  var d = a * a + b * b;
+  return (d !== 0)
+          ? new Complex(
+                  a / d,
+                  -b / d).acosh()
+          : new Complex(
+                  (a !== 0) ? a / 0 : 0,
+                  (b !== 0) ? -b / 0 : 0).acosh();
+}
+</calculateInverseHyperbolicCosine>
+
+<decorateComment>
+function decorateComment(node, comment, options) {
+  const { locStart, locEnd } = options;
+
+  const childNodes = getSortedChildNodes(node, options);
+  let precedingNode;
+  let followingNode;
+  
+  let left = 0;
+  let right = childNodes.length;
+<binarySearchInsertionPoint>
+  while (left < right) {
+    const middle = (left + right) >> 1;
+    const child = childNodes[middle];
+
+    if (
+      locStart(child) - locStart(comment) <= 0 &&
+      locEnd(comment) - locEnd(child) <= 0
+    ) {
+      
+      comment.enclosingNode = child;
+
+      decorateComment(child, comment, options);
+      return; 
+    }
+
+    if (locEnd(child) - locStart(comment) <= 0) {
+      precedingNode = child;
+      left = middle + 1;
+      continue;
+    }
+
+    if (locEnd(comment) - locStart(child) <= 0) {
+      followingNode = child;
+      right = middle;
+      continue;
+    }
+    
+    throw new Error("Comment location overlaps with node location");
+  }
+</binarySearchInsertionPoint>
+
+<assignCommentToNodes>
+  if (
+    comment.enclosingNode &&
+    comment.enclosingNode.type === "TemplateLiteral"
+  ) {
+    const quasis = comment.enclosingNode.quasis;
+    const commentIndex = findExpressionIndexForComment(
+      quasis,
+      comment,
+      options
+    );
+
+    if (
+      precedingNode &&
+      findExpressionIndexForComment(quasis, precedingNode, options) !==
+        commentIndex
+    ) {
+      precedingNode = null;
+    }
+    if (
+      followingNode &&
+      findExpressionIndexForComment(quasis, followingNode, options) !==
+        commentIndex
+    ) {
+      followingNode = null;
+    }
+  }
+
+  if (precedingNode) {
+    comment.precedingNode = precedingNode;
+  }
+
+  if (followingNode) {
+    comment.followingNode = followingNode;
+  }
+</assignCommentToNodes>
+}
+</decorateComment>
+
+<removeChildFromParent>
+function (node) {
+  var children = this._children;
+  var idx = children.indexOf(node);
+  if (idx < 0) {
+      return;
+  }
+
+  children.splice(idx, 1);
+  node._parent = null;
+
+  if (this._scene) {
+      node.traverse(this._removeSelfFromScene, this);
+  }
+}
+</removeChildFromParent>
+
+<convertImageSrcToBase64>
+function(base) {
+  var node = $(base).children('img:first');
+  if (node.attr('src').substr(0, 5) !== 'data:') {
+    node.attr('src', imgBase64(node, this.file.mime));
+  }
+}
+</convertImageSrcToBase64>
+
+<subscribeToEventWithDelegation>
+function(type, fn, obj, scope) {
+  scope = scope || this;
+  var Event = YAHOO.util.Event,
+  el = this.get('element') || this.get('id'),
+	self = this;
+
+	if (specialTypes[type] && !Event._createMouseDelegate) {
+    return false;	
+	}
+
+  if (!this._events[type]) {
+    if (el && this.DOM_EVENTS[type]) {
+<EventDelegationSetup>
+      Event.on(el, type, function(e, matchedEl) {
+        if (e.srcElement && !e.target) { 
+          e.target = e.srcElement;
+        }
+
+        if ((e.toElement && !e.relatedTarget) || (e.fromElement && !e.relatedTarget)) {
+          e.relatedTarget = Event.getRelatedTarget(e);
+        }
+        
+        if (!e.currentTarget) {
+          e.currentTarget = el;
+        }
+
+        self.fireEvent(type, e, matchedEl);
+
+      }, obj, scope);
+</EventDelegationSetup>
+    }
+    this.createEvent(type, {scope: this});
+  }
+  
+  return YAHOO.util.EventProvider.prototype.subscribe.apply(this, arguments); 
+}
+</subscribeToEventWithDelegation>
+
+<mockDirectoryConfiguration>
+function (path) {
+  var mockDirConfig = {
+    openRoute: function (req, res, params) {
+    },
+    
+    closeRoute: function (req, res, params) {
+    },
+  };
+
+  spyOn(mockDirConfig, 'openRoute').and.callThrough();
+  spyOn(mockDirConfig, 'closeRoute').and.callThrough();
+
+  registerRequireMock(testObject._formatPathForRequire(path), function () {
+    return mockDirConfig;
+  });
+
+  filesThatExist.push(path);
+
+  return mockDirConfig;
+}
+</mockDirectoryConfiguration>
+
+<dynamicErrorConstructor>
+function Block(errors, namespace, base, lazy) {
+  if ((base === undefined) || (base === true) || (base === null)) {
+    base = "Base";
+  } else if (base === false) {
+    base = Error;
+  } else if (typeof base !== "function") {
+    base = "" + base;
+  }
+<initializeErrorConstructorProperties>
+  this.p = {
+    errors: errors,
+    namespace: namespace,
+    prefix: namespace ? (namespace + ".") : "",
+    base: base,
+    lazy: !!lazy
+  };
+</initializeErrorConstructorProperties>
+  this.created = false;
+  if (!this.p.lazy) {
+    this.createAll();
+  }
+}
+</dynamicErrorConstructor>
+
+<cleanupOnUnload>
+function () {
+  unloaded = true;
+  
+  if ($loadSVGPromise && $loadSVGPromise.state() !== 'resolved') {
+    $loadSVGPromise.abort();
+    $loadSVGPromise = null;
+  }
+
+  if (removeOnUnload) {
+    if ($svg) {
+      $svg.remove();
+      $svg = null;
+    }
+    svgLoaded = false;
+  }
+}
+</cleanupOnUnload>
+
+<extractColumnFromRow>
+function extractFromRow(row, context, asString)
+{
+  var map    = row._arrayProcessedColumns;
+  var values = row.values;
+
+  var columnIndex = this.getIndex();
+  var ret = values[columnIndex];
+
+  if (!(asString && this.isVariant() && !map[columnIndex]))
+  {
+    if (!map[columnIndex])
+    {
+      if (ret !== null)
+      {
+        ret = values[columnIndex] =
+            context.convert(values[columnIndex], this, context);
+      }
+      map[columnIndex] = true;
+    }
+
+    var extractFn = !asString ? context.toValue : context.toString;
+    ret = extractFn(ret);
+  }
+
+  return ret;
+}
+</extractColumnFromRow>
+
+<addTsIgnoreComment>
+function addTsIgnore(filePath) {
+  const data = fs.readFileSync(filePath).toString().split('\n');
+  const lineNumber = data.findIndex((lineText) => lineText.includes('/dist/'));
+  if (lineNumber <= -1) return;
+
+<insertTsIgnoreComment>
+  data.splice(lineNumber, 0, '// @ts-ignore');
+</insertTsIgnoreComment>
+  const text = data.join('\n');
+<writeUpdatedFile>
+  fs.writeFile(filePath, text, function(err) {
+    if (err) return console.log(err);
+  });
+</writeUpdatedFile>
+}
+</addTsIgnoreComment>
+```

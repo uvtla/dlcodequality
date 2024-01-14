@@ -1,0 +1,295 @@
+```javascript
+
+<unbindEventsAndDestroyBinding>
+function () {
+    if (!this.$) {
+        return;
+    }
+    var e;
+    for (var j = 0; j < this.$events.length; j++) {
+        e = this.$events[j];
+        this.$.scope.unbind(e.eventType, e.callback, this);
+    }
+
+    this.$.scope.unbind('destroy', this.destroy, this);
+
+    if (this.$.twoWay === true) {
+        this.$.target.unbind(this.$.targetEvent, this._revCallback, this);
+    }
+    if (this.$subBinding) {
+        this.$subBinding.destroy();
+        this.$subBinding = null;
+    }
+
+    for (var i = 0; i < this.$parameters.length; i++) {
+        var par = this.$parameters[i];
+        if (par instanceof Binding) {
+            par.destroy();
+        }
+    }
+    this.$parameters = null;
+    this.$.scope = this.$.target = this.$.callback = null;
+    this.$ = null;
+    this.$targets = null;
+</unbindEventsAndDestroyBinding>
+<callBaseAndManageGarbageCollection>
+    this.callBase();
+
+    bindingsDestroyed++;
+    if (bindingsDestroyed === 500) {
+        if (typeof(CollectGarbage) === "function") {
+            CollectGarbage();
+        }
+        bindingsDestroyed = 0;
+    }
+</callBaseAndManageGarbageCollection>
+}
+```
+
+```javascript
+<initializeLinkedList>
+function(data){
+  this.head;
+  this.size;
+  if(typeof data !== 'undefined'){
+    this.head = new Node(data);
+    this.size = 1;
+  }else{
+    this.head = null;
+    this.size = 0;
+  }
+}
+</initializeLinkedList>
+```
+
+```javascript
+<generateXUID>
+function xuid () {
+  var now = Date.now()
+  var date = encode(now).slice(-7)
+  var random = ('000' + encode(counter)).slice(-3) +
+    encode(parseInt(randomBytes(6).toString('hex'), 16)).slice(-4)
+
+  <handleArguments>
+  if (arguments.length > 0) {
+    date = encode(arguments[0]).slice(-7)
+  }
+
+  if (arguments.length > 1) {
+    random = ('0000000' + encode(arguments[1])).slice(-7)
+  }
+  </handleArguments>
+
+  <manageCounter>
+  if (now !== time && counter > max / 2) {
+    counter = parseInt(randomBytes(2).toString('hex'), 16)
+  } else {
+    counter += 1
+  }
+  </manageCounter>
+
+  time = now
+
+  return date + random
+}
+</generateXUID>
+```
+
+```javascript
+<createBidCacheRegistry>
+function createBidCacheRegistry() {
+  let registry = {};
+
+  <setupRegistrySlot>
+  function setupRegistrySlot(auctionId) {
+    registry[auctionId] = {};
+    registry[auctionId].bidStorage = new Set();
+    registry[auctionId].queueDispatcher = createDispatcher(queueTimeDelay);
+    registry[auctionId].initialCacheKey = utils.generateUUID();
+  }
+  </setupRegistrySlot>
+
+  <bidCacheRegistryAPI>
+  return {
+    addBid: function (bid) {
+      
+      if (!registry[bid.auctionId]) {
+        setupRegistrySlot(bid.auctionId);
+      }
+      registry[bid.auctionId].bidStorage.add(bid);
+    },
+    removeBid: function (bid) {
+      registry[bid.auctionId].bidStorage.delete(bid);
+    },
+    getBids: function (bid) {
+      return registry[bid.auctionId] && registry[bid.auctionId].bidStorage.values();
+    },
+    getQueueDispatcher: function(bid) {
+      return registry[bid.auctionId] && registry[bid.auctionId].queueDispatcher;
+    },
+    setupInitialCacheKey: function(bid) {
+      if (!registry[bid.auctionId]) {
+        registry[bid.auctionId] = {};
+        registry[bid.auctionId].initialCacheKey = utils.generateUUID();
+      }
+    },
+    getInitialCacheKey: function(bid) {
+      return registry[bid.auctionId] && registry[bid.auctionId].initialCacheKey;
+    }
+  }
+  </bidCacheRegistryAPI>
+}
+</createBidCacheRegistry>
+```
+
+```javascript
+<computeHMAC>
+function hmac(data, key) {
+  mctx.init(key);
+  mctx.update(data);
+  return mctx.finish();
+}
+</computeHMAC>
+```
+
+```javascript
+<hideUIElement>
+function() {
+        this.fireEvent('hiding');
+
+        this.container.removeClass('move-' + this.opposite);
+
+        this.element
+            .conceal()
+            .removeClass('is-expanded')
+            .aria('expanded', false);
+
+        <manageBodyScroll>
+        if (this.options.stopScroll) {
+            $('body').removeClass('no-scroll');
+        }
+        </manageBodyScroll>
+
+        this.fireEvent('hidden');
+    }
+</hideUIElement>
+```
+
+```javascript
+<initializeController>
+function () {
+			this._initAndBindSelectedContentModel();
+			var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+			<attachRouteHandlers>
+			oRouter.getRoute("ContentDetails").attachMatched(this._onRouteMatched, this);
+			oRouter.getRoute("ContentDetailsFlip").attachMatched(this._onRouteMatched, this);
+			</attachRouteHandlers>
+		}
+</initializeController>
+```
+
+```javascript
+<initializeTransformControl>
+function(layer, options) {
+        OpenLayers.Control.prototype.initialize.apply(this, [options]);
+
+        this.layer = layer;
+
+        <setDefaultSymbolizer>
+        if(!this.rotationHandleSymbolizer) {
+            this.rotationHandleSymbolizer = {
+                stroke: false,
+                pointRadius: 10,
+                fillOpacity: 0,
+                cursor: "pointer"
+            };
+        }
+        </setDefaultSymbolizer>
+
+        <createTransformControlElements>
+        this.createBox();
+        this.createControl();        
+        </createTransformControlElements>
+    }
+</initializeTransformControl>
+```
+
+```javascript
+<handleDoubleTapGesture>
+function _doubleTapHandler(e) {
+      var pos,
+          ratio,
+          animation;
+
+      <checkGestureRequirements>
+      if (e.touches && e.touches.length === 1 && _settings('touchEnabled')) {
+        _doubleTap = true;
+
+        ratio = 1 / _settings('doubleClickZoomingRatio');
+        </checkGestureRequirements>
+
+        <getPositionAndDispatchEvent>
+        pos = position(e.touches[0]);
+        _self.dispatchEvent('doubleclick',
+          sigma.utils.mouseCoords(e, pos.x, pos.y));
+        </getPositionAndDispatchEvent>
+
+        <performDoubleClickZoom>
+        if (_settings('doubleClickEnabled')) {
+          pos = _camera.cameraPosition(
+            pos.x - sigma.utils.getCenter(e).x,
+            pos.y - sigma.utils.getCenter(e).y,
+            true
+          );
+
+          animation = {
+            duration: _settings('doubleClickZoomDuration'),
+            onComplete: function() {
+              _doubleTap = false;
+            }
+          };
+
+          sigma.utils.zoomTo(_camera, pos.x, pos.y, ratio, animation);
+        }
+        </performDoubleClickZoom>
+
+        <preventDefaultAndStopPropagation>
+        if (e.preventDefault)
+          e.preventDefault();
+        else
+          e.returnValue = false;
+
+        e.stopPropagation();
+        </preventDefaultAndStopPropagation>
+        return false;
+      }
+    }
+</handleDoubleTapGesture>
+```
+
+```javascript
+<projectPolygonsToOrthobasis>
+function(orthobasis) {
+            var EPS = 1e-5;
+            var cags = [];
+            <filterAndProjectPolygons>
+            this.polygons.filter(function(p) {
+                    
+                    return p.plane.normal.minus(orthobasis.plane.normal).lengthSquared() < EPS*EPS;
+                })
+                .map(function(polygon) {
+                    var cag = polygon.projectToOrthoNormalBasis(orthobasis);
+                    if (cag.sides.length > 0) {
+                        cags.push(cag);
+                    }
+            });
+            </filterAndProjectPolygons>
+            <unionProjectedCAG>
+            var result = new CAG().union(cags);
+            </unionProjectedCAG>
+            return result;
+        }
+</projectPolygonsToOrthobasis>
+``` 
+
+In these annotations, we see a mixture of compliant and non-compliant areas. The central theme across non-compliant sections is that they handle separately identifiable tasks within a larger process, hence violating the Single Responsibility Principle (SRP).

@@ -1,0 +1,297 @@
+```javascript
+<histogram>
+function histogram() {
+  <initializeHistogram>
+  const histogram = {
+    r: new Array(256).fill(0),
+    g: new Array(256).fill(0),
+    b: new Array(256).fill(0)
+  };
+  </initializeHistogram>
+
+  <calculateHistogram>
+  this.scanQuiet(0, 0, this.bitmap.width, this.bitmap.height, function(
+    x,
+    y,
+    index
+  ) {
+    histogram.r[this.bitmap.data[index + 0]]++;
+    histogram.g[this.bitmap.data[index + 1]]++;
+    histogram.b[this.bitmap.data[index + 2]]++;
+  });
+  </calculateHistogram>
+
+  return histogram;
+}
+</histogram>
+
+<isAtCodePoint>
+function isAtCodePoint(stream) {
+	const code = stream.peek();
+
+	return (isQuote(code) && getPrevCode(stream) === code)
+		|| (code === 60  && getPrevCode(stream) === 62 )
+		|| (isLineBreak(code) && reEmptyLine.test(stream.buffer.lineForRow(stream.pos.row)));
+}
+</isAtCodePoint>
+
+<formatTime>
+function formatTime(time) {
+	<validateAndFormatTime>
+	if (time == '') {
+		if (settings.required) return settings.duration ? '0:00' : '00:00';
+		else return time;
+	}
+	if ((new RegExp('^(-|\\+)?([0-9]+)(.([0-9]{1,2})?)?$', 'i')).test(time)) {
+		var hour = parseInt(RegExp.$2);
+		var min = parseInt(RegExp.$4);
+		if (!min) min = 0;
+		var negative = settings.duration && settings.durationNegative && RegExp.$1 == '-' ? true : false;
+		if (hour >= 24 && !settings.duration) hour = hour % 24;
+		if (min >= 60) min = min % 60;
+		if (settings.precision != 1) {
+			var f = Math.floor(min / settings.precision);
+			min = f * settings.precision + (Math.round((min - f * settings.precision) / settings.precision) == 1 ? settings.precision : 0);
+			if (min >= 60) min = 0;
+		}
+		time = (negative ? '-' : '') + (hour < 10 && !settings.duration ? '0' : '') + hour + settings.separator + (RegExp.$3 ? (min < 10 ? '0' : '') + min : '00');
+	}
+	else if ((new RegExp('^(-|\\+)?.([0-9]{1,2})')).test(time)) {
+		var min = parseInt(RegExp.$2);
+		var negative = settings.duration && settings.durationNegative && RegExp.$1 == '-' ? true : false;
+		if (min >= 60) min = min % 60;
+		time = (negative && min > 0 ? '-' : '') + '0' + (!settings.duration ? '0' : '') + settings.separator + (min < 10 ? '0' : '') + min;
+	}
+	else {
+		time = '0' + (!settings.duration ? '0' : '') + settings.separator + '00';
+	}
+	</validateAndFormatTime>
+	return (settings.duration && settings.useDurationPlusSign && !time.match(/^\-/) && !time.match(/^0+:00$/) ? '+' : '') + time;
+}
+</formatTime>
+
+<function>
+function(def, thisArg, func) {
+            
+    <createDeferred>
+    var d = new can.Deferred();
+    </createDeferred>
+    
+    <resolveOrReject>
+    def.then(function() {
+        var args = can.makeArray(arguments),
+            success = true;
+
+        try {
+            args[0] = func.apply(thisArg, args);
+        } catch (e) {
+            success = false;
+            d.rejectWith(d, [e].concat(args));
+        }
+        if (success) {
+            d.resolveWith(d, args);
+        }
+    }, function() {
+        d.rejectWith(this, arguments);
+    });
+    </resolveOrReject>
+
+    <abortFunction>
+    if (typeof def.abort === 'function') {
+        d.abort = function() {
+            return def.abort();
+        };
+    }
+    </abortFunction>
+
+    return d;
+}
+</function>
+
+<uniq>
+function uniq() {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    <performUniqOperation>
+    return multiArrayMacro(args, function (dependentKeys) {
+      var _this2 = this;
+
+      var uniq = _emberRuntimeSystemNative_array.A();
+
+      dependentKeys.forEach(function (dependentKey) {
+        var value = _emberMetalProperty_get.get(_this2, dependentKey);
+        if (_emberRuntimeUtils.isArray(value)) {
+          value.forEach(function (item) {
+            if (uniq.indexOf(item) === -1) {
+              uniq.push(item);
+            }
+          });
+        }
+      });
+
+      return uniq;
+    });
+    </performUniqOperation>
+}
+</uniq>
+
+<_encodePkcs1_v1_5>
+function _encodePkcs1_v1_5(m, key, bt) {
+  <initializeBuffer>
+  var eb = forge.util.createBuffer();
+  </initializeBuffer>
+
+  <calculateKeyLength>
+  var k = Math.ceil(key.n.bitLength() / 8);
+  </calculateKeyLength>
+
+  <checkMessageLength>
+  if(m.length > (k - 11)) {
+    var error = new Error('Message is too long for PKCS#1 v1.5 padding.');
+    error.length = m.length;
+    error.max = k - 11;
+    throw error;
+  }
+  </checkMessageLength>
+
+  <createPadding>
+  eb.putByte(0x00);
+  eb.putByte(bt);
+
+  var padNum = k - 3 - m.length;
+  var padByte;
+  if(bt === 0x00 || bt === 0x01) {
+    padByte = (bt === 0x00) ? 0x00 : 0xFF;
+    for(var i = 0; i < padNum; ++i) {
+      eb.putByte(padByte);
+    }
+  } else {
+    while(padNum > 0) {
+      var numZeros = 0;
+      var padBytes = forge.random.getBytes(padNum);
+      for(var i = 0; i < padNum; ++i) {
+        padByte = padBytes.charCodeAt(i);
+        if(padByte === 0) {
+          ++numZeros;
+        } else {
+          eb.putByte(padByte);
+        }
+      }
+      padNum = numZeros;
+    }
+  }
+  </createPadding>
+
+  <finalizeBuffer>
+  eb.putByte(0x00);
+  eb.putBytes(m);
+  </finalizeBuffer>
+
+  return eb;
+}
+</_encodePkcs1_v1_5>
+
+<transform>
+function transform(path) {
+    <processPath>
+    if (shouldProcess(path)) {
+        const renderer = Renderer.forPath(path);
+        transformer(path.node, renderer, buildErrorHandler(path));
+        
+        if (Renderer.isParent(path)) {
+            path.parentPath.replaceWith(renderer.toFunctionCall());
+        } else {
+            path.replaceWith(renderer.toFunctionCall());
+        }
+    }
+    </processPath>
+}
+</transform>
+
+<loadFromIndividualConfigFile>
+function loadFromIndividualConfigFile(key) {
+    <sanitizeKey>
+    key = _.replace(key, /\/|\\/g, ''); 
+    </sanitizeKey>
+
+    <checkCache>
+    if (individualKeyCache[key]) {
+        return individualKeyCache[key];
+    } else {
+    </checkCache>
+
+        <loadFile>
+        var toLoad = path.resolve(global.__appDir, 'config/' + key + '.json');
+
+        var content = '{}';
+        try {
+            content = fs.readFileSync(toLoad);
+        } catch (err) {
+            
+        }
+        </loadFile>
+
+        <parseAndDecrypt>
+        var json = {};
+        try {
+            json = JSON.parse(stripJsonComments(content.toString()));
+        } catch (err) {
+            console.warn('Error parsing JSON for %s', toLoad);
+        }
+
+        security.decryptObject(json, function (str) {
+            
+            return security.decrypt(str, process.env.decryptionKey);
+        });
+        </parseAndDecrypt>
+        
+        <updateCache>
+        individualKeyCache[key] = json;
+
+        return individualKeyCache[key];
+        </updateCache>
+    }
+}
+</loadFromIndividualConfigFile>
+
+<translate>
+function translate() {
+      <calculateOffset>
+      var offset = this.move * this.percentage;
+
+      if (!this.$refs.stripContainer) return;
+
+      if (offset < 0) {
+        offset = 0;
+      }
+      if (offset > this.maxOffset) {
+        offset = this.maxOffset;
+      }
+      this.currentOffset = offset;
+      </calculateOffset>
+
+      <applyTranslation>
+      return {
+        transform: this.config.translate + '(' + offset + 'px)'
+      };
+      </applyTranslation>
+}
+</translate>
+
+<createBlobReadStream>
+async function createBlobReadStream(dir, oid) {
+  <readObject>
+  const { object: content } = await git.readObject({ dir, oid });
+  </readObject>
+  
+  <createStream>
+  const stream = new PassThrough();
+  stream.end(content);
+  </createStream>
+  
+  return stream;
+}
+</createBlobReadStream>
+```

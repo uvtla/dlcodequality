@@ -1,0 +1,242 @@
+```javascript
+<parseAndSendHttpRequest>
+function (param, callbackId) {
+  <validateAndParseParam>
+  if (typeof param === 'string') {
+    try {
+      param = JSON.parse(param)
+    }
+    catch (e) {
+      return
+    }
+  }
+  if (typeof param !== 'object' || !param.url) {
+    return console.error(
+      '[h5-render] invalid config or invalid config.url for sendHttp API')
+  }
+  </validateAndParseParam>
+  
+  <sendHttpRequest>
+  const sender = this.sender
+  const method = param.method || 'GET'
+  const xhr = new XMLHttpRequest()
+  xhr.open(method, param.url, true)
+  xhr.onload = function () {
+    sender.performCallback(callbackId, this.responseText)
+  }
+  xhr.onerror = function (error) {
+    return console.error('[h5-render] unexpected error in sendHttp API', error)
+  }
+  xhr.send()
+  </sendHttpRequest>
+}
+</parseAndSendHttpRequest>
+
+<setNodeCptProbs>
+function setNodeCptProbs(cpt, probs, index) {
+  if(!isArrayOfArray(cpt)) {
+    for(var i=0; i < cpt.length; i++) {
+      cpt[i] = probs[index][i];
+    }
+    var nextIndex = index + 1;
+    return nextIndex;
+  } else {
+    var next = index;
+    for(var i=0; i < cpt.length; i++) {
+      next = setNodeCptProbs(cpt[i], probs, next);
+    }
+    return next;
+  }
+}
+</setNodeCptProbs>
+
+<initializeShell>
+function $$shell() {
+  const SHELL_PROMPT = 'angie > ';
+
+  if (shell) {
+    <terminatePreviousShellOutput>
+    process.stdout.write('\n');
+    </terminatePreviousShellOutput>
+  }
+
+  return app.$$load().then(function() {
+    <configureShellInputEncoding>
+    process.stdin.setEncoding('utf8');
+    </configureShellInputEncoding>
+
+    <startOrContinueShellSession>
+    if (!shell) {
+      shell = repl.start({
+        prompt: SHELL_PROMPT,
+        input: process.stdin,
+        output: process.stdout
+      });
+    } else {
+      process.stdout.write(SHELL_PROMPT);
+    }
+    </startOrContinueShellSession>
+  });
+}
+</initializeShell>
+
+<retrieveAndLogTransactionInfo>
+async function getTxInfo() {
+  const retVal = await Wormhole.DataRetrieval.transaction(TXID)
+
+  <logTransactionInfo>
+  console.log(`Info from TXID ${TXID}: ${JSON.stringify(retVal, null, 2)}`)
+  </logTransactionInfo>
+}
+</retrieveAndLogTransactionInfo>
+
+<readFeedsRecursively>
+function readNext (ix) {
+  if (ix < feedsArray.length) {
+    <processFeedItem>
+    var item = feedsArray [ix];
+    if (atLeastOneSubscriber (item.url)) {
+      readFeed (item.url, function () {
+        readNext (ix + 1);
+      });
+    }
+    else {
+      readNext (ix + 1);
+    }
+    </processFeedItem>
+  }
+}
+</readFeedsRecursively>
+
+<hasFieldsExcept>
+function hasFieldsExcept(obj, arrFields){
+  for (var field in obj)
+    if (arrFields.indexOf(field) === -1)
+      return true;
+  return false;
+}
+</hasFieldsExcept>
+
+<audioPlayerSetup>
+function(element, options) {
+  var element = element,
+      s = this.helpers.clone(this.settings),
+      id = 'audiojs'+this.instanceCount,
+      wrapperId = 'audiojs_wrapper'+this.instanceCount,
+      instanceCount = this.instanceCount++;
+  
+  <determineSettingsFromAttributes>
+  if (element.getAttribute('autoplay') != null) s.autoplay = true;
+  if (element.getAttribute('loop') != null) s.loop = true;
+  if (element.getAttribute('preload') == 'none') s.preload = false;
+  </determineSettingsFromAttributes>
+  
+  <mergeCustomOptions>
+  if (options) this.helpers.merge(s, options);
+  </mergeCustomOptions>
+  
+  <setupPlayerInterface>
+  if (s.createPlayer.markup) element = this.createPlayer(element, s.createPlayer, wrapperId);
+  else element.parentNode.setAttribute('id', wrapperId);
+  </setupPlayerInterface>
+  
+  <audioInstanceInitialization>
+  var audio = new container[audiojsInstance](element, s);
+  </audioInstanceInitialization>
+
+  <handleFlashFallback>
+  if (s.useFlash && s.hasFlash) {
+    this.injectFlash(audio, id);
+    this.attachFlashEvents(audio.wrapper, audio);
+  } else if (s.useFlash && !s.hasFlash) {
+    this.settings.flashError.apply(audio);
+  }
+  </handleFlashFallback>
+
+  <attachHTML5Events>
+  if (!s.useFlash || (s.useFlash && s.hasFlash)) this.attachEvents(audio.wrapper, audio);
+  </attachHTML5Events>
+
+  <registerPlayerInstance>
+  this.instances[id] = audio;
+  return audio;
+  </registerPlayerInstance>
+}
+</audioPlayerSetup>
+
+<decompressPublicKey>
+function decompressKey(key) {
+  <validateKeyFormat>
+  const format = key[0];
+  assert(key.length === 33);
+  switch (format) {
+    case 0x02:
+    case 0x03:
+      return key;
+    case 0x04:
+      key[0] = 0x02;
+      break;
+    case 0x05:
+      key[0] = 0x03;
+      break;
+    default:
+      throw new Error('Bad point format.');
+  }
+  </validateKeyFormat>
+
+  <convertAndRestoreKeyFormat>
+  const out = secp256k1.publicKeyConvert(key, false);
+  key[0] = format;
+  </convertAndRestoreKeyFormat>
+
+  return out;
+}
+</decompressPublicKey>
+
+<initializeRPC>
+function RPC(wdb) {
+  if (!(this instanceof RPC))
+    return new RPC(wdb);
+
+  RPCBase.call(this);
+  
+  <assertDependencies>
+  assert(wdb, 'RPC requires a WalletDB.');
+  </assertDependencies>
+
+  <initializeRPCProperties>
+  this.wdb = wdb;
+  this.network = wdb.network;
+  this.logger = wdb.logger.context('rpc');
+  this.client = wdb.client;
+  </initializeRPCProperties>
+
+  <initRPC>
+  this.wallet = null;
+  this.init();
+  </initRPC>
+}
+</initializeRPC>
+
+<constructInterviewInstance>
+function Interview(opts) {
+  <extendWithDefaultsAndOptions>
+  _.extend(this,
+    {
+      inquirer: require('inquirer'),
+      questionLookup: {},
+      logger: require('./logger'),
+      services: null,
+      tmpServiceJsonPath: null
+    },
+    require('./config')(),
+    opts
+  );
+  </extendWithDefaultsAndOptions>
+
+  <loadServiceConfiguration>
+  this._loadServiceJson();
+  </loadServiceConfiguration>
+}
+</constructInterviewInstance>
+```

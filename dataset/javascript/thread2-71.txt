@@ -1,6 +1,6 @@
 ```javascript
+<removeChildNodes>
 function () {
-  <removeChildNodes>
   var element = this.element,
       childNodes = element.childNodes,
       i = childNodes.length;
@@ -8,11 +8,11 @@ function () {
   while (i--) {
     element.removeChild(childNodes[i]);
   }
-  </removeChildNodes>
 }
+</removeChildNodes>
 
+<validateAndInitialize>
 function init(opts) {
-  <validateAndInitialize>
   if (!opts || !opts.appData) throw new Error(path.basename(__filename)+ ':' + arguments.callee.name + ': bad opts argument')
 
   var apiOpts = opts.apiOpts || {}
@@ -20,9 +20,10 @@ function init(opts) {
   if (Array.isArray(apiOpts.path)) state.apiPath = apiOpts.path
 
   state.deployFolder = opts.appData.launchFolder
-  </validateAndInitialize>
 }
+</validateAndInitialize>
 
+<update>
 function(sChangeReason) {
   <updateStateAndNotifyControl>
   this._bLoading = false;
@@ -36,7 +37,9 @@ function(sChangeReason) {
   }
   </updateBusyIndicator>
 }
+</update>
 
+<getLetterTime>
 function getLetterTime(timeString) {
   <parseTimeToSeconds>
   var totalSeconds = 0;
@@ -59,9 +62,10 @@ function getLetterTime(timeString) {
   return totalSeconds;
   </parseTimeToSeconds>
 }
+</getLetterTime>
 
+<sendEvent>
 function send() {
-  <sendEvent>
   var args = slice.call(arguments), events = this.events, handled;
 
   if (!this.__isCurrent__) {
@@ -84,11 +88,11 @@ function send() {
   if (!this.superstate) { transition.call(this); }
 
   return handled;
-  </sendEvent>
 }
+</sendEvent>
 
+<transformAST>
 function cleanUpAST(ast) {
-  <transformAST>
   return walk(ast, function(node, replace) {
     if (node.type === 'Block') {
       var lastIdx = 0;
@@ -103,11 +107,11 @@ function cleanUpAST(ast) {
       node.nodes = newNodes.concat(node.nodes.slice(lastIdx));
     }
   });
-  </transformAST>
 }
+</transformAST>
 
+<computePreviousVisibleNode>
 function getPreviousVisibleNode(self) {
-  <computePreviousVisibleNode>
   var prev = self.prev();
   if (!prev) {
       prev = self.get('parent');
@@ -115,20 +119,20 @@ function getPreviousVisibleNode(self) {
       prev = getLastVisibleDescendant(prev);
   }
   return prev;
-  </computePreviousVisibleNode>
 }
+</computePreviousVisibleNode>
 
+<checkParenthesisInNewExpression>
 function isNewExpressionWithParens(newExpression) {
-  <checkParenthesisInNewExpression>
   const lastToken = sourceCode.getLastToken(newExpression);
   const penultimateToken = sourceCode.getTokenBefore(lastToken);
 
   return newExpression.arguments.length > 0 || astUtils.isOpeningParenToken(penultimateToken) && astUtils.isClosingParenToken(lastToken);
-  </checkParenthesisInNewExpression>
 }
+</checkParenthesisInNewExpression>
 
+<mapFunctionOverMatrix>
 function(fn) {
-  <mapFunctionOverMatrix>
   var els = [], i = this.elements.length, nj = this.elements[0].length, j;
   while (i--) { j = nj;
             els[i] = [];
@@ -137,11 +141,11 @@ function(fn) {
             }
           }
   return Matrix$b.create(els);
-  </mapFunctionOverMatrix>
 }
+</mapFunctionOverMatrix>
 
+<collectInheritedCollections>
 function getInheritedCollectionNames(node) {
-  <collectInheritedCollections>
   var names = [],
       startNode = node,
       actualNode = node,
@@ -172,6 +176,6 @@ function getInheritedCollectionNames(node) {
   }
 
   return names;
-  </collectInheritedCollections>
 }
+</collectInheritedCollections>
 ```

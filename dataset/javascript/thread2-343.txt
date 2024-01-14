@@ -1,0 +1,267 @@
+```javascript
+<initNode>
+function initNode(initObj) {
+        <nodeDomainInitialization>
+        var resetUpdateProgres = false;
+        if (!isNodeDomainInitialized) {
+            MessageIds = initObj.messageIds;
+            updateDir = path.resolve(initObj.updateDir);
+            logFilePath = path.resolve(updateDir, logFile);
+            installStatusFilePath = path.resolve(updateDir, installStatusFile);
+            registerNodeFunctions();
+            isNodeDomainInitialized = true;
+            resetUpdateProgres = true;
+        }
+        </nodeDomainInitialization>
+        <sendingMessages>
+        postMessageToBrackets(MessageIds.NODE_DOMAIN_INITIALIZED, initObj.requester.toString(), resetUpdateProgres);
+        requesters[initObj.requester.toString()] = true;
+        postMessageToBrackets(MessageIds.REGISTER_BRACKETS_FUNCTIONS, initObj.requester.toString());
+        </sendingMessages>
+    }
+</initNode>
+
+<formatString>
+function (formatted, args) {
+        "use strict";
+        for (var prop in args) {
+            if (args.hasOwnProperty(prop)) {
+                var regexp = new RegExp("\\{" + prop + "\\}", "gi");
+                formatted = formatted.replace(regexp, args[prop]);
+            }
+        }
+        return formatted;
+    }
+</formatString>
+
+<createFilterChoices>
+function(filter, choice) {
+      var choices = [];
+      for (var i = 0; i < filter.choices.length; i++) {
+        choices.push({
+          label: filter.choices[i].label,
+          action: filter.name,
+          value: filterValueToChoiceValue(filter.choices[i].value, choice),
+          default: filter.choices[i].value === filter.def
+        });
+      };
+      return choices;
+    }
+</createFilterChoices>
+
+<applyTransform>
+function applyTransform(data, headers, status, fns) {
+        if (typeof fns === 'function') {
+            data = fns(data, headers, status);
+        } else {
+            for (var i = 0; i < fns.length; i++) {
+                data = fns[i](data, headers, status);
+            }
+        }
+        return data;
+    }
+</applyTransform>
+
+<Mutant>
+function Mutant(obj) {
+        var triggered,
+            i = 0;
+            mutations = {};
+    
+        <initializeEventTarget>
+        if (!obj.addEventListener) {
+            obj = EventTarget(obj);
+        }
+        </initializeEventTarget>
+        
+        <triggerMutationEvent>
+        function trigger() {
+            i++;
+            
+            if (triggered) return;
+            
+            triggered = setTimeout(function() {
+                var evt = new MutationEvent(mutations, i);
+    
+                triggered = null;
+                mutations = {};
+                i = 0;
+    
+                obj.dispatchEvent(evt);
+            }, 0);
+        }
+        </triggerMutationEvent>
+        
+        <proxyMutationHandler>
+        return new Proxy(obj, {
+            deleteProperty: function(target, property) {
+                if (property in target) {
+                    if (!(property in mutations)) {
+                        mutations[property] = target[property];
+                    }
+                    
+                    delete target[property];
+                    trigger();
+                }
+                
+                return true;
+            },
+            defineProperty: function(target, property, descriptor) {
+                var value = target[property];
+                
+                Object.defineProperty(target, property, descriptor);
+    
+                if (!(property in mutations)) {
+                    if (target[property] !== value) {
+                        mutations[property] = value;
+                        trigger();
+                    }
+                }
+            },
+            set: function(target, property, value, receiver) {
+                if (value !== target[property]) {
+                    if (!(property in mutations)) {
+                        mutations[property] = target[property];
+                    }
+                    
+                    target[property] = value;
+                    trigger();
+                }
+            }
+        });
+        </proxyMutationHandler>
+    }
+</Mutant>
+
+<parseMetaValue>
+function metaValue(value) {
+        var newValue = value;
+        <classifyValue>
+        if (typeof value === 'string') {
+            if (value.match(/^=/)) {
+                
+                var name = value.slice(1).trim();
+                newValue = new _reference2.default('metachild', name);
+            } else if (value.match(/^#([a-fA-F0-9]){3,8}/) || value.match(/^rgba?\(.*\)$/)) {
+                
+                newValue = _color_value2.default.fromColorValue(value);
+            } else if (value.toLowerCase() === 'true' || value.toLowerCase() === 'yes') {
+                newValue = true;
+            } else if (value.toLowerCase() === 'false' || value.toLowerCase() === 'no') {
+                newValue = false;
+            } else if (value.match(/^[0-9\.,]+$/)) {
+                var num = parseFloat(value);
+                if (!isNaN(num)) {
+                    newValue = num;
+                }
+            }
+        }
+        </classifyValue>
+        return newValue;
+    }
+</parseMetaValue>
+
+<createNetworkRequest>
+function(method, params, payload) {
+        <prepareRequest>
+        var baseUrl   = (method.base_url || this.spec.base_url).replace(/(\/)$/, '');
+        var headers   = {};
+        for (var header in method.headers) {
+            headers[header] = method.headers[header];
+        }
+        </prepareRequest>
+        return simpleHttp.createRequest(this.httpClient, baseUrl + method.path, method.method, headers, params, payload);
+    }
+</createNetworkRequest>
+
+<handleDocumentSave>
+function(doc, options) {
+          options = options || {};
+          var db = this;
+          <setupRequestDetails>
+          var beforeSend = fullCommit(options);
+          if (doc._id === undefined) {
+            var method = "POST";
+            var uri = this.uri;
+          } else {
+            var method = "PUT";
+            var uri = this.uri + encodeDocId(doc._id);
+          }
+          var versioned = maybeApplyVersion(doc);
+          </setupRequestDetails>
+          <sendAjaxRequest>
+          $.ajax({
+            type: method, url: uri + encodeOptions(options),
+            contentType: "application/json",
+            dataType: "json", data: toJSON(doc),
+            beforeSend : beforeSend,
+            complete: function(req) {
+                <handleResponse>
+                var resp = $.parseJSON(req.responseText);
+                if (req.status == 200 || req.status == 201 || req.status == 202) {
+                    doc._id = resp.id;
+                    doc._rev = resp.rev;
+                    if (versioned) {
+                        db.openDoc(doc._id, {
+                        attachPrevRev : true,
+                        success : function(d) {
+                            doc._attachments = d._attachments;
+                            if (options.success) options.success(resp);
+                        }
+                        });
+                    } else {
+                        if (options.success) options.success(resp);
+                    }
+                } else if (options.error) {
+                    options.error(req.status, resp.error, resp.reason);
+                } else {
+                    throw "The document could not be saved: " + resp.reason;
+                }
+                </handleResponse>
+            }
+          });
+          </sendAjaxRequest>
+        }
+</handleDocumentSave>
+
+<constructAttributeAst>
+function(attrs, attributeBlocks){
+    <constructAstFromAttributes>
+    var ast = [];
+    if (attributeBlocks.length) {
+        <mergeAttributes>
+        if (attrs.length) {
+            var val = this.attrs(attrs);
+            attributeBlocks.unshift(val);
+        }
+        if (attributeBlocks.length > 1) {
+            push.apply(ast, this.bufferExpression(this.runtime('attrs') + '(' + this.runtime('merge') + '([' + attributeBlocks.join(',') + ']), ' + stringify(this.terse) + ')'));
+        } else {
+            push.apply(ast, this.bufferExpression(this.runtime('attrs') + '(' + attributeBlocks[0] + ', ' + stringify(this.terse) + ')'));
+        }
+        </mergeAttributes>
+    } else if (attrs.length) {
+        push.apply(ast, this.bufferExpression(this.attrs(attrs, true)));
+    }
+    </constructAstFromAttributes>
+    return ast;
+  }
+</constructAttributeAst>
+
+<removeStarFromRepository>
+async function del(owner, repo) {
+        const endpoint = `/user/starred/${owner}/${repo}`
+        <sendUnstarRequest>
+        const { statusCode } = await this._request({
+            method: 'DELETE',
+            endpoint,
+        })
+        </sendUnstarRequest>
+        <verifyResponse>
+        if (statusCode != 204) {
+            throw new Error(`Unexpected status code ${statusCode}.`)
+        }
+        </verifyResponse>
+    }
+</removeStarFromRepository>
+```

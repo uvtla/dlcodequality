@@ -1,0 +1,276 @@
+```javascript
+<format>
+function format(number, decimals, thousandsSep, decPoint) {
+    <parseAndPrepare>
+    number = (number + '').replace(/[^0-9+-Ee.]/g, ''); // Clean up the number
+
+    var n = !isFinite(+number) ? 0 : +number,
+        prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+        sep = typeof thousandsSep !== 'string' ? ',' : thousandsSep,
+        dec = typeof decPoint !== 'string' ? '.' : decPoint,
+        s = ''
+    </parseAndPrepare>
+    
+    <generateFormattedString>
+    s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.') // Format decimal part
+    var re = /(-?\d+)(\d{3})/
+    while (re.test(s[0])) {
+        s[0] = s[0].replace(re, "$1" + sep + "$2") // Insert thousands separators
+    }
+    </generateFormattedString>
+
+    <adjustDecimalPlaces>
+    if ((s[1] || '').length < prec) {
+        s[1] = s[1] || ''
+        s[1] += new Array(prec - s[1].length + 1).join('0') // Pad with zeroes if necessary
+    }
+    </adjustDecimalPlaces>
+    
+    return s.join(dec)
+}
+</format>
+
+<treeWalker>
+function treeWalker(registryJson) {
+  <traverseRegistry>
+  if (registryJson.registry) {
+    return treeWalker(registryJson.registry);
+  }
+  </traverseRegistry>
+
+  const portlets = registryJson.portlets || [];
+
+  <assignCategories>
+  if (portlets.length > 0) {
+    portlets.forEach((p) => (p.categories = new Array(registryJson.name)));
+  }
+  </assignCategories>
+
+  <concatenateAndFlatten>
+  if (registryJson.categories) {
+    return portlets
+        .concat(registryJson.categories.map(portletRegistryToArray))
+        .reduce(flatten, []);
+  }
+  if (registryJson.subcategories) {
+    return portlets
+        .concat(registryJson.subcategories.map(portletRegistryToArray))
+        .reduce(flatten, []);
+  }
+  </concatenateAndFlatten>
+
+  return portlets;
+}
+</treeWalker>
+
+<keyboardEventHandler>
+function (event) {
+            var inst = $.timepicker._getInst(event.target);
+            var handled = true;
+            inst._keyEvent = true;
+            <evaluateVisibility>
+            if ($.timepicker._timepickerShowing) {
+                switch (event.keyCode) {
+                    case 9: $.timepicker._hideTimepicker();
+                        handled = false;
+                        break; 
+                    case 13:
+                        $.timepicker._updateSelectedValue(inst);
+                        $.timepicker._hideTimepicker();
+                        return false;
+                        break; 
+                    case 27: $.timepicker._hideTimepicker();
+                        break; 
+                    default: handled = false;
+                }
+            </evaluateVisibility>
+            else if (event.keyCode == 36 && event.ctrlKey) {
+                <showTimepicker>
+                $.timepicker._showTimepicker(this);
+                </showTimepicker>
+            }
+            else {
+                handled = false;
+            }
+            if (handled) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }
+</keyboardEventHandler>
+
+<contextCreation>
+function ctx() {
+    return function context(req, res, next) {
+        var data = {};
+
+        req.set = function set(key, value) {
+            <validateSetArguments>
+            assert.string(key, 'key must be string');
+
+            if (key === '') {
+                assert.fail('key must not be empty string');
+            }
+            </validateSetArguments>
+            data[key] = value;
+        };
+
+        req.get = function get(key) {
+            <validateGetArguments>
+            assert.string(key, 'key must be string');
+
+            if (key === '') {
+                assert.fail('key must not be empty string');
+            }
+            </validateGetArguments>
+            return data[key];
+        };
+
+        req._getAllContext = function _getAllContext() {
+            return data;
+        };
+
+        return next();
+    };
+}
+</contextCreation>
+
+<regexpConstructor>
+function () {
+            var target = arguments[0],
+                regStr = '', langNum = arguments.length, i;
+    
+            target = String(target);
+    
+            for (i = 1; i < langNum; ++i) {
+                <buildRegexpString>
+                switch( arguments[i] ) {
+                    case 'en':
+                        regStr += 'A-Za-z';
+                        break;
+                    case 'ko':
+                        regStr += 'ㄱ-ㅣ가-힣';
+                        break;
+                    case 'number':
+                        regStr += '0-9';
+                        break;
+                    default:
+                        regStr += arguments[i].replace( /[(){}[\]*+?.\\^$|,\-]/g, '\\$&' );
+                        break;
+                }
+                </buildRegexpString>
+            }
+            return new RegExp( '[' + regStr + ']' ).test( target );
+        }
+</regexpConstructor>
+
+<highlightCodeBlock>
+function( block ) {
+			<applyHighlighting>
+			hljs.highlightBlock( block );
+			</applyHighlighting>
+
+			if( block.hasAttribute( 'data-line-numbers' ) ) {
+				<applyLineNumbers>
+				hljs.lineNumbersBlock( block, { singleLine: true } );
+				</applyLineNumbers>
+
+				<highlightDelayed>
+				setTimeout( RevealHighlight.highlightLines.bind( this, block ), 0 );
+				</highlightDelayed>
+			}
+		}
+</highlightCodeBlock>
+
+<quickstart>
+async function quickstart() {
+  const bigqueryDataTransfer = require('@google-cloud/bigquery-data-transfer');
+
+  <initializeClient>
+  const client = new bigqueryDataTransfer.v1.DataTransferServiceClient();
+  </initializeClient>
+  
+  <getProjectId>
+  const projectId = await client.getProjectId();
+  </getProjectId>
+
+  <listDataSources>
+  
+  const formattedParent = client.projectPath(projectId, 'us-central1');
+  let nextRequest = {parent: formattedParent};
+  const options = {autoPaginate: false};
+  console.log('Data sources:');
+  do {
+    
+    const responses = await client.listDataSources(nextRequest, options);
+    
+    const resources = responses[0];
+    
+    nextRequest = responses[1];
+    
+    
+    resources.forEach(resource => {
+      console.log(`  ${resource.name}`);
+    });
+  } while (nextRequest);
+  </listDataSources>
+
+  <streamDataSources>
+  console.log('\n\n');
+  console.log('Sources via stream:');
+
+  client
+    .listDataSourcesStream({parent: formattedParent})
+    .on('data', element => {
+      console.log(`  ${element.name}`);
+    });
+  </streamDataSources>
+}
+</quickstart>
+
+<initializeScrollbar>
+function ScrollBar(options) {
+	<this.options>
+		this.options = $.extend({
+			// ...
+		}, options);
+		</this.options>
+		<initScrollbar>
+		this.init();
+		</initScrollbar>
+	}
+</initializeScrollbar>
+
+<constructorLeague>
+function League(obj) {
+    <assignProperties>
+    this.id = obj.id
+    this.caption = obj.caption
+    this.year = obj.year
+    </assignProperties>
+}
+</constructorLeague>
+
+<formatNumbersToList>
+function(numbers, type) {
+    <checkForSingleItem>
+    if (numbers.length < 2) {
+      return numberToDateName(''+numbers[0], type);
+    }
+    </checkForSingleItem>
+
+    <formatMultipleItems>
+    var last_val = '' + numbers.pop();
+    var output_text = '';
+
+    for (var i=0, value; value=numbers[i]; i++) {
+      if (output_text.length > 0) {
+        output_text += ', ';
+      }
+      output_text += numberToDateName(value, type);
+    }
+    </formatMultipleItems>
+    return output_text + ' and ' + numberToDateName(last_val, type);
+  }
+</formatNumbersToList>
+```

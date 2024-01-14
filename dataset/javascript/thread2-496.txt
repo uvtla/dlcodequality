@@ -1,0 +1,313 @@
+```javascript
+<function_1>
+function(node, pseudos) {
+  var len = pseudos.length,
+    pseudoFilters = expandFilters["pseudos"];
+
+  for (; len--;) {
+    <validatePseudoClass>
+    var pseudo = pseudos[len],
+      name = pseudo.name,
+      filter = pseudoFilters[name];
+
+    if (!filter) throw Error("不支持的伪类:" + name);
+    if (!filter(node, pseudo.param)) return false;
+    </validatePseudoClass>
+  }
+  return true;
+}
+</function_1>
+
+<function_2>
+function(type, params) {
+  var elm = this.spirit.element,
+    evt = null;
+
+  <createEvent>
+  if (window.CustomEvent && !gui.Client.isExplorer) { 
+    evt = new CustomEvent(type, params);
+  } else {
+    params = params || {
+      bubbles: false,
+      cancelable: false,
+      detail: undefined
+    };
+    evt = document.createEvent('HTMLEvents');
+    evt.initEvent(type, params.bubbles, params.cancelable);
+  }
+  evt.eventName = type;
+  </createEvent>
+
+  <dispatchEvent>
+  if (elm.dispatchEvent) {
+    return elm.dispatchEvent(evt);
+  } else if (elm[type]) {
+    return elm[type]();
+  } else if (elm['on' + type]) {
+    return elm['on' + type]();
+  }
+  </dispatchEvent>
+}
+</function_2>
+
+<function_3>
+function (object, callbacks) {
+  callbacks = callbacks || {};
+
+  var empty = function() {},
+    onComplete = callbacks.onComplete || empty,
+    onChange = callbacks.onChange || empty,
+    _this = this;
+
+  <animateObject>
+  fabric.util.animate({
+    startValue: object.get('opacity'),
+    endValue: 0,
+    duration: this.FX_DURATION,
+    onStart: function() {
+      object.setActive(false);
+    },
+    onChange: function(value) {
+      object.set('opacity', value);
+      _this.renderAll();
+      onChange();
+    },
+    onComplete: function() {
+      _this.remove(object);
+      onComplete();
+    }
+  });
+  </animateObject>
+
+  return this;
+}
+</function_3>
+
+<function_4>
+function nodeModulesResolverFn(normalizedId) {
+  if (!nodeModulesAt) {
+    throw new Error('Before you can load external dependencies, you must specify where node_modules can be found by ' +
+      'setting the \'nodeModulesAt\' option when creating the context');
+  }
+
+  var extId = normalizedId.id;
+
+  var modulePath = path.join(nodeModulesAt, extId);
+  <checkExternalDependency>
+  if (!externalDepExists[modulePath]) {
+    
+    <checkFileSystem>
+    if (fs.existsSync(modulePath)) {
+      externalDepExists[modulePath] = true;
+    } else {
+      var msg = 'Could not find external dependency [' + extId + '] at path [' + modulePath + ']';
+      throw new Error(buildMissingDepMsg(msg, extId, allExternalIds()));
+    }
+    </checkFileSystem>
+    
+  }
+  </checkExternalDependency>
+
+  return require(modulePath);
+}
+</function_4>
+
+<function_5>
+function (elem) {
+  var self = this;
+  if (elem === undefined) return;
+
+  <handleMapElements>
+  if (elem.mapElem !== undefined) {
+    self.animate(elem.mapElem, elem.mapElem.originalAttrs, elem.mapElem.attrsHover.animDuration);
+  }
+
+  if (elem.textElem !== undefined) {
+    self.animate(elem.textElem, elem.textElem.originalAttrs, elem.textElem.attrsHover.animDuration);
+  }
+  </handleMapElements>
+
+  <updateTooltipDisplay>
+  if (elem.options && elem.options.tooltip !== undefined) {
+    self.$tooltip.css({
+      'display': 'none',
+      'top': -1000,
+      'left': -1000
+    });
+  }
+  </updateTooltipDisplay>
+
+  <performBrowserAdjustment>
+  if (elem.mapElem !== undefined || elem.textElem !== undefined) {
+    if (self.paper.safari) self.paper.safari();
+  }
+  </performBrowserAdjustment>
+}
+</function_5>
+
+<function_6>
+function() {
+  <hideSections>
+  dom.hide(this.$startHelp);
+  dom.hide(this.$results);
+  dom.hide(this.$measureTasks);
+  dom.hide(this.$measuringPrompt);
+  dom.show(this.$startPrompt);
+  </hideSections>
+}
+</function_6>
+
+<function_7>
+function bindToBotDialog(bot, intentDialog, modelUrl, actions, options) {
+  <validateInputs>
+  if (!bot) {
+    throw new Error('bot is required');
+  }
+  if (!intentDialog) {
+    throw new Error('intentDialog is required');
+  }
+
+  if (!modelUrl) {
+    throw new Error('ModelUrl is required');
+  }
+  </validateInputs>
+
+  options = options || {};
+
+  <configureBotPersistence>
+  bot.set('persistConversationData', true);
+  </configureBotPersistence>
+
+  <setupBotLibrary>
+  bot.library(createBotLibrary(modelUrl, actions, options));
+  </setupBotLibrary>
+
+  <bindIntentActions>
+  _.forEach(actions, function(action) {
+    intentDialog.matches(action.intentName, createBotAction(action, modelUrl));
+  });
+  </bindIntentActions>
+}
+</function_7>
+
+<function_8>
+function(element) {
+  this.$element = $(element)
+  this.carousel = this.$element.data('bs.carousel')
+  this.options = $.extend({}, CarouselSwipe.DEFAULTS, this.carousel.options)
+  this.startX =
+    this.startY =
+    this.startTime =
+    this.cycling =
+    this.$active =
+    this.$items =
+    this.$next =
+    this.$prev =
+    this.dx = null
+  this.sliding = false
+
+  <setupTouchHandlers>
+  this.$element
+    .on('touchstart', $.proxy(this.touchstart, this))
+    .on('touchmove', $.proxy(this.touchmove, this))
+    .on('touchend', $.proxy(this.touchend, this))
+    .on('slide.bs.carousel', $.proxy(this.startSliding, this))
+    .on('slid.bs.carousel', $.proxy(this.stopSliding, this))
+  </setupTouchHandlers>
+}
+</function_8>
+
+<function_9>
+function build(config, locale, done) {
+  const shouldWatch = (util.env[`watch`] || util.env[`w`]) && (config.watch !== false);
+
+  <checkLocale>
+  if (locale && config.i18n && (config.i18n.locales instanceof Array) && (locale === config.i18n.locales[0]))
+    locale = undefined;
+  </checkLocale>
+
+  <normalizeConfig>
+  config = normalizeConfig(config, locale);
+  </normalizeConfig>
+
+  <setupMetalsmithBuild>
+  metalsmith(config.base || __dirname)
+    .clean(false)
+    .source(config.src)
+    .ignore(config.ignore)
+    .destination(config.dest)
+    .metadata(config.metadata.global)
+    .use(collections(config.collections))
+    .use(related(config.related))
+    .use((config.tags) ? tags(config.tags) : noop())
+    .use(pagination(config.pagination))
+    .use(metadata(config.metadata.collections))
+    .use(markdown(config.markdown))
+    .use(config.multilingual ? multilingual(locale) : noop())
+    .use(permalinks(config.permalinks))
+    .use(pathfinder(locale, config.i18n && config.i18n.locales))
+    .use(layouts(config.layouts))
+    .use(inPlace(config.inPlace))
+    .use((config.prism !== false) ? prism(config.prism, locale) : noop())
+    .use((config.mathjax !== false) ? mathjax(config.mathjax, locale) : noop())
+    .use(permalinks(config.permalinks))
+    .use(reporter(locale))
+    </setupMetalsmithBuild>
+
+  <executeBuild>
+  .build(function(err) {
+    if (err && shouldWatch) util.log(util.colors.blue(`[metalsmith]`), util.colors.red(err));
+    done(!shouldWatch && err);
+  });
+  </executeBuild>
+}
+</function_9>
+
+<function_10>
+function handleEntryPoint(index, value, that) {
+
+  var percentage;
+
+  <validateValueArray>
+  if (typeof value === "number") {
+    value = [value];
+  }
+
+  if (Object.prototype.toString.call(value) !== '[object Array]') {
+    throw new Error("noUiSlider: 'range' contains invalid value.");
+  }
+  </validateValueArray>
+
+  <assignPercentage>
+  if (index === 'min') {
+    percentage = 0;
+  } else if (index === 'max') {
+    percentage = 100;
+  } else {
+    percentage = parseFloat(index);
+  }
+  </assignPercentage>
+
+  <validatePercentageValue>
+  if (!isNumeric(percentage) || !isNumeric(value[0])) {
+    throw new Error("noUiSlider: 'range' value isn't numeric.");
+  }
+  </validatePercentageValue>
+
+  <updateSliderParameters>
+  that.xPct.push(percentage);
+  that.xVal.push(value[0]);
+
+  if (!percentage) {
+    if (!isNaN(value[1])) {
+      that.xSteps[0] = value[1];
+    }
+  } else {
+    that.xSteps.push(isNaN(value[1]) ? false : value[1]);
+  }
+
+  that.xHighestCompleteStep.push(0);
+  </updateSliderParameters>
+}
+</function_10>
+```

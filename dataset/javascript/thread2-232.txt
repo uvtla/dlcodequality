@@ -1,0 +1,207 @@
+```javascript
+<removeInvalidNodeErrorsInTemplateLiteral>
+function removeInvalidNodeErrorsInTemplateLiteral(node) {
+    if (typeof node.value.raw === "string") {
+        if (ALL_IRREGULARS.test(node.value.raw)) {
+            removeWhitespaceError(node);
+        }
+    }
+}
+</removeInvalidNodeErrorsInTemplateLiteral>
+
+<buildInputGroup>
+function(parentEl) {
+    this.fieldset = inputEx.cn('fieldset');
+    this.legend = inputEx.cn('legend', {className: 'inputEx-Group-legend'});
+
+    <fieldsetConfiguration>
+    if(this.options.collapsible) {
+        var collapseImg = inputEx.cn('div', {className: 'inputEx-Group-collapseImg'}, null, ' ');
+        this.legend.appendChild(collapseImg);
+        inputEx.sn(this.fieldset,{className:'inputEx-Expanded'});
+    }
+
+    if(!lang.isUndefined(this.options.legend) && this.options.legend !== ''){
+        this.legend.appendChild( inputEx.cn("span", null, null, " "+this.options.legend) );
+    }
+
+    if( this.options.collapsible || (!lang.isUndefined(this.options.legend) && this.options.legend !== '') ) {
+        this.fieldset.appendChild(this.legend);
+    }
+    </fieldsetConfiguration>
+
+    <renderFields>
+    for (var i = 0 ; i < this.options.fields.length ; i++) {
+        var input = this.options.fields[i];
+
+        if(!input) {
+            throw new Error("inputEx.Form: One of the provided fields is undefined ! (check trailing comma)");
+        }
+
+        var field = this.renderField(input);
+        this.fieldset.appendChild(field.getEl() );
+    }
+    </renderFields>
+
+    <handleCollapse>
+    if(this.options.collapsed) {
+        this.toggleCollapse();
+    }
+    </handleCollapse>
+
+    parentEl.appendChild(this.fieldset);
+}
+</buildInputGroup>
+
+<getLocaleNumberSymbol>
+function getLocaleNumberSymbol(locale, symbol) {
+    var data = findLocaleData(locale);
+    var res = data[13 ][symbol];
+    if (typeof res === 'undefined') {
+        if (symbol === NumberSymbol.CurrencyDecimal) {
+            return data[13 ][NumberSymbol.Decimal];
+        }
+        else if (symbol === NumberSymbol.CurrencyGroup) {
+            return data[13 ][NumberSymbol.Group];
+        }
+    }
+    return res;
+}
+</getLocaleNumberSymbol>
+
+<storeInstanceInMap>
+function() {
+    this.constructor.store[this.__get(this.constructor.id)] = this;
+    return can.Map.prototype._bindsetup.apply(this, arguments);
+}
+</storeInstanceInMap>
+
+<findAndUpdateOrHoldFile>
+function find(deleted, file) {
+    var meta = bundle[file].meta;
+    var match = files.some(function some (file) {
+        return file === meta.location || ~meta.location.indexOf(file)
+            || (meta.compiler && ~meta.compiler.imported.join(',').indexOf(file));
+    });
+
+    if (!match) return;
+
+    <handleDeleted>
+    if (!deleted) {
+        self.hold(meta.location); 
+        self.package.bundle[file].meta.content = fs.readFileSync(meta.location, 'utf8');
+    }
+    </handleDeleted>
+
+    <recordChanges>
+    extensions.push(meta.output);
+    changes.push(file);
+    </recordChanges>
+}
+</findAndUpdateOrHoldFile>
+
+<eventStop>
+function () {
+    var suicide = self.suicide;
+    self.suicide = false;
+    self.alive = false;
+    self.emit('stop', suicide);
+}
+</eventStop>
+
+<EventConstructor>
+function Event(type, data){
+    this._sender = null;
+    this._type   = type;
+    this._data   = data;
+
+    for(var prop in data) {
+        this[prop] = data[prop];
+    }
+
+    this._stopPropagation = false;
+}
+</EventConstructor>
+
+<determineSchemaType>
+function schemaType(schema) {
+    let type;
+
+    <checkAndAssignType>
+    if (schema.hasOwnProperty('type')) {
+        type = schema.type;
+    } else if (schema.hasOwnProperty('properties') || schema.hasOwnProperty('allOf') || schema.hasOwnProperty('additionalProperties')) {
+        type = 'object';
+    } else if (schema.hasOwnProperty('items')) {
+        type = 'array';
+    }
+    </checkAndAssignType>
+
+    <returnValidType>
+    switch (type) {
+        case 'array':
+        case 'boolean':
+        case 'file':
+        case 'integer':
+        case 'number':
+        case 'object':
+        case 'string':
+            return type;
+    }
+    </returnValidType>
+}
+</determineSchemaType>
+
+<parseLinearGradientArguments>
+function(prefix, func, values) {
+    var angle = '180deg';
+
+    <processAngleArgument>
+    if (/^(?:-?\d*\.?\d+(?:deg|rad)|to\b|top|right|bottom|left)/.test(values[0])) {
+        angle = values.shift();
+        if (angle.indexOf('to ') < 0) {
+            <adjustForModernSyntax>
+            if (angle.indexOf('top') >= 0) {
+                if (angle.indexOf('left') >= 0) {
+                    angle = 'to bottom right';
+                } else if (angle.indexOf('right') >= 0) {
+                    angle = 'to bottom left';
+                } else {
+                    angle = 'to bottom';
+                }
+            } else if (angle.indexOf('bottom') >= 0) {
+                if (angle.indexOf('left') >= 0) {
+                    angle = 'to top right';
+                } else if (angle.indexOf('right') >= 0) {
+                    angle = 'to top left';
+                } else {
+                    angle = 'to top';
+                }
+            } else if (angle.indexOf('left') >= 0) {
+                angle = 'to right';
+            } else if (angle.indexOf('right') >= 0) {
+                angle = 'to left';
+            } else if (prefix) {
+                <convertToLegacySyntax>
+                if (angle.indexOf('deg') >= 0) {
+                    angle = (90 - parseFloat(angle)) + 'deg';
+                } else if (angle.indexOf('rad') >= 0) {
+                    angle = (Math.PI / 2 - parseFloat(angle)) + 'rad';
+                }
+                </convertToLegacySyntax>
+            }
+            </adjustForModernSyntax>
+        }
+    }
+    </processAngleArgument>
+
+    return func + '(' + angle + ',' + values.join(',') + ')';
+}
+</parseLinearGradientArguments>
+
+<updateTooltipClass>
+function(obj, o, v, p) {
+    this.rendered && this.tooltip.removeClass(p).addClass(v);
+}
+</updateTooltipClass>
+```

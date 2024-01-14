@@ -1,0 +1,365 @@
+```javascript
+<dispatchKeyEvent>
+function dispatchKeyEvent(keyCode, opt_modifiers) {
+    var mod = opt_modifiers || {};
+
+    angular.element(element).triggerHandler({
+      type: 'keydown',
+      keyCode: keyCode,
+      which: keyCode,
+      ctrlKey: mod.ctrl,
+      altKey: mod.alt,
+      metaKey: mod.meta,
+      shortKey: mod.shift
+    });
+}
+</dispatchKeyEvent>
+
+<validateCertChain>
+function validateCertChain(cert, cb) {
+  
+  <buildCertificateChain>
+  var certs = [];
+  while (cert && cert.issuerCertificate &&
+  (cert.fingerprint !== cert.issuerCertificate.fingerprint)) {
+    certs.push(cert);
+    cert = cert.issuerCertificate;
+  }
+  </buildCertificateChain>
+
+  
+  var errors = new Array(certs.length);
+
+  
+  var eachCallback = function(certs, index) {
+    var cert = certs[index];
+    validateCert(cert, function(err, data) {
+      completed++;
+      errors[index] = err;
+
+      
+      if (data) {
+        getOcspResponseCache().set(cert, data);
+      }
+
+      
+      if (completed === certs.length) {
+        
+        
+        for (var errorIndex = 0, length = errors.length;
+             errorIndex < length; errorIndex++) {
+          var error = errors[errorIndex];
+          if (error) {
+            break;
+          }
+        }
+        cb(error);
+      }
+    });
+  };
+
+  
+  var completed = 0;
+  for (var index = 0, length = certs.length; index < length; index++) {
+    eachCallback(certs, index);
+  }
+}
+</validateCertChain>
+
+<getComponentForControl>
+function (oControl) {
+  var oComponent = null;
+  var sComponentId = null;
+
+  
+  if (oControl) {
+    sComponentId = Utils._getComponentIdForControl(oControl);
+    if (sComponentId) {
+      oComponent = Utils._getComponent(sComponentId);
+    }
+  }
+
+  return oComponent;
+}
+</getComponentForControl>
+
+<isDynamicArrayAccess>
+function isDynamicArrayAccess(node) {
+  return node && nodeType(node, exactMatch(nodeTypes.IDENTIFIER)) && (node.attributes.type.endsWith('[] storage ref') || node.attributes.type === 'bytes storage ref' || node.attributes.type === 'string storage ref')
+}
+</isDynamicArrayAccess>
+
+<mongoCompare>
+function mongoCompare(a, b) {
+  
+
+  if (a === undefined) {
+    if (b === undefined) {
+      return 0;
+    }
+    return -1;
+  } else if (b === undefined) {
+    return 1;
+  }
+
+  if (a === null) {
+    if (b === null) {
+      return 0;
+    }
+    return -1;
+  } else if (b === null) {
+    return 1;
+  }
+
+  if (_.isNumber(a)) {
+    if (_.isNumber(b)) {
+      return a - b;
+    }
+    return -1;
+  } else if (_.isNumber(b)) {
+    return 1;
+  }
+
+  if (_.isString(a)) {
+    if (_.isString(b)) {
+      return a.localeCompare(b);
+    }
+    return -1;
+  } else if (_.isString(b)) {
+    return 1;
+  }
+
+  if (_.isObject(a) && !_.isDate(a)) {
+    if (_.isObject(b) && !_.isDate(b)) {
+      if (_.isEmpty(a)) {
+        return _.isEmpty(b) ? 0 : -1;
+      } else if (_.isEmpty(b)) {
+        return 1;
+      }
+
+      for (const key of _.union(_.keys(a), _.keys(b)).sort()) {
+        const av = a[key],
+          bv = b[key];
+
+        if (av === undefined) {
+          return 1;
+        } else if (bv === undefined) {
+          return -1;
+        }
+
+        const v = mongoCompare(av, bv);
+
+        if (v) {
+          return v;
+        }
+      }
+
+      return 0;
+    }
+    return -1;
+  } else if (_.isObject(b) && !_.isDate(b)) {
+    return 1;
+  }
+
+  if (_.isDate(a)) {
+    if (_.isDate(b)) {
+      return a.valueOf() - b.valueOf();
+    }
+    return -1;
+  } else if (_.isDate(b)) {
+    return 1;
+  }
+
+  
+  if (a < b) {
+    return -1;
+  } else if (a > b) {
+    return 1;
+  }
+
+  return 0;
+}
+</mongoCompare>
+
+<requirifyImageReference>
+function requirifyImageReference(markdownImageReference) {
+  const [, mdImageStart, mdImagePath, optionalMdTitle, mdImageEnd ] = imagePathRE.exec(markdownImageReference) || []
+  if (!mdImagePath) {
+    return JSON.stringify(markdownImageReference)
+  } else {
+    const imageRequest = loaderUtils.stringifyRequest(
+      this,
+      loaderUtils.urlToRequest(mdImagePath)
+    )
+    const mdImageTitleAndEnd = optionalMdTitle ? JSON.stringify(optionalMdTitle + mdImageEnd) : JSON.stringify(mdImageEnd)
+
+    return `${JSON.stringify(mdImageStart)} + require(${imageRequest}) + ${mdImageTitleAndEnd}`
+  }
+}
+</requirifyImageReference>
+
+<deepFilterAndTransform>
+function (obj, filter) {
+    var result = {};
+
+    
+    var walk = function (obj, filter, result, path, originObj) {
+        var elem
+            , arrResult;
+        if (!originObj) {
+            var originObj = obj;
+        }
+        if (!path) {
+            path = '';
+        }
+        if (_.isObject(obj) && !_.isRegExp(obj) && !_.isFunction(obj)) {
+            
+            if (_.isEmpty(obj)) {
+                result[path] = {}
+            }
+            else {
+                
+                for (var value in obj) {
+                    
+                    if (_.isObject(obj[value]) && !_.isRegExp(obj[value]) && !_.isFunction(obj[value]) && !['public', 'virtual', 'allow', 'deny', 'convert'].includes(value)) {
+                        if (_.isArray(obj[value])) {
+                            
+                            if (_.isEmpty((obj[value]))) {
+                                if (_.isEmpty(path)) {
+                                    elem = value;
+                                }
+                                else {
+                                    elem = path + '.' + value + '';
+                                }
+
+                                if (!result[elem]) {
+                                    result[elem] = [];
+                                }
+                            }
+                            else {
+                                
+                                for (var thisArrayElem in obj[value]) {
+                                    if (_.isEmpty(path)) {
+                                        elem = value;
+                                    }
+                                    else {
+                                        elem = path + '.' + value + ''; 
+                                    }
+                                    if (!result[elem]) {
+                                        result[elem] = [];
+                                    }
+                                    arrResult = find(obj[value][thisArrayElem], filter);
+                                    
+                                    if (arrResult) {
+                                        (result[elem]).push(arrResult);
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            
+                            var subPath = _.isEmpty(path) ? value : path + '.' + value + '';
+
+                            
+                            if (!filter || value == filter) {
+                                if (path == '') {
+                                    try {
+                                        result[value] = eval('originObj' + generateObjectPath(value) + '');
+                                    } catch (e) {
+                                    }
+                                }
+                                else {
+                                    try {
+                                        result[path] = eval('originObj' + generateObjectPath(path) + '');
+                                    } catch (e) {
+                                    }
+                                }
+                            }
+
+                            result = walk(obj[value], filter, result, subPath, originObj);
+                        }
+                    }
+                    else {
+                        
+                        if (!filter || value == filter) {
+                            if (path == '') {
+                                try {
+                                    result[value] = eval('originObj' + generateObjectPath(value) + '');
+                                } catch (e) {
+                                }
+                            }
+                            else {
+                                try {
+                                    result[path] = eval('originObj' + generateObjectPath(path) + '');
+                                } catch (e) {
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        return result;
+    };
+
+    var resultArray = walk(obj, filter, result);
+    return _.isEmpty(resultArray) ? false : resultArray;
+}
+</deepFilterAndTransform>
+
+<readToTTF>
+function readToTTF(path) {
+    <convertFileToTTFObject>
+    let otf2ttfObj = TTF.otf2ttfobject
+    let ttfReader  = TTF.TTFReader
+    let woff2ttf   = TTF.woff2ttf
+    let ext = extname(path).toLowerCase()
+    let content = grunt.file.read(path, {encoding: null})
+    let ab = toArrayBuffer(content)
+    </convertFileToTTFObject>
+    switch(ext){
+        case '.otf':
+            return otf2ttfObj(ab)
+        case '.ttf':
+        case '.ttc':
+            return new ttfReader().read(ab)
+        case '.woff':
+        case '.woff2':
+            return ttfReader(woff2ttf(ab))
+        default:
+            throw new Error('Unsupported extension: '+ext)
+    }
+}
+</readToTTF>
+
+<renderCurrentTemplates>
+function() {
+    <concatenateRenderedTemplates>
+    var buffer = '',
+        i = 0,
+        count = this._current_templates.length;
+
+    for (; i < count; i++) {
+        buffer += this._current_templates[i].render();
+    }
+    </concatenateRenderedTemplates>
+
+    return buffer;
+}
+</renderCurrentTemplates>
+
+<justifyValue>
+function(value, leftJustify, minWidth, precision, zeroPad) {
+    <adjustStringValue>
+    if (precision != null) {
+        value = value.slice(0, precision);
+    }
+    </adjustStringValue>
+    return justify(value, '', leftJustify, minWidth, zeroPad);
+}
+</justifyValue>
+```
+
+In this set of annotations, each function is enclosed in tags named after the main responsibility represented by the respective function. These annotations indicate whether the functions are SRP compliant or not based on the given instructions. The major functionality within each function is tagged accordingly.

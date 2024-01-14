@@ -1,0 +1,298 @@
+```javascript
+<retrieveAssociations>
+function retrieveAssociations(req, res) {
+  <handleContentNegotiation>
+  switch(req.accepts(['json', 'html'])) {
+    
+    
+    
+    
+    default:
+  </handleContentNegotiation>
+      var rootUrl = req.protocol + ':
+      var queryPath = req.originalUrl;
+      <getAssociations>
+      req.chickadee.getAssociations(req, rootUrl, queryPath,
+                                    function(response, status) {
+        res.status(status).json(response);
+      });
+      </getAssociations>
+      break;
+  }
+}
+</retrieveAssociations>
+
+<binarySearch>
+function binarySearch(array, func) {
+    
+    let min = 0,
+        max = array.length;
+
+    <searchAlgorithm>
+    while (min < max) {
+        const mid = (min + max) >> 1;
+        const res = func(array[mid]);
+        if (res > 0) {
+            
+            max = mid;
+        } else {
+            
+            min = mid + 1;
+        }
+    }
+    </searchAlgorithm>
+    
+    return min;
+}
+</binarySearch>
+
+<addIndexAndRemoveJsExt>
+function addIndexAndRemoveJsExt(s) {
+        <conditionalProcessStringOrArray>
+        if (typeof s === 'string') {
+            return addIndexAndRemoveJsExtFromName(s);
+        } else {
+            var ret = [],
+                i = 0,
+                l = s.length;
+            for (; i < l; i++) {
+                ret[i] = addIndexAndRemoveJsExtFromName(s[i]);
+            }
+            return ret;
+        }
+        </conditionalProcessStringOrArray>
+    }
+</addIndexAndRemoveJsExt>
+
+<updateNodeContextSelection>
+function updateNodeContextSelection(root, oldSelection, newSelection, rootUpdate, ignoreRootSelection){
+    
+    <checkNoSelectionChange>
+    if (oldSelection === newSelection)
+      return;
+    </checkNoSelectionChange>
+
+    
+    var nextNode;
+    var cursor = root;
+    var selected = [];
+
+    <updateRootNode>
+    if (rootUpdate)
+    {
+      root.contextSelection = newSelection;
+      if (root.selected && !root.selectedRA_)
+        selected.push(root);
+    }
+    </updateRootNode>
+
+    <updateSelectionForChildren>
+    while (cursor)
+    {
+      
+      
+      <findNextNode>
+      nextNode = !cursor.selection || (ignoreRootSelection && cursor === root)
+        ? cursor.firstChild
+        : null;
+      </findNextNode>
+
+      if (nextNode && nextNode.contextSelection !== oldSelection)
+        throw 'Try change wrong context selection';
+
+      <traverseTree>
+      while (!nextNode)
+      {
+        
+        if (cursor === root)
+        {
+          <processSelectedNodes>
+          if (selected.length)
+          {
+            if (oldSelection)
+              oldSelection.remove(selected);
+
+            if (newSelection)
+            {
+              newSelection.add(selected);
+
+              
+              for (var i = 0; i < selected.length; i++)
+              {
+                var node = selected[i];
+                if (node.selected && !newSelection.has(node))
+                {
+                  node.selected = false;
+                  node.emit_unselect();
+                }
+              }
+            }
+          }
+          </processSelectedNodes>
+
+          return;
+        }
+        <findSiblingOrParent>
+        nextNode = cursor.nextSibling;
+
+        
+        if (!nextNode)
+          cursor = cursor.parentNode;
+        </findSiblingOrParent>
+      }
+      </traverseTree>
+
+      <updateCursorAndSelected>
+      cursor = nextNode;
+
+      
+      if (cursor.selected && !cursor.selectedRA_)
+        selected.push(cursor);
+
+      
+      cursor.contextSelection = newSelection;
+      </updateCursorAndSelected>
+    }
+    </updateSelectionForChildren>
+  }
+</updateNodeContextSelection>
+
+<prefixMatchLength>
+function prefixMatchLength(name, prefix) {
+  var prefixParts = prefix.split('/');
+  var nameParts = name.split('/');
+  <matchPrefix>
+  if (prefixParts.length > nameParts.length)
+    return 0;
+  for (var i = 0; i < prefixParts.length; i++) {
+    if (nameParts[i] != prefixParts[i])
+      return 0;
+  }
+  </matchPrefix>
+  return prefixParts.length;
+}
+</prefixMatchLength>
+
+<getResultSeverity>
+function getResultSeverity(messages) {
+  <checkMessagesAndCalculateSeverity>
+  if (!messages) {
+    return 0;
+  }
+
+  return messages
+    .map(it => it.severity)
+    .reduce((maxSeverity, severity) => Math.max(maxSeverity, severity), 0);
+  </checkMessagesAndCalculateSeverity>
+}
+</getResultSeverity>
+
+<assignFiberPropertiesInDEV>
+function assignFiberPropertiesInDEV(target, source) {
+  <initializeTargetIfNull>
+  if (target === null) {
+    
+    
+    target = createFiber(IndeterminateComponent, null, null, NoContext);
+  }
+  </initializeTargetIfNull>
+
+  <copySourcePropertiesToTarget>
+  
+  
+  
+  
+  
+
+  target.tag = source.tag;
+  target.key = source.key;
+  target.elementType = source.elementType;
+  target.type = source.type;
+  target.stateNode = source.stateNode;
+  target.return = source.return;
+  target.child = source.child;
+  target.sibling = source.sibling;
+  target.index = source.index;
+  target.ref = source.ref;
+  target.pendingProps = source.pendingProps;
+  target.memoizedProps = source.memoizedProps;
+  target.updateQueue = source.updateQueue;
+  target.memoizedState = source.memoizedState;
+  target.contextDependencies = source.contextDependencies;
+  target.mode = source.mode;
+  target.effectTag = source.effectTag;
+  target.nextEffect = source.nextEffect;
+  target.firstEffect = source.firstEffect;
+  target.lastEffect = source.lastEffect;
+  target.expirationTime = source.expirationTime;
+  target.childExpirationTime = source.childExpirationTime;
+  target.alternate = source.alternate;
+  if (enableProfilerTimer) {
+    target.actualDuration = source.actualDuration;
+    target.actualStartTime = source.actualStartTime;
+    target.selfBaseDuration = source.selfBaseDuration;
+    target.treeBaseDuration = source.treeBaseDuration;
+  }
+  target._debugID = source._debugID;
+  target._debugSource = source._debugSource;
+  target._debugOwner = source._debugOwner;
+  target._debugIsCurrentlyTiming = source._debugIsCurrentlyTiming;
+  target._debugHookTypes = source._debugHookTypes;
+  </copySourcePropertiesToTarget>
+  return target;
+}
+</assignFiberPropertiesInDEV>
+
+<handlePacketCallback>
+function(pack) {
+    <invokeCallbackIfValid>
+    if (pack.toSource !== false || pack.source !== process.pid) {
+      CALLBACK(pack.message)
+    }
+    </invokeCallbackIfValid>
+  }
+</handlePacketCallback>
+
+<addonsManager_getSearchFilter>
+function addonsManager_getSearchFilter(aSpec) {
+  <constructFilterSpec>
+    var spec = aSpec || { };
+  </constructFilterSpec>
+
+    <getSearchFilterElements>
+    return this.getElements({
+      type: "search_filterRadioButtons",
+      subtype: spec.attribute,
+      value: spec.value
+    });
+    </getSearchFilterElements>
+  }
+</addonsManager_getSearchFilter>
+
+<prettyPrint>
+function prettyPrint(json, tabs){
+	<formatJson>
+		var result = "";
+		
+		<iterateAndFormatProperties>
+		for (var property in json) {
+		    var value = json[property];
+		    
+		    <skipUndefinedProperty>
+		    if(value === undefined) {
+				continue;
+		    }
+		    </skipUndefinedProperty>
+		    
+		    <processProperty>
+		    if(_isJSON(value)){ result += prettyPrint(value, tabs + 1); }
+		    else { result += _appendTabs(property + " : " + value + "\n", tabs); }
+		    </processProperty>
+		}
+		</iterateAndFormatProperties>
+		
+		return result;
+	</formatJson>
+	}
+</prettyPrint>
+```

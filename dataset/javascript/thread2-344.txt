@@ -1,0 +1,184 @@
+```javascript
+<createServer>
+function createServer () {
+    <createExpressServer>
+    var server = express.createServer();
+    </createExpressServer>
+
+    <serverConfiguration>
+    server.configure(function () {
+        <middlewareSetup>
+        server.use(express.methodOverride());                          
+        server.use(express.bodyDecoder()); 	                          
+        server.use(express.staticProvider(__dirname + '/files'));     
+        server.use(setResponseHeader());                               
+        server.use(logConsole());                                      
+        server.use(auth([auth.Mac({ realm: "Example",
+                                   getTokenAttributes: getToken,
+                                   checkNonce: nonceCheck,
+                                   bodyHashMode: "require" })]));    
+        </middlewareSetup>
+    });
+    </serverConfiguration>
+
+    <specialOptionsRouting>
+    server.options(/.+/, function (req, res) {
+        res.send(' ');
+    });
+    </specialOptionsRouting>
+
+    return server;
+}
+</createServer>
+
+<areArrays>
+function areArrays () {
+  <checkAllArgumentsAreArrays>
+  for (let i = 0; i < arguments.length; i++) {
+    if (!Array.isArray(arguments[i])) {
+      return false;
+    }
+  }
+  </checkAllArgumentsAreArrays>
+  
+  return true;
+}
+</areArrays>
+
+<resize>
+function resize() {
+    <updateDimensions>
+    var w = $(window).width(), h = $(window).height();
+    </updateDimensions>
+
+    <updateCanvasAndScene>
+    canvas.attr({ width: w, height: h });
+    scene.getCamera().setAspect(w / h);
+    </updateCanvasAndScene>
+
+    <clearRenderer>
+    renderer.clearViewport();
+    </clearRenderer>
+}
+</resize>
+
+<addSuggestionClassName>
+function (suggestionNode, className) {
+    <modifySuggestionNodeClass>
+    var suggestionNodeClassList = new aria.utils.ClassList(suggestionNode);
+    suggestionNodeClassList.add(className);
+    suggestionNodeClassList.$dispose();
+    </modifySuggestionNodeClass>
+}
+</addSuggestionClassName>
+
+<configureElasticsearchMapping>
+function (next) {
+    <buildElasticsearchRequestBody>
+            
+    var body = {
+        settings: {...},
+        mappings: {}
+    };
+    // Dynamic assignments within the settings object have been omitted for brevity
+    body.mappings[options.type] = indexMap
+    </buildElasticsearchRequestBody>
+
+    <configureRequestOptions>
+    var reqOpts = {
+        method: 'PUT',
+        url: versionedUri,
+        body: JSON.stringify(body)
+    }
+    if(options.auth) {
+        reqOpts.auth = {
+            user: options.auth.user,
+            pass: options.auth.password,
+            sendImmediately: false
+        };
+    }
+    </configureRequestOptions>
+
+    <performElasticsearchRequest>
+    helpers.backOffRequest(reqOpts, function (err, res, body) {
+        if (err) {
+            return next(err)
+        }
+        if (!helpers.elasticsearchBodyOk(body)) {
+            var error = new Error('Unexpected index creation reply: '+util.inspect(body, true, 10, true))
+            error.body = body
+            return next(error)
+        }
+        return next()
+    })
+    </performElasticsearchRequest>
+}
+</configureElasticsearchMapping>
+
+<insertBuffer>
+function(tagName) {
+    <getAndInsertBuffer>
+    var parentBuffer = get(this, 'parentBuffer');
+    return this.newBuffer(tagName, parentBuffer, function(buffer) {
+      var siblings = parentBuffer.childBuffers;
+      var index = indexOf.call(siblings, this);
+      siblings.splice(index + 1, 0, buffer);
+    });
+    </getAndInsertBuffer>
+}
+</insertBuffer>
+
+<getViews>
+function(plural) {
+      <resolveAndValidateViewCollection>
+      if (lazy.isObject(plural)) return plural;
+      if (!this.views.hasOwnProperty(plural)) {
+        plural = this.inflections[plural];
+      }
+      if (!this.views.hasOwnProperty(plural)) {
+        throw new Error('getViews cannot find collection' + plural);
+      }
+      </resolveAndValidateViewCollection>
+      
+      return this.views[plural];
+}
+</getViews>
+
+<getBodyAsBuffer>
+function getBodyAsBuffer(body, encoding) {
+  <convertBodyToBuffer>
+  return body instanceof Buffer
+    ? body
+    : Buffer.from(`${body || ''}`, normalizeBodyEncoding(encoding));
+  </convertBodyToBuffer>
+}
+</getBodyAsBuffer>
+
+<validateAndPopulateUUID>
+function (uuid) {
+    <validateUUID>
+    var check = UUID.check(uuid);
+    if (!check) {
+        throw "not a UUID";
+    }
+    </validateUUID>
+
+    <setUUIDProperties>
+    this.version = check.version;
+    this.variant = check.variant;
+    this[check.format] = uuid;
+    </setUUIDProperties>
+}
+</validateAndPopulateUUID>
+
+<createOrRetrieveProfile>
+function(name, options) {
+	<handleProfileCreation>
+	if (arguments.length == 2)
+		return createProfile(name, options);
+	else
+		return new OutputProfile(utils.defaults(name || {}, defaultProfile));
+	</handleProfileCreation>
+}
+</createOrRetrieveProfile>
+```

@@ -1,0 +1,189 @@
+```javascript
+<checkVar>
+function checkVar(node) {
+  <parseNode>
+  const leftNode = (node.id.typeAnnotation) ? node.id.typeAnnotation : node.id;
+  const rightNode = node.init;
+  </parseNode>
+
+  <checkEqualitySpacing>
+  if (rightNode) {
+    const nonSpacedNode = getFirstNonSpacedToken(leftNode, rightNode, "=");
+
+    if (nonSpacedNode) {
+      report(node, nonSpacedNode);
+    }
+  }
+  </checkEqualitySpacing>
+}
+</checkVar>
+
+<initializePopup>
+function(id, lonlat, contentSize, contentHTML, anchor, closeBox, closeBoxCallback) {
+
+  this.imageSrc = OpenLayers.Util.getImageLocation('cloud-popup-relative.png');
+  OpenLayers.Popup.Framed.prototype.initialize.apply(this, arguments);
+  this.contentDiv.className = this.contentDisplayClass;
+}
+</initializePopup>
+
+<createDirectory>
+function mkdir(dir) {
+  return new Promise((resolve, reject) => {
+    <checkDirectoryExistence>
+    fs.lstat(dir, (err, stats) => {
+      
+      if (!err) return stats.isDirectory() ? resolve() : reject(new Error(`${dir} is not a direcotry.`));
+    </checkDirectoryExistence>
+      
+    <createNewDirectory>
+    fs.mkdir(dir, (err) => {
+      err ? reject(err) : resolve();
+    });
+    </createNewDirectory>
+  })
+}
+</createDirectory>
+
+<Event>
+function Event (type, cancelable) {
+  <setCancelable>
+  if (cancelable) {
+      Object.defineProperty(this, 'cancelable', { value: true, writable: false })
+  }
+  </setCancelable>
+  this.type = type
+}
+</Event>
+
+<splitOnQuotes>
+function splitOnQuotes (block: string): Array<string> {
+  return splitOnSingleQuotes(block).reduce((blocks, block) => {
+    return blocks.concat(splitOnDoubleQuotes(block))
+  }, [])
+}
+</splitOnQuotes>
+
+<mergeChannels>
+function merge() {
+  <gatherArguments>
+  for (var _len2 = arguments.length, channels = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    channels[_key2] = arguments[_key2];
+  }
+  </gatherArguments>
+
+  <mergeIntoChannel>
+  return Channel.merge.apply(Channel, [this].concat(channels));
+  </mergeIntoChannel>
+}
+</mergeChannels>
+
+<CruxWatcherInitialization>
+function CruxWatcher(url, options) {
+  <extendEventEmitter>
+  EventEmitter.call(this);
+  </extendEventEmitter>
+  this.url = url;
+  this.started = false;
+  this.fails = null;
+  this.failed = false;
+  if (typeof options !== 'object' || !options) options = {};
+  this.stats = {
+    total: 0,
+    success: 0,
+    failed: 0
+  };
+  this.options = {
+    timeout: options.timeout || 2,
+    timer: options.timer || 10,
+    fails: options.fails || 4,
+    auto_start: options.auto_start || true
+  };
+  <autoStart>
+  if (this.options.auto_start) {
+    this.start();
+  }
+  </autoStart>
+}
+</CruxWatcherInitialization>
+
+<unsubscribe>
+function unsubscribe(f) {
+  return function () {
+
+    <filterFitties>
+    fitties = fitties.filter(function (_) {
+      return _.element !== f.element;
+    });
+    </filterFitties>
+    
+    <disconnectObserver>
+    if (f.observeMutations) {
+      f.observer.disconnect();
+    }
+    </disconnectObserver>
+    
+    <resetStyle>
+    f.element.style.cssText = f.originalStyle;
+    </resetStyle>
+  };
+}
+</unsubscribe>
+
+<CommandBase>
+function CommandBase(pbRequestName, pbResponseName, callback) {
+  <getProtoBufCodes>
+  var requestCode = ProtoBufFactory.getCodeFor(pbRequestName);
+  this.expectedCode = ProtoBufFactory.getCodeFor(pbResponseName);
+  this.pbBuilder = ProtoBufFactory.getProtoFor(pbRequestName);
+  </getProtoBufCodes>
+
+  <validateCallback>
+  var schema = Joi.func().required();
+  var self = this;
+  Joi.validate(callback, schema, function(err, option) {
+    if (err) {
+        throw new Error('callback is required and must be a function');
+    }
+    self.callback = callback;
+  });
+  </validateCallback>
+ 
+  <setHeader>
+  this.header = new Buffer(5);
+  this.header.writeUInt8(requestCode, 4);
+  </setHeader>
+  
+  this.remainingTries = 1;
+  
+  <setName>
+  this.name = util.format('%s-%d', pbRequestName, cid);
+  cid++;
+  </setName>
+
+  <validateOptionsMethod>
+  this.validateOptions = function (arg_options, arg_schema, arg_joi_opts) {
+      var self = this;
+      Joi.validate(arg_options, arg_schema, arg_joi_opts, function(err, opts) {
+          if (err) {
+              throw err;
+          }
+          self.options = opts;
+      });
+  };
+  </validateOptionsMethod>
+}
+</CommandBase>
+
+<validate>
+function(a,b,c){
+  <validateInputType>
+  if("string"!=typeof a&&"object"!=typeof a)throw new Error("You must validate an object or a string");
+  </validateInputType>
+
+  <performValidation>
+  return"string"==typeof a||g(a)?this._validateString(a,b,c):this.isBinded(a)?this._validateBindedObject(a,b):this._validateObject(a,b,c)}
+  </performValidation>
+}
+</validate>
+```

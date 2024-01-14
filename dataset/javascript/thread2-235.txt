@@ -1,0 +1,237 @@
+Function 1:
+<addListElement>
+function add(element, options) {
+  
+  <validateElement>
+  if (!element.nodeName || /^(ul|li)$/i.test(element.nodeName) === false) {
+    return false;
+  }
+  </validateElement>
+  
+  <checkAndRemoveExistingElement>
+  else if (contains(element)) {
+    remove(element);
+  }
+  </checkAndRemoveExistingElement>
+
+  <initializeList>
+  var list = IS_TOUCH_DEVICE ? new TouchList(element) : new List(element);
+  </initializeList>
+
+  <liveSyncSetup>
+  if (options && options.live) {
+    list.syncInterval = setInterval(function() {
+      list.sync.call(list);
+    }, LIVE_INTERVAL);
+  }
+  </liveSyncSetup>
+
+  <syncList>
+  list.sync();
+  </syncList>
+
+  <addToLists>
+  lists.push(list);
+  </addToLists>
+
+  <startRefreshIfNeeded>
+  if (lists.length === 1) {
+    active = true;
+    refresh();
+  }
+  </startRefreshIfNeeded>
+}
+</addListElement>
+
+Function 2:
+<normalizeString>
+function (str, inside) {
+  if (typeof str === 'string') {
+    str = str.replace(/^\s+|\s+$/g, '');
+
+    <removeSpacesIfNeeded>
+    if (inside && /^[0-9\s]+$/.test(str)) {
+      str = str.replace(/\s/g, '');
+    }
+    </removeSpacesIfNeeded>
+
+    <replaceDecimalSeparator>
+    if (this.decimalRegex) {
+      str = str.replace(this.decimalRegex, '$1.$2');
+    }
+    </replaceDecimalSeparator>
+  }
+  return str;
+}
+</normalizeString>
+
+Function 3:
+<encryptPassword>
+function cmd_encrypt_password(args, done) {
+
+  <generateSalt>
+  var salt = args.salt || create_salt()
+  </generateSalt>
+
+  <passwordSetup>
+  var password = args.password
+  </passwordSetup>
+
+  <performHashing>
+  hasher(pepper + password + salt, options.rounds, function(pass) {
+    done(null, { ok: true, pass: pass, salt: salt })
+  })
+  </performHashing>
+}
+</encryptPassword>
+
+Function 4:
+<generateDateRange>
+function (startDate, endDate) {
+  var current = new Date(startDate);
+  var end = new Date(endDate);
+  var dates = [];
+
+  <calculatingDatesInRange>
+  while (current <= end) {
+    var m = current.getMonth() + 1;
+    var d = current.getDate();
+    var oneDate = [
+      current.getFullYear(),
+      m < 10 ? "0" + m : m,
+      d < 10 ? "0" + d : d].join('-');
+
+    dates.push(oneDate);
+    current.setDate(current.getDate() + 1);
+  }
+  </calculatingDatesInRange>
+
+  return dates;
+}
+</generateDateRange>
+
+Function 5:
+<readPackageMetadata>
+function (options, callback) {
+  <asarPathSetup>
+  var withAsar = path.join(options.src, 'resources/app.asar')
+  </asarPathSetup>
+  <nonAsarPathSetup>
+  var withoutAsar = path.join(options.src, 'resources/app/package.json')
+  </nonAsarPathSetup>
+
+  <readWithAsar>
+  try {
+    fs.accessSync(withAsar)
+    options.logger('Reading package metadata from ' + withAsar)
+    callback(null, JSON.parse(asar.extractFile(withAsar, 'package.json')))
+    return
+  } catch (err) {
+  }
+  </readWithAsar>
+
+  <readWithoutAsar>
+  try {
+    options.logger('Reading package metadata from ' + withoutAsar)
+    callback(null, fs.readJsonSync(withoutAsar))
+  } catch (err) {
+    callback(new Error('Error reading package metadata: ' + (err.message || err)))
+  }
+  </readWithoutAsar>
+}
+</readPackageMetadata>
+
+Function 6:
+<executeScript>
+function step() {
+  <fetchNextFunction>
+  var f = script.shift();
+  </fetchNextFunction>
+  
+  <executeOrComplete>
+  if (f) {
+    f(stack, step);
+  }
+  else {
+    return cb(null, stack.pop());
+  }
+  </executeOrComplete>
+}
+</executeScript>
+
+Function 7:
+<cloneRepository>
+function cloneSeed() {
+  return Q.Promise(function (resolve, reject) {
+    <defineRepository>
+    var repo = 'https://example.com/repo.git';
+    </defineRepository>
+    <getCurrentDirectory>
+    var cwd = process.cwd();
+    </getCurrentDirectory>
+    
+    <cloneAndCleanup>
+    cmd('git', ['clone', repo, cwd])
+      .then(function () {
+        fs.removeSync(path.join(cwd, '.git'));
+        resolve();
+      })
+      .fail(function (err) {
+        reject(err);
+      });
+    </cloneAndCleanup>
+  });
+}
+</cloneRepository>
+
+Function 8:
+<constructReducer>
+function reducer(props, map, key) {
+  <mergeProperties>
+  return Object.assign({}, map, {
+    [key]: props[key],
+  });
+  </mergeProperties>
+}
+</constructReducer>
+
+Function 9:
+<initializeMeshToonMaterial>
+function MeshToonMaterial(parameters) {
+  <callParentConstructor>
+  MeshPhongMaterial.call(this);
+  </callParentConstructor>
+
+  <setupDefinitions>
+  this.defines = { 'TOON': '' };
+  </setupDefinitions>
+
+  <defineMaterialType>
+  this.type = 'MeshToonMaterial';
+  </defineMaterialType>
+
+  <initializeGradientMap>
+  this.gradientMap = null;
+  </initializeGradientMap>
+
+  <setMaterialParameters>
+  this.setValues(parameters);
+  </setMaterialParameters>
+}
+</initializeMeshToonMaterial>
+
+Function 10:
+<readHostsFile>
+function (dir) {
+  <setDefaultDirectory>
+  dir = dir || _OS_HOSTS_DIR;
+  </setDefaultDirectory>
+
+  <readFileAndFormat>
+  var file = fs.readFileSync(dir, 'utf-8');
+  this.formatFile(file);
+  </readFileAndFormat>
+  
+  return this;
+}
+</readHostsFile>

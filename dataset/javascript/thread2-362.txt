@@ -1,0 +1,195 @@
+```javascript
+<mkfn>
+function mkfn(fn, params, name, ctx) {
+  return {
+    fn : fn,
+    ctx : ctx || null,
+    params : params || 0,
+    name : name || null,
+  };
+}
+</mkfn>
+
+<anonymous>
+function (params) {
+  const oThis = this;
+
+  oThis.contractName = params.contract_name;
+  oThis.contractAddress = params.contract_address;
+  oThis.chain = params.chain;
+  oThis.senderAddress = params.sender_address;
+  oThis.methodName = params.method_name;
+  oThis.methodArguments = params.method_arguments;
+}
+</anonymous>
+
+<rowDragFun>
+function rowDragFun(e) {
+    var oThis = this;
+    
+    if (!oThis.options.canRowDrag) {
+        return;
+    }
+
+    if (this.rowDragFlag) {
+        this.rowDragEndX = e.clientX;
+        this.rowDragEndY = e.clientY;
+        <calculateDrag>
+        var changeX = this.rowDragEndX - this.rowDragStartX,
+            changeY = this.rowDragEndY - this.rowDragStartY;
+        var rowHeight = this.rowDragEle.clientHeight;
+
+        var rowCounts = parseInt(changeY / rowHeight);
+
+        if (rowCounts < 0) {
+            this.dragdirection = -1;
+        } else {
+            this.dragdirection = 1;
+        }
+
+        this.rowDragEndIndex = this.rowDragStartIndex + rowCounts;
+        </calculateDrag>
+
+        <validateRowDrag>
+        if (this.rowDragEndIndex < 0) {
+            this.rowDragEndIndex = 0;
+        }
+        </validateRowDrag>
+
+        <updateDragUI>
+        if (this.rowDragEndIndex != this.rowDragStartIndex) {            
+            $('#' + this.options.id + '_content_tbody').find('tr td').removeClass('u-grid-drag-icon');            
+            $('#' + this.options.id + '_content_tbody').find('tr').eq(this.rowDragEndIndex).find('td').first().addClass('u-grid-drag-icon');
+        }
+        </updateDragUI>
+    }
+}
+</rowDragFun>
+
+<segmentIndex>
+function(index) {
+    var segments = this.segments;
+    var numSegments = segments.length;
+    if (numSegments === 0) throw new Error('Path has no segments.');
+
+    if (index < 0) index = numSegments + index;
+    <validateIndex>
+    if (index >= numSegments || index < 0) throw new Error('Index out of range.');
+    </validateIndex>
+
+    return segments[index];
+}
+</segmentIndex>
+
+<webpackBlock>
+function(module,exports,__webpack_require__){"use strict";(function(module){
+<!-- Omitted webpack internal functionality as it is beyond the scope of the task -->
+})(function(CodeMirror){"use strict";
+<!-- Omitted CodeMirror mode definition as it is beyond the scope of the task -->
+}
+</webpackBlock>
+
+<formatInline>
+function(composer, command, tagName, className, classRegExp, cssStyle, styleRegExp) {
+  var that = this;
+
+  <checkExecuteConditions>
+  if (this.state(composer, command, tagName, className, classRegExp, cssStyle, styleRegExp) &&
+    composer.selection.isCollapsed() &&
+    !composer.selection.caretIsLastInSelection() &&
+    !composer.selection.caretIsFirstInSelection()
+  ) {
+    var state_element = that.state(composer, command, tagName, className, classRegExp)[0];
+    composer.selection.executeAndRestoreRangy(function() {
+      var parent = state_element.parentNode;
+      composer.selection.selectNode(state_element, true);
+      wysihtml5.commands.formatInline.exec(composer, command, tagName, className, classRegExp, cssStyle, styleRegExp, true, true);
+    });
+  } else {
+    if (this.state(composer, command, tagName, className, classRegExp, cssStyle, styleRegExp) && !composer.selection.isCollapsed()) {
+      composer.selection.executeAndRestoreRangy(function() {
+        wysihtml5.commands.formatInline.exec(composer, command, tagName, className, classRegExp, cssStyle, styleRegExp, true, true);
+      });
+    } else {
+      wysihtml5.commands.formatInline.exec(composer, command, tagName, className, classRegExp, cssStyle, styleRegExp);
+    }
+  }
+  </checkExecuteConditions>
+}
+</formatInline>
+
+<processMessageList>
+function(messagelist, next) {
+  var keyList = JSON.parse(messagelist.Body);
+  if (CONSOLE_MESSAGES) console.log(new Date().toISOString(),'Raw messageList object:',keyList);
+  
+  <processEachMessage>
+  keyList.messages.forEach(function(item, index) {
+    data.INBOX.messages.push({
+      key: item.key,
+      raw: '',
+      flags: [],
+      internaldate: formatInternalDate(new Date(item.created))
+    });
+  }); 
+  </processEachMessage>
+  
+  <indexFolders>
+  indexFolders();
+  </indexFolders>
+
+  if (CONSOLE_MESSAGES) console.log(new Date().toISOString(),'Refreshed INBOX:',data);
+  if (CONSOLE_MESSAGES) console.log(new Date().toISOString(),'INBOX message detail:',data.INBOX.messages);
+
+  next(null);
+}
+</processMessageList>
+
+<extend>
+function extend(helper = {}) {
+  <pluginIntegration>
+  Object.keys(plugins).forEach((key) => {
+    const plugin = plugins[key]
+    helper[key] = plugin.default.bind(helper)
+  })
+  </pluginIntegration>
+  <extendMethod>
+  helper.extend = (name, method) => {
+    helper[name] = method.bind(helper)
+  }
+  </extendMethod>
+}
+</extend>
+
+<compile>
+function compile(config) {
+  let compiler;
+  <createCompiler>
+  try {
+    compiler = webpack(config);
+  } catch (e) {
+    printErrors('Failed to compile.', [e]);
+    process.exit(1);
+  }
+  </createCompiler>
+  return compiler;
+}
+</compile>
+
+<stringifyClass>
+function stringifyClass(classAttr) {
+  if (typeof classAttr === 'string') {
+    return classAttr;
+  }
+  <buildClassString>
+  var classes = [];
+  for (var key in classAttr) {
+    if (classAttr[key]) {
+      classes.push(key);
+    }
+  }
+  </buildClassString>
+  return classes.join(' ');
+}
+</stringifyClass>
+```

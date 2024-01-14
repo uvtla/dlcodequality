@@ -1,0 +1,225 @@
+```javascript
+<_biDimensionalArrayToObject>
+function _biDimensionalArrayToObject(aArr) {
+    var obj = {},
+      nIndex,
+      nLen = aArr.length,
+      oItem;
+    for (nIndex = 0; nIndex < nLen; nIndex++) {
+      oItem = aArr[nIndex];
+      obj[oItem[0]] = oItem[1];
+    }
+    return obj;
+}
+</_biDimensionalArrayToObject>
+
+<mergeAncestorElementsOfSelectionEnds>
+function mergeAncestorElementsOfSelectionEnds( range, blockLimit, startPath, endPath ) {
+	<initializeWalker>
+		var walkerRange = range.clone(),
+			walker, nextNode, previousNode;
+		walkerRange.setEndAt( blockLimit, CKEDITOR.POSITION_BEFORE_END );
+		walker = new CKEDITOR.dom.walker( walkerRange );
+	</initializeWalker>
+
+	<mergeElements>
+		if ( ( nextNode = walker.next() ) &&							
+			checkIfElement( nextNode ) &&								
+			blockMergedTags[ nextNode.getName() ] &&					
+			( previousNode = nextNode.getPrevious() ) &&				
+			checkIfElement( previousNode ) &&							
+			!previousNode.getParent().equals( range.startContainer ) && 
+																		
+			startPath.contains( previousNode ) &&						
+			endPath.contains( nextNode ) &&								
+			nextNode.isIdentical( previousNode ) )						
+		{
+			
+			nextNode.moveChildren( previousNode );
+			nextNode.remove();
+			mergeAncestorElementsOfSelectionEnds( range, blockLimit, startPath, endPath );
+		}
+	</mergeElements>
+}
+</mergeAncestorElementsOfSelectionEnds>
+
+<mean>
+function mean(input) {
+    <validateInput>
+		if (!Array.isArray(input)) {
+			throw new Error('input must be an array');
+		}
+
+		if (input.length === 0) {
+			throw new Error('input must not be empty');
+		}
+	</validateInput>
+
+	<calculateMean>
+		var sum = 0;
+		for (var i = 0; i < input.length; i++) {
+			sum += input[i];
+		}
+		return sum / input.length;
+	</calculateMean>
+}
+</mean>
+
+<Pokespotter>
+function Pokespotter(users, password, provider) {
+  <inputValidation>
+	  if (!Array.isArray(users) && !password) {
+		if (process.env.PGO_USERNAME && process.env.PGO_PASSWORD) {
+		  users = [{
+			username: process.env.PGO_USERNAME,
+			password: process.env.PGO_PASSWORD,
+			provider: (process.env.PGO_PROVIDER || 'google')
+		  }];
+		} else {
+		  throw new Error('You need to pass a username and password');
+		}
+	  } else if (!Array.isArray(users)) {
+		users = [{
+		  username: users,
+		  password: password, 
+		  provider: (provider || 'google')
+		}];
+	  } 
+	  
+	  if (users.length === 0) {
+		throw new Error('Invalid or no credentials passed');
+	  }
+  </inputValidation>
+
+  <initializeSpotters>
+	  var spotters = users.map(function (u) { return Spotter(u, DEBUG) });
+  </initializeSpotters>
+
+  <getLocationFunction>
+  function get(location, options) {
+    // ... [Code truncated for brevity] ...
+  }
+  </getLocationFunction>
+
+  <constructPokespotterObject>
+	  var obj = {
+		get: get,
+		getNearby: get
+	  };
+
+	  Object.defineProperty(obj, 'DEBUG', {
+		set: function (val) {
+		  DEBUG = val;
+		},
+		get: function () {
+		  return DEBUG
+		}
+	  });
+  </constructPokespotterObject>
+
+  return obj;
+}
+</Pokespotter>
+
+<dependencyMatch>
+function dependencyMatch (expected, actual) {
+  <normalizeExpectedActual>
+	  if (expected.indexOf('github:') === 0) {
+		expected = expected.replace(/^github:/, 'git:');
+		var parsed = url.parse(expected)
+		parsed.pathname += '.git'
+		expected = url.format(parsed)
+	  }
+	  actual = actual.replace(/^git\+https/, 'git')
+	  expected = expected.replace(/^git\+https/, 'git')
+
+	  expected = ngu(expected)
+	  actual = ngu(actual)
+
+	  expected.url = expected.url.replace('https://', 'git://');
+	  actual.url = actual.url.replace('https://', 'git://');
+  </normalizeExpectedActual>
+
+  <checkMismatch>
+	  if (expected.url !== actual.url) {
+		return false
+	  }
+
+	  if (actual.branch && actual.branch.indexOf(expected.branch) !== 0) {
+		return false
+	  }
+  </checkMismatch>
+
+  return true
+}
+</dependencyMatch>
+
+<initializeModule>
+function(moduleName, context) {
+	<createModule>
+		var module = modules[moduleName].creator(context);
+	</createModule>
+
+	<setupContext>
+		if (!context.getElement) {
+			context.getElement = function() {
+				return document.querySelector('[data-module="' + moduleName + '"]');
+			};
+		}
+	</setupContext>
+	
+	return module;
+}
+</initializeModule>
+
+<printUsage>
+function printUsage () {
+    // ... [All log statements serve a single purpose of printing usage instructions] ...
+    printSupportedExchanges ()
+    // ... [Code truncated for brevity] ...
+}
+</printUsage>
+
+<getPropertyValueLists>
+function (oProperty) {
+	<extractValueLists>
+		var aMatches,
+			sName,
+			sQualifier,
+			mValueLists = {};
+
+		for (sName in oProperty) {
+			aMatches = rValueList.exec(sName);
+			if (aMatches){
+				sQualifier = (aMatches[1] || "").slice(1); 
+				mValueLists[sQualifier] = oProperty[sName];
+			}
+		}
+	</extractValueLists>
+
+	return mValueLists;
+}
+</getPropertyValueLists>
+
+<setControllerModel>
+function (controller, context, transition) {
+	<updateModel>
+	  if (controller && context !== undefined) {
+		_emberMetalProperty_set.set(controller, 'model', context);
+	  }
+	</updateModel>
+}
+</setControllerModel>
+
+<incrementMetric>
+function(name, incr  ) {
+	<updateMetric>
+		var currVal = this.metrics[name] || 0;
+		incr = incr || 1;
+		this.setMetric(name, currVal + incr);
+	</updateMetric>
+}
+</incrementMetric>
+```
+
+Some functions, like printUsage, are compliant because all code contributes to a single clear purpose, which is printing usage instructions. Others have segments tagged separately within the main annotation to indicate distinct responsibilities that could potentially violate the SRP if these sections had significant complexity or were better suited modularized into separate functions.

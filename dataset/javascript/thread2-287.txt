@@ -1,0 +1,219 @@
+```javascript
+<to_kwargs>
+function to_kwargs(args, sortedKeys) {
+    var s = '';
+    if (!sortedKeys) {
+        var sortedKeys = keys(args).sort();
+    }
+    for (var i = 0; i < sortedKeys.length; ++i) {
+        var k = sortedKeys[i];
+        if (args[k] != undefined) {
+            if (s) {
+                s += ', ';
+            }
+            s += k + '=' + args[k];
+        }
+    }
+    return s;
+}
+</to_kwargs>
+```
+Compliant with SRP - It constructs a string of keyword arguments from the given arguments.
+
+```javascript
+<hasAttribute>
+function hasAttribute(element, attrName) {
+    if (typeof element.hasAttribute === 'function') {
+        return element.hasAttribute(attrName)
+    }
+    return element.getAttribute(attrName) !== null
+}
+</hasAttribute>
+```
+Compliant with SRP - It checks if an element has a specific attribute.
+
+```javascript
+<getElementCoordinates>
+function(element) {
+    var c = {};
+    try {
+        var rect = element.getBoundingClientRect();
+        c.x = Math.floor((rect.left + rect.right) / 2);
+        c.y = Math.floor((rect.top + rect.bottom) / 2);
+    } catch (e) {
+        c.x = 1;
+        c.y = 1;
+    }
+    return c;
+}
+</getElementCoordinates>
+```
+Compliant with SRP - It calculates the center coordinates of an element, resorting to default values in case of an error.
+
+```javascript
+<manipulateStylesAndAttributes>
+function (node, tagName, attrs) {
+    var list = domUtils.getElementsByTagName(node, node.tagName.toLowerCase());
+    for (var i = 0, ci; ci = list[i++];) {
+        // Not annotating because this is also part of manipulating styles and attributes for nodes
+        if (!ci.parentNode || domUtils.isBookmarkNode(ci)) {
+            continue;
+        }
+        
+        // Not annotating because this is also part of manipulating styles and attributes for nodes
+        if (ci.tagName.toLowerCase() == 'span') {
+            // Not annotating because this is also part of manipulating styles and attributes for nodes
+            ...
+            // The whole block inside this 'if' condition deals with style and attribute manipulation
+        }
+        // Not annotating because this is also part of manipulating styles and attributes for nodes
+        if (domUtils.isSameElement(node, ci)) {
+            domUtils.remove(ci, true);
+        }
+    }
+}
+</manipulateStylesAndAttributes>
+```
+Compliant with SRP - It manipulates styles and attributes for nodes.
+
+```javascript
+<generateCodeHandlerJs>
+function generateCodeHandlerJs(config) {
+    
+    var handler_js = null;
+    // Read and setup handler code
+    try {
+        <readHandlerJs>
+        handler_js = fs.readFileSync(HANDLER_FILENAME).toString();
+        </readHandlerJs>
+    } catch (e) {
+        <fallbackToTemplateRead>
+        handler_js = fs.readFileSync(__dirname + '/../templates/' + HANDLER_FILENAME + '.tmpl').toString();
+        </fallbackToTemplateRead>
+    }
+
+    // Add command functions to handler
+    for (var cmd_name in config.commands) {
+        <checkCommandNameValidity>
+        if (!cmd_name.match(/^[a-zA-Z][a-zA-Z0-9]+$/)) {
+            throw new Error('Defined method name is invalid format: ' + cmd_name);
+        }
+        </checkCommandNameValidity>
+
+        <checkIfCommandExists>
+        if (handler_js.indexOf(cmd_name) != -1) { 
+            continue; 
+        }
+        </checkIfCommandExists>
+
+        //...
+        // Several steps are involved in generating the JS functions
+        // This is still part of the responsibility to add command functions to the handler
+    }
+
+    // Replace placeholders with respective config values
+    <replacePlaceholders>
+    for (var config_key in config) {
+        handler_js = handler_js.replace(new RegExp('\\%' + config_key + '\\%', 'g'), config[config_key]);
+    }
+    </replacePlaceholders>
+
+    // Ensure module export is set
+    <ensureModuleExport>
+    if (!handler_js.match(/module\.exports = CommandsHandler;/)) {
+        handler_js += '\n\nmodule.exports = CommandsHandler;\n';
+    }
+    </ensureModuleExport>
+
+    return handler_js;
+}
+</generateCodeHandlerJs>
+```
+Non-compliant with SRP - This function involves several separate responsibilities like reading and setting up the handler code, validating command names, checking for existing commands, replacing placeholders, and ensuring module export.
+
+```javascript
+<formatAttributes>
+function formatAttributes(attrObj) {
+    var attributes = [];
+
+    for (var attribute in attrObj) {
+        attributes.push(attribute + '="' + attrObj[attribute] + '"');
+    }
+
+    return attributes.join(' ');
+}
+</formatAttributes>
+```
+Compliant with SRP - It formats an object of attributes into a string.
+
+```javascript
+<renderView>
+function() {
+    this.isClosed = false;
+
+    this.triggerMethod("before:render", this);
+    this.triggerMethod("item:before:render", this);
+
+    var data = this.serializeData();
+    data = this.mixinTemplateHelpers(data);
+
+    var template = this.getTemplate();
+    var html = Marionette.Renderer.render(template, data);
+
+    this.$el.html(html);
+    this.bindUIElements();
+
+    this.triggerMethod("render", this);
+    this.triggerMethod("item:rendered", this);
+
+    return this;
+}
+</renderView>
+```
+Compliant with SRP - It is responsible for the rendering process of a view.
+
+```javascript
+<App>
+function App() {
+    // React component rendering logic with embedded JSX is considered as a single responsibility
+    // Annotations within JSX or React component render functions are typically unnecessary unless there's explicit mix of responsibilities (like API calls, complex data processing, etc.)
+    // This App function doesn't seem to require internal annotations
+    ...
+}
+</App>
+```
+Compliant with SRP in context of React components - Entire function represents the rendering of a React component.
+
+```javascript
+<isCandidate>
+function isCandidate(modulePath) {
+    modulePath = modulePath || '';
+    var pathParts = modulePath.split(delim);
+    return (pathParts.length === 4 &&
+            pathParts[0] === 'app' &&
+            uiTypes.indexOf(pathParts[2]) >= 0);
+}
+</isCandidate>
+```
+Compliant with SRP - It determines if a given module path meets specific criteria to be a candidate.
+
+```javascript
+<wheelOn>
+function wheelOn(options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = {};
+    }
+    this.logger('RollingSpider#wheelOn');
+    this.writeTo(
+        'fa0b',
+        new Buffer([0x02, ++this.steps.fa0b & 0xFF, 0x02, 0x01, 0x02, 0x00, 0x01])
+    );
+
+    if (callback) {
+        callback();
+    }
+}
+</wheelOn>
+```
+Compliant with SRP - It enables the wheel mode on a Rolling Spider drone and triggers a callback.

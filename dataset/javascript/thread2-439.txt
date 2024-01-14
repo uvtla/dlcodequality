@@ -1,0 +1,197 @@
+```javascript
+<function_handleNodeOperations>
+function(id, type) {
+    var node = OpenLayers.Util.getElement(id);
+    if (node) {
+        <nodeTypeComparison>
+        if (!this.nodeTypeCompare(node, type)) {
+            node.parentNode.removeChild(node);
+            node = this.nodeFactory(id, type);
+        }
+        </nodeTypeComparison>
+    } else {
+        node = this.createNode(type, id);
+    }
+    return node;
+}
+</function_handleNodeOperations>
+
+<function_Splice>
+function Splice(object, index, removed, addedCount) {
+    ChangeRecord.call(this, object, 'splice', String(index));
+    this.index = index;
+    this.removed = removed;
+    this.addedCount = addedCount;
+}
+</function_Splice>
+
+<function_at_type>
+function at_type() {
+  match(/@type/);
+  add_tag("type");
+  skip_horiz_white();
+  <typeDefinitionBranching>
+  if (look(/\{/)) {
+    var tdf = typedef();
+    current_tag["type"] = tdf["type"];
+    current_tag["optional"] = tdf["optional"] ? true : false;
+  }
+  else if (look(/\S/)) {
+    current_tag["type"] = match(/\S+/);
+  }
+  </typeDefinitionBranching>
+  skip_white();
+}
+</function_at_type>
+
+<function_combinePrefixPatterns>
+function combinePrefixPatterns(regexs) {
+    <initializeVariables>
+    var capturedGroupIndex = 0;
+    var needToFoldCase = false;
+    var ignoreCase = false;
+    </initializeVariables>
+    
+    <determineCaseFolding>
+    for (var i = 0, n = regexs.length; i < n; ++i) {
+      var regex = regexs[i];
+      if (regex.ignoreCase) {
+        ignoreCase = true;
+      } else if (/[a-z]/i.test(regex.source.replace(
+                     /\\u[0-9a-f]{4}|\\x[0-9a-f]{2}|\\[^ux]/gi, ''))) {
+        needToFoldCase = true;
+        ignoreCase = false;
+        break;
+      }
+    }
+    </determineCaseFolding>
+
+    <charsetEscapeHandling>
+    function decodeEscape(charsetPart) {
+      ...
+    }
+    
+    function encodeEscape(charCode) {
+      ...
+    }
+
+    function caseFoldCharset(charSet) {
+      ...
+    }
+    </charsetEscapeHandling>
+
+    <regexGroupRenumbering>
+    function allowAnywhereFoldCaseAndRenumberGroups(regex) {
+      ...
+    }
+    </regexGroupRenumbering>
+
+    <regexCombination>
+    var rewritten = [];
+    for (var i = 0, n = regexs.length; i < n; ++i) {
+      var regex = regexs[i];
+      if (regex.global || regex.multiline) { throw new Error('' + regex); }
+      rewritten.push(
+          '(?:' + allowAnywhereFoldCaseAndRenumberGroups(regex) + ')');
+    }
+    </regexCombination>
+
+    return new RegExp(rewritten.join('|'), ignoreCase ? 'gi' : 'g');
+}
+</function_combinePrefixPatterns>
+
+<function_renderChildrenAndGetHTML>
+function() {
+    this.logger.log("completeRender: " + this.index + ", # of children: " + this.children.length);
+    var sb = [];
+
+    <accumulateChildrenHTML>
+    for (var i=0; i < this.children.length; ++i) {
+        sb[sb.length] = this.children[i].getHtml();
+    }
+    </accumulateChildrenHTML>
+
+    this.childrenRendered = true;
+
+    return sb.join("");
+}
+</function_renderChildrenAndGetHTML>
+
+<function_setTableSelection>
+function setTableSelection(table, rowData) {
+    if (table.isPanel) {
+        table = table.getView();
+    }
+    var model = this.findRecord(table.getStore(), rowData);
+
+    table.setSelection(model);
+}
+</function_setTableSelection>
+
+<function_replaceExt>
+function replaceExt(fpath, newExt) {
+  const oldExt = path.extname(fpath);
+  return _nativeExt.includes(oldExt) ? fpath :
+    path.join(path.dirname(fpath), path.basename(fpath, oldExt) + newExt);
+}
+</function_replaceExt>
+
+<function_match>
+function match (route) {
+  assert.equal(typeof route, 'string')
+
+  return route.trim()
+    .replace(/[\?|#].*$/, '')
+    .replace(/^(?:https?\:)\/\
+    .replace(/^.*?(\/.*)/, '$1')
+    .replace(/\/$/, '')
+}
+</function_match>
+
+<function_handleMouseEvent>
+function( e ){
+
+    e.preventDefault();
+
+    document.removeEventListener( 'mouseup', this, false );
+    if(this.isDrag) document.removeEventListener( 'mousemove', this, false );
+
+    <handleEditableTarget>
+    if(this.current !== undefined){ 
+
+        if( this.current === parseFloat(e.target.name) ){ 
+            e.target.contentEditable = true;
+            e.target.focus();
+        }
+
+    }
+    </handleEditableTarget>
+
+}
+</function_handleMouseEvent>
+
+<function_checkCache>
+function checkCache() {
+    <cacheStatusInitialization>
+    if(cache) {
+	    cacheStatusValues[0] = 'uncached';
+	    cacheStatusValues[1] = 'idle';
+	    cacheStatusValues[2] = 'checking';
+	    cacheStatusValues[3] = 'downloading';
+	    cacheStatusValues[4] = 'updateready';
+	    cacheStatusValues[5] = 'obsolete';
+    </cacheStatusInitialization>
+    
+    <cacheEventHandling>
+	    cache.addEventListener('cached', logEvent, false);
+	    cache.addEventListener('checking', logEvent, false);
+	    cache.addEventListener('downloading', logEvent, false);
+	    cache.addEventListener('error', logEvent, false);
+	    cache.addEventListener('noupdate', logEvent, false);
+	    cache.addEventListener('obsolete', logEvent, false);
+	    cache.addEventListener('progress', logEvent, false);
+	    cache.addEventListener('updateready', logEvent, false);
+    </cacheEventHandling>
+}
+</function_checkCache>
+```

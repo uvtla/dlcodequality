@@ -1,0 +1,207 @@
+<pongLayoutEditorDivHTML>
+function pongLayoutEditorDivHTML( divId, resourceURL, paramObj ) {
+	log( "layout-editor",  "divId="+divId+" resourceURL="+resourceURL );
+	if ( moduleConfig[ divId ] != null ) {
+		<updateModuleConfig>
+		var cnf = moduleConfig[ divId ].layout;
+		moduleConfig[ divId ].resourceURL = resourceURL;
+		moduleConfig[ divId ].page_id = -1;
+		</updateModuleConfig>
+		<generateHTMLOutput>
+		var contentItems = [];
+		contentItems.push( '<div id="'+divId+'Inner" style="width:100%;height:100%">' );
+		contentItems.push( '</div>' );
+		contentItems.push( '<div class="layoutEditorZoom"><form><select id="'+divId+'ZoomSel">' );
+		contentItems.push( '<option value="1.0">100%</option>' );
+		contentItems.push( '<option value="0.8">80%</option>' );
+		contentItems.push( '<option value="0.6">60%</option>' );
+		contentItems.push( '<option value="0.5">50%</option>' );
+		contentItems.push( '<option value="0.4" selected="selected">40%</option>' );
+		contentItems.push( '<option value="0.3">30%</option>' );
+		contentItems.push( '<option value="0.2">20%</option>' );
+		contentItems.push( '</select></div>' );
+		contentItems.push( '<script>' );
+		contentItems.push( '$(function() { ' );
+		contentItems.push( '    $( "#'+divId+'ZoomSel" ).change( ' );
+		contentItems.push( '       function( event ) { ' );
+		contentItems.push( '           udateModuleData( "'+divId+'", '+JSON.stringify(paramObj)+' ); ' );
+		contentItems.push( '          return false;  ' );
+		contentItems.push( '       }' );
+		contentItems.push( '     );  ' );
+		contentItems.push( ' }); ' );
+		contentItems.push( '</script>' );
+		$( "#"+divId ).html( contentItems.join( "\n" ) );
+		</generateHTMLOutput>
+		<renderLayoutEditor>
+		pongLayoutEditorRenderHTML( divId, resourceURL, paramObj, cnf );
+		</renderLayoutEditor>				
+	} else {
+		<handleError>
+		$( "#"+divId ).html( '<div id="'+divId+'layout-editor_Div" class="layout-editor">ERROR [1]</div>' );
+    		publishEvent( 'feedback', {'text':'Error: Layout config required!'} )
+		</handleError>
+	}
+}
+</pongLayoutEditorDivHTML>
+
+<openTheOtherDatabase>
+function openTheOtherDatabase() {
+    if (otherDB) return
+
+    <openDatabase>
+    if (window.openDatabase) {
+        otherDB = window.openDatabase("clicks_other_db", "1.0", "clicks_other_db", 8192)
+        otherDB.transaction(createDatabase_other)
+    }
+    </openDatabase>
+}
+</openTheOtherDatabase>
+
+<TermState>
+function TermState(options) {
+	<setupInheritanceAndOptions>
+	TermState.super_.call(this, {
+		decodeStrings: false
+	});
+	options = myUtil.extend({
+		attributes: {},
+	}, options);
+	this._defaultAttr = myUtil.extend({
+		fg: null,
+		bg: null,
+		bold: false,
+		underline: false,
+		italic: false,
+		blink: false,
+		inverse: false
+	}, options.attributes);
+	</setupInheritanceAndOptions>
+
+	<initializeState>
+	this._attributesUsed = true;
+
+	this.rows = ~~options.rows || 24;
+	this.columns = ~~options.columns || 80;
+	</initializeState>
+
+	<setupEventListeners>
+	this
+		.on("newListener", this._newListener)
+		.on("removeListener", this._removeListener)
+		.on("pipe", this._pipe);
+	</setupEventListeners>
+	
+	<resetState>
+	this.reset();
+	</resetState>
+}
+</TermState>
+
+<replace>
+function replace(oldNode, newNode){
+    <domReplaceChild>
+    return oldNode[PARENT_NODE] ? oldNode[PARENT_NODE].replaceChild(newNode, oldNode) : oldNode;
+    </domReplaceChild>
+}
+</replace>
+
+<rc>
+function rc(options, callback) {
+  <handleArguments>
+  if(typeof options === 'function') {
+    callback = options;
+    options = null;
+  }
+  </handleArguments>
+  <createRunControl>
+  var r = new RunControl(options);
+  if(typeof callback === 'function') r.load(callback);
+  </createRunControl>
+  return r;
+}
+</rc>
+
+<_isPropertyNestedObject>
+function _isPropertyNestedObject(o, k) {
+    return !!o && o.hasOwnProperty(k) && typeof o[k] === "object" && o[k] !== null && !isEmptyObject(o[k]);
+}
+</_isPropertyNestedObject>
+
+<chunk>
+function chunk(array, size, guard) {
+      <initChunking>
+      if ((guard ? isIterateeCall(array, size, guard) : size === undefined$1)) {
+        size = 1;
+      } else {
+        size = nativeMax(toInteger(size), 0);
+      }
+      var length = array == null ? 0 : array.length;
+      if (!length || size < 1) {
+        return [];
+      }
+      </initChunking>
+      <executeChunking>
+      var index = 0,
+          resIndex = 0,
+          result = Array(nativeCeil(length / size));
+
+      while (index < length) {
+        result[resIndex++] = baseSlice(array, index, (index += size));
+      }
+      </executeChunking>
+      return result;
+}
+</chunk>
+
+<reverseArray>
+function(list) {
+            if (isArray(list.value)) {
+                <reverseValue>
+                list.value = list.value.reverse();
+                </reverseValue>
+            }
+
+            return list;
+}
+</reverseArray>
+
+<circuitBreakerResponder>
+function (data, circuitbreakerState, callback) {
+        <chooseResponder>
+        const responder = (circuitbreakerState===CB.OPEN) ? config.bypass : config.handler;
+        </chooseResponder>
+
+        <invokeResponder>
+        const promise = responder.length > 1
+            ? new Promise(function(resolve, reject) {
+                responder(data, function(err, result) {
+                    if (err) return reject(err);
+                    resolve(result);
+                });
+            })
+            : Promise.resolve(responder(data));
+        </invokeResponder>
+
+        <handleCallback>
+        if (typeof callback !== 'function') return promise;
+        promise.then(
+            function (data) { callback(null, data); },
+            function (err) { callback(err, null); }
+        );
+        </handleCallback>
+}
+</circuitBreakerResponder>
+
+<mod9710>
+function mod9710 (input) {
+  <computeModulo>
+  var m = 0
+  for (var i = 0; i < input.length; i++) {
+    m *= 10
+    m += input.charCodeAt(i) - 48 
+    m %= 97
+  }
+  </computeModulo>
+  return m
+}
+</mod9710>

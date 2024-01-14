@@ -1,0 +1,160 @@
+```javascript
+<TimeSeries>
+function TimeSeries (source, column, options) {
+  this._initialize(source, column, options);
+  this._aggregation = this._options.aggregation;
+  this._offset = _hoursToSeconds(this._options.offset);
+  this._localTimezone = this._options.useLocalTimezone;
+}
+</TimeSeries>
+
+<inherits>
+function inherits(subClass, superClass) {
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    },
+  });
+}
+</inherits>
+
+<anonymousFunction>
+function(options) {
+  options = options || {};
+  this.host = options.host || 'localhost';
+  this.port = options.port || 8125;
+
+  if (!statsdClients[this.host + ':' + this.port]) {
+    statsdClients[this.host + ':' + this.port] = new StatsD(options);
+  }
+
+  this.client = statsdClients[this.host + ':' + this.port];
+  this.sampleRate = options.sampleRate || 1;
+
+  Writable.call(this, {objectMode: true});
+}
+</anonymousFunction>
+
+<InternalOpenIDError>
+function InternalOpenIDError(message, err) {
+  Error.call(this);
+  Error.captureStackTrace(this, arguments.callee);
+  this.name = 'InternalOpenIDError';
+  this.message = message;
+  this.openidError = err;
+}
+</InternalOpenIDError>
+
+<filterIcons>
+function (iconsList, iconNames) {
+  if (iconNames && iconNames.length > 0) {
+    var icons = [];
+    ariaUtilsArray.forEach(iconsList, function (item, i) {
+      if (!ariaUtilsArray.contains(iconNames, iconsList[i])) {
+        icons.push(iconsList[i]);
+      }
+    });
+    return icons;
+  }
+  return iconsList;
+}
+</filterIcons>
+
+<buildSequence>
+function() {
+  if (!builds.length) { return; } 
+
+  var build = builds.shift();
+  var buildCallback = function(stats) {
+    cb(build.buildName, stats);
+    if (builds.length) {
+      runNextBuild();
+    }
+  };
+  console.log(colors.cyan('[Starting build]'), build.buildName);
+  executeBuild(build, buildCallback);
+}
+</buildSequence>
+
+<adjustDate>
+function(parts, date, operation, reset) {
+  var currentDay = date.date();
+  
+  while (!parts[1].has(date.hour())) {
+    date[operation](1, 'hours')[reset]('hour');
+    
+    if (currentDay !== date.date()) {
+      return true;
+    }
+  }
+  return false;
+}
+</adjustDate>
+
+<generateOptions>
+function options( opts ) {
+  var out = {};
+
+  out.method = opts.method;
+  debug( 'Method: %s', opts.method );
+
+  out.protocol = opts.protocol+':';
+  debug( 'Protocol: %s', opts.protocol );
+
+  out.hostname = opts.hostname;
+  debug( 'Hostname: %s', opts.hostname );
+
+  out.port = opts.port;
+  debug( 'Port: %d', opts.port );
+
+  out.headers = getHeaders( opts );
+
+  return out;
+}
+</generateOptions>
+
+<getDefaultSettings>
+function() {
+  return Object.keys(defaults).sort().map(function(key) {
+    return {
+      name: key,
+      value: this.get(key),
+      type: typeof defaults[key].value,
+      description: defaults[key].description
+    };
+  }, this);
+}
+</getDefaultSettings>
+
+<calculatePerspective>
+function (farDistance, farResolution, depthBits) {
+  if (farDistance < 0) {
+    <throwNegativeDistanceError>
+    throw new ArgumentError(Logger.logMessage(Logger.LEVEL_SEVERE, "WWMath", "perspectiveNearDistanceForFarDistance",
+      "The specified distance is negative."));
+    </throwNegativeDistanceError>
+  }
+
+  if (farResolution < 0) {
+    <throwNegativeResolutionError>
+    throw new ArgumentError(Logger.logMessage(Logger.LEVEL_SEVERE, "WWMath", "perspectiveNearDistanceForFarDistance",
+      "The specified resolution is negative."));
+    </throwNegativeResolutionError>
+  }
+
+  if (depthBits < 1) {
+    <throwInvalidDepthBitsError>
+    throw new ArgumentError(Logger.logMessage(Logger.LEVEL_SEVERE, "WWMath", "perspectiveNearDistanceForFarDistance",
+      "The specified depth bits is negative."));
+    </throwInvalidDepthBitsError>
+  }
+
+  var maxDepthValue = (1 << depthBits) - 1;
+
+  return farDistance / (maxDepthValue / (1 - farResolution / farDistance) - maxDepthValue + 1);
+}
+</calculatePerspective>
+```

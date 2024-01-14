@@ -1,0 +1,368 @@
+```json
+<parse_BrtHLink>
+function parse_BrtHLink(data, length) {
+	var end = data.l + length;
+	var rfx = parse_UncheckedRfX(data, 16);
+	var relId = parse_XLNullableWideString(data);
+	var loc = parse_XLWideString(data);
+	var tooltip = parse_XLWideString(data);
+	var display = parse_XLWideString(data);
+	data.l = end;
+	var o = ({rfx:rfx, relId:relId, loc:loc, display:display});
+	if(tooltip) o.Tooltip = tooltip;
+	return o;
+}
+</parse_BrtHLink>
+
+<encode>
+function encode(body) {
+  if (typeof(body) == 'string') {
+    return [new Buffer(body, 'utf8')];
+  } else if (body instanceof Buffer) {
+    return [body];
+  } else {
+    var jsonBody = JSON.stringify(body);
+    return [new Buffer(jsonBody, 'utf8'), 'application/json'];
+  }
+}
+</encode>
+
+<constructor-apiClient>
+function(apiClient) {
+    <setAPIClient>
+	this.apiClient = apiClient || ApiClient.instance;
+    </setAPIClient>
+
+    <confirmUser>
+    this.confirmUser = function(registrationInfo, callback) {
+      var postBody = registrationInfo;
+      <checkRegistrationInfo>
+      if (registrationInfo == undefined || registrationInfo == null) {
+        throw "Missing the required parameter 'registrationInfo' when calling confirmUser";
+      }
+      </checkRegistrationInfo>
+      
+      <requestDataStructure>
+      var pathParams = {
+      };
+      var queryParams = {
+      };
+      var headerParams = {
+      };
+      var formParams = {
+      };
+      </requestDataStructure>
+
+      var authNames = ['artikcloud_oauth'];
+      var contentTypes = [];
+      var accepts = ['application/json'];
+      var returnType = DeviceRegConfirmUserResponseEnvelope;
+
+      <callApi>
+      return this.apiClient.callApi(
+        '/devices/registrations/pin', 'PUT',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+      </callApi>
+    }
+    </confirmUser>
+
+    <getRequestStatusForUser>
+    this.getRequestStatusForUser = function(requestId, callback) {
+      var postBody = null;
+
+      <checkRequestId>
+      if (requestId == undefined || requestId == null) {
+        throw "Missing the required parameter 'requestId' when calling getRequestStatusForUser";
+      }
+      </checkRequestId>
+
+      <requestStatusDataStructure>
+      var pathParams = {
+        'requestId': requestId
+      };
+      var queryParams = {
+      };
+      var headerParams = {
+      };
+      var formParams = {
+      };
+      </requestStatusDataStructure>
+
+      var authNames = ['artikcloud_oauth'];
+      var contentTypes = [];
+      var accepts = ['application/json'];
+      var returnType = DeviceRegStatusResponseEnvelope;
+
+      <callApi>
+      return this.apiClient.callApi(
+        '/devices/registrations/{requestId}/status', 'GET',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+      </callApi>
+    }
+    </getRequestStatusForUser>
+    
+    <unregisterDevice>
+    this.unregisterDevice = function(deviceId, callback) {
+      var postBody = null;
+
+      <checkDeviceId>
+      if (deviceId == undefined || deviceId == null) {
+        throw "Missing the required parameter 'deviceId' when calling unregisterDevice";
+      }
+      </checkDeviceId>
+
+      <unregisterDeviceDataStructure>
+      var pathParams = {
+        'deviceId': deviceId
+      };
+      var queryParams = {
+      };
+      var headerParams = {
+      };
+      var formParams = {
+      };
+      </unregisterDeviceDataStructure>
+
+      var authNames = ['artikcloud_oauth'];
+      var contentTypes = [];
+      var accepts = ['application/json'];
+      var returnType = UnregisterDeviceResponseEnvelope;
+
+      <callApi>
+      return this.apiClient.callApi(
+        '/devices/{deviceId}/registrations', 'DELETE',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+      </callApi>
+    }
+    </unregisterDevice>
+}
+</constructor-apiClient>
+
+<opts-function> 
+function(opts) {
+	<defaultOptionsAssignment>
+	var opts = opts || {};
+	var shouldHash = typeof opts.hash != 'undefined' ? opts.hash : defaults.hash;
+	var prefix = _.flatten([defaults.prefix]);
+	var shouldPrefix = typeof opts.shouldPrefix != 'undefined' ? opts.shouldPrefix : true;
+	</defaultOptionsAssignment>
+	return <throughFunction>through.obj</throughFunction>(function(file, enc, cb) {
+		
+		<generateHash>
+		var hash = md5(opts, file.contents.toString());
+		</generateHash>
+
+		<fileNameExtensionProcessing>
+		var ext = path.extname(file.path);
+		var basePath = path.basename(file.path, ext);
+		var filename = typeof hash !== 'undefined' ? basePath + '-' + hash + ext : basePath + ext;
+		file.path = path.join(path.dirname(file.path), filename);
+		</fileNameExtensionProcessing>
+
+		<removeOldFile>
+		var base = path.join(file.cwd, defaults.src);
+		var key = originalPath.replace(base, '');
+		var existing = manifest[key];
+		if (existing && existing.src && defaults.cleanup) {
+			fs.unlink(path.join(file.cwd, defaults.dest, existing.src));
+		} else if (defaults.cleanup && shouldHash) {
+			var nonHashPath = path.join(path.dirname(originalPath), basePath + ext).replace(base, '');
+			var absPath = path.join(file.cwd, defaults.dest, nonHashPath);
+			fs.exists(absPath, function(exists) {
+				if (!exists) return;
+				fs.unlink(absPath);
+			});
+		}
+		</removeOldFile>
+
+		<addPrefixToFile>
+		var filePrefix = shouldPrefix ? prefix[index % prefix.length] : '';
+		var src = file.path.replace(base, '');
+		manifest[key] = {
+			index: index++,
+			src: src,
+			dest: filePrefix + src
+		};
+		</addPrefixToFile>
+
+		<writeManifestAndUpdateStream>
+		writeManifest();
+		this.push(file);
+		cb();
+		</writeManifestAndUpdateStream>
+	});
+}
+</opts-function>
+
+<createEndpointRequest>
+function createEndpointRequest( handlerSpec, resource, namespace ) {
+
+	<extendWPRequest>
+	class EndpointRequest extends WPRequest {
+		constructor( options ) {
+			super( options );
+			this._levels = handlerSpec._levels;
+			this
+				.setPathPart( 0, resource )
+				.namespace( namespace );
+		}
+	}
+	</extendWPRequest>
+
+	<applyGetMixins>
+	if ( typeof handlerSpec._getArgs === 'object' ) {
+		Object.keys( handlerSpec._getArgs ).forEach( ( supportedQueryParam ) => {
+			const mixinsForParam = mixins[ supportedQueryParam ];
+			if ( typeof mixinsForParam === 'object' ) {
+				Object.keys( mixinsForParam ).forEach( ( methodName ) => {
+					applyMixin( EndpointRequest.prototype, methodName, mixinsForParam[ methodName ] );
+				} );
+			}
+		} );
+	}
+	</applyGetMixins>
+
+	<attachSetters>
+	Object.keys( handlerSpec._setters ).forEach( ( setterFnName ) => {
+		if ( ! EndpointRequest.prototype[ setterFnName ] ) {
+			EndpointRequest.prototype[ setterFnName ] = handlerSpec._setters[ setterFnName ];
+		}
+	} );
+	</attachSetters>
+
+	return EndpointRequest;
+}
+</createEndpointRequest>
+
+<can_mangle>
+function can_mangle(name) {
+	<checkForUnmangleableNames>
+	if (unmangleable.indexOf(name) >= 0) return false;
+	</checkForUnmangleableNames>
+	<checkForReservedNames>
+	if (reserved.indexOf(name) >= 0) return false;
+	</checkForReservedNames>
+	<checkForCacheProperties>
+	if (options.only_cache) {
+		return cache.props.has(name);
+	}
+	</checkForCacheProperties>
+	<checkForNumericStrings>
+	if (/^-?[0-9]+(\.[0-9]+)?(e[+-][0-9]+)?$/.test(name)) return false;
+	</checkForNumericStrings>
+	return true;
+}
+</can_mangle>
+
+<build>
+function build() {
+    
+    <buildIdentity>
+    var _ret = buildIdentity.call(this);
+    var typeId = _ret.typeId;
+    var typeName = _ret.typeName;
+    var body =
+        '\tvar opts = options ? options : {};\n' +
+        '\tthis.constructor.util._extend(this, opts.props);\n' +
+        '\tthis.constructor.super_.call(this, opts.buffer, opts.offset' +
+        (typeId ? '' : ', true') +
+        ');\n';
+    </buildIdentity>
+    
+    <buildBody>
+    body += _ret.body;
+    </buildBody>
+    
+    <buildSerialize>
+    body += buildSerialize.call(this);
+    </buildSerialize>
+    
+    <buildDeserialize>
+    body += buildDeserialize.call(this);
+    </buildDeserialize>
+    
+    <appendMethods>
+    for (var i = 0; i < this._methods.length; i++) {
+        body += this._methods[i];
+    }
+    </appendMethods>
+    
+    <loggingDebug>
+    if (logger.isDebugEnabled()) {
+        logger.debug('Body for %s type constructor:', typeName);
+        logger.debug('\n' + body);
+    }
+    </loggingDebug>
+    
+    <createConstructor>
+    return createConstructor(body, typeId, typeName);
+    </createConstructor>
+}
+</build>
+
+<key-value-options>
+function(key, value, options) {
+	<handleOptionsType>
+    if (isObject(key)) options = value;
+    else {
+    	<generateOrRetrieveKey>
+        if (!key) key = this.keygen();
+        </generateOrRetrieveKey>
+        <constructKeyValueObject>
+        var out = {};
+        out[key] = value;
+        key = out;
+        </constructKeyValueObject>
+    }
+    </handleOptionsType>
+    <mergeOptions>
+    options = opts(this, options);
+    </mergeOptions>
+
+    <returnAPICall>
+    return new APICall({
+        action: 'text',
+        type: 'POST',
+        options: options,
+        query: server_params(options),
+        data: JSON.stringify(key)
+    });
+    </returnAPICall>
+}
+</key-value-options>
+
+<context-model-properties>
+function (contextModel, properties) {
+	<createCacheId>
+    var cacheId = this.createContextCacheId(contextModel, properties);
+    if (!cacheId) {
+        return this;
+    }
+    </createCacheId>
+    
+    <checkAndCreateContext>
+    if (!this.$contextCache.hasOwnProperty(cacheId)) {
+        this.$contextCache[cacheId] = this.$dataSource.createContext(contextModel, properties, this);
+    }
+    </checkAndCreateContext>
+
+    return this.$contextCache[cacheId];
+}
+</context-model-properties>
+
+<isHashOrKeyValueArray>
+function (obj) {
+	<validateObjectStructure>
+    return isHash(obj) || (isArray(obj) && obj.length && obj.every(function (i) {
+            return isArray(i) && i.length === 2;
+        }));
+    </validateObjectStructure>
+}
+</isHashOrKeyValueArray>
+```

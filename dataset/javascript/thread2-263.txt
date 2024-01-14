@@ -1,0 +1,191 @@
+```javascript
+<hdel>
+function hdel(key) {
+  var args = slice.call(arguments, 1) // Parameter extraction
+    , req = typeof args[args.length - 1] === 'object' // Request handling
+        ? args.pop() : null
+    , val = this.getKey(key, req) // Get the hash value
+    , deleted = 0 // Initialize deletion count
+    , i; 
+
+  if(!val) return 0; // Return early if no value found
+
+  for(i = 0; i < args.length; i++) { // Iterate over fields to delete
+    deleted += val.delKey(args[i]);
+  }
+
+  if(val.hlen() === 0) { // Remove the whole key if empty
+    this.delKey(key, req);
+  }
+
+  return deleted; // Return count of deleted fields
+}
+</hdel>
+
+<applyTransformation>
+function (v) {
+    var a = this.val,
+        x = v.x,
+        y = v.y;
+
+    v.x = x * a[0] + y * a[3] + a[6];
+    v.y = x * a[1] + y * a[4] + a[7];
+
+    return v; // Apply a transformation matrix to a vector
+}
+</applyTransformation>
+
+<backtrackMatcher>
+function (scanner, matcher) {
+  var start = scanner.pos; // Save starting position
+  var result = matcher(scanner); // Run the matcher function
+  scanner.pos = start; // Reset scanner to starting position
+  return result; // Return the match result without advancing the scanner
+}
+</backtrackMatcher>
+
+<addFieldWithRanges>
+function(fieldName, ranges) {
+  if (!this.dataModelObject.hasField(fieldName)) { // Ensure field existence
+    throw new Error("Did not find field " + fieldName);
+  }
+  var f = this.dataModelObject.fieldByName(fieldName); // Get the field metadata
+  if ("number" !== f.type) { // Ensure correct field type
+    throw new Error("Field was of type " + f.type + ", expected number.");
+  }
+  
+  var updatedRanges = {};
+  if (!utils.isUndefined(ranges.start) && ranges.start !== null) { // Process range start
+    updatedRanges.start = ranges.start;
+  }
+  if (!utils.isUndefined(ranges.end) && ranges.end !== null) { // Process range end
+    updatedRanges.end = ranges.end;
+  }
+  if (!utils.isUndefined(ranges.step) && ranges.step !== null) { // Process range step
+    updatedRanges.size = ranges.step;
+  }
+  if (!utils.isUndefined(ranges.limit) && ranges.limit !== null) { // Process range limit
+    updatedRanges.maxNumberOf = ranges.limit;
+  }
+
+  this.columns.push({ // Add the configured field with ranges
+    fieldName: fieldName,
+    owner: f.owner,
+    type: f.type,
+    display: "ranges",
+    ranges: updatedRanges
+  });
+
+  return this;
+}
+</addFieldWithRanges>
+
+<initializeCarousel>
+function Carousel(container, options) {
+  var this$1 = this;
+  if ( options === void 0 ) options={};
+
+  this.handle = container; // Bind to DOM element
+
+  this.options = { // Define default options
+    animateClass: 'animate',
+    activeClass: 'active',
+    slideWrap: 'ul',
+    slides: 'li',         
+    infinite: true,       
+    display: 1,           
+    disableDragging: false, 
+    initialIndex: 0       
+  };
+  
+  this.current = 0;               // Initialize current index
+  this.slides = [];               // Initialize slides array
+  this.sliding = false;           // Initialize sliding state
+  this.cloned = 0;                // Initialize cloned items count
+  this.active = true;             // Initialize active state
+
+  this.dragging = false;          // Initialize dragging state
+  this.dragThreshold = 50;        // Initialize drag threshold
+  this.deltaX = 0;                // Initialize horizontal drag delta
+
+  this.isTouch = 'ontouchend' in document; // Determine if touch is supported
+  ['transform', 'webkitTransform', 'MozTransform', 'OTransform', 'msTransform'].forEach(function (t) {
+    if (document.body.style[t] !== undefined) { this$1.transform = t; } // Detect browser transform support
+  });
+
+  this.options = this._assign(this.options, options); // Merge passed options with defaults
+
+  this.init(); // Initialize the Carousel
+}
+</initializeCarousel>
+
+<initializeRedisTimeseriesStorage>
+function RedisTimeseriesStorage(options) {
+    this.redisClient = options.redisClient; // Set up the Redis client
+    this.keyPrepend = "js:tss:"; // Define key prefix
+    if (options.key) {
+        this.keyPrepend += options.key + ":"; // Optional custom key
+    }
+}
+</initializeRedisTimeseriesStorage>
+
+<setResponseHeaders>
+function _setResponseHeaders(headers) {
+    this.responseHeaders = {}; // Reset response headers
+
+    for (var header in headers) { // Copy headers to responseHeaders
+        if (headers.hasOwnProperty(header)) {
+            this.responseHeaders[header] = headers[header];
+        }
+    }
+
+    if (this.async) { // Trigger ready state change
+        this._readyStateChange(IsotropyXMLHttpRequest.HEADERS_RECEIVED);
+    } else {
+        this.readyState = IsotropyXMLHttpRequest.HEADERS_RECEIVED; // Set ready state directly
+    }
+}
+</setResponseHeaders>
+
+<resetSelectize>
+function() {
+    var self = this;
+
+    $('.tag', self.$container).remove(); // Clear tags from container
+    $('option', self.$element).remove(); // Clear options from select element
+
+    while (self.itemsArray.length > 0) // Empty the items array
+        self.itemsArray.pop();
+
+    self.pushVal(); // Synchronize value with native select element
+}
+</resetSelectize>
+
+<getCachedFunction>
+function _getCachedFunction(data, vars, relPath) {
+    var func;
+    if (app.viewCaching) { // Check if view caching is enabled
+        func = app.views.callbacks[relPath]; // Attempt to retrieve cached view function
+        if (func instanceof Function) { 
+            return func;
+        } else {
+            return null; // Return null if not a function
+        }
+    } else {
+        return null; // No caching means return null
+    }
+}
+</getCachedFunction>
+
+<parseHeaders>
+function parseHeaders(headerString) {
+    var headers = {};
+    var headersArray = headerString.split(/[\r\n]+/); // Split headers string into an array
+    headersArray.forEach(function (headerString) { // Iterate over each header string
+        var headerChunks = headerString.split(':'); // Split each header string into key-value pair
+        headers[headerChunks.shift().trim()] = headerChunks.join(':').trim(); // Trim and assign key-value pair
+    });
+    return headers; // Return parsed headers
+}
+</parseHeaders>
+```

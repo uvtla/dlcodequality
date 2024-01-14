@@ -1,0 +1,248 @@
+```javascript
+<compileEntity>
+function compileEntity() {
+  var entity = extend({
+    buildId: bff.key(payload),
+    extension: file.extension,
+    filename: file.filename,
+    fingerprint: print,
+    url: file.url
+  }, payload);
+
+  return entity;
+}
+</compileEntity>
+
+<EmbarkBin>
+function EmbarkBin(binpath, kind) {
+  this.binpath = binpath;
+  this.binrealpath = undefined;
+  this.kind = kind || 'invoked';
+  this.pkgDir = undefined;
+  this.pkgJson = undefined;
+}
+</EmbarkBin>
+
+<postRequest>
+function postRequest(requestPost, credentials, baseUrl, apiPath, requestOptions, params, callback) {
+  params = params || {};
+
+  
+  <prepareAndSendRequest>
+  const currentRequest = requestPost(extend({
+    url: baseUrl + apiPath,
+    oauth: credentials,
+  }, requestOptions), function(err, response, body) {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      body = {
+        error: 'Malformed Response: ' + body,
+      };
+    }
+    <handleResponse>
+    requestCallback(callback)(err, response, body);
+    </handleResponse>
+  });
+  </prepareAndSendRequest>
+
+  
+  <handleDataExclusion>
+  const dataKeys = ['data'];
+  currentRequest.form(omit(params, dataKeys));
+  currentRequest.oauth(credentials);
+  </handleDataExclusion>
+
+  
+  <modifyRequestHeaders>
+  delete currentRequest.headers['content-type'];
+  delete currentRequest.body;
+  </modifyRequestHeaders>
+
+  
+  <prepareDataParameters>
+  if ('data' in params && Array.isArray(params.data)) {
+    for (let i = 0; i < params.data.length; ++i) {
+      params['data[' + i + ']'] = params.data[i];
+    }
+    delete params.data;
+  }
+  </prepareDataParameters>
+
+  
+  <formDataAppending>
+  const form = currentRequest.form();
+  for (const key in params) {
+    form.append(key, params[key]);
+  }
+  </formDataAppending>
+
+  
+  <extendRequestHeaders>
+  extend(currentRequest.headers, form.getHeaders());
+  </extendRequestHeaders>
+
+  return currentRequest;
+}
+</postRequest>
+
+<parseRemoteBranches>
+function parseRemoteBranches(str) {
+  var res = [],
+      regex = /[\w]{40}\s+refs\/heads\/(.+)/g,
+      match;
+
+  <extractBranches>
+  while ((match = regex.exec(str)) != null) {
+    if (match.index === regex.lastIndex) {
+      regex.lastIndex++;
+    }
+    res.push(match[1]);
+  }
+  </extractBranches>
+
+  <validateResponse>
+  if (!res.length) {
+    throw new Error('Unable to parse ls-remote response', str);
+  }
+  </validateResponse>
+  return res;
+}
+</parseRemoteBranches>
+
+<transformData>
+function transformData(data, headers, status, fns) {
+  <applyTransformFunctions>
+  if (isFunction(fns))
+    return fns(data, headers, status);
+
+  forEach(fns, function(fn) {
+    data = fn(data, headers, status);
+  });
+  </applyTransformFunctions>
+
+  return data;
+}
+</transformData>
+
+<updateHookValue>
+function (fullHookName, hookValue, rootPropertyValue) {
+    var hookData = CSS.Hooks.registered[fullHookName];
+
+    if (hookData) {
+        var hookRoot = hookData[0],
+            hookPosition = hookData[1],
+            rootPropertyValueParts,
+            rootPropertyValueUpdated;
+
+        rootPropertyValue = CSS.Hooks.cleanRootPropertyValue(hookRoot, rootPropertyValue);
+
+        
+        <updatePropertyValue>
+        rootPropertyValueParts = rootPropertyValue.toString().match(CSS.RegEx.valueSplit);
+        rootPropertyValueParts[hookPosition] = hookValue;
+        rootPropertyValueUpdated = rootPropertyValueParts.join(" ");
+
+        return rootPropertyValueUpdated;
+        </updatePropertyValue>
+    } else {
+        
+        <returnUnchangedPropertyValue>
+        return rootPropertyValue;
+        </returnUnchangedPropertyValue>
+    }
+}
+</updateHookValue>
+
+<validateNode>
+function(node) {
+
+    var valid = true;
+    
+    <determineNodeValidity>
+    var nodeName;
+    try {
+        nodeName = node.nodeName.toUpperCase();
+    } catch(e) {
+        nodeName = node.nodeName;
+    }
+    valid = valid && !this.invalidHandleTypes[nodeName];
+    valid = valid && !this.invalidHandleIds[node.id];
+
+    for (var i=0, len=this.invalidHandleClasses.length; valid && i<len; ++i) {
+        valid = !Dom.hasClass(node, this.invalidHandleClasses[i]);
+    }
+    </determineNodeValidity>
+
+    <logValidationResult>
+    this.logger.log("Valid handle? ... " + valid);
+    </logValidationResult>
+
+    return valid;
+
+}
+</validateNode>
+
+<replaceSizeTokens>
+function replaceSizeTokens(pattern, width, height, next) {
+  
+  <replaceTokensInPattern>
+  pattern = pattern
+    .replace(/%r/g, '%wx%h')
+    .replace(/%w/g, width)
+    .replace(/%h/g, height);
+  </replaceTokensInPattern>
+
+  next(null, pattern);
+}
+</replaceSizeTokens>
+
+<initPageObjects>
+function initPageObjects()
+{
+	<initializeCanvasForBody>
+	if(isCanvas(document.body))
+	{
+		var newCanvas = new Canvas(document.body);
+		newCanvas.initCanvas();
+		canvases.push(newCanvas);
+	}
+	</initializeCanvasForBody>
+	else
+	{	
+		<initializeCanvasesForDivs>
+		var divs = document.getElementsByTagName('div');
+		var i;
+		for(i = 0; i < divs.length; i++)
+		{
+			if(isCanvas(divs[i]) && !findCanvas(divs[i].id))
+			{
+				var newCanvas = new Canvas(divs[i]);
+				newCanvas.initCanvas();
+				canvases.push(newCanvas);
+				newCanvas.fitBlocks();
+				newCanvas.alignBlocks();
+			}
+		}
+		</initializeCanvasesForDivs>
+	}
+}
+</initPageObjects>
+
+<ReticleRenderer>
+function ReticleRenderer(camera) {
+  this.camera = camera;
+
+  <createAndSetReticle>
+  this.reticle = this.createReticle_();
+  
+  this.reticle.position.z = -0.97;
+  camera.add(this.reticle);
+  </createAndSetReticle>
+
+  <setVisibility>
+  this.setVisibility(false);
+  </setVisibility>
+}
+</ReticleRenderer>
+```

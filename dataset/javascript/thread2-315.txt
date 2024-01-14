@@ -1,0 +1,280 @@
+Here are the annotations for the provided JavaScript functions:
+
+1. Compliant Function:
+```javascript
+<eventRemoval>
+function(type, listener, useCapture){
+    if (!this._eventTypes) { return; }
+    var state = this._eventTypes[type];
+    if (state) {
+        var listeners = state.listeners;
+        for (var i=0, len=listeners.length; i < len; i++) {
+            var l = listeners[i];
+            if (l && l.listener === listener && l.useCapture === useCapture) {
+                if (state.level !== 0) {
+                    listeners[i] = null;
+                    state.compact = true;
+                } else {
+                    listeners.splice(i, 1);
+                }
+                break;
+            }
+        }
+        if (listeners.length === 0) {
+            delete this._eventTypes[type];
+        }
+    }
+}
+</eventRemoval>
+```
+
+2. Non-Compliant Function:
+```javascript
+<setValueOrClear>
+function(value) {
+    var data;
+
+    if (arguments.length === 0) {
+        data = this.selection.data("select2-data");
+        if (data == undefined) data = null;
+        return data;
+    } else {
+        if (!value || value === "") {
+            this.clear();
+        } else {
+            this.opts.element.val(!value ? "" : this.id(value));
+            this.updateSelection(value);
+        }
+    }
+}
+</setValueOrClear>
+```
+
+3. Compliant Function:
+```javascript
+<mapSerialization>
+function mapObject(key, value) {
+    var c = key.charAt(0);
+    if (c === "_" || c === "$") {
+        return undefined;
+    } else if (isArray(this) && key.match(INTRINSIC)) {
+        return undefined;
+    } else if (isType(value)) {
+        return parse(value);
+    } else if (gui.Type.isComplex(value)) {
+        switch (value.constructor) {
+            case Object:
+            case Array:
+                return value;
+        }
+        return undefined;
+    } else {
+        if (isType(this)) {
+            var base = this.constructor.prototype;
+            var desc = Object.getOwnPropertyDescriptor(base, key);
+            if (desc && (desc.set || desc.get)) {
+                return undefined;
+            }
+        }
+        return value;
+    }
+}
+</mapSerialization>
+```
+
+4. Compliant Function:
+```javascript
+<addFieldDefinition>
+function addField(fields) {
+    for (const fieldName in fields) {
+        if (reservedFieldNames.indexOf(fieldName) >= 0) {
+            throw new InvalidDefinitionError(this.name, 'field %s is reserved name', fieldName);
+        }
+        const field = Type.createField(this, fieldName, fields[fieldName]);
+        if (field.props.unique && field.props.category === 'entity') {
+            let unique = field.props.unique,
+              message = `${fieldName} is unique`;
+            if (typeof unique === 'string') message = unique;
+            const index = {
+                name: `${this.table}_${field.props.column}`,
+                fields: [fieldName], unique: true, message,
+            };
+            this.indexes.push(index);
+        }
+
+        this.fields[fieldName] = field;
+    }
+}
+</addFieldDefinition>
+```
+
+5. Non-Compliant Function:
+```javascript
+<versionManagement>
+function bumpVersion(files, bumpType) {
+    <logging>
+    status('Bump', bumpType, 'version to files:', files.join(' '));
+    </logging>
+    if (config.dryRun) return '[not available in dry run]';
+
+    var newVersion;
+    var originalVersion;
+    files.forEach(function(fileName) {
+        <fileProcessing>
+        var filePath = path.join(projectRoot, fileName);
+
+        var data = JSON.parse(fs.readFileSync(filePath));
+        originalVersion = data.version;
+        var currentVersion = data.version;
+        if (!semver.valid(currentVersion)) {
+            var msg = 'Invalid version ' + currentVersion +
+                ' in file ' + fileName;;
+            var err = new Error(msg);
+            throw err;
+        }
+
+        if (S(currentVersion).endsWith(config.devSuffix)) {
+            currentVersion = S(currentVersion).chompRight(config.devSuffix).s;
+        }
+
+        if (bumpType === 'dev') {
+            newVersion = currentVersion + config.devSuffix;
+        } else {
+            newVersion = semver.inc(currentVersion, bumpType);
+        }
+        data.version = newVersion;
+
+        var content = JSON.stringify(data, null, config.indentation);
+        fs.writeFileSync(filePath, content);
+        </fileProcessing>
+
+        <logging>
+        status('Bump', originalVersion, '->', newVersion, 'in',
+            fileName);
+        </logging>
+    });
+
+    return newVersion;
+}
+</versionManagement>
+```
+
+6. Non-Compliant Function:
+```javascript
+<eventModification>
+function encasedCallback( e, namespace, triggeredElement ){
+    var result;
+
+    if( e._namespace && e._namespace !== namespace ) {
+        return;
+    }
+
+    e.data = data;
+    e.namespace = e._namespace;
+
+    <preventDefaultSetup>
+    var returnTrue = function(){
+        return true;
+    };
+
+    e.isDefaultPrevented = function(){
+        return false;
+    };
+
+    var originalPreventDefault = e.preventDefault;
+    var preventDefaultConstructor = function(){
+        if( originalPreventDefault ) {
+            return function(){
+                e.isDefaultPrevented = returnTrue;
+                originalPreventDefault.call(e);
+            };
+        } else {
+            return function(){
+                e.isDefaultPrevented = returnTrue;
+                e.returnValue = false;
+            };
+        }
+    };
+    </preventDefaultSetup>
+
+    e.target = triggeredElement || e.target || e.srcElement;
+    e.preventDefault = preventDefaultConstructor();
+    e.stopPropagation = e.stopPropagation || function () {
+        e.cancelBubble = true;
+    };
+
+    result = originalCallback.apply(this, [ e ].concat( e._args ) );
+
+    if( result === false ){
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    return result;
+}
+</eventModification>
+```
+
+7. Compliant Function:
+```javascript
+<customEventConstructor>
+function ErrorEvent(title, message, data) {
+    this.Event_constructor("error");
+    this.title = title;
+    this.message = message;
+    this.data = data;
+}
+</customEventConstructor>
+```
+
+8. Compliant Function:
+```javascript
+<insertModeInitialization>
+function InsertMode(viMode) {
+    var view = viMode.getView();
+    mKeyMode.KeyMode.call(this, view);
+    this.viMode = viMode;
+    this._createActions(view);
+}
+</insertModeInitialization>
+```
+
+9. Non-Compliant Function:
+```javascript
+<propertyProcessing>
+function(value, type, property, fields, object) {
+    if (_.isUndefined(value) || _.isNull(value)) {
+        return value;
+    }
+    var params = {};
+
+    if (_.isArray(type)) {
+        <parameterExtraction>
+        params = type[1] || {};
+        type   = type[0];
+        </parameterExtraction>
+    }
+
+    <typeValidation>
+    if (!(type in this._types)) {
+        throw new Error('Property type "' + type + '" does not exist!');
+    }
+    </typeValidation>
+
+    return this._types[type].call(this, value, params, property, fields, object);
+}
+</propertyProcessing>
+```
+
+10. Compliant Function:
+```javascript
+<computeBackOff>
+function computeBackOff(retries) {
+    var t = Math.ceil(minBackOff * Math.pow(backOffMultiplier, retries - 1));
+    if(t > maxBackOff) {
+      t = maxBackOff;
+    }
+    return t;
+}
+</computeBackOff>
+```

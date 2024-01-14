@@ -1,0 +1,280 @@
+```js
+<fileToPackage>
+function fileToPackage(d) {
+  debug(d);
+  if (d.startsWith('packages/node_modules/')) {
+    d = d.replace('packages/node_modules/', '');
+    d = d.split('/');
+    if (d[0].startsWith('@')) {
+      return d.slice(0, 2).join('/');
+    }
+
+    return d[0];
+  }
+
+  if (d.startsWith('docs') || d.startsWith('documentation') || d.startsWith('.github') || d.endsWith('.md')) {
+    return 'docs';
+  }
+
+  return 'tooling';
+}
+</fileToPackage>
+
+<onWrite>
+function onWrite (c) {
+  if (c[c.length - 1] === '\n') {
+    console.log(c.substr(0, c.length - 1))
+  } else {
+    console.log(c)
+  }
+}
+</onWrite>
+
+<ServiceDescriptorProto>
+function ServiceDescriptorProto(properties) {
+    this.method = [];
+    if (properties)
+        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+}
+</ServiceDescriptorProto>
+
+<setDocumentTitle>
+function (title) {
+    var document = window.document;
+    if (ariaUtilsType.isString(title)) {
+        document.title = title;
+    } else {
+        title = document.title;
+    }
+    return title;
+}
+</setDocumentTitle>
+
+<reformatPaths>
+function reformatPaths(paths) {
+  let output = {};
+
+  if (!paths) {
+    return output;
+  }
+
+  let pathsKeys = Object.keys(paths);
+
+  pathsKeys.forEach(function (eachKey) {
+    let newKey = eachKey;
+
+    if (eachKey.includes("{") && eachKey.includes("}")) {
+      newKey = newKey.replace(new RegExp('{', 'g'), ':');
+      newKey = newKey.replace(new RegExp('}', 'g'), '');
+    }
+
+    output[newKey] = paths[eachKey];
+  });
+
+  return output;
+}
+</reformatPaths>
+
+<messageHandlingAndCaching>
+function(threadId, messageContent) {
+
+  <formatAndDeliverMessage>
+  var message = formatDataToMakeMessage(threadId, messageContent);
+  deliver({
+    messageId: message.id,
+    ownerId: message.participant.id
+  });
+  </formatAndDeliverMessage>
+  
+  <handleMessageCaching>
+  if (canUseCache) {
+    if (db) {
+      var tempData = {};
+
+      try {
+        var salt = Utility.generateUUID();
+        tempData.id = parseInt(message.id);
+        tempData.owner = parseInt(userInfo.id);
+        tempData.threadId = parseInt(message.threadId);
+        tempData.time = message.time;
+        tempData.message = Utility.crypt(message.message, cacheSecret, salt);
+        tempData.data = Utility.crypt(JSON.stringify(unsetNotSeenDuration(message)), cacheSecret, salt);
+        tempData.salt = salt;
+        tempData.sendStatus = 'sent';
+      }
+      catch (error) {
+        fireEvent('error', {
+          code: error.code,
+          message: error.message,
+          error: error
+        });
+      }
+
+      db.messages.put(tempData)
+        .catch(function(error) {
+          fireEvent('error', {
+            code: error.code,
+            message: error.message,
+            error: error
+          });
+        });
+    }
+    else {
+      fireEvent('error', {
+        code: 6601,
+        message: CHAT_ERRORS[6601],
+        error: null
+      });
+    }
+  }
+  </handleMessageCaching>
+
+  <emitMessageEvents>
+  fireEvent('messageEvents', {
+    type: 'MESSAGE_NEW',
+    result: {
+      message: message
+    }
+  });
+  </emitMessageEvents>
+
+  <updateThreadInformation>
+  if (fullResponseObject) {
+    getThreads({
+      threadIds: [threadId]
+    }, function(threadsResult) {
+      var threads = threadsResult.result.threads;
+
+      if (messageContent.participant.id !== userInfo.id && !threadsResult.cache) {
+        fireEvent('threadEvents', {
+          type: 'THREAD_UNREAD_COUNT_UPDATED',
+          result: {
+            thread: threads[0],
+            messageId: messageContent.id,
+            senderId: messageContent.participant.id
+          }
+        });
+      }
+
+      if (!threadsResult.cache) {
+        fireEvent('threadEvents', {
+          type: 'THREAD_LAST_ACTIVITY_TIME',
+          result: {
+            thread: threads[0]
+          }
+        });
+      }
+    });
+  }
+  else {
+    fireEvent('threadEvents', {
+      type: 'THREAD_LAST_ACTIVITY_TIME',
+      result: {
+        thread: threadId
+      }
+    });
+  }
+  </updateThreadInformation>
+  
+  <handleCacheQueueDeletion>
+  if (hasCache && typeof queueDb == 'object') {
+    queueDb.waitQ.where('uniqueId')
+      .equals(message.uniqueId)
+      .and(function(item) {
+        return item.owner == parseInt(userInfo.id);
+      })
+      .delete()
+      .catch(function(error) {
+        fireEvent('error', {
+          code: error.code,
+          message: error.message,
+          error: error
+        });
+      });
+  }
+  else {
+    for (var i = 0; i < chatSendQueue.length; i++) {
+      if (chatSendQueue[i].uniqueId == message.uniqueId) {
+        chatSendQueue.splice(i, 1);
+      }
+    }
+  }
+  </handleCacheQueueDeletion>
+
+}
+</messageHandlingAndCaching>
+
+<loadExternalStylesheet>
+function(source, callback) {
+  callback = callback || noop;
+
+  <addToQueue>
+  if (queue[source] instanceof Array) {
+    return callback();
+  }
+  </addToQueue>
+
+  <initializeQueue>
+  queue[source] = [];
+  </initializeQueue>
+
+  <createAndAppendStylesheet>
+  var style     = document.createElement('link');
+  var head     = document.getElementsByTagName('head')[0];
+
+  style.type = 'text/css';
+  style.rel = 'stylesheet';
+  style.href = source;
+
+  head.appendChild(style);
+  </createAndAppendStylesheet>
+  
+  <invokeCallback>
+  callback();
+  </invokeCallback>
+}
+</loadExternalStylesheet>
+
+<hashKey>
+function hashKey(requestorId, taskId) {
+  var sha       = crypto.createHash('sha512');
+  sha.update(requestorId);
+  sha.update(taskId);
+
+  return sha.digest('hex');
+}
+</hashKey>
+
+<getTarget>
+function getTarget (node) {
+  if (node === void 0) {
+    return document.body
+  }
+
+  if (typeof node === 'string' && node.indexOf('?') === 0) {
+    return document.body
+  } else if (typeof node === 'string' && node.indexOf('?') > 0) {
+    node = node.split('?')[0]
+  }
+
+  if (node === 'body' || node === true) {
+    return document.body
+  }
+
+  return node instanceof window.Node ? node : document.querySelector(node)
+}
+</getTarget>
+
+<setDOMElementValue>
+function (selector, value) {
+  return this.waitForDOM(selector).execute(function (selector, value) {
+    var element = document.querySelector(selector);
+    if (element) {
+      element.value = value;
+    }
+  }, [selector, value]);
+}
+</setDOMElementValue>
+```

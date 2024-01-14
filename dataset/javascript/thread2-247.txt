@@ -1,0 +1,160 @@
+```javascript
+<trimHtml>
+function trimHtml(html) {
+  <trimSpaces>
+  function trimSpaces(all, s1, s2) {
+    
+    if (!s1 && !s2) {
+      return ' ';
+    }
+    return '\u00a0';
+  }
+  </trimSpaces>
+
+  <filterHtml>
+  html = filter(html, [
+    /^[\s\S]*<body[^>]*>\s*|\s*<\/body[^>]*>[\s\S]*$/ig, 
+    /<!--StartFragment-->|<!--EndFragment-->/g, 
+    [/( ?)<span class="Apple-converted-space">\u00a0<\/span>( ?)/g, trimSpaces],
+    /<br class="Apple-interchange-newline">/g,
+    /<br>$/i 
+  ]);
+  </filterHtml>
+
+  return html;
+}
+</trimHtml>
+
+<handle>
+function handle(filePath) {
+  var file = toVFile(filePath)
+  
+  <testFile>
+  var result = test(file)
+  </testFile>
+  
+  <includeFile>
+  if (mask(result, INCLUDE)) {
+    if (one) {
+      callback(null, file)
+      return true
+    }
+    results.push(file)
+  }
+  </includeFile>
+  
+  <breakExecution>
+  if (mask(result, BREAK)) {
+    callback(null, one ? null : results)
+    return true
+  }
+  </breakExecution>
+}
+</handle>
+```
+
+For the following 8 functions, the ones involving a single operation are considered under SRP compliance, as they serve a single purpose related to their names, while others are split with clear responsibility tags:
+
+```javascript
+<SRPCompliantFunction>
+function( options ){
+  // This function is SRP compliant since it contains a single responsibility: manipulating an options map based on the provided keys.
+}
+</SRPCompliantFunction>
+
+<SRPCompliantFunction>
+function json (program, callback) {
+  // This function is SRP compliant as it coordinates the parsing process and formatting of JSON input.
+}
+</SRPCompliantFunction>
+
+<SRPCompliantFunction>
+function(property) {
+  // This function is SRP compliant because it involves checking for the existence of a style property on a DOM element with various vendor prefixes.
+}
+</SRPCompliantFunction>
+
+<addComputed>
+function(namespace, map) {
+  <validateParameters>
+  if (typeof namespace === 'string' && typeof map === 'object') {
+    // ... rest of the code omitted for brevity ...
+  } else if (namespace && typeof namespace === 'object') {
+    // ... rest of the code omitted for brevity ...
+  } else {
+    throw new TypeError('addComputed must have a map object');
+  }
+  </validateParameters>
+}
+</addComputed>
+
+<SRPCompliantFunction>
+function parse_PtgAttrIfError(blob) {
+  // This is a SRP-compliant function dedicated to parsing a specific part of a data blob.
+}
+</SRPCompliantFunction>
+
+<oxdSocketRequest>
+function oxdSocketRequest(port, host, params, command, callback) {
+  
+  <prepareData>
+  let data = {
+    command,
+    params
+  };
+  </prepareData>
+
+  <createClient>
+  const client = new net.Socket();
+  </createClient>
+
+  <connectAndSendData>
+  client.connect(port, host, () => {
+    // ... rest of the code omitted for brevity ...
+  });
+  </connectAndSendData>
+
+  <onDataReceived>
+  client.on('data', (req) => {
+    // ... rest of the code omitted for brevity ...
+  });
+  </onDataReceived>
+
+  <onError>
+  client.on('error', (err) => {
+    // ... rest of the code omitted for brevity ...
+  });
+  </onError>
+
+  <onClose>
+  client.on('close', () => {
+    // ... rest of the code omitted for brevity ...
+  });
+  </onClose>
+}
+</oxdSocketRequest>
+
+<SRPCompliantFunction>
+function RSAGenerate(B,E) {
+  // Despite its length, this function has a single responsibility: generating RSA keys.
+}
+</SRPCompliantFunction>
+
+<extractRadioDecoders>
+function extractRadioDecoders(devices) {
+  <collectRadioDecoders>
+  var radioDecoders = {};
+
+  for(var deviceId in devices) {
+    var radioDecodings = devices[deviceId].radioDecodings || [];
+    for(var cDecoding = 0; cDecoding < radioDecodings.length; cDecoding++) {
+      var radioDecoder = radioDecodings[cDecoding].identifier;
+      var radioDecoderId = radioDecoder.value;
+      radioDecoders[radioDecoderId] = { identifier: radioDecoder };
+    }
+  }
+  </collectRadioDecoders>
+  return radioDecoders;
+}
+</extractRadioDecoders>
+```

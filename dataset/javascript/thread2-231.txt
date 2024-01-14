@@ -1,0 +1,67 @@
+```javascript
+<functionChartReplacer>
+function chartReplacer(codeBlockChartDataAndOptions, extensionOptions) {
+  <generateRandomId>
+  const randomId = `chart-${Math.random().toString(36).substr(2, 10)}`;
+  </generateRandomId>
+  
+  <buildChartContainerHTML>
+  let renderedHTML = `<div id="${randomId}" class="chart" />`;
+  </buildChartContainerHTML>
+
+  <setupDelayedChartRendering>
+  setTimeout(() => {
+    <selectChartContainer>
+    const chartContainer = document.querySelector(`#${randomId}`);
+    </selectChartContainer>
+    try {
+      <parseChartDataAndOptions>
+      parseCode2DataAndOptions(codeBlockChartDataAndOptions, ({data, options: chartOptions}) => {
+        <setDefaultChartOptions>
+        chartOptions = setDefaultOptions(chartOptions, extensionOptions, chartContainer);
+        </setDefaultChartOptions>
+
+        <validateAndRenderChart>
+        const chartType = chartOptions.editorChart.type;
+        if (SUPPORTED_CHART_TYPES.indexOf(chartType) < 0) {
+          chartContainer.innerHTML = `invalid chart type. type: bar, column, line, area, pie`;
+        } else if (CATEGORY_CHART_TYPES.indexOf(chartType) > -1 &&
+                    data.categories.length !== data.series[0].data.length) {
+          chartContainer.innerHTML = 'invalid chart data';
+        } else {
+          chart[chartType](chartContainer, data, chartOptions);
+        }
+        </validateAndRenderChart>
+      });
+      </parseChartDataAndOptions>
+    } catch (e) {
+      <handleChartError>
+      chartContainer.innerHTML = 'invalid chart data';
+      </handleChartError>
+    }
+  }, 0);
+  </setupDelayedChartRendering>
+
+  <returnRenderedHTML>
+  return renderedHTML;
+  </returnRenderedHTML>
+}
+</functionChartReplacer>
+
+<functionH>
+function h(options) {
+  <determineProtocol>
+  if ((/^https/i).test(options.protocol)) return https;
+  if (options.port === 443) return https;
+  </determineProtocol>
+
+  <defaultProtocol>
+  return http;
+  </defaultProtocol>
+}
+</functionH>
+```
+
+The other functions provided are not annotated as they either comply with the Single Responsibility Principle or do not contain sufficient complexity for a meaningful annotation within the scope of SRP. 
+
+For example, the `htmlEscape` function has a sole purpose: to escape characters in a string for HTML. Its operations comprehensively work together for the single task of escaping thus there isn't a clear violation of SRP to annotate.

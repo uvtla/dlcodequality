@@ -1,0 +1,246 @@
+```javascript
+<normalizeTuple>
+function normalizeTuple(target, path) {
+  <pathAnalysis>
+  var hasThis  = pathHasThis(path);
+  var isGlobal = !hasThis && isGlobalPath(path);
+  var key;
+  </pathAnalysis>
+
+  <prepareTarget>
+  if (!target || isGlobal) target = Ember.lookup;
+  if (hasThis) path = path.slice(5);
+  </prepareTarget>
+
+  <deprecationWarning>
+  Ember.deprecate(
+    "normalizeTuple will return '"+path+"' as a non-global. This behavior will change in the future (issue #3852)",
+    target === Ember.lookup || !target || hasThis || isGlobal || !isGlobalPath(path+'.')
+  );
+  </deprecationWarning>
+
+  <processKeyFromPath>
+  if (target === Ember.lookup) {
+    key = path.match(FIRST_KEY)[0];
+    target = get(target, key);
+    path   = path.slice(key.length+1);
+  }
+  </processKeyFromPath>
+
+  <pathValidation>
+  if (!path || path.length===0) throw new EmberError('Path cannot be empty');
+  </pathValidation>
+
+  return [ target, path ];
+}
+</normalizeTuple>
+
+<prefix>
+function prefix(property, scope, onlyPrefixed) {
+  <directPropertyCheck>
+  if ((! onlyPrefixed) && (property in scope)) return scope[property];
+  </directPropertyCheck>
+
+  <prefixIteration>
+  var prefixes = ["Ms", "ms", "Moz", "moz", "WebKit", "webkit"];
+  for (var i in prefixes) {
+    var prefixed = prefixes[i] + property;
+    if (prefixed in scope) return scope[prefixed];
+  }
+  </prefixIteration>
+
+  <capitalizeRetry>
+  if (property[0] !== property[0].toUpperCase()) {
+    return prefix(property[0].toUpperCase() + property.substring(1), scope, true);
+  </capitalizeRetry>
+  else {
+    return undefined;
+  }
+}
+</prefix>
+
+<validate>
+function validate( opts, options ) {
+  <validateOptionsObject>
+  if ( !isObject( options ) ) {
+    return new TypeError( 'invalid input argument. Options argument must be an object. Value: `' + options + '`.' );
+  }
+  </validateOptionsObject>
+  <validateDir>
+  if ( options.hasOwnProperty( 'dir' ) ) {
+    opts.dir = options.dir;
+    if ( !isString( opts.dir ) ) {
+      return new TypeError( 'invalid option. `dir` option must be a string primitive. Option: `' + opts.dir + '`.' );
+    }
+  }
+  </validateDir>
+  <validateBasename>
+  if ( options.hasOwnProperty( 'basename' ) ) {
+    opts.basename = options.basename;
+    if ( !isString( opts.basename ) ) {
+      return new TypeError( 'invalid option. `basename` option must be a string primitive. Option: `' + opts.basename + '`.' );
+    }
+  }
+  </validateBasename>
+  <validateFmt>
+  if ( options.hasOwnProperty( 'fmt' ) ) {
+    opts.fmt = options.fmt;
+    if ( !isString( opts.fmt ) ) {
+      return new TypeError( 'invalid option. `fmt` option must be a string primitive. Option: `' + opts.fmt + '`.' );
+    }
+  }
+  </validateFmt>
+  return null;
+}
+</validate>
+
+<closest>
+function closest(node, parentSelector) {
+  <validateInput>
+  if (!parentSelector || typeof parentSelector !== 'string') {
+    throw new Error('Please specify a selector to match against!');
+  }
+  </validateInput>
+
+  <searchAncestors>  
+  var cursor = node;
+  while (cursor && !matches(cursor, parentSelector)) {
+    cursor = cursor.parentNode;
+  }
+  </searchAncestors>
+
+  <returnResult>
+  if (!cursor) {
+    return null;
+  } else {
+    return cursor;
+  }
+  </returnResult>
+}
+</closest>
+
+The following code lacks proper context, as there is insufficient information about how the function is defined or used, so I'm unable to provide accurate SRP annotations. Typically, such utility functions should adhere to SRP if they perform a single, well-defined task:
+
+```
+function(cur, depth, context, collector, subKey) {
+    ...
+}
+```
+
+```javascript
+<formatModNames>
+function (modNames, refModName) {
+  <collectFormattedModNames>
+  var ret = [], i, l;
+  if (modNames) {
+    for (i = 0, l = modNames.length; i < l; i++) {
+      if (modNames[i]) {
+        ret.push(pluginAlias(addIndexAndRemoveJsExt(modNames[i])));
+      }
+    }
+  }
+  </collectFormattedModNames>
+
+  <normalizeDependencies>
+  if (refModName) {
+    ret = Utils.normalDepModuleName(refModName, ret);
+  }
+  </normalizeDependencies>
+  return ret;
+}
+</formatModNames>
+
+<Deferred>
+function Deferred () {
+  var self = this;
+
+  this.promise  = promise.factory();
+  <initialization>
+  this.onDone   = [];
+  this.onAlways = [];
+  this.onFail   = [];
+  </initialization>
+
+  <setPromiseHandlers>
+  this.promise.then(function (arg) {
+    promise.delay(function () {
+      array.each(self.onDone, function (i) {
+        i(arg);
+      });
+
+      array.each(self.onAlways, function (i) {
+        i(arg);
+      });
+
+      self.onAlways = [];
+      self.onDone   = [];
+      self.onFail   = [];
+    });
+  }, function (arg) {
+    promise.delay(function () {
+      array.each(self.onFail, function (i) {
+        i(arg);
+      });
+
+      array.each(self.onAlways, function (i) {
+        i(arg);
+      });
+
+      self.onAlways = [];
+      self.onDone   = [];
+      self.onFail   = [];
+    });
+  });
+  </setPromiseHandlers>
+}
+</Deferred>
+
+<setGlobalLogger>
+function setGlobalLogger(fn) {
+  <setLoggerForClasses>
+  for (let klass of [ContextMenuBuilder, ContextMenuListener, SpellCheckHandler]) {
+    klass.setLogger(fn);
+  }
+  </setLoggerForClasses>
+}
+</setGlobalLogger>
+
+<findNode>
+function findNode(name, root) {
+  <validateInput>
+  if (root === null || root === undefined) { return null; }
+  </validateInput>
+
+  <depthFirstSearch>
+  var i, stack, node;
+  stack = [root];
+  while (stack.length > 0) {
+    node = stack.pop();
+    if (node.name === name) {
+      return node;
+    }
+    for (i = node.children.length - 1; i >= 0; i -= 1) {
+      stack.push(node.children[i]);
+    }
+  }
+  </depthFirstSearch>
+  return null;
+}
+</findNode>
+
+<manageFieldValidation>
+function (name, validation) {
+  <resetValidation>
+  if (name == null && validation == null) {
+    delete this.isRequired;
+    return this;
+  }
+  </resetValidation>
+
+  <applyFieldValidation>
+  return this.field(name).validate(validation);
+  </applyFieldValidation>
+}
+</manageFieldValidation>
+
+```

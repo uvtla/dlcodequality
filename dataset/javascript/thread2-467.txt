@@ -1,0 +1,210 @@
+```javascript
+<initGlobal>
+function initGlobal (args) {
+    
+    if (global.__immutable_core_model__) {
+        return
+    }
+    
+    var GLOBAL = global.__immutable_core_model__ = {
+        concurrency: 5,
+        defaultBinaryIds: true,
+        defaultCharset: 'utf8',
+        defaultCompression: true,
+        defaultElasticsearch: undefined,
+        defaultEngine: 'InnoDB',
+        defaultInsertDelayed: false,
+        models: {},
+    }
+    
+    GLOBAL.validator = new Ajv({
+        allErrors: true,
+        coerceTypes: 'array',
+        removeAdditional: true,
+        useDefaults: true,
+        v5: true,
+    })
+}
+</initGlobal>
+
+<mockRequest>
+function mockRequest() {
+    return { and_return : function(body, type, status, headers) {
+      XMLHttpRequest = MockXMLHttpRequest
+      ActiveXObject = false
+      status = status || 200
+      headers = headers || {}
+      headers['content-type'] = type
+      JSpec.extend(XMLHttpRequest.prototype, {
+        responseText: body,
+        responseHeaders: headers,
+        status: status,
+        statusText: JSpec.statusCodes[status]
+      })
+    }}
+}
+</mockRequest>
+
+<generateSizeParam>
+function generateSizeParam(sizes) {
+  return sizes.map(size => size.join(DIMENSION_SEPARATOR)).join(SIZE_SEPARATOR);
+}
+</generateSizeParam>
+
+<scrollLogic>
+function () {
+	var headersLength = sourceHeaders.length;
+	var minDistance = Number.MAX_VALUE;
+	var closestHeader = -1;
+	var fileNameInUrl = filename === '' ? '' : filename + '.' +  extension;
+
+	if ((document.body.scrollTop || document.documentElement.scrollTop) < hashThreshold) {
+		if (!!window.location.hash)	{
+			currentHeader = -1;
+			if (!!(window.history && history.pushState)) {
+				window.history.replaceState({anchor: 0}, document.title, window.location.pathname);
+			}
+		}
+
+		return;
+	}
+	for (var i=0; i < headersLength; i++) {
+		if ((sourceHeaders[i].tagName === 'H3') && (!utils.hasClass(utils.closest(sourceHeaders[i], 'source_section'), 'source_section__open')) ) {
+			continue;
+		}
+
+		var currentDist = Math.abs( utils.offsetTop(sourceHeaders[i]) - 60 - window.pageYOffset ); 
+		if (currentDist < minDistance) {
+			closestHeader = i;
+			minDistance = currentDist;
+		}
+	}
+	if (closestHeader !== currentHeader) {
+		utils.removeClass( document.querySelector('.source_main_nav_li.__active'), '__active');
+		utils.removeClass( document.querySelector('.source_main_nav_a.__active'), '__active');
+		utils.addClass(navHeaders[closestHeader], '__active');
+
+		var parent = utils.closest(navHeaders[closestHeader], 'source_main_nav_li');
+		var hashFromLink = navHeaders[closestHeader].getAttribute('href');
+
+		if (!!parent && parent) {
+			utils.addClass(parent, '__active');
+		}
+
+		if (_this.conf.updateHash) {
+			if (!!(window.history && history.pushState)) {
+				window.history.replaceState({anchor: closestHeader+1}, document.title, fileNameInUrl + hashFromLink);
+			} else { 
+				window.location.hash = hashFromLink;
+			}
+		}
+		currentHeader = closestHeader;
+	}
+}
+</scrollLogic>
+
+<printHostnames>
+function printHostnames() {
+  console.log(chalk.yellow.bold(`${indent(2)} Hostnames requested: `));
+
+  if (Object.keys(hostnames).length === 0) {
+    console.log(chalk.yellow(`${indent(4)}none`));
+    return;
+  }
+
+  for (const key in hostnames) {
+    if (!hostnames[key]) return;
+    console.log(chalk.yellow(`${indent(4)}${key}: ${hostnames[key]}`));
+  }
+}
+</printHostnames>
+
+<modifyExpression>
+function(expression, combinator){
+  if (!expression) return combinator;
+
+  expression = Object.clone(Slick.parse(expression));
+
+  var expressions = expression.expressions;
+  for (var i = expressions.length; i--;)
+    expressions[i][0].combinator = combinator;
+
+  return expression;
+}
+</modifyExpression>
+
+<removeFromCollection>
+function(i, delaySort)
+  {
+    var removing;
+
+    if (i >= 0 && i < this.length)
+    {
+      removing = this[ i ];
+
+      this.map.removeAt( i );
+      this.trigger( Collection.Events.Remove, [this, removing, i] );
+
+      if ( !delaySort )
+      {
+        this.sort();
+      }
+    }
+
+    return removing;
+  }
+</removeFromCollection>
+
+<isQuantifierNext>
+function isQuantifierNext(pattern, pos, flags) {
+        return nativ.test.call(
+            flags.indexOf('x') > -1 ?
+                
+                /^(?:\s+|#.*|\(\?#[^)]*\))*(?:[?*+]|{\d+(?:,\d*)?})/ :
+                
+                /^(?:\(\?#[^)]*\))*(?:[?*+]|{\d+(?:,\d*)?})/,
+            pattern.slice(pos)
+        );
+}
+</isQuantifierNext>
+
+<mountChildren>
+function(nestedChildren, transaction, context) {
+      var children = ReactChildReconciler.instantiateChildren(
+        nestedChildren, transaction, context
+      );
+      this._renderedChildren = children;
+      var mountImages = [];
+      var index = 0;
+      for (var name in children) {
+        if (children.hasOwnProperty(name)) {
+          var child = children[name];
+          
+          var rootID = this._rootNodeID + name;
+          var mountImage = ReactReconciler.mountComponent(
+            child,
+            rootID,
+            transaction,
+            context
+          );
+          child._mountIndex = index;
+          mountImages.push(mountImage);
+          index++;
+        }
+      }
+      return mountImages;
+}
+</mountChildren>
+
+<isWithinRadius>
+function(x, y) {
+        var radius = this.radius,
+            deltaX = this.x - x,
+            deltaY = this.y - y;
+
+        return deltaX * deltaX + deltaY * deltaY < radius * radius;
+}
+</isWithinRadius>
+```
+
+Each function is enclosed with the starting tag `<functionName>` and the closing tag `</functionName>`, based on their primary responsibilities. The functions `initGlobal`, `mockRequest`, `generateSizeParam`, `scrollLogic`, `printHostnames`, `modifyExpression`, `removeFromCollection`, `isQuantifierNext`, `mountChildren`, and `isWithinRadius` are each considered as having a single responsibility, hence they are marked as compliant with the Single Responsibility Principle.

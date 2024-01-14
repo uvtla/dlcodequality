@@ -11,7 +11,7 @@ function(model, options) {
 }
 </function>
 
-<function report>
+<report>
 function report(node) {
     <generateMessage>
     const message = node.parent.type === "BlockStatement" ? "Nested block is redundant." : "Block is redundant.";
@@ -21,9 +21,9 @@ function report(node) {
     context.report({ node, message });
     </reportError>
 }
-</function report>
+</report>
 
-<function getFileSize>
+<getFileSize>
 function getFileSize(path) {
 	return new Promise(function(resolve, reject) {
 		<fileStatistics>
@@ -42,9 +42,9 @@ function getFileSize(path) {
 		</fileStatistics>
 	});
 }
-</function getFileSize>
+</getFileSize>
 
-<function replaceVirtualFields>
+<replaceVirtualFields>
 function replaceVirtualFields(options, model) {
 		<handleAttributes>
 		if (options.attributes) {
@@ -83,9 +83,9 @@ function replaceVirtualFields(options, model) {
 		}
 		</processIncludes>
 }
-</function replaceVirtualFields>
+</replaceVirtualFields>
 
-<function parseHttpResponse>
+<parseHttpResponse>
 function parseHttpResponse(options, filesWithHash) {
     <logging>
     if (options.verbose) {
@@ -134,9 +134,9 @@ function parseHttpResponse(options, filesWithHash) {
     return Promise.all(promises);
     </resolvePromises>
 }
-</function parseHttpResponse>
+</parseHttpResponse>
 
-<function init>
+<init>
 function init(cb) {  
   <validateCallback>
   if (typeof cb !== 'function') {
@@ -154,7 +154,7 @@ function init(cb) {
   cb(null, this.stream);
   </invokeCallback>
 }
-</function init>
+</init>
 
 <function>
 function (object) {
@@ -245,7 +245,7 @@ function (symbol, x, y, width, height, options) {
 }
 </function>
 
-<function parseMultiplicative>
+<parseMultiplicative>
 function parseMultiplicative() {
 	<parseExpressionElements>
 	var token, left, right, r;
@@ -281,7 +281,7 @@ function parseMultiplicative() {
 	</processMultiplicativeOperations>
 	return left;
 }
-</function parseMultiplicative>
+</parseMultiplicative>
 
 <function>
 function (metricType, statsdKey) {

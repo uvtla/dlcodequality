@@ -1,0 +1,215 @@
+<addNodesToDrag>
+function addNodesToDrag(nodes, opts) {
+    opts = opts || {};
+    var hasCompoundNodes = nodes.cy().hasCompoundNodes();
+
+    <updateNodesWithDragOptions>
+    if (opts.inDragLayer) {
+      nodes.forEach(setInDragLayer);
+      nodes.neighborhood().stdFilter(function (ele) {
+        return !hasCompoundNodes || ele.isEdge();
+      }).forEach(setInDragLayer);
+    }
+    </updateNodesWithDragOptions>
+
+    <addNodesToDragList>
+    if (opts.addToList) {
+      nodes.forEach(function (ele) {
+        addToDragList(ele, opts);
+      });
+    }
+    </addNodesToDragList>
+
+    <handleDescendantsForDrag>
+    addDescendantsToDrag(nodes, opts);
+    </handleDescendantsForDrag>
+
+    <updateAncestorsAndCache>
+    updateAncestorsInDragLayer(nodes, {
+      inDragLayer: opts.inDragLayer
+    });
+    r.updateCachedGrabbedEles();
+    </updateAncestorsAndCache>
+}
+</addNodesToDrag>
+
+<generateMonthNavigationHTMLAndEvents>
+function(picker, calendar, inst) {
+    var target = $(this);
+    var isTR = (inst.options.renderer.selectedClass === 'ui-state-active');
+    var minDate = inst.curMinDate();
+    var maxDate = inst.get('maxDate');
+    var year = inst.drawDate.year();
+    <buildNavigationHTML>
+    var html = '<div class="' + (!isTR ? 'calendars-month-nav' : 'ui-datepicker-month-nav') + '">';
+    for (var i = 0; i < calendar.monthsInYear(year); i++) {
+        var ord = calendar.fromMonthOfYear(year, i + calendar.minMonth) - calendar.minMonth;
+        var inRange = ((!minDate || calendar.newDate(year, i + calendar.minMonth,
+            calendar.daysInMonth(year, i + calendar.minMonth)).compareTo(minDate) > -1) && (!maxDate ||
+            calendar.newDate(year, i + calendar.minMonth, calendar.minDay).compareTo(maxDate) < +1));
+        html += '<div>' + (inRange ? '<a href="#" class="jd' +
+            calendar.newDate(year, i + calendar.minMonth, calendar.minDay).toJD() + '"' : '<span') +
+            ' title="' + calendar.local.monthNames[ord] + '">' + calendar.local.monthNamesShort[ord] +
+            (inRange ? '</a>' : '</span>') + '</div>';
+    }
+    html += '</div>';
+    </buildNavigationHTML>
+    <insertNavigationAndBindEvents>
+    $(html).insertAfter(picker.find('div.calendars-nav,div.ui-datepicker-header:first')).
+        find('a').click(function() {
+            var date = target.calendarsPicker('retrieveDate', this);
+            target.calendarsPicker('showMonth', date.year(), date.month());
+            return false;
+        });
+    </insertNavigationAndBindEvents>
+}
+</generateMonthNavigationHTMLAndEvents>
+
+<logoutUser>
+function(req, res) {
+    waterlock.logger.debug('user logout');
+    delete(req.session.user);
+
+    <handleLogoutProcess>
+    if (req.session.authenticated) {
+        this.logoutSuccess(req, res);
+    } else {
+        this.logoutFailure(req, res);
+    }
+    </handleLogoutProcess>
+}
+</logoutUser>
+
+<blockCmdArrowNavigation>
+function blockCmdArrowNavigation() {
+    if (Env.mac) {
+      <bindArrowKeyHandler>
+      editor.on('keydown', function (e) {
+        if (VK.metaKeyPressed(e) && !e.shiftKey && (e.keyCode == 37 || e.keyCode == 39)) {
+          e.preventDefault();
+          editor.selection.getSel().modify('move', e.keyCode == 37 ? 'backward' : 'forward', 'lineboundary');
+        }
+      });
+      </bindArrowKeyHandler>
+    }
+}
+</blockCmdArrowNavigation>
+
+<applyRatioToProperties>
+function(ratio) {
+    var target = this.target,
+        a = this.a,
+        i = a.length,
+        e, val;
+      <handlePropertyInterpolation>
+      if (this._round) {
+          while (--i > -1) {
+              e = a[i];
+              target[e.i] = Math.round(e.s + e.c * ratio);
+          }
+      } else {
+          while (--i > -1) {
+              e = a[i];
+              val = e.s + e.c * ratio;
+              target[e.i] = (val < 0.000001 && val > -0.000001) ? 0 : val;
+          }
+      }
+      </handlePropertyInterpolation>
+}
+</applyRatioToProperties>
+
+<stripSensitiveValues>
+function authorizedHandler(value) {
+    if (! value) return value;
+
+    <removeSensitiveKeys>
+    delete value.public_id;
+    delete value.version;
+    delete value.signature;
+    delete value.resource_type;
+    </removeSensitiveKeys>
+
+    return value;
+}
+</stripSensitiveValues>
+
+<initializeCellState>
+function mxCellState(view, cell, style) {
+    <assignCellStateProperties>
+    this.view = view;
+    this.cell = cell;
+    this.style = (style != null) ? style : {};
+
+    this.origin = new mxPoint();
+    this.absoluteOffset = new mxPoint();
+    </assignCellStateProperties>
+}
+</initializeCellState>
+
+<fetchPullRequestFiles>
+async function getPrFiles(prNo) {
+  <logFetchingPrFiles>
+  logger.debug({ prNo }, 'getPrFiles');
+  </logFetchingPrFiles>
+  <retrievePRDiff>
+  const diff = (await api.get(
+    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
+    { json: false }
+  )).body;
+  </retrievePRDiff>
+  <parseDiffToGetFiles>
+  const files = parseDiff(diff).map(file => file.to);
+  </parseDiffToGetFiles>
+  return files;
+}
+</fetchPullRequestFiles>
+
+<executePromiseHandlingErrors>
+function callAndCatchPromiseError(fn, ...args) {
+    const next = args[args.length - 1];
+    let p = null;
+    <attemptFunctionCall>
+    try {
+      p = fn.apply(null, args);
+    } catch (err) {
+      return next(err);
+    }
+    </attemptFunctionCall>
+    <handlePromiseError>
+    if (p && p.then && p.catch) {
+      p.catch(err => next(err));
+    }
+    </handlePromiseError>
+}
+</executePromiseHandlingErrors>
+
+<checkAndReportReferenceIssues>
+function checkReference(reference, index, references) {
+    var identifier = reference.identifier;
+
+    <validateReferenceProperties>
+    if (identifier &&
+        !reference.init &&
+        (index === 0 || references[index - 1].identifier !== identifier)
+    ) {
+    </validateReferenceProperties>
+        <reportIssueBasedOnWriteOrPropModification>
+        if (reference.isWrite()) {
+            context.report(
+                identifier,
+                ProblemMessages.noParamReassign,
+                {
+                    name: identifier.name
+                });
+        } else if (props && isModifyingProp(reference)) {
+            context.report(
+                identifier,
+                ProblemMessages.noParamPropertyReassign,
+                {
+                    name: identifier.name
+                });
+        }
+        </reportIssueBasedOnWriteOrPropModification>
+    }
+}
+</checkAndReportReferenceIssues>

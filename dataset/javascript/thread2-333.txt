@@ -1,0 +1,197 @@
+<createColoredCanvas>
+function createColoredCanvas(color) {
+    const canvas = document.createElement('canvas');
+
+    canvas.width = 6;
+    canvas.height = 1;
+
+    const context = canvas.getContext('2d');
+
+    context.fillStyle = color;
+    context.fillRect(0, 0, 6, 1);
+
+    return canvas;
+}
+</createColoredCanvas>
+
+<WixActivityData>
+function WixActivityData() {
+    this.createdAt = new Date().toISOString();
+    
+    this.activityLocationUrl = null;
+    
+    this.activityDetails = {summary : null, additionalInfoUrl : null};
+    
+    this.activityType = null;
+    
+    this.activityInfo = null;
+    
+    this.init = function(obj) {
+        this.activityType = { name: obj.activityType };
+        this.activityDetails = obj.activityDetails;
+        this.activityInfo = obj.activityInfo;
+        this.id = obj.id;
+        this.activityLocationUrl = obj.activityLocationUrl;
+        this.createdAt = obj.createdAt;
+        return this;
+    };
+}
+</WixActivityData>
+
+<getRosEnvVar>
+function getRosEnvVar(envVarName) {
+  const envVar = process.env[envVarName];
+
+  if (!envVar) {
+    throw new Error(`Unable to find required environment variable ${envVarName}`);
+  }
+
+  return envVar;
+}
+</getRosEnvVar>
+
+<AjaxGet>
+function (url, options, cb) {
+    if (isFunction(options)) {
+        const t = cb;
+        cb = options;
+        options = t;
+    }
+    if (IS_NODE && Ajax.get.node) {
+        return Ajax.get.node(url, cb, options);
+    }
+    const client = Ajax._getClient(cb);
+    client.open('GET', url, true);
+    if (options) {
+        for (const k in options.headers) {
+            client.setRequestHeader(k, options.headers[k]);
+        }
+        client.withCredentials = options.credentials === 'include';
+        if (options['responseType']) {
+            client.responseType = options['responseType'];
+        }
+    }
+    client.send(null);
+    return client;
+}
+</AjaxGet>
+
+<identifyContainer>
+function(c) {
+    return c.cid || c.id || c.containerName || c.containerID || c.name;
+}
+</identifyContainer>
+
+<populateModel>
+function populateModel(model, modelData) {
+    for(var prop in modelData) {
+        if(modelData.hasOwnProperty(prop) && typeof modelData[prop] !== 'function') {
+            if( prop != "id" ) {
+                if ( modelData[prop] == 'sure_this_is_true' ) {
+                    model[prop] = true;
+                } else if ( modelData[prop] == 'sure_this_is_false' ) {
+                    model[prop] = false;
+                } else {
+                    model[prop] = modelData[prop];
+                }
+            }
+        }
+    }
+}
+</populateModel>
+
+<isTypoTypeof>
+function isTypoTypeof(left, right) {
+    if (state.option.notypeof)
+      return false;
+
+    if (!left || !right)
+      return false;
+
+    var values = [
+      "undefined", "object", "boolean", "number",
+      "string", "function", "xml", "object", "unknown"
+    ];
+
+    if (right.type === "(identifier)" && right.value === "typeof" && left.type === "(string)")
+      return !_.contains(values, left.value);
+
+    return false;
+  }
+</isTypoTypeof>
+
+<formatNodeValue>
+function formatNodeValue(node, profile) {
+	if (node.value != null && reNl.test(node.value)) {
+		const indent = profile.indent(1);
+		return splitByLines(node.value).map((line, i) => `${indent}${i ? ' ' : '|'} ${line}`).join('\n');
+	}
+
+	return node.value;
+}
+</formatNodeValue>
+
+<getEnvironment>
+function getEnvironment() {
+  if (isSuperSandboxedIframe()) {
+    return 89;
+  } else if (isDfpInAmp()) {
+    return 5;
+  } else if (isDfp()) {
+    return 4;
+  } else if (isAmp()) {
+    return 1;
+  } else if (isDFPSafeFrame()) {
+    return 11;
+  } else if (isSafeFrame()) {
+    return 10;
+  } else if (isMraid()) {
+    return 2;
+  } else if (isCodeOnPage()) {
+    return 0;
+  } else if (isSandboxedIframe()) {
+    return 16;
+  } else {
+    return 90;
+  }
+}
+</getEnvironment>
+
+<computeElementPosition>
+function (obj) {
+    var parent = null,
+      box = null,
+      pos = [],
+      _sL = document.body.scrollLeft + document.documentElement.scrollLeft,
+      _sT = document.body.scrollTop + document.documentElement.scrollTop;
+
+    if (obj.parentNode === null || getStyle(obj, 'display') == 'none') return false;
+    if (obj.getBoundingClientRect) { 
+      box = obj.getBoundingClientRect();
+      return [Math.round(box.left) + (document.documentElement.scrollLeft || document.body.scrollLeft), Math.round(box.top) + (document.documentElement.scrollTop || document.body.scrollTop), _sL, _sT];
+    } else if (document.getBoxObjectFor) { 
+      box = document.getBoxObjectFor(obj);
+      pos = [box.x, box.y];
+    } else { 
+      pos = [obj.offsetLeft, obj.offsetTop];
+      parent = obj.offsetParent;
+      if (parent != obj) {
+        while (parent) {
+          pos[0] += parent.offsetLeft;
+          pos[1] += parent.offsetTop;
+          parent = parent.offsetParent;
+        }
+      }
+      if (window.opera || (document.childNodes && !document.all && !navigator.taintEnabled && !accentColorName)) pos[1] -= document.body.offsetTop;
+    }
+    if (obj.parentNode) parent = obj.parentNode;
+    else parent = null;
+    while (parent && parent.tagName != 'BODY' && parent.tagName != 'HTML') {
+      pos[0] -= parent.scrollLeft;
+      pos[1] -= parent.scrollTop;
+      if (parent.parentNode) parent = parent.parentNode;
+      else parent = null;
+    }
+    return pos.concat([_sL, _sT]);
+}
+</computeElementPosition>

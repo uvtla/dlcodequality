@@ -1,0 +1,326 @@
+```javascript
+<validatePassword>
+function() {
+    <checkConfirmPasswordField>
+    if(this.options.confirmPasswordField) {
+        if(this.options.confirmPasswordField.getValue() != this.getValue() ) {
+            return false;
+        }
+    }
+    </checkConfirmPasswordField>
+    return inputEx.PasswordField.superclass.validate.call(this);
+}
+</validatePassword>
+```
+```javascript
+<calculateControlPoints>
+function(knots) {
+    console.warn('deprecated');
+
+    var firstControlPoints = [];
+    var secondControlPoints = [];
+    var n = knots.length - 1;
+    var i;
+
+    <handleSpecialCase>
+    if (n == 1) {
+        firstControlPoints[0] = new Point(
+            (2 * knots[0].x + knots[1].x) / 3,
+            (2 * knots[0].y + knots[1].y) / 3
+        );
+        secondControlPoints[0] = new Point(
+            2 * firstControlPoints[0].x - knots[0].x,
+            2 * firstControlPoints[0].y - knots[0].y
+        );
+        return [firstControlPoints, secondControlPoints];
+    }
+    </handleSpecialCase>
+
+    var rhs = [];
+
+    <calculateRHS_X>
+    for (i = 1; i < n - 1; i++) {
+        rhs[i] = 4 * knots[i].x + 2 * knots[i + 1].x;
+    }
+    rhs[0] = knots[0].x + 2 * knots[1].x;
+    rhs[n - 1] = (8 * knots[n - 1].x + knots[n].x) / 2.0;
+    var x = this.getFirstControlPoints(rhs);
+    </calculateRHS_X>
+
+    <calculateRHS_Y>
+    for (i = 1; i < n - 1; ++i) {
+        rhs[i] = 4 * knots[i].y + 2 * knots[i + 1].y;
+    }
+    rhs[0] = knots[0].y + 2 * knots[1].y;
+    rhs[n - 1] = (8 * knots[n - 1].y + knots[n].y) / 2.0;
+    var y = this.getFirstControlPoints(rhs);
+    </calculateRHS_Y>
+
+    <assembleControlPoints>
+    for (i = 0; i < n; i++) {
+        firstControlPoints.push(new Point(x[i], y[i]));
+        if (i < n - 1) {
+            secondControlPoints.push(new Point(
+                2 * knots [i + 1].x - x[i + 1],
+                2 * knots[i + 1].y - y[i + 1]
+            ));
+        } else {
+            secondControlPoints.push(new Point(
+                (knots[n].x + x[n - 1]) / 2,
+                (knots[n].y + y[n - 1]) / 2)
+            );
+        }
+    }
+    </assembleControlPoints>
+
+    return [firstControlPoints, secondControlPoints];
+}
+</calculateControlPoints>
+```
+```javascript
+<filterHeaders>
+function filterSensitiveHeaders(headers, sensitiveKeys) {
+    try {
+        const retval = {};
+        <iterateHeaders>
+        for (const key in headers) {
+            if (sensitiveKeys.findIndex(item => key.toLowerCase() === item.toLowerCase()) === -1) {
+                retval[key] = headers[key];
+            }
+        }
+        </iterateHeaders>
+        return retval;
+    } catch(e) {
+        return headers;
+    }
+}
+</filterHeaders>
+```
+```javascript
+<verifyDataSources>
+function verifyDataSources(formDataSourceIds, cb) {
+    findMatchingDocuments(models.MODELNAMES.DATA_SOURCE, formDataSourceIds, dataSourceModel, cb);
+}
+</verifyDataSources>
+```
+```javascript
+<sendWebSocketMessage>
+function notifyWebSocket(message) {
+    if (!webSocketServer || !message)
+        return;
+
+    <iterateConnections>
+    for (var value in webSocketServer.conn) {
+        var connection = webSocketServer.conn[value];
+        if (connection)
+            connection.send(message)
+    }
+    </iterateConnections>
+}
+</sendWebSocketMessage>
+```
+```javascript
+<initializeHydroInstance>
+function Hydro() {
+    if (!(this instanceof Hydro)) {
+        return new Hydro();
+    }
+
+    this.loader = loader;
+    this.plugins = [];
+    this.emitter = new EventEmitter;
+    this.runner = new Runner;
+    this.frame = new Frame(this.runner.topLevel);
+    this.interface = new Interface(this, this.frame);
+    this.config = new Config;
+}
+</initializeHydroInstance>
+```
+```javascript
+<performSIFTAlgorithm>
+function SIFT( s1, s2, options ) {
+    
+    options = options != null ?
+        options : {}
+
+    var maxDistance = options.maxDistance
+    var maxOffset   = options.maxOffset || SIFT.maxOffset
+    var tokenize    = options.tokenizer || SIFT.tokenizer
+    var match       = options.tokenMatcher || SIFT.tokenMatcher
+    var evalMatch   = options.matchEvaluator || SIFT.matchEvaluator
+    var evalLength  = options.lengthEvaluator || SIFT.lengthEvaluator
+    var evalTrans   = options.transpositionEvaluator || SIFT.transpositionEvaluator
+    
+    var t1 = tokenize( s1 )
+    var t2 = tokenize( s2 )
+    
+    var tl1 = t1.length
+    var tl2 = t2.length
+    
+    if( tl1 === 0 ) return evalLength( tl2 )
+    if( tl2 === 0 ) return evalLength( tl1 )
+    
+    
+    var c1 = 0
+    var c2 = 0
+    
+    var lcss = 0
+    
+    var lcs = 0
+    
+    var trans = 0
+    
+    var offsets = []
+    
+    <performComparisonAndOffsetAdjustment>
+    while( ( c1 < tl1 ) && ( c2 < tl2 ) ) {
+        if( match( t1[c1], t2[c2] ) ) {
+            lcs = lcs + evalMatch( t1[c1], t2[c2] )
+            while( offsets.length ) {
+                if( c1 <= offsets[0][0] || c2 <= offsets[0][1] ) {
+                    trans++
+                    break
+                } else {
+                    offsets.shift()
+                }
+            }
+            offsets.push( [ c1, c2 ] )
+        } else {
+            lcss = lcss + evalLength( lcs )
+            lcs = 0
+            if( c1 !== c2 ) {
+                c1 = c2 = Math.min( c1, c2 )
+            }
+            for( var i = 0; i < maxOffset; i++ ) {
+                if( ( c1 + i < tl1 ) && match( t1[c1+i], t2[c2] ) ) {
+                    c1 = c1 + i - 1
+                    c2 = c2 - 1
+                    break
+                }
+                if( ( c2 + i < tl2 ) && match( t1[c1], t2[c2+i] ) ) {
+                    c1 = c1 - 1
+                    c2 = c2 + i - 1
+                    break
+                }
+            }
+        }
+        
+        c1++
+        c2++
+        
+        if( maxDistance ) {
+            var distance = evalLength( Math.max( c1, c2 ) ) - evalTrans( lcss, trans )
+            if( distance >= maxDistance ) return Math.round( distance )
+        }
+        
+    }
+    </performComparisonAndOffsetAdjustment>
+    
+    lcss = lcss + evalLength( lcs )
+    
+    return Math.round(
+        evalLength( Math.max( tl1, tl2 ) ) -
+        evalTrans( lcss, trans )
+    )
+    
+}
+</performSIFTAlgorithm>
+```
+```javascript
+<findIndentationStartPunctuator>
+function findIndentationStartPunctuator(evaluate) {
+                const searchIndex = evaluate.code.search(/(\S)\s*$/u)
+                if (searchIndex < 0) {
+                    return null
+                }
+                const charIndex =
+                    evaluate.expressionStart.range[1] + searchIndex
+                const node = sourceCode.getNodeByRangeIndex(charIndex)
+                if (!node) {
+                    
+                    return null
+                }
+                const tokens = sourceCode
+                    .getTokens(node)
+                    .filter(
+                        t =>
+                            t.range[0] <= evaluate.range[1] &&
+                            t.range[1] >= evaluate.range[0]
+                    )
+
+                let targetToken = tokens.find(
+                    t => t.range[0] <= charIndex && charIndex < t.range[1]
+                )
+                if (!targetToken) {
+                    targetToken = tokens
+                        .reverse()
+                        .find(t => t.range[1] <= charIndex)
+                }
+                let token = targetToken
+                <handleIndentationDetermination>
+                while (token) {
+                    if (
+                        token.range[0] > evaluate.range[1] ||
+                        token.range[1] < evaluate.range[0]
+                    ) {
+                        return null
+                    }
+                    if (isIndentationStartPunctuator(token)) {
+                        return token
+                    }
+                    if (isIndentationEndPunctuator(token)) {
+                        
+                        const next = findPairOpenPunctuator(token)
+                        token = sourceCode.getTokenBefore(next)
+                        continue
+                    }
+
+                    token = sourceCode.getTokenBefore(token)
+                }
+                </handleIndentationDetermination>
+
+                return null
+            }
+</findIndentationStartPunctuator>
+```
+```javascript
+<modifyURLParameters>
+function addParas (src, paraName, paraVal) {
+  let paraNameQ = new RegExp('\\$?{' + paraName + '}', 'g')
+  <updateURLIfPlaceholderExists>
+  if (src.search(paraNameQ) > -1) {
+    return src.replace(paraNameQ, paraVal)
+  }
+  </updateURLIfPlaceholderExists>
+  <appendParameter>
+  src += src.indexOf('?') > -1 ? '&' : '?'
+  paraName = DEFAULT_PARAMS[paraName] ||  paraName
+  return src + paraName + '=' + paraVal
+  </appendParameter>
+}
+</modifyURLParameters>
+```
+```javascript
+<updateGeometry>
+function() {
+        var angle, point;
+        var ring = this.feature.geometry.components[0];
+        
+        <handleGeometryRecreation>
+        if(ring.components.length != (this.sides + 1)) {
+            this.createGeometry();
+            ring = this.feature.geometry.components[0];
+        }
+        </handleGeometryRecreation>
+        <updateVertices>
+        for(var i=0; i<this.sides; ++i) {
+            point = ring.components[i];
+            angle = this.angle + (i * 2 * Math.PI / this.sides);
+            point.x = this.origin.x + (this.radius * Math.cos(angle));
+            point.y = this.origin.y + (this.radius * Math.sin(angle));
+            point.clearBounds();
+        }
+        </updateVertices>
+    }
+</updateGeometry>
+```

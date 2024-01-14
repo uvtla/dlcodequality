@@ -1,0 +1,181 @@
+Here are the annotations for SRP compliance or violations:
+
+### Function 1:
+```javascript
+function scan(sourceCode, filePath) {
+  var match, r = new RegExp(MATCH_DIRECTIVE);
+  while ((match = r.exec(sourceCode))) {
+    match[1].split(/\s*,\s*/).forEach(function (s) {
+      var m = s.match(/(["'])(.*?)\1/);
+      if (!m) {
+        util.warn('syntax error on #script directive on argument ...<cyan> % </cyan>...%At <cyan>%</cyan>\t',
+          s, util.NL, filePath);
+      } else {
+        <parseAndLoadSource>
+        var url = m[2];
+        var requiredPath = path.normalize(path.dirname(filePath) + '/' + url);
+        if (!references[requiredPath]) {
+          references[requiredPath] = true;
+          var source = context.grunt.file.read(requiredPath);
+          scan(source, requiredPath);
+          paths.push(requiredPath);
+          sources.push(source);
+        }
+        </parseAndLoadSource>
+      }
+    });
+  }
+}
+```
+### Function 2:
+```javascript
+<setObjectPosition>
+function (x, y) {
+  var target = this._currentTransform.target;
+  target.lockMovementX || target.set('left', x - this._currentTransform.offsetX);
+  target.lockMovementY || target.set('top', y - this._currentTransform.offsetY);
+}
+</setObjectPosition>
+```
+### Function 3:
+```javascript
+function rgbToObject(rgb) {
+  <validateAndConvertColor>
+  const isRgba = rgb.toLowerCase().indexOf('rgba') === 0;
+  const color = rgb.replace(/ /g, '');
+  const result = isRgba ? RGBA_REGEX.exec(color) : RGB_REGEX.exec(color);
+  if (!result) {
+    console.warn(`Plx, ERROR: rgb or rgba color is not in the right format: "${rgb}"`);
+    return null;
+  }
+  </validateAndConvertColor>
+  return {
+    r: parseInt(result[1], 10),
+    g: parseInt(result[2], 10),
+    b: parseInt(result[3], 10),
+    a: isRgba ? parseFloat(result[4]) : 1,
+  };
+}
+```
+### Function 4:
+```javascript
+function() {
+  <removeTileAndCleanup>
+  if (this.tile) {
+    this.removeTileMonitoringHooks(this.tile);
+    this.tile.destroy();
+    this.tile = null;
+  }
+  OpenLayers.Layer.prototype.destroy.apply(this, arguments);
+  </removeTileAndCleanup>
+}
+```
+### Function 5:
+```javascript
+<initializeAudioMediaSource>
+function LGAudioMediaSource() {
+  this.properties = {
+    gain: 0.5
+  };
+  this._audionodes = [];
+  this._media_stream = null;
+  this.addOutput("out", "audio");
+  this.addInput("gain", "number");
+  var context = LGAudio.getAudioContext();
+  this.audionode = context.createGain();
+  this.audionode.graphnode = this;
+  this.audionode.gain.value = this.properties.gain;
+}
+</initializeAudioMediaSource>
+```
+### Function 6:
+```javascript
+<processManifestContents>
+function (contents, wfCb) {
+  async.eachSeries(contents.split('\n'), function (line, eachCb) {
+    setImmediateCompat(function () {
+      <parseAndExecuteDirectives>
+      if (line && line.indexOf('#') !== 0) {
+        var directive = line.match(DIRECTIVE_REGEX);
+        if (!directive) {
+          eachCb(new Error('Bad directive in manifest file: ' + line));
+        } else {
+          var cmd = directive[1];
+          var file = directive[2];
+          if (self[cmd]) {
+            self[cmd](manifest, assetBundle, file, eachCb);
+          } else {
+            eachCb(new Error('Bad directive in manifest file: ' + line));
+          }
+        }
+      } else {
+        eachCb();
+      }
+      </parseAndExecuteDirectives>
+    });
+  }, wfCb);
+}
+</processManifestContents>
+```
+### Function 7:
+```javascript
+<convertValueByType>
+function (value, inferredType) {
+  if (inferredType === 'boolean') {
+    return value ? '' : undefined;
+  } else if (inferredType !== 'object' && inferredType !== 'function'
+      && value !== undefined) {
+    return value;
+  }
+}
+</convertValueByType>
+```
+### Function 8:
+```javascript
+<setupServerAndClientReadyState>
+function onceServerReady(e, cbc, client, server) {
+  server[emitter].set('ready');
+  client[emitter].set('ready');
+  client[emitter].set('server', server);
+}
+</setupServerAndClientReadyState>
+```
+### Function 9:
+```javascript
+<removeClassesFromElement>
+function () {
+  var el = this.element(),
+    cName = $B(el).attr('class');
+  if (cName) {
+    var args = arguments,
+      argNum = args.length, i;
+    for (i = 0; i < argNum; ++i) {
+      cName = cName.replace(args[i], '');
+    }
+    $B(el).attr('class', cName);
+  }
+}
+</removeClassesFromElement>
+```
+### Function 10:
+```javascript
+<convertListToArray>
+function listToArray(list) {
+  if (isFunction(list)) {
+    return function (x) {
+      const m = list(x)
+      if (!isSameType(List, m)) {
+        throw new TypeError('listToArray: List returning function required')
+      }
+      return m.toArray()
+    }
+  }
+  if (isSameType(List, list)) {
+    return list.toArray()
+  }
+  throw new TypeError('listToArray: List or List returning function required')
+}
+</convertListToArray>
+```
+
+The annotations were added to indicate responsibilities that could be potentially separated into their own functions or are currently well-encapsulated within a single function. Each tag represents a self-contained responsibility, and the functions have been annotated accordingly, either for compliance or violations of the Single Responsibility Principle.

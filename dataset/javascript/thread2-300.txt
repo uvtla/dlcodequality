@@ -1,0 +1,263 @@
+Let's annotate each function for SRP compliance.
+
+1. mount function
+```javascript
+function mount(mountLocation, tagname, props) {
+    
+    const id = makeUID(`riotjs_mount_${tagname}`); // Single responsibility: Generate a unique ID.
+    
+    const fauxTag = `<${tagname} data-elmoed-editor="${tagname}" id="${id}">
+        </${tagname}>`; // Single responsibility: Create a faux tag for mounting.
+
+    
+    const selector = '[data-elmoed-editor]';
+    const subEditors = mountLocation.querySelectorAll(selector);
+    for (const submountedEditor of subEditors) {
+        if (!submountedEditor._tag) {
+            console.error('Unsuccessful unmount tag: Bad Riot.js version?');
+            continue;
+        }
+        submountedEditor._tag.unmount(); // Single responsibility: Unmount existing sub editors.
+    }
+
+    mountLocation.innerHTML = ''; // Single responsibility: Clear mount location.
+
+    mountLocation.innerHTML = fauxTag; // Single responsibility: Set faux tag to mount location.
+
+    const tagInstance = riot.mount(`#${id}`, props)[0]; // Single responsibility: Mount the tag instance.
+    tagInstance.on('before-unmount', () => {
+        props.clearAll(); // Single responsibility: Clear props before unmounting.
+    });
+    return tagInstance; // Single responsibility: Return tag instance.
+}
+```
+
+2. _addTrip function
+```javascript
+function _addTrip(trip) {
+
+    let found = false;
+    for ( let i = 0; i < rtn.length; i++ ) {
+      if ( rtn[i].id === trip.id ) {
+        found = true; // Single responsibility: Check if trip already exists in rtn array.
+      }
+    }
+
+    if ( !found ) {
+        let stopFound = false;
+        let add = false;
+        for ( let i = 0; i < trip.stopTimes.length; i++ ) {
+            let stopId = trip.stopTimes[i].stop.id;
+            if ( !stopFound && stopId === stop.id ) {
+                stopFound = true; // Single responsibility: Find stop inside trip.
+            }
+            else if ( stopFound ) {
+                if ( nextStops.indexOf(stopId) > -1 ) {
+                    add = true; // Single responsibility: Decide to add trip to rtn array.
+                    i = trip.stopTimes.length;
+                }
+            }
+        }
+
+        if ( add ) {
+            rtn.push(trip); // Single responsibility: Add trip to rtn array.
+        }
+    }
+}
+```
+
+3. SVGFont2SVGIcons function (Non-compliant example, due to multiple responsibilities)
+```javascript
+function SVGFont2SVGIcons(options) {
+
+  // Setup and configurations are part of initialization responsibility.
+  var inputStream = null;
+  var outputStream = null;
+  var saxStream = null;
+  var pathParser = null;
+  var startContent = null;
+  var endContent = null;
+  var ascent = 0;
+  var descent = 0;
+  var horizontalAdv = 0;
+  var glyphCount = 0;
+  var d = '';
+  options = options || {};
+
+  // Stream manipulations are separate responsibilities.
+  <streamSetup>
+  inputStream = new Stream.PassThrough();
+  outputStream = new Stream.PassThrough({objectMode: true});
+  saxStream = Sax.createStream(true);
+  </streamSetup>
+
+  <plexerSetup> 
+  Plexer.call(this, {
+    objectMode: true
+  }, inputStream, outputStream);
+  </plexerSetup>
+
+  <modeSetup>
+  this._writableState.objectMode = false;
+  this._readableState.objectMode = true;
+  </modeSetup>
+
+  <saxStreamHandling>
+  saxStream.on('opentag', function(tag) {
+    // Handling of each tag type is a different responsibility.
+    <fontTagProcessing>
+    // ...code...
+    </fontTagProcessing>
+    
+    <fontFaceProcessing>
+    // ...code...
+    </fontFaceProcessing>
+    
+    <glyphTagProcessing>
+    // ...code...
+    </glyphTagProcessing>
+  });
+
+  inputStream.pipe(saxStream);
+  saxStream.once('end', function() {
+    outputStream.end();
+  });
+  </saxStreamHandling>
+}
+```
+
+4. Anonymous function
+```javascript
+function () {
+  var self = this;
+
+  self._super(); // Single responsibility: Invoke parent method.
+
+  self.resizeDragHelper = new DragHelper(this._id, {
+    start: function () {
+      self.fire('ResizeStart'); // Single responsibility: Fire resize start event.
+    },
+
+    drag: function (e) {
+      if (self.settings.direction != "both") {
+        e.deltaX = 0; // Single responsibility: Modify drag event properties.
+      }
+
+      self.fire('Resize', e); // Single responsibility: Fire resize event.
+    },
+
+    stop: function () {
+      self.fire('ResizeEnd'); // Single responsibility: Fire resize end event.
+    }
+  });
+}
+```
+
+5. contains function
+```javascript
+function contains(array, value) {
+  for (let i = 0; i < array.length; i++) {
+    if (array[i] == value) { 
+      return true; // Single responsibility: Determine if array contains a given value.
+    }
+  }
+  return false;
+}
+```
+
+6. Anonymous function
+```javascript
+function (prop, obj) {
+  try {
+    return (typeof obj === 'object') && 
+           (prop in obj) && 
+           obj[prop] !== null; // Single responsibility: Check if the property exists on an object and is not null.
+  } catch (ex) {
+    return false;
+  }
+}
+```
+
+7. doReconnect function
+```javascript
+function doReconnect() {
+
+  self.retry.waiting = true; // Single responsibility: Set retry state.
+  
+  self.socket.removeAllListeners(); // Single responsibility: Clean up socket listeners.
+  
+  self.socket = common.createSocket(self._options); // Single responsibility: Create a new socket.
+
+  self.socket.once('connect', function () {
+    self.retry.waiting = false; // Single responsibility: Update retry state on connect.
+    self.retry.retries = 0;
+  });
+
+  self._setup(); // Single responsibility: Setup socket configurations and event handlers.
+  self.connect(); // Single responsibility: Establish socket connection.
+}
+```
+
+8. Function with SCCLine parameter
+```javascript
+function(SCCLine) {
+  if (SCCLine.length === 0) {
+      return; // Single responsibility: Exit if SCCLine is empty.
+  }
+  
+  var wordIdx, 
+      splitLine = SCCLine.match(SCC_REGEX), // Single responsibility: Parse SCCLine using regex.
+      words = splitLine[3].split(' '); // Single responsibility: Split line into words.
+  
+  timeStamp = splitLine[1]; // Single responsibility: Extract timestamp from splitLine.
+  frameCount = 0;
+  for (wordIdx = 0; wordIdx < words.length; wordIdx++) {
+      commandBuffer.push(words[wordIdx]); // Single responsibility: Add words to command buffer.
+      module.exports.translateWord(words[wordIdx]); // Single responsibility: Translate each word.
+  }
+}
+```
+
+9. misbutton function
+```javascript
+function misbutton(current, missing) {
+  if (arguments.length < 2) {
+    current = cwd(); // Single responsibility: Set default current path.
+    missing = arguments[0];
+  }
+
+  var root = isAbsolute(current) ? '/' : ''; // Single responsibility: Determine root path.
+  var curParts = trimArray(current.split('/')); // Single responsibility: Split and trim current path.
+  var misParts = trimArray(missing.split('/')); // Single responsibility: Split and trim missing path.
+  var length = curParts.length;
+  var sameIndex = 0;
+
+  for (var i = 0; i < length; i += 1) {
+    if (curParts[i] === misParts[sameIndex]) {
+      sameIndex += 1; // Single responsibility: Determine overlapping path parts.
+    }
+  }
+  var diffLength = length - sameIndex;
+  var head = curParts.slice(0,diffLength); // Single responsibility: Extract different parts of the current path.
+  var res = head.concat(misParts); // Single responsibility: Combine parts to form result path.
+
+  return root + res.join('/'); // Single responsibility: Join parts to create the final path.
+}
+```
+
+10. arrayToDict function
+```javascript
+function arrayToDict(array, valueToKeyFn, opt_this) {
+  opt_this = opt_this || this; // Single responsibility: Set default context.
+  var result = {};
+  var length = array.length;
+  for (var i = 0; i < length; i++) {
+    var value = array[i];
+    var key = valueToKeyFn.call(opt_this, value); // Single responsibility: Generate a key for each value using valueToKeyFn.
+    result[key] = value; // Single responsibility: Build the dictionary.
+  }
+  return result; // Single responsibility: Return the built dictionary.
+}
+```
+
+Each function has been annotated with comments indicating the responsibilities. The SVGFont2SVGIcons function example has nested tags which show multiple responsibilities in a single function, demonstrating an SRP violation. Other functions have been annotated with single responsibilities unless there was a clear need for nested annotations.

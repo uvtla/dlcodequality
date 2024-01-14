@@ -1,0 +1,122 @@
+<_getQBezierValue>
+function _getQBezierValue(t, p1, p2, p3) {
+    var iT = 1 - t;
+    return iT * iT * p1 + 2 * iT * t * p2 + t * t * p3;
+}
+</_getQBezierValue>
+
+<commandFunction>
+function (fnName, args) {
+    var cmdName = args[0].toLowerCase(),
+        cmd, cmdFn;
+        <lookupCommand>
+    cmd = this.commands[cmdName] || UE.commands[cmdName];
+    cmdFn = cmd && cmd[fnName];
+        </lookupCommand>
+    if ((!cmd || !cmdFn) && fnName == 'queryCommandState') {
+        return 0;
+    } else if (cmdFn) {
+        return cmdFn.apply(this, args);
+    }
+}
+</commandFunction>
+
+<FieldValidator>
+function FieldValidator(rules, config) {
+    this.rules = rules;
+    this.fieldLabel = undefined;
+        <processConfig>
+    if (config) {
+        this.setConfig(config);
+    }
+        </processConfig>
+}
+</FieldValidator>
+
+<takeGlobalQueue>
+function takeGlobalQueue() {
+    if (globalDefQueue.length) {
+        each(globalDefQueue, function(queueItem) {
+            var id = queueItem[0];
+            if (typeof id === 'string') {
+                context.defQueueMap[id] = true;
+            }
+            defQueue.push(queueItem);
+        });
+        globalDefQueue = [];
+    }
+}
+</takeGlobalQueue>
+
+<PointCreation>
+function(lon, lat) {
+    if (OpenLayers.Util.isArray(lon)) {
+        lat = lon[1];
+        lon = lon[0];
+    }
+    this.lon = OpenLayers.Util.toFloat(lon);
+    this.lat = OpenLayers.Util.toFloat(lat);
+}
+</PointCreation>
+
+<ImageUrlSource>
+function ImageUrlSource(sourceFromTile, opts) {
+    opts = opts ? opts : {};
+    this._loadPool = new WorkPool({
+        concurrency: opts.concurrency || defaultConcurrency
+    });
+    
+    this._retryDelay = opts.retryDelay || defaultRetryDelay;
+    this._retryMap = {};
+    
+    this._sourceFromTile = sourceFromTile;
+}
+</ImageUrlSource>
+
+<unwrap>
+function unwrap(value) {
+    if (streaming) return value;
+    return new Promise(function (resolve) {
+        stream._read = function () {
+            release();
+            this._read = release;
+            resolve(value);
+        }
+    });
+}
+</unwrap>
+
+<searchBar_removeEngine>
+function searchBar_removeEngine(name) {
+    if (this.isEngineInstalled(name)) {
+        var engine = this._bss.getEngineByName(name);
+        this._bss.removeEngine(engine);
+    }
+}
+</searchBar_removeEngine>
+
+<modulo>
+function modulo(n, d) {
+    if (d === 0) {
+        return n;
+    }
+    if (d < 0) {
+        return NaN;
+    }
+    return (n % d + d) % d;
+}
+</modulo>
+
+<handleTouchEvent>
+function (event) {
+    event = normalizeEvent(this.dom, event);
+    
+    event.zrByTouch = true;
+    
+    this.handler.processGesture(this, event, 'change');
+    
+    domHandlers.mousemove.call(this, event);
+    
+    setTouchTimer(this);
+}
+</handleTouchEvent>

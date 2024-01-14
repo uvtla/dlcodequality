@@ -1,0 +1,245 @@
+```javascript
+<createBroker>
+function createBroker (ascoltatore, moscaOpts) {
+  <initializeBrokerSettings>
+  const moscaSettings = {
+    
+    backend: ascoltatore,
+    persistence: {
+      factory: mosca.persistence.Redis
+    }
+  }
+
+  moscaOpts = Object.assign({}, moscaSettings, moscaOpts)
+  const server = new mosca.Server(moscaOpts)
+  server.on('ready', setup)
+  </initializeBrokerSettings>
+
+  <handlePublishedEvents>
+  server.on('published', function (packet, client) {
+    const presence = packet.topic.match(/^\$SYS\/.*\/(new|disconnect)\/clients$/)
+    if (presence) {
+      const clientId = packet.payload
+      const type = presence[1] === 'new' ? 'connected' : 'disconnected'
+      server.publish({
+        topic: `$aws/events/presence/${type}/${clientId}`,
+        payload: JSON.stringify(createAWSLifecycleEvent({
+          type,
+          clientId
+        }))
+      })
+    }
+
+    const subscription = packet.topic.match(/^\$SYS\/.*\/new\/(subscribes|unsubscribes)$/)
+    if (subscription) {
+      const type = subscription[1] === 'subscribes' ? 'subscribed' : 'unsubscribed'
+      const { clientId, topic } = JSON.parse(packet.payload)
+      server.publish({
+        topic: `$aws/events/subscriptions/${type}/${clientId}`,
+        payload: JSON.stringify(createAWSLifecycleEvent({
+          type,
+          clientId,
+          topics: [topic]
+        }))
+      })
+    }
+  })
+  </handlePublishedEvents>
+
+  return server
+}
+</createBroker>
+
+<create>
+function create (id, spec) {
+  <validateAndParseEntity>
+  validateModifiers(id, spec, ['select'])
+  const entity = {}
+  entity.spec = spec
+  entity.select = parseSwitch(spec)
+  </validateAndParseEntity>
+  return entity
+}
+</create>
+
+<buildError>
+function buildError(k, message) {
+  <accumulateErrorMessages>
+  if (!Array.isArray(errors[k])) errors[k] = [];
+  errors[k].push(message);
+  </accumulateErrorMessages>
+}
+</buildError>
+
+<Q>
+function Q(redisClient, key) {
+  <initializeQueue>
+  if (!(this instanceof Q)) {
+    return new Q(redisClient, key);
+  }
+  this._redis = redisClient;
+  this._key = key;
+  </initializeQueue>
+}
+</Q>
+
+<addPathGuides>
+function addPathGuides($canvas, parent) {
+  <drawGuidesForPaths>
+  var handles = parent._handles,
+    prevHandle, nextHandle, otherHandle,
+    handle, h,
+    guide, guideProps;
+  guideProps = $.extend({}, parent.guide, {
+    layer: true,
+    draggable: false,
+    type: 'line'
+  });
+  if (parent._method === $.fn.drawQuadratic) {
+    $canvas.addLayer(guideProps);
+    parent._guide = $canvas.getLayer(-1);
+    $canvas.moveLayer(parent._guide, -handles.length - 1);
+  } else if (parent._method === $.fn.drawBezier) {
+    parent._guides = [];
+    for (h = 0; h < handles.length; h += 1) {
+      handle = handles[h];
+      nextHandle = handles[h + 1];
+      prevHandle = handles[h - 1];
+      otherHandle = null;
+      if (nextHandle !== undefined) {
+        if (handle._xProp.indexOf('x') === 0 && nextHandle._xProp.indexOf('cx') === 0) {
+          otherHandle = nextHandle;
+        }
+      } else if (prevHandle !== undefined) {
+        if (prevHandle._xProp.indexOf('cx') === 0 && handle._xProp.indexOf('x') === 0) {
+          otherHandle = prevHandle;
+        }
+      }
+      if (otherHandle !== null) {
+        $canvas.addLayer(guideProps);
+        guide = $canvas.getLayer(-1);
+        guide._handles = [handle, otherHandle];
+        parent._guides.push(guide);
+        $canvas.moveLayer(guide, -handles.length - 1);
+      }
+    }
+  }
+  updatePathGuides(parent);
+  </drawGuidesForPaths>
+}
+</addPathGuides>
+
+<initializeCalendarEvents>
+function () {
+
+  var oCalendarTBody = Dom.get(calendarId).tBodies[0],
+    aElements = oCalendarTBody.getElementsByTagName("a"),
+    oAnchor;
+
+  if (aElements.length > 0) {
+  
+    <findAnchorElement>
+    Dom.batch(aElements, function (element) {
+      if (Dom.hasClass(element.parentNode, "today")) {
+        oAnchor = element;
+      }
+    });
+    
+    if (!oAnchor) {
+      oAnchor = aElements[0];
+    }
+    </findAnchorElement>
+
+    <setFocusOnAnchor>
+    lang.later(0, oAnchor, function () {
+      try {
+        oAnchor.focus();
+      }
+      catch(e) {}
+    });
+    </setFocusOnAnchor>
+  
+  }
+  
+}
+</initializeCalendarEvents>
+
+<fixHttpMethod>
+function fixHttpMethod (fn, name) {
+  <updateHttpVerb>
+  if (fn.http && fn.http.verb && fn.http.verb.toLowerCase() === 'put') {
+    fn.http.verb = 'patch'
+  }
+  </updateHttpVerb>
+}
+</fixHttpMethod>
+
+<read>
+function read(src, basedir, callback){
+  <readPageContent>
+  var page = new Page(src, basedir)
+  page.read(callback)
+  </readPageContent>
+}
+</read>
+
+<getSubstitution>
+function getSubstitution(matched, str, position, captures, namedCaptures, replacement) {
+  <handleReplacementSubstitutions>
+  var tailPos = position + matched.length;
+  var m = captures.length;
+  var symbols = SUBSTITUTION_SYMBOLS_NO_NAMED;
+  if (namedCaptures !== undefined) {
+    namedCaptures = toObject(namedCaptures);
+    symbols = SUBSTITUTION_SYMBOLS;
+  }
+  return $replace.call(replacement, symbols, function (match, ch) {
+    var capture;
+    switch (ch.charAt(0)) {
+      case '$': return '$';
+      case '&': return matched;
+      case '`': return str.slice(0, position);
+      case "'": return str.slice(tailPos);
+      case '<':
+        capture = namedCaptures[ch.slice(1, -1)];
+        break;
+      default: 
+        var n = +ch;
+        if (n === 0) return match;
+        if (n > m) {
+          var f = floor(n / 10);
+          if (f === 0) return match;
+          if (f <= m) return captures[f - 1] === undefined ? ch.charAt(1) : captures[f - 1] + ch.charAt(1);
+          return match;
+        }
+        capture = captures[n - 1];
+    }
+    return capture === undefined ? '' : capture;
+  });
+  </handleReplacementSubstitutions>
+}
+</getSubstitution>
+
+<handleMouseMove>
+function (event) {
+  <lockPointerAndCalculateMovement>
+  if (!this.data.enabled || (!this.mouseDown && !this.pointerLocked)) { return; }
+  if (this.pointerLocked) {
+    movementX = event.movementX || event.mozMovementX || 0;
+    movementY = event.movementY || event.mozMovementY || 0;
+  } else {
+    movementX = event.screenX - previousMouseEvent.screenX;
+    movementY = event.screenY - previousMouseEvent.screenY;
+  }
+  </lockPointerAndCalculateMovement>
+
+  <updateCameraRotation>
+  this.previousMouseEvent = event;
+  direction = this.data.reverseMouseDrag ? 1 : -1;
+  yawObject.rotation.y += movementX * 0.002 * direction;
+  pitchObject.rotation.x += movementY * 0.002 * direction;
+  pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
+  </updateCameraRotation>
+}
+</handleMouseMove>
+```

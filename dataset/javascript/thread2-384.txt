@@ -1,0 +1,268 @@
+```javascript
+<authenticateViaBrowser>
+function authenticateViaBrowser (url, isAskFlow = false, isPrivate = false, clearSession = false) {
+  return new Promise((resolve, reject) => {
+    <generateCliToken>
+    const cliToken = randtoken.generate(128)
+    </generateCliToken>
+    <parseAndPrepareWebSocketUrl>
+    const parsedURL = new URL(url)
+    parsedURL.protocol = url && url.toLowerCase().includes('https') ? 'wss:/' : 'ws:/'
+    const wsUrl = parsedURL.toString()
+    </parseAndPrepareWebSocketUrl>
+    <initializeWebSocket>
+    const ws = websocket(wsUrl)
+    </initializeWebSocket>
+
+    <setupStreaming>
+    const readBuffer = new ReadableStreamBuffer()
+    readBuffer.put(cliToken)
+    pump(readBuffer, ws, split2(), err => err ? reject(err) :  null)
+      .on('data', (authToken) => {
+        <handleAuthToken>
+        let err
+        if (!authToken) {
+          err = new Error('Authentication failed. No token obtained.')
+        } else if (typeof authToken === 'string' && authToken.toLowerCase() === 'timeout') {
+          err = new Error('Authentication timed out.')
+        }
+        err ? reject(err) : resolve(authToken)
+        ws.destroy()
+        </handleAuthToken>
+      })
+    </setupStreaming>
+
+    <processWebSocketConnection>
+    ws.once('connect', () => {
+      console.log('Authentication required. Opening the login page in a browser...')
+      
+      <generateBrowserLoginUrl>
+      const cliLoginUrl = generateBrowserLoginUrl(url, cliToken, {
+        isAskFlow,
+        isPrivate,
+        clearSession
+      })
+      opn(cliLoginUrl, { wait: false })
+      </generateBrowserLoginUrl>
+    })
+    </processWebSocketConnection>
+  })
+}
+</authenticateViaBrowser>
+
+<bundleHandler>
+function bundleHandler (pathToHandlers, module, file) {
+    <validateFile>
+    if (file.length < 3 || file.indexOf('bundle.') === 0 || file.substr(file.length - 3) !== '.js') {
+        return;
+    }
+    </validateFile>
+
+    <checkAccessibility>
+    fs.access(pathToHandlers + '/bundle.' + file, err => {
+        <handleAccessUnavailable>
+        if (err && err.code === 'ENOENT') {
+            return ;
+        }
+        </handleAccessUnavailable>
+
+        <processBundle>
+        let fnIri = module + '/' + file.slice(0, -3);
+        fs.unlink(pathToHandlers + '/bundle.' + file, err => {
+            <logUnlinkFailure>
+            if (err) {
+                console.log('Failed to delete old bundle for handler: ' + fnIri);
+                return console.log(err);
+            }
+            </logUnlinkFailure>
+            <logBundleHandler>
+            console.log('Bundle handler: ' + fnIri);
+            runtime.bundle(fnIri, {}, (err) => {
+                <logBundleFailure>
+                if (err) {
+                    console.log('Failed to bundle handler: ' + fnIri);
+                    return console.log(err);
+                }
+                </logBundleFailure>
+                <logBundleSuccess>
+                console.log('Bundle done for handler: ' + fnIri);
+                </logBundleSuccess>
+            });
+            </logBundleHandler>
+        });
+        </processBundle>
+    });
+    </checkAccessibility>
+}
+</bundleHandler>
+
+<rawData>
+function rawData() {
+  return {
+    <generateMockData>
+    DocumentationGeneration: {
+      // Mock data generation for DocumentationGeneration module
+      // ...
+    },
+    CreateDirs: {
+      // Mock data generation for CreateDirs module
+      // ...
+    }
+    </generateMockData>
+  };
+}
+</rawData>
+
+<updateTextInputFieldState>
+function () {
+  <invokeUpdateState>
+  this.$InputWithFrame._updateState.call(this);
+  </invokeUpdateState>
+  <computeAndApplyInputWidth>
+  var inputWidth = this._computeInputWidth();
+  if (inputWidth < 0) {
+      inputWidth = 0;
+  }
+  if (inputWidth) {
+      this.getTextInputField().style.width = inputWidth + "px";
+  }
+  </computeAndApplyInputWidth>
+  <applyStyleForLegacyBrowsers>
+  if ((this._isIE7OrLess || this._simpleHTML) && !this._helpTextSet) {
+      this.getTextInputField().style.color = this._getTextFieldColor();
+  }
+  </applyStyleForLegacyBrowsers>
+  <validationPopupHide>
+  if (!(this._cfg.formatError || this._cfg.error)) {
+      this._validationPopupHide();
+  }
+  </validationPopupHide>
+}
+</updateTextInputFieldState>
+
+<updateSelectedIndex>
+function () {
+  <updateBindingValue>
+  var bind = this._bindingListeners.selectedIndex;
+  if (bind) {
+      var newIndex = this._transform(bind.transform, this._domElt.selectedIndex, "fromWidget");
+      ariaUtilsJson.setValue(bind.inside, bind.to, newIndex, bind.cb);
+  }
+  </updateBindingValue>
+}
+</updateSelectedIndex>
+
+<handleIncomingMessagesAndCommands>
+function telekit_cmd(telekit) {
+  <messageAndPostEventHandler>
+  let handle = (context) => {
+      <parseCommand>
+      let cmd = parse(context.update);
+      </parseCommand>
+
+      <applyParsedCommand>
+      if (cmd) {
+          cmd.name = cmd.entities[0].name;
+          cmd.mention = cmd.entities[0].mention;
+          context.isCommand = true;
+          context.command = cmd;
+          </applyParsedCommand>
+
+          <triggerCommandEvents>
+          if (telekit.command) {
+              telekit.command(context);
+          }
+          telekit.emit('command', context);
+          telekit.emit(`/${context.command.name}`, context);
+          telekit.dispatch('command', context);
+          </triggerCommandEvents>
+          return;
+      }
+
+      <defaultNonCommandEventHandling>
+      context.isCommand = false;
+      context.command = null;
+      </defaultNonCommandEventHandling>
+  };
+  </messageAndPostEventHandler>
+
+  <initializeMessageAndPostHandlers>
+  telekit.context.isCommand = false;
+  telekit.context.command = null;
+  telekit.on('message', handle);
+  telekit.on('post', handle);
+  </initializeMessageAndPostHandlers>
+}
+</handleIncomingMessagesAndCommands>
+
+<cacheFunction>
+function _cacheFunction(func, data, vars, relPath) {
+  <assignEngineName>
+  func.engine = this.className;
+  </assignEngineName>
+  <registerCallback>
+  if (vars) app.views.callbacks[relPath] = func;
+  </registerCallback>
+}
+</cacheFunction>
+
+<extractAndDecodeCodeBlock>
+function getCode(match, lang) {
+  return <decodeString>
+  match.substring(`<pre><code class="${lang}">`.length, match.indexOf('</code>'))
+    .replace(/&#39;/g, '\'')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"');
+  </decodeString>
+}
+</extractAndDecodeCodeBlock>
+
+<initializeSliderElements>
+function addElements ( connectOptions, base ) {
+  <setupSlider>
+  scope_Handles = [];
+  scope_Connects = [];
+  scope_Connects.push(addConnect(base, connectOptions[0]));
+  for ( var i = 0; i < options.handles; i++ ) {
+      scope_Handles.push(addOrigin(base, i));
+      scope_HandleNumbers[i] = i;
+      scope_Connects.push(addConnect(base, connectOptions[i + 1]));
+  }
+  </setupSlider>
+}
+</initializeSliderElements>
+
+<constructor_TX>
+function TX(options) {
+  <returnNewInstanceOfTX>
+  if (!(this instanceof TX))
+    return new TX(options);
+  </returnNewInstanceOfTX>
+
+  <initializeTransactionProperties>
+  this.version = 1;
+  this.inputs = [];
+  this.outputs = [];
+  this.locktime = 0;
+  this.mutable = false;
+  this._hash = null;
+  this._hhash = null;
+  this._whash = null;
+  this._raw = null;
+  this._size = -1;
+  this._witness = -1;
+  this._sigops = -1;
+  this._hashPrevouts = null;
+  this._hashSequence = null;
+  this._hashOutputs = null;
+  </initializeTransactionProperties>
+
+  <applyOptionsToInstance>
+  if (options)
+    this.fromOptions(options);
+  </applyOptionsToInstance>
+}
+</constructor_TX>
+```

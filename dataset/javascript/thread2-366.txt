@@ -1,0 +1,366 @@
+<pleaseNotify>
+function pleaseNotify (urlServer, domain, port, path, urlFeed, feedstats, callback) { 
+		var now = new Date ();
+		<buildRequestObject>
+		var theRequest = {
+			url: urlServer,
+			followRedirect: true, 
+			headers: {Accept: "application/json"},
+			method: "POST",
+			form: {
+				port: port,
+				path: path,
+				url1: urlFeed,
+				protocol: "http-post"
+				}
+			}; </buildRequestObject>
+		
+		<logActivity>
+		myConsoleLog ("pleaseNotify: urlFeed == " + urlFeed); </logActivity>
+		<recordActivityStats>
+		feedstats.whenLastCloudRenew = now;
+		feedstats.ctCloudRenew++;
+		flFeedsArrayChanged = true; </recordActivityStats>
+		
+		<sendRequest>
+		request (theRequest, function (err, response, body) {
+			<recordErrorStats>
+			function recordErrorStats (message) {
+				feedstats.ctCloudRenewErrors++; 
+				feedstats.ctConsecutiveCloudRenewErrors++;
+				feedstats.whenLastCloudRenewError = now;
+				feedstats.lastCloudRenewError = message;
+				flFeedsArrayChanged = true; 
+				} </recordErrorStats>
+			try {
+				var flskip = false;
+				
+				<errorHandling>
+				if (err) {
+					flskip = true;
+					if (callback) {
+						callback (err.message);
+						}
+					}
+				else {
+					if (!body.success) {
+						flskip = true;
+						if (callback) {
+							callback (body.msg);
+							}
+						}
+					} </errorHandling>
+				
+				<updateStatsOnError>
+				if (flskip) {
+					recordErrorStats (err.message);
+					} </updateStatsOnError>
+				<resetErrorStats>
+				else {
+					feedstats.ctConsecutiveCloudRenewErrors = 0;
+					flFeedsArrayChanged = true; </resetErrorStats>
+					<returnCallback>
+					if (callback) {
+						callback ("It worked.");
+						} </returnCallback>
+					}
+				}
+			catch (err) {
+				<recordError>
+				recordErrorStats (err.message);
+				if (callback) {
+					callback (err.message);
+					} </recordError>
+				}
+			}); </sendRequest>
+		}
+</pleaseNotify>
+
+<startUpgrade>
+function startUpgrade(dirPath, options) {
+  <checkIfValidProject>
+  try {
+    fs.accessSync(path.join(dirPath, './package.json')) </checkIfValidProject>
+    <performUpgrade>
+    startUpgradeCustomComponent(dirPath, options) </performUpgrade>
+  } catch (err) {
+    <logErrorMessage>
+    console.log(`project is not a valid custom component project: ${dirPath}`) </logErrorMessage>
+  }
+}
+</startUpgrade>
+
+<concatPubPath>
+function concatPubPath(env, fileName) {
+
+        "use strict";
+
+        <buildHostPrefixMap>
+        var hostPrefixMap = {
+            'daily': 'h5.waptest',
+            'prepub': 'h5.wapa',
+            'wapp': 'wapp.m', 
+            'online': 'h5.m'
+        }; </buildHostPrefixMap>
+
+        <returnCompleteURL>
+        return 'http://' + hostPrefixMap[env] + '.taobao.com/' + fileName; </returnCompleteURL>
+    }
+</concatPubPath>
+
+<updateDescriptor>
+function updateDescriptor(newDescriptor, options) {
+    
+	<initializeVariables>
+	var descriptor,
+		typeTest,
+		eventType; </initializeVariables>
+	
+	<processNewDescriptor>
+	if (newDescriptor) {
+		if (!currentProperty)
+			throw exception('name');
+		
+		descriptor = newDescriptor;
+	} </processNewDescriptor>
+	
+	<processOptions>
+	if (options) {
+		if (!currentProperty)
+			throw exception('property');
+		
+		descriptor = getCurrentDescriptor();
+		
+		if (options.type)
+			typeTest = getTestFor(options.type);
+		
+		if (options.event)
+			eventType = options.event === true ? ProtoTyper.CHANGE : options.event;
+		
+		<modifyDescriptorBasedOnOptions>
+		if (descriptor.hasOwnProperty('value') && (typeTest || eventType)) {
+			
+			push(currentTarget, '_'+currentProperty, {
+				'value': descriptor.value,
+				'enumerable': false,
+				'writable': true
+			});
+			delete descriptor.value;
+		}
+		
+		if (descriptor.hasOwnProperty('writable') && (typeTest || eventType))
+			delete descriptor.writable;
+		
+		if (typeTest || eventType) {
+			descriptor.get = generateGet(currentProperty);
+			descriptor.set = generateSet(descriptor.set, currentProperty, typeTest, eventType);
+		}
+		
+		if (options.notKey)
+			descriptor.enumerable = false;
+		
+		if (options.final)
+			descriptor.configurable = false; </modifyDescriptorBasedOnOptions>
+	} </processOptions>
+	
+	
+	<updatePropertyDescriptor>
+	push(currentTarget, currentProperty, descriptor); </updatePropertyDescriptor>
+}
+</updateDescriptor>
+
+<duplicateAndModifyInstance>
+function() {
+    <createDuplicateInstance>
+    var dup = this._dup(); </createDuplicateInstance>
+    <modifyDuplicateInstance>
+    dup = dup.noload(); </modifyDuplicateInstance>
+    <setPropertyReferences>
+    dup._priorModel = dup._model;
+    dup._model = undefined; </setPropertyReferences>
+    <returnModifiedInstance>
+    return dup; </returnModifiedInstance>
+  }
+</duplicateAndModifyInstance>
+
+<performServicePost>
+function(relpath, params, callback) {
+	<buildQualifiedURL>
+    var url = this.qualifiedPath;
+    if (relpath) {
+        url = url + "/" + relpath;    
+    } </buildQualifiedURL>
+    <executePostRequest>
+    return this.service.post(
+        url,
+        params,
+        callback
+    ); </executePostRequest>
+}
+</performServicePost>
+
+<runGruntTask>
+function RunGruntTask(taskname,absolutePath) {
+	<initializeExecutionModule>
+    var exec = require('child_process').exec; </initializeExecutionModule>
+    var gruntarg = ' --gruntfile ';
+    var space = ' ';
+
+    <executeWindowsTask>
+    if (os === 'Windows_NT') {
+        gruntPath = 'node_modules\\grunt-cli\\bin\\grunt' || absolutePath;
+        var ShellTask = gruntPath + space + gruntarg + gruntfile + space + taskname;
+        var GruntTask = new shell(ShellTask);
+        GruntTask.on('output', function(data) {
+            console.log(data);
+        });
+        GruntTask.on('end', function(code) {
+            console.log("Execution done");
+        });
+    } </executeWindowsTask>
+
+    <executeUnixTask>
+    if (os === 'Darwin' || os === 'Linux') {
+        gruntPath = 'node_modules/grunt-cli/bin/grunt';
+        var child = exec(gruntPath + gruntarg + gruntfile + space + taskname, function(error, stdout, stderr) {
+            if (error !== null) {
+                console.log('exec error: ' + error);
+                var stdout = error;
+                return stdout;
+            } else {
+                console.log('stdout: ' + stdout);
+                return stdout;
+            }
+
+        });
+    } </executeUnixTask>
+}
+</runGruntTask>
+
+<abstractSolrFilterTemplate>
+function _abstract_solr_filter_template(filters){
+	
+	<initializeFilterBuffer>
+	var allbuf = new Array(); </initializeFilterBuffer>
+	for( var filter_key in filters ){
+
+	    var filter_val = filters[filter_key];
+
+	    <processArrayFilters>
+	    if( filter_val &&
+		filter_val != null &&
+		typeof filter_val == 'object' &&
+		filter_val.length ){
+
+		    for( var i = 0; i < filter_val.length; i++ ){
+			var minibuffer = new Array();
+			var try_val = filter_val[i];
+			if( typeof(try_val) != 'undefined' &&
+			try_val != '' ){
+			    minibuffer.push('fq=');
+			    minibuffer.push(filter_key);
+			    minibuffer.push(':');
+			    minibuffer.push('"');
+			    minibuffer.push(filter_val[i]);
+			    minibuffer.push('"');
+			    allbuf.push(minibuffer.join(''));
+			}
+		    }		    
+		} </processArrayFilters>
+		<processSingleFilters>
+		else{
+		    var minibuf = new Array();
+		    if( typeof(filter_val) != 'undefined' &&
+			filter_val != '' ){
+			    minibuf.push('fq=');
+			    minibuf.push(filter_key);
+			    minibuf.push(':');
+			    minibuf.push('"');
+			    minibuf.push(filter_val);
+			    minibuf.push('"');
+			    allbuf.push(minibuf.join(''));
+			}
+		} </processSingleFilters>
+	}
+	<returnFilterString>
+	return allbuf.join('&'); </returnFilterString>
+    }
+</abstractSolrFilterTemplate>
+
+<createDefaults>
+function createDefaults () {
+	<constructDefaultsObject>
+ return {
+    postsPerPage: 5,
+    posts: './_posts/',
+    showDrafts: process.env.NODE_ENV !== 'production',
+    showFuture: process.env.NODE_ENV !== 'production',
+    metaFormat: 'json',
+    readMoreLink: readMoreLink,
+    readMoreTag: '<!--more-->',
+    routes: {
+      '/post/:post': 'post',
+      '/page/:page': 'page',
+      '/tag/:tag': 'tag',
+      '/category/:category': 'category'
+    }
+  }; </constructDefaultsObject>
+}
+</createDefaults>
+
+<agentOnRequest>
+function Agent_onRequest(message) {
+  <getMessageName>
+  var mName = message.name </getMessageName>
+
+  <getCallbackFunction>
+  var cb = this._receiveCBs.get(mName) </getCallbackFunction>
+
+  <validateCallbackPresence>
+  if (!cb) {
+    message = {
+      type:  "response",
+      name:  mName,
+      from:  this.info.id,
+      id:    message.id,
+      error: "agent does not handle messages named '" + mName + "'"
+    }
+
+    this._session._sendMessage(message)
+    return
+  } </validateCallbackPresence>
+
+  var agent = this;
+
+  <executeCallback>
+  try {
+    cb(message.body, reply)
+
+  }
+  catch (e) {
+    reply(err, null)
+  } </executeCallback>
+
+  
+  <prepareReply>
+  var replied = false
+
+  function reply(err, body) {
+    if (replied) return
+    replied = true
+
+    <constructResponseMessage>
+    var rMessage = {
+      type:  "response",
+      name:  mName,
+      from:  agent.info.id,
+      id:    message.id,
+      body:  body
+    }
+
+    if (err) rMessage.error = err
+
+    agent._session._sendMessage(rMessage) </constructResponseMessage>
+  } </prepareReply>
+}
+</agentOnRequest>

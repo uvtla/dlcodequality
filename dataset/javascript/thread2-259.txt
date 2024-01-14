@@ -1,0 +1,176 @@
+<uncheckVisibleCheckboxes>
+function (justVisible) {
+    var justVisible = typeof justVisible === 'undefined' ? true : justVisible;
+
+    if(justVisible) {
+        var visibleCheckboxes = $("li input[type='checkbox']:not(:disabled)", this.$ul).filter(":visible");
+        visibleCheckboxes.prop('checked', false);
+
+        var values = visibleCheckboxes.map(function() {
+            return $(this).val();
+        }).get();
+
+        $("option:enabled", this.$select).filter(function(index) {
+            return $.inArray($(this).val(), values) !== -1;
+        }).prop('selected', false);
+
+        if (this.options.selectedClass) {
+            $("li:not(.divider):not(.disabled)", this.$ul).filter(":visible").removeClass(this.options.selectedClass);
+        }
+    }
+    else {
+        $("li input[type='checkbox']:enabled", this.$ul).prop('checked', false);
+        $("option:enabled", this.$select).prop('selected', false);
+
+        if (this.options.selectedClass) {
+            $("li:not(.divider):not(.disabled)", this.$ul).removeClass(this.options.selectedClass);
+        }
+    }
+}
+</uncheckVisibleCheckboxes>
+
+<injectGlobPatterns>
+function requireGlobInjectables(pattern) {
+    return _.map(glob.sync(pattern), function (file) {
+        return injectableFromFile(file);
+    });
+}
+</injectGlobPatterns>
+
+<calculateChecksum>
+function calcWeak32(data, prev, start, end) {
+  var a = 0;
+  var b = 0;
+  var M = 1 << 16;
+  var N = 65521;
+
+  if (!prev) {
+    var len = (start >= 0 && end >= 0) ? (end - start + 1) : data.length;
+    var datai;
+    for (var i = 0; i < len; i++) {
+      datai = data[i];
+      a += datai;
+      b += ((len - i) * datai);
+    }
+
+    a %= N;
+    b %= N;
+  } else {
+    var k = start;
+    var l = end - 1;
+    var prev_k = k - 1;
+    var prev_l = l - 1;
+    var prev_first = data[prev_k];
+    var curr_last = data[l];
+
+    a = (prev.a - prev_first + curr_last) % N;
+    b = (prev.b - (prev_l - prev_k + 1) * prev_first + a) % N;
+  }
+  return { a: a, b: b, sum: a + b * M };
+}
+</calculateChecksum>
+
+<formatAndConcatenateNumbers>
+function(numbers) {
+    if (numbers.length < 2) {
+      return moment()._locale.ordinal(numbers);
+    }
+
+    var last_val = numbers.pop();
+    return numbers.join(', ') + ' and ' + moment()._locale.ordinal(last_val);
+}
+</formatAndConcatenateNumbers>
+
+<parseCircularReference>
+function parseCircular(object) {
+  
+  if (!config().circularRefs) {
+    return object;
+  }
+
+  let pointerPath = parsePointer(object.$ref);
+
+  
+  for (let i = 0; i < pointerPath.length; i++) {
+    if (pointerPath[i] !== path[i]) {
+      throw new Error('Invalid circular reference "' +  object.$ref + '"');
+    }
+  }
+
+  return stack[pointerPath.length];
+}
+</parseCircularReference>
+
+<createErrorWithStatus>
+function error(status, msg) {
+  var err = new Error(msg);
+  err.status = status;
+  return err;
+}
+</createErrorWithStatus>
+
+<dispatchEvent>
+function(type, data) {
+    if (gui.Type.isString(type)) {
+        return this._dispatch({
+            type: type,
+            data: data,
+            global: false
+        });
+    } else {
+        console.error('The "target" argument (the first argument) of gui.Broadcast.dispatch is deprecated');
+        this.dispatch(arguments[1], arguments[2]);
+    }
+}
+</dispatchEvent>
+
+<getElementPosition>
+function (el) {
+    var offsets = el.getPosition(); 
+    return {
+        left: offsets.x,
+        top: offsets.y
+    };
+}
+</getElementPosition>
+
+<setupRenderBufferStorage>
+function setupRenderBufferStorage( renderbuffer, renderTarget ) {
+
+    _gl.bindRenderbuffer( 36161, renderbuffer );
+
+    if ( renderTarget.depthBuffer && ! renderTarget.stencilBuffer ) {
+
+        _gl.renderbufferStorage( 36161, 33189, renderTarget.width, renderTarget.height );
+        _gl.framebufferRenderbuffer( 36160, 36096, 36161, renderbuffer );
+
+    } else if ( renderTarget.depthBuffer && renderTarget.stencilBuffer ) {
+
+        _gl.renderbufferStorage( 36161, 34041, renderTarget.width, renderTarget.height );
+        _gl.framebufferRenderbuffer( 36160, 33306, 36161, renderbuffer );
+
+    } else {
+
+        _gl.renderbufferStorage( 36161, 32854, renderTarget.width, renderTarget.height );
+
+    }
+
+    _gl.bindRenderbuffer( 36161, null );
+
+}
+</setupRenderBufferStorage>
+
+<augmentFunctionExecution>
+function after(f, after, changeRet){
+    
+    return changeRet ?
+        function after_CRet(){
+            return after.apply(this,[f.apply(this,arguments)].concat(makeArray(arguments)));
+        }:
+        function after_Ret(){
+            var ret = f.apply(this,arguments);
+            after.apply(this,arguments);
+            return ret;
+        }
+}
+</augmentFunctionExecution>

@@ -1,0 +1,250 @@
+```javascript
+<function1>
+function (options, onConnect) {
+    var self = this;
+    EventEmitter.call(this);
+
+    this.options = options;
+
+    
+    this.debug_enabled = options.debug;
+    this.handshook = false;
+
+    
+    this.data = '';
+
+    
+    <connectCallback>
+    var cb = function () {
+        connected.call(self);
+        onConnect.call(self);
+    };
+    </connectCallback>
+    
+    <establishConnection>
+    if (options.path) {
+        this.debug("Trying to establish connection to unix socket %s", options.path);
+        this.client = net.connect(options.path, cb);
+    } else {
+        this.debug("Trying to establish connection to %s on port %s", options.host, options.port);
+        this.client = net.connect(options.port, options.host, cb);
+    }
+    </establishConnection>
+
+    
+    <dataProvider>
+    this.client.on('data', function (data) {
+        var obj = dezeusify.call(self, data.toString('utf8'));
+        obj.forEach(function (item) {
+            received.call(self, item);
+        });
+    });
+    </dataProvider>
+
+    
+    <handleDisconnection>
+    this.client.on('end', function () {
+        disconnected.call(self);
+    });
+    </handleDisconnection>
+
+    <handleConnectionError>
+    this.client.on('error', function (err) {
+        self.debug("Whoops, an error occurred: %s", err.message);
+        throw new Error(util.format("A connection error occurred: %s", err.message));
+    });
+    </handleConnectionError>
+
+    
+    <eventListenerManagement>
+    this.on('newListener', function (evt) {
+        this.debug("A new event listener was added");
+        if (evt.toUpperCase() === evt && !this.subscribedEvents.indexOf(evt) !== -1) {
+            subscribeServerEvent.call(self, evt);
+        }
+    });
+    </eventListenerManagement>
+
+    this.subscribedEvents = [];
+    this.waitingCallbacks = [];
+}
+</function1>
+
+<function2>
+function() {
+    gui.Broadcast.dispatch(gui.BROADCAST_WILL_SPIRITUALIZE);
+    this._spiritualizeinitially();
+    gui.Broadcast.dispatch(gui.BROADCAST_DID_SPIRITUALIZE);
+}
+</function2>
+
+<function3>
+function (model, options) {
+    <indexModel>
+    this._index(model);
+    </indexModel>
+    <attachCollectionToModel>
+    if (!model.collection) model.collection = this;
+    </attachCollectionToModel>
+    <attachEventToModel>
+    if (model.on) model.on('all', this._onModelEvent, this);
+    </attachEventToModel>
+}
+</function3>
+
+<function4>
+function(){
+    var self = this;
+
+    
+    <stateRequirementCheck>
+    self.requireMinState( munit.ASSERT_STATE_SETUP, self.log );
+    self.requireMaxState( munit.ASSERT_STATE_TEARDOWN, self.log );
+    </stateRequirementCheck>
+
+    
+    <logMessage>
+    self._logs.push( Slice.call( arguments ) );
+    </logMessage>
+
+    return self;
+}
+</function4>
+
+<function5>
+function init(loader) {
+    <loaderSetup>
+    var loaderConfig = loaderUtils.getLoaderConfig(loader, 'web3Loader');
+    web3 = require('./lib/web3')(loaderConfig.provider);
+    config = mergeConfig(loaderConfig);
+    </loaderSetup>
+    <debugFlagSetup>
+    isDebug = loader.debug;
+    </debugFlagSetup>
+}
+</function5>
+
+<function6>
+function (worldWindow) {
+    
+    this.wwd = worldWindow;
+
+    this.roundGlobe = this.wwd.globe;
+
+    <createProjectionSelection>
+    this.createProjectionList();
+    $("#projectionDropdown").find(" li").on("click", function (e) {
+        thisExplorer.onProjectionClick(e);
+    });
+    </createProjectionSelection>
+
+    <layerListSynchronization>
+    this.synchronizeLayerList();
+    </layerListSynchronization>
+
+    <setupSearchInteractivity>
+    $("#searchBox").find("button").on("click", function (e) {
+        thisExplorer.onSearchButton(e);
+    });
+
+    this.geocoder = new WorldWind.NominatimGeocoder();
+    this.goToAnimator = new WorldWind.GoToAnimator(this.wwd);
+    $("#searchText").on("keypress", function (e) {
+        thisExplorer.onSearchTextKeyPress($(this), e);
+    });
+    </setupSearchInteractivity>
+}
+</function6>
+
+<function7>
+function() {
+    var baseInfo = this.callSuper('toObject');
+    
+    <extensionWithSpecificProperties>
+    var o = extend(baseInfo, {
+        path: this.path
+    });
+    if (this.sourcePath) {
+        o.sourcePath = this.sourcePath;
+    }
+    if (this.transformMatrix) {
+        o.transformMatrix = this.transformMatrix;
+    }
+    </extensionWithSpecificProperties>
+    
+    return o;
+}
+</function7>
+
+<function8>
+function(obj) {
+    <deepClone>
+    var objType = this.objectType(obj);
+    if(objType == "array" || objType == "object") {
+      var clone = (objType == "array")? [] : {};
+      for(var key in obj) {
+        var val = obj[key];
+        clone[key] = this.deepClone(val);
+      }
+      return clone;
+    }
+    else {
+      return obj;
+    }
+    </deepClone>
+}
+</function8>
+
+<function9>
+function (result) {
+    item.done = true;
+    
+    <clearTimeoutOnResult>
+    if (timeout_trigger) {
+        clearTimeout(timeout_trigger);
+        timeout_trigger = undefined;
+    }
+    </clearTimeoutOnResult>
+    
+    <processFailureResult>
+    if (result === false) {
+        that.all_passed = false;
+        
+        <triggerEarlyCompletion>
+        if (item.keep === false)
+            return that.done();
+        </triggerEarlyCompletion>
+    }
+    </processFailureResult>
+    
+    <processNextItem>
+    that.curr++;
+    that.next();
+    </processNextItem>
+}
+</function9>
+
+<function10>
+function Logger(opt) {
+    
+    <loggerInitialization>
+    var self = {};
+    var defaultOptions = {...};
+
+    var init = function(opt) {...};
+    var getInstance = function(opt) {...};
+    var setDefaultLevels = function() {...};
+
+    init(opt);
+    </loggerInitialization>
+    
+    <loggingCapabilityExtension>
+    self.setLevels = function(levels) {...};
+    self.getLogger = function(details) {...};
+    self.log = function() {...};
+    </loggingCapabilityExtension>
+    
+    return self
+}
+</function10>
+```

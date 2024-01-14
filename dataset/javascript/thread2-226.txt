@@ -1,0 +1,178 @@
+```javascript
+<watchFileEvent>
+function(file, event, callback) {
+    <searchFileInWatchList>
+    for(var i = 0; i < watchList.length; i++) {
+        if(watchList[i].file === file) {
+            watchers[i].on(event, wrapCallback(callback, watchList[i].expression));
+            watchList[i].callback[event] = callback;
+            return;
+        }
+    }
+    </searchFileInWatchList>
+    throw new Error(file + " was not being watched previously");
+}
+</watchFileEvent>
+```
+
+```javascript
+<generateSchemaForValidation>
+function _generate(schemaName) {
+  var schema = generateSchema(schemaName, this._instructions, this._macros, this._opts.strict);
+  this.ajv.removeSchema(schema.id);
+  return schema;
+}
+</generateSchemaForValidation>
+```
+
+```javascript
+<handleVersionMismatch>
+function sendVersionMiss() {
+    var adapter = requireModule('ember-debug/adapters/' + currentAdapter)['default'].create();
+    <listenForVersionCheck>
+    adapter.onMessageReceived(function(message) {
+      if (message.type === 'check-version') {
+        sendVersionMismatch();
+      }
+    });
+    </listenForVersionCheck>
+    sendVersionMismatch();
+
+    <sendVersionMismatchNotification>
+    function sendVersionMismatch() {
+      adapter.sendMessage({
+        name: 'version-mismatch',
+        version: Ember.VERSION,
+        from: 'inspectedWindow'
+      });
+    }
+    </sendVersionMismatchNotification>
+  }
+</handleVersionMismatch>
+```
+
+```javascript
+<checkPrimitiveOrDate>
+function __isPrimitive(obj) {
+  if (obj == null) return false;
+  
+  if (obj != Object(obj)) return true;
+  return __isDate(obj);
+}
+</checkPrimitiveOrDate>
+```
+
+```javascript
+<initialiseWebSocketServer>
+function (server) {
+    <loadHandler>
+    if (handler) {
+        handler = require(require('path').resolve() + '/' + handler);
+    } else {
+        console.log('No handler defined for websocket server, not starting websocket.');
+        return;
+    }
+    </loadHandler>
+    
+    <createWebSocketServer>
+    var WebSocketServer = require('websocket').server;
+    var wsServer = new WebSocketServer({
+        httpServer: server
+    });
+    </createWebSocketServer>
+    
+    <attachRequestHandler>
+    wsServer.on('request', handler);
+    </attachRequestHandler>
+}
+</initialiseWebSocketServer>
+```
+
+```javascript
+<performVectorProjection>
+function project (out, vec, m) {
+  <assignVariables>
+  var x = vec[0],
+    y = vec[1],
+    z = vec[2],
+    a00 = m[0], a01 = m[1], a02 = m[2], a03 = m[3],
+    a10 = m[4], a11 = m[5], a12 = m[6], a13 = m[7],
+    a20 = m[8], a21 = m[9], a22 = m[10], a23 = m[11],
+    a30 = m[12], a31 = m[13], a32 = m[14], a33 = m[15]
+  </assignVariables>
+
+  <calculateProjectedVector>
+  var lw = 1 / (x * a03 + y * a13 + z * a23 + a33)
+
+  out[0] = (x * a00 + y * a10 + z * a20 + a30) * lw
+  out[1] = (x * a01 + y * a11 + z * a21 + a31) * lw
+  out[2] = (x * a02 + y * a12 + z * a22 + a32) * lw
+  </calculateProjectedVector>
+
+  return out
+}
+</performVectorProjection>
+```
+
+```javascript
+<constructorDiscoveredBridge>
+function DiscoveredBridge (ip, port) {
+  <handleWithoutNew>
+  if (!(this instanceof DiscoveredBridge)) {
+    return new DiscoveredBridge(ip, port);
+  }
+  </handleWithoutNew>
+
+  this.ip = ip;
+  this.port = port;
+}
+</constructorDiscoveredBridge>
+```
+
+```javascript
+<createChatDialog>
+function(params, callback) {
+    <prepareOccupantsIds>
+    if (params && params.occupants_ids && Utils.isArray(params.occupants_ids)) {
+        params.occupants_ids = params.occupants_ids.join(', ');
+    }
+    </prepareOccupantsIds>
+
+    <sendChatDialogRequest>
+    this.service.ajax({
+        url: Utils.getUrl(DIALOGS_API_URL),
+        type: 'POST',
+        data: params
+    }, callback);
+    </sendChatDialogRequest>
+}
+</createChatDialog>
+```
+
+```javascript
+<getSiblingElements>
+function getSiblings(el) {
+    <gatherAllSiblings>
+    const allSiblings = getPreviousSiblings(el).concat(getNextSiblings(el));
+    </gatherAllSiblings>
+
+    <filterSiblings>
+    return allSiblings.filter(filterSibling);
+    </filterSiblings>
+}
+</getSiblingElements>
+```
+
+```javascript
+<showHintForStep>
+function _showHint(stepId) {
+    <findAndModifyHintElement>
+    var hint = this._targetElement.querySelector('.introjs-hint[data-step="' + stepId + '"]');
+
+    if (hint) {
+        hint.className = hint.className.replace(/introjs\-hidehint/g, '');
+    }
+    </findAndModifyHintElement>
+}
+</showHintForStep>
+```

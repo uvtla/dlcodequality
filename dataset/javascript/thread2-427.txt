@@ -1,0 +1,308 @@
+```javascript
+<upsertKVM>
+function upsertKVM(filepath, cb2) {
+    if(filepath.options.type === 'env') {
+        <getKVMsEnvironment>
+        apigeeSdk.getKVMsEnvironment(grunt.config.get("apigee_profiles"),
+            function(error, response, body) {
+                grunt.log.debug(response.statusCode);grunt.log.debug(body);
+                upsertKVMList(body, filepath, cb2);
+            }, grunt.option('curl'));
+        </getKVMsEnvironment>
+    } else if(filepath.options.type === 'org') {
+        <getKVMsOrganization>
+        apigeeSdk.getKVMsOrganization(grunt.config.get("apigee_profiles"),
+            function(error, response, body) {
+                grunt.log.debug(response.statusCode);grunt.log.debug(body);
+                upsertKVMList(body, filepath, cb2);
+            }, grunt.option('curl'));
+        </getKVMsOrganization>
+    }
+}
+</upsertKVM>
+
+<navigateCallbacks>
+function (navigationInstruction, callbackName, next, ignoreResult) {
+    <setupNavigation>
+    var plan = navigationInstruction.plan;
+    var infos = findDeactivatable(plan, callbackName);
+    var i = infos.length;
+    </setupNavigation>
+    function inspect(val) {
+        if (ignoreResult || shouldContinue(val)) {
+            return iterate();
+        }
+        return next.cancel(val);
+    }
+    function iterate() {
+        if (i--) {
+            try {
+                <navigationCallback>
+                var viewModel = infos[i];
+                var result = viewModel[callbackName](navigationInstruction);
+                return processPotential(result, inspect, next.cancel);
+                </navigationCallback>
+            }
+            catch (error) {
+                return next.cancel(error);
+            }
+        }
+        <updateRouterDeactivation>
+        navigationInstruction.router.couldDeactivate = true;
+        </updateRouterDeactivation>
+        return next();
+    }
+    return iterate();
+}
+</navigateCallbacks>
+
+<trimmedLeftIndexCalculation>
+function trimmedLeftIndex(string) {
+    var index = -1,
+        length = string.length;
+
+    while (++index < length) {
+        var c = string.charCodeAt(index);
+        if (!((c <= 160 && (c >= 9 && c <= 13) || c == 32 || c == 160) || c == 5760 || c == 6158 ||
+            (c >= 8192 && (c <= 8202 || c == 8232 || c == 8233 || c == 8239 || c == 8287 || c == 12288 || c == 65279)))) {
+            break;
+        }
+    }
+    return index;
+}
+</trimmedLeftIndexCalculation>
+
+<objectMetaEnhancement>
+function object(baseObj) {
+    <initializeBaseObject>
+    baseObj = baseObj || {};
+    var metaObj = baseObj.__objmeta || {};
+    Object.defineProperty(baseObj, '__objmeta', {value: metaObj});
+    </initializeBaseObject>
+
+    <setOpeningMeta>
+    function setOpening(tokenOrLexer) {
+        metaObj.line = tokenOrLexer.line;
+        metaObj.col = tokenOrLexer.col;
+        metaObj.prelude = tokenOrLexer.prelude;
+    }
+    Object.defineProperty(baseObj, 'setOpening', {value: setOpening});
+    </setOpeningMeta>
+
+    <setClosingMeta>
+    function setClosing(tokenOrLexer) {
+        metaObj.endLine = tokenOrLexer.line;
+        metaObj.endCol = tokenOrLexer.col;
+        metaObj.endPrelude = tokenOrLexer.prelude;
+    }
+    Object.defineProperty(baseObj, 'setClosing', {value: setClosing});
+    </setClosingMeta>
+
+    return baseObj;
+}
+</objectMetaEnhancement>
+
+<foldMapValidationAndExecution>
+function foldMap(fn, m) {
+    <validateFunctionForFoldMap>
+    if(!isFunction(fn)) {
+        throw new TypeError(
+            'foldMap: Function returning Semigroups of the same type required for first argument'
+        )
+    }
+    </validateFunctionForFoldMap>
+
+    <executeFoldMap>
+    if(isArray(m)) {
+        return _array.foldMap(fn, m)
+    }
+
+    if(m && isFunction(m.foldMap)) {
+        return m.foldMap(fn)
+    }
+    </executeFoldMap>
+
+    <throwErrorForInvalidFoldable>
+    throw new TypeError(
+        'foldMap: Non-empty Foldable with at least one Semigroup required for second argument'
+    )
+    </throwErrorForInvalidFoldable>
+}
+</foldMapValidationAndExecution>
+
+<SyncPromiseImplementation>
+function SyncPromise(fnExecutor) {
+    <promiseInitialization>
+    var bCaught = false,
+        iState, 
+        fnReject,
+        fnResolve,
+        vResult,
+        that = this;
+    </promiseInitialization>
+
+    <promiseRejectFunction>
+    function reject(vReason) {
+        vResult = vReason;
+        iState = -1;
+
+        if (!bCaught && SyncPromise.listener) {
+            SyncPromise.listener(that, false);
+        }
+
+        if (fnReject) {
+            fnReject(vReason);
+            fnReject = fnResolve = null;
+        }
+    }
+    </promiseRejectFunction>
+
+    <promiseResolveFunction>
+    function resolve(vResult0) {
+        var fnThen;
+
+        if (vResult0 === that) {
+            reject(new TypeError("A promise cannot be resolved with itself."));
+            return;
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        iState = 1;
+        if (fnResolve) {
+            fnResolve(vResult);
+            fnReject = fnResolve = null;
+        }
+    }
+    </promiseResolveFunction>
+
+    <promiseStateFunctions>
+    this.caught = function () {
+        ...
+    };
+
+    this.getResult = function () {
+        ...
+    };
+
+    this.isFulfilled = function () {
+        ...
+    };
+
+    this.isPending = function () {
+        ...
+    };
+
+    this.isRejected = function () {
+        ...
+    };
+    </promiseStateFunctions>
+
+    <promiseExecuteFnExecutor>
+    call(fnExecutor, resolve, reject);
+    </promiseExecuteFnExecutor>
+
+    <setDefaultState>
+    if (iState === undefined) {
+        vResult = new Promise(function (resolve, reject) {
+            fnResolve = resolve;
+            fnReject = reject;
+        });
+        vResult.catch(function () {});
+    }
+    </setDefaultState>
+}
+</SyncPromiseImplementation>
+
+<toHexStringFormatting>
+function toHexString(buffer, options) {
+    <handleOptions>
+    options = options || {};
+    var prefix = options.prefix || '', digits, idx;
+    </handleOptions>
+
+    <processBufferBasedOnFormat>
+    if ((options.format || 'BE') !== 'BE') {
+        _reverseBuffer(buffer);
+    }
+    </processBufferBasedOnFormat>
+
+    <convertToHexAndTrim>
+    digits = buffer.toString('hex');
+    idx = _lastHeadIndex(digits, '0');
+    idx = idx >= 0 ? idx : digits.length - 1;
+    </convertToHexAndTrim>
+
+    <formatAndReturnHexString>
+    return prefix + _pad(
+        _split(digits.slice(idx), options.groupsize, options.delimiter), prefix, options.padstr, options.size);
+    </formatAndReturnHexString>
+}
+</toHexStringFormatting>
+
+<refValidatorAndSetter>
+function (ref, component) {
+    <validateInstNotNull>
+    var inst = this.getPublicInstance();
+    !(inst != null) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Stateless function components cannot have refs.') : _prodInvariant('110') : void 0;
+    </validateInstNotNull>
+    <getAndWarnOnPublicComponentInstance>
+    var publicComponentInstance = component.getPublicInstance();
+    ...
+    </getAndWarnOnPublicComponentInstance>
+    <setRefOnInstance>
+    var refs = inst.refs === emptyObject ? inst.refs = {} : inst.refs;
+    refs[ref] = publicComponentInstance;
+    </setRefOnInstance>
+}
+</refValidatorAndSetter>
+
+<hideStepElements>
+function (steps) {
+    for (var i = 0; i < steps.length; i++) {
+        steps[i].style.display = 'none';
+    }
+}
+</hideStepElements>
+
+<renderMessagesFromTemplate>
+function renderMessages(messages, parentIndex) {
+    <generateMessagesMap>
+    return lodash.map(messages, function(message) {
+        var lineNumber,
+            columnNumber;
+
+        lineNumber = message.line || 0;
+        columnNumber = message.column || 0;
+
+        return messageTemplate({
+            parentIndex: parentIndex,
+            lineNumber: lineNumber,
+            columnNumber: columnNumber,
+            severityNumber: message.severity,
+            severityName: message.severity === 1 ? "Warning" : "Error",
+            message: message.message,
+            ruleId: message.ruleId
+        });
+    }).join("\n");
+    </generateMessagesMap>
+}
+</renderMessagesFromTemplate>
+```

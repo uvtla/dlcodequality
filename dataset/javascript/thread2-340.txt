@@ -1,0 +1,169 @@
+<read>
+function read(file, opts) {
+    <parseOpts>
+    var encoding = opts.encoding || 'utf8';</parseOpts>
+    <getData>
+    var data = opts.transform(fs.readFileSync(file, encoding));</getData>
+    <parseData>
+    return css.parse(data, {source: file}).stylesheet;</parseData>
+}
+</read>
+
+<_colorToRgbArray>
+function _colorToRgbArray(color) {
+    <initializeVariables>
+    var originalColor, elem,
+        rgb = [],
+        multiple = 1;</initializeVariables>
+
+    <handleColor>
+    if (color === 'transparent') {
+        color = 'rgba(0, 0, 0, 0)';
+    } else if (color.match(/^([a-z]+|#[0-9a-f]+)$/gi)) {
+        
+        elem = document.head;
+        originalColor = elem.style.color;
+        elem.style.color = color;
+        color = $.css(elem, 'color');
+        elem.style.color = originalColor;
+    }</handleColor>
+    
+    <calculateRgb>
+    if (color.match(/^rgb/gi)) {
+        rgb = color.match(/(\d+(\.\d+)?)/gi);
+        
+        if (color.match(/%/gi)) {
+            multiple = 2.55;
+        }
+        rgb[0] *= multiple;
+        rgb[1] *= multiple;
+        rgb[2] *= multiple;
+        
+        if (rgb[3] !== undefined) {
+            rgb[3] = parseFloat(rgb[3]);
+        } else {
+            rgb[3] = 1;
+        }
+    }</calculateRgb>
+    <returnResult>
+    return rgb;</returnResult>
+}
+</_colorToRgbArray>
+
+<anonymous>
+function(feature) {
+        <activationHandling>
+        var activated = false;
+        if(!this.handlers.drag.dragging) {
+            this.feature = feature;
+            this.handlers.drag.activate();
+            activated = true;
+        }</activationHandling>
+        <overHandling>
+        this.over = this.feature.id == feature.id;</overHandling>
+        <onEnterHandling>
+        if(activated) {
+            OpenLayers.Element.addClass(this.map.viewPortDiv, this.displayClass + "Over");
+            this.onEnter(feature);
+        }</onEnterHandling>
+        <returnResult>
+        return activated;</returnResult>
+    }
+</anonymous>
+
+<renderToStaticMarkup>
+function renderToStaticMarkup(element) {
+  <validateElement>
+  !ReactElement.isValidElement(element) ? "development" !== 'production' ? invariant(false, 'renderToStaticMarkup(): You must pass a valid ReactElement.') : _prodInvariant('47') : void 0;</validateElement>
+  <renderElement>
+  return renderToStringImpl(element, true);</renderElement>
+}
+</renderToStaticMarkup>
+
+<anonymous>
+function(array1, array2) {
+        <matchComparison>
+        var match = array1[0]==array2[0] && array1[1]==array2[1] && array1[2]==array2[2];</matchComparison>
+        <returnResult>
+        return match;</returnResult>
+    }
+</anonymous>
+
+<anonymous>
+function(pos, prop) {
+     <splatProp>
+     prop = $.splat(prop);</splatProp>
+     <updateNodePositions>
+     this.viz.graph.eachNode(function(elem) {
+         $.each(prop, function(p) { elem.getPos(p).$add(pos); });
+     });</updateNodePositions>
+  }
+</anonymous>
+
+<createConnection>
+function createConnection(port, host, options) {
+  <handleArguments>
+  if (isObject(port)) {
+    options = port;
+  }
+  else if (isObject(host)) {
+    options = host;
+  }
+  else if (isObject(options)) {
+    options = options; // This line doesn't change the state of options, so technically it's redundant and doesn't align with SRP
+  }
+  else {
+    options = {};
+  }
+  
+  if (isNumber(port)) {
+    options.port = port;
+  }
+
+  if (isString(host)) {
+    options.host = host;
+  }</handleArguments>
+  
+  <debugAndConnect>
+  debug('createConnection', options);
+  return tls.connect(options);</debugAndConnect>
+}
+</createConnection>
+
+<startApp>
+function(packageName, componentName) {
+    <promiseCreation>
+    return new Promise(function(resolve, reject) {
+        exec(resolve, reject, APP_PLUGIN_NAME, "startApp", [packageName, componentName]);
+    });</promiseCreation>
+}
+</startApp>
+
+<getResult>
+function getResult (err) {
+    <initializeResult>
+    var res = {
+        valid: true,
+        errors: []
+    };</initializeResult>
+
+    <handleError>
+    if (err !== null) {
+        res.valid = false;
+        res.errors.push(err);
+    }</handleError>
+
+    <returnResult>
+    return res;</returnResult>
+}
+</getResult>
+
+<ListNode>
+function ListNode (children) {
+    <assignChildren>
+    for(var i = 0; i < children.length; i++)
+        this[i] = children[i];
+    this.length = children.length;
+    </assignChildren>
+}
+</ListNode>

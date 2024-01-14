@@ -1,0 +1,191 @@
+```javascript
+<setAnimationParent>
+function(parent) {
+  <checkIfSelfParent>
+  if (parent === this) {
+    throw new Error('parent can not be set to self!');
+  }
+  </checkIfSelfParent>
+  
+  enterModifyCurrentAnimationState();
+  
+  try {
+    <detachFromCurrentPlayer>
+    if (this._player !== null) {
+      this._player.source = null;
+      this._player = null;
+    }
+    </detachFromCurrentPlayer>
+    
+    <removeFromParent>
+    if (this.parent !== null) {
+      this.remove();
+    }
+    </removeFromParent>
+
+    this._parent = parent;
+
+    <updateStartTime>
+    if (this.parent === null || this.parent.type !== 'seq') {
+      this._startTime =
+          this._stashedStartTime === undefined ? 0.0 : this._stashedStartTime;
+      this._stashedStartTime = undefined;
+    }
+    </updateStartTime>
+
+    this._updateTimeMarkers();
+  } finally {
+    <exitModifyAnimationState>
+    exitModifyCurrentAnimationState(
+        Boolean(this.player) ? repeatLastTick : null);
+    </exitModifyAnimationState>
+  }
+}
+</setAnimationParent>
+
+<copyIfSet>
+function copyIfSet(src, dest, prop) {
+  if (src[prop]) {
+    dest[prop] = src[prop];
+  }
+}
+</copyIfSet>
+
+<createCustomError>
+function(msg, type, details) {
+  if(_nodejs) {
+    <setupErrorInheritance>
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+    </setupErrorInheritance>
+  }
+  this.name = type || 'jsonld.Error';
+  this.message = msg || 'An unspecified JSON-LD error occurred.';
+  this.details = details || {};
+}
+</createCustomError>
+
+<preventComplexMerge>
+function preventComplexMerge(objValue, srcValue) {
+  if (!isObjectLike(objValue) && !isObjectLike(srcValue)) {
+    return DEFAULT_MERGER;
+  }
+
+  if (!isPlainObject(objValue) || !isPlainObject(srcValue)) {
+    return srcValue || objValue;
+  }
+
+  return mergeWith({}, objValue, srcValue, preventComplexMerge);
+}
+</preventComplexMerge>
+
+<loadMyrmexApi>
+function loadApi(apiSpecPath, identifier) {
+  return plugin.myrmex.fire('beforeApiLoad', apiSpecPath, identifier)
+  .spread((apiSpecPath, identifier) => {
+    <getApiSpecification>
+    const apiSpec = _.cloneDeep(require(apiSpecPath));
+    apiSpec['x-myrmex'] = apiSpec['x-myrmex'] || {};
+    </getApiSpecification>
+
+    <instantiateApi>
+    const Api = require('./api');
+    const api = new Api(apiSpec, identifier);
+    </instantiateApi>
+
+    return plugin.myrmex.fire('afterApiLoad', api);
+  })
+  .spread(api => {
+    <initializeApi>
+    return api.init();
+    </initializeApi>
+  });
+}
+</loadMyrmexApi>
+
+<validateConfig>
+function(config){
+    if (!config.name)
+        throw "ERR: No name was assigned";
+    if(!config.post)
+        throw "ERR: No post function was assigned";
+    this.name = config.name;
+    this.req = config.req || [];
+    this.post = config.post;
+    this.invokers = config.invokers || [];
+    this.pre = config.pre;
+}
+</validateConfig>
+
+<getBagsByAttribute>
+function _getBagsByAttribute(safeContents, attrName, attrValue, bagType) {
+  var result = [];
+
+  for(var i = 0; i < safeContents.length; i ++) {
+    for(var j = 0; j < safeContents[i].safeBags.length; j ++) {
+      var bag = safeContents[i].safeBags[j];
+      if(bagType !== undefined && bag.type !== bagType) {
+        continue;
+      }
+
+      if(attrName === null) {
+        result.push(bag);
+        continue;
+      }
+      if(bag.attributes[attrName] !== undefined &&
+        bag.attributes[attrName].indexOf(attrValue) >= 0) {
+        result.push(bag);
+      }
+    }
+  }
+
+  return result;
+}
+</getBagsByAttribute>
+
+<getCompletionData>
+function() {
+  var input = this.terminal.getInputState();
+  var start = input.cursor.start;
+  var index = this.terminal.getChoiceIndex();
+
+  return this.requisition.getStateData(start, index).then(function(data) {
+    <formatCompletionData>
+    data.statusMarkup.forEach(function(member) {
+      member.string = member.string.replace(/ /g, '\u00a0'); 
+      member.className = 'gcli-in-' + member.status.toString().toLowerCase();
+    }, this);
+    </formatCompletionData>
+
+    return data;
+  });
+}
+</getCompletionData>
+
+<checkHasMethod>
+function hasMethod (signature) {
+  <normalizeSignature>
+  signature = getValidSignature(signature)
+  </normalizeSignature>
+
+  <lookupModuleAndMethod>
+  var module = immutable.modules[signature.moduleName]
+  
+  if (!defined(module)) {
+      return false
+  }
+  
+  return defined(module[signature.methodName]) ? true : false
+  </lookupModuleAndMethod>
+}
+</checkHasMethod>
+
+<drawPatternOnCompositor>
+function drawPattern(pattern, x, y, width, height) {
+  <enqueuePatternDrawing>
+  var key = "0,0," + width + "," + height;
+  this.compositor.addQuad(pattern, key, x, y, width, height);
+  </enqueuePatternDrawing>
+}
+</drawPatternOnCompositor>
+```

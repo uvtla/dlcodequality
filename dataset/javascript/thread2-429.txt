@@ -1,0 +1,274 @@
+```javascript
+<findOutliers>
+function() {
+			
+			<calculateMedianAndRange>
+			var median = this.median();
+			var range  = this.iqr() * 1.5;
+			</calculateMedianAndRange>
+
+			<initializeOutliers>
+			var outliers = stats([]);			
+			</initializeOutliers>
+
+			<iterateAndPushOutliers>
+			this.each(function(num) {
+				if (Math.abs(num - median) > range) {
+					outliers.push(num);
+				}
+			});
+			</iterateAndPushOutliers>
+
+			return outliers;
+		}
+</findOutliers>
+
+<getMinimumValue>
+function getMinimum() {
+        var args = [];
+        <argsAssignment>
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        </argsAssignment>
+        return Math.min.apply(Math, args);
+    }
+</getMinimumValue>
+
+<removeItem>
+function(item, dontPushVal, options) {
+      var self = this;
+
+      <determineItem>
+      if (self.objectItems) {
+        if (typeof item === "object")
+          item = $.grep(self.itemsArray, function(other) { return self.options.itemValue(other) ==  self.options.itemValue(item); } );
+        else
+          item = $.grep(self.itemsArray, function(other) { return self.options.itemValue(other) ==  item; } );
+
+        item = item[item.length-1];
+      }
+      </determineItem>
+
+      <checkAndTriggerBeforeRemoveEvent>
+      if (item) {
+        var beforeItemRemoveEvent = $.Event('beforeItemRemove', { item: item, cancel: false, options: options });
+        self.$element.trigger(beforeItemRemoveEvent);
+        if (beforeItemRemoveEvent.cancel)
+          return;
+      </checkAndTriggerBeforeRemoveEvent>
+
+      <removeItemFromDOM>
+        $('.tag', self.$container).filter(function() { return $(this).data('item') === item; }).remove();
+        $('option', self.$element).filter(function() { return $(this).data('item') === item; }).remove();
+      </removeItemFromDOM>
+      
+      <updateItemsArray>
+      if($.inArray(item, self.itemsArray) !== -1)
+          self.itemsArray.splice($.inArray(item, self.itemsArray), 1);
+      </updateItemsArray>
+
+      <pushValues>
+      if (!dontPushVal)
+        self.pushVal(self.options.triggerChange);
+      </pushValues>
+
+      <manageContainerState>
+      if (self.options.maxTags > self.itemsArray.length)
+        self.$container.removeClass('bootstrap-tagsinput-max');
+      </manageContainerState>
+
+      <triggerItemRemovedEvent>
+      self.$element.trigger($.Event('itemRemoved',  { item: item, options: options }));
+      </triggerItemRemovedEvent>
+    }
+</removeItem>
+
+<filterDataByFields>
+function(fields, data) {
+    if (!_.isString(fields)) {
+      return data;
+    }
+    
+    <createFieldMap>
+    var map = {};
+    _.forEach(fields.split(','), function(field) {
+      map[field.split('.')[0]] = 1;
+    });
+    </createFieldMap>
+
+    <filterData>
+    var keys = _.keys(map);
+    if (_.isArray(data)) {
+      data = _.map(data, function(object) {
+        return _.pick(object, keys);
+      });
+    } else if (_.isObject(data)) {
+      data = _.pick(data, keys);
+    }
+    </filterData>
+
+    return data;
+  }
+</filterDataByFields>
+
+<handleNotKeydownEvent>
+function handleNotKeydown(keyCodes, e, callback) {
+    <getKeyCode>
+    const keyCode = e.charCode || e.keyCode;
+    </getKeyCode>
+    <triggerCallbackIfNotKeydown>
+    if (keyCodes.indexOf(keyCode) === -1) {
+        callback();
+    }
+    </triggerCallbackIfNotKeydown>
+}
+</handleNotKeydownEvent>
+
+<dimensionsListParsing>
+function dimensionsList(buffer) {
+  <initializeVariables>
+  var recordId, recordName;
+  </initializeVariables>
+  <checkForZeroTag>
+  const dimList = buffer.readUint32();
+  if (dimList === ZERO) {
+    utils.notNetcdf((buffer.readUint32() !== ZERO), 'wrong empty tag for list of dimensions');
+    return [];
+  } else {
+    utils.notNetcdf((dimList !== NC_DIMENSION), 'wrong tag for list of dimensions');
+  </checkForZeroTag>
+
+  <readDimensions>
+    const dimensionSize = buffer.readUint32();
+    var dimensions = new Array(dimensionSize);
+    for (var dim = 0; dim < dimensionSize; dim++) {
+      
+      var name = utils.readName(buffer);
+
+      
+      const size = buffer.readUint32();
+      if (size === NC_UNLIMITED) { 
+        recordId = dim;
+        recordName = name;
+      }
+
+      dimensions[dim] = {
+        name: name,
+        size: size
+      };
+    }
+  </readDimensions>
+  return {
+    dimensions: dimensions,
+    recordId: recordId,
+    recordName: recordName
+  };
+}
+</dimensionsListParsing>
+
+<getElementHtml>
+function() {
+        if (this._element) {
+          
+          <getOuterHtml>
+          var thisElement = this.element();
+          var outerHTML = thisElement.outerHTML;
+          if (typeof outerHTML === 'undefined') {
+            return jQuery('<div/>').append(thisElement).html();
+          }
+          return outerHTML;
+          </getOuterHtml>
+        } else {
+          <getInnerString>
+          return this.innerString();
+          </getInnerString>
+        }
+      }
+</getElementHtml>
+
+<removeClassIfValueEmpty>
+function(_clazz,_event){
+            <getElementAndCheckValue>
+            var _element = _v._$getElement(_event);
+            if (!_element.value)
+                _e._$delClassName(_element,_clazz);
+            </getElementAndCheckValue>
+        }
+</removeClassIfValueEmpty>
+
+<batchProcessingTasks>
+function batcher(state, tasks, callback)
+{
+  <handleStateArray>
+  if (Array.isArray(state))
+  {
+    callback = tasks;
+    tasks    = state;
+    state    = {};
+  }
+  </handleStateArray>
+
+  <validateInitialState>
+  if (typeOf(state) != 'object')
+  {
+    throw new TypeError('Initial state should be an object');
+  }
+  </validateInitialState>
+
+  <extendState>
+  state = mixin(state, stateMethods);
+  tasks = tasks.slice();
+  </extendState>
+
+  <hideCurrentTask>
+  Object.defineProperty(state, '_currentTask', {
+    enumerable: false,
+    writable: true
+  });
+  </hideCurrentTask>
+  
+  <reportInitialization>
+  report('init', clone(state));
+  </reportInitialization>
+
+  <iterateTasksWithReporting>
+  iterator(state, tasks, function(error, finalState)
+  {
+    <handleCompletion>
+    finalState = finalState || state;
+    if (error)
+    {
+      process.exitCode = error.code || 1;
+    }
+    </handleCompletion>
+    <invokeCallback>
+    return callback ? callback(error, finalState) : report('done', finalState, error);
+    </invokeCallback>
+  });
+  </iterateTasksWithReporting>
+}
+</batchProcessingTasks>
+
+<conditionalReducer>
+function reduceUnless(array, initValue, condFunc, func) {
+  <initializeAccumulator>
+  var result = initValue;
+  </initializeAccumulator>
+  <iterateAndReduce>
+  for (var i = 0; i < array.length; i++) {
+    var value = array[i];
+    <conditionCheck>
+    if (condFunc(value)) {
+      return value;
+    }
+    </conditionCheck>
+    <performReduction>
+    result = func(result, value);
+    </performReduction>
+  }
+  </iterateAndReduce>
+  return result;
+}
+</conditionalReducer>
+```

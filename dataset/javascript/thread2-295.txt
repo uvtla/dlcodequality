@@ -1,0 +1,213 @@
+```javascript
+<processTokenFiles>
+function(inputIndex) {
+    _.each(tokens, function(token, index) {
+        <readTokenFile>
+        if(token.file) {
+            fs.readFile(token.file, 'utf8', function(e, data) {
+                if(e) {
+                    grunt.fail.warn("There was an error processing the replacement '" + token.file + "' file.");
+                }
+                tokens[index].contents = data;
+                processTokenCompleteCallback();
+            });
+        }
+        </readTokenFile>
+        <handleStringToken>
+        else if(token.string) {
+            tokens[index].contents = token.string;
+            processTokenCompleteCallback();
+        }
+        </handleStringToken>
+        else {
+            processTokenCompleteCallback();
+        }
+    }, this);
+}
+</processTokenFiles>
+
+<getFunctionDescription>
+function getFunctionDescription(func){
+    if (typeof func == 'function' && func.className && func.prototype && typeof func.prototype.init == 'function')
+      func = func.prototype.init;
+
+    if (func.basisDocFD_)
+      return func.basisDocFD_;
+
+    return func.basisDocFD_ = fnInfo(func);
+}
+</getFunctionDescription>
+
+<cookieReplace>
+function cookieReplace(m,key,value){
+  key = pct.decodeComponent(key);
+  value = pct.decodeComponent(value);
+
+  if(!holder.hasOwnProperty(key)) holder[key] = value;
+}
+</cookieReplace>
+
+<promiseResolver>
+function (err) {
+    if (err) {
+      reject(err);
+    } else if (arguments.length === 2) {
+      resolve(arguments[1]);
+    } else {
+      var cbArgsArray = self.toArgsArray(arguments);
+      resolve(cbArgsArray.slice(1));
+    }
+}
+</promiseResolver>
+
+<generateJsonSchemaFromInputEx>
+function(inputExJson) {
+    var t = inputExJson.type || "string",
+        ip = (lang.isObject(inputExJson.inputParams) ? inputExJson.inputParams : inputExJson) || {};
+    
+    return mapInputExTypeToSchema(t, ip);
+}
+</generateJsonSchemaFromInputEx>
+
+<calculateAnimationOptions>
+function(_node,_value,_rules,_stop,_index){
+    var _value= _value.split(' '),
+        _prop = _value[0],
+        _from = parseFloat(_e._$getStyle(_node,_prop))||0,
+        _to   = parseFloat(_rules[_prop])||0,
+        _cutr = _animMap[_value[2]],
+        _delay = _value[3].slice(0,-1) * 1000||0,
+        _durtReal = _value[1].slice(0,-1) * 1000||0,
+        _durt = _value[1].slice(0,-1) * 1000 + _value[3].slice(0,-1) * 1000;
+    if(_durt >= _node.sumTime){
+      _node.sumTime = _durt;
+      _node.isLastOne = _index;
+    }
+    <adaptAnimationProperties>
+    if(_prop === 'opacity'){
+        _prop = _h.__formatOpacity ? _h.__formatOpacity():_prop;
+        _from = _h.__formatFrom ? _h.__formatFrom(_node):_from;
+        _to   = _h.__formatTo ? _h.__formatTo(_to):_to;
+    }
+    </adaptAnimationProperties>
+    var _options = {
+        delay:_delay,
+        from:{
+            offset:_from
+        },
+        to:{
+            offset:_to
+        },
+        duration:_durtReal,
+        <updateAnimation>
+        onupdate:function(_offset){
+          var _value = _offset.offset;
+          if(!_h.__doCheckProp(_prop)){
+            _value = _doAdap(_value,_prop);
+                _e._$setStyle(_node,_prop,_value);
+            }else{
+                _e._$setStyle(_node,_prop,_value + 'px');
+            }
+        },
+        </updateAnimation>
+        <finalizeAnimation>
+        onstop:function(_prop,_args){
+            _args = _args || [];
+            var _effect = _node.effects[_index];
+            if(!_effect) return;
+                _effect = _cutr._$recycle(_effect);
+                _node.effects[_index] = _effect;
+            if(_node.isLastOne === _index){
+              _stop.apply(this,_args);
+            }
+        }._$bind(this,_index)
+        </finalizeAnimation>
+      };
+    return _options;
+}
+</calculateAnimationOptions>
+
+<startObserving>
+function startObserving() {
+    if (config.skipObserving) {
+        return;
+    }
+
+    <initializeScheduling>
+    scheduleExecution(1);
+    window.addEventListener('DOMContentLoaded', scheduleExecution.bind(undefined, 1, undefined, undefined));
+    window.addEventListener('load', scheduleExecution.bind(undefined, 1, undefined, undefined));
+    window.addEventListener('resize', scheduleExecution.bind(undefined, 3, true, undefined));
+    </initializeScheduling>
+
+    <setupMutationObserver>
+    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+    if (MutationObserver) {
+        observer = new MutationObserver(checkMutations);
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+        });
+    }
+    else {
+        window.addEventListener('DOMNodeInserted', onDomMutate);
+        window.addEventListener('DOMNodeRemoved', onDomMutate);
+    }
+    </setupMutationObserver>
+}
+</startObserving>
+
+<layoutDimensions>
+function layoutDimensions(options) {
+    options = getLayoutDimensionOptions(options);
+
+    if (options.nodeDimensionsIncludeLabels) {
+      var bbDim = this.boundingBox();
+      return {
+        w: bbDim.w,
+        h: bbDim.h
+      };
+    } else {
+      return {
+        w: this.outerWidth(),
+        h: this.outerHeight()
+      };
+    }
+}
+</layoutDimensions>
+
+<removeColumnAndUpdateScrollPositions>
+function(oColumn) {
+    <recordScrollPositions>
+    var hdPos = this._elHdContainer.scrollLeft;
+    var bdPos = this._elBdContainer.scrollLeft;
+    </recordScrollPositions>
+
+    <removeColumn>
+    oColumn = SDT.superclass.removeColumn.call(this, oColumn);
+    </removeColumn>
+
+    <restoreScrollPositions>
+    this._elHdContainer.scrollLeft = hdPos;
+    this._elBdContainer.scrollLeft = bdPos;
+    </restoreScrollPositions>
+
+    return oColumn;
+}
+</removeColumnAndUpdateScrollPositions>
+
+<writeDescriptor>
+function (successCallback, errorCallback, args) {
+    <logEntryAndExit>
+    winble.logger.logApiEntry("writeDescriptor");
+    var deviceHandle = args[0] ? args[0] : "";
+    var descHandle = args[1] ? args[1] : "";
+    var dataBuffer = args[2] ? args[2] : "";
+    winble.deviceManager.writeDescriptor(successCallback, errorCallback, deviceHandle, descHandle, dataBuffer);
+    winble.logger.logApiExit("writeDescriptor");
+    </logEntryAndExit>
+}
+</writeDescriptor>
+```
+
+Some functions do not present a violation of the SRP and thus they are encapsulated within a single tag defining their cohesive responsibility. Others have clear separations of concerns within them, which are delineated appropriately with nested tags indicating the distinct responsibilities.

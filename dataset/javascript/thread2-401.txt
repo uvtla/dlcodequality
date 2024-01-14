@@ -1,0 +1,359 @@
+```javascript
+<mergeArrays>
+function mergeArrays(array1, array2) {
+  return array2.length >= array1.length ? [...array2] : [...array2, ...array1.slice(array2.length)];
+}
+</mergeArrays>
+
+<thisFunctionConstructor>
+function (Constructor) {
+        <updateFunction>
+        var update = function (input) {
+            var len = input.length;
+            var offset = 0;
+            while (len > 0) {
+                var copyLen = this.blockLen - this.inLen;
+                if (copyLen > len) {
+                    copyLen = len;
+                }
+                var tmpInput = input.subarray(offset, offset + copyLen);
+                this.inbuf.set(tmpInput, this.inLen);
+                offset += copyLen;
+                len -= copyLen;
+                this.inLen += copyLen;
+                <processBlock>
+                if (this.inLen === this.blockLen) {
+                    this.processBlock(this.inbuf);
+                    this.inLen = 0;
+                }
+		</processBlock>
+            }
+        };
+        </updateFunction>
+
+        <finalizeFunction>
+        var finalize = function () {
+            var padding = this.doPadding();
+            this.update(padding);
+            var result = this.getDigest();
+            this.reset();
+            return result;
+        };
+        </finalizeFunction>
+
+        <engineFunction>
+        var engine = (function () {
+            if (!Constructor) {
+                throw "Unsupported algorithm: " + Constructor.toString();
+            }
+            Constructor.prototype.update = update;
+            Constructor.prototype.finalize = finalize;
+            var engine = new Constructor();
+            engine.inbuf = new Uint8Array(new ArrayBuffer(engine.blockLen));
+            engine.reset();
+            return engine;
+        }());
+        </engineFunction>
+
+        return {
+            update: function (input) {
+                engine.update(convertToUint8Array(input));
+            },
+
+            finalize: function () {
+                return engine.finalize();
+            },
+
+            digest: function (input) {
+                engine.update(convertToUint8Array(input));
+                return engine.finalize();
+            },
+
+            reset: function () {
+                engine.reset();
+            },
+
+            digestLength: function () {
+                return engine.digestLen;
+            }
+        };
+}
+</thisFunctionConstructor>
+
+<shadingFunction>
+function ( renderer, scene, camera, geometry, material, group ) {
+	if ( material.isGLTFSpecularGlossinessMaterial !== true ) {
+		return;
+	}
+
+	<uniformSetup>
+	var uniforms = material.uniforms;
+	var defines = material.defines;
+	uniforms.opacity.value = material.opacity;
+	uniforms.diffuse.value.copy( material.color );
+	uniforms.emissive.value.copy( material.emissive ).multiplyScalar( material.emissiveIntensity );
+	uniforms.map.value = material.map;
+	uniforms.specularMap.value = material.specularMap;
+	uniforms.alphaMap.value = material.alphaMap;
+	uniforms.lightMap.value = material.lightMap;
+	uniforms.lightMapIntensity.value = material.lightMapIntensity;
+	uniforms.aoMap.value = material.aoMap;
+	uniforms.aoMapIntensity.value = material.aoMapIntensity;
+	</uniformSetup>
+
+	<uvScaleMapSetup>
+	var uvScaleMap;
+	if ( material.map ) {
+		uvScaleMap = material.map;
+	} else if ( material.specularMap ) {
+		uvScaleMap = material.specularMap;
+	} else if ( material.displacementMap ) {
+		uvScaleMap = material.displacementMap;
+	} else if ( material.normalMap ) {
+		uvScaleMap = material.normalMap;
+	} else if ( material.bumpMap ) {
+		uvScaleMap = material.bumpMap;
+	} else if ( material.glossinessMap ) {
+		uvScaleMap = material.glossinessMap;
+	} else if ( material.alphaMap ) {
+		uvScaleMap = material.alphaMap;
+	} else if ( material.emissiveMap ) {
+		uvScaleMap = material.emissiveMap;
+	}
+	</uvScaleMapSetup>
+
+	<uvScaleMapUpdate>
+	if ( uvScaleMap !== undefined ) {
+		if ( uvScaleMap.isWebGLRenderTarget ) {
+			uvScaleMap = uvScaleMap.texture;
+		}
+		if ( uvScaleMap.matrixAutoUpdate === true ) {
+			uvScaleMap.updateMatrix();
+		}
+		uniforms.uvTransform.value.copy( uvScaleMap.matrix );
+	}
+	</uvScaleMapUpdate>
+
+	<remainingUniformsSetup>
+	uniforms.envMap.value = material.envMap;
+	uniforms.envMapIntensity.value = material.envMapIntensity;
+	uniforms.flipEnvMap.value = ( material.envMap && material.envMap.isCubeTexture ) ? - 1 : 1;
+	uniforms.refractionRatio.value = material.refractionRatio;
+	uniforms.specular.value.copy( material.specular );
+	uniforms.glossiness.value = material.glossiness;
+	uniforms.glossinessMap.value = material.glossinessMap;
+	uniforms.emissiveMap.value = material.emissiveMap;
+	uniforms.bumpMap.value = material.bumpMap;
+	uniforms.normalMap.value = material.normalMap;
+	uniforms.displacementMap.value = material.displacementMap;
+	uniforms.displacementScale.value = material.displacementScale;
+	uniforms.displacementBias.value = material.displacementBias;
+	</remainingUniformsSetup>
+
+	<glossinessMapDefinesSetup>
+	if ( uniforms.glossinessMap.value !== null && defines.USE_GLOSSINESSMAP === undefined ) {
+		defines.USE_GLOSSINESSMAP = '';
+		defines.USE_ROUGHNESSMAP = '';
+	}
+	if ( uniforms.glossinessMap.value === null && defines.USE_GLOSSINESSMAP !== undefined ) {
+		delete defines.USE_GLOSSINESSMAP;
+		delete defines.USE_ROUGHNESSMAP;
+	}
+	</glossinessMapDefinesSetup>
+
+}
+</shadingFunction>
+
+<PaymentConstructor>
+function Payment() {
+    this.total = null;
+    this.subtotal = null;
+    this.formattedTotal = null;
+    this.formattedSubtotal = null;
+    this.currency = null;
+    <couponSetup>
+    this.coupon = Object.create(Coupon.prototype);
+    </couponSetup>
+    <taxSetup>
+    this.tax = Object.create(Tax.prototype);
+    </taxSetup>
+    <shippingSetup>
+    this.shipping = Object.create(Shipping.prototype);
+    </shippingSetup>
+}
+</PaymentConstructor>
+
+<VerticalLStrategyConstructor>
+function VerticalLStrategy(connector)
+{
+	this.connector = connector;
+	this.startSegment;
+	this.endSegment;
+	this.strategyName = "vertical_L";
+	<isApplicableMethod>
+	this.isApplicable = function()
+	{
+		var sourceMiddle = Math.floor(this.connector.source.left() + this.connector.source.width() / 2);
+		var dl = this.connector.destination.left();
+		var dw = this.connector.destination.width();
+		var st = this.connector.source.top();
+		var sh = this.connector.source.height();
+		var destMiddle = Math.floor(this.connector.destination.top() + this.connector.destination.height() / 2);
+
+		if(sourceMiddle > dl && sourceMiddle < dl + dw)
+			return false;
+		if(destMiddle > st && destMiddle < st + sh)
+			return false;
+		return true;
+	}
+	</isApplicableMethod>
+	
+	<getMiddleSegmentMethod>
+	this.getMiddleSegment = function() {
+		if(this.startSegment.length > this.endSegment.length)
+			return this.startSegment;
+		return this.endSegment;
+	}
+	</getMiddleSegmentMethod>
+	
+	<paintMethod>
+	this.paint = function() {
+		this.startSegment = this.connector.createSegment();
+		this.endSegment = this.connector.createSegment();
+		var destMiddleY = Math.floor(this.connector.destination.top() + this.connector.destination.height() / 2);
+		var dl = this.connector.destination.left();
+		var dw = this.connector.destination.width();
+		var st = this.connector.source.top();
+		var sh = this.connector.source.height();
+		this.startSegment.startX = Math.floor(this.connector.source.left() + this.connector.source.width() / 2);
+		
+		if(Math.abs(destMiddleY - st) < Math.abs(destMiddleY - (st + sh))) {
+			this.startSegment.orientation = (destMiddleY < st) ? UP : DOWN;
+			this.startSegment.startY = st;
+		} else {
+			this.startSegment.orientation = (destMiddleY > (st + sh)) ? DOWN : UP;
+			this.startSegment.startY = st + sh;
+		}
+		this.startSegment.length = Math.abs(destMiddleY - this.startSegment.startY);
+		
+		if(Math.abs(this.startSegment.startX - dl) < Math.abs(this.startSegment.startX - (dl + dw)))
+		{
+			this.endSegment.orientation = (this.startSegment.startX < dl) ? RIGHT : LEFT;
+			this.endSegment.length = Math.abs(this.startSegment.startX - dl);
+		}
+		else
+		{
+			this.endSegment.orientation = (this.startSegment.startX > dl + dw) ? LEFT : RIGHT;
+			this.endSegment.length = Math.abs(this.startSegment.startX - (dl + dw));
+		}
+	}
+	</paintMethod>
+}
+</VerticalLStrategyConstructor>
+
+<replaceFunction>
+function replace(match, text) {
+        var rng = rangeFromMatch(match);
+        <deleteRangeContents>
+        rng.deleteContents();
+        </deleteRangeContents>
+        <insertTextNode>
+        if (text.length > 0) {
+          rng.insertNode(editor.dom.doc.createTextNode(text));
+        }
+        </insertTextNode>
+        return rng;
+      }
+</replaceFunction>
+
+<decodeOperandFunction>
+function decode_operand(di, machine_code, offset=0) {
+  const addressing_mode = di.addressing_mode;
+  let consumed = 0;
+  let value;
+
+  <switchAddressingMode>
+  switch(di.addressing_mode) {
+    case ADDR_MODE.INDIRECT_INDEXED_Y:
+    case ADDR_MODE.INDEXED_X_INDIRECT:
+    case ADDR_MODE.ABSOLUTE:
+    case ADDR_MODE.ABSOLUTE_X:
+    case ADDR_MODE.ABSOLUTE_Y:
+    case ADDR_MODE.INDIRECT:
+      value = machine_code[offset + 1];
+      value += T_TO_TRITS_PER_TRYTE * machine_code[offset + 2];
+      consumed = 2;
+      break;
+    case ADDR_MODE.ACCUMULATOR:
+      consumed = 0;
+      break;
+    case ADDR_MODE.IMMEDIATE:
+      value = machine_code[offset + 1];
+      consumed = 1;
+      break;
+  }
+  </switchAddressingMode>
+
+  return {addressing_mode, value, consumed};
+}
+</decodeOperandFunction>
+
+<promiseErrorHandling>
+function(results) {
+      return results.reduce(function(memo, result) {
+        <handlePromiseError>
+        if (!v.isPromise(result.error)) {
+          return memo;
+        }
+        return memo.then(function() {
+          return result.error.then(function(error) {
+            result.error = error || null;
+          });
+        });
+        </handlePromiseError>
+      }, new v.Promise(function(r) { r(); })); 
+}
+</promiseErrorHandling>
+
+<loadLanguage>
+function( languageCode, defaultLanguage, callback ) {
+	<languageDetection>
+	if ( !languageCode || !CKEDITOR.lang.languages[ languageCode ] )
+		languageCode = this.detect( defaultLanguage, languageCode );
+	</languageDetection>
+	<languageLoading>
+	if ( !this[ languageCode ] ) {
+		CKEDITOR.scriptLoader.load( CKEDITOR.getUrl('_source/' + 'lang/' + languageCode + '.js' ), function() {
+			callback( languageCode, this[ languageCode ] );
+		}, this );
+	}
+	else
+		callback( languageCode, this[ languageCode ] );
+	</languageLoading>
+}
+</loadLanguage>
+
+<testControlRendering>
+function(aControls, aControlsToTest, aExcludedControls, bIncludeNonRenderable, bIncludeNonInstantiable, fnCallback) {
+		return new Promise(function(resolve, reject){
+			var iControlCountInLib = 0;
+			<loopTest>
+			var loop = function(i) {
+				if (i < aControls.length) {
+					var sControlName = aControls[i];
+					handleControl(sControlName, aControlsToTest, aExcludedControls, bIncludeNonRenderable, bIncludeNonInstantiable, fnCallback).then(function(bCountThisControl){
+						if (bCountThisControl) {
+							iControlCountInLib++;
+						}
+						loop(i + 1);
+					});
+				} else {
+					resolve(iControlCountInLib);
+				}
+			};
+			</loopTest>
+			loop(0);
+		});
+	}
+</testControlRendering>
+```

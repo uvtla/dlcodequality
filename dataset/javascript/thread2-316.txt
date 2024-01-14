@@ -1,0 +1,216 @@
+```javascript
+
+<insertBefore>
+function(node) {
+
+  if( node instanceof NWTNodeInstance ) {
+    node = node._node;
+  }
+
+  var child = this.one('*');
+
+  this._node.insertBefore(node, (child._node? child._node : null));
+  
+  return this;
+}
+</insertBefore>
+
+<gzip>
+function gzip(data) {
+  var unit8Array = new Uint8Array(toBuffer(data));
+  return new Buffer(pako.gzip(unit8Array));
+}
+</gzip>
+
+<submitForm>
+function (request) {
+            var form;
+
+            <resolveForm>
+            if (ariaUtilsType.isHTMLElement(request.form)) {
+                form = request.form;
+            } else if (ariaUtilsType.isString(request.formId)) {
+                form = Aria.$window.document.getElementById(request.formId);
+            }
+            </resolveForm>
+
+            if (!form) {
+                <loggingError>
+                this.$logError(this.MISSING_FORM); 
+                </loggingError>
+                return request.callback.onerror.call(request.callback.scope, request);
+            }
+
+            <assignRequestProperties>
+            if (!request.url) {
+                request.url = form.action;
+            }
+
+            if (!request.method) {
+                request.method = form.method;
+            }
+
+            if (form.enctype && !request.headers) {
+                request.headers = {
+                    "Content-Type" : form.enctype
+                };
+            } else if (form.enctype && request.headers && !request.headers["Content-Type"]) {
+                request.headers["Content-Type"] = form.enctype;
+            }
+
+            request.form = form;
+            request.formId = form.id;
+            </assignRequestProperties>
+            
+            return this.asyncRequest(request);
+}
+</submitForm>
+
+<_buildSound>
+function _buildSound(soundDescriptor) {
+  descriptor = soundDescriptor;
+  this.service = soundDescriptor.service;
+  this.url = soundDescriptor.url;
+  this.title = soundDescriptor.title;
+  this.artist = soundDescriptor.artist;
+  this.cover = soundDescriptor.cover;
+  this.artistCover = soundDescriptor.artistCover;
+  this.soundCover = soundDescriptor.soundCover;
+  this.waveFormImage = soundDescriptor.waveFormImage;
+  this.link = soundDescriptor.link;
+  this.appData = soundDescriptor.appData;
+}
+</_buildSound>
+
+<addFileOrBrowseDirectory>
+function _addFileOrContinueBrowsing (item, fileList) {
+  !fs.statSync(item).isDirectory() ? fileList.push(item) : _browseDir(item, fileList)
+}
+</addFileOrBrowseDirectory>
+
+<createFlashObject>
+function(swfURL, containerID, swfID, version, backgroundColor, expressInstall, wmode, buttonSkin)
+{
+
+  var swfObj = new YAHOO.deconcept.SWFObject(swfURL, swfID, "100%", "100%", version, backgroundColor);
+
+  if(expressInstall)
+  {
+    <useExpressInstall>
+    swfObj.useExpressInstall(expressInstall);
+    </useExpressInstall>
+  }
+
+  <addFlashParameters>
+  swfObj.addParam("allowScriptAccess", "always");
+  if(wmode)
+  {
+    swfObj.addParam("wmode", wmode);
+  }
+  swfObj.addParam("menu", "false");
+
+  swfObj.addVariable("allowedDomain", document.location.hostname);
+  swfObj.addVariable("YUISwfId", swfID);
+  swfObj.addVariable("YUIBridgeCallback", "YAHOO.widget.FlashAdapter.eventHandler");
+  if (buttonSkin) {
+    swfObj.addVariable("buttonSkin", buttonSkin);
+  }
+  </addFlashParameters>
+
+  var container = YAHOO.util.Dom.get(containerID);
+  <writeFlashObject>
+  var result = swfObj.write(container);
+  if(result)
+  {
+    this._swf = YAHOO.util.Dom.get(swfID);
+    YAHOO.widget.FlashAdapter.owners[swfID] = this;
+  }
+  else
+  {
+  }
+  </writeFlashObject>
+}
+</createFlashObject>
+
+<checkAttributesUndefined>
+function (testIdx, testCount, variationCount) {
+  if (variationCount === undefined) {
+    return typeof this.xml[0].children[testIdx].children[testCount].attrs === 'undefined';
+  }
+
+  return typeof this.xml[0].children[testIdx].children[testCount].children[variationCount].attrs === 'undefined';
+}
+</checkAttributesUndefined>
+
+<updateUI>
+function() {
+  <configurePadding>
+  this.padding = this.positionBlocks[this.relativePosition].padding;
+  </configurePadding>
+
+  if (this.closeDiv) {
+    <styleCloseDiv>
+    var contentDivPadding = this.getContentDivPadding();
+    this.closeDiv.style.right = contentDivPadding.right + this.padding.right + "px";
+    this.closeDiv.style.top = contentDivPadding.top + this.padding.top + "px";
+    </styleCloseDiv>
+  }
+  
+  <updateBlocks>
+  this.updateBlocks();
+  </updateBlocks>
+}
+</updateUI>
+
+<printObjectTypeIndexer>
+function ObjectTypeIndexer(node, print) {
+  if (node["static"]) this.push("static ");
+  this.push("[");
+  print.plain(node.id);
+  this.push(":");
+  this.space();
+  print.plain(node.key);
+  this.push("]");
+  this.push(":");
+  this.space();
+  print.plain(node.value);
+}
+</printObjectTypeIndexer>
+
+<loadImagePattern>
+function(url) {
+  if (!url) return this
+
+  var self = this
+    , img  = document.createElement('img')
+
+  <handleImageLoad>
+  img.onload = function() {
+    var p = self.parent(SVG.Pattern)
+
+    if(p === null) return
+
+    <setPatternSize>
+    if (self.width() == 0 && self.height() == 0)
+      self.size(img.width, img.height)
+    if (p && p.width() == 0 && p.height() == 0)
+      p.size(self.width(), self.height())
+    </setPatternSize>
+
+    <loadedCallback>
+    if (typeof self._loaded === 'function')
+      self._loaded.call(self, {
+        width:  img.width
+      , height: img.height
+      , ratio:  img.width / img.height
+      , url:    url
+      })
+    </loadedCallback>
+  }
+  </handleImageLoad>
+
+  return this.attr('href', (img.src = this.src = url), SVG.xlink)
+}
+</loadImagePattern>
+
+```

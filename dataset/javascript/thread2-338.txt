@@ -1,0 +1,601 @@
+```javascript
+<buildFilter>
+function buildFilter(recordTypes, valueExprCtx, testSpec) {
+    <errorMessageCreation>
+    const error = msg => new common.X2UsageError(
+        'Invalid filter specification' + (
+            valueExprCtx.basePath.length > 0 ?
+                ' on ' + valueExprCtx.basePath : '') + ': ' + msg
+    );
+    </errorMessageCreation>
+
+    <validateTestSpecification>
+    if (!Array.isArray(testSpec) || (testSpec.length === 0))
+        throw error(
+            'filter test specification must be an array and must not be empty.');
+    </validateTestSpecification>
+
+    <extractAndValidatePredicate>
+    const pred = testSpec[0];
+    if ((typeof pred) !== 'string')
+        throw error(`invalid type for predicate "${pred}".`);
+    const predParts = pred.match(
+            /^\s*(?:(?::(!?\w+)\s*)|([^:=\s].*?)\s*(?:=>\s*(!?\w+)\s*)?)$/i);
+    if (predParts === null)
+        throw error(`predicate "${pred}" has invalid syntax.`);
+    </extractAndValidatePredicate>
+
+    <handleLogicalJunction>
+    if (predParts[1] !== undefined) {
+
+        <validateNestedTestsArray>
+        if (!Array.isArray(testSpec[1]) || (testSpec.length > 2))
+            throw error(
+                'logical junction must be followed by exactly one' +
+                    ' array of nested tests.');
+        </validateNestedTestsArray>
+
+        <determineJunctionType>
+        let juncType, invert;
+        switch (predParts[1].toLowerCase()) {
+        case 'or':
+        case 'any':
+        case '!none':
+            juncType = 'OR'; invert = false;
+            break;
+        case '!or':
+        case '!any':
+        case 'none':
+            juncType = 'OR'; invert = true;
+            break;
+        case 'and':
+        case 'all':
+            juncType = 'AND'; invert = false;
+            break;
+        case '!and':
+        case '!all':
+            juncType = 'AND'; invert = true;
+            break;
+        default:
+            throw error(`unknown junction type "${predParts[1]}".`);
+        }
+        </determineJunctionType>
+
+        <createRecordsFilterJunction>
+        const junc = new RecordsFilterJunction(juncType, invert);
+        </createRecordsFilterJunction>
+
+        <populateJunctionWithNestedTests>
+        testSpec[1].forEach(nestedTestSpec => {
+            const nestedTest = buildFilter(
+                recordTypes, valueExprCtx, nestedTestSpec);
+            if (nestedTest)
+                junc.addElement(nestedTest);
+        });
+        </populateJunctionWithNestedTests>
+
+        <returnJunction>
+        return (junc.isEmpty() ? undefined : junc);
+        </returnJunction>
+    }
+    </handleLogicalJunction>
+
+    <handleValueExpression>
+    const valueExpr = new ValueExpression(valueExprCtx, predParts[2]);
+    </handleValueExpression>
+
+    <handleCollectionTests>
+    let testType, invert = false, testParams;
+
+    const singlePropValueExprCtx = (
+        valueExpr.isSinglePropRef() &&
+            valueExprCtx.getRelativeContext(predParts[2]));
+    if (singlePropValueExprCtx &&
+        !singlePropValueExprCtx.basePropertyDesc.isScalar()) {
+
+        <getCollectionFilterTestAndValidate>
+        let colFilterSpecInd = 1;
+        const rawTestType = (
+            predParts[3] !== undefined ? predParts[3] : '!empty');
+        switch (rawTestType.toLowerCase()) {
+        case '!empty':
+            invert = true;
+        case 'empty':
+            testType = 'empty';
+            break;
+        case '!count':
+            invert = true;
+        case 'count':
+            testType = 'count';
+            testParams = [ testSpec[1] ];
+            if (!Number.isInteger(testParams[0]))
+                throw error(
+                    `test "${rawTestType}" expects an integer number argument.`);
+            colFilterSpecInd = 2;
+            break;
+        default:
+            throw error(
+                `invalid collection test "${pred}" as it may only be "empty"` +
+                    ', "!empty", "count" or "!count".');
+        }
+        </getCollectionFilterTestAndValidate>
+
+        <getCollectionFilterSpec>
+        const colFilterSpec = testSpec[colFilterSpecInd];
+        if ((testSpec.length > colFilterSpecInd + 1) || (
+            (colFilterSpec !== undefined) && !Array.isArray(colFilterSpec)))
+            throw error(
+                'collection test may only have none or a single' +
+                    ' collection filter argument and it must be an array.');
+        </getCollectionFilterSpec>
+
+        <createRecordsFilterCollectionTest>
+        return new RecordsFilterCollectionTest(
+            recordTypes,
+            valueExprCtx.normalizePropertyRef(
+                predParts[2].match(/^((?:\^\.)*[^.]+)/)[1]),
+            testType, invert, testParams,
+            singlePropValueExprCtx,
+            colFilterSpec
+        );
+        </createRecordsFilterCollectionTest>
+    }
+    </handleCollectionTests>
+
+    <prepareTestParams>
+    function getSingleTestParam() {
+        const v = testSpec[1];
+        if ((testSpec.length > 2) || (v === undefined) ||
+            (v === null) || Array.isArray(v))
+            throw error(
+                `test "${rawTestType}" expects a single non-null,` +
+                    ` non-array argument.`);
+        return [ v ];
+    }
+    function getTwoTestParams() {
+        let v1, v2;
+        switch (testSpec.length) {
+        case 2:
+            if (Array.isArray(testSpec[1]) && (testSpec[1].length === 2)) {
+                v1 = testSpec[1][0];
+                v2 = testSpec[1][1];
+            }
+            break;
+        case 3:
+            v1 = testSpec[1];
+            v2 = testSpec[2];
+        }
+        if ((v1 === undefined) || (v2 === undefined) ||
+            (v1 === null) || (v2 === null) ||
+            Array.isArray(v1) || Array.isArray(v2))
+            throw error(
+                `test "${rawTestType}" expects two non-null,` +
+                    ` non-array arguments.`);
+        return [ v1, v2 ];
+    }
+    function getListTestParams() {
+        const f = (a, v) => {
+            if ((v === null) || (v === undefined))
+                throw error(
+                    `test "${rawTestType}" expects a list of non-null` +
+                        ` arguments.`);
+            if (Array.isArray(v))
+                v.forEach(vv => { f(a, vv); });
+            else
+                a.push(v);
+            return a;
+        };
+        const a = testSpec.slice(1).reduce(f, new Array());
+        if (a.length === 0)
+            throw error(
+                `test "${rawTestType}" expects a list of non-null arguments.`);
+        return a;
+    }
+    </prepareTestParams>
+
+    <determineSingleValueTest>
+    const rawTestType = (
+        predParts[3] ? predParts[3] : (
+            testSpec.length > 1 ? 'is' : 'present'));
+    switch (rawTestType.toLowerCase()) {
+    case 'is':
+    case 'eq':
+        testType = 'eq';
+        testParams = getSingleTestParam();
+        break;
+    case 'not':
+    case 'ne':
+    case '!eq':
+        testType = 'ne';
+        testParams = getSingleTestParam();
+        break;
+    case 'min':
+    case 'ge':
+    case '!lt':
+        testType = 'ge';
+        testParams = getSingleTestParam();
+        break;
+    case 'max':
+    case 'le':
+    case '!gt':
+        testType = 'le';
+        testParams = getSingleTestParam();
+        break;
+    case 'gt':
+        testType = 'gt';
+        testParams = getSingleTestParam();
+        break;
+    case 'lt':
+        testType = 'lt';
+        testParams = getSingleTestParam();
+        break;
+    case '!in':
+    case '!oneof':
+        invert = true;
+    case 'in':
+    case 'oneof':
+    case 'alt':
+        testType = 'in';
+        testParams = getListTestParams();
+        break;
+    case '!between':
+        invert = true;
+    case 'between':
+        testType = 'between';
+        testParams = getTwoTestParams();
+        break;
+    case '!contains':
+        invert = true;
+    case 'contains':
+        testType = 'contains';
+        testParams = getSingleTestParam();
+        break;
+    case '!containsi':
+    case '!substring':
+        invert = true;
+    case 'containsi':
+    case 'substring':
+        testType = 'containsi';
+        testParams = getSingleTestParam();
+        break;
+    case '!starts':
+        invert = true;
+    case 'starts':
+        testType = 'starts';
+        testParams = getSingleTestParam();
+        break;
+    case '!startsi':
+    case '!prefix':
+        invert = true;
+    case 'startsi':
+    case 'prefix':
+        testType = 'startsi';
+        testParams = getSingleTestParam();
+        break;
+    case '!matches':
+        invert = true;
+    case 'matches':
+        testType = 'matches';
+        testParams = getSingleTestParam();
+        break;
+    case '!matchesi':
+    case '!pattern':
+    case '!re':
+        invert = true;
+    case 'matchesi':
+    case 'pattern':
+    case 're':
+        testType = 'matchesi';
+        testParams = getSingleTestParam();
+        break;
+    case '!empty':
+    case 'present':
+        invert = true;
+    case 'empty':
+        testType = 'empty';
+        if (testSpec.length > 1)
+            throw error(`test "${rawTestType}" expects no arguments.`);
+        break;
+    default:
+        throw error(`unknown test "${rawTestType}".`);
+    }
+    </determineSingleValueTest>
+
+    <processValueExpressionPlaceholders>
+    if (testParams) {
+        for (let i = 0, len = testParams.length; i < len; i++) {
+            const testParam = testParams[i];
+            if (placeholders.isExpr(testParam)) {
+                testParams[i] = new ValueExpression(
+                    valueExprCtx, testParam.expr);
+            }
+        }
+    }
+    </processValueExpressionPlaceholders>
+
+    <returnRecordsFilterValueTest>
+    return new RecordsFilterValueTest(valueExpr, testType, invert, testParams);
+    </returnRecordsFilterValueTest>
+}
+</buildFilter>
+
+<HttpError>
+function HttpError(message, options) {
+    <errorInitialization>
+    if (!(this instanceof HttpError)) {
+        return new HttpError(message, options);
+    }
+
+    HttpError.super_.call(this);
+    Error.captureStackTrace(this, this.constructor);
+    this.name = 'HttpError';
+    this.message = message;
+    this.status = 500;
+    </errorInitialization>
+
+    <processErrorOptions>
+    options = options || {};
+    if (options.code)     { this.code = options.code; }
+    if (options.errors)   { this.errors = options.errors; }
+    if (options.headers)  { this.headers = options.headers; }
+    if (options.cause)    { this.cause = options.cause; }
+    </processErrorOptions>
+}
+</HttpError>
+
+<throttle>
+function throttle(f, delay) {
+  var timeoutId;
+  var previous = 0;
+
+  <throttleExecution>
+  return function throttleExecute_() {
+    var args = arguments;
+    var now = +(new Date());
+    var remaining = delay - (now - previous);
+
+    if (remaining <= 0) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+      previous = now;
+
+      f.apply(null, args);
+    } else if (!timeoutId) {
+      timeoutId = setTimeout(function() {
+        previous = +(new Date());
+        timeoutId = null;
+
+        f.apply(null, args);
+      }, remaining);
+    }
+  };
+  </throttleExecution>
+}
+</throttle>
+
+<Client>
+function Client (globalRequest, maxSockets) {
+  var emptyResponse = JSON.parse(JSON.stringify(response))
+  var body = ''
+  var httpAgent = null
+  var httpsAgent = null
+
+  <initializeAgents>
+  if (maxSockets) {
+    httpAgent = new http.Agent({ maxSockets: maxSockets })
+    httpsAgent = new https.Agent({ maxSockets: maxSockets })
+  }
+  </initializeAgents>
+
+  <emptyRequestFunction>
+  this.emptyRequest = function () {
+    return JSON.parse(JSON.stringify(request))
+  }
+  </emptyRequestFunction>
+
+  <isEmptyFunction>
+  function isEmpty (obj) {
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        return false
+      }
+    }
+    return true
+  }
+  </isEmptyFunction>
+
+  <buildPathFunction>
+  function buildPath (basePath, queryParams) {
+    basePath = basePath.concat('?')
+    var url = basePath.concat(queryString.stringify(queryParams))
+    return url
+  }
+  </buildPathFunction>
+
+  <buildRequestFunction>
+  function buildRequest (globalRequest, endpointRequest) {
+    var request = JSON.parse(JSON.stringify(globalRequest))
+    request.host = endpointRequest.host || globalRequest.host
+    request.method = endpointRequest.method
+
+    if (endpointRequest.port) {
+      request.port = endpointRequest.port
+    }
+
+    <pathProcessing>
+    request.path = !isEmpty(endpointRequest.queryParams)
+      ? buildPath(endpointRequest.path, endpointRequest.queryParams)
+      : endpointRequest.path
+    </pathProcessing>
+
+    <headersProcessing>
+    if (!isEmpty(endpointRequest.headers)) {
+      for (var attrname in endpointRequest.headers) {
+        request.headers[attrname] = endpointRequest.headers[attrname]
+      }
+    }
+    </headersProcessing>
+
+    <bodyProcessing>
+    if (!isEmpty(endpointRequest.body)) {
+      body = JSON.stringify(endpointRequest.body)
+      request.headers['Content-Length'] = Buffer.byteLength(body)
+      request.headers['Content-Type'] = 'application/json'
+    }
+    </bodyProcessing>
+
+    <agentSelection>
+    if (maxSockets) {
+      request.agent = endpointRequest.test === true ? httpAgent : httpsAgent
+    }
+    </agentSelection>
+    return request
+  }
+  </buildRequestFunction>
+
+  <APIFunction>
+  this.API = function (endpointRequest, callback) {
+    var request = buildRequest(globalRequest, endpointRequest)
+
+    var requestProtocol = null;
+
+    <determineProtocol>
+    if (endpointRequest.test === true) {
+      requestProtocol = http
+      request.port = endpointRequest.port
+    } else {
+      requestProtocol = https
+    }
+    </determineProtocol>
+
+    <httpRequestSetup>
+    var httpRequest = requestProtocol.request(request, function (httpResponse) {
+      var responseBody = ''
+
+      <responseBodyAggregation>
+      httpResponse.on('data', function (chunk) {
+        responseBody += chunk
+      })
+      </responseBodyAggregation>
+
+      <responseEndHandling>
+      httpResponse.on('end', function () {
+        var response = JSON.parse(JSON.stringify(emptyResponse))
+        response.statusCode = httpResponse.statusCode
+        response.body = responseBody
+        response.headers = httpResponse.headers
+        callback(response)
+      })
+      </responseEndHandling>
+    })
+    </httpRequestSetup>
+
+    <errorHandling>
+    httpRequest.on('error', function (e) {
+      var response = JSON.parse(JSON.stringify(emptyResponse))
+      response.statusCode = e.statusCode || 500
+      response.body = JSON.stringify({
+        message: e.message,
+        name: e.name,
+        stack: e.stack
+      })
+      callback(response)
+    })
+    </errorHandling>
+
+    <bodyWriting>
+    if (!isEmpty(endpointRequest.body)) {
+      httpRequest.write(body)
+    }
+    </bodyWriting>
+
+    httpRequest.end()
+  }
+  </APIFunction>
+
+  return this
+}
+</Client>
+
+<removeDecorator>
+function (decorator, txt) {
+    var decostr = "@" + decorator;
+    var r = txt
+        .replace(decostr, "")
+        .trim()
+        ;
+    if (debug) console.log(`Cleaning deco: ${decorator} in  ${txt}
+    Result: ${r}
+    `);
+
+
+    return r;
+}
+</removeDecorator>
+
+<execute>
+function execute(req, res) {
+  this.state.pubsub.psubscribe(req.conn, req.args);
+}
+</execute>
+
+<processNodeContentWithPosthtml>
+function processNodeContentWithPosthtml(node, options) {
+    return function (content) {
+        return processWithPostHtml(options.plugins, path.join(path.dirname(options.from), node.attrs.href), content, [function (tree) {
+            
+            return tree.match(match('content'), function () {
+                return node.content || '';
+            });
+        }]);
+    };
+}
+</processNodeContentWithPosthtml>
+
+<get>
+function get(uri, locals) {
+  const name = getLayoutName(uri),
+    model = name && files.getLayoutModules(name),
+    callHooks = _.get(locals, 'hooks') !== 'false',
+    reqExtension = _.get(locals, 'extension'),
+    renderModel = reqExtension && files.getLayoutModules(name, reqExtension),
+    executeRender = model && _.isFunction(model.render) && callHooks;
+
+  return models.get(model, renderModel, executeRender, uri, locals);
+}
+</get>
+
+<mousemove_callback>
+function mousemove_callback(e) {
+    var x  = e.pageX || e.originalEvent.touches[0].pageX;
+    var y  = e.pageY || e.originalEvent.touches[0].pageY;
+
+    <cancelTimeoutOnMovement>
+    if (Math.abs(oX - x) > maxMove || Math.abs(oY - y) > maxMove) {
+        if (timeout) clearTimeout(timeout);
+    }
+    </cancelTimeoutOnMovement>
+}
+</mousemove_callback>
+
+<returnEntityToPool>
+function (el) {
+    <checkElInUsed>
+    var index = this.usedEls.indexOf(el);
+    if (index === -1) {
+      warn('The returned entity was not previously pooled from ' + this.attrName);
+      return;
+    }
+    </checkElInUsed>
+    <removeElFromUsedAndAddToAvailable>
+    this.usedEls.splice(index, 1);
+    this.availableEls.push(el);
+    el.object3D.visible = false;
+    el.pause();
+    </removeElFromUsedAndAddToAvailable>
+    return el;
+  } 
+</returnEntityToPool>
+```
+
+In the above annotations, I've identified distinct responsibilities based on blocks of instructions serving a specific function within each method. The labeling provides a clear view of the SRP compliance or violation within each function. It's essential to remember that simple operations and lines that do not form a meaningful instruction set do not constitute a separate responsibility under SRP and have not been tagged as such.

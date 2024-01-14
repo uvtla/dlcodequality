@@ -1,0 +1,359 @@
+```javascript
+<prepareColors>
+function prepareColors(colors) {
+    Object.keys(colors).forEach(function (color) {
+        var code = colors[color],
+            replaced = replaceColors(code, colors);
+
+        if (replaced !== code) {
+            colors[color] = replaced;
+        }
+    });
+}
+</prepareColors>
+
+<getLatencyAndWait>
+function getLatencyAndWait() {
+    var result = null;
+
+    if (isDestroyed) {
+        return Promise.resolve(result);
+    }
+
+    return getLatency(slave)
+        .then(function (latency) { result = latency })  
+        .catch(function (err)    { console.log(err) })  
+        .then(function () { return util.wait(DELAY) })  
+        .then(function () { return result});            
+}
+</getLatencyAndWait>
+
+<addFieldHandler>
+function (handler, ns, name, type, id, from, options) {
+    var hand = new Strophe.Handler(handler, ns, name, type, id, from, options);
+    this.addHandlers.push(hand);
+    return hand;
+}
+</addFieldHandler>
+
+<drawHorizontalLegend>
+function drawHorizontalLegend() {
+    let xOffset = markerSize;
+
+    svg.select('.legend-group')
+        .selectAll('g')
+        .remove();
+
+    
+    svg.select('.legend-group')
+        .append('g')
+        .classed('legend-line', true);
+
+    
+    entries = svg.select('.legend-line')
+        .selectAll('g.legend-entry')
+        .data(data);
+
+    
+    entries.enter()
+        .append('g')
+        .classed('legend-entry', true)
+        .attr('data-item', getId)
+        .attr('transform', function({name}) {
+            let horizontalOffset = xOffset,
+                lineHeight = chartHeight / 2,
+                verticalOffset = lineHeight,
+                labelWidth = textHelper.getTextWidth(name, textSize);
+
+            xOffset += markerSize + 2 * getLineElementMargin() + labelWidth;
+
+            return `translate(${horizontalOffset},${verticalOffset})`;
+        })
+        .merge(entries)
+        .append('circle')
+        .classed('legend-circle', true)
+        .attr('cx', markerSize/2)
+        .attr('cy', markerYOffset)
+        .attr('r', markerSize / 2)
+        .style('fill', getCircleFill)
+        .style('stroke-width', 1);
+
+    svg.select('.legend-group')
+        .selectAll('g.legend-entry')
+        .append('text')
+        .classed('legend-entry-name', true)
+        .text(getName)
+        .attr('x', getLineElementMargin())
+        .style('font-size', `${textSize}px`)
+        .style('letter-spacing', `${textLetterSpacing}px`);
+
+    
+    svg.select('.legend-group')
+        .selectAll('g.legend-entry')
+        .exit()
+        .transition()
+        .style('opacity', 0)
+        .remove();
+
+    adjustLines();
+}
+</drawHorizontalLegend>
+
+<_findHandler>
+async function _findHandler(model, _id, request, Log) {
+  try {
+    let query = Object.assign({}, request.query)
+    try {
+      <preProcessing>
+      if (
+        model.routeOptions &&
+        model.routeOptions.find &&
+        model.routeOptions.find.pre
+      ) {
+        query = await model.routeOptions.find.pre(_id, query, request, Log)
+      }
+      </preProcessing>
+    } catch (err) {
+      handleError(err, 'There was a preprocessing error.', Boom.badRequest, Log)
+    }
+
+    let flatten = false
+    if (query.$flatten) {
+      flatten = true
+    }
+    delete query.$flatten
+    let mongooseQuery = model.findOne({ _id: _id })
+    mongooseQuery = QueryHelper.createMongooseQuery(
+      model,
+      query,
+      mongooseQuery,
+      Log
+    ).lean()
+    let result = await mongooseQuery.exec()
+    if (result) {
+      let data = result
+      try {
+        <postProcessing>
+        if (
+          model.routeOptions &&
+          model.routeOptions.find &&
+          model.routeOptions.find.post
+        ) {
+          data = await model.routeOptions.find.post(request, result, Log)
+        }
+        </postProcessing>
+      } catch (err) {
+        handleError(
+          err,
+          'There was a postprocessing error.',
+          Boom.badRequest,
+          Log
+        )
+      }
+      <handleAssociations>
+      if (model.routeOptions) {
+        let associations = model.routeOptions.associations
+        for (let associationKey in associations) {
+          let association = associations[associationKey]
+          if (association.type === 'ONE_MANY' && data[associationKey]) {
+            
+            result[associationKey] = data[associationKey]
+          }
+          if (association.type === 'MANY_MANY' && flatten === true) {
+            
+            if (result[associationKey]) {
+              result[associationKey] = result[associationKey].map(object => {
+                object = object[association.model]
+                return object
+              })
+            }
+          }
+        }
+      }
+      </handleAssociations>
+
+      <filterDeletedEmbeds>
+      if (config.enableSoftDelete && config.filterDeletedEmbeds) {
+        
+        filterDeletedEmbeds(result, {}, '', 0, Log)
+      }
+      </filterDeletedEmbeds>
+
+      Log.log('Result: %s', JSON.stringify(result))
+
+      return result
+    } else {
+      throw Boom.notFound('No resource was found with that id.')
+    }
+  } catch (err) {
+    handleError(err, null, null, Log)
+  }
+}
+</_findHandler>
+
+<labelTranslation>
+function(doc_key, map_field, item_key){
+
+    var retlbl = null;
+
+    var map_str = anchor.get_doc_field(doc_key, map_field);
+
+    if( map_str && bbop.what_is(map_str) === 'string' ){
+
+        
+        <mapInitialization>
+        if( typeof(anchor._doc_label_maps[doc_key]) ===  'undefined'){
+            anchor._doc_label_maps[doc_key] = {};
+        }
+        if( typeof(anchor._doc_label_maps[doc_key][map_field]) === 'undefined'){
+            
+            
+            anchor._doc_label_maps[doc_key][map_field] =
+                JSON.parse(map_str);
+        }
+        </mapInitialization>
+
+        
+        var map = anchor._doc_label_maps[doc_key][map_field];
+
+        
+        if( map && map[item_key] ){
+            retlbl = map[item_key];
+        }
+    }
+
+    return retlbl;
+}
+</labelTranslation>
+
+<bodyParsingAndValidation>
+function body(ctx) {
+  if (['HEAD', 'GET'].indexOf(ctx.operation.spec.method) >= 0) return;
+
+  var consumeMimes = ctx.operation.spec.consumes ||
+    ctx.operation.resource.api.spec.consumes || [];
+  var mimes = lodash.intersection(consumeMimes,
+    Object.keys(ctx.router.decoder));
+  var prefix = describe(ctx);
+
+  if (!mimes.length) {
+    debug(prefix + 'body middleware disabled (no consumes)');
+    return;
+  }
+
+  var env = ctx.operation.resource.api.env;
+  var options = validateOptions(ctx.operation, 'form', false);
+  var schema = transform.parameters(ctx.operation.spec, 'body');
+
+  if (!schema) {
+    debug(prefix + 'body middleware disabled (no schema)');
+    return;
+  }
+
+  return function(req, res, next) {
+    var mime = is(req, mimes);
+    var bodyErr;
+
+    if (mime) {
+      var body;
+
+      if (req.sf.text) {
+        try {
+          body = ctx.router.decoder[mime](req.sf.text);
+        } catch (err) {
+          debug(prefix + 'body decoder failed', err);
+
+          bodyErr = new Error('Decode body failed');
+          bodyErr.statusCode = 400;
+          bodyErr.parent = err;
+          bodyErr.expose = true;
+
+          return next(bodyErr);
+        }
+      } else if (schema.required) {
+        bodyErr = new Error('Body required');
+        bodyErr.statusCode = 400;
+        bodyErr.expose = true;
+
+        return next(bodyErr);
+      } else {
+        return next();
+      }
+
+      req.sf.body = body;
+
+      if (validate(res, env.validate(schema, { body: body }, options))) {
+        next();
+      }
+    } else if (schema.required) {
+      bodyErr = new Error('Body required');
+      bodyErr.statusCode = 400;
+      bodyErr.expose = true;
+
+      return next(bodyErr);
+    } else {
+      next();
+    }
+  };
+}
+</bodyParsingAndValidation>
+
+<returnModelOrCreateError>
+function(attrs, options) {
+    if (attrs instanceof Model) return attrs;
+    options = options ? _.clone(options) : {};
+    options.collection = this;
+    var model = new this.model(attrs, options);
+    if (!model.validationError) return model;
+    this.trigger('invalid', this, model.validationError, options);
+    return false;
+}
+</returnModelOrCreateError>
+
+<seriesResolver>
+async function series(resolvers){
+    
+    const results = [];
+
+    
+    for (const r of resolvers){
+        results.push(await r.resolve());
+    }
+
+    
+    return results;
+}
+</seriesResolver>
+
+<paginateList>
+function paginateList(formSubmissionModel, params, callback) {
+    logger.debug("paginateList", params);
+    var query = params.query || {};
+    var paginate = params.paginate || {};
+    var fieldModel = params.fieldModel;
+
+    
+    var sortBy = params.sortBy || {
+        submissionCompletedTimestamp: -1
+    };
+
+    formSubmissionModel.paginate(query, {
+        page: paginate.page,
+        limit: paginate.limit,
+        select: CONSTANTS.SUBMISSION_SUMMARY_FIELD_SELECTION,
+        populate: {"path": "formFields.fieldId", "model": fieldModel, "select": "_id type name"},
+        sortBy: sortBy,
+        lean: true
+    }, function(err, submissionsResult) {
+
+        
+        var paginationResult = _.extend({
+            pages: submissionsResult.pages,
+            total: submissionsResult.total
+        }, params);
+
+        handleListResult(err, paginationResult, submissionsResult.docs, callback);
+    });
+}
+</paginateList>
+```

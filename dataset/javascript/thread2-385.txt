@@ -1,0 +1,237 @@
+```javascript
+<_requireDirAll>
+function _requireDirAll(originalModule, absDir, options) {
+  var modules = {};
+  var files = [];
+
+  try {
+    files = fs.readdirSync(absDir);
+  } catch (e) {
+    if (options.throwNoDir) {
+      throw e;
+    }
+  }
+
+  for (var length=files.length, i=0; i<length; ++i) {
+    var reqModule = {};
+    reqModule.filename = files[i];
+    reqModule.ext      = path.extname(reqModule.filename);
+    reqModule.base     = path.basename(reqModule.filename, reqModule.ext);
+    reqModule.filepath = path.join(absDir, reqModule.filename);
+
+    if (fs.statSync(reqModule.filepath).isDirectory() &&
+      options.recursive &&
+      ! isExcludedDir(reqModule, options.excludeDirs) ) {
+      reqModule.name = reqModule.filename;
+      
+      modules[reqModule.name] = _requireDirAll(originalModule, reqModule.filepath, options);
+
+    } else if ( ! isExcludedFileRe(reqModule, options.includeFiles) && !isExcludedFileParent(reqModule, originalModule)) {
+      reqModule.name    = reqModule.base;
+      reqModule.exports = require(reqModule.filepath);
+      if (options.map) {
+        options.map(reqModule);
+      }
+
+      var source = reqModule.exports;
+      var target = (reqModule.name === 'index' && options.indexAsParent) ? modules : modules &&  modules[ reqModule.name ];
+
+      var sourceIsObject = (typeof source === 'object');
+      var targetIsObject = (typeof target === 'object');
+
+      if (sourceIsObject && targetIsObject) {
+        deepAssign(target, source);
+      } else {
+        target = source;
+      }
+
+      if (reqModule.name === 'index' && options.indexAsParent) {
+        modules = target;
+      } else {
+        modules[ reqModule.name ] = target;
+      }
+    }
+  }
+
+  return modules;
+}
+</_requireDirAll>
+
+<forceTestFailure>
+function (optMsg) {
+  var msg = "Forced Failure";
+  if (optMsg) {
+    msg += " (" + optMsg + ")";
+  }
+
+  this.raiseFailure(msg);
+
+  throw {
+    name : this.ASSERT_FAILURE,
+    message : msg
+  };
+}
+</forceTestFailure>
+
+<writeFileSync>
+function writeFileSync(cvs, data) {
+  if (typeof data.path !== 'string') {
+    throw new TypeError('Invalid path type: ' + typeof data.path);
+  }
+
+  var buff = cvs.toBuffer();
+  var fd = fs.openSync(data.path, 'w', WRITE_MODE);
+
+  try {
+    fs.writeSync(fd, buff, 0, buff.length, 0);
+  } catch (error) {
+    fs.closeSync(fd);
+  }
+}
+</writeFileSync>
+
+<moduleLoader>
+function (options, callback) {
+  options = extend({}, MODULE_LOADER_DEFAULTS, options)
+  var modulesFolder = options.uri
+
+  iterateFiles(modulesFolder, loadModule, callback, isJsFile)
+
+  function loadModule(fileName) {
+    if (options.skip && options.skip.test(fileName)) {
+      return
+    }
+    var module = require(fileName)
+    var name = path.relative(options.uri, fileName)
+    options.core.add(name, module)
+  }
+}
+</moduleLoader>
+
+<goBack>
+function goBack() {
+  if (History.length > 1 || location === RefreshLocation) {
+    location.pop();
+    return true;
+  }
+
+  warning(false, 'goBack() was ignored because there is no router history');
+
+  return false;
+}
+</goBack>
+
+<isObjectLiteralType>
+function isObjectLiteralType(type) {
+  return type.symbol && (type.symbol.flags & (4096  | 2048 )) !== 0 &&
+      getSignaturesOfType(type, 0 ).length === 0 &&
+      getSignaturesOfType(type, 1 ).length === 0;
+}
+</isObjectLiteralType>
+
+<getStateParams>
+function getStateParams(state) {
+  if (!state.params) {
+    return state.url ? state.url.params : state.parent.params;
+  }
+  return state.params;
+}
+</getStateParams>
+
+<computeSpecifierMap>
+function computeSpecifierMap(specifiers) {
+  const specifierCount = specifiers.length;
+  const specifierMap = Object.create(null);
+
+  for (let i = 0; i < specifierCount; ++i) {
+    const s = specifiers[i];
+
+    const local =
+      s.type === "ExportDefaultSpecifier" ? "default" :
+      s.type === "ExportNamespaceSpecifier" ? "*" :
+      s.local.name;
+
+    const __ported =
+      s.type === "ImportSpecifier" ? s.imported.name :
+      s.type === "ImportDefaultSpecifier" ? "default" :
+      s.type === "ImportNamespaceSpecifier" ? "*" :
+      (s.type === "ExportSpecifier" ||
+       s.type === "ExportDefaultSpecifier" ||
+       s.type === "ExportNamespaceSpecifier") ? s.exported.name :
+      null;
+
+    if (typeof local === "string" && typeof __ported === "string") {
+      addToSpecifierMap(specifierMap, __ported, local);
+    }
+  }
+
+  return specifierMap;
+}
+</computeSpecifierMap>
+
+<SphereGeneration>
+function Sphere(r, nsides, nsegments) {
+  r = r || 0.5;
+  nsides = nsides || 36;
+  nsegments = nsegments || 18;
+
+  Geometry.call(this, { vertices: true, normals: true, texCoords: true, faces: true });
+
+  var vertices = this.vertices;
+  var texCoords = this.texCoords;
+  var normals = this.normals;
+  var faces = this.faces;
+
+  var degToRad = 1/180.0 * Math.PI;
+
+  var dphi   = 360.0/nsides;
+  var dtheta = 180.0/nsegments;
+
+  for (var segment=0; segment<=nsegments; ++segment) {
+    var theta = segment * dtheta;
+    for (var side=0; side<=nsides; ++side) {
+      var phi = side * dphi;
+      var pos = evalPos(theta, phi);
+      var normal = pos.dup().normalize();
+      var texCoord = new Vec2(phi/360.0, theta/180.0);
+
+      vertices.push(pos);
+      normals.push(normal);
+      texCoords.push(texCoord);
+
+      if (segment == nsegments) continue;
+      if (side == nsides) continue;
+
+      faces.push([ /* ... face indices ... */ ]);
+    }
+  }
+
+  this.computeEdges();
+}
+</SphereGeneration>
+
+<calculatePerspectiveNearDistance>
+function calculatePerspectiveNearDistance(viewportWidth, viewportHeight, distanceToSurface) {
+  if (viewportWidth <= 0) {
+    throw new ArgumentError(Logger.logMessage(Logger.LEVEL_SEVERE, "WWMath", "calculatePerspectiveNearDistance",
+      "invalidWidth"));
+  }
+
+  if (viewportHeight <= 0) {
+    throw new ArgumentError(Logger.logMessage(Logger.LEVEL_SEVERE, "WWMath", "calculatePerspectiveNearDistance",
+      "invalidHeight"));
+  }
+
+  if (distanceToSurface < 0) {
+    throw new ArgumentError(Logger.logMessage(Logger.LEVEL_SEVERE, "WWMath", "calculatePerspectiveNearDistance",
+      "The specified distance is negative."));
+  }
+
+  var aspectRatio = viewportHeight / viewportWidth;
+
+  return 2 * distanceToSurface / Math.sqrt(aspectRatio * aspectRatio + 5);
+}
+</calculatePerspectiveNearDistance>
+```
+
+In most cases, the functions are performing a specific task or a set of closely related tasks that fit within a single responsibility. However, I have enclosed the entire function in tags to ensure clarity, as splitting these functions into finer-grained responsibilities would require extensive knowledge of the surrounding application context and might not necessarily lead to a meaningful segregation of responsibilities.

@@ -1,0 +1,302 @@
+Let's annotate each function provided for Single Responsibility Principle (SRP) compliance or violations. This will sometimes include nested tags for parts of functions that have separate responsibilities.
+
+---
+
+<set$$1>
+function set$$1(a, b) {
+  var innerEq,
+      outerEq = true;
+
+  if (a.size !== b.size) {
+    return false;
+  }
+
+  a.forEach(function (aVal) {
+    if (!outerEq) {
+      return;
+    }
+
+    innerEq = false;
+    
+    b.forEach(function (bVal) {
+      var parentPairs;
+
+      if (innerEq) {
+        return;
+      }
+
+      parentPairs = pairs;
+      if (innerEquiv(bVal, aVal)) {
+        innerEq = true;
+      }
+
+      pairs = parentPairs;
+    });
+
+    if (!innerEq) {
+      outerEq = false;
+    }
+  });
+
+  return outerEq;
+}
+</set$$1>
+
+---
+
+<View>
+function View(tplPath, tplFile, data){
+  this.data = data||{};
+  this.defines = {};
+  this.enabled = true;
+  
+  <configureTemplateSettings>
+  this.settings = doT.templateSettings;
+  this.settings.varname = 'it,helpers'; 
+  this.settings.cache = true; 
+  this.settings.layout = /\{\{##\s*(?:def\.)?_layout\s*(?:\:|=)\s*([\s\S]+?)\s*#\}\}/; 
+  </configureTemplateSettings>
+  if(tplPath){ this.path = tplPath; }
+  if(tplFile){
+    this.file = tplFile;
+    
+    <initializeLayout>
+    this.layout();
+    </initializeLayout>
+  }
+}
+</View>
+
+---
+
+<createStylToCss>
+function createStylToCss(stylPath) {
+  return new Promise((resolve, reject) => {
+    try {
+      const stylStr = FS.readFileSync(stylPath, 'utf8');
+      
+      <stylusRendering>
+      stylus(stylStr.toString())
+        .set('filename', stylPath)
+        .set('compress', true)
+        .render((err, css) => {
+          if (err) throw err;
+          resolve(css);
+        });
+      </stylusRendering>
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+</createStylToCss>
+
+---
+
+<stripify>
+function stripify(file) {
+  if (/\.json$/.test(file)) return through();
+
+  var code = '';
+
+  <transform>
+  function transform(chunk, encoding, next) {
+    code += chunk;
+    next();
+  }
+  </transform>
+
+  <flush>
+  function flush(done) {
+    var ast = rocambole.parse(code);
+
+    code = rocambole.moonwalk(ast, function strip(node) {
+      if (/* condition to match nodes */ ) {
+        return remove(node);
+      }
+    });
+
+    this.push(code.toString());
+    done();
+  }
+  </flush>
+
+  return through(transform, flush);
+}
+</stripify>
+
+---
+
+<processTextContent>
+function processTextContent(text) {
+  if (destroyed) {
+      return;
+  }
+
+  
+  <checkForExcessiveTextBoxes>
+  var numTextBoxes = util.countInStr(text, '<div');
+  
+  if (numTextBoxes > MAX_TEXT_BOXES) {
+      return '';
+  }
+  </checkForExcessiveTextBoxes>
+
+  
+  <removeStylesheetLinks>
+  text = text.replace(/<link rel="stylesheet".*/, '');
+  </removeStylesheetLinks>
+
+  return text;
+}
+</processTextContent>
+
+---
+
+<match>
+function match(o, p, strict) {
+
+  var o_type = get_type(o),
+      p_type = get_type(p);
+
+  if (strict) {
+    <strictTypeComparison>
+    if (o_type !== p_type) { return false; }
+    </strictTypeComparison>
+
+    <strictValueComparison>
+    switch (o_type) {
+      // Case checks
+    }
+    </strictValueComparison>
+
+  } else {
+    <looseValueComparison>
+    switch (p_type) {
+      // Case checks
+    }
+    </looseValueComparison>
+  }
+}
+</match>
+
+---
+
+<ImmutableCoreModelFormInstance>
+function ImmutableCoreModelFormInstance(args) {
+  
+  <mergeFormArguments>
+  _.merge(this, args.form)
+  </mergeFormArguments>
+
+  <reinitializeFields>
+  this.fields = _.cloneDeep(args.form.fields)
+  </reinitializeFields>
+
+  <cleanupArguments>
+  delete args.form
+  </cleanupArguments>
+
+  <initializeBasedOnArgs>
+  if (args.record) {
+      this.initRecord(args.record)
+      
+      delete args.record
+  }
+  
+  else if (args.error) {
+      this.initInput(args.input, args.error)
+      
+      delete args.error
+      delete args.input
+  }
+  
+  else if (args.input) {
+      this.initInput(args.input)
+      
+      delete args.input
+  }
+  </initializeBasedOnArgs>
+
+  <mergeRemainingArguments>
+  mergeArgs(this, args)
+  </mergeRemainingArguments>
+
+  <conditionallySetReadonlyAndSubmit>
+  if (args.mode === 'update' && !this.model.columnName('parentId')) {
+      
+      _.each(this.fields, field => {
+          field.readonly = true
+      })
+      
+      this.submit = false
+  }
+  </conditionallySetReadonlyAndSubmit>
+}
+</ImmutableCoreModelFormInstance>
+
+---
+
+<myOnresizebeforedraw>
+function myOnresizebeforedraw(obj) {
+  var gutterLeft = obj.Get('chart.gutter.left');
+  var gutterRight = obj.Get('chart.gutter.right');
+
+  <setHorizontalMargins>
+  obj.Set('chart.hmargin', (obj.canvas.width - gutterLeft - gutterRight) / (obj.original_data[0].length * 2));
+  </setHorizontalMargins>
+}
+</myOnresizebeforedraw>
+
+---
+
+<getAliases>
+function getAliases(obj) {
+  var names = {};
+
+  <addMainName>
+  if (obj.name) {
+    names[obj.name] = true;
+  }
+  </addMainName>
+
+  <addAllAliases>
+  var aliases = obj.aliases;
+  var i, l;
+  for (i = 0, l = aliases.length; i < l; i++) {
+    names[aliases[i]] = true;
+  }
+  </addAllAliases>
+
+  <generateUniqueAliasList>
+  return Object.keys(names);
+  </generateUniqueAliasList>
+}
+</getAliases>
+
+---
+
+<anonymousConfigFunction>
+function(config) {
+  <omitSettings>
+  config = omit(config, 'settings');
+  </omitSettings>
+
+  <cloneAndSubstitute>
+  var subbed = cloneDeep(config);
+  var subFlag = this._applySubstitutions(subbed, null, null);
+  </cloneAndSubstitute>
+
+  <determineConfigVariant>
+  var unsubbed = subFlag ? config : subbed;
+  </determineConfigVariant>
+
+  <returnConfigVariants>
+  return {subbed:subbed, unsubbed:unsubbed};
+  </returnConfigVariants>
+}
+</anonymousConfigFunction>
+
+---
+
+In all provided functions, nested tags indicate parts of the code that are handling distinct responsibilities which might be considered violations of the Single Responsibility Principle. Each tagged section shows a separate logical concern, providing clarity on how the larger function is comprised of multiple tasks.

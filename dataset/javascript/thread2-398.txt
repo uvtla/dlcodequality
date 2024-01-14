@@ -1,0 +1,188 @@
+Here are the annotations for SRP compliance based on the provided functions:
+
+1.
+```javascript
+function () { // Compliant: function represents a single responsibility of gathering object properties.
+        return {
+            position: this.position,
+            iteration: this.iteration,
+            length: this.length,
+            cycles: this.cycles,
+            empty: this.empty(),
+            eof: this.eof(),
+            bof: this.bof(),
+            cr: this.cr(),
+            ref: this.ref
+        };
+}
+```
+
+2.
+```javascript
+<makeRootDir>
+function makeRootDir(dest, cwd, savedir, callback) { // Non-compliant: function handles filesystem manipulation and asynchronous execution.
+  <determineRoot>
+  let root = path.join(cwd, (savedir || ''), dest.split('/')[0]);
+  console.log('delete: ', root)
+  </determineRoot>
+
+  <removeDirectory>
+  let rm = 'if [ -e '+ root +' ]; then rm -rf ' + root + '; fi';
+  let removed = exec(rm, (error, stdout, stderr) => {
+    if (error !== null) throw ('[Error: makeRootDir:] ' + error);
+  }).on('close', () => {
+  </removeDirectory>
+    
+  <createDirectory>
+    let maked = exec('mkdir ' + root).on('close', () => {
+      return callback && callback();
+    });
+  </createDirectory>
+  });
+}
+</makeRootDir>
+```
+
+3.
+```javascript
+<getChildren>
+function getChildren(ul, recursive) { // Compliant: function is responsible for traversing and collecting child elements.
+    var children = [];
+    ul.children().children("[id^='cd']")
+      .each(function() {
+        var comment = $(this).data('comment');
+        if (recursive)
+          comment.children = getChildren($(this).find('#cl' + comment.id), true);
+        children.push(comment);
+      });
+    return children;
+}
+</getChildren>
+```
+
+4.
+```javascript
+<nodecat>
+function nodecat(fileNames, options, callback) { // Non-compliant: function handles argument normalization, promises, and file concatenation.
+  <handleArgumentsAndPromises>
+  if (!callback && typeof options === 'function') {
+    callback = options;
+    options = null;
+  }
+  ...
+  try {
+    ...
+  } catch (err) {
+    ...
+  }
+  </handleArgumentsAndPromises>
+
+  <performConcatenation>
+  let errNodecat = null;
+  let inCleanup;
+  ...
+  let i = 0;
+  function catNext() {
+    ...
+  }
+  catNext();
+  </performConcatenation>
+
+  return undefined;
+}
+</nodecat>
+```
+
+5.
+```javascript
+function getElementError(message, container) { // Compliant: function creates an error message based on the given parameters.
+  return new Error([message, debugDOM(container)].filter(Boolean).join('\n\n'))
+}
+```
+
+6.
+```javascript
+function byName(a, b) { // Compliant: function is a comparator specifically for sorting file names.
+  if (a === INDEX_FILE) {
+    ...
+  }
+  ...
+  return a.toLowerCase().localeCompare(b.toLowerCase());
+}
+```
+
+7.
+```javascript
+<renderContent>
+function renderContent(source, generator, context, options, cb) { // Compliant: function's single responsibility is rendering and processing templates.
+    ejs.renderFile(generator.templatePath(source), context, options, (err, res) => {
+        if (!err) {
+            cb(res);
+        } else {
+            generator.error(`Copying template ${source} failed. [${err}]`);
+        }
+    });
+}
+</renderContent>
+```
+
+8.
+```javascript
+<loadBatchStateFromDynamoDB>
+function loadBatchStateFromDynamoDB(batch, context) { // Non-compliant: function includes both data loading and error handling from AWS DynamoDB.
+  <initializeAndDefine>
+  const task = this;
+  ...
+  </initializeAndDefine>
+
+  <dynamoDbOperations>
+  try {
+    ...  
+    return dynamoDBDocClient.get(getRequest).promise()
+      ...
+  } catch (err) {
+    ...
+  }
+  </dynamoDbOperations>
+}
+</loadBatchStateFromDynamoDB>
+```
+
+9.
+```javascript
+<deeplyExtendPkg>
+function deeplyExtendPkg(a, b) { // Compliant: function's purpose is to deeply extend package configurations.
+	if(!a.resolutions) {
+		a.resolutions = {};
+	}
+	utils.extend(a.resolutions, b.resolutions || {});
+    ...
+	utils.extend(a.steal, b.steal, true);
+}
+</deeplyExtendPkg>
+```
+
+10.
+```javascript
+function ( arrayBuffer ) { // Non-compliant: function handles both parsing of the buffer and processing of file lines.
+	<setupAndLogging>
+	if ( this.logging.enabled ) console.time( 'OBJLoader2.Parser.parse' );
+	this.configure();
+	...
+	</setupAndLogging>
+
+	<parseAndProcess>
+    for ( var code, word = '', bufferPointer = 0, slashesCount = 0, i = 0; i < length; i++ ) {
+      ...
+    }
+	</parseAndProcess>
+
+	<this.finalizeParsing>
+	this.finalizeParsing();
+	</this.finalizeParsing>
+
+	<logging>
+	if ( this.logging.enabled ) console.timeEnd(  'OBJLoader2.Parser.parse' );
+	</logging>
+}
+```

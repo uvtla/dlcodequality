@@ -1,0 +1,243 @@
+<toordinal>
+function _toordinal(year, month, day) {
+  var days_before_year = ((year - 1) * 365) + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400);
+  var days_before_month = _DAYS_BEFORE_MONTH[month] + (month > 2 && isleap(year) ? 1 : 0);
+  return (days_before_year + days_before_month + day);
+}
+</toordinal>
+
+<safeCloneElement>
+function safeCloneElement (element, props, ...children) {
+  <manageRefs>
+  const cloneRef = props.ref
+  const originalRef = element.ref
+  const originalRefIsAFunction = (typeof originalRef === 'function')
+  </manageRefs>
+
+  <mergeProps>
+  const mergedProps = {...props}
+  </mergeProps>
+
+  <mergeStyles>
+  if (element.props.style && props.style) {
+    mergedProps.style = { ...element.props.style, ...props.style }
+  }
+  </mergeStyles>
+
+  <mergeKeys>
+  mergedProps.key = element.key || props.key
+  </mergeKeys>
+
+  <chainEventHandlers>
+  Object.keys(props).forEach((prop) => {
+    if (prop.indexOf('on') === 0 && (
+        typeof props[prop] === 'function' ||
+        typeof element.props[prop] === 'function'
+    )) {
+      mergedProps[prop] = createChainedFunction(element.props[prop], props[prop])
+    }
+  })
+  </chainEventHandlers>
+
+  <cloneWithoutRefs>
+  if (originalRef == null || cloneRef == null) {
+    return React.cloneElement(element, mergedProps, ...children)
+  }
+  </cloneWithoutRefs>
+
+  <warnAndRefMerging>
+  warn(originalRefIsAFunction,
+    `Cloning an element with a ref that will be overwritten because the ref \
+is not a function. Use a composable callback-style ref instead. \
+Ignoring ref: ${originalRef}`)
+  </warnAndRefMerging>
+
+  <cloneWithRefs>
+  return React.cloneElement(element, {
+    ...mergedProps,
+    ref (component) {
+      cloneRef(component)
+      originalRef(component)
+    }
+  }, ...children)
+  </cloneWithRefs>
+}
+</safeCloneElement>
+
+<registerMock>
+function registerMock(post) {
+  <createResponseObject>
+  var responseObj = {};
+  responseObj["statusCode"] = parseInt(post.statusCode) || 200;
+  responseObj["header"] = post.header || {
+          'Content-Type': post.contentType || 'application/json',
+          'Access-Control-Allow-Origin': '*'
+      };
+  responseObj["contentType"] = post.contentType || "application/json";
+  if (typeof post.responseText == 'object') {
+      responseObj["responseText"] = JSON.stringify(post.responseText);
+  } else {
+      responseObj["responseText"] = post.responseText || "This is a fake response";
+  }
+  responseObj["responseFile"] = post.responseFile;
+  responseObj["id"] = post.id;
+  responseObj["keyValues"] = post.keyValues || {};
+  responseObj["eval"] = post.eval;
+  responseObj["delayTime"] = parseInt(post.delayTime) || 0;
+  </createResponseObject>
+
+  <processRequestPath>
+  var requestPath = post.requestPath;
+  if (post.requestJSONBody == '' || post.requestJSONBody == null) {
+    mockReqRespMap[requestPath] = responseObj;
+  } else {
+    responseObj["requestJSONBody"] = post.requestJSONBody;
+    var uniqueID = md5(JSON.stringify(post.requestJSONBody));
+    mockReqRespMap[requestPath + uniqueID] = responseObj;
+  }
+  </processRequestPath>
+}
+</registerMock>
+
+<isRunByHusky>
+function isRunByHusky (ppid) {
+  return find('pid', ppid).then(list => {
+    <processList>
+    debug('process list: %o', list)
+    const cmd = list[0] && list[0].cmd
+    const pppid = list[0] && list[0].ppid
+    </processList>
+
+    <checkCommands>
+    if (!cmd) {
+      return false
+    }
+    if (huskyCmdReg.test(cmd)) {
+      return true
+    }
+    </checkCommands>
+
+    <recursiveCheck>
+    return isRunByHusky(pppid)
+    </recursiveCheck>
+  })
+}
+</isRunByHusky>
+
+<methodsWrapper>
+function() {
+  <parseArgs>
+  var self = this,
+      args = self.parseInsertArgs(arguments);
+  </parseArgs>
+
+  <executeMultimix>
+  return self.multimix({
+      insert: args.command
+  }, args.animate, args.callback);
+  </executeMultimix>
+}
+</methodsWrapper>
+
+<createBodystructure>
+function createBodystructure(tree, options) {
+  <prepareOptions>
+  options = options || {};
+  </prepareOptions>
+
+  <walkerFunction>
+  var walker = function(node) {
+    <processNode>
+    switch((node.parsedHeader['content-type'] || {}).type) {
+        case 'multipart':
+            return processMultipartNode(node, options);
+        case 'text':
+            return processTextNode(node, options);
+        case 'message':
+            if (!options.attachmentRFC822) {
+                return processRFC822Node(node, options);
+            }
+            return processAttachmentNode(node, options);
+        default:
+            return processAttachmentNode(node, options);
+    }
+    </processNode>
+  };
+  </walkerFunction>
+
+  <walkerExecution>
+  return walker(tree);
+  </walkerExecution>
+}
+</createBodystructure>
+
+<describeFunction>
+function () {
+  <hasFunctionState>
+  if (this.hasFnState()) {
+      return when.resolve();
+  }
+  </hasFunctionState>
+
+  <initDescribeDfd>
+  if (!this._describeDfd) {
+      this.sendMessage("Describe");
+      this._describeDfd = when.defer();
+  }
+  </initDescribeDfd>
+
+  <describePromise>
+  return this._describeDfd.promise;
+  </describePromise>
+}
+</describeFunction>
+
+<mkdir>
+function mkdir(affixes, callback) {
+  <generateDirName>
+  var dirPath = generateName(affixes, 'd-');
+  </generateDirName>
+  <createDirectory>
+  fs.mkdir(dirPath, parseInt('0700', 8), function(err) {
+    if (!err) {
+      <manageCleanup>
+      deleteDirOnExit(dirPath);
+      </manageCleanup>
+    }
+    <invokeCallback>
+    if (callback) {
+      callback(err, dirPath);
+    }
+    </invokeCallback>
+  });
+  </createDirectory>
+}
+</mkdir>
+
+<forOwn>
+function forOwn(object, callback, thisArg) {
+  <prepareCallback>
+  callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3);
+  </prepareCallback>
+  <iterateObject>
+  return baseForOwn(object, callback);
+  </iterateObject>
+}
+</forOwn>
+
+<createCar>
+function createCar(car) {
+  <createCardComponents>
+  var back = createCardBack(assets.carBack);
+  var front = new CarFront(car);
+  var flippable = new FlippableCard(back, front);
+  </createCardComponents>
+  <setInitialPosition>
+  flippable.x = flippable.regX;
+  flippable.y = flippable.regY;
+  </setInitialPosition>
+  <returnFlippable>
+  return flippable;
+  </returnFlippable>
+}
+</createCar>

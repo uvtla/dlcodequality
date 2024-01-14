@@ -1,0 +1,371 @@
+```javascript
+<analyzeModuleDefinition>
+function analyzeModuleDefinition(node) {
+  var args = node.arguments;
+  var arg = 0;
+  <parseModuleName>
+  if ( arg < args.length
+       && args[arg].type === Syntax.Literal && typeof args[arg].value === 'string' ) {
+    warning("module explicitly defined a module name '" + args[arg].value + "'");
+    currentModule.name = args[arg].value;
+    arg++;
+  }
+  </parseModuleName>
+  <parseDependencies>
+  if ( arg < args.length && args[arg].type === Syntax.ArrayExpression ) {
+    currentModule.dependencies = convertValue(args[arg], "string[]");
+    arg++;
+  }
+  </parseDependencies>
+  <parseFactory>
+  if ( arg < args.length && args[arg].type === Syntax.FunctionExpression ) {
+    currentModule.factory = args[arg];
+    arg++;
+  }
+  </parseFactory>
+  <resolveDependencies>
+  if ( currentModule.dependencies && currentModule.factory ) {
+    for ( var i = 0; i < currentModule.dependencies.length && i < currentModule.factory.params.length; i++ ) {
+      var name = currentModule.factory.params[i].name;
+      var module = resolveModuleName(currentModule.module, currentModule.dependencies[i]);
+      debug("  import " + name + " from '" + module + "'");
+      currentModule.localNames[name] = {
+        module: module
+        
+      };
+    }
+  }
+  </resolveDependencies>
+  <collectShortcuts>
+  if ( currentModule.factory ) {
+    collectShortcuts(currentModule.factory.body);
+  }
+  </collectShortcuts>
+}
+</analyzeModuleDefinition>
+
+<moveToTop>
+function moveToTop(child) {
+  var childIndex = this.getChildIndex(child);
+  <reorderElement>
+  if (childIndex > 0) {
+    this.children.splice(0, 0, this.children.splice(childIndex, 1)[0]); 
+    child.pos.z = this.children[1].pos.z + 1;
+  }
+  </reorderElement>
+}
+</moveToTop>
+
+<history>
+function history(params, cb) {
+  <configureRequest>
+  params.resourcePath = config.addURIParams(constants.STATS_BASE_PATH + "/history", params);
+  params.method = 'POST';
+  params.data = params.data || {};
+  </configureRequest>
+  <makeRequest>
+  mbaasRequest.admin(params, cb);
+  </makeRequest>
+}
+</history>
+
+<reduceArray>
+function (arr, callback, initialValue) {
+  
+  <validateInput>
+  var len = arr.length;
+  if (typeof callback !== 'function') {
+      throw new TypeError('callback is not function!');
+  }
+
+  if (len === 0 && arguments.length == 2) {
+      throw new TypeError('arguments invalid');
+  }
+  </validateInput>
+
+  var k = 0;
+  var accumulator;
+  <initializeAccumulator>
+  if (arguments.length >= 3) {
+      accumulator = arguments[2];
+  }
+  else {
+      do {
+          if (k in arr) {
+              accumulator = arr[k++];
+              break;
+          }
+          k += 1;
+          if (k >= len) {
+              throw new TypeError();
+          }
+      }
+      while (TRUE);
+  }
+  </initializeAccumulator>
+
+  <accumulateValues>
+  while (k < len) {
+      if (k in arr) {
+          accumulator = callback.call(undefined, accumulator, arr[k], k, arr);
+      }
+      k++;
+  }
+  </accumulateValues>
+
+  return accumulator;
+}
+</reduceArray>
+
+<modUpdatePreparedState>
+function modUpdatePreparedState(id) {
+  <initializeState>
+  var updatingModules = {};
+  </initializeState>
+  <updateDependencies>
+  update(id);
+  </updateDependencies>
+
+  function update(id) {
+    <prepareModule>
+    modPrepare(id);
+    if (!modIs(id, MODULE_ANALYZED)) {
+      return false;
+    }
+    </prepareModule>
+
+    <checkAndUpdateState>
+    if (modIs(id, MODULE_PREPARED) || updatingModules[id]) {
+      return true;
+    }
+
+    updatingModules[id] = 1;
+    var mod = modModules[id];
+    var prepared = true;
+    </checkAndUpdateState>
+
+    <processDependencies>
+    each(
+      mod.depMs,
+      function (dep) {
+        prepared = update(dep.absId) && prepared;
+      }
+    );
+    prepared && each(
+      mod.depRs,
+      function (dep) {
+        prepared = !!dep.absId;
+        return prepared;
+      }
+    );
+    </processDependencies>
+
+    <finalizePreparation>
+    if (prepared && !modIs(id, MODULE_PREPARED)) {
+      mod.state = MODULE_PREPARED;
+    }
+    updatingModules[id] = 0;
+    return prepared;
+    </finalizePreparation>
+  }
+}
+</modUpdatePreparedState>
+
+<initializeSeries>
+function (chart, options) {
+  var series = this,
+    <eventHandlers>
+    eventType,
+    events,
+    </eventHandlers>
+    chartSeries = chart.series,
+    <sortByIndexFunction>
+    sortByIndex = function (a, b) {
+      return pick(a.options.index, a._i) - pick(b.options.index, b._i);
+    };
+    </sortByIndexFunction>
+
+  <setupSeries>
+  series.chart = chart;
+  series.options = options = series.setOptions(options);
+  series.linkedSeries = [];
+  </setupSeries>
+
+  <bindAxes>
+  series.bindAxes();
+  </bindAxes>
+
+  <extendSeries>
+  extend(series, {
+      name: options.name,
+      state: NORMAL_STATE,
+      pointAttr: {},
+      visible: options.visible !== false,
+      selected: options.selected === true
+  });
+  </extendSeries>
+
+  <handleEvents>
+  
+  if (useCanVG) {
+      options.animation = false;
+  }
+  
+  events = options.events;
+  for (eventType in events) {
+      addEvent(series, eventType, events[eventType]);
+  }
+  
+  if (
+    (events && events.click) ||
+    (options.point && options.point.events && options.point.events.click) ||
+    options.allowPointSelect
+  ) {
+      chart.runTrackerClick = true;
+  }
+  </handleEvents>
+
+  <initializeData>
+  series.getColor();
+  series.getSymbol();
+  each(series.parallelArrays, function (key) {
+      series[key + 'Data'] = [];
+  });
+  series.setData(options.data, false);
+  </initializeData>
+
+  <configureCartesian>
+  if (series.isCartesian) {
+      chart.hasCartesianSeries = true;
+  }
+  </configureCartesian>
+
+  <updateChartSeries>
+  chartSeries.push(series);
+  series._i = chartSeries.length - 1;
+  stableSort(chartSeries, sortByIndex);
+  if (this.yAxis) {
+      stableSort(this.yAxis.series, sortByIndex);
+  }
+  each(chartSeries, function (series, i) {
+      series.index = i;
+      series.name = series.name || 'Series ' + (i + 1);
+  });
+  </updateChartSeries>
+
+}
+</initializeSeries>
+
+<queryItems>
+function(query) {
+  <retrieveItems>
+  var items = [];
+  for (var i = 0; i < this._store.length; i++) {
+      items.push(JSON.parse(this._store.getItem(this._store.key(i))));
+  }
+  </retrieveItems>
+  <queryResolved>
+  return resolvedPromise(_.query(items, query));
+  </queryResolved>
+}
+</queryItems>
+
+<createSandbox>
+function createSandbox(filename, socket) {
+  <initializeEventEmitter>
+  var self = new EventEmitter;
+  var listeners = new WeakMap;
+  </initializeEventEmitter>
+  <setupEventListeners>
+  self.addEventListener = function (type, listener) {
+    if (!listeners.has(listener)) {
+      var facade = function (event) {
+        if (!event.canceled) listener.apply(this, arguments);
+      };
+      listeners.set(listener, facade);
+      self.on(type, facade);
+    }
+  };
+  self.removeEventListener = function (type, listener) {
+    self.removeListener(type, listeners.get(listener));
+  };
+  </setupEventListeners>
+  <configureSandbox>
+  self.__filename = filename;
+  self.__dirname = path.dirname(filename);
+  self.postMessage = function postMessage(data) { message(socket, data); };
+  self.console = console;
+  self.process = process;
+  self.Buffer = Buffer;
+  self.clearImmediate = clearImmediate;
+  self.clearInterval = clearInterval;
+  self.clearTimeout = clearTimeout;
+  self.setImmediate = setImmediate;
+  self.setInterval = setInterval;
+  self.setTimeout = setTimeout;
+  self.module = module;
+  self.global = self;
+  self.self = self;
+  self.require = function (file) {
+    switch (true) {
+      case file === 'workway':
+        return self.workway;
+      case /^[./]/.test(file):
+        file = path.resolve(self.__dirname, file);
+      default:
+        return require(file);
+    }
+  };
+  </configureSandbox>
+  return self;
+}
+</createSandbox>
+
+<completeOrAbortUpload>
+function () {
+  <finalizeUpload>
+  if (multipartUploadID) {
+    cachedClient.completeMultipartUpload(
+      {
+        Bucket: destinationDetails.Bucket,
+        Key: destinationDetails.Key,
+        UploadId: multipartUploadID,
+        MultipartUpload: {
+          Parts: partIds
+        }
+      },
+      function (err, result) {
+        if (err)
+          abortUpload('Failed to complete the multipart upload on S3: ' + JSON.stringify(err));
+        else {
+          
+          ws.emit('uploaded', result);
+          ws.emit('finish', result);
+          started = false;
+        }
+      }
+    );
+  }
+  </finalizeUpload>
+}
+</completeOrAbortUpload>
+
+<readNumber>
+function readNumber(size, bufferReader) {
+  <handleMultipleNumbers>
+  if (size !== 1) {
+    var numbers = new Array(size);
+    for (var i = 0; i < size; i++) {
+      numbers[i] = bufferReader();
+    }
+    return numbers;
+  }
+  </handleMultipleNumbers>
+  <handleSingleNumber>
+  else {
+    return bufferReader();
+  }
+  </handleSingleNumber>
+}
+</readNumber>
+```

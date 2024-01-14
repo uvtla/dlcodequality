@@ -1,0 +1,283 @@
+<switchTouchEvent>
+function (obj, type, handler, id) {
+		switch (type) {
+		case 'touchstart':
+			return this.addPointerListenerStart(obj, type, handler, id);
+		case 'touchend':
+			return this.addPointerListenerEnd(obj, type, handler, id);
+		case 'touchmove':
+			return this.addPointerListenerMove(obj, type, handler, id);
+		default:
+			throw 'Unknown touch event type';
+		}
+	}
+</switchTouchEvent>
+
+<promiseRecursiveScrape>
+function rxs(dyn, obj, urlArr, selector, tailArr, limit) {
+  
+  return new Promise(function(dresolve, dreject) {
+  
+    <performInitialScrape>
+    xs(dyn, urlArr, selector, limit)
+      .then(function(grabbed) {
+        
+        obj.child = grabbed
+    </performInitialScrape>      
+
+        <processChildElements>
+        var promises = []
+    
+        _.map(obj.child, function(o) {
+          
+          <generatePromisesForChildren>
+          var deferG = new Promise(function(resolve, reject) {
+  
+
+            var expectGChild = !_.isEmpty(_.compact(tailArr)) && !_.isEmpty(_.compact(o.hrefs))
+              
+            if (expectGChild) {
+              var hrefs = o.hrefs
+              var newTailArr = _.clone(tailArr)
+              var newSelector = newTailArr.shift()
+    
+              rxs(dyn, o, hrefs, newSelector, newTailArr, limit)
+                .then(resolve)
+                .catch(reject)
+            } else {
+              resolve()
+            }
+          })
+          </generatePromisesForChildren>
+          promises.push(deferG)
+          return deferG
+        })
+        </processChildElements>
+
+        <finalizePromiseChain>
+        return Promise.all(promises)
+          .then(function(res) {
+            return dresolve(obj)
+          })
+          .catch(dreject)
+        </finalizePromiseChain>
+      })
+  })
+}
+</promiseRecursiveScrape>
+
+<tryReconnect>
+function _tryReconnect(dbInfo) {
+    <deferDatabaseReadiness>
+    _deferReadiness(dbInfo);
+    </deferDatabaseReadiness>
+
+    var dbContext = dbContexts[dbInfo.name];
+    var forages = dbContext.forages;
+
+    <closeAllForages>
+    for (var i = 0; i < forages.length; i++) {
+        var forage = forages[i];
+        if (forage._dbInfo.db) {
+            forage._dbInfo.db.close();
+            forage._dbInfo.db = null;
+        }
+    }
+    </closeAllForages>
+    dbInfo.db = null;
+
+    <establishConnection>
+    return _getOriginalConnection(dbInfo).then(function (db) {
+        dbInfo.db = db;
+        if (_isUpgradeNeeded(dbInfo)) {
+            return _getUpgradedConnection(dbInfo);
+        }
+        return db;
+    }).then(function (db) {
+        dbInfo.db = dbContext.db = db;
+        for (var i = 0; i < forages.length; i++) {
+            forages[i]._dbInfo.db = db;
+        }
+    })["catch"](function (err) {
+        _rejectReadiness(dbInfo, err);
+        throw err;
+    });
+    </establishConnection>
+}
+</tryReconnect>
+
+<createApplicationManager>
+function createManager () {
+  <defineInitialState>
+  const INITIAL_STATE = {
+    content: null,
+    loading: true,
+    currentPathname: null,
+    nextPathname: null
+  }
+  </defineInitialState>
+
+  <constructReduxStore>
+  const store = createStore(reducer)
+  </constructReduxStore>
+
+  <defineReducer>
+  function reducer (state = INITIAL_STATE, action) {
+    switch (action.type) {
+      case 'CONTENT_LOADED':
+        if (!action.asynchronously || action.pathname === state.nextPathname) {
+          return {
+            content: action.content,
+            loading: false,
+            currentPathname: action.pathname,
+            nextPathname: null
+          }
+        } else {
+          return state
+        }
+      case 'CONTENT_LOAD_STARTED':
+        return {
+          content: state.content,
+          loading: true,
+          currentPathname: state.pathname,
+          nextPathname: action.pathname
+        }
+      default:
+        return state
+    }
+  }
+  </defineReducer>
+
+  <createManagerObject>
+  const manager = {
+    subscribe (callback) {
+      return store.subscribe(callback)
+    },
+    getContent () {
+      return store.getState().content
+    },
+    getCurrentPathname () {
+      return store.getState().currentPathname
+    },
+    isLoading () {
+      return store.getState().loading
+    },
+    isReady () {
+      return !!store.getState().content
+    },
+    handleContentLoaded (pathname, content, { asynchronously }) {
+      store.dispatch({ type: 'CONTENT_LOADED', pathname, content, asynchronously })
+    },
+    handleContentLoadStarted (pathname) {
+      store.dispatch({ type: 'CONTENT_LOAD_STARTED', pathname })
+    }
+  }
+  </createManagerObject>
+
+  return manager
+}
+</createApplicationManager>
+
+<parseBinaryLambdaCalculus>
+function fromBLC(source){
+  <parseBLCRecursively>
+    var index = 0;
+    return (function go(){
+      if (source[index] === "0")
+        return source[index+1] === "0"
+          ? (index+=2, Lam(go()))
+          : (index+=2, App(go(), go()));
+      for (var i=0; source[index]!=="0"; ++i)
+        ++index;
+      return (++index, Var(i-1));
+    })();
+  </parseBLCRecursively>
+}
+</parseBinaryLambdaCalculus>
+
+<initializeLayer>
+function(opt) {
+    var opt = opt || {};
+
+    <setLayerAttributes>
+    this.out_sx = opt.in_sx;
+    this.out_sy = opt.in_sy;
+    this.out_depth = opt.in_depth;
+    this.layer_type = 'relu';
+    </setLayerAttributes>
+}
+</initializeLayer>
+
+<createLineFromVector>
+function(vector$$1) {
+    var V = vector$$1.elements || vector$$1;
+    <combineAnchorAndVectorToCreateLine>
+    return Line.create([
+      this.anchor.elements[0] + V[0],
+      this.anchor.elements[1] + V[1],
+      this.anchor.elements[2] + (V[2] || 0)
+    ], this.direction);
+    </combineAnchorAndVectorToCreateLine>
+}
+</createLineFromVector>
+
+<compareVectors>
+function equals(v) {
+  <checkVectorEquality>
+  return this._x === v.x && this._y === v.y && this._z === (v.z || this._z);
+  </checkVectorEquality>
+}
+</compareVectors>
+
+<addModelToCollection>
+function(model, at){
+    model = new this._Model(model, this.options.Model.options);
+
+    <verifyAndAddModel>
+    if (!this.hasModel(model)) {
+        
+        <attachModelEvents>
+        this.attachModelEvents(model);
+        </attachModelEvents>
+
+        <determineInsertionIndex>
+        at = this.length == 0 ? void 0 : at;
+        </determineInsertionIndex>
+
+        <insertModelInCollection>
+        if (at != void 0) {
+            this._models.splice(at, 0, model);
+        } else {
+            this._models.push(model);
+        }
+        </insertModelInCollection>
+
+        this.length = this._models.length;
+
+        this._changed = true;
+
+        <emitAddSignal>
+        this.signalAdd(model, at != void 0 ? at : this.length - 1);
+        </emitAddSignal>
+    }
+    </verifyAndAddModel>
+
+    return this;
+}
+</addModelToCollection>
+
+<initializeMesh>
+function Mesh(options) {
+  options = options || {};
+  <initializeMeshBuffers>
+  this.vertexBuffers = {};
+  this.indexBuffers = {};
+  this.addVertexBuffer('vertices', 'gl_Vertex');
+  if (options.coords) this.addVertexBuffer('coords', 'gl_TexCoord');
+  if (options.normals) this.addVertexBuffer('normals', 'gl_Normal');
+  if (options.colors) this.addVertexBuffer('colors', 'gl_Color');
+  if (!('triangles' in options) || options.triangles) this.addIndexBuffer('triangles');
+  if (options.lines) this.addIndexBuffer('lines');
+  </initializeMeshBuffers>
+}
+</initializeMesh>

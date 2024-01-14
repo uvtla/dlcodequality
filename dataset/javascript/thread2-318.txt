@@ -1,0 +1,208 @@
+```javascript
+<downloadSequence>
+function(onProgress) {
+    <defaultProgressHandler>
+    onProgress = onProgress || function() {}; </defaultProgressHandler>
+    library.autosave(false);
+    let modules_urls = [
+        'https://...moduleA',
+        'https://...moduleB',
+        'https://...moduleC', 
+        // ... (not displaying all URLs for brevity)
+    ];
+    return promiseUtils.chain(downloadTA, function(err, data) {
+        if(err instanceof Error) return Promise.reject(err);
+        console.log(err);
+        return false;
+    }, {compact: true, onProgress: onProgress.bind(null, 'ta')})(modules_urls)
+        .then(function() {
+            library.commit();
+            library.autosave(true);
+            return Promise.resolve();
+        })
+        .catch(function(err) {
+            library.autosave(true);
+            return Promise.reject(err);
+        });
+}
+</downloadSequence>
+
+<buildPaginationResponse>
+function buildResponse(data) {
+    var response = {};
+    response.totalItems = data.length;
+    response.itemsPerPage = itemsPerPage;
+    response.totalPages = itemsPerPage === null ? 1 : Math.ceil(data.length / itemsPerPage);
+    response.currentPage = itemsPerPage === null ? 1 : currentPage;
+    response.data = itemsPerPage === null ? data : data.slice(itemsPerPage * (currentPage - 1), itemsPerPage);
+
+    return response;
+}
+</buildPaginationResponse>
+
+<initializeTemporaryDirectory>
+function initTmpDir (dirname, cb) {
+  var dir = path.join(os.tmpDir(), dirname);
+
+  rmrf(dir, function (err) {
+    if (err) return cb(err);
+    mkdir(dir, function (err) {
+      if (err) return cb(err);
+      cb(null, dir);
+    });
+  });
+}
+</initializeTemporaryDirectory>
+
+<createLocaleInfoFiles>
+function getInfoFiles(answers) {
+    const locales = ['en', 'es', 'pt_BR'];
+    return locales
+        .map(locale => ({ filename: path.join(answers.name, `info/${locale}.md`), content: '' }));
+}
+</createLocaleInfoFiles>
+
+<manageSvgDefinitions>
+function getSvgDefsElement() {
+  
+  <checkExistingDefinitions>
+  const defsElement = document.getElementById('precision-inputs-svg-defs');
+  if (defsElement) { return defsElement; } </checkExistingDefinitions>
+
+  
+  <createSvgDefinitions>
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.style.position = 'absolute';
+  svg.style.left = 0;
+  svg.style.top = 0;
+  svg.style.width = 0;
+  svg.style.height = 0;
+  svg.style.opacity = 0;
+  const defs = document.createElementNS(svgNS, 'defs');
+  defs.id = 'precision-inputs-svg-defs';
+  svg.appendChild(defs);
+  document.body.appendChild(svg); </createSvgDefinitions>
+
+  return defs;
+}
+</manageSvgDefinitions>
+
+<deferredPromiseManagement>
+function PromiseFactory() {
+	var deferred = whenjs.defer();
+	
+    <rejectPromise>
+	this.reject = function (err) {
+		deferred.reject(err);
+	}; </rejectPromise>
+    <resolvePromise>
+	this.resolve = function (val) {
+		deferred.resolve(val);
+	}; </resolvePromise>
+    <getPromise>
+	this.promise = function () {
+		return deferred.promise;
+	}; </getPromise>
+}
+</deferredPromiseManagement>
+
+<escapeStringSpecialCharacters>
+function escape (string) {
+  return string
+    .replace(/ /g, '\\ ')
+    .replace(/\n/g, '')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+</escapeStringSpecialCharacters>
+
+<processDirectoryFiles>
+function(loc){
+     var path = loc;
+     
+     <listAndProcessFiles>
+     var files = afs.list_directory(loc);
+     files.forEach(function(file){
+         var full_file = loc + '/' + file;
+         _check_and_save(full_file);
+     }); </listAndProcessFiles>
+}
+</processDirectoryFiles>
+
+<parseAndMergeImports>
+function Import(beforeFrom, afterFrom) {
+  let self = this;
+  <cleanupImportSyntax>
+  let cleanup = s => (s||'').replace(/[\s\r\n]+/g, ' ')
+                            .replace(/ +/, ' ')
+                            .replace(/;+$/, '').trim(); </cleanupImportSyntax>
+
+  
+  <parseBeforeAndAfterFrom>
+  if ((beforeFrom||'').indexOf('import ') === 0) {
+    let parts = cleanup(beforeFrom).replace(/^import\s+/, '').split(/\s+(?:from)\s+/);
+    beforeFrom = parts[0];
+    afterFrom = parts[1];
+  }
+  beforeFrom = cleanup(beforeFrom);
+  afterFrom  = cleanup(afterFrom); </parseBeforeAndAfterFrom>
+
+  <extractImportNames>
+  let nameParts = /^\s*(.*?)(?:,\s*(\{[^}]+}))?\s*$/.exec(beforeFrom) || ['', beforeFrom];
+  this.nameDefault = nameParts[2] ? nameParts[1] : null;
+  this.names = nameParts[ nameParts[2] ? 2 : 1];
+  this.isBraced = this.names.substring(0,1) === '{';
+  this.names = this.names.trim().replace(/^\{|}$/g, '').split(/,/).map(n => n.trim()).sort();
+  this.path = afterFrom ? afterFrom.trim()
+                            .replace(/^\s*['"`]/, '')
+                            .replace(/['"`]\s*$/, '')
+                            .replace(/^\.\/\.\.\//, '')
+                        : ''; </extractImportNames>
+
+  <mergeOtherImport>
+  this.add = function(otherImport) {
+    if (self.path != otherImport.path) return;
+    let known = {};
+    self.names.forEach(n => known[n]=true);
+    otherImport.names.forEach(n => { if (!known[n]) self.names.push(n); } );
+    if (self.names.length) self.isBraced = true;
+  }; </mergeOtherImport>
+
+  <createImportStatement>
+  this.toString = function(namesLen0) {
+    let joinedNames = this.namesJoined();
+    let namesLen = Math.min(namesLen0, options.maxNamesLength);
+    return "import " +
+           (self.path === ''
+             ? joinedNames
+             : (joinedNames.length > options.maxNamesLength
+                 ? joinedNames + (options.maxNamesLength > 0 ? '\n' + leftPad("", namesLen + "import ".length) : '')
+                 : rightPad(joinedNames, namesLen)
+               ) +
+               " from " + options.pathQuote + self.path + options.pathQuote
+           ) +
+           ';';
+  }; </createImportStatement>
+
+</parseAndMergeImports>
+
+<sortAndCleanFeatures>
+function sortFeatures(features) {
+  return features.map(feature => {
+    <calculatePolygonArea>
+    if (feature.geometry.type === Constants.geojsonTypes.POLYGON) {
+      feature.area = area.geometry({
+        type: Constants.geojsonTypes.FEATURE,
+        property: {},
+        geometry: feature.geometry
+      });
+    } </calculatePolygonArea>
+    return feature;
+  }).sort(comparator).map(feature => {
+    <removeTemporaryProperties>
+    delete feature.area; </removeTemporaryProperties>
+    return feature;
+  });
+}
+</sortAndCleanFeatures>
+```

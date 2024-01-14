@@ -1,0 +1,233 @@
+< prioritizeOpenFile >
+function prioritizeOpenFile(files, firstFile) {
+  var workingSetFiles = MainViewManager.getWorkingSet(MainViewManager.ALL_PANES),
+      workingSetFileFound = {},
+      fileSetWithoutWorkingSet = [],
+      startingWorkingFileSet = [],
+      propertyName = "",
+      i = 0;
+  firstFile = firstFile || "";
+
+  < identifyWorkingFiles >
+  for (i = 0; i < workingSetFiles.length; i++) {
+    workingSetFileFound[workingSetFiles[i].fullPath] = false;
+  }
+  </ identifyWorkingFiles >
+
+  < filterFilesNotInWorkingSet >
+  fileSetWithoutWorkingSet = files.filter(function (key) {
+    if (workingSetFileFound[key] !== undefined) {
+      workingSetFileFound[key] = true;
+      return false;
+    }
+    return true;
+  });
+  </ filterFilesNotInWorkingSet >
+
+  < prioritizeFirstFile >
+  if (workingSetFileFound[firstFile] === true) {
+    startingWorkingFileSet.push(firstFile);
+    workingSetFileFound[firstFile] = false;
+  }
+  </ prioritizeFirstFile >
+
+  < collectRemainingWorkingFiles >
+  for (propertyName in workingSetFileFound) {
+    if (workingSetFileFound.hasOwnProperty(propertyName) && workingSetFileFound[propertyName]) {
+      startingWorkingFileSet.push(propertyName);
+    }
+  }
+  </ collectRemainingWorkingFiles >
+  return startingWorkingFileSet.concat(fileSetWithoutWorkingSet);
+}
+</ prioritizeOpenFile >
+
+< calculateNetworkValue >
+function (ip, cidr) {
+  if (typeof ip === "string")
+    ip = this.parseIp(ip);
+  return this.networkFromIpCIDR(ip, cidr) | this.wildcardFromCIDR(cidr);
+}
+</ calculateNetworkValue >
+
+< deleteDefaultRequestOptions >
+function() {
+  var names = slice.call(arguments);
+  if (!names.length) {
+    delete this.defaultRequestOptions;
+  } else {
+    _.each(names, function(name) {
+      delete this.defaultRequestOptions[name];
+    }, this);
+  }
+}
+</ deleteDefaultRequestOptions >
+
+< FetcherConstructor >
+function Fetcher (options) {
+  UpstreamFetcher.call(this, options);
+
+  < addExtractors >
+  this.addExtractor('manifestUrl', require(path.join(__dirname, 'extractors', 'manifestUrl.dataAttribute')));
+  </ addExtractors >
+
+  < addTransforms >
+  this.addTransform('html', require(path.join(__dirname, 'transforms', 'html.injectCordova')));
+  this.addTransform('html', require(path.join(__dirname, 'transforms', 'html.injectWinJsCompat')));
+  this.addTransform('html', require(path.join(__dirname, 'transforms', 'html.injectWinJs')));
+  this.addTransform('html', require(path.join(__dirname, 'transforms', 'html.injectBlinkGap')));
+  </ addTransforms >
+}
+</ FetcherConstructor >
+
+< emitFirstHandler >
+function emitFirst (emitter, events, handler) {
+  handler = once(handler)
+  < attachOnceHandlers >
+  events.forEach((e) => {
+    emitter.once(e, (...args) => {
+      < removeListeners >
+      events.forEach((ev) => {
+        emitter.removeListener(ev, handler)
+      })
+      </ removeListeners >
+      handler.apply(emitter, args)
+    })
+  })
+  </ attachOnceHandlers >
+}
+</ emitFirstHandler >
+
+< CacheConstructor >
+function Cache(options) {
+  options = options || {};
+  if (!(this instanceof Cache)) {
+    return new Cache(options);
+  }
+  if (typeof options === 'function'){
+    options = { store: options };
+  }
+  _.defaults(options, defaults);
+
+  < initializeStore >
+  var Store = options.store;
+  this.ttl = options.ttl;
+  this.tti = options.tti;
+  this.store = new Store(options);
+  this.stats = new CacheStats();
+  </ initializeStore >
+}
+</ CacheConstructor >
+
+< ariaAddDelegate >
+function (eventName, callback) {
+  if (!this._currentSection) {
+    return;
+  }
+  var delegate = ariaUtilsDelegate;
+
+  < handleNonDelegatedEvent >
+  if (!delegate.isDelegated(eventName)) {
+    var delegateId = delegate.add(callback);
+    this._currentSection.delegateIds.push(delegateId);
+    this.write(delegate.getFallbackMarkup(eventName, delegateId, true));
+    return;
+  }
+  </ handleNonDelegatedEvent >
+
+  < createDelegatedCallback >
+  callback = new aria.utils.Callback(callback);
+  this._currentSection.delegateCallbacks.push(callback);
+  if (!this._delegateMap) {
+    this._delegateMap = {};
+  }
+  this._delegateMap[eventName] = callback;
+  </ createDelegatedCallback >
+}
+</ ariaAddDelegate >
+
+< delegateMethodCreator >
+function (instance, methodName, create) {
+  if (methodName && methodName.constructor != String)
+    throw new Error("methodName has to be string");
+  var d = instance.__delegates;
+  if (!d) {
+    if (!create)
+      return null;
+    d = {};
+    instance.__delegates = d;
+  }
+  var m = d[methodName];
+  if (!m) {
+    if (!create)
+      return null;
+    var f = instance[methodName];
+    if (!f) {
+      throw new Error("method " + methodName + " not found");
+    }
+    m = function () {
+      return f.apply(instance, arguments);
+    };
+    d[methodName] = m;
+  }
+  return m;
+}
+</ delegateMethodCreator >
+
+< ResolverConstructor >
+function Resolver(options)
+{
+  if (!(this instanceof Resolver))
+    return new Resolver(options);
+  Logger.mixin(this, options);
+  options = this.options = setProperties({}, this.options, options);
+
+  this._cache = {};
+  this._manifestCache = {};
+  this._core = {};
+  this._extensions = new PriorityList();
+  this._manifests = new PriorityList();
+  this._prefixes = new PriorityList(function(a, b)
+  {
+    return a.value === b.value;
+  });
+
+  < initializeResolver >
+  this._group("Resolver Initialize", null, function()
+  {
+    this._initGet();
+    this._initRoot();
+    this._initCore();
+    this._initExtension();
+    this._initPrefix();
+    this._initManifest();
+    this._initAllowExtensionless(options.allowExtensionless);
+  });
+  </ initializeResolver >
+}
+</ ResolverConstructor >
+
+< fileWatcher >
+function watcher(manifest)
+{
+  return function(file)
+  {
+    < handleFileEvent >
+    return function(event)
+    {
+      if (event == 'change')
+      {
+        < updateCacheOnFileChange >
+        fs.stat(file, function(err, stat)
+        {
+          if (err) return; 
+          var mtime = stat.mtime.getTime();
+          if (cache[manifest].version < mtime) cache[manifest].version = mtime;
+        });
+        </ updateCacheOnFileChange >
+      }
+    };
+    </ handleFileEvent >
+  }
+}
+</ fileWatcher >

@@ -1,0 +1,244 @@
+```javascript
+<dateNodeDefinition>
+function() {
+  var def = YAHOO.widget.DateNode.superclass.getNodeDefinition.call(this);
+  <checkForDefinition>
+  if (def === false) { return false; }
+  </checkForDefinition>
+  <setCalendarConfig>
+  if (this.calendarConfig) { def.calendarConfig = this.calendarConfig; }
+  </setCalendarConfig>
+  return def;
+}
+</dateNodeDefinition>
+
+<isMember>
+function sismember(key, member, req) {
+  <getKeyValue>
+  var val = this.getKey(key, req);
+  if(val === undefined) return 0;
+  </getKeyValue>
+  <checkMembership>
+  return val.sismember(member);
+  </checkMembership>
+}
+</isMember>
+
+<renderTemplateFile>
+function renderTemplateFile(engine, filePath, context) {
+  var loader = engine.getLoader();
+  
+  <resolveFilePath>
+  var resolvedFilePath = loader.resolve(null, filePath);
+  </resolveFilePath>
+
+  <getTemplateSource>
+  return Promise()
+  .then(function() {
+    if (!loader.async) {
+      return loader.getSource(resolvedFilePath);
+    }
+
+    var deferred = Promise.defer();
+    loader.getSource(resolvedFilePath, deferred.makeNodeResolver());
+    return deferred.promise;
+  })
+  </getTemplateSource>
+  .then(function(result) {
+    <handleNotFound>
+    if (!result) {
+        throw error.TemplateError(new Error('Not found'), {
+            filename: filePath
+        });
+    }
+    </handleNotFound>
+
+    <renderWithTemplate>
+    return render(engine, result.path, result.src, context);
+    </renderWithTemplate>
+  });
+}
+</renderTemplateFile>
+
+<handleWebSocketError>
+function receiverOnError(err) {
+  const websocket = this[kWebSocket];
+
+  websocket._socket.removeListener('data', socketOnData);
+
+  websocket.readyState = WebSocket.CLOSING;
+  <setErrorDetails>
+  websocket._closeCode = err[kStatusCode];
+  websocket.emit('error', err);
+  </setErrorDetails>
+  <destroySocket>
+  websocket._socket.destroy();
+  </destroySocket>
+}
+</handleWebSocketError>
+
+<calculateMindMapDimensions>
+function getMindMapDimensions(root) {
+  <initializeDimensions>
+  var pos = root.getPosition();
+  var left = 0, top = 0, right = 0, bottom = 0;
+  var padding = 50;
+  </initializeDimensions>
+
+  <checkNodeDimensions>
+  function checkDimensions(node) {
+    var pos = node.getPosition();
+    var tm = node.textMetrics;
+
+    if (pos.x < left) {
+      left = pos.x;
+    }
+
+    if (pos.x + tm.width > right) {
+      right = pos.x + tm.width;
+    }
+
+    if (pos.y < top) {
+      top = pos.y;
+    }
+
+    if (pos.y + node.outerHeight() > bottom) {
+      bottom = pos.y + node.outerHeight();
+    }
+  }
+  </checkNodeDimensions>
+
+  <updateDimensions>
+  checkDimensions(root);
+  root.forEachDescendant(checkDimensions);
+  </updateDimensions>
+
+  <calculateDimensions>
+  var horizontal = Math.max(Math.abs(right), Math.abs(left));
+  var vertical = Math.max(Math.abs(bottom), Math.abs(top));
+
+  return {
+    width : 2 * horizontal + padding,
+    height : 2 * vertical + padding
+  };
+  </calculateDimensions>
+}
+</calculateMindMapDimensions>
+
+<setupDepthTexture>
+function setupDepthTexture (framebuffer, renderTarget) {
+  var isCube = (renderTarget instanceof THREE.WebGLRenderTargetCube);
+    <checkCubeRenderTarget>
+  if (isCube) throw new Error('Depth Texture with cube render targets is not supported!');
+    </checkCubeRenderTarget>
+
+  <bindFramebuffer>
+  _gl.bindFramebuffer( _gl.FRAMEBUFFER, framebuffer );
+  </bindFramebuffer>
+
+  <validateDepthTexture>
+  if ( !(renderTarget.depthTexture instanceof THREE.DepthTexture) ) {
+    throw new Error('renderTarget.depthTexture must be an instance of THREE.DepthTexture');
+  }
+  </validateDepthTexture>
+
+  <configureDepthTexture>
+  if ( !properties.get( renderTarget.depthTexture ).__webglTexture ||
+      renderTarget.depthTexture.image.width !== renderTarget.width ||
+      renderTarget.depthTexture.image.height !== renderTarget.height ) {
+    renderTarget.depthTexture.image.width = renderTarget.width;
+    renderTarget.depthTexture.image.height = renderTarget.height;
+    renderTarget.depthTexture.needsUpdate = true;
+  }
+  </configureDepthTexture>
+
+  <attachTextureToFramebuffer>
+  setTexture2D( renderTarget.depthTexture, 0 );
+
+  var webglDepthTexture = properties.get( renderTarget.depthTexture ).__webglTexture;
+  _gl.framebufferTexture2D( _gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT, _gl.TEXTURE_2D, webglDepthTexture, 0 );
+  </attachTextureToFramebuffer>
+}
+</setupDepthTexture>
+
+<appendNode>
+function(node) {
+  this.logger.log("insertAfter: " + node);
+  var p = node.parent;
+  if (p) {
+    
+    <manipulateTree>
+    if (this.tree) {
+      this.tree.popNode(this);
+    }
+    </manipulateTree>
+
+    var refIndex = node.isChildOf(p);
+    this.logger.log(refIndex);
+
+    <insertNode>
+    if (!node.nextSibling) {
+      this.nextSibling = null;
+      return this.appendTo(p);
+    }
+
+    p.children.splice(refIndex + 1, 0, this);
+
+    node.nextSibling.previousSibling = this;
+    this.previousSibling = node;
+    this.nextSibling = node.nextSibling;
+    node.nextSibling = this;
+    </insertNode>
+
+    <applyParent>
+    this.applyParent(p);
+    </applyParent>
+  }
+
+  return this;
+}
+</appendNode>
+
+<functionWrapper>
+function F(iid, f, flags) {
+  var bFlags = decodeBitPattern(flags, 1); 
+  <createWrappedFunction>
+  return function () {
+    var base = this;
+    return (lastComputedValue = invokeFun(iid, base, f, arguments, bFlags[0], false));
+  }
+  </createWrappedFunction>
+}
+</functionWrapper>
+
+<ruleCreator>
+function create(context) {
+  <ruleDefinition>
+  return {
+    CallExpression(node) {
+      if (isRequireCall(node) && !isValidRequire(node)) {
+        context.report(node, message);
+      }
+    }
+  };
+  </ruleDefinition>
+}
+</ruleCreator>
+
+<encodeBase32>
+function encode(data) {
+  <validateArray>
+  $.checkArgument(data instanceof Array, 'Must be Array');
+  </validateArray>
+  var base32 = '';
+  <createBase32String>
+  for (var i=0; i<data.length; i++) {
+    var value = data[i];
+    $.checkArgument(0 <= value && value < 32, 'Non-base32, value ' + value);
+    base32 += CHARSET[value];
+  }
+  </createBase32String>
+  return base32;
+}
+</encodeBase32>
+```

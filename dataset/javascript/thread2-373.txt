@@ -1,0 +1,399 @@
+```javascript
+<_addEntityIdentifier>
+function _addEntityIdentifier(entity, obj) {
+    if (entity.constructor === EVT.Entity.Product) {
+      obj.product = entity.id;
+    } else if (entity.constructor === EVT.Entity.Thng) {
+      obj.thng = entity.id;
+    } else if (entity.constructor === EVT.Entity.Collection) {
+      obj.collection = entity.id;
+    }
+
+    return obj;
+}
+</_addEntityIdentifier>
+
+<createNamespace>
+function createNamespace(name) {
+  
+  var isObject = name === 'Object';
+  
+  var sugarNamespace = getNewChainableClass(name, true);
+  
+  var extend = function (opts) {
+
+    var nativeClass = globalContext[name], nativeProto = nativeClass.prototype;
+    var staticMethods = {}, instanceMethods = {}, methodsByName;
+    
+    function objectRestricted(name, target) {
+      
+    }
+   
+    function arrayOptionExists(field, val) {
+      
+    }
+
+    function arrayOptionExcludes(field, val) {
+      
+    }
+
+    function disallowedByFlags(methodName, target, flags) {
+      
+    }
+
+    function namespaceIsExcepted() {
+      
+    }
+
+    function methodIsExcepted(methodName) {
+      
+    }
+
+    function canExtend(methodName, method, target) {
+      
+    }
+
+    
+    
+    forEachProperty(methodsByName || sugarNamespace, function(method, methodName) {
+      
+    });
+
+    
+    
+    extendNative(nativeClass, staticMethods);
+    extendNative(nativeProto, instanceMethods);
+
+    
+    
+    setProperty(sugarNamespace, 'active', true);
+    return sugarNamespace;
+  };
+
+  
+  defineWithOptionCollect('defineStatic', STATIC);
+  
+  defineWithOptionCollect('defineInstance', INSTANCE);
+  
+  defineWithOptionCollect('defineInstanceAndStatic', INSTANCE | STATIC);
+  
+  defineWithOptionCollect('defineStaticWithArguments', STATIC, true);
+  
+  defineWithOptionCollect('defineInstanceWithArguments', INSTANCE, true);
+  
+  setProperty(sugarNamespace, 'defineStaticPolyfill', function(arg1, arg2, arg3) {
+   
+  });
+
+  
+  setProperty(sugarNamespace, 'defineInstancePolyfill', function(arg1, arg2, arg3) {
+    
+  });
+
+  
+  setProperty(sugarNamespace, 'alias', function(name, source) {
+    
+  });
+
+  
+  setProperty(sugarNamespace, 'extend', extend);
+
+  
+  namespacesByName[name] = sugarNamespace;
+  namespacesByClassString['[object ' + name + ']'] = sugarNamespace;
+
+  mapNativeToChainable(name);
+  mapObjectChainablesToNamespace(sugarNamespace);
+
+
+  
+  return Sugar[name] = sugarNamespace;
+}
+</createNamespace>
+
+<stringifyArg>
+function stringifyArg (arg) {
+	if (Array.isArray(arg)) {
+		<arrayToString>
+		return arg.map(stringifyArg).join(" ");
+		</arrayToString>
+	} else {
+		return String(arg);
+	}
+}
+</stringifyArg>
+
+<anonymous>
+function (data, retainEmpty) {
+        if (!(Array.isArray(data) && data.length)) { return []; }
+
+        var formdata = [],
+            i,
+            ii,
+            param;
+
+        for (i = 0, ii = data.length; i < ii; i++) {
+            <processDataItem>
+            param = typeof data[i] === 'object' && Object.assign({}, data[i]);
+
+            if (!(param && param.key)) {
+                continue;
+            }
+
+            if (param.type === 'file' && !param.src && param.value) {
+                param.src = (_.isString(param.value) || _.isArray(param.value)) ? param.value : null;
+                delete param.value;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(param, 'enabled')) {
+                param.enabled === false && (param.disabled = true);
+                delete param.enabled; 
+            }
+
+            util.cleanEmptyValue(param, 'description', retainEmpty);
+            </processDataItem>
+
+            formdata.push(param);
+        }
+
+        return formdata;
+}
+</anonymous>
+
+<Push>
+function Push(phonegap) {
+        "use strict";
+    
+        var events = new Events({'bind': this});
+    
+        var push;
+    
+        var registrationId;
+        Object.defineProperty(this, 'registrationId', {
+            
+        });
+    
+        var device = 'android';
+        <iOSDeviceCheck>
+        var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (iOS) device = 'ios';
+        </iOSDeviceCheck>
+    
+        Object.defineProperty(this, 'device', {
+            
+        });
+    
+        <onRegistration>
+        function onRegistration(data) {
+            
+        }
+        </onRegistration>
+    
+        <onNotification>
+        function onNotification(data) {
+            events.trigger('notification', data);
+            push.finish();
+        }
+        </onNotification>
+    
+        <onError>
+        function onError(error) {
+            beyond.logs.append('Push notification error: ' + error);
+        }
+        </onError>
+    
+        <onPhonegapDone>
+        function onPhonegapDone() {
+    
+            
+    
+            var config = {
+                
+            };
+    
+            push = PushNotification.init(config);
+    
+            push.on('registration', onRegistration);
+            push.on('notification', onNotification);
+            push.on('error', onError);
+    
+        }
+        </onPhonegapDone>
+    
+        
+        if (phonegap.isPhonegap && beyond.params.pushNotifications) {
+            phonegap.done(onPhonegapDone);
+        }
+    
+}
+</Push>
+
+<checkAndWarnForMutatedProps>
+function checkAndWarnForMutatedProps(element) {
+  if (!element._store) {
+    
+    return;
+  }
+
+  var originalProps = element._store.originalProps;
+  var props = element.props;
+
+  for (var propName in props) {
+    if (props.hasOwnProperty(propName)) {
+      <compareAndWarn>
+      if (!originalProps.hasOwnProperty(propName) ||
+          !is(originalProps[propName], props[propName])) {
+        warnForPropsMutation(propName, element);
+        originalProps[propName] = props[propName];
+      }
+      </compareAndWarn>
+    }
+  }
+}
+</checkAndWarnForMutatedProps>
+
+<refreshDataState>
+function refreshDataState (sName, oDataState) {
+		if (oDataState.getChanges().messages) {
+			<processMessages>
+			var aMessages = oDataState.getMessages();
+			var aLabels = sap.ui.core.LabelEnablement.getReferencingLabels(this);
+			var sLabelId = aLabels[0];
+			var bForceUpdate = false;
+
+			aMessages.forEach(function(oMessage) {
+				
+					var oLabel = sap.ui.getCore().byId(sLabelId);
+					if (oLabel.getMetadata().isInstanceOf("sap.ui.core.Label") && oLabel.getText && oMessage.getAdditionalText() !== oLabel.getText()) {
+						oMessage.setAdditionalText(oLabel.getText());
+						bForceUpdate = true;
+					} else {
+						Log.warning(
+							
+							this
+						);
+
+					}
+				
+				if (oMessage.getControlId() !== this.getId()){
+					oMessage.addControlId(this.getId());
+					bForceUpdate = true;
+				}
+			}.bind(this));
+			
+			var oMessageModel = sap.ui.getCore().getMessageManager().getMessageModel();
+			oMessageModel.checkUpdate(bForceUpdate, true);
+			</processMessages>
+
+			<updateValueState>
+			if (aMessages && aMessages.length > 0) {
+				var oMessage = aMessages[0];
+				
+				if (ValueState[oMessage.type]) {
+					this.setValueState(oMessage.type);
+					this.setValueStateText(oMessage.message);
+				}
+			} else {
+				this.setValueState(ValueState.None);
+				this.setValueStateText('');
+			}
+			</updateValueState>
+		}
+}
+</refreshDataState>
+
+<definitionFunction>
+function( definition ) {
+			var $ = definition.$,
+				baseClass = definition.base,
+				privates = definition.privates || definition._,
+				proto = definition.proto,
+				statics = definition.statics;
+
+			<createConstructor>
+			!$ && ( $ = function() {
+				baseClass && this.base.apply( this, arguments );
+			} );
+			</createConstructor>
+
+			<handlePrivates>
+			if ( privates ) {
+				var originalConstructor = $;
+				$ = function() {
+					
+				};
+			}
+			</handlePrivates>
+
+			<inheritBaseClass>
+			if ( baseClass ) {
+				
+			}
+			</inheritBaseClass>
+
+			<extendPrototypes>
+			if ( proto )
+				this.extend( $.prototype, proto, true );
+			</extendPrototypes>
+
+			<applyStatics>
+			if ( statics )
+				this.extend( $, statics, true );
+			</applyStatics>
+
+			return $;
+}
+</definitionFunction>
+
+<_link_comp>
+function _link_comp(str1, str2){
+	<splitAndSort>
+	var tmp1 = str1.split('?');
+	var head1 = '';
+	var args1 = [];
+	if( ! tmp1[1] ){ 
+	    args1 = tmp1[0].split('&');
+	}else{ 
+	    head1 = tmp1[0];
+	    args1 = tmp1[1].split('&');
+	}
+	var sorted_args1 = args1.sort();
+
+	var tmp2 = str2.split('?');
+	var head2 = '';
+	var args2 = [];
+	if( ! tmp2[1] ){ 
+	    args2 = tmp2[0].split('&');
+	}else{ 
+	    head2 = tmp2[0];
+	    args2 = tmp2[1].split('&');
+	}
+	var sorted_args2 = args2.sort();
+	</splitAndSort>
+
+	<compareResults>
+	var retval = false;
+	if( head1 == head2 &&
+	    _same_array(sorted_args1, sorted_args2) ){
+	    retval = true;
+	}
+	return retval;
+	</compareResults>
+}
+</_link_comp>
+
+<getNodePath>
+function getNodePath(node) {
+    var nodePaths = [];
+    <gatherPaths>
+    var nodeParent = node;
+    while (nodeParent) {
+        
+        nodeParent = nodeParent.parent;
+    }
+    </gatherPaths>
+
+    return nodePaths;
+}
+</getNodePath>
+```

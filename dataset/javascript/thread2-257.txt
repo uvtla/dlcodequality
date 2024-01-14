@@ -1,0 +1,236 @@
+```javascript
+<function_1>
+function (expr, sup, sub) {
+    <generateOperator_applyScriptHandler>
+    var opShape = generateOperator.call(this), 
+        expBox = expr.getFixRenderBox(), 
+        scriptHanlder = this.parentExpression.isSideScript() ? "applySide" : "applyUpDown", 
+        space = new ScriptController(this, opShape, sup, sub, {zoom: .5})[scriptHanlder](), 
+        padding = 5, 
+        diff = (space.height + space.top + space.bottom - expBox.height) / 2;
+    </generateOperator_applyScriptHandler>
+    
+    <translateShapes>
+    opShape.translate(0, space.top);
+    sup.translate(0, space.top);
+    sub.translate(0, space.top);
+    </translateShapes>
+    
+    <positionExpression>
+    if (diff >= 0) {
+        expr.translate(space.width + padding, diff);
+    } else {
+        diff = -diff;
+        opShape.translate(0, diff);
+        sup.translate(0, diff);
+        sub.translate(0, diff);
+        expr.translate(space.width + padding, 0);
+    }
+    </positionExpression>
+    
+    <expandTranslateParentExpression>
+    this.parentExpression.expand(padding, padding * 2);
+    this.parentExpression.translateElement(padding, padding);
+    </expandTranslateParentExpression>
+}
+</function_1>
+
+<function_2>
+function (obj, options) {
+    obj = this.toContext(obj);
+    return OpenLayers.Format.XML.VersionedOGC.prototype.write.apply(this, arguments);
+}
+</function_2>
+
+<function_3>
+function (hashrate) {
+    <processHashrate>
+    if (hashrate <= 0 || _.isNaN(hashrate)) {
+        return 'N/A';
+    }
+    if (hashrate < 1e3) {
+        return hashrate.toFixed(2) + 'MH/s';
+    }
+    if (hashrate < 1e6) {
+        return (hashrate / 1e3).toFixed(2) + 'GH/s';
+    }
+    if (hashrate < 1e9) {
+        return (hashrate / 1e6).toFixed(2) + 'TH/s';
+    }
+    </processHashrate>
+    
+    return (hashrate / 1e9).toFixed(2) + 'PH/s';
+}
+</function_3>
+
+<function_4>
+function domToCSS(name) {
+    return name.replace(/([A-Z])/g, function (str, m1) {
+        return '-' + m1.toLowerCase();
+    }).replace(/^ms-/, '-ms-');
+}
+</function_4>
+
+<function_5>
+function isIterable(was) {
+    <checkIterable>
+    return _.isObject(was) && !_.isFunction(was) && !_.isArray(was);
+    </checkIterable>
+}
+</function_5>
+
+<function_6>
+function (data, opts) {
+    <processDataAndOptions>
+    var i, triples, url, script, parser, docElem,
+        format = (opts && opts.format),
+        async = (opts && opts.async) || $.rdf.databank.defaults.async,
+        success = (opts && opts.success) || $.rdf.databank.defaults.success,
+        error = (opts && opts.error) || $.rdf.databank.defaults.error,
+        proxy = (opts && opts.proxy) || $.rdf.databank.defaults.proxy,
+        depth = (opts && opts.depth) || $.rdf.databank.defaults.depth;
+    url = (typeof data === 'string' && data.substring(1, 7) === 'http:');
+    </processDataAndOptions>
+    
+    <handleURL>
+    if (url.scheme) {
+        if (!queue(this, url, { success: success, error: error })) {
+            script = '<script type="text/javascript" src="' + proxy + '?id=' + this.id + '&amp;depth=' + depth + '&amp;url=' + encodeURIComponent(url.resolve('').toString()) + '"></script>';
+            if (async) {
+                setTimeout("$('head').append('" + script + "')", 0);
+            } else {
+                $('head').append(script);
+            }
+        }
+        return this;
+    } else {
+    </handleURL>
+    
+        <determineFormat>
+        if (format === undefined) {
+            // Determining the format based on the string content or the document element
+        }
+        </determineFormat>
+        
+        <parseData_AddTriples>
+        parser = $.rdf.parsers[format];
+        if (typeof data === 'string') {
+            data = parser.parse(data);
+        }
+        triples = parser.triples(data);
+        for (i = 0; i < triples.length; i += 1) {
+            this.add(triples[i], opts);
+        }
+        </parseData_AddTriples>
+        
+        return this;
+    }
+}
+</function_6>
+
+<function_7>
+function (id_token) {
+    var jws = new KJUR.jws.JWS();
+    jws.parseJWS(id_token);
+    return [jws.parsedJWS.headS, jws.parsedJWS.payloadS, jws.parsedJWS.si];
+}
+</function_7>
+
+<function_8>
+function constructMongoLink(dbName, prefix, servers, params, credentials) {
+    <constructMongoURL>
+    if (dbName && Array.isArray(servers)) {
+        // Constructing the MongoDB connection URL based on various parameters
+    </constructMongoURL>
+    return null;
+}
+</function_8>
+
+<function_9>
+function usagePercent(opts, cb) {
+    <initializeVariables>
+    var cpus = os.cpus();
+    var timeUsed;
+    var timeUsed0 = 0;
+    var timeUsed1 = 0;
+    var timeIdle;
+    var timeIdle0 = 0;
+    var timeIdle1 = 0;
+    var cpu1;
+    var cpu0;
+    var time;
+    </initializeVariables>
+
+    <handleOptions_Callback>
+    if (typeof opts === 'function') {
+        // Handling case when opts is actual a callback function
+    } else {
+        // Initializing options if they are provided as an object
+    }
+    </handleOptions_Callback>
+
+    <validateCoreIndex>
+    if (opts.coreIndex < -1 ||
+        opts.coreIndex >= cpus.length ||
+        typeof opts.coreIndex !== 'number' ||
+        Math.abs(opts.coreIndex % 1) !== 0
+    ) {
+        // Error handling for invalid coreIndex
+    }
+    </validateCoreIndex>
+
+    <calculateUsage>
+    if (opts.coreIndex === -1) {
+        // Calculating usage for all cores
+    } else {
+        // Calculating usage for a specific core
+    }
+    </calculateUsage>
+}
+</function_9>
+
+<function_10>
+function insert(editable, type, data) {
+    <prepareInsertion>
+    var editor = editable.editor,
+        selection = editor.getSelection(),
+        range = selection.getRanges()[ 0 ],
+        dontFilter = false;
+
+    if (type == 'unfiltered_html') {
+        type = 'html';
+        dontFilter = true;
+    }
+
+    if (range.checkReadOnly())
+        return;
+
+    var path = new CKEDITOR.dom.elementPath(range.startContainer, range.root),
+        blockLimit = path.blockLimit || range.root,
+        that = {
+            type: type,
+            dontFilter: dontFilter,
+            editable: editable,
+            editor: editor,
+            range: range,
+            blockLimit: blockLimit,
+            mergeCandidates: [],
+            zombies: []
+        };
+    </prepareInsertion>
+
+    <executeInsertion>
+    prepareRangeToDataInsertion(that);
+    if (data && processDataForInsertion(that, data)) {
+        insertDataIntoRange(that);
+    }
+    cleanupAfterInsertion(that);
+    </executeInsertion>
+
+    <finalizeInsertion>
+    range.select();
+    afterInsert(editable);
+    </finalizeInsertion>
+}
+</function_10>
+```

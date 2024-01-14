@@ -1,0 +1,233 @@
+Function 1:
+```javascript
+function(element, value) {
+    <addClassNames>
+    var c, cl, className, classNames = [];
+    if (typeof value === "string" && value) {
+      classNames = value.split(/\s+/);
+    }
+    </addClassNames>
+    <applyClassNamesToElement>
+    if (element && element.nodeType === 1 && classNames.length > 0) {
+      className = (" " + (element.className || "") + " ").replace(/[\t\r\n\f]/g, " ");
+      for (c = 0, cl = classNames.length; c < cl; c++) {
+        if (className.indexOf(" " + classNames[c] + " ") === -1) {
+          className += classNames[c] + " ";
+        }
+      }
+      className = className.replace(/^\s+|\s+$/g, "");
+      if (className !== element.className) {
+        element.className = className;
+      }
+    }
+    </applyClassNamesToElement>
+    return element;
+}
+```
+
+Function 2:
+```javascript
+function exec(home, command, argv, env, callback) {
+  <processArguments>
+  if (argv != null && !(argv instanceof Array)) {
+    callback = env
+    env = argv
+    argv = null
+  }
+  if (env instanceof Function) {
+    callback = env
+    env = null
+  }
+  </processArguments>
+  <setDefaultArguments>
+  argv = argv || []
+  env = env || {}
+  env.__proto__ = process.env
+  </setDefaultArguments>
+
+  <checkHomeDirectory>
+  fs.stat(home, function(error, homeStat) {
+    if (error) {
+      if (error.code !== 'ENOENT') return callback(error)
+      return callback(`${home} not found`)
+    }
+  </checkHomeDirectory>
+
+    <checkCommandPath>
+    const commandPath = `${home}${command}`
+    
+    fs.stat(commandPath, function(error, commandStat) {
+      if (error) {
+        if (error.code !== 'ENOENT') return callback(error)
+        return callback(`${commandPath} not found`)
+      }
+    </checkCommandPath>
+
+    <validateCommandFile>
+      if (!commandStat.isFile())
+        return callback(`${commandPath} is not a file`)
+      if (homeStat.uid !== commandStat.uid || homeStat.gid !== commandStat.gid)
+        return callback(`${home} uid & gid don't match with ${command}`)
+      if (!(commandStat.mode & S_IX))
+        return callback(`${command} is not executable`)
+    </validateCommandFile>
+
+    <createOptionsAndExecute>
+      const options = {
+        cwd: home,
+        env: env,
+        uid: homeStat.uid,
+        gid: homeStat.gid
+      }
+      chrootSpawn(command, argv, options, callback)
+    </createOptionsAndExecute>
+    })
+  })
+}
+```
+
+Function 3:
+```javascript
+function stringify() {
+  <mapToJson>
+  return map(function (chunk, next) {
+    var stringified;
+    try {
+      stringified = JSON.stringify(chunk);
+    } catch (e) {
+      return next(e);
+    }
+    return next(null, stringified);
+  });
+  </mapToJson>
+}
+```
+
+Function 4:
+```javascript
+function processFile(argv, inputPath, opt_outputPath) {
+  <determineOutputPath>
+  var outputPath = opt_outputPath;
+  if (!opt_outputPath) {
+    var ext = path.extname(inputPath);
+    if (ext.length) {
+      outputPath = inputPath.substr(0, inputPath.length - ext.length) + '.instrumented' + ext;
+    } else {
+      outputPath = inputPath + '.instrumented.js';
+    }
+  }
+  </determineOutputPath>
+  <readAndTransformCode>
+  var sourceCode = fs.readFileSync(inputPath).toString();
+  var targetCode = transformCode(0, inputPath, sourceCode, argv);
+  </readAndTransformCode>
+  <writeTransformedCode>
+  console.log('Writing ' + outputPath + '...');
+  fs.writeFileSync(outputPath, targetCode);
+  fs.chmodSync(outputPath, fs.statSync(inputPath).mode);
+  </writeTransformedCode>
+}
+```
+
+Function 5:
+```javascript
+function lookupRoute(server, id) {
+    <findRouteById>
+    const route = server.lookup(id)
+    assert(route, 'There is no route with the defined ID', 'notFound')
+    </findRouteById>
+    return route
+}
+```
+
+Function 6:
+```javascript
+function isEqualWith(value, other, customizer) {
+    <setCustomizer>
+    customizer = typeof customizer == 'function' ? customizer : undefined$1;
+    </setCustomizer>
+    <compareValues>
+    var result = customizer ? customizer(value, other) : undefined$1;
+    return result === undefined$1 ? baseIsEqual(value, other, undefined$1, customizer) : !!result;
+    </compareValues>
+}
+```
+
+Function 7:
+```javascript
+function(raw) { 
+    <validateAndParseInput>
+    if (typeof(raw) !== "string") $.error("String expected.");
+    var split = raw.split('x');
+    if (split.length !== 2) $.error("Should be two elements only.");
+    </validateAndParseInput>
+    
+    <processSplitElements>
+    var list = [];
+    $.each(split, function() {
+        var digit = Number($.trim(this));
+        if (isNaN(digit)) $.error(this + " is not a digit.");
+        list.push(digit);
+    });
+    </processSplitElements>
+    return list;
+}
+```
+
+Function 8:
+```javascript
+function setSuperCalled() {
+    <updateSegmentSuperCalledStatus>
+    const segments = funcInfo.codePath.currentSegments;
+    for (let i = 0; i < segments.length; ++i) {
+        const segment = segments[i];
+        if (segment.reachable) {
+            segInfoMap[segment.id].superCalled = true;
+        }
+    }
+    </updateSegmentSuperCalledStatus>
+}
+```
+
+Function 9:
+```javascript
+function executeAll(cfg) {
+    <logPackageInformation>
+    console.log(`${clr.DIM+clr.LIGHT_MAGENTA}Package: ${cfg.packageRoot}${clr.RESET}`);
+    </logPackageInformation>
+    <createObservableAndResolve>
+    return new Promise((resolve, reject) => {
+        createObservable(cfg).subscribe({
+            next({ command, exitCode }) {
+                if (exitCode == 0)
+                    cfg.log(`${EMIT_COLOR}just-build ${cfg.tasksToRun.join(' ')} done.${clr.RESET}${cfg.watchMode ? NOW_WATCHING_COLOR + ' Still watching...' + clr.RESET : ''}`);
+                else
+                    cfg.log(`just-build ${cfg.tasksToRun.join(' ')} failed. ${command} returned ${exitCode}`);
+            },
+            error(err) {
+                reject(err);
+            },
+            complete() {
+                resolve();
+            }
+        });
+    });
+    </createObservableAndResolve>
+}
+```
+
+Function 10:
+```javascript
+function(event) {
+    <handleClusteringAndCache>
+    var propagate = true;
+    if (!this.clustering) {
+        this.clearCache();
+        this.features = event.features;
+        this.cluster();
+        propagate = false;
+    }
+    </handleClusteringAndCache>
+    return propagate;
+}
+```

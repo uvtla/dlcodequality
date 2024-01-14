@@ -1,0 +1,250 @@
+```javascript
+<render>
+function render(drizzleData) {
+  return Promise.all([
+    renderPages(drizzleData),
+    renderCollections(drizzleData)
+  ]).then(
+    allData => {
+      return {
+        data: drizzleData.data,
+        pages: allData[0],
+        patterns: allData[1],
+        templates: drizzleData.templates,
+        options: drizzleData.options,
+        tree: drizzleData.tree
+      };
+    },
+    error => DrizzleError.error(error, drizzleData.options.debug)
+  );
+}
+</render>
+
+<createKafkaConsumerAsync>
+function createKafkaConsumerAsync(kafkaConfig) {
+    let topicConfig = {};
+    <configureTopic>
+    if ('default_topic_config' in kafkaConfig) {
+        topicConfig = kafkaConfig.default_topic_config;
+        delete kafkaConfig.default_topic_config;
+    }
+    </configureTopic>
+
+    <initializeConsumer>
+    const consumer = P.promisifyAll(
+        new kafka.KafkaConsumer(kafkaConfig, topicConfig)
+    );
+    </initializeConsumer>
+
+    <connectConsumer>
+    return consumer.connectAsync(undefined)
+    .thenReturn(consumer);
+    </connectConsumer>
+}
+</createKafkaConsumerAsync>
+
+<flatMap>
+function flatMap(iterator) {
+    
+    <handleEmptyArguments>
+    if (arguments.length === 0) {
+      return this;
+    }
+    </handleEmptyArguments>
+
+    var result = [],
+        length = this.length,
+        index;
+
+    <iterateAndMap>
+    for (index = 0; index < length; index++) {
+      var iteratorResult = iterator(this[index], index, this);
+
+      if (Array.isArray(iteratorResult)) {
+        result.push.apply(result, iteratorResult);
+      } else {
+        result.push(iteratorResult);
+      }
+    }
+    </iterateAndMap>
+
+    <finalizeResults>
+    return makeImmutableArray(result);
+    </finalizeResults>
+}
+</flatMap>
+
+<enforceHeightRestriction>
+function (height) {
+            
+            if (height !== undefined && height !== null && typeof(height) !== "string") {
+                
+                height = Math.min(17895697, height); 
+                height += "px";
+            }
+
+            <applyRenderPolicy>
+            this._renderPolicyValue('height', height);
+            </applyRenderPolicy>
+}
+</enforceHeightRestriction>
+
+<argumentsContainOptions>
+function argumentsContainOptions (args) {
+  <checkArgsLength>
+  if (args.length < 2) { 
+    return false
+  }
+  </checkArgsLength>
+
+  <checkLastArgForObject>
+  if (_.isPlainObject(args[args.length - 1])) { 
+    <checkPreLastArg>
+    if (isClass(args[args.length - 2]) || _.isPlainObject(args[args.length - 2])) { 
+      return true
+    }
+    </checkPreLastArg>
+  }
+  </checkLastArgForObject>
+
+  <defaultReturn>
+  return false
+  </defaultReturn>
+}
+</argumentsContainOptions>
+
+<indexKeys>
+function indexKeys(target, pred) {
+  <provideDefaultPredicate>
+  pred = pred || has;
+  </provideDefaultPredicate>
+  var results = [];
+
+  <iterateAndIndex>
+  for (var i = 0, len = target.length; i < len; i += 1) {
+    if (pred(target, i)) {
+      results.push(String(i));
+    }
+  }
+  </iterateAndIndex>
+
+  <returnResults>
+  return results;
+  </returnResults>
+}
+</indexKeys>
+
+<extractAttributes>
+function extractAttributes(attrSet) {
+	var reAttrName = /^[\w\-:\$@]+\.?$/;
+
+  <splitAndMapAttributes>
+	return splitAttributes(attrSet).map(function(attr) {
+      
+      <handleImplicitValue>
+			if (reAttrName.test(attr)) {
+				var value = '';
+				if (attr.charAt(attr.length - 1) == '.') {
+					
+					attr = attr.substr(0, attr.length - 1);
+					value = attr;
+				}
+				return {
+					name: attr,
+					value: value
+				};
+      }
+      </handleImplicitValue>
+
+      <splitNameAndValue>
+			if (~attr.indexOf('=')) {
+				var parts = attr.split('=');
+				return {
+					name: parts.shift(),
+					value: unquote(parts.join('='))
+				};
+      }
+      </splitNameAndValue>
+
+      <handleDefaultAttribute>
+			return {
+				name: DEFAULT_ATTR_NAME,
+				value: unquote(attr)
+			};
+    });
+    </handleDefaultAttribute>
+  </splitAndMapAttributes>
+}
+</extractAttributes>
+
+<loadObject>
+function loadObject(data, db, callback) {
+    <defaultCallback>
+    callback = callback || function() {};
+    </defaultCallback>
+
+    <iterateAndInsert>
+    var iterator = function(modelName, next){
+        insertCollection(modelName, data[modelName], db, next);
+    };
+    async.forEachSeries(Object.keys(data), iterator, callback);
+    </iterateAndInsert>
+}
+</loadObject>
+
+<getDebugNamespaceColor>
+function getDebugNamespaceColor (namespace) {
+  var type = getDebugNamespaceType(namespace);
+
+  <retrieveColor>
+  var color = settings.colors && settings.colors[type];
+  </retrieveColor>
+
+  <returnOrDefault>
+  return color || null;
+  </returnOrDefault>
+}
+</getDebugNamespaceColor>
+
+<compute>
+function(compute, func, context) {
+	var observation = new Observation(func, context, compute);
+	var updater = compute.updater.bind(compute);
+
+  <handleNonProductionName>
+	if(process.env.NODE_ENV !== 'production') {
+		Object.defineProperty(updater,"name",{
+			value: canReflect.getName(compute) + ".updater",
+		});
+	}
+  </handleNonProductionName>
+	
+	compute.observation = observation;
+	return {
+		
+    <onObserver>
+		_on: function() {
+			canReflect.onValue( observation, updater,"notify");
+			if (observation.hasOwnProperty("_value")) {
+				compute.value = observation._value;
+			} else {
+				compute.value = observation.value;
+			}
+		},
+    </onObserver>
+    
+    <offObserver>
+		_off: function() {
+			canReflect.offValue( observation, updater,"notify");
+		},
+    </offObserver>
+
+    <getObservationDepth>
+		getDepth: function() {
+			return observation.getDepth();
+		}
+    </getObservationDepth>
+	};
+}
+</compute>
+```

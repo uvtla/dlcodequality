@@ -1,0 +1,187 @@
+```javascript
+<removeItemFromStorage>
+function (key) {
+  var oldValue = this.getItem(key);
+
+  if (oldValue !== null) {
+    ariaStorageEventBus.stop = true;
+    this._remove(this.namespace + key);
+    ariaStorageEventBus.stop = false;
+
+    ariaStorageEventBus.notifyChange(this.type, key, null, oldValue, this.namespace);
+  }
+}
+</removeItemFromStorage>
+
+<configureCommander>
+function command(base, actions, opts) {
+
+<loadConfigurations>
+  actions = actions || {};
+  opts = opts || {};
+
+  var commands = JSON.parse(fs.readFileSync(p.join(base, opts.commandFile || '../conf/commands.json'))),
+    pkg = JSON.parse(fs.readFileSync(p.join(base, '../package.json')));</loadConfigurations>
+
+  if (actions.commands && commands.commands) {
+    _.each(actions.commands, function (command, name) {
+      if (commands.commands[name]) {
+        commands.commands[name].action = command.action;
+      }
+    });
+  }
+
+  commander.version(pkg.version);
+
+  if (commands.options) {
+    _.each(commands.options, function (option) {
+      commander.option(option.arg, option.desc, option.action);
+    });
+  }
+
+  _.each(commands.commands, function (command, name) {
+    var program = commander
+      .command(name)
+      .description(command.desc);
+
+    _.each(command.options, function (option) {
+      program.option(option.arg, option.desc, option.action);
+    });
+
+    program.action(command.action);
+  });
+
+<prePostCommands>
+  _preCommand(commands.commands);
+
+  commander.parse(process.argv);
+
+  _postCommand(commander.args, commands.commands, commands.options);</prePostCommands>
+}</configureCommander>
+
+<injectStylesheet>
+function getStylesheet(data, isUrl, cb) {
+<createStylesheetElement>
+  var el = document.createElement(isUrl ? 'link' : 'style'),
+    head = document.getElementsByTagName('head')[0];
+
+  el.type = 'text/css';</createStylesheetElement>
+
+<configureStylesheetLink>
+  if (isUrl) {
+    el.href = data;
+    el.rel = 'stylesheet';</configureStylesheetLink>
+
+<setLoadEvent>
+    el.onload = el.onreadystatechange = function() {
+      if ((!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')) {
+        el.onload = el.onreadystatechange = null;
+
+        if (typeof cb === 'function')
+          cb();
+      }
+    };
+  }</setLoadEvent>
+  else {
+<insertStyles>
+    el.innerHTML = data;</insertStyles>
+  }
+
+<appendToHead>
+  head.appendChild(el);</appendToHead>
+}</injectStylesheet>
+
+<processResponse>
+function process_response(raw_response) {
+  const { item_preparer, query_result_preparer } = params;
+  const raw_data = raw_response.data;
+  if (Array.isArray(raw_data)) {
+<resolveArrayItems>
+    return resolve_promise(raw_data.map(item_preparer));</resolveArrayItems>
+  } else if (raw_data instanceof Query_result) {
+<processQueryResult>
+    const query_result = new Query_result(raw_data);
+    query_result.items = raw_data.items.map(query_result_preparer);</processQueryResult>
+<resolveQueryResult>
+    return resolve_promise(query_result);</resolveQueryResult>
+  }
+<resolveRawData>
+  return resolve_promise(item_preparer(raw_data));</resolveRawData>
+}</processResponse>
+
+<getExtensionEngine>
+function(ext) {
+  ext = ext || this.option('view engine');
+  if (ext && ext[0] !== '.') {
+    ext = '.' + ext;
+  }
+  return this._.engines.getEngine(ext);
+}</getExtensionEngine>
+
+<createSQLiteRecordStream>
+function createSQLiteRecordStream(dbPaths, importPlace) {
+  const sqliteStream = combinedStream.create();
+
+<defineSQLiteStatement>
+  const sqliteStatement = importPlace ?
+    SQLiteStream.findGeoJSONByPlacetypeAndWOFId(getPlacetypes(), importPlace) :
+    SQLiteStream.findGeoJSONByPlacetype(getPlacetypes());</defineSQLiteStatement>
+
+<appendDBStreams>
+  dbPaths.forEach((dbPath) => {
+    sqliteStream.append( (next) => {
+      logger.info(`Loading ${path.basename(dbPath)} database from ${path.dirname(dbPath)}`);
+      next(new SQLiteStream(dbPath, sqliteStatement));
+    });
+  });</appendDBStreams>
+
+  return sqliteStream;
+}</createSQLiteRecordStream>
+
+<murmurhash>
+function (h) {
+  h = x64Xor(h, [0, h[0] >>> 1])
+  h = x64Multiply(h, [0xff51afd7, 0xed558ccd])
+  h = x64Xor(h, [0, h[0] >>> 1])
+  h = x64Multiply(h, [0xc4ceb9fe, 0x1a85ec53])
+  h = x64Xor(h, [0, h[0] >>> 1])
+  return h
+}</murmurhash>
+
+<classStringForValue>
+function (parsedPath) {
+  return View._classStringForValue(parsedPath.path, parsedPath.stream.value(), parsedPath.className, parsedPath.falsyClassName);
+}</classStringForValue>
+
+<makeHref>
+function makeHref(to, params, query) {
+  return this.context.router.makeHref(to, params, query);
+}</makeHref>
+
+<createProxies>
+function createProxies(config, map, parentPath) {
+<initializeProxyCreation>
+  parentPath = parentPath || [];
+
+  var isBase = parentPath.length === 0;
+  var proxies = {};
+  var path;</initializeProxyCreation>
+
+<processMapping>
+  for (var key in map) {
+    if (map.hasOwnProperty(key)) {
+      if (isObject(map[key])) {
+<createProxiesRecursively>
+        proxies[key] = createProxies(config, map[key], parentPath.concat([key]));</createProxiesRecursively>
+      }
+      else if (isBoolean(map[key])) {
+<createProxiedMethod>
+        path = parentPath.join('/') + (isBase ? '' : '/') + key;
+        proxies[key] = createProxiedMethod(config, path);</createProxiedMethod>
+      }
+    }
+  }</processMapping>
+
+  return proxies;
+}</createProxies>
+```

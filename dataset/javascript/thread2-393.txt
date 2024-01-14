@@ -1,0 +1,275 @@
+```javascript
+<updateExtractsAndMaps>
+function(){
+    var insertedMap = {};
+    var deletedMap = {};
+    var delta;
+
+    for (var key in this.sourceMap_)
+    {
+      var sourceObjectInfo = this.sourceMap_[key];
+      var sourceObject = sourceObjectInfo.source;
+
+      if (sourceObject instanceof DataObject)
+      {
+        var newValue = this.rule(sourceObject) || null;
+        var oldValue = sourceObjectInfo.value;
+
+        if (isEqual(newValue, oldValue))
+          continue;
+
+        <handleInserts>
+        if (newValue instanceof DataObject || newValue instanceof ReadOnlyDataset)
+        {
+          var inserted = addToExtract(this, newValue, sourceObject);
+          for (var i = 0; i < inserted.length; i++)
+          {
+            var item = inserted[i];
+            var id = item.basisObjectId;
+            if (deletedMap[id])
+              delete deletedMap[id];
+            else
+              insertedMap[id] = item;
+          }
+        }
+        </handleInserts>
+
+        <handleDeletions>
+        if (oldValue)
+        {
+          var deleted = removeFromExtract(this, oldValue, sourceObject);
+          for (var i = 0; i < deleted.length; i++)
+          {
+            var item = deleted[i];
+            var id = item.basisObjectId;
+            if (insertedMap[id])
+              delete insertedMap[id];
+            else
+              deletedMap[id] = item;
+          }
+        }
+        </handleDeletions>
+
+        <updateSourceValue>
+        sourceObjectInfo.value = newValue;
+        </updateSourceValue>
+      }
+    }
+
+    <emitDelta>
+    if (delta = getDelta(values(insertedMap), values(deletedMap)))
+      this.emit_itemsChanged(delta);
+    </emitDelta>
+
+    return delta;
+  }
+</updateExtractsAndMaps>
+
+<recursiveFormatting>
+function formatNumber(number, precision, thousand, decimal) {
+
+  <handleArrayInput>
+  if (Array.isArray(number)) {
+    return number.map(function(val) {
+      return formatNumber(val, precision, thousand, decimal);
+    });
+  }
+  </handleArrayInput>
+
+  <applyFormatting>
+  number = unformat(number);
+
+  const opts = defaults(
+      (isObject(precision) ? precision : {
+        precision : precision,
+        thousand : thousand,
+        decimal : decimal
+      }),
+      numberSettings
+    );
+
+  const usePrecision = checkPrecision(opts.precision);
+
+  const fixedNumber = toFixed(number || 0, usePrecision);
+  const negative = fixedNumber < 0 ? "-" : "";
+  const base = String(parseInt(Math.abs(fixedNumber), 10));
+  const mod = base.length > 3 ? base.length % 3 : 0;
+
+  return negative + (mod ? base.substr(0, mod) + opts.thousand : "") + base.substr(mod).replace(/(\d{3})(?=\d)/g, "$1" + opts.thousand) + (usePrecision ? opts.decimal + toFixed(Math.abs(number), usePrecision).split('.')[1] : "");
+  </applyFormatting>
+}
+</recursiveFormatting>
+
+<handlePromiseError>
+function (error) {
+    <recordError>
+    results[index] = error;
+    hasError = true;
+    </recordError>
+
+    <incrementFulfillment()>
+    fulfilled += 1;
+    </incrementFulfillment>
+
+    <emitErrorOnComplete>
+    if (fulfilled === length) {
+        deferred.emitError(results);
+    }
+    </emitErrorOnComplete>
+}
+</handlePromiseError>
+
+<defineSingleTest>
+function only(testName, callback) {
+    <checkAndResetQueue>
+    if (focused$1) {
+        return;
+    }
+
+    config.queue.length = 0;
+    focused$1 = true;
+    </checkAndResetQueue>
+
+    <queueTest>
+    var newTest = new Test({
+        testName: testName,
+        callback: callback
+    });
+
+    newTest.queue();
+    </queueTest>
+}
+</defineSingleTest>
+
+<resetApplicationState>
+async function reset () {
+    
+    try {
+        <checkAndStopApp>
+        if (immutableApp && immutableApp.server && immutableApp.started) {
+            await stop()
+        }
+        </checkAndStopApp>
+        
+        <resetConfiguration>
+        immutableApp = global.__immutable_app__ = _.cloneDeep(defaultGlobalConfig)
+        
+        immutableApp.express = express()
+        </resetConfiguration>
+    }
+    catch (err) {
+        <handleResetError>
+        throw err
+        </handleResetError>
+    }
+}
+</resetApplicationState>
+
+<getMaxSatisfyingVersion>
+function maxSatisfying (versions, range) {
+  return versions
+    .filter(function (v) { return satisfies(v, range) })
+    .sort(compare)
+    .pop()
+}
+</getMaxSatisfyingVersion>
+
+<initializeSaveToMongo>
+function SaveToMongo(opts) {
+  if (!(this instanceof SaveToMongo)) return new SaveToMongo(opts);
+
+  <validateAndSetOptions>
+  var options = this.options = opts || {};
+
+  if (options.bulk) {
+
+    if (typeof options.bulk !== 'object') {
+      throw new TypeError('Option `bulk` must be an object');
+    }
+
+    if (options.bulk.mode !== 'ordered' && options.bulk.mode !== 'unordered') {
+      throw new Error('Option `bulk.mode` must be a string and can be "ordered" or "unordered"');
+    }
+
+    if (options.bulk.bufferSize && (typeof options.bulk.bufferSize !== 'number' or options.bulk.bufferSize <= 0)) {
+      throw new Error('Option `bulk.bufferSize` must be a number greater than 0');
+    }
+
+  }
+
+  this.bulk = options.bulk;
+  this.opCounter = options.bulk ? 0 : null;
+  if (this.bulk && !this.bulk.bufferSize) this.bulk.bufferSize = 1000;
+  </validateAndSetOptions>
+
+  <extendWritableStream>
+  Writable.call(this, options.streamOptions || {
+    objectMode: true
+  });
+  </extendWritableStream>
+
+  
+  <handleFinishEvent>
+  this.on('finish', function() {
+    if (this.bulk && this.opCounter > 0) {
+      debug('Executing remaining bulk inserts');
+
+      this.executeBulkOps(function(err, result) {
+        this._db.close();
+        this.emit('done');
+      });
+    } else {
+      this._db.close();
+      this.emit('done');
+    }
+  });
+  </handleFinishEvent>
+}
+</initializeSaveToMongo>
+
+<initializeMysqlTransit>
+function MysqlTransit(dbOriginal, dbTemp, connectionParameters) {
+  this.dbOriginal = dbOriginal;
+  this.dbTemp = dbTemp;
+  this.connectionParameters = connectionParameters;
+  this.queryQueue = [];
+  this.tablesToDrop = [];
+  this.tablesToCreate = [];
+  this.interactive = true;
+  return this._init();
+}
+</initializeMysqlTransit>
+
+<handleDatabaseInsertionResult>
+function(err, status) {
+    <processInsertionError>
+    if (err) {
+        callback(err);
+        return;
+    }
+    </processInsertionError>
+    
+    <updateInsertionStatus>
+    if (status || status === 'OK') {
+        report.inserted += _.isNumber(status) ? status : 1;
+    } else {
+        report.errors += 1;
+    }
+    </updateInsertionStatus>
+
+    <continueInsertions>
+    AddRecursive();
+    </continueInsertions>
+}
+</handleDatabaseInsertionResult>
+
+<removeToolFromStore>
+function(enabledElement) {
+    <filterTools>
+    store.state.tools = store.state.tools.filter(
+        tool => tool.element !== enabledElement
+    );
+    </filterTools>
+}
+</removeToolFromStore>
+```

@@ -1,0 +1,260 @@
+```javascript
+<breadcrumbWalk>
+function (callback, ctx) {
+    var depth, node;
+    for (depth = 0, node = this; node !== null; node = node.parent(), depth++)
+        ctx = callback(depth, node, ctx);
+    return ctx;
+}
+</breadcrumbWalk>
+
+<StatefulClientChannel>
+function StatefulClientChannel(client, readable, writable, opts) {
+  ClientChannel.call(this, client, opts);
+  this._readable = readable;
+  this._writable = writable;
+  this._connected = !!(opts && opts.noPing);
+  this._readable.on('end', onEnd);
+  this._writable.on('finish', onFinish);
+
+  var self = this;
+  var timer = null;
+  
+  <handleEndOfTransmission>
+  this.once('eot', function () {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    if (!self._connected) {
+      self.emit('_ready');
+    }
+    this._writable.removeListener('finish', onFinish);
+    if (this._endWritable) {
+      debug('ending transport');
+      this._writable.end();
+    }
+    this._readable
+      .removeListener('data', onPing)
+      .removeListener('data', onMessage)
+      .removeListener('end', onEnd);
+  });
+  </handleEndOfTransmission>
+
+  <scheduledPing>
+  var hreq; 
+  if (this._connected) {
+    this._readable.on('data', onMessage);
+  } else {
+    this._readable.on('data', onPing);
+    process.nextTick(ping);
+    if (self.timeout) {
+      timer = setTimeout(function () {
+        self.destroy(new Error('timeout'));
+      }, self.timeout);
+    }
+  }
+  </scheduledPing>
+
+  function ping(retry) {
+    <establishConnection>
+    if (self.destroyed) {
+      return;
+    }
+    hreq = self._createHandshakeRequest(self._adapter, !retry);
+    var payload = [
+      HANDSHAKE_REQUEST_TYPE.toBuffer(hreq),
+      utils.bufferFrom([0, 0]) 
+    ];
+    self._writable.write({id: self._prefix, payload: payload});
+    </establishConnection>
+  }
+
+  function onPing(obj) {
+    <handleHandshakeResponse>
+    if (!self._matchesPrefix(obj.id)) {
+      debug('discarding unscoped response %s (still connecting)', obj.id);
+      return;
+    }
+    var buf = Buffer.concat(obj.payload);
+    try {
+      var hres = readHead(HANDSHAKE_RESPONSE_TYPE, buf).head;
+      if (hres.serverHash) {
+        self._adapter = self._getAdapter(hres);
+      }
+    } catch (cause) {
+      self.destroy(cause);
+      return;
+    }
+    var match = hres.match;
+    debug('handshake match: %s', match);
+    self.emit('handshake', hreq, hres);
+    if (match === 'NONE') {
+      process.nextTick(function () { ping(true); });
+    } else {
+      debug('successfully connected');
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      self._readable.removeListener('data', onPing).on('data', onMessage);
+      self._connected = true;
+      self.emit('_ready');
+      hreq = null;
+    }
+    </handleHandshakeResponse>
+  }
+
+  function onMessage(obj) {
+    <processIncomingMessage>
+    var id = obj.id;
+    if (!self._matchesPrefix(id)) {
+      debug('discarding unscoped message %s', id);
+      return;
+    }
+    var cb = self._registry.get(id);
+    if (cb) {
+      process.nextTick(function () {
+        debug('received message %s', id);
+        cb(null, Buffer.concat(obj.payload), self._adapter);
+      });
+    }
+    </processIncomingMessage>
+  }
+
+  function onEnd() { self.destroy(true); }
+  function onFinish() { self.destroy(); }
+}
+</StatefulClientChannel>
+
+<buildSideFaces>
+function buildSideFaces() {
+    var layeroffset = 0;
+    sidewalls(contour, layeroffset);
+    layeroffset += contour.length;
+
+    for (h = 0, hl = holes.length; h < hl; h++) {
+        ahole = holes[h];
+        sidewalls(ahole, layeroffset);
+        layeroffset += ahole.length;
+    }
+}
+</buildSideFaces>
+
+<propsMatch>
+function propsMatch(test, testFields, expected, expectedFields, equals) {
+  var equality = equals || Rekord.equals;
+
+  if (isString(testFields)) {
+    return equality(test[testFields], expected[expectedFields]);
+  } else {
+    for (var i = 0; i < testFields.length; i++) {
+      var testProp = testFields[i];
+      var expectedProp = expectedFields[i];
+
+      if (!equality(test[testProp], expected[expectedProp])) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+</propsMatch>
+
+<hasClassInParent>
+function (element, className) {
+    var elemClassName;
+    while (element) {
+        elemClassName = attr(element, 'class');
+        if (elemClassName) {
+            if (elemClassName.indexOf(className) !== -1) {
+                return true;
+            } else if (elemClassName.indexOf(PREFIX + 'container') !== -1) {
+                return false;
+            }
+        }
+        element = element.parentNode;
+    }       
+}
+</hasClassInParent>
+
+<getCalendarInstance>
+function(name, language) {
+    name = (name || 'gregorian').toLowerCase();
+    language = language || '';
+    var cal = this._localCals[name + '-' + language];
+    if (!cal && this.calendars[name]) {
+        cal = new this.calendars[name](language);
+        this._localCals[name + '-' + language] = cal;
+    }
+    if (!cal) {
+        throw (this.local.invalidCalendar || this.regionalOptions[''].invalidCalendar)
+            .replace(/\{0\}/, name);
+    }
+    return cal;
+}
+</getCalendarInstance>
+
+<clearCookie>
+function (name, domain, secure, path, jar) {
+    cookie.set(name, "", "-1s", domain, secure, path, jar);
+    return name;
+}
+</clearCookie>
+
+<queryAssertion>
+function(query, rootData, scopeData, scopePath) {
+    var pQuery = this.QueryParser.parseQuery(query);
+    return this.QueryRunner.assert(pQuery, rootData, scopeData, scopePath);
+}
+</queryAssertion>
+
+<handleMouseEvent>
+function(eventName, eventData) {
+    var lastEvent = this.lastMouseEvent;
+    lastEvent.eventName = eventName;
+    lastEvent.mouseButton = eventData.mouseButton;
+    lastEvent.target = eventData.target;
+    lastEvent.realX = eventData.realX;
+    lastEvent.realY = eventData.realY;
+    lastEvent.clientX = eventData.clientX; 
+    lastEvent.clientY = eventData.clientY; 
+    lastEvent.originalEvent = eventData.originalEvent;
+
+    var mouseButton = eventData.mouseButton;
+    if (eventName === "MouseDown") {
+        if (this._buttonDown[mouseButton] !== true) {
+            this._buttonDown[mouseButton] = true;
+            this.triggerMouseEvent(eventName, eventData);
+        }
+    } else if (eventName === "MouseUp") {
+        if (this._buttonDown[mouseButton] === true) {
+            this._buttonDown[mouseButton] = false;
+            this.triggerMouseEvent(eventName, eventData);
+        }
+    } else {
+        this.triggerMouseEvent(eventName, eventData);
+    }
+
+    return this;
+}
+</handleMouseEvent>
+
+<pullSiteFiles>
+function(site, uuid, env, newBackup) {
+    app.status('Pulling files.');
+
+    if (firstTime()) {
+        return pullFilesArchive(site, env, newBackup)
+        .then(function() {
+            return pullFilesRsync(uuid, env);
+        });
+    }
+    else {
+        return pullFilesRsync(uuid, env);
+    }
+}
+</pullSiteFiles>
+```
+
+Each function above is annotated as a whole according to SRP, as they all serve a single high-level responsibility. However, it's crucial to note that some of them manage multiple tasks with distinct responsibilities, though the division is not clear cut enough to segment the functions further without additional context.

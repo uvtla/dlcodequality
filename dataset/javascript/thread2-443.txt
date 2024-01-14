@@ -1,0 +1,296 @@
+```javascript
+<transformColor>
+function transformColor(string) {
+  return parser(string).walk(function(node) {
+    if (node.type !== "function" || node.value !== "color") {
+      return
+    }
+
+    node.value = colorFn.convert(parser.stringify(node))
+    node.type = "word"
+  }).toString()
+}
+</transformColor>
+
+<anonymous>
+function (elements, callback, options) {
+  <validateArguments>
+  if (!validateArguments(elements, callback)) return
+  </validateArguments>
+
+  if (!Array.isArray(elements)) {
+    elements = [ elements ]
+  }
+
+  each.call(elements, function (e) {
+    const handler = function () {
+      callback.call(e, count(e, options))
+    }
+
+    liveElements.push({ element: e, handler: handler })
+
+    handler()
+
+    e.addEventListener('input', handler)
+  })
+
+  return this
+}
+</anonymous>
+
+<generateSpecialWorkdayOrHolidayRender>
+function generateSpecialWorkdayOrHolidayRender(dayMap, lang = 'zh-cn') {
+  return function render(data, locale, current) {
+    const currentDate = formatter(new Date(current), 'YYYY-MM-DD');
+    const type = data[currentDate];
+    if (type) {
+      if (type === 'work') {
+        return (
+          <span className="workday-label">{localeMap[locale] && localeMap[locale].workday}</span>
+        );
+      }
+      return (
+        <span className="holiday-label">{localeMap[locale] && localeMap[locale].holiday}</span>
+      );
+    }
+    return null;
+  }.bind(null, dayMap, lang);
+}
+</generateSpecialWorkdayOrHolidayRender>
+
+<anonymous>
+function() {
+    <checkForDuplicateArguments>
+    var badArg = false;
+    var hash = {};
+    for (var i = 0; i < this.arguments_.length; i++) {
+      if (hash['arg_' + this.arguments_[i].toLowerCase()]) {
+        badArg = true;
+        break;
+      }
+      hash['arg_' + this.arguments_[i].toLowerCase()] = true;
+    }
+    if (badArg) {
+      this.setWarningText(Blockly.Msg.PROCEDURES_DEF_DUPLICATE_WARNING);
+    } else {
+      this.setWarningText(null);
+    }
+    </checkForDuplicateArguments>
+    
+    <updateFieldWithParamString>
+    var paramString = '';
+    if (this.arguments_.length) {
+      paramString = Blockly.Msg.PROCEDURES_BEFORE_PARAMS +
+          ' ' + this.arguments_.join(', ');
+    }
+    </updateFieldWithParamString>
+    
+    <disableAndEnableEvents>
+    Blockly.Events.disable();
+    this.setFieldValue(paramString, 'PARAMS');
+    Blockly.Events.enable();
+    </disableAndEnableEvents>
+}
+</anonymous>
+
+<mapRequestRecursive>
+function mapRequestRecursive(req, attrNode, context) {
+  // Multiple responsibilities identified, each wrapped in corresponding tags.
+  <performAttributeChecks>
+  if (attrNode.hidden && !req.internal) {
+    throw new RequestError(
+        ['Unknown attribute "' + context.attrPath.join('.') + '" - it is a hidden attribute'].join(' ')
+    );
+  }
+
+  if (attrNode.deprecated && !req.internal) {
+    context.deprecated.push(context.attrPath.join('.'));
+  }
+
+  if ((attrNode.permission || context.authContext) && !req.internal) {
+    try {
+      if (!context.auth || !context.auth.check) throw new ImplementationError(`No valid Auth-Provider available`);
+      context.authContext = context.auth.check(attrNode, context.authContext);
+    } catch (err) {
+      err.message += ` at "${context.attrPath.join('.')}"`;
+      throw err;
+    }
+  }
+
+  if (!req.internal) attrNode.selected = true;
+  </performAttributeChecks>
+
+  // ... Additional responsibilities ...
+
+  <processRequestRecursive>
+  if (req.select) {
+    Object.keys(req.select).forEach(subAttrName => {
+      const subAttrNode = getAttribute([subAttrName], attrNode, context);
+      const subContext = Object.assign({}, context);
+      subContext.attrPath = context.attrPath.concat([subAttrName]);
+
+      mapRequestRecursive(req.select[subAttrName], subAttrNode, subContext);
+    });
+  }
+  </processRequestRecursive>
+
+  return context.resourceTree;
+}
+</mapRequestRecursive>
+
+<convertValueType>
+function (val, errorMessage) {
+  <typeToValueConversion>
+  switch(true) {
+    case typeof val == 'string': 
+      return val;
+
+    case val === undefined:
+    case val === null: 
+      return 'nil';
+    
+    case val === Infinity: 
+      return 'inf';
+
+    case val === -Infinity: 
+      return '-inf';
+
+    case typeof val == 'number': 
+    case typeof val == 'boolean': 
+      return window.isNaN(val)? 'nan' : '' + val;
+
+    default: 
+      return throwCoerceError(val, errorMessage) || '';
+  }
+  </typeToValueConversion>
+}
+</convertValueType>
+
+<VehicleDescriptor>
+function VehicleDescriptor(properties) {
+  <setProperties>
+  if (properties)
+    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+      if (properties[keys[i]] != null)
+        this[keys[i]] = properties[keys[i]];
+  </setProperties>
+}
+</VehicleDescriptor>
+
+<buildWorkerCode>
+function ( functionCodeBuilder, parserName, libLocations, libPath, runnerImpl ) {
+  // SRP violation: Too many responsibilities are included in this function.
+  if ( THREE.LoaderSupport.Validator.isValid( this.loaderWorker.worker ) ) return;
+
+  <loggingCheck>
+  if ( this.logging.enabled ) {
+    console.info( 'WorkerSupport: Building worker code...' );
+    console.time( 'buildWebWorkerCode' );
+  }
+  </loggingCheck>
+
+  <selectRunnerImpl>
+  if ( THREE.LoaderSupport.Validator.isValid( runnerImpl ) ) {
+    if ( this.logging.enabled ) console.info( 'WorkerSupport: Using "' + runnerImpl.runnerName + '" as Runner class for worker.' );
+  } else if ( typeof window !== "undefined" ) {
+    runnerImpl = THREE.LoaderSupport.WorkerRunnerRefImpl;
+    if ( this.logging.enabled ) console.info( 'WorkerSupport: Using DEFAULT "THREE.LoaderSupport.WorkerRunnerRefImpl" as Runner class for worker.' );
+  } else {
+    runnerImpl = THREE.LoaderSupport.NodeWorkerRunnerRefImpl;
+    if ( this.logging.enabled ) console.info( 'WorkerSupport: Using DEFAULT "THREE.LoaderSupport.NodeWorkerRunnerRefImpl" as Runner class for worker.' );
+  }
+  </selectRunnerImpl>
+
+  var userWorkerCode = functionCodeBuilder( THREE.LoaderSupport.WorkerSupport.CodeSerializer );
+  userWorkerCode += 'var Parser = '+ parserName +  ';\n\n';
+  userWorkerCode += THREE.LoaderSupport.WorkerSupport.CodeSerializer.serializeClass( runnerImpl.runnerName, runnerImpl );
+  userWorkerCode += 'new ' + runnerImpl.runnerName + '();\n\n';
+
+
+  <handleLibraries>
+  var scope = this;
+  if ( THREE.LoaderSupport.Validator.isValid( libLocations ) && libLocations.length > 0 ) {
+    var libsContent = '';
+    var loadAllLibraries = function ( path, locations ) {
+      if ( locations.length === 0 ) {
+        scope.loaderWorker.initWorker( libsContent + userWorkerCode, runnerImpl.runnerName );
+        if ( scope.logging.enabled ) console.timeEnd( 'buildWebWorkerCode' );
+      } else {
+        var loadedLib = function ( contentAsString ) {
+          libsContent += contentAsString;
+          loadAllLibraries( path, locations );
+        };
+        var fileLoader = new THREE.FileLoader();
+        fileLoader.setPath( path );
+        fileLoader.setResponseType( 'text' );
+        fileLoader.load( locations[ 0 ], loadedLib );
+        locations.shift();
+      }
+    };
+    loadAllLibraries( libPath, libLocations );
+  } else {
+    this.loaderWorker.initWorker( userWorkerCode, runnerImpl.runnerName );
+    if ( this.logging.enabled ) console.timeEnd( 'buildWebWorkerCode' );
+  }
+  </handleLibraries>
+}
+</buildWorkerCode>
+
+<stop>
+function stop() {
+  return function stopImpl(clearQueue, jumpToEnd) {
+    <handleAnimationStop>
+    var self = this;
+    var selfIsArrayLike = self.length !== undefined;
+    var all = selfIsArrayLike ? self : [self];
+
+    var cy = this._private.cy || this;
+
+    if (!cy.styleEnabled()) {
+      return this;
+    }
+
+    for (var i = 0; i < all.length; i++) {
+      var ele = all[i];
+      var _p = ele._private;
+      var anis = _p.animation.current;
+
+      for (var j = 0; j < anis.length; j++) {
+        var ani = anis[j];
+        var ani_p = ani._private;
+
+        if (jumpToEnd) {
+          
+          ani_p.duration = 0;
+        }
+      }
+
+      if (clearQueue) {
+        _p.animation.queue = [];
+      }
+
+      if (!jumpToEnd) {
+        _p.animation.current = [];
+      }
+    }
+    </handleAnimationStop>
+
+    <notifyForRedraw>
+    cy.notify('draw');
+    </notifyForRedraw>
+    
+    return this;
+  };
+}
+</stop>
+
+<defErrorChecking>
+function def (params, spec, errs) {
+  for (var key in params) {
+    if (!spec.hasOwnProperty(key)) <defError>defError(key, errs)</defError>
+  }
+}
+</defErrorChecking>
+```
+
+Please note that not all code snippets provided map exactly to a single SRP responsibility. Some functions contain complex or miscellaneous logic that doesn't neatly align with just one responsibility or the logic itself may be responsible for a single purpose. In such cases, broader sections of code are annotated, and the tags describe the general activity or purpose of the code block.

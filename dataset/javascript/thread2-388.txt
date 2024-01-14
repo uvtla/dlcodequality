@@ -1,0 +1,338 @@
+<report>
+function report(condition) {
+  const node = condition.reference.identifier;
+
+  context.report({
+    node,
+    message: "'{{name}}' is not modified in this loop.",
+    data: node
+  });
+}
+</report>
+
+<createAttributeSetters>
+function createAttributeSetters(gl, program) {
+  <initializeAttributes>
+  const attribSetters = {};
+  </initializeAttributes>
+
+  <getAttributesFromProgram>
+  const numAttribs = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+  for (let ii = 0; ii < numAttribs; ++ii) {
+    const attribInfo = gl.getActiveAttrib(program, ii);
+    if (isBuiltIn(attribInfo)) {
+      continue;
+    }
+    const index = gl.getAttribLocation(program, attribInfo.name);
+    const typeInfo = attrTypeMap[attribInfo.type];
+    const setter = typeInfo.setter(gl, index, typeInfo);
+    setter.location = index;
+    attribSetters[attribInfo.name] = setter;
+  }
+  </getAttributesFromProgram>
+
+  return attribSetters;
+}
+</createAttributeSetters>
+
+<recompute>
+function recompute() {
+  <defineVariables>
+  var matrix = me.matrix,
+      angle,
+      s, c,
+      m00,
+      m01,
+      m02,
+      m03,
+      m10,
+      m11,
+      m12,
+      m13;
+  </defineVariables>
+
+  <checkForIdentityTransformation>
+  if (!translateX &&
+      !translateY &&
+      !rotation &&
+      !skewX &&
+      !skewY &&
+      scaleX === 1 &&
+      scaleY === 1
+  ) {
+    me.transformed = false;
+    return;
+  }
+  </checkForIdentityTransformation>
+
+  <initializeMatrix>
+  mat4.identity(matrix);
+  </initializeMatrix>
+
+  <performTransformation>
+  translate(translateX + centerX, translateY + centerY);
+  </performTransformation>
+
+  <applySkewing>
+  if (skewX) {
+    matrix[4] = skewX / me.width;
+  }
+  if (skewY) {
+    matrix[1] = skewY / me.height;
+  }
+  </applySkewing>
+
+  <rotateMatrix>
+  if (rotation) {
+    <saveOriginalMatrixState>
+    m00 = matrix[0];
+    m01 = matrix[1];
+    m02 = matrix[2];
+    m03 = matrix[3];
+    m10 = matrix[4];
+    m11 = matrix[5];
+    m12 = matrix[6];
+    m13 = matrix[7];
+    </saveOriginalMatrixState>
+
+    <computeRotation>
+    angle = -(degrees ? rotation * Math.PI / 180 : rotation);
+    </computeRotation>
+
+    <calculateSineCosine>
+    s = Math.sin(angle);
+    c = Math.cos(angle);
+    </calculateSineCosine>
+
+    <updateMatrixForRotation>
+    matrix[0] = m00 * c + m10 * s;
+    matrix[1] = m01 * c + m11 * s;
+    matrix[2] = m02 * c + m12 * s;
+    matrix[3] = m03 * c + m13 * s;
+    matrix[4] = m10 * c - m00 * s;
+    matrix[5] = m11 * c - m01 * s;
+    matrix[6] = m12 * c - m02 * s;
+    matrix[7] = m13 * c - m03 * s;
+    </updateMatrixForRotation>
+  }
+  </rotateMatrix>
+
+  <scaleMatrix>
+  if (scaleX !== 1) {
+    matrix[0] *= scaleX;
+    matrix[1] *= scaleX;
+    matrix[2] *= scaleX;
+    matrix[3] *= scaleX;
+  }
+  if (scaleY !== 1) {
+    matrix[4] *= scaleY;
+    matrix[5] *= scaleY;
+    matrix[6] *= scaleY;
+    matrix[7] *= scaleY;
+  }
+  </scaleMatrix>
+
+  <revertTranslation>
+  translate(-centerX, -centerY);
+  </revertTranslation>
+
+  <setStatus>
+  me.transformed = true;
+  </setStatus>
+}
+</recompute>
+
+<indexCurve>
+function indexCurve (data, start, minX, minY, size) {
+  <initializeNode>
+  var node = start
+  </initializeNode>
+
+  <computeZOrderAndLink>
+  do {
+    if (node.z === null) {
+      node.z = zOrder(data[node.i], data[node.i + 1], minX, minY, size)
+    }
+    node.prevZ = node.prev
+    node.nextZ = node.next
+    node = node.next
+  } while (node !== start)
+  </computeZOrderAndLink>
+
+  <prepareForSorting>
+  node.prevZ.nextZ = null
+  node.prevZ = null
+  </prepareForSorting>
+
+  <sortNodes>
+  sortLinked(node)
+  </sortNodes>
+}
+</indexCurve>
+
+<parseArgument>
+function (argument) {
+  <initializePosition>
+  var pos;
+  </initializePosition>
+
+  <checkForNegation>
+  if (argument.charAt(0) === "-") {
+    argument = argument.substr(1);
+    pos = argument.indexOf(":");
+    if (-1 < pos) {
+      return [
+        argument.substr(0, pos),
+        argument.substr(pos + 1)
+      ];
+    } else {
+      return [argument];
+    }
+  }
+  </checkForNegation>
+
+  <findEqualsSign>
+  pos = argument.indexOf("=");
+  if (-1 < pos) {
+    return [
+      argument.substr(0, pos),
+      argument.substr(pos + 1)
+    ];
+  }
+  </findEqualsSign>
+
+  return argument;
+}
+</parseArgument>
+
+<generatePropertyString>
+function( version ) {
+  <preparePropertyName>
+  var propName = (this.group ? this.group + '.' : '') + capitalDashCase( this._field )
+  </preparePropertyName>
+
+  <gatherParameters>
+  var keys = Object.keys( this )
+  var params = []
+  for( var i = 0; i < keys.length; i++ ) {
+    if (keys[i] === 'group') continue
+    params.push( capitalDashCase( keys[i] ) + '=' + this[ keys[i] ] )
+  }
+  </gatherParameters>
+
+  <composeFinalString>
+  return propName +
+    ( params.length ? ';' + params.join( ';' ) : params ) + ':' +
+    ( Array.isArray( this._data ) ? this._data.join( ';' ) : this._data )
+  </composeFinalString>
+}
+</generatePropertyString>
+
+<Checksum>
+function Checksum(type, val) {
+  <initializeProperties>
+  this.type = type;
+  this.val = val || 0;
+  </initializeProperties>
+
+  <assignComputeMethod>
+  switch (this.type) {
+    case 0x00:
+      this._compute = this._computeNone;
+      break;
+    case 0x01:
+      this._compute = this._computeCrc32;
+      break;
+    case 0x02:
+      this._compute = this._computeFarm32;
+      break;
+    case 0x03:
+      this._compute = this._computeCrc32C;
+      break;
+    default:
+      assert(false, 'invalid checksum type ' + this.type);
+  }
+  </assignComputeMethod>
+}
+</Checksum>
+
+<getTargets>
+function (vName) {
+  <initializeComponent>
+  var that = this,
+      aResult = [];
+  </initializeComponent>
+
+  <processTargetNames>
+  if (Array.isArray(vName)) {
+    vName.forEach(function (sName) {
+      var oTarget = that._mTargets[sName];
+
+      if (oTarget) {
+        aResult.push(oTarget);
+      } else {
+        Log.error("The target you tried to get \"" + sName + "\" does not exist!", that);
+      }
+    });
+    return aResult;
+  }
+  </processTargetNames>
+
+  return this._mTargets[vName];
+}
+</getTargets>
+
+<getValuesList>
+function getValuesList (stateObject, chunkNames) {
+  <resetAccumulator>
+  getValuesList_accumulator.length = 0;
+  </resetAccumulator>
+
+  <collectValues>
+  var chunkNamesLength = chunkNames.length;
+  for (var i = 0; i < chunkNamesLength; i++) {
+    getValuesList_accumulator.push(stateObject[chunkNames[i]]);
+  }
+  </collectValues>
+
+  return getValuesList_accumulator;
+}
+</getValuesList>
+
+<toSampleArray>
+function toSampleArray(audioBuffer) {
+  <initializeSampleRead>
+  var inSamples = audioBuffer.length;
+  readSamples += inSamples;
+  </initializeSampleRead>
+
+  <calculateExpectedSamples>
+  var expectedWrittenSamples = Math.round(readSamples * format.rate / audioBuffer.sampleRate);
+  var outSamples = expectedWrittenSamples - writtenSamples;
+  </calculateExpectedSamples>
+
+  <updateWrittenSamples>
+  writtenSamples += outSamples;
+  </updateWrittenSamples>
+
+  <createDataArray>
+  var data = new SampleArray(outSamples * format.channels);
+  </createDataArray>
+
+  <processChannels>
+  for (var channel = 0; channel < format.channels; channel++) {
+    var audioData = audioBuffer.getChannelData(channel);
+
+    <writeInterpolatedSamples>
+    var offset = channel;
+    for (var i = 0; i < outSamples; i++) {
+      data[offset] = interpolateSample(audioData, i / (outSamples - 1)) * maxSampleValue;
+      offset += format.channels;
+    }
+    </writeInterpolatedSamples>
+  }
+  </processChannels>
+
+  return data;
+}
+</toSampleArray>

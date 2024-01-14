@@ -1,0 +1,371 @@
+```javascript
+<set>
+function set(target, path, value) {
+    if (path.length === 0) {
+        return value;
+    }
+    return assign(Array.isArray(target) ? [] : {}, target, (_a = {},
+        _a[path[0]] = path.length > 1 ? set(target[path[0]] || {}, path.slice(1), value) : value,
+        _a));
+    var _a;
+}
+</set>
+
+<rank>
+function rank (competingCombinations) {
+  let exequoCount = -1;
+
+  return competingCombinations
+    .map((cards, i) => {
+      <getHandRank>
+      const rank = getHandRank(cards);
+      </getHandRank>
+      cards.index = i;
+      cards.rank = rank;
+      return cards;
+    })
+    .sort(function sortByRank (comb1, comb2) {
+      <sortByStrength>
+      const rank1 = comb1.rank;
+      const rank2 = comb2.rank;
+      if (rank1.strength !== rank2.strength) {
+        return rank2.strength - rank1.strength;
+      }
+      </sortByStrength>
+
+      <sortByRank>
+      const val1 = getCardRank(rank1.rank);
+      const val2 = getCardRank(rank2.rank);
+      if (val1 !== val2) {
+        return val2 - val1;
+      }
+      </sortByRank>
+
+      <sortByKickers>
+      for (let i = 0; i < rank1.kickers.length; i++) {
+        const kicker1 = getCardRank(rank1.kickers[i]);
+        const kicker2 = getCardRank(rank2.kickers[i]);
+        if (kicker1 !== kicker2) {
+          return kicker2 - kicker1;
+        }
+      }
+      </sortByKickers>
+
+      <resolveExequo>
+      const label = comb1.exequo || comb2.exequo || "#" + (++exequoCount);
+      comb1.exequo = comb2.exequo = label;
+      </resolveExequo>
+    });
+}
+</rank>
+
+<cleanRedundantCode>
+function cleanRedundantCode(str, opts){
+    opts = opts || {};
+    var minimize = def(opts.minimize, true);
+    var comments = opts.comments || {};
+    var htmlComments = comments.html,
+        rglComments = comments.rgl;
+
+    if(minimize && typeof str === 'string'){
+        var SINGLE_SPACE = ' ';
+        var EMPTY = '';
+
+        <removeHtmlComments>
+        str = !htmlComments ? str.replace(/<!-[\s\S]*?-->/g, EMPTY) : str;
+        </removeHtmlComments>
+
+        <removeRglComments>
+        str = !rglComments ? str.replace(/{![\s\S]*?!}/g, EMPTY) : str;
+        </removeRglComments>
+
+        <replaceWhitespace>
+        str = str.replace(/[\f\t\v]{2,}/g, SINGLE_SPACE);
+        </replaceWhitespace>
+
+        <trimString>
+        str = str.trim();
+        </trimString>
+    }
+    return str;
+}
+</cleanRedundantCode>
+
+<getNewlineStr>
+function getNewlineStr(sample) {
+	var candidates = ["\r\n", "\n\r", "\n", "\r"];
+	var nrLines = {};
+	var lineLengths = {};
+	var threshold = 5; 
+
+    <countNewlines>
+	candidates.forEach(function(newlineStr) {
+		nrLines[newlineStr] = 1;
+		var l = [];
+		var curPos = 0;
+		while((newlinePos = sample.indexOf(newlineStr, curPos)) > -1) {
+			++nrLines[newlineStr];
+			var lineLength = newlinePos - curPos;
+			l.push(lineLength);
+			curPos = newlinePos + newlineStr.length;
+		}
+		lineLengths[newlineStr] = l;
+	});
+    </countNewlines>
+
+    <eliminateImpossibleCandidates>
+	["\r\n", "\n\r"].forEach(function(newlineStr) {
+		var nr = nrLines[newlineStr];
+		if(nr > 1) {
+			["\n", "\r"].forEach(function(newlineStr) {
+				if(nrLines[newlineStr] == nr) {
+					nrLines[newlineStr] = 1;
+				}
+			});
+		}
+	});
+    </eliminateImpossibleCandidates>
+
+    <chooseRemainingCandidates>
+	var remainingCandidates = [];
+	candidates.forEach(function(newlineStr) {
+		if(nrLines[newlineStr] > 1) {
+			remainingCandidates.push(newlineStr);
+		}
+	});
+    </chooseRemainingCandidates>
+
+    <selectNewlineCandidate>
+	if(remainingCandidates.length == 0) {
+		return null;
+	}
+	if(remainingCandidates.length == 1) {
+		return remainingCandidates[0];
+	}
+
+	var finalRemainers = [];
+	var maxNrLines = 0;
+	remainingCandidates.forEach(function(newlineStr) {
+		var curNrLines = nrLines[newlineStr];
+		maxNrLines = Math.max(maxNrLines, curNrLines);
+		if(curNrLines > threshold) {
+			finalRemainers.push(newlineStr);
+		}
+	});
+
+	if(finalRemainers.length == 0) {
+		var winner = null;
+		remainingCandidates.some(function(newlineStr) {
+			if(nrLines[newlineStr] == maxNrLines) {
+				winner = newlineStr;
+				return true;
+			}
+			return false;
+		});
+		return winner;
+	}
+	if(finalRemainers.length == 1) {
+		return finalRemainers[0];
+	}
+
+	var winner = null;
+	var winnerScore = Infinity;
+	finalRemainers.forEach(function(newlineStr) {
+		var l = lineLengths[newlineStr];
+		var sum = 0;
+		l.forEach(function(d) { sum += d; });
+		var avg = sum / l.length;
+
+		var absSum = 0;
+		l.forEach(function(d) { absSum += Math.abs(d - avg); });
+		var score = absSum / l.length / avg; 
+
+		if(score < winnerScore) {
+			winnerScore = score;
+			winner = newlineStr;
+		}
+	});
+	return winner;
+    </selectNewlineCandidate>
+}
+</getNewlineStr>
+
+<getTransactionSuccess>
+function getTransactionSuccess(eth, txHash, timeout = 800000, callback) {
+  const cb = callback || function cb() {};
+  let count = 0;
+  return new Promise((resolve, reject) => {
+    const txInterval = setInterval(() => {
+      <getTransactionReceipt>
+      eth.getTransactionReceipt(txHash, (err, result) => {
+        if (err) {
+          clearInterval(txInterval);
+          cb(err, null);
+          reject(err);
+        }
+
+        if (!err && result) {
+          clearInterval(txInterval);
+          cb(null, result);
+          resolve(result);
+        }
+      });
+      </getTransactionReceipt>
+
+      <checkTimeout>
+      if (count >= timeout) {
+        clearInterval(txInterval);
+        const errMessage = `Receipt timeout waiting for tx hash: ${txHash}`;
+        cb(errMessage, null);
+        reject(errMessage);
+      }
+      </checkTimeout>
+      
+      count += 7000;
+    }, 7000);
+  });
+}
+</getTransactionSuccess>
+
+<debugLogging>
+function (smth) {
+    <conditionalDebug>
+    if (typeof debug !== "undefined") {
+        debug(smth);
+    }
+    </conditionalDebug>
+    <conditionalConsoleLog>
+    else if (global.console && global.console.log) {
+        global.console.log(smth);
+    }
+    </conditionalConsoleLog>
+}
+</debugLogging>
+
+<dataViewInitialization>
+function(data_source) {
+    <debugCheck>
+		if (Lava.schema.DEBUG && !data_source.isCollection) Lava.t("Wrong argument supplied for DataView constructor");
+    </debugCheck>
+		this._data_source = data_source;
+}
+</dataViewInitialization>
+
+<extract>
+function() {
+        var l_sFile = arguments[0],
+            l_sOutputDir = arguments[1],
+            l_oOptions,
+            l_oCallback,
+            l_aUnrarredFiles = [],
+            l_sError;
+
+        <argumentProcessing>
+        
+        
+        
+        
+
+        if (typeof(arguments[2]) === "function") {
+            l_oOptions = {};
+            l_oCallback = arguments[2];
+        } else {
+            l_oOptions = arguments[2] || {};
+            l_oCallback = arguments[3];
+        }
+
+        if (!l_sFile || typeof(l_sFile) !== "string") {
+            throw ("Unrar::Error, missing file argument.");
+        }
+
+        if (!l_sOutputDir || typeof(l_sOutputDir) !== "string") {
+            throw ("Unrar::Error, missing output directory argument.");
+        }
+
+        if (!l_oCallback) {
+            throw ("Unrar::Error, missing callback argument.");
+        }
+        </argumentProcessing>
+
+        <unrarProcess>
+        childProcess = child_process.fork(path.join(__dirname, "js/UnrarSubprocess.js"), [l_sFile, l_sOutputDir]);
+
+        childProcess.on('message', (m) => {
+            if (m.event === "progress") {
+                if (l_oOptions.onProgress) {
+                    l_oOptions.onProgress(m.data);
+                }
+            } else if (m.event === "finish") {
+                l_aUnrarredFiles = m.data;
+                childProcess.kill();
+            } else if (m.event === "error") {
+                l_sError = m.data;
+                childProcess.kill("SIGKILL");
+            } else if (m.event === "abort") {
+                l_sError = m.data;
+                childProcess.kill("SIGKILL");
+            }
+
+        });
+
+        childProcess.on('close', function() {
+            l_oCallback(l_sError, l_aUnrarredFiles);
+        });
+        </unrarProcess>
+    }
+</extract>
+
+<checkCombinator3>
+function checkCombinator3(i) {
+    <identifyCombinator>
+    const type = tokens[i].type;
+    if (type === TokenType.PlusSign ||
+        type === TokenType.GreaterThanSign ||
+        type === TokenType.Tilde) return 1;
+    else return 0;
+    </identifyCombinator>
+}
+</checkCombinator3>
+
+<_onInboxMessage>
+function _onInboxMessage (sender, _, msgBuffer) {
+    let message = JSON.parse(msgBuffer)
+    <setIP>
+    masterBroker.setIP(message.toAddress)
+    </setIP>
+
+    switch (message.type) {
+      case 'voteRequest':
+        <handleVoteRequest>
+        debug(`sending vote to ${node.name === message.from ? 'myself' : message.from}`)
+        _inbox.send([sender, _, JSON.stringify({
+          id: _advertiseId || node.id,
+          name: node.name,
+          endpoints: masterBroker.endpoints,
+          isMaster: masterBroker.isMaster,
+          candidate: !_advertiseId
+        })])
+        </handleVoteRequest>
+        break
+      case 'masterRequest':
+        <handleMasterRequest>
+        let connectedMaster = node.master
+        if (connectedMaster) {
+          debug(`sending master coordinates to ${message.from}`)
+          _inbox.send([sender, _, JSON.stringify(connectedMaster)])
+        } else {
+          debug(`unable to send master coordinates to ${message.from}`)
+          _inbox.send([sender, _, JSON.stringify(false)])
+        }
+        </handleMasterRequest>
+        break
+      case 'masterElected':
+        <handleMasterElected>
+        _inbox.send([sender, _, ''])
+        debug(`received notice of master election: ${message.data.name}`)
+        resolver.emit('newmaster', message.data)
+        </handleMasterElected>
+    }
+  }
+</_onInboxMessage>
+```

@@ -1,0 +1,369 @@
+<step1a$1>
+function step1a$1(token) {
+    <getR1Responsibility>
+    var r1 = getR1(token);
+
+    if (!r1) {
+        return token;
+    }
+    </getR1Responsibility>
+
+    <matchRegExpResponsibility>
+    var r1Match = r1.match(/(a|e|ede|ande|ende|ane|ene|hetene|en|heten|ar|er|heter|as|es|edes|endes|enes|hetenes|ens|hetens|ers|ets|et|het|ast)$/);
+
+    if (r1Match) {
+        return token.replace(new RegExp(r1Match[1] + '$'), '');
+    }
+    </matchRegExpResponsibility>
+
+    return token;
+}
+</step1a$1>
+
+<rdfToJs>
+function rdfToJs (node) {
+    <initializeValue>
+    let value;
+    const rdfVal = node.value;
+    const datatype = node.datatype;
+    </initializeValue>
+  
+    <throwErrorFunction>
+    const throwError = () => {
+        throw new Error(
+            `Cannot parse rdf type/value to JS value.  Given value [${rdfVal}] of type [${datatype}].`
+        );
+    };
+    </throwErrorFunction>
+  
+    <parseDatatype>
+    if (datatype) {
+        const XMLSchema = 'http://www.w3.org/2001/XMLSchema#';
+        switch (datatype.value) {
+            case `${XMLSchema}boolean`:
+                if (rdfVal === '1') {
+                    value = true;
+                } else if (rdfVal === '0') {
+                    value = false;
+                } else {
+                    throwError();
+                }
+                break;
+            case `${XMLSchema}dateTime`:
+                value = new Date(rdfVal);
+                break;
+            case `${XMLSchema}decimal`:
+            case `${XMLSchema}double`:
+                value = Number.parseFloat(rdfVal);
+                break;
+            case `${XMLSchema}integer`:
+                value = Number.parseInt(rdfVal);
+                break;
+            case 'http://www.w3.org/1999/02/22-rdf-syntax-ns#langString':
+            case `${XMLSchema}string`:
+            default:
+                value = rdfVal;
+                break;
+        }
+    } else {
+        value = rdfVal;
+    }
+    </parseDatatype>
+  
+    return value;
+}
+</rdfToJs>
+
+<automat>
+function automat(template, replacements) {
+    <checkArguments>
+    var hasReplacements = arguments.length > 1;
+    </checkArguments>
+
+    <handleTemplateFunction>
+    if (typeof template === 'function') {
+        template = template.call(this); 
+    }
+    </handleTemplateFunction>
+
+    <performReplacements>
+    if (hasReplacements) {
+        var args = arguments;
+        template = template.replace(automat.replacersRegex, function(match, key) {
+            key -= -1; 
+            return args.length > key ? args[key] : '';
+        });
+
+        template = template.replace(automat.encodersRegex, function(match, key) {
+            key -= -1; 
+            if (args.length > key) {
+                var htmlEncoderNode = document.createElement('DIV');
+                htmlEncoderNode.textContent = args[key];
+                return htmlEncoderNode.innerHTML;
+            } else {
+                return '';
+            }
+        });
+    }
+    </performReplacements>
+
+    return template;
+}
+</automat>
+
+<dispatch>
+function dispatch(methodName, inDocument, xpath, contextNode, namespaceResolver) {
+    <preprocessXpath>
+    xpath = preprocess(xpath);
+    </preprocessXpath>
+
+    <setDefaultContext>
+    if (!contextNode) {
+        contextNode = inDocument;
+    }
+    </setDefaultContext>
+
+    <executeXpathQuery>
+    var result = getEngineFor(inDocument)
+        .setIgnoreAttributesWithoutValue(ignoreAttributesWithoutValue)
+        [methodName](xpath, contextNode, namespaceResolver);
+    </executeXpathQuery>
+
+    return result;
+}
+</dispatch>
+
+<generateNames>
+function generateNames(model, prefix, name) {
+    <initializeProperties>
+    if (name === void 0) { name = ""; }
+    model.fullPackageName = prefix + (name != "." ? name : "");
+    model.properties = argv.properties;
+    model.explicitRequired = argv.explicitRequired;
+    model.camelCaseProperties = argv.camelCaseProperties;
+    model.camelCaseGetSet = argv.camelCaseGetSet;
+    model.underscoreGetSet = argv.underscoreGetSet;
+    model.generateBuilders = argv.generateBuilders;
+    </initializeProperties>
+
+    <processDefinitionsAndNames>
+    var newDefinitions = {};
+
+    var key;
+    for (key in model.messages) {
+        var message = model.messages[key];
+        newDefinitions[message.name] = "Builder";
+        generateNames(message, model.fullPackageName, "." + (model.name ? model.name : ""));
+    }
+
+    for (key in model.enums) {
+        var currentEnum = model.enums[key];
+        newDefinitions[currentEnum.name] = "";
+        currentEnum.fullPackageName = model.fullPackageName + (model.name ? "." + model.name : "");
+    }
+
+    for (key in model.fields) {
+        var field = model.fields[key];
+        if (typeof newDefinitions[field.type] !== "undefined") {
+            field.type = model.name + "." + field.type;
+        }
+    }
+    model.oneofsArray = [];
+    for (key in model.oneofs) {
+        var oneof = model.oneofs[key];
+        model.oneofsArray.push({ name: key, value: oneof });
+    }
+
+    var definitions = [];
+    for (key in newDefinitions) {
+        definitions.push({ name: key, type: ((model.name ? (model.name + ".") : "") + key) + newDefinitions[key] });
+    }
+    model.definitions = definitions;
+    </processDefinitionsAndNames>
+}
+</generateNames>
+
+<getSupportedDataTypes>
+function getSupportedDataTypes () {
+    <initializeTypesArray>
+    var types = [];
+    </initializeTypesArray>
+
+    <checkAndPushTypes>
+    if (typeof Uint8Array === 'function') {
+        types.push(Uint8Array);
+    }
+    if (typeof Uint16Array === 'function') {
+        types.push(Uint16Array);
+    }
+    if (typeof ArrayBuffer === 'function') {
+        types.push(ArrayBuffer);
+    }
+    if (typeof Uint32Array === 'function') {
+        types.push(Uint32Array);
+    }
+    if (typeof Int8Array === 'function') {
+        types.push(Int8Array);
+    }
+    if (typeof Int16Array === 'function') {
+        types.push(Int16Array);
+    }
+    if (typeof Int32Array === 'function') {
+        types.push(Int32Array);
+    }
+    if (typeof Uint8ClampedArray === 'function') {
+        types.push(Uint8ClampedArray);
+    }
+    if (typeof Float32Array === 'function') {
+        types.push(Float32Array);
+    }
+    if (typeof Float64Array === 'function') {
+        types.push(Float64Array);
+    }
+    if (typeof DataView === 'function') {
+        types.push(DataView);
+    }
+    </checkAndPushTypes>
+
+    return types;
+}
+</getSupportedDataTypes>
+
+<TokenBucket>
+function TokenBucket(timespan, limit, { distFactor = 1, factor = 20, spread = 500 / timespan, now = Date.now } = {}) {
+    <initializeProperties>
+    this.now = now;
+    this.timespan = timespan;
+    this.givenLimit = limit;
+    this.factor = factor;
+    this.spread = spread;
+    this.timespanIndex = Math.ceil(timespan / factor);
+    this.total = 0;
+    this.time = -1;
+    this.buffer = new Array(this.factor + 1).fill(0);
+    </initializeProperties>
+  
+    <setDistFactorMethod>
+    this.setDistFactor(distFactor);
+    </setDistFactorMethod>
+}
+</TokenBucket>
+
+<parseCLIArguments>
+function (args, cb) {
+    <initializeCLIParameters>
+    var flags = {},
+        commands = {};
+    </initializeCLIParameters>
+
+    <checkArgumentsAvailability>
+    if (!args || !args.length) {
+        printUsage();
+    }
+    </checkArgumentsAvailability>
+
+    <parseArguments>
+    for (var i = 0, len = args.length; i < len; i++) {
+        var arg = args[i],
+            rFlag = /^--/,
+            split;
+
+        if (rFlag.test(arg)) {
+            split = arg.split("=");
+            flags[split[0].replace(rFlag, "")] = (split[1] || true);
+        } else {
+            commands[arg] = true;
+        }
+    }
+    </parseArguments>
+
+    <handleFlagsAndCommands>
+    if (flags.quiet) {
+        nsl.log("server", "Squarespace server running in silent mode");
+        nsl.silence();
+    }
+
+    if (flags.open) {
+        serverConfig.open = true;
+    }
+
+    if (flags.auth) {
+        serverConfig.auth = true;
+    }
+
+    if (flags.version) {
+        printVersion();
+    } else if (commands.buster) {
+        sqsCache.clear();
+        process.exit();
+    } else if (commands.server) {
+        if (flags.port) {
+            flags.port = Number(flags.port);
+            serverConfig.port = flags.port;
+        }
+        cb();
+    }
+    </handleFlagsAndCommands>
+}
+</parseCLIArguments>
+
+<getMatchedWord>
+function getMatchedWord(sWords, sTokenToMatch) {
+    <checkInputWords>
+    if (sWords) {
+    </checkInputWords>
+
+        <defineStartsWithTokenFunction>
+        var fnStartsWithToken = function (sString) {
+            return sString.toLowerCase().indexOf(sTokenToMatch.toLowerCase()) === 0;
+        };
+        </defineStartsWithTokenFunction>
+
+        <splitAndFilterWords>
+        var aMetadataTokens = sWords.split(" ");
+        var sMatchedMetadataToken = aMetadataTokens.filter(fnStartsWithToken);
+        </splitAndFilterWords>
+
+        <returnMatchedWord>
+        if (sMatchedMetadataToken.length) {
+            return sMatchedMetadataToken[0];
+        }
+        </returnMatchedWord>
+    }
+    return null;
+}
+</getMatchedWord>
+
+<calculateClosestPointOnLineSegment>
+function (p, p1, p2, sqDist) {
+    <initializeVariables>
+    var x = p1.x,
+        y = p1.y,
+        dx = p2.x - x,
+        dy = p2.y - y,
+        dot = dx * dx + dy * dy,
+        t;
+    </initializeVariables>
+
+    <calculateProjection>
+    if (dot > 0) {
+        t = ((p.x - x) * dx + (p.y - y) * dy) / dot;
+
+        if (t > 1) {
+            x = p2.x;
+            y = p2.y;
+        } else if (t > 0) {
+            x += dx * t;
+            y += dy * t;
+        }
+    }
+    </calculateProjection>
+
+    <computeDistanceOrPoint>
+    dx = p.x - x;
+    dy = p.y - y;
+
+    return sqDist ? dx * dx + dy * dy : new L.Point(x, y);
+    </computeDistanceOrPoint>
+}
+</calculateClosestPointOnLineSegment>

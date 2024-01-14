@@ -1,0 +1,262 @@
+```javascript
+<writeScriptPayToPubKeyHash>
+function writeScriptPayToPubKeyHash(address, buffer, offset) {
+    offset = buffer.writeUInt8(25, offset); 
+    offset = buffer.writeUInt8(OPS.OP_DUP, offset);
+    offset = buffer.writeUInt8(OPS.OP_HASH160, offset);
+    
+    offset = buffer.writeUInt8(20, offset); 
+    offset += Buffer.from(base58check.decode(address, 'hex').data, 'hex').copy(buffer, offset);
+    
+    offset = buffer.writeUInt8(OPS.OP_EQUALVERIFY, offset);
+    offset = buffer.writeUInt8(OPS.OP_CHECKSIG, offset);
+    return offset;
+}
+</writeScriptPayToPubKeyHash>
+
+<genAssignmentCode>
+function genAssignmentCode(
+  value,
+  assignment
+) {
+  <parseModel>
+  var modelRs = parseModel(value);
+  </parseModel>
+  if (modelRs.idx === null) {
+    return (value + "=" + assignment)
+  } else {
+    return "var $$exp = " + (modelRs.exp) + ", $$idx = " + (modelRs.idx) + ";" +
+      "if (!Array.isArray($$exp)){" +
+        value + "=" + assignment + "}" +
+      "else{$$exp.splice($$idx, 1, " + assignment + ")}"
+  }
+}
+</genAssignmentCode>
+
+<createShader>
+function () {
+  <shaderCodeCacheAccess>
+  var code = shaderCodeCache[this._shaderID];
+  </shaderCodeCacheAccess>
+  <createNewShader>
+  var shader = new Shader(code.vertex, code.fragment);
+  </createNewShader>
+  return shader;
+}
+</createShader>
+
+<modifyVisibility>
+function (oControl, bVisible) {
+  <getOldVisibility>
+  var bOldVisible = this.getVisible(oControl);
+  </getOldVisibility>
+
+  <setNewVisibility>
+  var vReturnValue = JsControlTreeModifier.setVisible.apply(this, arguments);
+  </setNewVisibility>
+
+  <saveUndoOperation>
+  if (bOldVisible !== this.getVisible(oControl)) {
+    this._saveUndoOperation("setVisible", [oControl, bOldVisible]);
+  }
+  </saveUndoOperation>
+
+  return vReturnValue;
+}
+</modifyVisibility>
+
+<registerSnapshotTransformer>
+function (meta, fn) {
+  <validateArguments>
+  if (!_.isObject(meta) || meta.version === undefined || meta.version === null || !_.isNumber(meta.version)) {
+    throw new Error('Please pass in a version');
+  }
+  if (!_.isFunction(fn)) {
+    throw new Error('Please pass in a function');
+  }
+  </validateArguments>
+
+  <wrapFunction>
+  var wrappedFn;
+  if (fn.length === 1) {
+    wrappedFn = function (s, cb) {
+      try {
+        cb(null, fn(s));
+      } catch (err) {
+        cb(err);
+      }
+    };
+  } else {
+    wrappedFn = fn;
+  }
+  </wrapFunction>
+
+  <registerTransformer>
+  this.loadingSnapshotTransformerRegistrations.push({ meta: meta, fn: wrappedFn });
+  </registerTransformer>
+  return this;
+}
+</registerSnapshotTransformer>
+
+<defineProp>
+function defineProp(obj, key, get) {
+  <defineProperty>
+  Object.defineProperty(obj, key, { get, enumerable: true });
+  </defineProperty>
+}
+</defineProp>
+
+<removeDuplicates>
+function removeDuplicates(arr) {
+  <checkArrayAndReduce>
+  if (isArray(arr)) {
+    return reduce(arr, function (a, b) {
+      if (indexOf(a, b) === -1) {
+        return a.concat(b);
+      } else {
+        return a;
+      }
+    }, []);
+  }
+  </checkArrayAndReduce>
+}
+</removeDuplicates>
+
+<build>
+function build(config) {
+  <normalizeConfigAndPrepareEnvironment>
+  
+  var options = command.norm(config);
+  var inputFilename = options.file;
+  var flow = new Flow(options, 'build');
+  var fconsole = flow.console;
+
+  flow.exitOnFatal = true;
+  flow.outputResourceDir = 'res/';
+
+  fconsole.enabled = options.verbose;
+  chalk.enabled = options.color && process.stdout.isTTY;
+
+  </normalizeConfigAndPrepareEnvironment>
+
+  <displayBuildInformation>
+  if (!options.silent) {
+    if (options.verbose) {
+      
+      fconsole.start('Build with ' + utils.getToolsId());
+      fconsole.log('Base path:  ', options.base);
+      fconsole.log('Index file: ', options.file);
+      fconsole.log('Output path:', options.output);
+      if (options.jsBundle) fconsole.log('Bundle:     ', options.jsBundleName + '.' + options.jsBundle);
+      fconsole.log('Plugins:    ', flow.plugins ? flow.plugins.join(', ') : 'NONE');
+      fconsole.endl();
+    } else {
+      
+      process.stdout.write(...);
+      // display build information in a different format
+    }
+  }
+  </displayBuildInformation>
+
+  <fileSystemChecks>
+  
+  if (!fs.existsSync(inputFilename) || !fs.statSync(inputFilename).isFile()) flow.exit('Input file ' + inputFilename + ' not found');
+  
+  if (options.output == path.dirname(inputFilename)) flow.exit('Output path shouldn't be the same as input file location');
+  </fileSystemChecks>
+
+  <initializeProcess>
+  fconsole.start('\nInit\n====\n');
+  
+  flow.indexFile = flow.files.add({ ... });
+  </initializeProcess>
+
+  <handlerExecutionSetup>
+  
+  var handlers = extract.handlers({ ... }).concat([...]).filter(Boolean);
+  
+  var stdoutHandlerTitle;
+  var stdoutHandlerSilent = false;
+  var handlerCount = handlers.length;
+  var taskCount = 0;
+  var warningCount = 0;
+  var timing = [];
+  var time;
+  var stdoutPos;
+  var resolve = function () {};
+  var result = new Promise(function (resolve_) { ... });
+
+  flow.timing = timing;
+
+  // additional functions like repeat, asyncTaskStart, asyncTaskDone, nextHandler, and runHandler
+  // are defined here
+  
+  process.nextTick(runHandler);
+  </handlerExecutionSetup>
+
+  <postBuildProcessing>
+  
+  if (isChildProcess) {
+    // Handling results in child process
+  } else {
+    // Handling results in main process
+  }
+  </postBuildProcessing>
+
+  return result;
+}
+</build>
+
+<getTimeIntervalMeasurementUnits>
+function getTimeIntervalMeasurementUnits(localeData, restrictedSetOfUnits) {
+  <extractUnits>
+  
+  let units = Object.keys(localeData)
+  </extractUnits>
+  
+  <filterByRestrictedSet>
+  
+  if (restrictedSetOfUnits) {
+    
+    units = restrictedSetOfUnits.filter(_ => units.indexOf(_) >= 0)
+  }
+  </filterByRestrictedSet>
+  
+  <includeNowUnit>
+  
+  if ((!restrictedSetOfUnits || restrictedSetOfUnits.indexOf('now') >= 0) && units.indexOf('now') < 0) {
+    if (localeData.second.current) {
+      units.unshift('now')
+    }
+  }
+  </includeNowUnit>
+
+  return units
+}
+</getTimeIntervalMeasurementUnits>
+
+<runBench>
+function run(id, iters) {
+  <benchSetup>
+  var bench = new Bench(id, ƒ)
+  </benchSetup>
+  
+  <runBenchmarkAndSendResults>
+  try { Result.when(bench.do(iters), send, error) }
+  catch (e) { error(e) }
+  </runBenchmarkAndSendResults>
+
+  <sendResult>
+  function send(result) {
+    process.send({ ... });
+  }
+  </sendResult>
+  
+  <sendError>
+  function error(e) {
+    process.send({ ... });
+  }
+  </sendError>
+}
+</runBench>
+```

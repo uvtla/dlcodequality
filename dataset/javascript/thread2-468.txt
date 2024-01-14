@@ -1,0 +1,360 @@
+### Function 1 - Cleanup and Suspend Refreshable
+```javascript
+function() {
+    <removeListeners>
+	if (this._binds) {
+		for (var i = 0, count = this._binds.length; i < count; i++) {
+			this._binds[i].removeListener(this._bind_changed_listeners[i]);
+		}
+		this._binds = this._bind_changed_listeners = null;
+	}
+	this._argument.removeListener(this._argument_changed_listener);
+    </removeListeners>
+    
+    <checkAndFlushObservable>
+	this._observable_listener && this._flushObservable();
+    </checkAndFlushObservable>
+    
+    <destroyIfOwnCollection>
+	if (this._own_collection) {
+		this._value.destroy();
+	}
+    </destroyIfOwnCollection>
+    
+    <suspendRefresh>
+	this.suspendRefreshable();
+    </suspendRefresh>
+}
+```
+- **Compliance**: Violated. There are several distinct responsibilities such as removing event listeners, flushing observables, destroying collections, and suspending refreshables.
+
+### Function 2 - Delete Key
+```javascript
+function delKey(key, req) {
+    <getKey>
+	var rval = this.getRawKey(key);
+    </getKey>
+    
+    if(rval !== undefined) {
+        <deleteExpiryAndKeyData>
+        this.delExpiry(key, req);
+        delete this._data[key];
+        this._keys.splice(ArrayIndex.indexOf(key, this._keys), 1);
+        </deleteExpiryAndKeyData>
+        
+        return 1;
+    }
+    return 0;
+}
+```
+- **Compliance**: Violated. The function has responsibilities such as getting the raw key, deleting the expiry time, deleting the key from the data, and updating the keys array.
+
+### Function 3 - Hot Module Replacement Check
+```javascript
+<hotCheck>
+function hotCheck(apply, callback) {
+    <validateIdleStatus>
+	if(hotStatus !== "idle") throw new Error("check() is only allowed in idle status");
+    </validateIdleStatus>
+    
+    <configureCallback>
+	if(typeof apply === "function") {
+		hotApplyOnUpdate = false;
+		callback = apply;
+	} else {
+		hotApplyOnUpdate = apply;
+		callback = callback || function(err) { if(err) throw err; };
+	}
+    </configureCallback>
+    
+    <setStatusAndDownloadManifest>
+	hotSetStatus("check");
+	hotDownloadManifest(function(err, update) {
+		if(err) return callback(err);
+		if(!update) {
+			hotSetStatus("idle");
+			callback(null, null);
+			return;
+		}
+		<hotInitializeMaps>
+		hotRequestedFilesMap = {};
+		hotAvailibleFilesMap = {};
+		hotWaitingFilesMap = {};
+		for(var i = 0; i < update.c.length; i++)
+			hotAvailibleFilesMap[update.c[i]] = true;
+		hotUpdateNewHash = update.h;
+		</hotInitializeMaps>
+
+		hotSetStatus("prepare");
+		hotCallback = callback;
+		hotUpdate = {};
+		var chunkId = 0; { hotEnsureUpdateChunk(chunkId); }
+		if(hotStatus === "prepare" && hotChunksLoading === 0 && hotWaitingFiles === 0) {
+			hotUpdateDownloaded();
+		}
+	});
+    </setStatusAndDownloadManifest>
+}
+</hotCheck>
+```
+- **Compliance**: Violated. Responsibilities include: checking if the system is idle, configuring the callback, setting the status, and managing the hot module replacement process.
+
+### Function 4 - Interface Function Hash Generation
+```javascript
+<generateFunctionHash>
+function(iface)
+{
+    var hash        = {};
+    var collection  = iface.__name__.substring(1);
+    var dataContext = this;
+
+    <eachInterfaceFunction>
+    _(typedef.signature(iface)).each(function (info, key) {
+        <generateFunction>
+        hash[key] = function() {
+            var args       = [dataContext.apiKey].concat(_(arguments).toArray());
+            if (key == 'sendTemplate') {
+                key = 'sendEmail';
+            }
+            var methodName = collection + '.' + key;
+            var d          = Q.defer();
+
+            dataContext.client.methodCall(methodName, args, d.makeNodeResolver());
+
+            return d.promise;
+        };
+        </generateFunction>
+    });
+    </eachInterfaceFunction>
+
+    <createClassInstance>
+    this[collection] = new (typedef.class(collection).define(hash))();
+    </createClassInstance>
+}
+</generateFunctionHash>
+```
+- **Compliance**: Violated. There are multiple responsibilities like generating the method hash, handling special cases in function keys, calling the method, and creating a class instance based on the generated hash.
+
+### Function 5 - Create Style from Code
+```javascript
+<createStyleFromCode>
+function createStylefromCode(styles, abspath) {
+    <importQueries>
+    const arr = queryImport(styles)
+    </importQueries>
+    
+    <handleImportStyle>
+    const baseRes = handleImportStyle(styles, abspath)
+    </handleImportStyle>
+    
+    <initializeASTandObjects>
+    const obj = {}
+    const ast = csstree.parse(baseRes);
+    </initializeASTandObjects>
+    
+    <walkAST>
+    csstree.walk(ast, {
+        enter: function (node) {
+            <processRuleNode>
+            if (node.type === 'Rule' && node.prelude && node.prelude.type === 'SelectorList') {
+                const clzName = []
+                <forEachSelector>
+                node.prelude.children.forEach(e => {
+                    let ans = selectorBlockHandler(e)
+                    if (ans) {
+                        obj[ans] = obj[ans] || {}
+                        clzName.push(ans)
+                    }
+                })
+                </forEachSelector>
+                const styleArray = []
+                <forEachStyleBlock>
+                node.block.children.forEach(e => {
+                    const styleItem = styleBlockHandler(e)
+                    styleItem.length > 0 && styleArray.push(styleItem)
+                })
+                </forEachStyleBlock>
+                <applyStylesToClassNames>
+                clzName.forEach(e => {
+                    try {
+                        const styleObject = transform(styleArray)
+                        if (styleObject.fontWeight) {
+                            styleObject.fontWeight = styleObject.fontWeight + ""
+                        }
+                        Object.assign(obj[e], styleObject)
+                    } catch (e) {
+                        console.error("convert ", abspath, " error:", e.message)
+                    }
+                })
+                </applyStylesToClassNames>
+            }
+            </processRuleNode>
+        },
+    })
+    </walkAST>
+    
+    return {styles: obj, imports: arr}
+}
+</createStyleFromCode>
+```
+- **Compliance**: Violated. It has multiple responsibilities such as importing queries, handling imported styles, initializing AST and objects, and walking through the AST to process each node.
+
+### Function 6 - Start Byzantine Phase
+```javascript
+<startByzantinePhase>
+function startPhase(hp, phase){
+    <checkConfiguration>
+    if(!conf.IF_BYZANTINE)
+        return;
+    </checkConfiguration>
+    
+    hp = parseInt(hp);
+    phase = parseInt(phase);
+    <validateAddress>
+    if(!validationUtils.isValidAddress(address_p)){
+        console.log("byllllogg startPhase address_p not known yet");
+        setTimeout(function(){
+            startPhase(hp, phase);
+        }, 1000);
+        return;    
+    }
+    </validateAddress>
+
+    <logStateAndValidation>
+    console.log("byllllogg startPhase, h_p:" + h_p + ", p_p:" + p_p + ", hp:" + hp + ", phase:" + phase);
+    if(h_p > hp)
+        return;
+    else if(h_p === hp && p_p >= phase)
+        return;
+    </logStateAndValidation>
+
+    <prepareForProposal>
+    waitingProposer = "";
+    getCoordinators(null, hp, phase, function(err, proposer, roundIndex, witnesses){
+        // ... Complex logic of preparing and handling proposal
+    });
+    </prepareForProposal>
+}
+</startByzantinePhase>
+```
+- **Compliance**: Violated. This function has disparate responsibilities like checking configuration, validating addresses, logging state, and preparing for a Byzantine proposal phase.
+
+### Function 7 - Complete Dimensions
+```javascript
+function completeDimensions(sysDims, source, opt) {
+    <prepareInputs>
+    if (!Source.isInstance(source)) {
+        source = Source.seriesDataToSource(source);
+    }
+    opt = opt || {};
+    </prepareInputs>
+
+    <initializeVariables>
+    sysDims = (sysDims || []).slice();
+    var dimsDef = (opt.dimsDef || []).slice();
+    var encodeDef = createHashMap(opt.encodeDef);
+    var dataDimNameMap = createHashMap();
+    var coordDimNameMap = createHashMap();
+    var result = [];
+    </initializeVariables>
+
+    <determineDimCountAndExtend>
+    var dimCount = getDimCount(source, sysDims, dimsDef, opt.dimCount);
+    for (var i = 0; i < dimCount; i++) {
+        // ... Code to extend and setup dimension definitions
+    }
+    </determineDimCountAndExtend>
+
+    <processEncodeDef>
+    encodeDef.each(function (dataDims, coordDim) {
+        // ... Code to process encode definitions
+    });
+    </processEncodeDef>
+
+    <processSysDims>
+    each(sysDims, function (sysDimItem, sysDimIndex) {
+        // ... Code to process system dimensions
+    });
+    </processSysDims>
+
+    <generateExtraDimensions>
+    var generateCoord = opt.generateCoord;
+    var generateCoordCount = opt.generateCoordCount;
+    //... Code to generate extra dimensions
+    </generateExtraDimensions>
+
+    return result;
+}
+```
+- **Compliance**: Violated. The function handles tasks such as preparing inputs, initializing variables, determining dim counts, processing encode definitions, handling system dimensions, and generating additional dimensions.
+
+### Function 8 - Bind Model or Collection to View
+```javascript
+function(view, options) {
+    <prepareOptions>
+    options = _.extend({}, defaultOptions, defaultCallbacks, options);
+    </prepareOptions>
+
+    <initializeModelOrCollection>
+    var model = options.model || view.model,
+        collection = options.collection || view.collection;
+    if(typeof model === 'undefined' && typeof collection === 'undefined'){
+        throw 'Before you execute the binding your view must have a model or a collection.';
+    }
+    </initializeModelOrCollection>
+
+    <bindModelOrCollection>
+    if(model) {
+        bindModel(view, model, options);
+    }
+    else if(collection) {
+        collection.each(function(model){
+            bindModel(view, model, options);
+        });
+        collection.bind('add', collectionAdd, {view: view, options: options});
+        collection.bind('remove', collectionRemove);
+    }
+    </bindModelOrCollection>
+}
+```
+- **Compliance**: Violated. This function is responsible for extending options, initializing model or collection, and binding the model or the collection to the view along with event handlers.
+
+### Function 9 - Create Error Response
+```javascript
+function createErrorResponse(code, err, message) {
+    <assignDefaults>
+    code = (code || isNaN(code)) ? code : 500;
+    err = (err) ? err : '';
+    message = (message) ? message : '';
+    </assignDefaults>
+
+    <buildErrorResponse>
+    return {
+        'code': code,
+        'error': err,
+        'message': message
+    };
+    </buildErrorResponse>
+}
+```
+- **Compliance**: Compliant. The function follows a single responsibility of creating and returning an error response object with assigned defaults.
+
+### Function 10 - Status Reporting Service
+```javascript
+function StatusReportingService(serviceRegistry, operationsClient, domId, progressDomId, notificationContainerDomId) {
+    <initializeService>
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = serviceRegistry.registerService("orion.page.message", this); 
+	this._operationsClient = operationsClient;
+	this.notificationContainerDomId = notificationContainerDomId;
+	this.domId = domId;
+	this.progressDomId = progressDomId || domId;
+	this._hookedClose = false;
+	this._timer = null;
+	this._clickToDisMiss = true;
+	this._cancelMsg = null;
+	this.statusMessage = this.progressMessage = null;
+	</initializeService>
+}
+```
+- **Compliance**: Compliant. The function's responsibility is initializing and setting up the Status Reporting Service.

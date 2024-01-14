@@ -1,0 +1,227 @@
+```javascript
+<checkSpacing>
+function checkSpacing(kind, side, leftToken, rightToken) {
+  <calculateSpacing>
+  if (!!(rightToken.range[0] - leftToken.range[1]) !== modes[kind][side]) {
+    const after = leftToken.value === "*";
+    const spaceRequired = modes[kind][side];
+    const node = after ? leftToken : rightToken;
+    const messageId = `${spaceRequired ? "missing" : "unexpected"}${capitalize(side)}`;
+    </calculateSpacing>
+
+    <reportSpacingIssue>
+    context.report({
+      node,
+      messageId,
+      fix(fixer) {
+        if (spaceRequired) {
+          if (after) {
+            return fixer.insertTextAfter(node, " ");
+          }
+          return fixer.insertTextBefore(node, " ");
+        }
+        return fixer.removeRange([leftToken.range[1], rightToken.range[0]]);
+      }
+    });
+    </reportSpacingIssue>
+  }
+}
+</checkSpacing>
+
+<mitm>
+async function mitm(options) {
+  <validateOptions>
+  const { origin, dest, log = false, host = '0.0.0.0', port = rand(1025, 65535) } = options;
+  if (typeof origin !== 'string' || !origin || typeof dest !== 'string' || !dest) {
+    throw new TypeError('origin and dest in mitm options must set correctly.');
+  }
+  if (origin === dest) {
+    throw new Error('Same origin and dest may cause request loop.');
+  }
+  </validateOptions>
+
+  <parseOptions>
+  const [originHostname, originPort = 80] = origin.trim().toLowerCase().split(':');
+  const [destHostname, destPort = 80] = dest.trim().toLowerCase().split(':');
+  </parseOptions>
+
+  <createServer>
+  const server = new Server();
+  </createServer>
+
+  <handleRequest>
+  server.on('request', (cReq, cRes) => {
+    ...
+  });
+  </handleRequest>
+
+  <handleConnect>
+  server.on('connect', (req, cSocket, header) => {
+    ...
+  });
+  </handleConnect>
+
+  <handleServerError>
+  server.on('error', err => {
+    logger.error(err.message);
+  });
+  </handleServerError>
+
+  <startServer>
+  let resolve = null;
+  const delayLog = new Promise(rs => resolve = rs);
+  server.listen(parseInt(port, 10), host, err => {
+    if (err) {
+      throw err;
+    }
+    resolve();
+  });
+  </startServer>
+
+  <logServerStart>
+  await delayLog;
+  logger.success(`MITM proxy listening on ${chalk.cyan.underline(`http://${host}:${port}`)}`);
+  </logServerStart>
+
+  return server;
+}
+</mitm>
+
+<isArrayWithMax>
+function isArrayWithMax(value, max) {
+  <checkArray>
+  if (!isArray(value)) {
+    return false;
+  }
+  </checkArray>
+
+  <validateMaxValue>
+  for (var i = 0; i < value.length; i++) {
+    if (value[i] > max) {
+      return false;
+    }
+  }
+  </validateMaxValue>
+
+  return true;
+}
+</isArrayWithMax>
+
+<encloseN>
+function encloseN(L, B) {
+  var circle,
+  ...
+
+  <determineCircle>
+  switch (B.length) {
+    ...
+  }
+  </determineCircle>
+
+  <updateLinkedList>
+  while (l1) {
+    ...
+  }
+  </updateLinkedList>
+
+  <setLinkedListTail>
+  L.tail = l0;
+  </setLinkedListTail>
+
+  return circle;
+}
+</encloseN>
+
+<mxKeyHandler>
+function mxKeyHandler(graph, target) {
+  if (graph != null) {
+    <initialize>
+    this.graph = graph;
+    this.target = target || document.documentElement;
+    ...
+    </initialize>
+
+    <bindKeydownHandler>
+    this.keydownHandler = mxUtils.bind(this, function(evt) {
+      this.keyDown(evt);
+    });
+    mxEvent.addListener(this.target, 'keydown', this.keydownHandler);
+    </bindKeydownHandler>
+
+    <bindUnloadHandler>
+    if (mxClient.IS_IE) {
+      mxEvent.addListener(window, 'unload',
+        mxUtils.bind(this, function() {
+          this.destroy();
+        })
+      );
+    }
+    </bindUnloadHandler>
+  }
+}
+</mxKeyHandler>
+
+<findIndexInSortedIntervals>
+function findIndexInSortedIntervals(ary, mapLoFn, mapWidthFn, loVal) {
+  <findLowIndex>
+  var first = findLowIndexInSortedArray(ary, mapLoFn, loVal);
+  </findLowIndex>
+
+  <determineIndex>
+  if (first == 0) {
+    ...
+  } else if (first < ary.length) {
+    ...
+  } else if (first == ary.length) {
+    ...
+  } else {
+    return ary.length;
+  }
+  </determineIndex>
+}
+</findIndexInSortedIntervals>
+
+<nativeAEAD>
+function nativeAEAD() {
+  <determineAEADSupport>
+  return config.aead_protect && (
+    ...
+  );
+  </determineAEADSupport>
+}
+</nativeAEAD>
+
+<mxCompactTreeLayout>
+function mxCompactTreeLayout(graph, horizontal, invert) {
+  <initializeLayout>
+  mxGraphLayout.call(this, graph);
+  this.horizontal = (horizontal != null) ? horizontal : true;
+  this.invert = (invert != null) ? invert : false;
+  </initializeLayout>
+}
+</mxCompactTreeLayout>
+
+<adjustTimezoneOffset>
+function (date, type, rule) {
+  <calculateOffset>
+  var offset = 0;
+  ...
+  offset *= 60 * 1000; 
+  </calculateOffset>
+
+  <applyOffset>
+  return new Date(date.getTime() + offset);
+  </applyOffset>
+}
+</adjustTimezoneOffset>
+
+<_Wrap>
+function _Wrap(key, setFunction, _cacheGetter, _cacheSetter, ttl) {
+  <performCacheOperation>
+  return new Promise((resolve, reject) => {
+    ...
+  });
+  </performCacheOperation>
+}
+</_Wrap>
+```

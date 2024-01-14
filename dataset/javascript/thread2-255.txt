@@ -1,0 +1,238 @@
+```js
+<starttls>
+function starttls(socket, options, callback) {
+    var sslcontext, pair, cleartext;
+    socket.removeAllListeners('data');
+    
+    options.ciphers = options.ciphers || <sslCiphersConfiguration>'EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA384'+
+            ':EECDH+aRSA+SHA256:EECDH:+CAMELLIA256:+AES256:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL'+
+            ':!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4:!SEED:!ECDSA:CAMELLIA256-SHA:AES256-SHA:'+
+            'CAMELLIA128-SHA:AES128-SHA'</sslCiphersConfiguration>;
+    sslcontext = require('crypto').createCredentials(options);
+    pair = require('tls').createSecurePair(sslcontext, true, false, false);
+    cleartext = pipe(pair, socket);
+
+    pair.on('secure', <handleSecureEvent>function() {
+        var verifyError = (pair._ssl || pair.ssl).verifyError();
+
+        if (verifyError) {
+            cleartext.authorized = false;
+            cleartext.authorizationError = verifyError;
+        } else {
+            cleartext.authorized = true;
+        }
+
+        callback(cleartext);
+    }</handleSecureEvent>);
+
+    cleartext._controlReleased = true;
+    return pair;
+}
+</starttls>
+
+<_githubOrgRepo>
+function _githubOrgRepo (gitUrl) {
+  if (!gitUrl) {
+    return null
+  }
+  const match = gitUrl.match(/.*?(:\/\/|@)github\.com[/:](.*?)(#.*?)?$/)
+  return match && match[2] && match[2].replace(/\.git$/, '')
+}
+</_githubOrgRepo>
+
+<genBitmapImage>
+function genBitmapImage (oData) {
+  
+  // Image header information calculations
+  const biWidth = oData.width
+  const biHeight = oData.height
+  const biSizeImage = biWidth * biHeight * 3
+  const bfSize = biSizeImage + 54 
+
+  // BITMAPFILEHEADER creation
+  const BITMAPFILEHEADER = [
+    0x42, 0x4D,
+    bfSize & 0xff, bfSize >> 8 & 0xff, bfSize >> 16 & 0xff, bfSize >> 24 & 0xff,
+    0, 0,
+    0, 0,
+    54, 0, 0, 0
+  ]
+
+  // BITMAPINFOHEADER creation
+  const BITMAPINFOHEADER = [
+    40, 0, 0, 0,
+    biWidth & 0xff, biWidth >> 8 & 0xff, biWidth >> 16 & 0xff, biWidth >> 24 & 0xff,
+    biHeight & 0xff, biHeight >> 8 & 0xff, biHeight >> 16 & 0xff, biHeight >> 24 & 0xff,
+    1, 0,
+    24, 0,
+    0, 0, 0, 0,
+    biSizeImage & 0xff, biSizeImage >> 8 & 0xff, biSizeImage >> 16 & 0xff, biSizeImage >> 24 & 0xff,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0
+  ]
+
+  // Calculate padding for scanlines
+  const iPadding = (4 - ((biWidth * 3) % 4)) % 4
+
+  // Process pixel data
+  const aImgData = oData.data
+  let strPixelData = ''
+  const biWidth4 = biWidth << 2
+  let y = biHeight
+  const fromCharCode = String.fromCharCode
+
+  do {
+    const iOffsetY = biWidth4 * (y - 1)
+    let strPixelRow = ''
+    for (let x = 0; x < biWidth; x++) {
+      let iOffsetX = x << 2
+      strPixelRow += fromCharCode(aImgData[iOffsetY + iOffsetX + 2]) +
+                     fromCharCode(aImgData[iOffsetY + iOffsetX + 1]) +
+                     fromCharCode(aImgData[iOffsetY + iOffsetX])
+    }
+
+    for (let c = 0; c < iPadding; c++) {
+      strPixelRow += String.fromCharCode(0)
+    }
+
+    strPixelData += strPixelRow
+  } while (--y)
+
+  // Combine and encode headers and pixel data
+  const strEncoded = encodeData(BITMAPFILEHEADER.concat(BITMAPINFOHEADER)) + encodeData(strPixelData)
+
+  return strEncoded
+}
+</genBitmapImage>
+
+<Noptify>
+function Noptify(args, options) {
+  events.EventEmitter.call(this);
+  options = this.options = options || {};
+  this.args = args || process.argv;
+  this._program = options.program || <pathBasename>(path.basename(this.args[this.args[0] === 'node' ? 1 : 0]))</pathBasename>;
+
+  this._shorthands = {};
+  this._commands = {};
+  this._routes = [];
+  this._steps = [];
+  this.nopt = {};
+
+  <optionConfiguration>
+  this.option('help', '-h', 'Show help usage');
+  this.option('version', '-v', 'Show package version');
+  </optionConfiguration>
+}
+</Noptify>
+
+<functionProxy>
+function(to, from, fnName, setupFn) {
+  to[fnName] = function() {
+    if (setupFn) {
+      <setupFunction>setupFn();</setupFunction>
+    }
+    return from[fnName].apply(from, arguments);
+  };
+}
+</functionProxy>
+
+<processClass>
+function processClass(clazz, computation) {
+  if (!clazz.methods.method) {
+    return;
+  }
+  if (clazz.methods.method instanceof Array) {
+
+    clazz.methods.method.forEach(function(method) {
+      ++computation.total;
+      
+      computation.passed = parseInt(method.hits) > 0 ? ++computation.passed : computation.passed;
+    });
+
+  } else { 
+    ++computation.total;
+    computation.passed = parseInt(clazz.methods.method.hits) > 0 ? ++computation.passed : computation.passed;
+  }
+}
+</processClass>
+
+<LGraphFXLens>
+function LGraphFXLens() {
+    this.addInput("Texture", "Texture");
+    this.addInput("Aberration", "number");
+    this.addInput("Distortion", "number");
+    this.addInput("Blur", "number");
+    this.addOutput("Texture", "Texture");
+    this.properties = {
+        aberration: 1.0,
+        distortion: 1.0,
+        blur: 1.0,
+        precision: LGraphTexture.DEFAULT
+    };
+
+    if (!LGraphFXLens._shader) {
+        LGraphFXLens._shader = new GL.Shader(
+            GL.Shader.SCREEN_VERTEX_SHADER,
+            LGraphFXLens.pixel_shader
+        );
+        LGraphFXLens._texture = new GL.Texture(3, 1, {
+            format: gl.RGB,
+            wrap: gl.CLAMP_TO_EDGE,
+            magFilter: gl.LINEAR,
+            minFilter: gl.LINEAR,
+            pixel_data: [255, 0, 0, 0, 255, 0, 0, 0, 255]
+        });
+    }
+}
+</LGraphFXLens>
+
+<findExpression>
+function(editor, fn) {
+    var content = String(editor.getContent());
+    var il = content.length;
+    var exprStart = editor.getCaretPos() - 1;
+    var exprEnd = exprStart + 1;
+            
+    // Determine the start of expression
+    while (exprStart >= 0 && fn(content.charAt(exprStart), exprStart, content)) exprStart--;
+            
+    // Determine the end of expression
+    while (exprEnd < il && fn(content.charAt(exprEnd), exprEnd, content)) exprEnd++;
+            
+    // Return the found range if any
+    if (exprEnd > exprStart) {
+        return range([++exprStart, exprEnd]);
+    }
+}
+</findExpression>
+
+<webpackObservableExtension>
+function(module, exports, __webpack_require__) {
+
+    "use strict";
+    var Observable_1 = __webpack_require__(5);
+    var window_1 = __webpack_require__(593);
+    Observable_1.Observable.prototype.window = window_1.window;
+    
+}
+</webpackObservableExtension>
+
+<processGroupsKeys>
+function processGroupsKeys(){
+    var GroupsKeys = [];
+
+    module.groups.forEach(function(table){
+        GroupsKeys.push({
+            value: table.get('id'),
+            text: table.get('name'),
+        });
+    });
+
+    module.GroupsKeys = GroupsKeys;
+}
+</processGroupsKeys>
+```
+
+Each of the functions is enclosed in tags indicating its primary responsibility. In this case, no internal tags were necessary because each function had a single cohesive responsibility, hence being compliant with the Single Responsibility Principle (SRP).

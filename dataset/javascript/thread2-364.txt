@@ -1,0 +1,261 @@
+```javascript
+<getter>
+function getter(value, properties) {
+  if (properties.get) {
+    value = properties.get.call(this, value)
+  }
+  return value
+}
+</getter>
+
+<functionRoute>
+function(uri) {
+  var route = this.defined(uri);
+  if (route !== false) {
+    if (this._routes[route].method === null) {
+      var f = this._routes[route].handler.bind(this._routes[route].handler);
+      f(this.params(route));
+    } else {
+      <navigateRoute>
+      var Obj = this._routes[route].handler;
+      var method = this._routes[route].method;
+      Obj[method](this.params(route));
+      </navigateRoute>
+    }
+  } else {
+    <handleUndefinedRoute>
+    console.error('Route "' + uri + '" is not defined.');
+    return false;
+    </handleUndefinedRoute>
+  }
+}
+</functionRoute>
+
+<updateModel>
+function (prop, val) {
+  can.Observe.prototype.___set.call(this, prop, val)
+  if (prop === this.constructor.id && this._bindings) {
+    <updateStore>
+    this.constructor.store[getId(this)] = this;
+    </updateStore>
+  }
+}
+</updateModel>
+
+<getPlural>
+function() {
+  var bundle = this.match(/(\w+)\sof\s\w+/);
+  if (bundle) return this.replace(bundle[1], bundle[1].getPlural());
+  str = this.replace(/([^aeiou])y$/, '$1ies');
+  if (str == this) str = str.replace(/([ch|sh|x|s|o])$/, '$1es');
+  if (str == this) str += 's';
+  return str;
+}
+</getPlural>
+
+<generateNSISScript>
+function generateNSIScript(files, callback) {
+  sys.puts('Generating NSIS script');
+  var installFileList = '  SetOverwrite try\n',
+      removeFileList  = '',
+      removeDirList   = '';
+
+<filterFiles>
+  files = files.filter(function(file) {
+    if (~file.indexOf('node-builds') && !~file.indexOf('cyg') && !~file.indexOf('tmp') && !~file.indexOf('etc')) {
+      return;
+    }
+    return file;
+  });
+</filterFiles>
+
+<prepareInstallationScripts>
+  var prevDirname, i, len;
+  for (i = 0, len = files.length; i < len; i++) {
+    var file = files[i];
+    var dirname = path.dirname(file);
+    if (dirname != prevDirname) {
+      prevDirname = dirname;
+      installFileList += '  SetOutPath "$INSTDIR\\' + dirname.replace(/\//g, '\\') + '"\n';
+      removeDirList  += '  RMDir "$INSTDIR\\' + dirname.replace(/\//g, '\\') + '"\n';
+    }
+
+    var m;
+    if ((m = file.match(/\/?(README|LICENSE)(.md)?$/))) {
+      installFileList += '  File /oname=' + m[1] + '.txt "${ROOT_PATH}\\' + file.replace(/\//g, '\\') + '"\n';
+    } else {
+      installFileList += '  File "${ROOT_PATH}\\' + file.replace(/\//g, '\\') + '"\n';
+    }
+    removeFileList  += '  Delete "$INSTDIR\\' + file.replace(/\//g, '\\') + '"\n';
+  }
+</prepareInstallationScripts>
+
+<compileNSISScript>
+  var tmp = new Template(fs.readFileSync(path.join(__dirname, 'installer_nsi.template'), 'utf8'));
+  var data = tmp.substitute({
+    root_path: path.join(__dirname, '../..'),
+    output_path: OUTPUT_PATH,
+    version: 'v' + VERSION,
+    install_file_list: installFileList,
+    remove_file_list: removeFileList,
+    remove_dir_list: removeDirList
+  });
+</compileNSISScript>
+  callback(data);
+}
+</generateNSISScript>
+
+<setWait>
+function setWait(attributes, interval, timeLimit, callback) {
+  if (typeof timeLimit === 'function') {
+    callback  = timeLimit;
+    timeLimit = null;
+  }
+
+  var self  = this,
+      start = Date.now(),
+      fired = false,
+      equalCheckId,
+      current;
+
+<waitLoop>
+  equalCheckId = setInterval(function () {
+    self.refresh(function (err, resource) {
+      if (timeLimit) {
+        current = Date.now();
+        if (current - start > timeLimit) {
+          clearInterval(equalCheckId);
+          if (!fired) {
+            fired = true;
+            callback(err, resource);
+            return;
+          }
+        }
+      }
+
+      if (err) {
+        return;
+      } 
+
+      var equal = true,
+          keys  = Object.keys(attributes);
+
+      if (typeof attributes === 'function') {
+        equal = attributes(resource);
+      }
+      else {
+        for (var i = 0; i < keys.length; i++) {
+          if (attributes[keys[i]] !== resource[keys[i]]) {
+            equal = false;
+            break;
+          }
+        }
+      }
+
+      if (equal) {
+        clearInterval(equalCheckId);
+        callback(null, resource);
+      }
+    });
+  }, interval);
+</waitLoop>
+
+  return equalCheckId;
+}
+</setWait>
+
+<httpResponse>
+function httpResponse(response) {
+  if (!response) {
+    throw new Error('Unable to parse response.')
+  }
+  const errorAttrs = response.Chyba && response.Chyba.attributes
+  if (errorAttrs) {
+    throw new Error(`${response.Chyba.$value} (${errorAttrs.kod})`)
+  }
+  const body = response.Potvrzeni && response.Potvrzeni.attributes
+  const header = response.Hlavicka && response.Hlavicka.attributes
+  if (!body || !header) {
+    throw new Error('Unable to read response.')
+  }
+}
+</httpResponse>
+
+<requireModule>
+function(x, reload){
+  var id = modules[name][1][x];
+  if (_testability_cache_[x]) return _testability_cache_[x];
+  return newRequire(id ? id : x, undefined, reload);
+}
+</requireModule>
+
+<filterViews>
+function(p) {
+  p = new g.Point(p);
+  var views = this.model.getElements().map(this.findViewByModel, this);
+  return views.filter(function(view) {
+    return view && view.vel.getBBox({ target: this.viewport }).containsPoint(p);
+  }, this);
+}
+</filterViews>
+
+<gulpJsdocJson>
+function(infos, name) {
+  name = name || 'jsdoc.json';
+
+  var firstFile = null;
+  var readme = null;
+
+  var wp = new Parser(infos);
+
+<streamProcessing>
+  var bufferFiles = function(file, enc, next){
+    if (file.isNull()) return; 
+    if (file.isStream()) return this.emit('error', new PluginError('gulp-jsdoc', 'Streaming not supported'));
+    
+    if (!firstFile)
+      firstFile = file;
+    
+    if (/[.]js$/i.test(file.path))
+      wp.parse(file);
+    else if(/readme(?:[.]md)?$/i.test(file.path))
+      readme = marked(file.contents.toString('utf8'));
+
+    next();
+  };
+</streamProcessing>
+
+<concludeGulpJsdoc>
+  var endStream = function(conclude){
+    if (!firstFile){
+      conclude();
+      return;
+    }
+
+    var data;
+    try {
+      data = JSON.stringify(wp.complete(), null, 2);
+    } catch(e) {
+      return this.emit('error', new PluginError('gulp-jsdoc',
+        'Oooooh! Failed parsing with jsdoc. What did you do?! ' + e));
+    }
+
+    var vinyl = new File({
+      cwd: firstFile.cwd,
+      base: firstFile.base,
+      path: path.join(firstFile.base, name),
+      contents: new Buffer(data)
+    });
+
+    vinyl.readme = readme;
+
+    this.push(vinyl);
+
+    conclude();
+  };
+</concludeGulpJsdoc>
+
+  return through2.obj(bufferFiles, endStream);
+}
+</gulpJsdocJson>
+```

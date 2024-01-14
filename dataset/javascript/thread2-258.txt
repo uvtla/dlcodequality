@@ -1,0 +1,209 @@
+```javascript
+<isReactNode>
+function isReactNode(node) {
+  return isValidContainer(node) && (node.hasAttribute(ROOT_ATTR_NAME) || node.hasAttribute(ATTR_NAME));
+}
+</isReactNode>
+
+<getFeedback>
+function getFeedback() {
+        var out;
+        out = this.textareaElement ?
+            this.textareaElement.value : this._feedback;
+        return out ? out.trim() : out;
+    }
+</getFeedback>
+
+<configureChildrenCollections>
+function (collection, element, settings) {
+    if (settings.children) {
+        $.each(settings.children, function (index, childrenSettings) {
+            if (!childrenSettings.selector) {
+                console.log("jquery.collection.js: given collection " + collection.attr('id') + " has children collections, but children's root selector is undefined.");
+                return true;
+            }
+            if (element !== null) {
+                <initiateChildrenCollection>
+                element.find(childrenSettings.selector).collection(childrenSettings); 
+                </initiateChildrenCollection>
+            } else {
+                <initiateTopLevelCollection>
+                collection.find(childrenSettings.selector).collection(childrenSettings);
+                </initiateTopLevelCollection>
+            }
+        });
+    }
+}
+</configureChildrenCollections>
+
+<fileChecks>
+function fileChecks(filepath) {
+    
+    if (!grunt.file.exists(filepath)) {
+        grunt.log.warn('Source file "' + filepath + '" not found');
+        return false;
+    }
+
+    if (options.checkFilesize) {
+        
+        <getFileStats>
+        var stats = fs.lstatSync(filepath);
+        </getFileStats>
+
+        if (stats.size > UNCRITICAL_FILE_SIZE) {
+            <logFileSizeWarning>
+            grunt.log.warn('uncritical datauri size (' + filesize(UNCRITICAL_FILE_SIZE) + ') exceeded: ' + filepath + ' (' + filesize(stats.size) + ')');
+            </logFileSizeWarning>
+        }
+    }
+
+    return true;
+}
+</fileChecks>
+
+<parseError>
+function parseError(logText, jqXhr, textStatus, errorThrown) {
+    <logInitialError>
+    log("**warning: AJAX call failure in " + logText + ": [" +
+        textStatus +
+        "], [" +
+        errorThrown +
+        "], [" +
+        jqXhr.responseText +
+        "], [" +
+        jqXhr.statusText +
+        "]");
+    </logInitialError>
+
+    if (errorThrown === "" || errorThrown === "Internal Server Error") {
+        if (textStatus !== "error") {
+            errorThrown = jqXhr.responseText || textStatus;
+        }
+        else {
+            if (typeof jqXhr.responseJSON === "object" && typeof jqXhr.responseJSON.Message === "string") {
+                errorThrown = jqXhr.responseJSON.Message;
+            }
+            else {
+                if (typeof jqXhr.responseText === "string") {
+                    errorThrown = jqXhr.responseText;
+                }
+                else
+                    errorThrown = "Server or network error";
+            }
+        }
+    }
+
+    <logParsedError>
+    log(" error parsed to --> [" + errorThrown + "]");
+    </logParsedError>
+    return errorThrown;
+}
+</parseError>
+
+<generateResult>
+function() {
+      salep.isRunning = false;
+      var result = new Result({
+        success: successCount,
+        fail: failCount,
+        skip: skipCount,
+        total: totalCount,
+        tests: salep.tests,
+        cases: salep.cases
+      });
+      successCount = failCount = totalCount = skipCount = 0;
+      return result;
+}
+</generateResult>
+
+<disposeAndReloadTemplate>
+function (evt) {
+    var reloading = evt.reloadingObject;
+    var tmpCfg = this._getReloadCfg();
+    var isUsingModuleData = reloading && (this.moduleCtrl.getData() == tmpCfg.data);
+    <disposeTemplate>
+    Aria.disposeTemplate(tmpCfg.div);
+    </disposeTemplate>
+    if (reloading) {
+        var oSelf = this;
+        reloading.$on({
+            scope : {},
+            <reloadObjectListener>
+            "objectLoaded" : function (evt) {
+                tmpCfg.moduleCtrl = evt.object;
+                if (isUsingModuleData) {
+                    tmpCfg.data = evt.object.getData();
+                }
+                oSelf._callLoadTemplate(tmpCfg);
+            }
+            </reloadObjectListener>
+        });
+    }
+}
+</disposeAndReloadTemplate>
+
+<pipedFunction>
+function() {
+    var fns = [].slice.call(arguments);
+    return function piped() {
+      var args = [].slice.call(arguments);
+      <invokePipedFunctions>
+      fns.forEach(function(fn) {
+        args = [fn.apply(null, args)];
+      });
+      </invokePipedFunctions>
+      return args[0];
+    };
+  }
+</pipedFunction>
+
+<generatePath>
+function generatePath(path = "/", params = {}) {
+  return path === "/" ? path : <compileAndCreatePath>compilePath(path)(params, { pretty: true });</compileAndCreatePath>
+}
+</generatePath>
+
+<runTask>
+function run(taskKey) {
+  var args = inputArgs(outs, pipe, taskKey)
+  var taskName = task[taskKey]
+  var f = funcs[taskName]
+
+  
+
+  if (gotReturn) return
+
+  <handleReturnTask>
+  if ((taskName === 'return') && (!gotReturn)) {
+    returnValue = args[0]
+    gotReturn = true
+    return
+  }
+  </handleReturnTask>
+
+  
+
+  if (no(f)) {
+    <logTaskNotFound>
+    var taskNotFound = new Error('Task not found: ' + taskName + ' [' + taskKey + '] ')
+    taskNotFound.taskKey = taskKey
+    taskNotFound.taskName = taskName
+    </logTaskNotFound>
+  }
+
+  
+
+  try {
+    outs[taskKey] = <executeTaskFunction>f.apply(null, args)</executeTaskFunction>
+  } catch (err) {
+    
+    <handleTaskError>
+    err.taskName = taskName
+    err.taskKey = taskKey
+
+    throw err
+    </handleTaskError>
+  }
+}
+</runTask>
+```

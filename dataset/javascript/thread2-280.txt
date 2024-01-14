@@ -1,0 +1,367 @@
+```javascript
+<cssParseUri>
+function cssParseUri(candidate) {
+  <regexDefinitions>
+  var string1 = /^\s*["]([^"]*)["]\s*$/;
+  var string2 = /^\s*[']([^']*)[']\s*$/;
+  var url1 = /^\s*url\s*[(]["]([^"]*)["][)]\s*$/;
+  var url2 = /^\s*url\s*[(][']([^']*)['][)]\s*$/;
+  var url3 = /^\s*url\s*[(]([^)]*)[)]\s*$/;
+  var match;
+  </regexDefinitions>
+  
+  <parseMatch>
+  if ((match = string1.exec(candidate))) {
+    return match[1];
+  } else if ((match = string2.exec(candidate))) {
+    return match[1];
+  } else if ((match = url1.exec(candidate))) {
+    return match[1];
+  } else if ((match = url2.exec(candidate))) {
+    return match[1];
+  } else if ((match = url3.exec(candidate))) {
+    return match[1];
+  }
+  return null;
+  </parseMatch>
+}
+</cssParseUri>
+
+<SourceTextParser>
+function SourceTextParser(sourceText, classes, methods) {
+  this.Comments = [];
+  this.sourceText = sourceText;
+  this.classes = classes;
+  this.methods = methods;
+}
+</SourceTextParser>
+
+<Protos>
+function Protos() {
+  var self = this;
+  global.protos = this;
+
+  <extendSelf>
+  deepExtend(this, this.constructor);
+  </extendSelf>
+
+  <defineGlobalsGetter>
+  this.__defineGetter__('globals', function() {
+    return global;
+  });
+  </defineGlobalsGetter>
+
+  <setClusterConfig>
+  this.clusterConfig = {
+    listenPort: null,
+    multiProcess: 0,
+    singleProcess: 'node',
+    masterProcess: 'node [master]',
+    workerProcess: 'node [worker]'
+  };
+  </setClusterConfig>
+
+  <extendShortcutDefinitions>
+  this.extend = _.extend;
+  this.deepExtend = deepExtend;
+  </extendShortcutDefinitions>
+
+  <loadLibrariesAndModules>
+  this.drivers = {};
+  this.engines = {};
+  this.storages = {};
+  this.lib = {};
+  this.regex = require('./regex');
+  this.inflect = inflect;
+  this.path = pathModule.resolve(__dirname, '../');
+  </loadLibrariesAndModules>
+
+  <setClassNameAndEnvironment>
+  this.className = this.constructor.name;
+  Object.defineProperty(this, 'environment', {
+    value: this.config.environment,
+    writable: false,
+    enumerable: true,
+    configurable: false
+  });
+  </setClassNameAndEnvironment>
+
+  <initializeServerOptions>
+  this.serverOptions = null;
+  this.launchApplication();
+  this.util.onlySetEnumerable(this, [
+    'version', 
+    'className', 
+    'environment', 
+    'path', 
+    'config', 
+    'apps', 
+    'drivers', 
+    'engines', 
+    'storages'
+  ]);
+  </initializeServerOptions>
+}
+</Protos>
+
+<anonymousFunction>
+function() {
+  var self = this;
+  var limit = self._pool;
+  var cnt = 0;
+  var i = 0;
+
+  <checkSoundLimit>
+  if (self._sounds.length < limit) {
+    return;
+  }
+  </checkSoundLimit>
+
+  <countEndedSounds>
+  for (i=0; i<self._sounds.length; i++) {
+    if (self._sounds[i]._ended) {
+      cnt++;
+    }
+  }
+  </countEndedSounds>
+
+  <cleanupEndedSounds>
+  for (i=self._sounds.length - 1; i>=0; i--) {
+    if (cnt <= limit) {
+      return;
+    }
+
+    if (self._sounds[i]._ended) {
+      <disconnectWebAudio>
+      if (self._webAudio && self._sounds[i]._node) {
+        self._sounds[i]._node.disconnect(0);
+      }
+      </disconnectWebAudio>
+
+      <removeEndedSound>
+      self._sounds.splice(i, 1);
+      cnt--;
+      </removeEndedSound>
+    }
+  }
+  </cleanupEndedSounds>
+}
+</anonymousFunction>
+
+<callbackFunction>
+function(resp) { 
+  <findCurrentBranch>
+  var branches = resp.Children;
+  var currentBranch;
+  for (var i = 0; i < branches.length; i++) {
+    if (branches[i].Current) {
+      currentBranch = branches[i];
+      break;
+    }
+  }
+  </findCurrentBranch>
+  
+  <resetDataFields>
+  data.command = undefined;
+  data.targetBranch = undefined;
+  data.parameters = undefined;
+  </resetDataFields>
+
+  <setDataItems>
+  data.items.LocalBranch = currentBranch;
+  data.items.Remote = currentBranch.RemoteLocation[0].Children[0];
+  </setDataItems>
+
+  <invokePushCallback>
+  pushCallback(data).then(function() {
+    refresh();
+  });
+  </invokePushCallback>
+}
+</callbackFunction>
+
+<objectSortByKey>
+function objectSortByKey(data, key, reverse) {
+  <sortKeys>
+  let keys = Object.keys(data);
+  keys.sort((a, b) => {
+      const aw = data[a][key] !== undefined ? parseInt(data[a][key], 10) : 0;
+      const bw = data[b][key] !== undefined ? parseInt(data[b][key], 10) : 0;
+      if (aw === bw) {
+          return 0;
+      }
+      return reverse !== true && aw < bw ? -1 : 1;
+  });
+  </sortKeys>
+
+  <rearrangeData>
+  keys.forEach((key) => {
+      const value = data[key];
+      delete data[key];
+      data[key] = value;
+  });
+  </rearrangeData>
+}
+</objectSortByKey>
+
+<XMLHttpRequest>
+function XMLHttpRequest() {
+  var scope = ctorEvent();
+  goog.base(this, descriptor);
+  
+  <initializeXhr>
+  this.handle_ = new originalXhr();
+  </initializeXhr>
+
+  <initializeTrackersAndProps>
+  this.trackers_ = {};
+  this.props_ = {
+    'method': null,
+    'url': null,
+    'async': true,
+    'user': null,
+    'headers': {},
+    'timeout': 0,
+    'withCredentials': false,
+    'overrideMimeType': null,
+    'responseType': ''
+  };
+  </initializeTrackersAndProps>
+
+  <attachReadyStateChangeEventListener>
+  this.flow_ = null;
+  var self = this;
+  var handle = this.handle_;
+  var props = this.props_;
+  this.handle_.addEventListener('readystatechange', function(e) {
+    var flow = self.flow_;
+    if (!flow) {
+      return;
+    }
+
+    <parseHeadersOnReadyState2>
+    var value = undefined;
+    if (handle.readyState == 2) {
+      var headers = {};
+      var allHeaders = handle.getAllResponseHeaders().split('\r\n');
+      for (var n = 0; n < allHeaders.length; n++) {
+        if (allHeaders[n].length) {
+          var parts = allHeaders[n].split(':');
+          headers[parts[0]] = parts[1].substr(1);
+        }
+      }
+      value = {
+        'status': this.status,
+        'statusText': this.statusText,
+        'headers': headers
+      };
+    }
+    </parseHeadersOnReadyState2>
+
+    <recordTraceOnReadyStateChange>
+    if (handle.readyState < 4) {
+      wtf.trace.Flow.extend(flow, 'readyState: ' + handle.readyState, value);
+    } else {
+      wtf.trace.Flow.terminate(flow, 'readyState: ' + handle.readyState);
+    }
+    </recordTraceOnReadyStateChange>
+  }, false);
+  </attachReadyStateChangeEventListener>
+
+  <setEventHooks>
+  this.setEventHook('readystatechange', function(e) {
+    wtf.trace.appendScopeData('url', props['url']);
+    wtf.trace.appendScopeData('readyState', handle['readyState']);
+  });
+  this.setEventHook('load', function(e) {
+    wtf.trace.appendScopeData('url', props['url']);
+  });
+  </setEventHooks>
+
+  wtf.trace.Scope.leave(scope);
+}
+</XMLHttpRequest>
+
+<setValueFunction>
+function(value) {
+  <validateAndTransformValue>
+  if (Lang.isNumber(value)) {
+    value += 'px';
+  }
+  </validateAndTransformValue>
+
+  <setStyleAndFixEdges>
+  this.setStyle(HEIGHT,value);
+  this._fixEdges();
+  this.redraw();
+  </setStyleAndFixEdges>
+}
+</setValueFunction>
+
+<cssFunction>
+function css() {
+  <findCssElement>
+  const cssElement = findChild(libraryAppData, "css");
+  if (cssElement != null) {
+    const css = cssElement._;
+    if (css === "false") {
+      log.verbose("  sap.ui5/library/css property taken from .library appData: '%s'", false);
+      return false;
+    }
+  } else if (libraryJSInfo.noLibraryCSS) {
+    log.verbose("  sap.ui5/library/css property extracted from library.js: '%s'", false);
+    return false;
+  }
+  </findCssElement>
+}
+</cssFunction>
+
+<countGroupsFunction>
+function () {
+  <lastGroupCheck>
+  if (this._lastGroup && typeof this._lastGroup.index === "number") {
+    return Promise.wrap(this._count);
+  } else {
+  </lastGroupCheck>
+    
+  <initializeCountPromise>
+  var that = this;
+  var countPromise = new Promise(function (complete) {
+    var fetch = {
+      initialBatch: function () {
+        that._fetchNextIndex();
+      },
+      getGroup: function () { return null; },
+      countBefore: 0,
+      countAfter: 0,
+      complete: function (failed) {
+        if (failed) {
+          that._count = 0;
+        }
+        
+        var count = that._count;
+        if (typeof count === "number") {
+          complete(count);
+          return true;
+        } else {
+          return false;
+        }
+      }
+    };
+    
+    that._fetchQueue.push(fetch);
+    
+    if (!that._itemBatch) {
+      that._continueFetch(fetch);
+    }
+  });
+  </initializeCountPromise>
+
+  <returnOrExecuteCountPromise>
+  return (typeof this._count === "number" ? Promise.wrap(this._count) : countPromise);
+  </returnOrExecuteCountPromise>
+}
+</countGroupsFunction>
+```
+
+Note: The tags reflect distinct responsibilities and coherent blocks of instructions within each JavaScript function according to the SRP. Simple statements and variable assignments are not individually tagged unless they form part of an identifiable responsibility.

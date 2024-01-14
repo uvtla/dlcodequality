@@ -1,0 +1,326 @@
+Here are the SRP annotations for the given JavaScript functions:
+
+Non-Compliant Functions Example:
+
+<zoomTo>
+function zoomTo(ratio) {
+    <parameterHandling>
+    var hasTooltip = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var _originalEvent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    var _zoomable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+    </parameterHandling>
+
+    <variableInitialization>
+    var options = this.options,
+        pointers = this.pointers,
+        imageData = this.imageData;
+    </variableInitialization>
+
+    ratio = Math.max(0, ratio);
+
+    <zoomCalculation>
+    if (isNumber(ratio) && this.viewed && !this.played && (_zoomable || options.zoomable)) {
+      if (!_zoomable) {
+        var minZoomRatio = Math.max(0.01, options.minZoomRatio);
+        var maxZoomRatio = Math.min(100, options.maxZoomRatio);
+
+        ratio = Math.min(Math.max(ratio, minZoomRatio), maxZoomRatio);
+      }
+    </zoomCalculation>
+
+    <originalEventAdjustment>
+    if (_originalEvent && ratio > 0.95 && ratio < 1.05) {
+      ratio = 1;
+    }
+    </originalEventAdjustment>
+
+    <imageDimensionsUpdate>
+    var newWidth = imageData.naturalWidth * ratio;
+    var newHeight = imageData.naturalHeight * ratio;
+    </imageDimensionsUpdate>
+
+    <positionUpdate>
+    if (_originalEvent) {
+        var offset = getOffset(this.viewer);
+        var center = pointers && Object.keys(pointers).length ? getPointersCenter(pointers) : {
+          pageX: _originalEvent.pageX,
+          pageY: _originalEvent.pageY
+        };
+
+        imageData.left -= (newWidth - imageData.width) * ((center.pageX - offset.left - imageData.left) / imageData.width);
+        imageData.top -= (newHeight - imageData.height) * ((center.pageY - offset.top - imageData.top) / imageData.height);
+      } else {
+        imageData.left -= (newWidth - imageData.width) / 2;
+        imageData.top -= (newHeight - imageData.height) / 2;
+      }
+    </positionUpdate>
+
+    <renderImage>
+    imageData.width = newWidth;
+    imageData.height = newHeight;
+    imageData.ratio = ratio;
+    this.renderImage();
+    </renderImage>
+
+    <tooltipHandling>
+    if (hasTooltip) {
+      this.tooltip();
+    }
+    </tooltipHandling>
+    }
+
+    return this;
+  }
+</zoomTo>
+
+Compliant Functions Example:
+
+<anonymousFunctionCreateCircle>
+function (x, y, r) {
+    return new BVG('circle', x.constructor.name === 'Object' ? x : {
+      x: x,
+      y: y,
+      r: r
+    }, function (tag, data) {
+      tag.setAttribute('cx', data.x);
+      tag.setAttribute('cy', data.y);
+      tag.setAttribute('r', data.r);
+    });
+}
+</anonymousFunctionCreateCircle>
+
+<WaterlockInit>
+function Waterlock(){
+  events.EventEmitter.call(this);
+
+  <initialization>
+  this.sails      = global.sails; 
+  this.engine     = _.bind(this.engine, this)();
+  this.config     = _.bind(this.config, this)();
+  this.methods    = _.bind(this.methods, this)().collect();
+  this.models     = _.bind(this.models, this)();
+  this.actions    = _.bind(this.actions, this)();
+  this.cycle      = _.bind(this.cycle, this)();
+  this.jwt        = require('jwt-simple');
+  this.validator  = _.bind(this.validator, this)();
+  </initialization>
+}
+</WaterlockInit>
+
+<requireModule>
+function requireModule(filePath, refreshFlag) {
+    <moduleCaching>
+    if (refreshFlag) {
+        delete injector.require.cache[filePath];
+    }
+    </moduleCaching>
+    
+    return injector.require(filePath);
+}
+</requireModule>
+
+<wrap>
+function wrap(obj, method, func) {
+    <interceptMethod>
+	var proceed = obj[method];
+	obj[method] = function () {
+		var args = Array.prototype.slice.call(arguments);
+		args.unshift(proceed);
+		return func.apply(this, args);
+	};
+	</interceptMethod>
+}
+</wrap>
+
+<DependencyInjectorInit>
+function DependencyInjector(opts) {
+    <configurationSetup>
+    var rootDefault = p.join(__dirname, '../../..');
+    this.rootDir = opts.rootDir || rootDefault;                 
+    this.require = opts.require || require;                     
+    this.container = opts.container || 'api';                   
+    this.servicesDir = opts.servicesDir || 'services';          
+    this.tplDir = opts.tplDir || 'dist/tpls';                   
+    this.debug = opts.debug || false;                           
+    this.debugPattern = opts.debugPattern;                      
+    this.debugHandler = opts.debugHandler;                      
+    this.adapters = opts.adapters || {};                        
+    this.reactors = opts.reactors || {};                        
+    this.adapterMap = this.loadAdapterMap(opts);                
+    this.aliases = this.loadAliases(opts);                      
+    this.factories = this.loadFactories(opts);                  
+    </configurationSetup>
+}
+</DependencyInjectorInit>
+
+<modify>
+function modify(translate) {
+    if (Glide.settings.focusAt >= 0) {
+        <calculatePeekTranslation>
+        var peek = Components.Peek.value;
+
+        if (isObject(peek)) {
+          return translate - peek.before;
+        }
+
+        return translate - peek;
+        </calculatePeekTranslation>
+      }
+
+      return translate;
+    }
+</modify>
+
+<defaults>
+function defaults(object) {
+    <setDefaults>
+    if (!object) {
+      return object;
+    }
+    for (var argsIndex = 1, argsLength = arguments.length; argsIndex < argsLength; argsIndex++) {
+      var iterable = arguments[argsIndex];
+      if (iterable) {
+        for (var key in iterable) {
+          if (typeof object[key] == 'undefined') {
+            object[key] = iterable[key];
+          }
+        }
+      }
+    }
+    </setDefaults>
+    return object;
+}
+</defaults>
+
+<determineClientScope>
+function determineClientScope (req, res, next) {
+  <scopeResolution>
+  var params = req.connectParams
+  var subject = req.client
+  var scope = params.scope || subject.default_client_scope
+
+  if (params.grant_type === 'client_credentials') {
+    Scope.determine(scope, subject, function (err, scope, scopes) {
+      if (err) { return next(err) }
+      req.scope = scope
+      req.scopes = scopes
+      next()
+    })
+  } else {
+    next()
+  }
+  </scopeResolution>
+}
+</determineClientScope>
+
+<promiseHandlerWithFileWriter>
+function(promise, result, output, isProgress) {
+	<initializePromiseOutcomeElement>
+	var element = document.createElement("div"); 
+	</initializePromiseOutcomeElement>
+
+	<countFileWriteOperations>
+	var waitCount = 0;
+	</countFileWriteOperations>
+
+	<successFileWriteCallback>
+	var successFn = function(file) {
+		this.callback = function() {
+			var string = i18nUtil.formatMessage(messages["WroteMsg"], typeof(file) === "string" ? file : this.shellPageFileService.computePathString(file)); 
+			var writer = new mResultWriters.ShellStringWriter(element);
+			writer.write(string + "\n"); 
+			if (--waitCount !== 0 || isProgress) {
+				promise.progress(element);
+			} else {
+				promise.resolve(element);
+			}
+		}.bind(this);
+		return this;
+	}.bind(this);
+	</successFileWriteCallback>
+
+	<errorFileWriteCallback>
+	var errorFn = function(file) {
+		this.callback = function(error) {
+			var string = i18nUtil.formatMessage(messages["WriteFailMsg"], typeof(file) === "string" ? file : this.shellPageFileService.computePathString(file)); 
+			string += " [" + error + "]"; 
+			var writer = new mResultWriters.ShellStringWriter(element);
+			writer.write(string + "\n"); 
+			if (--waitCount !== 0 || isProgress) {
+				promise.progress(element);
+			} else {
+				promise.resolve(element);
+			}
+		}.bind(this);
+		return this;
+	}.bind(this);
+	</errorFileWriteCallback>
+
+	<manageDirectoryForWriteOperation>
+	var destination = output || this.shellPageFileService.getCurrentDirectory();
+	waitCount++;
+	this.shellPageFileService.ensureDirectory(null, destination).then(
+		function(directory) {
+			waitCount--;
+
+			var files = result.getValue();
+			if (!result.isArray()) {
+				files = [files];
+			}
+			files.forEach(function(file) {
+				waitCount++;
+				var pathSegments = file.path.split(this.shellPageFileService.SEPARATOR);
+
+				<sanitizePathSegments>
+				var index = 0;
+				while (index < pathSegments.length) {
+					var segment = pathSegments[index];
+					if (segment === ".") { 
+						pathSegments.splice(index, 1);
+					} else if (segment === "..") { 
+						if (index === 0) {
+							errorFn(i18nUtil.formatMessage(messages["WriteFailNotDescendentOfOutputDir"], file.path));
+							return;
+						}
+						pathSegments.splice(index-- - 1, 2);
+					} else {
+						index++;
+					}
+				}
+				</sanitizePathSegments>
+
+				<executeFileWriteOperation>
+				var writeFile = function(parentNode, fileToWrite, pathSegments) {
+					var segment = pathSegments[0];
+					pathSegments.splice(0,1);
+					var nodeString = this.shellPageFileService.computePathString(parentNode) + this.shellPageFileService.SEPARATOR + segment;
+					if (pathSegments.length === 0) {
+						if (fileToWrite.isDirectory) {
+							this.shellPageFileService.ensureDirectory(parentNode, segment).then(successFn(nodeString).callback, errorFn(nodeString).callback);
+						} else {
+							this.shellPageFileService.ensureFile(parentNode, segment).then(
+								function(file) {
+									var writer = new mResultWriters.FileBlobWriter(file, this.shellPageFileService);
+									writer.addBlob(fileToWrite.blob);
+									writer.write().then(successFn(file).callback, errorFn(file).callback);
+								}.bind(this),
+								errorFn(nodeString).callback
+							);
+						}
+						return;
+					}
+					this.shellPageFileService.ensureDirectory(parentNode, segment).then(
+						function(newNode) {
+							writeFile(newNode, fileToWrite, pathSegments);
+						},
+						errorFn(this.shellPageFileService.computePathString(parentNode) + this.shellPageFileService.SEPARATOR + segment).callback
+					);
+				}.bind(this);
+				writeFile(directory, file, pathSegments);
+			}.bind(this));
+		}.bind(this),
+		errorFn(destination).callback
+	);
+	</executeFileWriteOperation>
+}
+</promiseHandlerWithFileWriter>

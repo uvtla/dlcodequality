@@ -1,0 +1,300 @@
+<field>
+function field() {
+  var args = mlutil.asArray.apply(null, arguments);
+  switch(args.length) {
+  case 0:
+    throw new Error('missing field name');
+  case 1:
+    return new FieldDef(new FieldNameDef(args[0]));
+  case 2:
+    return new FieldDef(new FieldNameDef(args[0], args[1]));
+  default:
+    throw new Error('too many arguments for field identifier: '+args.length);
+ }
+}
+</field>
+
+<resizeChart>
+function (width, height, animation) {
+  var chart = this,
+    chartWidth,
+    chartHeight,
+    fireEndResize;
+
+  chart.isResizing += 1;
+  fireEndResize = function () {
+    if (chart) {
+      fireEvent(chart, 'endResize', null, function () {
+        chart.isResizing -= 1;
+      });
+    }
+  };
+
+  setAnimation(animation, chart);
+
+  chart.oldChartHeight = chart.chartHeight;
+  chart.oldChartWidth = chart.chartWidth;
+  if (defined(width)) {
+    chart.chartWidth = chartWidth = mathMax(0, mathRound(width));
+    chart.hasUserSize = !!chartWidth;
+  }
+  if (defined(height)) {
+    chart.chartHeight = chartHeight = mathMax(0, mathRound(height));
+  }
+
+  (globalAnimation ? animate : css)(chart.container, {
+    width: chartWidth + PX,
+    height: chartHeight + PX
+  }, globalAnimation);
+
+  chart.setChartSize(true);
+  chart.renderer.setSize(chartWidth, chartHeight, animation);
+
+  chart.maxTicks = null;
+  each(chart.axes, function (axis) {
+    axis.isDirty = true;
+    axis.setScale();
+  });
+
+  each(chart.series, function (serie) {
+    serie.isDirty = true;
+  });
+
+  chart.isDirtyLegend = true; 
+  chart.isDirtyBox = true; 
+
+  chart.layOutTitles(); 
+  chart.getMargins();
+
+  chart.redraw(animation);
+
+  chart.oldChartHeight = null;
+  fireEvent(chart, 'resize');
+
+  if (globalAnimation === false) {
+    fireEndResize();
+  } else { 
+    setTimeout(fireEndResize, (globalAnimation && globalAnimation.duration) || 500);
+  }
+}
+</resizeChart>
+
+<createPluginConfig>
+function(name, data) {
+  return {
+    name: null,
+    task: null,
+    weight: 0,
+    inquire: null,
+    conf: {
+      type: 'pluginconfig',
+      key: data.option.name || null,
+      plugin: name
+    }
+  };
+}
+</createPluginConfig>
+
+<runTestSuite>
+function run(config) {
+  var specCollector = require('./specCollector'),
+      resultCollector = require('./resultCollector'),
+      inspector = require('./inspector'),
+      spitterOuter = require('./spitterOuter'),
+      summariser = require('./summariser'),
+      XmlWriter = require('./junitXmlWriter'),
+      fs = require('fs'),
+      prepareNodeData = require('./visualiser/prepareNodeData'),
+      allSpecs;
+
+  <outputFileComparison>
+  function outputFileComparison(specs, results) {
+    var files = [specs, results];
+    
+    try {
+      results = inspector(files, config);
+      var writer = new XmlWriter(config);
+      writer.writeResults(results);
+      var output = spitterOuter(results, config);
+      output.forEach(function(line) {
+        console.log(line);
+      });
+      if (config.outputSummary) {
+        var summary = summariser(results);
+        summary.forEach(function(summaryItem) {
+          console.log(summaryItem);
+        });
+      }
+      prepareNodeData(config, files);
+    } catch (e) {
+      if (config.watch) {
+        console.log("Still watching... carry on BDD'ing!");
+      }
+    }
+  }
+  </outputFileComparison>
+
+  <collectResults>
+  function collectResults(specs) {
+    allSpecs = specs;
+    return resultCollector(config.results);
+  }
+  </collectResults>
+
+  <compareOutputFiles>
+  function compareOutputFiles(results) {
+    outputFileComparison(allSpecs, results);
+  }
+  </compareOutputFiles>
+
+  specCollector(config.specs, config.tags)
+    .then(collectResults)
+    .then(compareOutputFiles);
+}
+</runTestSuite>
+
+<colorToRgb>
+function(color) {
+  var rgb;
+  
+  if (color in COLORS) {
+    rgb = COLORS[color];
+    return {
+      r: rgb[0],
+      g: rgb[1],
+      b: rgb[2]
+    };
+  }
+  
+  else if (color[0] === HASH) {
+    return this._hexToRgb(color.substring(1));
+  }
+  
+  else if (color.substr(0, 4) === RGB_PAREN) {
+    rgb = RGB_REGEX.exec(color.replace(/ /g,''));
+    return {
+      r: parseInt(rgb[1], 10),
+      g: parseInt(rgb[2], 10),
+      b: parseInt(rgb[3], 10)
+    };
+  }
+  
+  else {
+    return {
+      r: 0,
+      g: 0,
+      b: 0
+    };
+  }
+}
+</colorToRgb>
+
+<inetLatency>
+function inetLatency(host, callback) {
+  <normalizeArguments>
+  if (util.isFunction(host) && !callback) {
+    callback = host;
+    host = '';
+  }
+  
+  host = host || '8.8.8.8';
+  </normalizeArguments>
+
+  <measureLatency>
+  return new Promise((resolve) => {
+    process.nextTick(() => {
+      let cmd;
+      if (_linux || _freebsd || _openbsd || _darwin) {
+        if (_linux) {
+          cmd = 'ping -c 2 -w 3 ' + host + ' | grep rtt';
+        }
+        if (_freebsd || _openbsd) {
+          cmd = 'ping -c 2 -t 3 ' + host + ' | grep round-trip';
+        }
+        if (_darwin) {
+          cmd = 'ping -c 2 -t 3 ' + host + ' | grep avg';
+        }
+        
+        exec(cmd, function (error, stdout) {
+          <calculateAndReturnResult>
+          let result = -1;
+          if (!error) {
+            const line = stdout.toString().split('=');
+            if (line.length > 1) {
+              const parts = line[1].split('/');
+              if (parts.length > 1) {
+                result = parseFloat(parts[1]);
+              }
+            }
+          }
+          if (callback) { callback(result); }
+          resolve(result);
+          </calculateAndReturnResult>
+        });
+      }
+      
+      if (_sunos) { /* ... similar structure as above */ }
+      
+      if (_windows) { /* ... similar structure as above */ }
+    });
+  });
+  </measureLatency>
+}
+</inetLatency>
+
+<convertPatternProperties>
+function convertPatternProperties (data) {
+  Object.keys(data.properties).map(function (key) {
+    if (/^\/.*\/$/.test(key)) {
+      data.patternProperties = data.patternProperties || {}
+      const stringRegex = key.slice(1, -1)
+      data.patternProperties[stringRegex] = data.properties[key]
+      delete data.properties[key]
+    }
+  })
+  return data
+}
+</convertPatternProperties>
+
+<ApiDox>
+function ApiDox() {
+  this.settings = {
+    input: '',
+    inputText: null,
+    inputTitle: '',
+    output: '',
+    fullSourceDescription: false
+  };
+  this.anchors = {};
+  this.comments = [];
+  this.curSection = null;
+  this.fileComment = {};
+  this.lines = [];
+  this.params = {};
+  this.returns = {};
+  this.sees = [];
+  this.toc = [];
+  this.throws = [];
+}
+</ApiDox>
+
+<applyMask>
+function applyMask(mask) {
+  var x, y, r3x, r3y;
+  
+  switch (mask) {
+    /* ... mask application code with nested loops ... */
+  }
+}
+</applyMask>
+
+<createFolder>
+function(url, projectName, serverPath, create) {
+  var d = new orion.Deferred();
+  this.createFolder(url, projectName).then(function(project) {
+    project.ContentLocation = project.Location;
+    d.resolve(project);
+  }, d.reject);
+  return d;
+}
+</createFolder>

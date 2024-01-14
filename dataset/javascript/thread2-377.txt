@@ -1,0 +1,263 @@
+```
+<reactAddComponentRef>
+function(component, ref, owner) {
+    ("production" !== "development" ? invariant(
+      ReactOwner.isValidOwner(owner),
+      'addComponentAsRefTo(...): Only a ReactOwner can have refs. This ' +
+      'usually means that you\'re trying to add a ref to a component that ' +
+      'doesn\'t have an owner (that is, was not created inside of another ' +
+      'component\'s `render` method). Try rendering this component inside of ' +
+      'a new top-level component which will hold the ref.'
+    ) : invariant(ReactOwner.isValidOwner(owner)));
+    owner.attachRef(ref, component);
+}
+</reactAddComponentRef>
+```
+
+```
+<regExpRestore>
+function $$core$$createRegExpRestore () {
+        var esc = /[.?*+^$[\]\\(){}|-]/g,
+            lm  = RegExp.lastMatch || '',
+            ml  = RegExp.multiline ? 'm' : '',
+            ret = { input: RegExp.input },
+            reg = new $$core$$List(),
+            has = false,
+            cap = {};
+
+        <escapingsHandling>
+        for (var i = 1; i <= 9; i++)
+            has = (cap['$'+i] = RegExp['$'+i]) || has;
+        lm = lm.replace(esc, '\\$&');
+        if (has) {
+            for (var i = 1; i <= 9; i++) {
+                var m = cap['$'+i];
+                if (!m)
+                    lm = '()' + lm;
+                else {
+                    m = m.replace(esc, '\\$&');
+                    lm = lm.replace(m, '(' + m + ')');
+                }
+                $$core$$arrPush.call(reg, lm.slice(0, lm.indexOf('(') + 1));
+                lm = lm.slice(lm.indexOf('(') + 1);
+            }
+        }
+        </escapingsHandling>
+
+        <regExpConstruction>
+        ret.exp = new RegExp($$core$$arrJoin.call(reg, '') + lm, ml);
+        </regExpConstruction>
+
+        return ret;
+    }
+</regExpRestore>
+```
+
+```
+<deployOpenSTUtilityContract>
+async function (showPrompts) {
+
+    <loggerUsage>
+    logger.step('** Deploying OpenST Utility Contract');
+    if (showPrompts) {
+      logger.info('Utility Chain Deployer Address: ' + utilityDeployerAddress);
+      logger.info('Value Chain ID: ' + VALUE_CHAIN_ID);
+      logger.info('Utility Chain ID: ' + UTILITY_CHAIN_ID);
+      logger.info('Foundation Address: ' + foundationAddress);
+    </loggerUsage>
+
+    <userPromptForConfirmation>
+    await new Promise(
+        function (onResolve, onReject) {
+          prompts.question("Please verify all above details. Do you want to proceed? [Y/N]", function (intent) {
+            if ((intent === 'Y') || (intent === 'y')) {
+              logger.info('Great! Proceeding deployment.');
+              prompts.close();
+              onResolve();
+            } else {
+              logger.error('Exiting deployment scripts. Change the env vars and re-run.');
+              process.exit(1);
+            }
+          });
+        }
+      );
+    </userPromptForConfirmation>
+
+    if (!showPrompts) {
+      prompts.close();
+    }
+
+    <deployContract>
+    const openSTUtiltiyContractDeployResponse = await deployHelper.perform(openSTUtilityContractName,
+      web3Provider, openSTUtilityContractAbi, openSTUtilityContractBin, utilityDeployerName,
+      {gasPrice: UC_GAS_PRICE, gas: UC_GAS_LIMIT}, [VALUE_CHAIN_ID, UTILITY_CHAIN_ID, utilityRegistrarContractAddress]
+    );
+    </deployContract>
+
+    <initiateOwnershipTransfer>
+    const openSTUtilityContractAddress = openSTUtiltiyContractDeployResponse.contractAddress
+      , openStUtility = new OpenStUtilityKlass(openSTUtilityContractAddress);
+    logger.step('** Initiating OwnerShipTransfer of openSTUtility Contract to foundation');
+    await openStUtility.initiateOwnerShipTransfer(utilityDeployerName, foundationAddress, {gasPrice: UC_GAS_PRICE, gas: UC_GAS_LIMIT});
+    </initiateOwnershipTransfer>
+
+    <validateOwnership>
+    const getOwnerResponse = await openStUtility.getOwner();
+    if (!foundationAddress.equalsIgnoreCase(getOwnerResponse.data.address)) {
+      logger.error('Exiting the deployment as owner of openSTUtility Contract does not match');
+      process.exit(1);
+    }
+    </validateOwnership>
+
+    return Promise.resolve(responseHelper.successWithData(
+      {contract: 'openSTUtility', address: openSTUtilityContractAddress}));
+  }
+</deployOpenSTUtilityContract>
+```
+
+```
+<generateLaunchStoryboardContentsJSON>
+function getLaunchStoryboardContentsJSON(splashScreens, launchStoryboardImagesDir) {
+
+    <mapPlatformLaunchStoryboardImages>
+    var platformLaunchStoryboardImages = mapLaunchStoryboardContents(splashScreens, launchStoryboardImagesDir);
+    </mapPlatformLaunchStoryboardImages>
+
+    <prepareContentsJSON>
+    var contentsJSON = {
+        images: [],
+        info: {
+            author: 'Xcode',
+            version: 1
+        }
+    };
+    contentsJSON.images = platformLaunchStoryboardImages.map(function(item) {
+        var newItem = {
+            idiom: item.idiom,
+            scale: item.scale
+        };
+
+        
+        <setItemSizeClasses>
+        if (item.width !== CDV_ANY_SIZE_CLASS) {
+            newItem['width-class'] = IMAGESET_COMPACT_SIZE_CLASS;
+        }
+        if (item.height !== CDV_ANY_SIZE_CLASS) {
+            newItem['height-class'] = IMAGESET_COMPACT_SIZE_CLASS;
+        }
+        </setItemSizeClasses>
+
+        <setFilenameIfExists>
+        if (item.filename) {
+            newItem.filename = item.filename;
+        }
+        </setFilenameIfExists>
+        
+        return newItem;
+    });
+    </prepareContentsJSON>
+    
+    return contentsJSON;
+}
+</generateLaunchStoryboardContentsJSON>
+```
+
+```
+<vantageAuthMiddleware>
+function(middleware, options) {
+    <authentication>
+    if (this.server && this.server.auth) {
+      this.server.auth(middleware, options);
+    } else {
+      throw new Error("vantage.auth is only available in Vantage.IO. Please use this (npm install vantage-io --save)");
+    }
+    </authentication>
+
+    return this;
+}
+</vantageAuthMiddleware>
+```
+
+```
+<providerConstructor>
+function Provider(storage) {
+  <defineProperties>
+  Object.defineProperties(this, {
+    
+    
+    storage: {value: storage}
+
+  });
+  </defineProperties>
+
+  <validateStorageInstance>
+  if (!(this.storage instanceof Storage))
+    throw new TypeError('storage must be of type Storage');
+  </validateStorageInstance>
+}
+</providerConstructor>
+```
+
+```
+<getActiveTouches>
+function getActiveTouches(mouseEv, eventName) {
+        
+        if (mouseEv.type == 'mouseup') {
+            return new TouchList();
+        }
+
+        <createTouchListBasedOnEvent>
+        var touchList = createTouchList(mouseEv);
+        if(isMultiTouch && mouseEv.type != 'mouseup' && eventName == 'touchend') {
+            touchList.splice(1, 1);
+        }
+        </createTouchListBasedOnEvent>
+        
+        return touchList;
+    }
+</getActiveTouches>
+```
+
+```
+<errorInformationConstructor>
+function(message, path, rule, value, errors) {
+  this.message = message;
+  this.path = path;
+  this.rule = rule;
+  this.value = value;
+  this.errors = errors;
+}
+</errorInformationConstructor>
+```
+
+```
+<writeGifPixels>
+function writePixels() {
+    <initializeEncoder>
+    var myencoder = new LZWEncoder(width, height, indexedPixels, colorDepth);
+    </initializeEncoder>
+
+    <performEncoding>
+    myencoder.encode(out);
+    </performEncoding>
+}
+</writeGifPixels>
+```
+
+```
+<invertMatrix>
+function() {
+      var determinant;
+      
+      <calculateDeterminant>
+      determinant = this.a * this.d - this.b * this.c;
+      </calculateDeterminant>
+
+      <createInvertedMatrix>
+      return Matrix(this.d / determinant, -this.b / determinant, -this.c / determinant, this.a / determinant, (this.c * this.ty - this.d * this.tx) / determinant, (this.b * this.tx - this.a * this.ty) / determinant);
+      </createInvertedMatrix>
+}
+</invertMatrix>
+```
+
+Each of the abovementioned functions has been annotated within their respective tags, indicating areas of single or multiple responsibilities within the functions. Some functions strictly adhere to SRP, while others have multiple responsibilities highlighted within nested tags.

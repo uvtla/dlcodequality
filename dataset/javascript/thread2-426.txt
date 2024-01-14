@@ -1,0 +1,253 @@
+Here are the annotations for Single Responsibility Principle compliance. Functions contain nested tags when they have multiple responsibilities.
+
+<function1>
+function (array, fn) {
+  if (array != null && fn != null) {
+    for (var i = 0; i < array.length; i++) {
+      fn(array[i]);
+    }
+  }
+      
+  return array;
+}
+</function1>
+
+<function2>
+function ($ul, direction) {
+  var current = this.S('.visible', $ul),
+      target = current[direction]();
+
+  <skipSelectorCheck>
+  if (this.settings.skip_selector && target.find(this.settings.skip_selector).length != 0) {
+    target = target[direction]();
+  }
+  </skipSelectorCheck>
+
+  <triggerEvents>
+  if (target.length) {
+    this.S('img', target)
+      .trigger('click', [current, target]).trigger('click.fndtn.clearing', [current, target])
+      .trigger('change.fndtn.clearing');
+  }
+  </triggerEvents>
+}
+</function2>
+
+<function3>
+function parse(value, now) {
+  now = now ? this.toDate(now) : new Date();
+  
+  <validateDate>
+  if (!now) {
+    return null;
+  }
+  </validateDate>
+
+  <parseValue>
+  if (value.indexOf('営業日') !== -1) {
+    value = suji(value);
+    var matches = value.match(BIZ);
+    if (matches) {
+      return this.addBiz(now, matches[1] * (matches[2] === '前' ? -1 : 1));
+    } else {
+      return null;
+    }
+  } else {
+    return parseFn(value, this.startMonth, this._startWeek, now) || toDatetimeFn(value, this.startMonth);
+  }
+  </parseValue>
+}
+</function3>
+
+<function4>
+function flip(str, options) {
+  if (typeof str != 'string') {
+    throw new Error('input is not a String.');
+  }
+
+  <parseCSS>
+  var node = css.parse(str, options);
+  </parseCSS>
+
+  <flipNodeCSS>
+  flipNode(node.stylesheet);
+  </flipNodeCSS>
+
+  return css.stringify(node, options);
+}
+</function4>
+
+<function5>
+function (value) {
+  var lines = vCard.normalize(value)
+    .split(/\r?\n/g)
+    
+  <validateVCardStructure>
+  var begin = lines[0];
+  var version = lines[1];
+  var end = lines[lines.length - 1];
+
+  if (!/BEGIN:VCARD/i.test(begin))
+    throw new SyntaxError('Invalid vCard: Expected "BEGIN:VCARD" but found "' + begin + '"');
+
+  if (!/END:VCARD/i.test(end))
+    throw new SyntaxError('Invalid vCard: Expected "END:VCARD" but found "' + end + '"');
+
+  if (!/VERSION:\d\.\d/i.test(version))
+    throw new SyntaxError('Invalid vCard: Expected "VERSION:\\d.\\d" but found "' + version + '"');
+  </validateVCardStructure>
+
+  <validateAndParseData>
+  this.version = version.substring(8, 11);
+  if (!vCard.isSupported(this.version))
+    throw new Error('Unsupported version "' + this.version + '"');
+
+  this.data = vCard.parseLines(lines);
+  </validateAndParseData>
+
+  return this;
+}
+</function5>
+
+<function6>
+function UcFirst(str) {
+    var firstChar = "";
+    var leftChars = "";
+    var retStr;
+
+    <convertString>
+    if (typeof str == "string" && str.length > 0) {
+        firstChar = str[0].toUpperCase();
+        leftChars = str.slice(1, str.length);
+    }
+    </convertString>
+
+    retStr = firstChar + leftChars;
+    return retStr;
+}
+</function6>
+
+<function7>
+function find(requestObj, callback) {
+    var i, found, storedData, property, storage;
+
+    storage = this;
+    callback = callback || function () { };
+
+    <validateRequestObj>
+    if (typeof requestObj === 'undefined' || requestObj === null) {
+        callback(null);
+        return this;
+    }
+    </validateRequestObj>
+
+    <processRequestData>
+    for (i = 0; i < storage.preprocessors.length; i++) {
+        requestObj.data = storage.preprocessors[i](requestObj.data, requestObj);
+    }
+    </processRequestData>
+
+    <configureRequest>
+    requestObj.config = {};
+    requestObj.config.url = requestObj.config.url || this.url.find;
+    requestObj.config.type = requestObj.config.type || this.constructor.REQUEST_TYPE_GET;
+    </configureRequest>
+
+    <sendAndProcessRequest>
+    this.constructor._sendRequest(requestObj, function (data) {
+        for (i = 0; i < storage.processors.length; i++) {
+            data = storage.processors[i](data, requestObj);
+        }
+        callback(data);
+    });
+    </sendAndProcessRequest>
+
+    return this;
+}
+</function7>
+
+<function8>
+function (event) {
+    if (!(event && event.type)) {
+      return false;
+    }
+    if (event.client && event.client !== this) {
+      return false;
+    }
+    <evaluateEventMeta>
+    var meta = _clientMeta[this.id];
+    var clippedEls = meta && meta.elements;
+    var hasClippedEls = !!clippedEls && clippedEls.length > 0;
+    var goodTarget = !event.target || hasClippedEls && clippedEls.indexOf(event.target) !== -1;
+    var goodRelTarget = event.relatedTarget && hasClippedEls && clippedEls.indexOf(event.relatedTarget) !== -1;
+    var goodClient = event.client && event.client === this;
+    if (!meta || !(goodTarget || goodRelTarget || goodClient)) {
+      return false;
+    }
+    </evaluateEventMeta>
+    return true;
+}
+</function8>
+
+<function9>
+function runUntilResolved(genInstance, nextArg) {
+  try {
+    <stepGenerator>
+    let nextResult = genInstance.next(nextArg);
+    if (nextResult.done) {
+      return Promise.resolve(nextResult.value);
+    } else {
+      let v = nextResult.value;
+      let fn = v.fn;
+      let thisArg;
+      if (fn instanceof Array) {
+        thisArg = fn[0];
+        fn = fn[1];
+      }
+      let args = v.args;
+
+      if (fn == null || args == null) {
+        throw new Error('`Episode7.run` requires using `Episode7.call` with every `yield`. '+
+          'Check all of the `yield` expressions in [Function: '+genInstance.episode7Name+']');
+      }
+    </stepGenerator>
+
+    <resolveSideEffect>
+    let sideEffect;
+    if (isGeneratorFunction(fn)) {
+      sideEffect = Promise.resolve()
+        .then(function() {
+          return run(fn, ...args)
+        })
+    } else {
+      sideEffect = Promise.resolve()
+        .then(function() {
+          return fn.call(thisArg, ...args)
+        })
+    }
+    return sideEffect
+      .then(function(result) {
+        return runUntilResolved(genInstance, result);
+      })
+    </resolveSideEffect>
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+</function9>
+
+<function10>
+function convertRawTheme(theme) {
+  <transformTheme>
+  if (!Array.isArray(theme.constants)) {
+    return {
+      constants: Object.keys(theme.constants).map(key => theme.constants[key]),
+      styles: [].concat(theme.styles),
+      animations: [].concat(theme.animations)
+    }
+  }
+  else
+    return theme;
+  </transformTheme>
+}
+</function10>

@@ -1,0 +1,131 @@
+Annotation of the provided functions for SRP compliance:
+
+1.
+<animateElementProperty>
+function(ele, prop, value, stepCallback) {
+  var params = {};
+  params[prop] = value;
+  ele.animate(
+    params,
+    {
+      'duration'  : settings.animateDuration,
+      'easing'  : settings.animateEase,
+      'queue'   : false,
+      'step'    : stepCallback
+    }
+  );
+}
+</animateElementProperty>
+This function adheres to SRP, it handles animating an element property with specific parameters.
+
+2.
+<makeTempFile>
+function makeTempFile() {
+    const n = Math.floor(Math.random() * 100000)
+    const tempFile = path.join(os.tmpdir(), `node-exiftool_test_${n}.jpg`)
+    return new Promise((resolve, reject) => {
+        const rs = fs.createReadStream(jpegFile)
+        const ws = fs.createWriteStream(tempFile)
+        rs.on('error', reject)
+        ws.on('error', reject)
+        ws.on('close', () => {
+            resolve(tempFile)
+        })
+        rs.pipe(ws)
+    })
+}
+</makeTempFile>
+The function is compliant with SRP; it's responsible for creating a temporary file.
+
+3.
+<componentMixin>
+function componentMixin(tag$$1) {
+  // ... previously omitted codes are assumed to be part of the mixin logic
+  each(mixins, function (mix) {
+    // ... mixin logic continues
+    if (instance.init)
+      { instance.init.bind(tag$$1)(tag$$1.opts); }
+  });
+
+  return tag$$1
+}
+</componentMixin>
+The function does not seem to violate SRP as it is focused on mixing in capabilities to a given component object.
+
+4.
+<WaveformData>
+function WaveformData(response_data, adapter) {
+  this.adapter = adapter.fromResponseData(response_data);
+  this.segments = {};
+  this.points = {};
+  this.offset(0, this.adapter.length);
+}
+</WaveformData>
+This function serves a single responsibility of initializing a WaveformData instance.
+
+5.
+<iterateOverKeys>
+function iterateOverKeys(getFn, obj, fn, hidden) {
+  var keys = getFn(obj), desc;
+  for (var i = 0, key; key = keys[i]; i++) {
+    desc = getOwnPropertyDescriptor(obj, key);
+    if (desc.enumerable || hidden) {
+      fn(obj[key], key);
+    }
+  }
+}
+</iterateOverKeys>
+This function adheres to SRP by iterating over an object’s keys and performing a given action on them.
+
+6.
+<getComponentPath>
+function getComponentPath(componentName) {
+  let entry = COMPONENTS.find(({ name }) => name === componentName)
+  if (!entry) {
+    return null
+  }
+  return `veui/${COMPONENTS_DIRNAME}/${entry.path}`
+}
+</getComponentPath>
+The function is compliant with SRP; it finds and returns the path of a specified component.
+
+7.
+<generateThumbnail>
+function(fileBlobOrUrl, container, options) {
+  if (qq.isString(fileBlobOrUrl)) {
+    log("Attempting to update thumbnail based on server response.");
+    return drawFromUrl(fileBlobOrUrl, container, options || {});
+  }
+  else {
+    log("Attempting to draw client-side image preview.");
+    return draw(fileBlobOrUrl, container, options || {});
+  }
+}
+</generateThumbnail>
+This function has a single responsibility of generating a thumbnail from different sources.
+
+8.
+<FileReadStream>
+function FileReadStream(path, options) {
+  stream.Stream.call(this);
+  // Stream setup code
+  this._open();
+}
+</FileReadStream>
+This constructor function seems to comply with SRP, focusing on creating and setting up a file read stream.
+
+9.
+<last>
+function last(predicate, defaultValue) {
+  // ...RxJS pipeable operator code
+}
+</last>
+This function is an example of a RxJS operator and adheres to SRP by providing a single functionality of emitting the last value(s) from a source Observable.
+
+10.
+<getFileLines>
+function getFileLines(filename, line_no_Arr) {
+  // ...File reading and line extraction code
+}
+</getFileLines>
+The function follows SRP, as it is responsible for reading specific lines from a file.

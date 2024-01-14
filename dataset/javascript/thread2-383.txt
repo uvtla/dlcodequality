@@ -1,0 +1,331 @@
+```javascript
+<fetchDataAndUpdateCollection>
+function(db, namespace) { 
+    var collection = this;
+    <triggerRequestEvent>
+    collection.trigger('request', collection); 
+    </triggerRequestEvent>
+    <fetchData>
+    fetch(db, namespace, function(err, res) { 
+      <handleFetchError>
+      if (err) { 
+        throw err;
+      }
+      </handleFetchError>
+      <resetCollection>
+      collection.reset(res, {parse: true}); 
+      </resetCollection>
+      <triggerSyncEvent>
+      collection.trigger('sync', collection);
+      </triggerSyncEvent>
+    });
+    </fetchData>
+    return collection;
+}
+</fetchDataAndUpdateCollection>
+
+<bindFrameBuffer>
+function (renderer) {
+
+        if (renderer.__currentFrameBuffer) {
+            <frameBufferCheck>
+            if (renderer.__currentFrameBuffer === this) {
+                return;
+            }
+
+            console.warn('Renderer already bound with another framebuffer. Unbind it first');
+            </frameBufferCheck>
+        }
+        <setCurrentFrameBuffer>
+        renderer.__currentFrameBuffer = this;
+        </setCurrentFrameBuffer>
+
+        var _gl = renderer.gl;
+
+        <bindGLFrameBuffer>
+        _gl.bindFramebuffer(GL_FRAMEBUFFER, this._getFrameBufferGL(renderer));
+        </bindGLFrameBuffer>
+        this._boundRenderer = renderer;
+        var cache = this._cache;
+
+        <cacheViewport>
+        cache.put('viewport', renderer.viewport);
+        </cacheViewport>
+
+        var hasTextureAttached = false;
+        var width;
+        var height;
+        <attachTextures>
+        for (var attachment in this._textures) {
+            hasTextureAttached = true;
+            var obj = this._textures[attachment];
+            if (obj) {
+                width = obj.texture.width;
+                height = obj.texture.height;
+                this._doAttach(renderer, obj.texture, attachment, obj.target);
+            }
+        }
+        </attachTextures>
+
+        this._width = width;
+        this._height = height;
+
+        <checkTextureAttachment>
+        if (!hasTextureAttached && this.depthBuffer) {
+            console.error('Must attach texture before bind, or renderbuffer may have incorrect width and height.');
+        }
+        </checkTextureAttachment>
+
+        <setViewport>
+        if (this.viewport) {
+            renderer.setViewport(this.viewport);
+        }
+        else {
+            renderer.setViewport(0, 0, width, height, 1);
+        }
+        </setViewport>
+
+        <detachTextures>
+        var attachedTextures = cache.get('attached_textures');
+        if (attachedTextures) {
+            for (var attachment in attachedTextures) {
+                if (!this._textures[attachment]) {
+                    var target = attachedTextures[attachment];
+                    this._doDetach(_gl, attachment, target);
+                }
+            }
+        }
+        </detachTextures>
+        <setupRenderbuffer>
+        if (!cache.get(KEY_DEPTHTEXTURE_ATTACHED) && this.depthBuffer) {
+            if (cache.miss(KEY_RENDERBUFFER)) {
+                cache.put(KEY_RENDERBUFFER, _gl.createRenderbuffer());
+            }
+            var renderbuffer = cache.get(KEY_RENDERBUFFER);
+            if (width !== cache.get(KEY_RENDERBUFFER_WIDTH)
+                    || height !== cache.get(KEY_RENDERBUFFER_HEIGHT)) {
+                _gl.bindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+                _gl.renderbufferStorage(GL_RENDERBUFFER, _gl.DEPTH_COMPONENT16, width, height);
+                cache.put(KEY_RENDERBUFFER_WIDTH, width);
+                cache.put(KEY_RENDERBUFFER_HEIGHT, height);
+                _gl.bindRenderbuffer(GL_RENDERBUFFER, null);
+            }
+            if (!cache.get(KEY_RENDERBUFFER_ATTACHED)) {
+                _gl.framebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
+                cache.put(KEY_RENDERBUFFER_ATTACHED, true);
+            }
+        }
+        </setupRenderbuffer>
+    }
+</bindFrameBuffer>
+
+<renderLoginRegister>
+function renderLoginRegister(req, res) {
+    <createUrl>
+    var root = sandbox.helpers.url('', true, req.secure);
+    if (req.subdomain) {
+      root = root.replace(':');
+    }
+    </createUrl>
+
+    <checkUserSession>
+    if (req.session.user) {
+      return res.redirect(root);
+    }
+    </checkUserSession>
+
+    <handleFirstTimeLogin>
+    if (req.query.firsttime) {
+      res.flash(
+        req.flash.NOTIFICATION,
+        'We\'ve <a target="_blank" href="/blog/ssl"><strong>upgraded our login process to use SSL</strong></a>, however, this does mean  you have been logged out today, so please could you log in again below.<br><br><a href="http:');
+    }
+    </handleFirstTimeLogin>
+
+    <collectFlashMessages>
+    var info = req.flash(req.flash.INFO),
+      error = req.flash(req.flash.ERROR),
+      notification = req.flash(req.flash.NOTIFICATION);
+    var flash = error || notification || info;
+    </collectFlashMessages>
+    <determineEnvironment>
+    var production =
+      req.cookies && req.cookies.debug ? false : sandbox.helpers.production;
+    </determineEnvironment>
+
+    <renderResponse>
+    res.render('register-login', {
+      flash: flash,
+      token: req.csrfToken(),
+      layout: 'sub/layout.html',
+      referrer: req.flash(req.flash.REFERER) || req.get('referer'),
+      root: root,
+      static: sandbox.helpers.urlForStatic('', req.secure),
+      show: req.url.indexOf('/register') !== -1 ? 'register' : 'login',
+      forgotten: !!req.query.forgotten || !!undefsafe(req, 'body.forgotten'),
+      email: req.query.email || undefsafe(req, 'body.email'),
+    });
+    </renderResponse>
+  }
+</renderLoginRegister>
+
+<getBidiStreamingListener>
+function _getBidiStreamingListener(method_definition, emitter) {
+  var deserialize = common.wrapIgnoreNull(
+    method_definition.responseDeserialize);
+  <createStreamListener>
+  return {
+    onReceiveMetadata: function (metadata) {
+      emitter.emit('metadata', metadata);
+    },
+    onReceiveMessage: function(message, next, context) {
+      <handleReadStream>
+      if (emitter.push(message) && message !== null) {
+        var call = context.call;
+        var get_listener = function() {
+          return context.listener;
+        };
+        var read_batch = {};
+        read_batch[grpc.opType.RECV_MESSAGE] = true;
+        call.startBatch(read_batch, _getStreamReadCallback(emitter, call,
+          get_listener, deserialize));
+      } else {
+        emitter.reading = false;
+      }
+      </handleReadStream>
+    },
+    onReceiveStatus: function (status) {
+      emitter._receiveStatus(status);
+    }
+  };
+  </createStreamListener>
+}
+</getBidiStreamingListener>
+
+<filterAttributes>
+function(attrs) {
+      <createOptionsObject>
+      var options = {};
+      </createOptionsObject>
+      <sanitizeAttributes>
+      for(var key in attrs) {
+        if (key.match(/^\$/) || key.match(/^ng[A-Z]/)) {
+          <ignoreFrameworkAttributes>
+          void(0);
+          </ignoreFrameworkAttributes>
+        } else {
+          <accumulateValidOptions>
+          options[key] = attrs[key];
+          </accumulateValidOptions>
+        }
+      }
+      </sanitizeAttributes>
+      return options;
+    }
+</filterAttributes>
+
+<checkKeyEvent>
+function (evt) {
+        <checkForKeyMask>
+        if(this.keyMask == null) {
+            return true;
+        }
+        </checkForKeyMask>
+        
+        <computeKeyModifiers>
+        var keyModifiers =
+            (evt.shiftKey ? OpenLayers.Handler.MOD_SHIFT : 0) |
+            (evt.ctrlKey  ? OpenLayers.Handler.MOD_CTRL  : 0) |
+            (evt.altKey   ? OpenLayers.Handler.MOD_ALT   : 0) |
+            (evt.metaKey  ? OpenLayers.Handler.MOD_META  : 0);
+        </computeKeyModifiers>
+    
+        <evaluateModifiersAgainstMask>
+        return (keyModifiers == this.keyMask);
+        </evaluateModifiersAgainstMask>
+    }
+</checkKeyEvent>
+
+<showContentInModal>
+function(content) {
+        
+        <bypassOnTrueContent>
+        if (content === true) {
+            return;
+        }
+        </bypassOnTrueContent>
+
+        <handleBlackoutLoader>
+        if (this.blackout) {
+            this.blackout.hideLoader();
+        }
+        </handleBlackoutLoader>
+
+        <fireShowingEvent>
+        this.fireEvent('showing');
+        </fireShowingEvent>
+
+        <updateContentOnElement>
+        var body = this.element.find(this.ns('content'));
+            body.html(content);
+        </updateContentOnElement>
+
+        <fireLoadEvent>
+        this.fireEvent('load', [content]);
+        </fireLoadEvent>
+
+        <revealElement>
+        this.element.reveal();
+        </revealElement>
+
+        <applyFullScreenStyling>
+        if (this.options.fullScreen) {
+            body.css('min-height', $(window).height());
+        }
+        </applyFullScreenStyling>
+
+        <fireShownEvent>
+        this.fireEvent('shown');
+        </fireShownEvent>
+    }
+</showContentInModal>
+
+<lookupDefinitionByName>
+function (bodySchemaModels, defName) {
+        <findDefinitionInCollection>
+        for (var i in bodySchemaModels) {
+            if (bodySchemaModels[i]["name"] == defName) {
+                return bodySchemaModels[i];
+            }
+        }
+        </findDefinitionInCollection>
+        return null;
+    }
+</lookupDefinitionByName>
+
+<equalsPixel>
+function(px) {
+        <checkPixelEquality>
+        var equals = false;
+        if (px != null) {
+            equals = ((this.x == px.x && this.y == px.y) ||
+                      (isNaN(this.x) && isNaN(this.y) && isNaN(px.x) && isNaN(px.y)));
+        }
+        </checkPixelEquality>
+        return equals;
+    }
+</equalsPixel>
+
+<popRandomKey>
+function spop() {
+  <selectRandomKey>
+  var ind = Math.floor(Math.random() * this._keys.length)
+    , val = this._keys[ind];
+  </selectRandomKey>
+  <deleteKeyAndReturnValue>
+  this.delKey(val);
+  return val;
+  </deleteKeyAndReturnValue>
+}
+</popRandomKey>
+```

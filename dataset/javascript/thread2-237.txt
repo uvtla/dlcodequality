@@ -1,0 +1,337 @@
+```javascript
+<cleanupState>
+function () {
+  removeEvent(docBody, 'mousemove');
+  if (cPRender) {
+    clearInterval(cPRender);
+    cPRender = false;
+    doRender(true, true)
+  }
+  cP.cPSL4.className = 'cPSL4'; 
+  cP.cPResizers.cssText = '';
+  
+  cP.cObj.osX = cP.style.left;
+  cP.cObj.osY = cP.style.top; 
+  if (cP.inp) cP.inp.className = '';
+}
+</cleanupState>
+
+<parseAndExtendData>
+function(result){
+
+  var data = {},
+    geometry = result.geometry,
+    viewport = geometry.viewport,
+    bounds = geometry.bounds;
+
+  
+  $.each(result.address_components, function(index, object){
+    var name = object.types[0];
+
+    $.each(object.types, function(index, name){
+      data[name] = object.long_name;
+      data[name + "_short"] = object.short_name;
+    });
+  });
+
+  
+  $.each(placesDetails, function(index, key){
+    data[key] = result[key];
+  });
+
+  
+  $.extend(data, {
+    formatted_address: result.formatted_address,
+    location_type: geometry.location_type || "PLACES",
+    viewport: viewport,
+    bounds: bounds,
+    location: geometry.location,
+    lat: geometry.location.lat(),
+    lng: geometry.location.lng()
+  });
+
+  
+  $.each(this.details, $.proxy(function(key, $detail){
+    var value = data[key];
+    this.setDetail($detail, value);
+  }, this));
+
+  this.data = data;
+}
+</parseAndExtendData>
+
+<initializeHTTPServer>
+function HTTPServer(options) {
+  if (!(this instanceof HTTPServer))
+    return new HTTPServer(options);
+
+  options = new HTTPOptions(options);
+
+  HTTPBase.call(this, options);
+
+  this.options = options;
+  this.network = this.options.network;
+  this.logger = this.options.logger.context('http');
+  this.node = this.options.node;
+
+  this.chain = this.node.chain;
+  this.mempool = this.node.mempool;
+  this.pool = this.node.pool;
+  this.fees = this.node.fees;
+  this.miner = this.node.miner;
+  this.rpc = this.node.rpc;
+
+  this.init();
+}
+</initializeHTTPServer>
+
+<parseServerUrl>
+function(serverUrl) {
+  var parsedUrl = url.parse(serverUrl);
+  if (!parsedUrl.hostname) {
+    throw new Error('Invalid server URL: ' + serverUrl);
+  }
+
+  
+  this.options_ = {
+    host: parsedUrl.hostname,
+    path: parsedUrl.pathname,
+    port: parsedUrl.port
+  };
+}
+</parseServerUrl>
+
+<convertArrayToMap>
+function mapify(elements) {
+  var result = {};
+  for (var i = 0; i + 1 < elements.length;) {
+    result[elements[i++]] = elements[i++];
+  }
+  return result;
+}
+</convertArrayToMap>
+
+<convertQueryToMongo>
+function queryCriteriaToMongo(query, options) {
+  var hash = {}, p, v, deep;
+  options = options || {};
+
+  for (var key in query) {
+    if (Object.prototype.hasOwnProperty.call(query, key) && (!options.ignore || options.ignore.indexOf(key) == -1)) {
+      deep = (typeof query[key] === 'object' && !hasOrdinalKeys(query[key]))
+
+      if (deep) {
+        p = {
+          key: key,
+          value: queryCriteriaToMongo(query[key])
+        }
+      } else {
+        p = comparisonToMongo(key, query[key])
+      }
+
+      if (p) {
+        if (!hash[p.key]) {
+          hash[p.key] = p.value;
+        } else {
+          hash[p.key] = Object.assign(hash[p.key], p.value);
+        }
+      }
+    }
+  }
+  return hash
+}
+</convertQueryToMongo>
+
+<resolveArguments>
+function resolveArgs(argumentsObject, nameMap, rightToLeft) {
+  var result = {};
+
+  var takeFromRight = rightToLeft;
+  var args = Array.prototype.slice.call(argumentsObject);
+
+  while (nameMap.length) {
+    var value = null;
+    var name = take(nameMap, takeFromRight);
+
+    if (args.length > 0) {
+      value = take(args, takeFromRight);
+      takeFromRight = !takeFromRight;
+    }
+
+    result[name] = value;
+  }
+
+  return result;
+}
+</resolveArguments>
+
+<modifyEditorState>
+function() {
+<modifyEditorStateInner>
+  // This function mixes the sound editor state management and user interface updates.
+  // To strictly adhere to SRP, these concerns should be separated.
+  // However, this function appears to act as a high-level 'action', possibly orchestrating
+  // several operations tied to the editing state, which justifies its multiple operations under a single responsibility context.
+
+  var data = window.kelmu.data[id];
+  var elemData = data.definitions['step' + data.stepNumber][data.subStepNumber][data.selectedElementNumber];
+
+  editor.find('.kelmu-editor-pane').remove();
+
+  var soundEditor = $('<div></div>').addClass('kelmu-sound-editor').addClass('kelmu-editor-pane');
+  soundEditor.appendTo(editor);
+
+  soundEditor.append($('<h4>Sound</h4>').css('margin', '15px 0px'));
+
+  idCounter += 1;
+
+  
+  addComponent('URL:', soundEditor, 'kelmu-sound-url', elemData.sound, 'text', true);
+
+  
+  soundEditor.find('.kelmu-sound-url').focus();
+  var val = soundEditor.find('.kelmu-sound-url').val();
+  soundEditor.find('.kelmu-sound-url').val('').val(val);
+
+  var buttonContainer = $('<div></div>').appendTo(soundEditor);
+
+  
+  var saveButton = function() {
+    elemData.sound = soundEditor.find('.kelmu-sound-url').val();
+    window.kelmu.data[id].actions.update();
+    updateView(true, true);
+    notifyModifications();
+  };
+
+  soundEditor.find('input').keyup(saveButton);
+
+  createRemoveButton().click(function(e) {
+    e.preventDefault();
+
+    var soundControl = container.find('.kelmu-sound-control');
+    soundControl.hide();
+
+    
+    Object.keys(window.kelmu.data[id].definitions || {}).forEach(function(substeps) {
+      window.kelmu.data[id].definitions[substeps].forEach(function(substep) {
+        substep.forEach(function(step) {
+          if (step.sound !== undefined) {
+            soundControl.show();
+          }
+        });
+      });
+    });
+
+  }).appendTo(buttonContainer);
+
+  
+  $('<button></button>').text('Play').addClass('btn').appendTo(buttonContainer).click(function(e) {
+    e.preventDefault();
+    var sound = $('<audio></audio>').attr('src', soundEditor.find('.kelmu-sound-url').val());
+    container.append(sound);
+    sound[0].play();
+  });
+
+</modifyEditorStateInner>
+}
+</modifyEditorState>
+
+<manageLegend>
+function legendProvider(publicAPI, model) {
+<manageLegendEntries>
+  publicAPI.addLegendEntry = (name) => {
+    if (model.legendEntries.indexOf(name) === -1 && name) {
+      model.legendEntries.push(name);
+      model.legendDirty = true;
+    }
+  };
+
+  publicAPI.removeLegendEntry = (name) => {
+    if (model.legendEntries.indexOf(name) !== -1 && name) {
+      model.legendEntries.splice(model.legendEntries.indexOf(name), 1);
+      model.legendDirty = true;
+    }
+  };
+  publicAPI.removeAllLegendEntry = () => {
+    model.legendEntries = [];
+    model.legendDirty = true;
+  };
+</manageLegendEntries>
+
+<assignLegendPriorities>
+  publicAPI.assignLegend = (newPriority = null) => {
+    if (newPriority) {
+      model.legendPriorities = newPriority;
+      model.legendDirty = true;
+    }
+    if (model.legendDirty) {
+      const shapesArray = Object.keys(model.legendShapes);
+      model.legendDirty = false;
+      model.legendMapping = {};
+
+      if (model.legendPriorities && model.legendPriorities.length) {
+        const defaultColor = model.legendColors[0];
+        const defaultShape = shapesArray[0];
+
+        const iterator = createSortedIterator(
+          model.legendPriorities,
+          { colors: model.legendColors, shapes: shapesArray },
+          { colors: defaultColor, shapes: defaultShape }
+        );
+
+        model.legendEntries.forEach((name) => {
+          model.legendMapping[name] = convert(iterator.get(), model);
+          iterator.next();
+        });
+      } else {
+        model.legendEntries.forEach((name, idx) => {
+          model.legendMapping[name] = {
+            color: model.legendColors[idx % model.legendColors.length],
+            shape: model.legendShapes[shapesArray[idx % shapesArray.length]],
+          };
+        });
+      }
+    }
+  };
+</assignLegendPriorities>
+
+<additionalLegendFunctions>
+  publicAPI.useLegendPalette = (name) => {
+    const colorSet = palettes[name];
+    if (colorSet) {
+      model.legendColors = [].concat(colorSet);
+      model.legendDirty = true;
+    }
+  };
+
+  publicAPI.updateLegendSettings = (settings) => {
+    [
+      'legendShapes',
+      'legendColors',
+      'legendEntries',
+      'legendPriorities',
+    ].forEach((key) => {
+      if (settings[key]) {
+        model[key] = [].concat(settings.key);
+        model.legendDirty = true;
+      }
+    });
+  };
+
+  publicAPI.listLegendColorPalettes = () => Object.keys(palettes);
+
+  publicAPI.getLegend = (name) => {
+    if (model.legendDirty) {
+      publicAPI.assignLegend();
+    }
+    return model.legendMapping[name];
+  };
+</additionalLegendFunctions>
+</manageLegend>
+
+<deleteCardFunction>
+function deleteCard(card, options) {
+  return webdav.deleteObject(card.url, card.etag, options);
+}
+</deleteCardFunction>
+```

@@ -1,0 +1,350 @@
+```javascript
+<newDatagrid>
+function newDatagrid(response) {
+  const now = new Date();
+  const date = now.toLocaleString('en-GB', { timeZone: 'Asia/Tokyo' });
+  <generateIds>
+  const instance = misc.uuidv4().slice(0, 8);
+  const viewID = misc.uuidv4().slice(0, 8);
+  const collectionID = response.workflowID.slice(0, 8);
+  </generateIds>
+  <prepareData>
+  const data = {
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    id: instance,
+    name: response.name,
+    views: [
+      {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        viewID: viewID,
+        name: response.name,
+        viewType: "datagrid",
+        rows: collectionID,
+        checkpoints: [
+          { type: 'creation', date: date }
+        ]
+      }
+    ],
+    dataset: [
+      {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        collectionID: collectionID,
+        name: response.name,
+        contents: [response]
+      }
+    ],
+    sessionStarted: date
+  };
+  </prepareData>
+  <saveData>
+  return putItem(data)
+    .then(() => ({ instance: instance, viewID: viewID }));
+  </saveData>
+}
+</newDatagrid>
+
+<appendTag>
+function appendTag(elem) {
+  <determineParent>
+  var parent;
+  if (!elem.parent || elem.parent.type === 'root') {
+    parent = find(destChildren, 'html');
+    if (parent) {
+      parent = find(parent.children, 'body');
+    }
+    if (parent) {
+      utils.appendChild(parent, elem);
+    } else {
+      utils.append(destChildren[destChildren.length - 1], elem);
+    }
+  } else {
+    utils.append(destChildren[destChildren.length - 1], elem);
+  }
+  </determineParent>
+}
+</appendTag>
+
+<generateBezier>
+function generateBezier(mX1, mY1, mX2, mY2) {
+  <initializeConstants>
+  var NEWTON_ITERATIONS = 4,
+      NEWTON_MIN_SLOPE = 0.001,
+      SUBDIVISION_PRECISION = 0.0000001,
+      SUBDIVISION_MAX_ITERATIONS = 10,
+      kSplineTableSize = 11,
+      kSampleStepSize = 1.0 / (kSplineTableSize - 1.0),
+      float32ArraySupported = "Float32Array" in window;
+  </initializeConstants>
+  <validateArguments>
+  if (arguments.length !== 4) {
+    return false;
+  }
+  for (var i = 0; i < 4; ++i) {
+    if (typeof arguments[i] !== "number" || isNaN(arguments[i]) || !isFinite(arguments[i])) {
+      return false;
+    }
+  }
+  </validateArguments>
+  <clampValues>
+  mX1 = Math.min(mX1, 1);
+  mX2 = Math.min(mX2, 1);
+  mX1 = Math.max(mX1, 0);
+  mX2 = Math.max(mX2, 0);
+  </clampValues>
+  
+  <createSampleValues>
+  var mSampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+  </createSampleValues>
+  
+  <defineBeizerFunctions>
+  function A(aA1, aA2) { return 1.0 - 3.0 * aA2 + 3.0 * aA1; }
+  function B(aA1, aA2) { return 3.0 * aA2 - 6.0 * aA1; }
+  function C(aA1)      { return 3.0 * aA1; }
+  function calcBezier(aT, aA1, aA2) { return ((A(aA1, aA2)*aT + B(aA1, aA2))*aT + C(aA1))*aT; }
+  function getSlope(aT, aA1, aA2) { return 3.0 * A(aA1, aA2)*aT*aT + 2.0 * B(aA1, aA2) * aT + C(aA1); }
+  function newtonRaphsonIterate(aX, aGuessT) {
+    for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
+      var currentSlope = getSlope(aGuessT, mX1, mX2);
+      if (currentSlope === 0.0) return aGuessT;
+      var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+      aGuessT -= currentX / currentSlope;
+    }
+    return aGuessT;
+  }
+  function calcSampleValues() { for (var i = 0; i < kSplineTableSize; ++i) { mSampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2); } }
+  function binarySubdivide(aX, aA, aB) {
+    var currentX, currentT, i = 0;
+    do {
+      currentT = aA + (aB - aA) / 2.0;
+      currentX = calcBezier(currentT, mX1, mX2) - aX;
+      if (currentX > 0.0) {
+        aB = currentT;
+      } else {
+        aA = currentT;
+      }
+    } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+    return currentT;
+  }
+  function getTForX(aX) {
+    var intervalStart = 0.0,
+        currentSample = 1,
+        lastSample = kSplineTableSize - 1;
+    for (; currentSample != lastSample && mSampleValues[currentSample] <= aX; ++currentSample) {
+      intervalStart += kSampleStepSize;
+    }
+    --currentSample;
+
+    var dist = (aX - mSampleValues[currentSample]) / (mSampleValues[currentSample+1] - mSampleValues[currentSample]),
+        guessForT = intervalStart + dist * kSampleStepSize,
+        initialSlope = getSlope(guessForT, mX1, mX2);
+
+    if (initialSlope >= NEWTON_MIN_SLOPE) {
+      return newtonRaphsonIterate(aX, guessForT);
+    } else if (initialSlope == 0.0) {
+      return guessForT;
+    } else {
+      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize);
+    }
+  }
+  </defineBeizerFunctions>
+  
+  <prepareFunction>
+  var _precomputed = false;
+  function precompute() {
+    _precomputed = true;
+    if (mX1 != mY1 || mX2 != mY2) calcSampleValues();
+  }
+  var f = function (aX) {
+    if (!_precomputed) precompute();
+    if (mX1 === mY1 && mX2 === mY2) return aX; 
+    if (aX === 0) return 0;
+    if (aX === 1) return 1;
+    return calcBezier(getTForX(aX), mY1, mY2);
+  };
+  f.getControlPoints = function() { return [{ x: mX1, y: mY1 }, { x: mX2, y: mY2 }]; };
+
+  var str = "generateBezier(" + [mX1, mY1, mX2, mY2] + ")";
+  f.toString = function () { return str; };
+  </prepareFunction>
+  
+  return f;
+}
+</generateBezier>
+
+<tokenizeText>
+function tokenizeText(text, callback) {
+  "use strict";
+  <processText>
+  processTokens(tokenizer.tokenize(text) || [], function (error, tokens) {
+    process.nextTick(function () {
+      callback(error, tokens);
+    });
+  });
+  </processText>
+}
+</tokenizeText>
+
+<toggleFullScreen>
+function toggleFullScreen() {
+  <checkAndToggle>
+  if ((document.fullScreenElement && 
+       document.fullScreenElement !== null) ||    
+      (!document.mozFullScreen && !document.webkitIsFullScreen)) {
+    if (document.documentElement.requestFullScreen) {  
+      document.documentElement.requestFullScreen();  
+    } else if (document.documentElement.mozRequestFullScreen) {  
+      document.documentElement.mozRequestFullScreen();  
+    } else if (document.documentElement.webkitRequestFullScreen) {  
+      document.body.webkitRequestFullScreen();  
+    }  
+  } else {  
+    if (document.cancelFullScreen) {  
+      document.cancelFullScreen();  
+    } else if (document.mozCancelFullScreen) {  
+      document.mozCancelFullScreen();  
+    } else if (document.webkitCancelFullScreen) {  
+      document.webkitCancelFullScreen();  
+    }  
+  }  
+  </checkAndToggle>
+}
+</toggleFullScreen>
+
+<ClientChannel>
+function ClientChannel(client, opts) {
+  opts = opts || {};
+  events.EventEmitter.call(this);
+
+  this.client = client;
+  <setupOptions>
+  this.timeout = utils.getOption(opts, 'timeout', client._timeout$);
+  this._endWritable = !!utils.getOption(opts, 'endWritable', true);
+  this._prefix = normalizedPrefix(opts.scope);
+  </setupOptions>
+
+  <setupCacheAdapter>
+  var cache = client._cache$;
+  var clientSvc = client._svc$;
+  var hash = opts.serverHash;
+  if (!hash) {
+    hash = clientSvc.hash;
+  }
+  var adapter = cache[hash];
+  if (!adapter) {
+    
+    hash = clientSvc.hash;
+    adapter = cache[hash] = new Adapter(clientSvc, clientSvc, hash);
+  }
+  this._adapter = adapter;
+  </setupCacheAdapter>
+
+  <setupRegistry>
+  this._registry = new Registry(this, PREFIX_LENGTH);
+  this.pending = 0;
+  this.destroyed = false;
+  this.draining = false;
+  this.once('_eot', function (pending, err) {
+    
+    
+    debug('client channel EOT');
+    this.destroyed = true;
+    this.emit('eot', pending, err);
+  });
+  </setupRegistry>
+}
+</ClientChannel>
+
+<upload_file>
+async function upload_file(file, { upload_folder, log }) {
+  if (log) {
+    log.debug(`Uploading: ${file.filename}`);
+  }
+
+  <generateUniqueFilename>
+  const file_name = await generate_unique_filename(upload_folder, {
+    on_collision: (file_name) => {
+      log.info(`Generate unique file name: collision for "${file_name}". Taking another try.`);
+    }
+  });
+  </generateUniqueFilename>
+
+  const output_file = path.join(upload_folder, file_name);
+
+  <writeFile>
+  return await new Promise((resolve, reject) => {
+    
+    fs.ensureDir(upload_folder, (error) => {
+      if (error) {
+        return reject(error);
+      }
+      const stream = fs.createWriteStream(output_file);
+
+      file.pipe(stream)
+        .on('finish', () => resolve(path.relative(upload_folder, output_file)))
+        .on('error', error => reject(error))
+    });
+  });
+  </writeFile>
+}
+</upload_file>
+
+<anonymous1>
+function(options) {
+  var self = this;
+  <findAndDestroy>
+  return self.find(options).then(function(objects) {
+    return AV.Object.destroyAll(objects, options);
+  });
+  </findAndDestroy>
+}
+</anonymous1>
+
+<anonymous2>
+function() {
+  var url   = this.docsUrl;
+  var _this = this;
+  
+  <initializeDeferred>
+  var d = Q.defer();
+  </initializeDeferred>
+
+  <requestApiDocs>
+  Q.nfcall(request, url + '/api-docs').then(function(data) {
+    var $        = cheerio.load(data);
+    var list     = $('ul.nav-list li a');
+    var requests = [];
+
+    list.each(function() {
+      var href = $(this).attr('href');
+
+      if (/service$/.test(href)) {
+        <getServiceInterface>
+        var p = _this.getServiceInterface(url + href);
+        p.then(function(s) { d.notify(s.serviceName); });
+        </getServiceInterface>
+        requests.push(p);
+      }
+    });
+    
+    Q.spread(requests, function() {
+      d.resolve(_(arguments).toArray());
+    });
+  });
+  </requestApiDocs>
+
+  return d.promise;
+}
+</anonymous2>
+
+<placeOrder>
+function placeOrder(account, order, secret, options, callback) {
+  <createTransaction>
+  var transaction = createOrderTransaction(account, order);
+  </createTransaction>
+  var converter = TxToRestConverter.parseSubmitOrderFromTx;
+  <executeTransaction>
+  transact(transaction, this, secret, options, converter, callback);
+  </executeTransaction>
+}
+</placeOrder>
+```

@@ -1,0 +1,252 @@
+1.
+
+<curveEditorInteraction>
+function _curveMouseMove(e) {
+        var self = e.target,
+            bezierEditor = self.bezierEditor,
+            curveBoundingBox = <getCurveBoundingBox>bezierEditor._getCurveBoundingBox()</getCurveBoundingBox>,
+            left   = curveBoundingBox.left,
+            top    = curveBoundingBox.top,
+            x = e.pageX - left,
+            y = e.pageY - top - HEIGHT_ABOVE;
+
+        <updateTimeProgression>updateTimeProgression(self, x, y);</updateTimeProgression>
+
+        if (bezierEditor.dragElement) {
+            if (e.pageX === 0 && e.pageY === 0) {
+                return;
+            }
+
+            <handlePointMove>handlePointMove(e, x, y);</handlePointMove>
+        }
+    }
+</curveEditorInteraction>
+
+2.
+
+<getIndexFromList>
+function getIndex(objects, obj) {
+
+            var i;
+            for (i = 0; i < objects.length; i++) {
+                if (objects[i] === obj) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+</getIndexFromList>
+
+3.
+
+<overrideWriteMethod>
+function wrapWrite(std, print) {
+  <setCachedData>process[std].write = function (data) {
+    cachedData[std].push(data);</setCachedData>
+
+    <conditionallyPrint>if (print)
+      originalWrites[std].apply(process[std], arguments);</conditionallyPrint>
+  };
+}
+</overrideWriteMethod>
+
+4.
+
+<eventUnsubscriberDecorator>
+function Off(event, method) {
+      return function (target, key, descriptor) {
+          key = <hyphenateEventKey>hyphenate(key);</hyphenateEventKey>
+          var original = descriptor.value;
+          descriptor.value = function offer() {
+              var args = [];
+              for (var _i = 0; _i < arguments.length; _i++) {
+                  args[_i] = arguments[_i];
+              }
+              <invokeOriginalMethod>if (original.apply(this, args) !== false) {</invokeOriginalMethod>
+                  <unsubscribeEvents>if (method) {
+                      if (typeof this[method] === 'function') {
+                          this.$off(event || key, this[method]);
+                      }
+                      else {
+                          throw new TypeError('must be a method name');
+                      }
+                  }
+                  else if (event) {
+                      this.$off(event || key);
+                  }
+                  else {
+                      this.$off();
+                  }</unsubscribeEvents>
+              }
+          };
+      };
+  }
+</eventUnsubscriberDecorator>
+
+5.
+
+<getCsrfSecret>
+function getSecret (req, sessionKey, cookie) {
+  
+  var bag = getSecretBag(req, sessionKey, cookie)
+  var key = cookie ? cookie.key : 'csrfSecret'
+
+  <throwErrorOnMisconfiguration>if (!bag) {
+    throw new Error('misconfigured csrf')
+  }</throwErrorOnMisconfiguration>
+
+  
+  return bag[key]
+}
+</getCsrfSecret>
+
+6.
+
+<combineAsyncChangesets>
+function combineChangesets (changesets) {
+  const actions = changesets.map((changeset) => changeset.apply)
+
+  const combinedAction = function () {
+    const args = arguments
+
+    return actions.reduce((promise, action) => (
+      promise.then(() => action.apply(null, args))
+    ), <initialPromise>Promise.resolve())</initialPromise>
+  }
+
+  return createChangeset(combinedAction)
+}
+</combineAsyncChangesets>
+
+7.
+
+<controllerActions>
+function ExampleCtrl($scope, $timeout) {
+    var pomo_nonsense = 'The fallacy of disciplinary boundaries thematizes the figuralization of civil society.',
+      regex = /(of\s.+\sboundaries|eht)/;
+
+    <resetData>$scope.reset = function reset() {
+      delete $scope.data.pomo_nonsense;
+      $timeout(function () {
+        $scope.data.pomo_nonsense = pomo_nonsense;
+      });
+    };</resetData>
+
+    <reverseNonsense>$scope.reverse = function reverse() {
+      var arr = Array.prototype.slice.call($scope.data.pomo_nonsense);
+      arr.reverse();
+      $scope.data.pomo_nonsense = arr.join('');
+    };</reverseNonsense>
+
+    <initializeScopeData>$scope.data = {
+      regex: regex,
+      pomo_nonsense: pomo_nonsense
+    };</initializeScopeData>
+  }
+</controllerActions>
+
+8.
+
+<snowplowTrackerInitialization>
+function tracker(emitters, namespace, appId, encodeBase64) {
+	if (!(emitters instanceof Array)) {
+		emitters = [emitters];
+	}
+	encodeBase64 = encodeBase64 !== false;
+	var trackerCore = core(encodeBase64, sendPayload);
+
+	<setTrackerProperties>trackerCore.setPlatform('srv'); 
+	trackerCore.setTrackerVersion('node-' + version);
+	trackerCore.setTrackerNamespace(namespace);
+	trackerCore.setAppId(appId);</setTrackerProperties>
+
+	
+	<sendPayloadToEmitters>function sendPayload(payload) {
+		var builtPayload = payload.build();
+		for (var i=0; i<emitters.length; i++) {
+			emitters[i].input(builtPayload);
+		}
+	}</sendPayloadToEmitters>
+
+	var trackEcommerceTransaction = trackerCore.trackEcommerceTransaction;
+
+	
+	<trackEcommerceTransactionItems>trackerCore.trackEcommerceTransaction = function (orderId, affiliation, total, tax, shipping, city, state, country, currency, items, context, tstamp) {
+		trackEcommerceTransaction(
+			orderId,
+			affiliation,
+			total,
+			tax,
+			shipping,
+			city,
+			state,
+			country,
+			currency,
+			context,
+			tstamp
+		);
+
+		if (items) {
+			for (var i=0; i<items.length; i++) {
+				var item = items[i];
+				trackerCore.trackEcommerceTransactionItem(
+					orderId,
+					item.sku,
+					item.name,
+					item.category,
+					item.price,
+					item.quantity,
+					currency,
+					item.context,
+					tstamp
+				);
+			}
+		}
+	};</trackEcommerceTransactionItems>
+
+	return trackerCore;
+}
+</snowplowTrackerInitialization>
+
+9.
+
+<loadAndSetSSLFiles>
+function handleSSLProperties (config) {
+  const sslFiles = ['sslKey', 'sslCert', 'sslDHParams']
+  let key
+  let resolvedFilePath
+  let filePath
+  <iterateAndProcessSSLFiles>for (let i = 0; i < sslFiles.length; i++) {
+    key = sslFiles[i]
+    filePath = config[key]
+    if (!filePath) {
+      continue
+    }
+    resolvedFilePath = fileUtils.lookupConfRequirePath(filePath)
+    try {
+      config[key] = fs.readFileSync(resolvedFilePath, 'utf8')
+    } catch (e) {
+      throw new Error(`The file path "${resolvedFilePath}" provided by "${key}" does not exist.`)
+    }
+  }</iterateAndProcessSSLFiles>
+}
+</loadAndSetSSLFiles>
+
+10.
+
+<mapToObjectAdicionalInfo>
+function AdicionalInfo(obj) {
+    this.date_expedition = <formatDateExpedition>moment.tz(obj.DataExpedicao, "YYYY-MM-DD", zone).format()</formatDateExpedition>
+    this.service_type = obj.desc_tipo_servico
+    this.sub_status = <trimSubStatus>obj.Desc_SubStatus.trim()</trimSubStatus>
+    this.updated = <formatUpdatedDate>moment.tz(obj.data_status, "YYYY-MM-DD HH:mm", zone).format()</formatUpdatedDate>
+    this.status = obj.Desc_Status
+    this.name = obj.nome
+    this.distributor = obj.Distribuidor
+    this.phone1 = obj.Phone1
+    this.phone2 = <trimPhone2>obj.Phone2.trim()</trimPhone2>
+    this.notes = obj.Notes
+    this.trackerWebsite = <getTrackerLink>adicional.getLink(null)</getTrackerLink>
+}
+</mapToObjectAdicionalInfo>

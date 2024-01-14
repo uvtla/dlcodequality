@@ -1,0 +1,261 @@
+```javascript
+<listS3Objects>
+function (prefix, callback, marker, contents) {
+
+    <initializeSearchObject>
+    var search = {
+        Prefix: prefix, 
+        Bucket: options.bucket
+    };
+
+    if (marker) {
+        search.Marker = marker;
+    }
+    </initializeSearchObject>
+
+    <listObjectsFromS3>
+    s3.listObjects(search, function (err, list) { 
+
+        if (!err) {
+
+            <mergeContents>
+            var objects = (contents) ? contents.concat(list.Contents) : list.Contents;
+            </mergeContents>
+
+            <handleTruncatedList>
+            if (list.IsTruncated) {
+                var new_marker = _.last(list.Contents).Key;
+                listObjects(prefix, callback, new_marker, objects);
+            }
+            </handleTruncatedList>
+            <handleCompleteList>
+            else {
+                callback(_.uniq(objects, function (o) { return o.Key; }));
+            }
+            </handleCompleteList>
+        }
+        <handleError>
+        else {
+            grunt.fatal('Failed to list content of bucket ' + options.bucket + '\n' + err);
+        }
+        </handleError>
+    });
+    </listObjectsFromS3>
+}
+</listS3Objects>
+
+<initializeParser>
+function initializeParser(document, debug) {
+    const chars = new antlr.InputStream(document);
+    const lexer = new grammar.DocumentLexer(chars);
+    <prepareLexer>
+    const listener = new CustomErrorListener(debug);
+    lexer.removeErrorListeners();
+    lexer.addErrorListener(listener);
+    </prepareLexer>
+    const tokens = new antlr.CommonTokenStream(lexer);
+    const parser = new grammar.DocumentParser(tokens);
+    <prepareParser>
+    parser.buildParseTrees = true;
+    parser.removeErrorListeners();
+    parser.addErrorListener(listener);
+    parser._errHandler = new CustomErrorStrategy();
+    </prepareParser>
+    return parser;
+}
+</initializeParser>
+
+<addItem>
+function(item)
+{
+    <convertArgumentsToArray>
+    var items = conbo.toArray(arguments);
+    </convertArgumentsToArray>
+    
+    if (items.length)
+    {
+        <updateInternalState>
+        this.source.push.apply(this.source, this.__applyItemClass(items));
+        this.__updateBindings(items);
+        this.dispatchEvent(new conbo.ConboEvent(conbo.ConboEvent.ADD));
+        this.dispatchChange('length');
+        </updateInternalState>
+    }
+    
+    return this.length;
+}
+</addItem>
+
+<mulFunction>
+function mul() {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+    var acc = args[0];
+    for (var i = 1; i < args.length; i++) {
+        <multiplicationLogic>
+        acc = _mul_two(acc, args[i]);
+        </multiplicationLogic>
+    }
+    return acc;
+}
+</mulFunction>
+
+<getTextRect>
+function getTextRect (node) {
+  if (!isBrowser) return
+  if (!range) range = document.createRange()
+
+  <createTextNodeRange>
+  range.selectNode(node)
+  </createTextNodeRange>
+
+  <getBoundingClientRect>
+  return range.getBoundingClientRect()
+  </getBoundingClientRect>
+}
+</getTextRect>
+
+<renderTreeFunction>
+function renderTree (object, options) {
+  const tree = require('archy')(transformTree(object, options.fn))
+  <generateCodeOutput>
+  return '<pre><code>\n' + tree + '</code></pre>'
+  </generateCodeOutput>
+}
+</renderTreeFunction>
+
+<replaceDomElement>
+function (domElement, event) {
+    var label;
+    var domUtil = ariaUtilsDom;
+    <retrieveLabelText>
+    label = domElement.textContent || domElement.innerText;
+    </retrieveLabelText>
+    
+    <replaceElement>
+    domUtil.replaceDomElement(domElement.parentNode, this._textInputField);
+    </replaceElement>
+    
+    <handleRemovedSuggestion>
+    var removedSuggestionInfo = this._removeValue(label);
+    var removedSuggestion = removedSuggestionInfo.removedSuggestion;
+    var removedSuggestionIndex = removedSuggestionInfo.removedSuggestionIndex;
+    this._keepFocus = true;
+    this._textInputField.focus();
+    </handleRemovedSuggestion>
+    
+    <editControllerValue>
+    if (removedSuggestion) {
+        var report = this.controller.editValue(removedSuggestion, removedSuggestionIndex);
+        this._reactToControllerReport(report);
+    }
+    </editControllerValue>
+    
+    <restoreFocusManager>
+    this._restoreKeepFocus();
+    </restoreFocusManager>
+}
+</replaceDomElement>
+
+<buildHashTimeLockContract>
+function buildHashTimeLockContract(network, xHash, destH160Addr, revokerH160Addr, lockTime) {
+  const bitcoinNetwork = bitcoin.networks[network];
+
+  <compileRedeemScript>
+  const redeemScript = bitcoin.script.compile([
+    // ... script opcodes ...
+  ]);
+  </compileRedeemScript>
+
+  <createP2SHAddress>
+  const addressPay = bitcoin.payments.p2sh({
+    redeem: { output: redeemScript, network: bitcoinNetwork },
+    network: bitcoinNetwork,
+  });
+  </createP2SHAddress>
+
+  <extractAddress>
+  const { address } = addressPay;
+  </extractAddress>
+  
+  <constructHTLCObject>
+  return {
+    
+    address,
+    redeemScript: redeemScript.toString('hex'),
+
+    
+    xHash,
+    lockTime,
+    redeemer: hex.ensurePrefix(destH160Addr),
+    revoker: hex.ensurePrefix(revokerH160Addr),
+  };
+  </constructHTLCObject>
+}
+</buildHashTimeLockContract>
+
+<FileMediatorServiceConstructor>
+function FileMediatorService(mediator, config) {
+  this.mediator = mediator;
+  this.config = config || {};
+  <configureMediatorTopics>
+  this.filesDataTopics = new MediatorTopicUtility(mediator).prefix(this.config.cloudDataTopicPrefix).entity(this.config.datasetId);
+  </configureMediatorTopics>
+}
+</FileMediatorServiceConstructor>
+
+<_formatParamFunction>
+function _formatParam(paramReport, verbose = false) {
+  <formatParamVerbose>
+  if (paramReport.valid && verbose) {
+    const result = [[complete('Arg:'), `${paramReport.atomDocArg.name} is complete`, '']];
+    if (paramReport.hasChildren) {
+      result.push(['Nested Params:']);
+      return paramReport.childrenReports.reduce((collector, paramChildReport) => {
+        const paramResult = _formatParam(paramChildReport, verbose);
+        return collector.concat(paramResult);
+      }, result);
+    }
+    return result;
+  } else if (paramReport.valid) {
+    return false;
+  }
+  </formatParamVerbose>
+  
+  const result = [];
+  <formatParamNameMismatch>
+  if (!paramReport.nameMatch.valid) {
+    result.push(
+      [
+        missing('Arg Name:'),
+        paramReport.nameMatch.inspectorValue,
+        paramReport.nameMatch.atomDocValue,
+      ]
+    );
+  }
+  </formatParamNameMismatch>
+  <formatParamOptionalMismatch>
+  if (!paramReport.optionalMatch.valid) {
+    result.push(
+      [missing('Arg Optional:'), 'Missing', `Add (optional) to ${paramReport.atomDocArg.name}`]
+    );
+  }
+  </formatParamOptionalMismatch>
+  <formatParamNested>
+  if (paramReport.hasChildren) {
+    result.push(['Nested Params:']);
+    return paramReport.childrenReports.reduce((collector, paramChildReport) => {
+      const paramResult = _formatParam(paramChildReport, verbose);
+      if (paramResult !== false) {
+        return collector.concat(paramResult);
+      }
+      return collector;
+    }, result);
+  }
+  </formatParamNested>
+  return result;
+}
+</_formatParamFunction>
+```

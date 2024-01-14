@@ -1,0 +1,162 @@
+```javascript
+<initializeReader>
+function(settings){
+	
+	this._currentElement = new Element("document");
+	this._topCandidate = null;
+	this._origTitle = this._headerTitle = "";
+	this._scannedLinks = {};
+	if(settings) this._processSettings(settings);
+}
+</initializeReader>
+
+<encodeURL>
+function encode_url(str) {
+    <constructURL>
+    var slash = str.indexOf('/', 8) + 1 || str.length;
+    var res = encode(str.slice(0, slash).toUpperCase(), false);
+    </constructURL>
+
+    <encodePath>
+    if (slash >= str.length) {
+        return res;
+    }
+    var path_res = encode(str.slice(slash), false);
+    res.data27 = res.data27.concat(path_res.data27);
+    </encodePath>
+
+    <mergeEncodedData>
+    if (res.data10 && path_res.data10) {
+        res.data10 = res.data10.concat(path_res.data10);
+    }
+    if (res.data1 && path_res.data1) {
+        res.data1 = res.data1.concat(path_res.data1);
+    }
+    </mergeEncodedData>
+
+    return res;
+}
+</encodeURL>
+
+<generateCallStack>
+function(){
+    var funcstring, stack = "";
+    if (this.args) {
+        var func = this.args.callee;
+        while (func){
+            funcstring = String(func);
+            func = func.caller;
+        }
+    }
+    return stack;
+}
+</generateCallStack>
+
+<getSynchronousStackTrace>
+function StackTrace$$getSync(opts) {
+    opts = _merge(_options, opts);
+    var err = _generateError();
+    var stack = _isShapedLikeParsableError(err) ? ErrorStackParser.parse(err) : StackGenerator.backtrace(opts);
+    return _filtered(stack, opts.filter);
+}
+</getSynchronousStackTrace>
+
+<generateMinifiedJSFilePaths>
+function getMinifiedJSFiles(files) {
+  <aggregateMinifiedFileNames>
+  var minifiedFiles = [];
+  files.forEach(function(path) {
+    minifiedFiles.push('<%- project.uglify %>/' + path.replace('.js', '.min.js').replace('/<%= originalPluginName %>/', ''));
+  });
+  </aggregateMinifiedFileNames>
+  return minifiedFiles;
+}
+</generateMinifiedJSFilePaths>
+
+<emitSIGINTSignal>
+function emitSIGINT() {
+    <cleanupResources>
+    if (rl) {
+        rl.close()
+        rl = null
+    }
+    if (ipcListener) {
+        process.removeListener("message", ipcListener)
+        ipcListener = null
+    }
+    </cleanupResources>
+    
+    <emitInterruptSignal>
+    emitter.emit("SIGINT")
+    </emitInterruptSignal>
+}
+</emitSIGINTSignal>
+
+<convertToArray>
+function(collection) {
+    return Array.from ? Array.from(collection) : Array.apply(null, collection);
+}
+</convertToArray>
+
+<validateReferenceValue>
+function isValidRefValue(recordTypes, val, propDesc) {
+
+	<checkValueType>
+	if ((typeof val) !== 'string')
+		return false;
+	</checkValueType>
+
+	<checkHashFormat>
+	const hashInd = val.indexOf('#');
+	if ((hashInd <= 0) || (hashInd === val.length - 1))
+		return false;
+	</checkHashFormat>
+
+	<validateReferenceTarget>
+	const refTarget = val.substring(0, hashInd);
+	if (refTarget !== propDesc.refTarget)
+		return false;
+	</validateReferenceTarget>
+
+	<validateReferencedID>
+	const refTargetDesc = recordTypes.getRecordTypeDesc(refTarget);
+	const refIdPropDesc = refTargetDesc.getPropertyDesc(
+		refTargetDesc.idPropertyName);
+	if ((refIdPropDesc.scalarValueType === 'number') &&
+		!Number.isFinite(Number(val.substring(hashInd + 1))))
+		return false;
+	</validateReferencedID>
+
+	return true;
+}
+</validateReferenceValue>
+
+<uglifyJavaScript>
+function uglify(src, dest) {
+    <retrieveLicence>
+    var licence = getLicence(src);
+    </retrieveLicence>
+
+    <minifyAndWrite>
+    try {
+        var final_code = uglifyJs.minify(src, {
+            ascii_only: true
+        });
+        fs.writeFileSync(dest, licence + "\r\n" + final_code.code, FILE_ENCODING);
+    } catch (ex) {
+        console.log(ex, ex.stack);
+        error = true;
+    }
+    </minifyAndWrite>
+}
+</uglifyJavaScript>
+
+<listLogSummary>
+function ListLogSummary (all) {
+   this.all = all;
+   this.latest = all.length && all[0] || null;
+   this.total = all.length;
+}
+</listLogSummary>
+```
+Each annotated block represents a cohesive set of operations that fulfill a specific role in the context of the parent function. For example, in the `uglifyJavaScript` function, there are two distinct responsibilities: retrieving the license and performing the minification and file writing. These have been annotated with separate tags, `<retrieveLicence>` and `<minifyAndWrite>` respectively.

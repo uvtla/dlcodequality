@@ -1,0 +1,415 @@
+```javascript
+<createMetaRecordStream>
+function createMetaRecordStream(metaFilePaths, types) {
+  <initializeStream>
+  const metaRecordStream = combinedStream.create();
+  </initializeStream>
+
+  <appendFilePathsToStream>
+  metaFilePaths.forEach((metaFilePath) => {
+    metaRecordStream.append( (next) => {
+      <logging>
+      logger.info( `Loading ${path.basename(metaFilePath)} records from ${path.dirname(metaFilePath)}` );
+      </logging>
+      <appendToStreamCallback>
+      next(createOneMetaRecordStream(metaFilePath));
+      </appendToStreamCallback>
+    });
+  });
+  </appendFilePathsToStream>
+
+  return metaRecordStream;
+}
+</createMetaRecordStream>
+
+<setConfig>
+function setConfig(config) {
+  <getConfig>
+  let oldConfig = getConfig();  
+  if (!oldConfig) return false;
+  </getConfig>
+
+  <validateConfig>
+  if (typeof config !== 'object' || !config) return false;
+  </validateConfig>
+
+  <serializeConfig>
+  let configData = '';
+  try {
+    configData = JSON.stringify(config, null, 1);
+  } catch (e) {
+    <serializeConfigException>
+    console.warn(`thorin-env: failed to serialize configuration`, e);
+    return false;
+    </serializeConfigException>
+  }
+  </serializeConfig>
+
+  <writeToDisk>
+  try {
+    fs.writeFileSync(PERSIST_FILE, configData, {encoding: 'utf8'});
+  } catch (e) {
+    <writeToDiskException>
+    console.warn(`thorin-env: failed to persist new config in .thorin file`);
+    console.debug(e);
+    return false;
+    </writeToDiskException>
+  }
+  </writeToDisk>
+
+  return true;
+}
+</setConfig>
+
+<extend>
+function extend (base, extension) {
+  <handleUndefinedCases>
+  if (isUndefined(base)) {
+    return copy(extension);
+  }
+  if (isUndefined(extension)) {
+    return copy(base);
+  }
+  </handleUndefinedCases>
+
+  <extendObjects>
+  if (isPureObject(base) && isPureObject(extension)) {
+    return utils.extendDeep(base, extension);
+  }
+  </extendObjects>
+
+  return copy(extension);
+}
+</extend>
+
+<writeClientConfig>
+function writeClientConfig(client, clientId, configs, callback) {
+  <logDebugInfo>
+  debug('writeClientConfig: "%s", %j', clientId, configs);
+  </logDebugInfo>
+
+  <updateEntityConfiguration>
+  updateEntityConfig(client, getClientConfigPath(clientId), configs, callback);
+  </updateEntityConfiguration>
+}
+</writeClientConfig>
+
+<tagHandlingFunction>
+function(tagName, isSelfClose ) {
+  <initializeRules>
+  var rules = this._.rules[ tagName ];
+  </initializeRules>
+
+  <handleSelfClosingTag>
+  if ( isSelfClose ) {
+    this._.output.push( this.selfClosingEnd );
+
+    <adjustFormattingAfterClose>
+    if ( rules && rules.breakAfterClose )
+      this._.needsSpace = rules.needsSpace;
+    </adjustFormattingAfterClose>
+  } else {
+    this._.output.push( '>' );
+
+    <handleIndentation>
+    if ( rules && rules.indent )
+      this._.indentation += this.indentationChars;
+    </handleIndentation>
+  }
+  </handleSelfClosingTag>
+
+  <handleBreakAfterOpenAndPreTag>
+  if ( rules && rules.breakAfterOpen )
+    this.lineBreak();
+  tagName == 'pre' && ( this._.inPre = 1 );
+  </handleBreakAfterOpenAndPreTag>
+}
+</tagHandlingFunction>
+
+<midmean>
+function midmean( arr, sorted ) {
+  <validationChecks>
+  if ( !Array.isArray( arr ) ) {
+    throw new TypeError( 'midmean()::invalid input argument. Must provide an array.' );
+  }
+  if ( arguments.length > 1 && typeof sorted !== 'boolean' ) {
+    throw new TypeError( 'midmean()::invalid input argument. Second argument must be a boolean.' );
+  }
+  if ( arr.length < 3 ) {
+    throw new TypeError( 'midmean()::invalid input argument. Midmean not applicable.' );
+  }
+  </validationChecks>
+
+  <sortArrayIfNeeded>
+  if ( !sorted ) {
+    arr = arr.slice();
+    arr.sort( ascending );
+  }
+  </sortArrayIfNeeded>
+
+  <calculateMidmean>
+  var len = arr.length,
+      mean = 0,
+      N = 0,
+      delta,
+      low,
+      high;
+
+  
+  if ( len%4 === 0 ) {
+    low = len*0.25;
+    high = len*0.75 - 1;
+  }
+  else {
+    low = Math.ceil( len*0.25 );
+    high = Math.floor( len*0.75 ) - 1;
+  }
+
+  
+  for ( var i = low; i <= high; i++ ) {
+    N += 1;
+    delta = arr[ i ] - mean;
+    mean += delta / N;
+  }
+  </calculateMidmean>
+  
+  return mean;
+}
+</midmean>
+
+<textAndValueConversion>
+function (displayValue, currentlyOpen) {
+  <dataInitialization>
+  var dataModel = this._dataModel, options = dataModel.listContent, selectedValues = dataModel.selectedValues;
+  dataModel.selectedIdx = -1; 
+  </dataInitialization>
+
+  <parseAndSetValues>
+  selectedValues = this._parseInputString(options, displayValue);
+  if (!currentlyOpen) {
+    <updateModel>
+    if (!ariaUtilsJson.equals(selectedValues, dataModel.value)) {
+        ariaUtilsJson.setValue(dataModel, 'selectedValues', selectedValues);
+        dataModel.value = selectedValues;
+        dataModel.text = this._getDisplayValue(selectedValues);
+    }
+    </updateModel>
+  }
+  </parseAndSetValues>
+
+  <prepareReport>
+  var report = new ariaWidgetsControllersReportsDropDownControllerReport();
+  report.displayDropDown = options.length > 0 && !currentlyOpen;
+
+  if (report.displayDropDown) {
+    <setInitialInput>
+    dataModel.initialInput = displayValue;
+    </setInitialInput>
+
+    <setListContent>
+    ariaUtilsJson.setValue(dataModel, 'listContent', options);
+    </setListContent>
+  }
+
+  report.text = dataModel.text;
+  report.value = this._getValue(dataModel.text, dataModel.value);
+  if (!selectedValues.length) {
+    dataModel.selectedIdx = null;
+  }
+  </prepareReport>
+
+  return report;
+}
+</textAndValueConversion>
+
+<insertLineBreakBeforeToken>
+function (node) {
+  <insertBreakCondition>
+  if (node.startToken.prev && node.startToken.prev.type !== 'LineBreak') {
+    <performInsert>
+    insertBefore(node.startToken, nextLineFactory());
+    </performInsert>
+  }
+  </insertBreakCondition>
+}
+</insertLineBreakBeforeToken>
+
+<checkEnvironmentAndCreateFolders>
+function() {
+  <pathRetrieval>
+  var path = $options.path;
+  </pathRetrieval>
+
+  <checkForConfigFile>
+  $fs.exists("fis-conf.js", function(res) {
+    if (res == true) {
+      <checkTargetPathExists>
+      $fs.exists(path, function(res) {
+        if (res == true) {
+          <handleExistingPathError>
+          console.log("[Error-1001] This path:" + path + " exists");
+          </handleExistingPathError>
+        } else {
+          <createAppFolder>
+          snippets.fn.appFolder(path);
+          </createAppFolder>
+        }
+      });
+      </checkTargetPathExists>
+    } else {
+      <handleNoConfigFileError>
+      console.log("[Error-1002] In this folder that can't build widget or page folders");
+      </handleNoConfigFileError>
+    }
+  });
+  </checkForConfigFile>
+}
+</checkEnvironmentAndCreateFolders>
+
+<imageGalleryInteractions>
+function() {
+  <galleryInitialization>
+  var self = this;
+  </galleryInitialization>
+
+  <addEventListenersToElements>
+  document.addEventListener(enterEventName, function(event) {
+    <checkViewerAndTargetImage>
+    if (!self.viewer) return;
+    var target = event.target;
+    if (!self.checkImage(target)) return;
+    </checkViewerAndTargetImage>
+
+    <displayViewer>
+    self.viewer.style.display = 'block';
+    setTimeout(function() {
+      self.viewer.style.opacity = 1;
+    }, 0);
+    self.index = self.images.indexOf(target);
+    self.currentItem = self.createImage(self.index);
+    </displayViewer>
+  }, false);
+
+  <closeViewerEvent>
+  self.closeButton.addEventListener(tapEventName, function(event) {
+    self.viewer.style.opacity = 0;
+    setTimeout(function() {
+      self.viewer.style.display = 'none';
+      <disposeCurrentImage>
+      self.disposeImage(true);
+      </disposeCurrentImage>
+    }, 600);
+    event.preventDefault();
+    event.cancelBubble = true;
+  }, false);
+  </closeViewerEvent>
+
+  <navigationButtonsEvents>
+  self.leftButton.addEventListener(tapEventName, function() {
+    self.prev();
+  }, false);
+  self.rightButton.addEventListener(tapEventName, function() {
+    self.next();
+  }, false);
+  </navigationButtonsEvents>
+
+  <preventDefaultImageMove>
+  self.mask.addEventListener($.EVENT_MOVE, function(event) {
+    event.preventDefault();
+    event.cancelBubble = true;
+  }, false);
+  </preventDefaultImageMove>
+
+  <swipeEvents>
+  self.viewer.addEventListener('swipeleft', function(event) {
+    if (self.scaleValue == 1) self.next();
+    event.preventDefault();
+    event.cancelBubble = true;
+  }, false);
+  self.viewer.addEventListener('swiperight', function(event) {
+    if (self.scaleValue == 1) self.prev();
+    event.preventDefault();
+    event.cancelBubble = true;
+  }, false);
+  </swipeEvents>
+
+  <touchEvents>
+  self.viewer.addEventListener($.EVENT_START, function(event) {
+    <initializeMultiTouch>
+    var touches = event.touches;
+    if (touches.length == 2) {
+      var p1 = touches[0];
+      var p2 = touches[1];
+      var x = p1.pageX - p2.pageX; 
+      var y = p1.pageY - p2.pageY; 
+      self.scaleStart = Math.sqrt(x * x + y * y);
+      self.isMultiTouch = true;
+    </initializeMultiTouch>
+    <initializeSingleTouch>
+    else if (touches.length = 1) {
+      self.dragStart = touches[0];
+    }
+    </initializeSingleTouch>
+  }, false);
+  self.viewer.addEventListener($.EVENT_MOVE, function(event) {
+    var img = self.currentItem.querySelector('img');
+    var touches = event.changedTouches;
+    if (touches.length == 2) {
+      <pinchZoom>
+      event.preventDefault();
+      event.cancelBubble = true;
+      var p1 = touches[0];
+      var p2 = touches[1];
+      var x = p1.pageX - p2.pageX;
+      var y = p1.pageY - p2.pageY;
+      self.scaleEnd = Math.sqrt(x * x + y * y);
+      self._scaleValue = (self.scaleValue * (self.scaleEnd / self.scaleStart));
+      
+      img.style.webkitTransform = "scale(" + self._scaleValue + "," + self._scaleValue + ") "; 
+      </pinchZoom>
+    } else if (!self.isMultiTouch && touches.length == 1 && self.scaleValue != 1) {
+      <dragImage>
+      event.preventDefault();
+      event.cancelBubble = true;
+      self.dragEnd = touches[0];
+      self._dragX = self.dragX + (self.dragEnd.pageX - self.dragStart.pageX);
+      self._dragY = self.dragY + (self.dragEnd.pageY - self.dragStart.pageY);
+      img.style.marginLeft = self._dragX + 'px';
+      img.style.marginTop = self._dragY + 'px';
+      </dragImage>
+    }
+  }, false);
+  self.viewer.addEventListener($.EVENT_END, function() {
+    <finalizeScaleAndDrag>
+    self.scaleValue = self._scaleValue || self.scaleValue;
+    self._scaleValue = null;
+    self.dragX = self._dragX;
+    self.dragY = self._dragY;
+    self._dragX = null;
+    self._dragY = null;
+    var touches = event.touches;
+    self.isMultiTouch = (touches.length != 0);
+    </finalizeScaleAndDrag>
+  });
+  </touchEvents>
+
+  <doubletapEvent>
+  self.viewer.addEventListener('doubletap', function() {
+    var img = self.currentItem.querySelector('img');
+    if (self.scaleValue === 1) {
+      self.scaleValue = 2;
+    } else {
+      self.scaleValue = 1;
+    }
+    self.dragX = 0;
+    self.dragY = 0;
+    img.style.marginLeft = self.dragX + 'px';
+    img.style.marginTop = self.dragY + 'px';
+    img.style.webkitTransform = "scale(" + self.scaleValue + "," + self.scaleValue + ") "; 
+    self.viewer.__tap_num = 0;
+  }, false);
+  </doubletapEvent>
+</imageGalleryInteractions>
+```
+
+Annotations for the given functions identify sections within the code where distinct responsibilities are highlighted. These sections are indicated with corresponding tags for each function, clearly outlining parts where SRP adherence and violations can be observed.

@@ -637,16 +637,9 @@ function makeDetectable(options, element, callback) {
                 return !!getState(element).container;
             }
             </areElementsInjected>
-
-            <notifyListenersIfNeeded>
-            function notifyListenersIfNeeded() {
-                function isFirstNotify() {
-                    return getState(element).lastNotifiedWidth === undefined;
-                }
-
-                debug("notifyListenersIfNeeded invoked");
-
-                var state = getState(element);
-
-                
-                if (
+	}
+	<registerListenersAndPositionElements>
+}
+</makeDetectable>
+<ignoredForGoodReason>
+</ignoredForGoodReason>

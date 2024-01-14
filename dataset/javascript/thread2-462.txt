@@ -1,0 +1,252 @@
+```javascript
+<setEventExtender>
+function (fn) {
+    <validateFunction>
+    if (!fn || !_.isFunction(fn)) {
+      var err = new Error('Please pass a valid function!');
+      debug(err);
+      throw err;
+    }
+    </validateFunction>
+
+    <assignExtenderFunction>
+    if (fn.length === 2) {
+      this.getNewIdForThisEventExtender = fn;
+      return this;
+    }
+
+    this.getNewIdForThisEventExtender = function (evt, callback) {
+      callback(null, fn(evt));
+    };
+    </assignExtenderFunction>
+
+    return this;
+}
+</setEventExtender>
+
+<ResizeConstructor>
+function Resize($rootScope, scope, element, options) {
+    <initializeProperties>
+    rootScope = $rootScope;
+        
+    this.id = nextUid();
+    this.name = this.id;
+    this.scope = scope;
+    this.timeStamp = 0;
+    
+    this.element = element; 
+    
+    this.DOMelement = null;
+    if (typeof(element) == 'object') {
+        this.DOMelement = element[0];
+    } else {
+        this.DOMelement = document.getElementById(element);
+    }
+    
+    this.options = {
+        callApply: false 
+    };
+
+    this.nodeList = [];
+    this.nodeIndex = {};
+    this.cssKeys = [];
+    this.scopeVars = [];
+    </initializeProperties>
+
+    <processOptions>
+    for (var optKey in options) {
+        if (!options.hasOwnProperty(optKey)) continue;
+        this.options[optKey] = options[optKey];
+        if (optKey == 'name') {
+            this.name = options[optKey];
+        }
+    }
+    </processOptions>
+
+    <addResizeEventHandlers>
+    var self = this;
+    addResizeListener(this);
+    this.element.bind('$destroy', function () {
+        self.destroy();
+    });
+    </addResizeEventHandlers>
+
+    <initializeOrientationChangeHandler>
+    if (!orientationChangeHandlerStarted) {
+        window.addEventListener(fidj.BrowserCapabilities.RESIZE_EVENT, Resize.handleDocOrientationChange, false);
+        orientationChangeHandlerStarted = true;
+        window.setTimeout(function () {
+            a4p.safeApply($rootScope, function () {
+                Resize.handleDocOrientationChange();
+            });
+        }, 200);
+    }
+    </initializeOrientationChangeHandler>
+}
+</ResizeConstructor>
+
+<configureExecutor>
+function configureExecutor(executor) {
+  <defineExecutorCommands>
+  executor.defineCommand(
+      Command.LAUNCH_APP,
+      'POST',
+      '/session/:sessionId/chromium/launch_app');
+  executor.defineCommand(
+      Command.GET_NETWORK_CONDITIONS,
+      'GET',
+      '/session/:sessionId/chromium/network_conditions');
+  executor.defineCommand(
+      Command.SET_NETWORK_CONDITIONS,
+      'POST',
+      '/session/:sessionId/chromium/network_conditions');
+  executor.defineCommand(
+      Command.SEND_DEVTOOLS_COMMAND,
+      'POST',
+      '/session/:sessionId/chromium/send_command');
+  </defineExecutorCommands>
+}
+</configureExecutor>
+
+<typeOfFunction>
+function typeOf (value) {
+  <determineValueType>
+  var type = {
+    hasValue: false,
+    isArray: false,
+    isPOJO: false,
+    isNumber: false,
+  };
+
+  if (value !== undefined && value !== null) {
+    type.hasValue = true;
+    var typeName = typeof value;
+
+    if (typeName === 'number') {
+      type.isNumber = !isNaN(value);
+    }
+    else if (Array.isArray(value)) {
+      type.isArray = true;
+    }
+    else {
+      type.isPOJO =
+        (typeName === 'object') &&
+        !(value instanceof RegExp) &&
+        !(value instanceof Date);
+    }
+  }
+  </determineValueType>
+
+  return type;
+}
+</typeOfFunction>
+
+<clearStringBackwards>
+function clearStringBackwards(stream: tty.WriteStream, str: string): void {
+  <clearPreviousOutput>
+  readline.moveCursor(stream, -stream.columns, 0);
+  readline.clearLine(stream, 0);
+  </clearPreviousOutput>
+  
+  <handleMultilineClearing>
+  let lineCount = (str.match(/\n/g) || []).length;
+  while (lineCount > 0) {
+    readline.moveCursor(stream, 0, -1);
+    readline.clearLine(stream, 0);
+    --lineCount;
+  }
+  </handleMultilineClearing>
+}
+</clearStringBackwards>
+
+<getDomain>
+function getDomain(data, accessor) {
+    <mapAndFilterData>
+    return data
+      .map(function (item) {
+        return accessor.call(this, item);
+      })
+      .filter(function (item, index, array) {
+        return array.indexOf(item) === index;
+      });
+    </mapAndFilterData>
+}
+</getDomain>
+
+<createStack>
+function createStack(app, plugins) {
+  <initializeStackWithMinimalConfig>
+  if (app.enabled('minimal config')) {
+    return es.pipe.apply(es, []);
+  }
+  </initializeStackWithMinimalConfig>
+
+  <addToStackBasedOnPlugins>
+  function enabled(acc, plugin, name) {
+    if (plugin == null) {
+      acc.push(through.obj());
+    }
+    if (app.enabled(name + ' plugin')) {
+      acc.push(plugin);
+    }
+    return acc;
+  }
+  var arr = _.reduce(plugins, enabled, []);
+  </addToStackBasedOnPlugins>
+
+  return es.pipe.apply(es, arr);
+}
+</createStack>
+
+<configureDefaultMode>
+function configureDefaultMode (outputFolder) {
+  <setupLogging>
+  const logfile = path.join(outputFolder, 'thumbsup.log')
+  const stream = fs.createWriteStream(logfile, { flags: 'a' })
+  overrideDebugFormat()
+  debug.enable('thumbsup:error,thumbsup:warn')
+  debug.useColors = () => false
+  debug.log = function () {
+    const line = util.format.apply(util, arguments) + '\n'
+    stream.write(line)
+  }
+  </setupLogging>
+}
+</configureDefaultMode>
+
+<checkMapLayersChanged>
+function() {
+    <compareLayerStates>
+    if ( !this.layerStates.length ||
+         (this.map.layers.length != this.layerStates.length) ) {
+        return true;
+    }
+
+    for (var i = 0, len = this.layerStates.length; i < len; i++) {
+        var layerState = this.layerStates[i];
+        var layer = this.map.layers[i];
+        if ( (layerState.name != layer.name) ||
+             (layerState.inRange != layer.inRange) ||
+             (layerState.id != layer.id) ||
+             (layerState.visibility != layer.visibility) ) {
+            return true;
+        }
+    }
+    </compareLayerStates>
+
+    return false;
+}
+</checkMapLayersChanged>
+
+<amf3decInteger>
+function amf3decInteger(buf) { 
+    <decodeUI29>
+    var resp = amf3decUI29(buf);
+    </decodeUI29>
+    <convertToInteger>
+    if (resp.value > 0x0FFFFFFF) resp.value = (resp.value & 0x0FFFFFFF) - 0x10000000;
+    </convertToInteger>
+    return resp;
+}
+</amf3decInteger>
+```

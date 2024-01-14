@@ -1,0 +1,507 @@
+```javascript
+<migrate>
+function migrate() {
+  var multi = rclient.multi()
+
+  
+  <redisCommands>
+  multi.get('version')
+  multi.get('anvil:connect:version')
+  multi.dbsize()
+  </redisCommands>
+
+  <executionAndErrorHandling>
+  multi.exec(function (err, results) {
+    if (err) {
+      console.log(Array.isArray(err) ? err[0].message : err.message)
+      process.exit(1)
+    }
+  </executionAndErrorHandling>
+
+  <versionAndDatabaseSizeCheck>
+    var version = results[1][1] || results[0][1]
+    var dbsize = results[2][1]
+
+    
+    if (!version && dbsize > 0) {
+      if (process.argv.indexOf('--no-db-check') === -1) {
+        console.log(
+          "\nRedis already contains data, but it doesn't seem to be an " +
+          'Anvil Connect database.\nIf you are SURE it is, start the server ' +
+          'with --no-db-check to skip this check.\n'
+        )
+        return process.exit(1)
+      }
+    }
+  </versionAndDatabaseSizeCheck>
+
+  <migrationInitiation>
+    var migrations = [
+      
+      require('../migrations/baseline')()
+    ].concat(
+      
+      require('../migrations')(version)
+    )
+  </migrationInitiation>
+
+  <migrationExecution>
+    async.parallel(migrations, function (err, results) {
+      if (err) {
+        console.log('Unable to initialize Redis database.')
+        console.log(err.message)
+        return process.exit(1)
+      }
+
+      updateVersion(function (err) {
+        if (err) {
+          console.log('Unable to initialize Redis database.')
+          console.log(err.message)
+          return process.exit(1)
+        }
+
+        console.log('Successfully initialized Redis database.')
+      })
+    })
+  </migrationExecution>
+  })
+}
+</migrate>
+
+<UMLGeneralizationView>
+function UMLGeneralizationView() {
+  UMLGeneralEdgeView.apply(this, arguments);
+  this.tailEndStyle = Core.ES_FLAT;
+  this.headEndStyle = Core.ES_TRIANGLE;
+  this.lineMode = Core.LM_SOLID;
+}
+</UMLGeneralizationView>
+
+<defineProperty>
+function defineProperty(target, property, value, options) {
+  Object.defineProperty(target, property, {
+    value,
+    writable: (options && options.writable) !== false,
+    configurable: (options && options.configurable) !== false,
+    enumerable: options && options.enumerable
+  });
+  return target;
+}
+</defineProperty>
+
+<checkRegex>
+function checkRegex(_regex, _config) {
+  let pattern;
+  let config;
+
+  <handleArguments>
+  try {
+    [pattern, config] = handleArgs(_regex, _config);
+  } catch (e) {
+    return Promise.reject(RESPONSE_INVALID);
+  }
+  log(`Input OK. pattern /${pattern}/ config ${JSON.stringify(config)}`);
+  </handleArguments>
+
+  <requestInitiation>
+  let postObject = generatePostObject(pattern);
+  let postBuffer = JSON.stringify(postObject);
+  let postHeaders = generatePostHeaders(config, Buffer.byteLength(postBuffer));
+  </requestInitiation>
+
+  <promiseResult>
+  function promiseResult(options, data) {
+    log(`promiseResult: data ${data}`);
+    return new Promise((resolve, reject) => {
+      <checkCache>
+      const cacheHit = checkCache(config, pattern);
+      if (cacheHit !== RESPONSE_UNKNOWN) {
+        log(`Cache hit: ${cacheHit}`);
+        return resolve(cacheHit);
+      }
+      </checkCache>
+
+      <sendRequest>
+      const req = https.request(options, (res) => {
+        res.setEncoding('utf8');
+
+        let response = '';
+        res.on('data', (chunk) => {
+          log(`Got data`);
+          response += chunk;
+        });
+
+        res.on('end', () => {
+          log(`end: I got ${JSON.stringify(response)}`);
+
+          const result = serverResponseToRESPONSE(response);
+          log(`end: result ${result}`);
+          updateCache(config, postObject.pattern, result);
+
+          if (result === RESPONSE_INVALID) {
+            return reject(result);
+          } else {
+            return resolve(result);
+          }
+        });
+      });
+      </sendRequest>
+
+      <errorHandling>
+      req.on('error', (e) => {
+        log(`Error: ${e}`);
+        return reject(RESPONSE_INVALID);
+      });
+      </errorHandling>
+
+      <writeData>
+      log(`Writing to req:\n${data}`);
+      req.write(data);
+      req.end();
+      </writeData>
+    });
+  }
+  </promiseResult>
+
+  <returnPromise>
+  return promiseResult(postHeaders, postBuffer);
+  </returnPromise>
+}
+</checkRegex>
+
+<copyingOperation>
+function (src, dst, callback) {
+  fs.exists(dst, function (exists) {
+    
+    <handleExistence>
+    if (exists) {
+      
+      callback(src, dst);
+    }
+    </handleExistence>
+
+    
+    <handleNonExistence>
+    else {
+      fs.mkdir(dst, function () {
+        callback(src, dst);
+      });
+    }
+    </handleNonExistence>
+  });
+}
+</copyingOperation>
+
+<DeviceFirmwareBundle>
+function DeviceFirmwareBundle() {
+  var firmwareImageInformation = null;
+  var firmwareImage = null;
+  var deviceImage = null;
+  var device = null;
+  var curatedDevice = null;
+
+  <deviceStateInitialization>
+  var initialDeviceState = {};
+
+  var version = null;
+  var serial = null;
+  var connectionType = null;
+  var deviceType = null;
+  var deviceTypeString = null;
+  </deviceStateInitialization>
+
+  <progressTracking>
+  var progressListener = null;
+
+  this.setProgressListener = function (newListener) {
+    progressListener = newListener;
+  };
+  this.getProgressListener = function () {
+    return progressListener;
+  };
+  this.updateProgressScaled = function (value) {
+    if (shouldUpdateProgressBar) {
+      var scaledValue = curScaling * value + curOffset;
+      progressListener.updatePercentage(scaledValue, nop);
+    }
+  };
+  </progressTracking>
+
+  <gettersAndSetters>
+  
+  this.getFirmwareImage = function () {
+    return firmwareImage;
+  };
+
+  
+  this.setFirmwareImage = function (newFirmwareImage) {
+    firmwareImage = newFirmwareImage;
+  };
+
+  
+  this.getFirmwareImageInformation = function () {
+    return firmwareImageInformation;
+  };
+  </gettersAndSetters>
+
+  <additionalMethods>
+  function getUpgradeTargetFlashInfo() {
+    // ...
+  }
+  this.getUpgradeTargetFlashInfo = getUpgradeTargetFlashInfo;
+
+  function isLoadingRecoveryFW() {
+    // ...
+  }
+  this.isLoadingRecoveryFW = isLoadingRecoveryFW;
+
+  this.setConnectionType = function (newConnectionType) {
+    // ...
+  };
+  this.setDeviceType = function (newDeviceType) {
+    // ...
+  };
+  </additionalMethods>
+
+  <setters>
+  
+  this.setFirmwareImageInformation = function (newFirmwareImageInformation) {
+    firmwareImageInformation = newFirmwareImageInformation;
+  };
+
+  
+  this.setDevice = function (newDevice) {
+    device = newDevice;
+  };
+
+  
+  this.setCuratedDevice = function (newCuratedDevice) {
+    curatedDevice = newCuratedDevice;
+  };
+
+  
+  this.getDevice = function () {
+    return device;
+  };
+
+  
+  this.getCuratedDevice = function () {
+    return curatedDevice;
+  };
+
+  
+  this.getFirmwareVersion = function () {
+    return version;
+  };
+
+  
+  this.setFirmwareVersion = function (newVersion) {
+    version = newVersion;
+  };
+
+  
+  this.setSerialNumber = function (newSerial) {
+    serial = newSerial;
+  };
+
+  
+  this.getSerialNumber = function () {
+    return serial;
+  };
+
+  this.getConnectionType = function () {
+    return connectionType;
+  };
+
+  this.getDeviceType = function () {
+    return deviceType;
+  };
+  this.getDeviceTypeString = function () {
+    return deviceTypeString;
+  };
+  this.deviceHasWiFi = function () {
+    var hasWiFi = false;
+    if (deviceType == driver_const.LJM_DT_T7) {
+      hasWiFi = true;
+    }
+    return hasWiFi;
+  };
+  </setters>
+
+  <interpretationAndState>
+  function interpretData(activeFW, primaryFW, recoveryFW) {
+    // ...
+  }
+  
+  this.getInitialDeviceState = function () {
+    return initialDeviceState;
+  };
+  this.setInitialDeviceState = function (activeFW, primaryFW, recoveryFW) {
+    initialDeviceState = interpretData(activeFW, primaryFW, recoveryFW);
+    if (DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+      console.log('Initial Device State', initialDeviceState);
+    }
+  };
+  this.performDeviceReboot = function () {
+    // ...
+  };
+  this.verifyLoadedFirmwareVersion = function () {
+    // ...
+  };
+  </interpretationAndState>
+
+  <tempDataStore>
+  var tempDataStore = {};
+  this.clearTempDataStore = function () {
+    tempDataStore = {};
+  };
+  this.addTempDataStore = function (key, value) {
+    tempDataStore[key] = value;
+  };
+  this.getTempDataStore = function () {
+    return tempDataStore;
+  };
+  </tempDataStore>
+}
+</DeviceFirmwareBundle>
+
+<tileCacheHandling>
+function(evt) {
+  var tile = evt.object;
+  var img = this.tileCache[tile.url];
+  if (img) {
+    <disassociateImg>
+    if (img.parentNode &&
+            OpenLayers.Element.hasClass(img.parentNode, 'olBackBuffer')) {
+        img.parentNode.removeChild(img);
+        img.id = null;
+    }
+    </disassociateImg>
+    
+    <associateTile>
+    if (!img.parentNode) {
+        img.style.visibility = 'hidden';
+        img.style.opacity = 0;
+        tile.setImage(img);
+        
+        <tileCacheIndexHandling>
+        OpenLayers.Util.removeItem(this.tileCacheIndex, tile.url);
+        this.tileCacheIndex.push(tile.url);
+        </tileCacheIndexHandling>
+    }
+    </associateTile>
+  }
+}
+</tileCacheHandling>
+
+<handleConfigObject>
+function handleConfigObject(oCfg, mHandlers) {
+
+  <processConfig>
+  function processConfig(key, value) {
+    var handler = mHandlers[key];
+    if (typeof handler === 'function') {
+      if (handler.length === 1) {
+        handler(value);
+      } else if (value != null) {
+        forEach(value, handler);
+      }
+    } else {
+      log.warning("configuration option " + key + " not supported (ignored)");
+    }
+  }
+  </processConfig>
+
+  
+  <processBaseUrl>
+  if (oCfg.baseUrl) {
+    processConfig("baseUrl", oCfg.baseUrl);
+  }
+  </processBaseUrl>
+
+  <processOtherOptions>
+  forEach(oCfg, function (key, value) {
+    
+    if (key !== "baseUrl") {
+      processConfig(key, value);
+    }
+  });
+  </processOtherOptions>
+}
+</handleConfigObject>
+
+<processStatements>
+function (out, statement) {
+  var statname = statement.name;
+  if (statname.charAt(0) == '@') {
+      statname = '@';
+  }
+
+  <statementProcessing>
+  var handler = this.STATEMENTS[statname];
+  if (handler == null) {
+      out.logError(statement, this.UNKNOWN_STATEMENT, [statname]);
+  } else if (handler.container === true && statement.content === undefined) {
+      out.logError(statement, this.EXPECTED_CONTAINER, [statname]);
+  } else if (handler.container === false && statement.content !== undefined) {
+      out.logError(statement, this.UNEXPECTED_CONTAINER, [statname]);
+  } else if (handler.inMacro !== undefined && out.isOutputReady() !== handler.inMacro) {
+      if (handler.inMacro) {
+          out.logError(statement, ariaTemplatesStatements.SHOULD_BE_IN_MACRO, [statname]);
+      } else {
+          out.logError(statement, this.SHOULD_BE_OUT_OF_MACRO, [statname]);
+      }
+  } else {
+      if (handler.paramRegexp) {
+          <paramRegexpCheck>
+          var res = handler.paramRegexp.exec(statement.paramBlock);
+          if (res == null) {
+              out.logError(statement, this.INVALID_STATEMENT_SYNTAX, [statname, handler.paramRegexp]);
+          } else {
+              if (this._isDebug) {
+                  out.trackLine(statement.lineNumber);
+              }
+              handler.process(out, statement, res);
+          }
+          </paramRegexpCheck>
+      } else {
+          if (this._isDebug) {
+              out.trackLine(statement.lineNumber);
+          }
+          handler.process(out, statement, this);
+      }
+  }
+  </statementProcessing>
+}
+</processStatements>
+
+<expandParamOptions>
+function expandParamOptions(options) {
+  if (!options) { return {}; }
+
+  <paramProcessing>
+  if (!Ember.isArray(options)) {
+    options = [options];
+  }
+
+  let params = {};
+  let option, i, key;
+
+  for (i = 0; i < options.length; i++) {
+    option = options[i];
+    if (typeof option === "object") {
+      for (key in option) {
+        params[key] = option[key];
+      }
+    } else {
+      params[option] = option;
+    }
+  }
+  </paramProcessing>
+
+  <paramReturn>
+  return params;
+  </paramReturn>
+}
+</expandParamOptions>
+```

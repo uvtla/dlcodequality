@@ -1,0 +1,343 @@
+<functionPrompt>
+function Prompt() {
+  <applyParentClass>
+  Base.apply(this, arguments);
+  </applyParentClass>
+
+  <initializeRawDefault>
+  var rawDefault = true;
+  </initializeRawDefault>
+
+  <extendOptions>
+  utils.extend(this.opt, {
+    <customFilterFunction>
+    filter: function(input) {
+      <determineFilterValue>
+      var value = rawDefault;
+      if (input != null && input !== '') {
+        value = /^y(es)?/i.test(input);
+      }
+      </determineFilterValue>
+      return value;
+    }.bind(this)
+    </customFilterFunction>
+  });
+  </extendOptions>
+
+  <setDefaultOption>
+  if (typeof this.opt.default === 'boolean') {
+    rawDefault = this.opt.default;
+  }
+  </setDefaultOption>
+
+  <formatDefaultOption>
+  this.opt.default = rawDefault ? 'Y/n' : 'y/N';
+  </formatDefaultOption>
+
+  return this;
+}
+</functionPrompt>
+
+<fireEvent>
+function (event, type) {
+  <checkMapPresence>
+  if (!this.getMap()) {
+    return;
+  }
+  </checkMapPresence>
+
+  <defineEventType>
+  const eventType = type || this._getEventTypeToFire(event);
+  </defineEventType>
+
+  <handleContextMenuEvent>
+  if (eventType === 'contextmenu' && this.listens('contextmenu')) {
+    stopPropagation(event);
+    preventDefault(event);
+  }
+  </handleContextMenuEvent>
+
+  <prepareEventParamsAndFire>
+  const params = this._getEventParams(event);
+  this._fireEvent(eventType, params);
+  </prepareEventParamsAndFire>
+}
+</fireEvent>
+
+<handleChat>
+function handleChat(request, response, chat) {
+  var resp, id;
+  <handlePostRequest>
+  if (request.method === "POST") {
+    requestBody(request, function(form) {
+      while (chat.length > CHATLINES) {
+        chat.shift();
+      }
+
+      if (chat.length) {
+        id = chat[chat.length-1].id + 1;
+      } else {
+        id = 0;
+      }
+      chat.push({
+        id: id,  
+        name: form.name,  
+        input: form.input  
+      });
+      respOk(response, '', 'text/json');
+    });
+  }
+  </handlePostRequest>
+  
+  <handleGetRequest>
+  else {
+    var form = requestQuery(request);
+    var lastid = +form.lastid;
+    if (lastid >= 0) {
+      for (var i=0; i<chat.length; i++) {
+        if (chat[i].id === lastid) {
+          break;
+        }
+      }
+      resp = JSON.stringify(chat.slice(i+1));
+    } else {
+      resp = JSON.stringify(chat);
+    }
+    respOk(response, resp, 'text/json');
+  }
+  </handleGetRequest>
+}
+</handleChat>
+
+<frame>
+function frame() {
+  <checkIfFrameIsRunning>
+  if (!frameRunning) {
+    frameRunning = true;
+    requestAnimationFrame(animationLoop);
+  }
+  </checkIfFrameIsRunning>
+  <createNewFrame>
+  return create.apply(qframe, arguments);
+  </createNewFrame>
+}
+</frame>
+
+<unknownFunctionName>
+function(content, start, removed, added) {
+  var addedViews = [];
+  var view, item, idx, len, itemViewClass, emptyView;
+
+  <calculateContentLength>
+  len = content ? get(content, 'length') : 0;
+  </calculateContentLength>
+
+  <handleContent>
+  if (len) {
+    itemViewClass = get(this, 'itemViewClass');
+    itemViewClass = handlebarsGetView(content, itemViewClass, this.container);
+
+    for (idx = start; idx < start+added; idx++) {
+      item = content.objectAt(idx);
+
+      <createAddedViews>
+      view = this.createChildView(itemViewClass, {
+        content: item,
+        contentIndex: idx
+      });
+
+      addedViews.push(view);
+      </createAddedViews>
+    }
+  }
+  </handleContent>
+  
+  <handleEmptyContent>
+  else {
+    emptyView = get(this, 'emptyView');
+
+    if (!emptyView) { return; }
+
+    <resolveGlobalPath>
+    if ('string' === typeof emptyView && isGlobalPath(emptyView)) {
+      emptyView = get(emptyView) || emptyView;
+    }
+    </resolveGlobalPath>
+
+    <createEmptyView>
+    emptyView = this.createChildView(emptyView);
+    addedViews.push(emptyView);
+    set(this, 'emptyView', emptyView);
+
+    if (CoreView.detect(emptyView)) {
+      this._createdEmptyView = emptyView;
+    }
+    </createEmptyView>
+  }
+  </handleEmptyContent>
+
+  <replaceViews>
+  this.replace(start, 0, addedViews);
+  </replaceViews>
+}
+</unknownFunctionName>
+
+<makeMappingArray>
+function makeMappingArray (N, data, gamma) {
+  let i;
+  const x = [];
+  const y0 = [];
+  const y1 = [];
+  const lut = [];
+
+  <setGamma>
+  gamma = gamma === null ? 1 : gamma;
+  </setGamma>
+
+  <populateXYArrays>
+  for (i = 0; i < data.length; i++) {
+    const element = data[i];
+
+    x.push((N - 1) * element[0]);
+    y0.push(element[1]);
+    y1.push(element[1]);
+  }
+  </populateXYArrays>
+
+  <createLinearSpace>
+  const xLinSpace = linspace(0, 1, N);
+  </createLinearSpace>
+
+  <applyGammaCorrection>
+  for (i = 0; i < N; i++) {
+    xLinSpace[i] = (N - 1) * Math.pow(xLinSpace[i], gamma);
+  }
+  </applyGammaCorrection>
+
+  <findIndexes>
+  const xLinSpaceIndexes = searchSorted(x, xLinSpace);
+  </findIndexes>
+
+  <interpolateColors>
+  for (i = 1; i < N - 1; i++) {
+    const index = xLinSpaceIndexes[i];
+    const colorPercent = ((xLinSpace[i] - x[index - 1]) / (x[index] - x[index - 1]));
+    const colorDelta = (y0[index] - y1[index - 1]);
+
+    lut[i] = colorPercent * colorDelta + y1[index - 1];
+  }
+  </interpolateColors>
+
+  <setLutEdges>
+  lut[0] = y1[0];
+  lut[N - 1] = y0[data.length - 1];
+  </setLutEdges>
+
+  return lut;
+}
+</makeMappingArray>
+
+<mkId>
+function mkId(value, mayBeNegative) {
+  <initializeIdAndSign>
+  var id = -1,
+      sign = 1;
+  </initializeIdAndSign>
+  
+  <handleNegativeValue>
+  if (value.charAt(0) == '-') {
+    sign = -1;
+    value = value.substring(1);
+  }
+  </handleNegativeValue>
+
+  <parseIdValue>
+  if (Lang.NUMBER_DEC.test(value))
+    id = parseInt(value);
+  else if (Lang.NUMBER_HEX.test(value))
+    id = parseInt(value.substring(2), 16);
+  else if (Lang.NUMBER_OCT.test(value))
+    id = parseInt(value.substring(1), 8);
+  else
+    throw Error("illegal id value: " + (sign < 0 ? '-' : '') + value);
+  </parseIdValue>
+
+  <adjustAndCheckId>
+  id = (sign*id)|0; 
+  if (!mayBeNegative && id < 0)
+    throw Error("illegal id value: " + (sign < 0 ? '-' : '') + value);
+  </adjustAndCheckId>
+
+  return id;
+}
+</mkId>
+
+<readLineStringGeometry_>
+function readLineStringGeometry_(text) {
+  <assertLineStringFormat>
+  console.assert(text.substring(0, 2) === 'l(');
+  console.assert(text[text.length - 1] == ')');
+  </assertLineStringFormat>
+  
+  <extractText>
+  text = text.substring(2, text.length - 1);
+  </extractText>
+  
+  <decodeCoordinatesAndCreateGeometry>
+  const flatCoordinates = this.decodeCoordinates_(text);
+  return new olGeomLineString(flatCoordinates, olGeomGeometryLayout.XY);
+  </decodeCoordinatesAndCreateGeometry>
+}
+</readLineStringGeometry_>
+
+<cacheAndResolveSVG>
+function(response) {
+  <checkAndUpdateSVGCached>
+  if (!svgCache[url]) {
+    svgCache[url] = angular.element('<div>').append(response)[0].querySelector('svg');
+  }
+  </checkAndUpdateSVGCached>
+  <resolveSVG>
+  resolve(svgCache[url]);
+  </resolveSVG>
+}
+</cacheAndResolveSVG>
+
+<initOrSetSettings>
+function(setting) {
+  <handleUndefinedSetting>
+  if (typeof setting === "undefined") {
+    if (typeof window !== "undefined") {
+      if (typeof window.reckonSettings !== "undefined") {
+        <setDelimSettingsFromGlobal>
+        if (typeof window.reckonSettings.delimStart) {
+          settings.delimStart = window.reckonSettings.delimStart;
+        }
+        if (typeof window.reckonSettings.delimEnd) {
+          settings.delimEnd = window.reckonSettings.delimEnd;
+        }
+        </setDelimSettingsFromGlobal>
+      }
+    }
+  }
+  </handleUndefinedSetting>
+  <handleDefinedSetting>
+  else {
+    <setDelimSettingsFromArgument>
+    if (typeof setting.delimStart) {
+      settings.delimStart = setting.delimStart;
+    }
+    if (typeof setting.delimEnd) {
+      settings.delimEnd = setting.delimEnd;
+    }
+    </setDelimSettingsFromArgument>
+  }
+  </handleDefinedSetting>
+  <setInstanceDelimeters>
+  this.delimStart = settings.delimStart;
+  this.delimEnd = settings.delimEnd;
+  </setInstanceDelimeters>
+  
+  return this;
+}
+</initOrSetSettings>

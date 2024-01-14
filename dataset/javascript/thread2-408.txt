@@ -1,0 +1,199 @@
+```
+<maybeImportNode>
+function maybeImportNode(state, node, doc) {
+  return node.ownerDocument === doc ? node : doc.importNode(node, true);
+}
+</maybeImportNode>
+```
+
+```
+<trashOrUntrashPages>
+function trashOrUntrashPages(cb) {
+  const ids = tree.map(p => p._id);
+  return self.apos.docs.db.update({ _id: { $in: ids } }, action, {
+    multi: true
+  }, (err, res) => {
+    cb(err);
+  });
+}
+</trashOrUntrashPages>
+```
+
+```
+<decode>
+function decode(str, keepSlashes) {
+  <decodeAndReplace>
+  if (isEncoded) {
+    str = str.replace(/\uFEFF[0-9]/g, function (str) {
+      return encodingLookup[str];
+    });
+  }
+  </decodeAndReplace>
+  <removeEscapedCharacters>
+  if (!keepSlashes) {
+    str = str.replace(/\\([\'\";:])/g, "$1");
+  }
+  </removeEscapedCharacters>
+  
+  return str;
+}
+</decode>
+```
+
+```
+<getSelectedValue>
+function getSelectedValue(customSelect) {
+  var hiddenSelect = this.UI.getHiddenSelect(customSelect);
+  <checkAndReturnMultiple>
+  if (this.isMultiple(customSelect)) {
+    var selectedOptions = [];
+    [].forEach.call(hiddenSelect.options, function (option) {
+      if (option.selected) {
+        selectedOptions.push(option.value);
+      }
+    });
+    return selectedOptions;
+  </checkAndReturnMultiple>
+  <returnSingle>
+  else {
+    return hiddenSelect.options[hiddenSelect.selectedIndex].value;
+  }
+  </returnSingle>
+}
+</getSelectedValue>
+```
+
+```
+<contentOverlapping>
+function contentOverlapping(targetElement, bgNode) {
+  var targetRect = targetElement.getClientRects()[0];
+  <findOverlappingElements>
+  var obscuringElements = dom.shadowElementsFromPoint(
+    targetRect.left,
+    targetRect.top
+  );
+  if (obscuringElements) {
+    for (var i = 0; i < obscuringElements.length; i++) {
+      if (
+        obscuringElements[i] !== targetElement &&
+        obscuringElements[i] === bgNode
+      ) {
+        return true;
+      }
+    }
+  }
+  </findOverlappingElements>
+  return false;
+}
+</contentOverlapping>
+```
+
+```
+<treegridCheckFirstNode>
+function() {
+  if ($(this).treegrid('isNode')) {
+    <getParentAndCheck>
+    var parentNode = $(this).treegrid('getParentNode');
+    if (parentNode === null) {
+      if ($(this).treegrid('getNodeId') === $(this).treegrid('getRootNodes').first().treegrid('getNodeId')) {
+        return true;
+      }
+    } else {
+      if ($(this).treegrid('getNodeId') === parentNode.treegrid('getChildNodes').first().treegrid('getNodeId')) {
+        return true;
+      }
+    }
+    </getParentAndCheck>
+  }
+  return false;
+}
+</treegridCheckFirstNode>
+```
+
+```
+<createModuleReducer>
+function createModuleReducer(reducers) {
+  return reducers ? combineReducers(reducers) : function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    return state;
+  };
+}
+</createModuleReducer>
+```
+
+```
+<makeAs>
+function makeAs(input, model) {
+  return model._isUTC ? moment(input).zone(model._offset || 0) :
+    moment(input).local();
+}
+</makeAs>
+```
+
+```
+<intFromNumbers>
+function intFromNumbers(numbers) {
+  if (numbers.length === 0) { return }
+
+  <findMaximum>
+  let max = numbers[0]
+  let maxi = 0  
+  numbers.forEach((n, i) => {if (max < n) { max = n; maxi = i }})
+  </findMaximum>
+
+  <calcPriorNumber>
+  let priorNumber = intFromNumbers(numbers.slice(0, maxi))
+  if (priorNumber === undefined) { priorNumber = 1 }
+  </calcPriorNumber>
+  <calcPosteriorNumber>
+  let posteriorNumber = intFromNumbers(numbers.slice(maxi + 1))
+  if (posteriorNumber === undefined) { posteriorNumber = 0 }
+  </calcPosteriorNumber>
+
+  return priorNumber * max + posteriorNumber
+}
+</intFromNumbers>
+```
+
+```
+<getMockForRequest>
+function getMockForRequest(handler, requestSettings) {
+  <handleRequestFunction>
+  if ($.isFunction(handler)) {
+    return handler(requestSettings);
+  }
+  </handleRequestFunction>
+
+  <handleUrlMatching>
+  if ($.isFunction(handler.url.test)) {
+    if (!handler.url.test(requestSettings.url)) {
+      return null;
+    }
+  } else {
+    var star = handler.url.indexOf('*');
+    if (handler.url !== requestSettings.url && star === -1 ||
+      !new RegExp(handler.url.replace(/[-[\]{}()+?.,\\^$|#\s]/g, "\\$&").replace(/\*/g, '.+')).test(requestSettings.url)) {
+      return null;
+    }
+  }
+  </handleUrlMatching>
+  
+  <checkDataEquality>
+  if (handler.data) {
+    if (!requestSettings.data || !isMockDataEqual(handler.data, requestSettings.data)) {
+      return null;
+    }
+  }
+  </checkDataEquality>
+
+  <checkRequestType>
+  if (handler && handler.type &&
+    handler.type.toLowerCase() != requestSettings.type.toLowerCase()) {
+    return null;
+  }
+  </checkRequestType>
+
+  return handler;
+}
+</getMockForRequest>
+```

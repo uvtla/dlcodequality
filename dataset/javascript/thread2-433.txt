@@ -1,0 +1,265 @@
+<SetGarbage>
+function SetGarbage (proxy, timeout) {
+
+    <debugLogging>
+    proxy.Debug (4, "SetGarbage timeout=%d", timeout);
+    </debugLogging>
+    
+    <schedulingNextGarbageCollection>
+    setTimeout (function(){SetGarbage (proxy, timeout);}, timeout*500);
+    </schedulingNextGarbageCollection>
+    
+    <calculateGarbageThreshold>
+    var lastshow = new Date().getTime() - (timeout *1000);
+    </calculateGarbageThreshold>
+    
+    <removeOldVessels>
+    for (var mmsi in proxy.vessels) {
+        var vessel = proxy.vessels[mmsi];
+        if (vessel.lastshow < lastshow) {
+            <debugLoggingVesselRemoval>
+            proxy.Debug (5, "Removed Vessel mmsi=%s", mmsi);
+            </debugLoggingVesselRemoval>
+            delete proxy.vessels [mmsi];
+        }
+    }
+    </removeOldVessels>
+      
+}
+</SetGarbage>
+
+<updateShadowCamera>
+function updateShadowCamera( camera, light ) {
+
+	<shadowCameraSetup>
+		var shadowCamera = light.shadowCamera,
+			pointsFrustum = light.pointsFrustum,
+			pointsWorld = light.pointsWorld;
+	</shadowCameraSetup>
+
+	<calculateBoundingBox>
+		_min.set( Infinity, Infinity, Infinity );
+		_max.set( -Infinity, -Infinity, -Infinity );
+
+		for ( var i = 0; i < 8; i ++ ) {
+
+			var p = pointsWorld[ i ];
+
+			p.copy( pointsFrustum[ i ] );
+			THREE.ShadowMapPlugin.__projector.unprojectVector( p, camera );
+
+			p.applyMatrix4( shadowCamera.matrixWorldInverse );
+
+			if ( p.x < _min.x ) _min.x = p.x;
+			if ( p.x > _max.x ) _max.x = p.x;
+
+			if ( p.y < _min.y ) _min.y = p.y;
+			if ( p.y > _max.y ) _max.y = p.y;
+
+			if ( p.z < _min.z ) _min.z = p.z;
+			if ( p.z > _max.z ) _max.z = p.z;
+
+		}
+	</calculateBoundingBox>
+
+	<updateShadowCameraProperties>
+		shadowCamera.left = _min.x;
+		shadowCamera.right = _max.x;
+		shadowCamera.top = _max.y;
+		shadowCamera.bottom = _min.y;	
+	</updateShadowCameraProperties>
+
+	<updateProjectionMatrix>
+		shadowCamera.updateProjectionMatrix();
+    </updateProjectionMatrix> 
+
+}
+</updateShadowCamera>
+
+<submitFormData>
+function submitFormData(params, cb) {
+  <prepareRequestParameters>
+  var resourcePath = config.addURIParams("/appforms/forms/:id/submitFormData", params);
+  var method = "POST";
+  var data = params.submission;
+
+  params.resourcePath = resourcePath;
+  params.method = method;
+  params.data = data;
+  </prepareRequestParameters>
+
+  <performRequest>
+  mbaasRequest.app(params, cb);
+  </performRequest>
+}
+</submitFormData>
+
+<_generateInterpolatedColor>
+function _generateInterpolatedColor() {
+  <generateInterpolationParameters>
+  const randIndicies = _getNextColorPair();
+  const fraction = Math.random();
+  </generateInterpolationParameters>
+  
+  <calculateInterpolatedColor>
+  const interpolatedColor = [];
+
+  for (let i = 0; i < 4; i++) {
+    interpolatedColor.push(
+      Math.floor(
+        fraction * distinctColors[randIndicies[0]][i] +
+          (1.0 - fraction) * distinctColors[randIndicies[1]][i]
+      )
+    );
+  }
+  </calculateInterpolatedColor>
+
+  return interpolatedColor;
+}
+</_generateInterpolatedColor>
+
+<function_that_needs_name>
+function (key, howMany) {
+                    
+    if (arguments.length > 2) {
+        <handleAdditionalArguments>
+        var args = copyargs(arguments);
+        args[1] = 0; 
+        this._list._spliceFromKey.apply(this._list, args);
+        </handleAdditionalArguments>
+    }
+                    
+    <removeKeysAndCollectResults>
+    var result = [];
+    if (howMany) {
+        var keysToRemove = [];
+        var filteredKeys = this._filteredKeys;
+        var filteredKeyIndex = filteredKeys.indexOf(key);
+        for (var i = filteredKeyIndex, len = filteredKeys.length; i < len && (i - filteredKeyIndex) < howMany; i++) {
+            var key = filteredKeys[i];
+            keysToRemove.push(key);
+        }
+        var that = this;
+        keysToRemove.forEach(function (key) {
+            result.push(that._list._spliceFromKey(key, 1)[0]);
+        });
+    }
+    </removeKeysAndCollectResults>
+    return result;
+}
+</function_that_needs_name>
+
+<makeServeMiddleware>
+function makeServeMiddleware() {
+  return function handle(req, resp, next) {
+    <handleRequestForStylesheets>
+    if (/^\/.*\.css$/.test(req.url)) {
+      resp.end("");
+    }
+    </handleRequestForStylesheets>
+    <passThroughNonStylesheets>
+    else {
+      next();
+    }
+    </passThroughNonStylesheets>
+  };
+}
+</makeServeMiddleware>
+
+<init>
+function init(domainManager) {
+    <setupDomainManager>
+    _domainManager = domainManager;
+    if (!domainManager.hasDomain("launcher")) {
+        domainManager.registerDomain("launcher", {major: 0, minor: 1});
+    }
+    </setupDomainManager>
+    
+    <registerLaunchCommand>
+    domainManager.registerCommand(
+        "launcher",      
+        "launch",       
+        _cmdLaunch,     
+        false,          
+        "Launches a given HTML file in the browser for live development",
+        [
+            { name: "url", type: "string", description: "file:
+            { name: "browser", type: "string", description: "browser name"}
+        ],
+        []
+    );
+    </registerLaunchCommand>
+}
+</init>
+
+<commitPicker>
+function commitPicker(picker) {
+    <determineActiveFilter>
+    var filter = getActiveFilter();
+    </determineActiveFilter>
+
+    <compileFilterPatterns>
+    return (filter && filter.patterns.length) ? compile(filter.patterns) : "";
+    </compileFilterPatterns>
+}
+</commitPicker>
+
+<anonymousFunction>
+function( fn ){
+    <setupThreadExecution>
+      var self = this;
+      var _p = self._private;
+      var subsize = self.spreadSize(); 
+      var pass = _p.pass.shift().concat([]); 
+      var runPs = [];
+    </setupThreadExecution>
+
+      <executeFunctionOnThreads>
+      for( var i = 0; i < this.length; i++ ){
+        var thread = this[i];
+        var slice = pass.splice( 0, subsize );
+
+        var runP = thread.pass( slice ).run( fn );
+
+        runPs.push( runP );
+
+        var doneEarly = pass.length === 0;
+        if( doneEarly ){ break; }
+      }
+      </executeFunctionOnThreads>
+
+      <aggregateThreadResults>
+      return $$.Promise.all( runPs ).then(function( thens ){
+        var postpass = new Array();
+        var p = 0;
+
+        
+        for( var i = 0; i < thens.length; i++ ){
+          var then = thens[i]; 
+
+          for( var j = 0; j < then.length; j++ ){
+            var t = then[j]; 
+
+            postpass[ p++ ] = t;
+          }
+        }
+
+        return postpass;
+      });
+      </aggregateThreadResults>
+}
+</anonymousFunction>
+
+<registerEvent>
+function registerEvent(eventName, position, extra){
+
+    <performEventRegistration>
+    currentSession.registerEvent(eventName, position, extra);
+    </performEventRegistration>
+
+    <checkDataPairIntegrity>
+    _checkDataPairs();
+    </checkDataPairIntegrity>
+    
+}
+</registerEvent>

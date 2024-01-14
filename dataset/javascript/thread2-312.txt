@@ -1,0 +1,217 @@
+```javascript
+<closePopup>
+function (domEvent) {
+    if (this.isOpen) {
+        <createCloseEvent>
+        var event = {
+            name : "onBeforeClose",
+            cancelClose : false,
+            domEvent : domEvent
+        };
+        this.$raiseEvent(event);
+        </createCloseEvent>
+        if (!event.cancelClose) {
+            <hideModal>
+            this._hide();
+            this._modalNavigationInterceptor.destroyElements();
+            this.isOpen = false;
+            </hideModal>
+            
+            <handlePopupClosure>
+            ariaPopupsPopupManager.onPopupClose(this);
+            if (!this.conf.animateOut) {
+                this._onAfterClose();
+            } else {
+                this._getAnimator().$onOnce({
+                    "animationend" : this._onAfterClose,
+                    scope : this
+                });
+            }
+            </handlePopupClosure>
+        }
+    }
+}
+</closePopup>
+
+<persistentStorageWrapper>
+function(key, type, callback) {
+    return function(value) {
+        <storageOperations>
+        try {
+            if ( value != null || type === 'string' ) {
+                if (value) {
+                    localStorage.setItem(key, type === 'boolean' ? 'X' : value);
+                } else {
+                    localStorage.removeItem(key);
+                }
+                callback(value);
+            }
+            value = localStorage.getItem(key);
+            return type === 'boolean' ? value === 'X' : value;
+        } catch (e) {
+            Log.warning("Could not access localStorage while accessing '" + key + "' (value: '" + value + "', are cookies disabled?): " + e.message);
+        }
+        </storageOperations>
+    };
+}
+</persistentStorageWrapper>
+
+<pagerInitialization>
+function Pager(page, sortby, desc, limit) {
+    this.page = page || 1;
+    this.count = 0;
+    this.sortby = sortby || null;
+    this.desc = desc || true;
+    this.limit = limit || 30;
+    this.name = "";
+    this.lastKey = null;
+}
+</pagerInitialization>
+
+<saveAndNavigate>
+function (sLayer, sNameSpace, sFileName, sFileType, sData, sTransportId, sPackageName) {
+    return LRepConnector.saveFile(sLayer, sNameSpace, sFileName, sFileType, sData, sTransportId, sPackageName).then(this._navToDisplayMode.bind(this));
+}
+</saveAndNavigate>
+
+<stripCDataContent>
+function stripCData(original) {
+    <stripCDataLogic>
+    var left = '<![CDATA[',
+        right = ']]>',
+        copy = trim(original),
+        changed = false,
+        leftLength = left.length,
+        rightLength = right.length;
+
+    if (copy.indexOf(left) == 0) {
+        copy = copy.substring(leftLength);
+        changed = true;
+    }
+
+    var copyLength = copy.length;
+
+    if (copy.indexOf(right) == copyLength - rightLength) {
+        copy = copy.substring(0, copyLength - rightLength);
+        changed = true;
+    }
+    </stripCDataLogic>
+
+    return changed ? copy : original;
+}
+</stripCDataContent>
+
+<checkSpacingAroundFirstToken>
+function checkSpacingAroundFirstToken(node) {
+    <checkFirstTokenSpacing>
+    const firstToken = node && sourceCode.getFirstToken(node);
+
+    if (firstToken && firstToken.type === "Keyword") {
+        checkSpacingAround(firstToken);
+    }
+    </checkFirstTokenSpacing>
+}
+</checkSpacingAroundFirstToken>
+
+<intmaxValidation>
+function intmax( type ) {
+    if ( !arguments.length ) {
+        return TYPES.int32;
+    }
+    if ( !isString( type ) ) {
+        throw new TypeError( 'intmax()::invalid input argument. Must provide an input string primitive. Value: `' + type + '`.' );
+    }
+    if ( !TYPES.hasOwnProperty( type ) ) {
+        throw new Error( 'intmax()::invalid input argument. Unrecognized integer type. Must be one of the following: \"' + Object.keys( TYPES ).join( '\", \"' ) + '\". Value: `' + type + '`.' );
+    }
+    return TYPES[ type ];
+}
+</intmaxValidation>
+
+<handleRouting>
+function (context, transition) {
+    var controller;
+    <initControllerLogic>
+    var controllerName = this.controllerName || this.routeName;
+    var definedController = this.controllerFor(controllerName, true);
+
+    if (!definedController) {
+        controller = this.generateController(controllerName, context);
+    } else {
+        controller = definedController;
+    }
+    </initControllerLogic>
+    
+    <setupController>
+    if (!this.controller) {
+        var propNames = _emberMetalProperty_get.get(this, '_qp.propertyNames');
+        addQueryParamsObservers(controller, propNames);
+        this.controller = controller;
+    }
+
+    var queryParams = _emberMetalProperty_get.get(this, '_qp');
+    var states = queryParams.states;
+    if (transition) {
+        _emberRoutingUtils.stashParamNames(this.router, transition.state.handlerInfos);
+
+        var params = transition.params;
+        var allParams = queryParams.propertyNames;
+        var cache = this._bucketCache;
+
+        allParams.forEach(function (prop) {
+            var aQp = queryParams.map[prop];
+            aQp.values = params;
+            var cacheKey = _emberRoutingUtils.calculateCacheKey(aQp.prefix, aQp.parts, aQp.values);
+
+            if (cache) {
+                var value = cache.lookup(cacheKey, prop, aQp.undecoratedDefaultValue);
+                _emberMetalProperty_set.set(controller, prop, value);
+            }
+        });
+    }
+
+    controller._qpDelegate = states.allowOverrides;
+
+    if (transition) {
+        var qpValues = getQueryParamsFor(this, transition.state);
+        controller.setProperties(qpValues);
+    }
+
+    this.setupController(controller, context, transition);
+    </setupController>
+
+    <renderTemplateBlock>
+    if (!this._environment || this._environment.options.shouldRender) {
+        this.renderTemplate(controller, context);
+    }
+    </renderTemplateBlock>
+}
+</handleRouting>
+
+<validateOptionsAndSetLog>
+function(options) {
+    options = options || {};
+
+    this.validateRunOptions(options);
+
+    if (_.has(options, 'log') && this.logger.level && this.logger.level.toString() != options.log.toUpperCase()) {
+        this.logger.setLevel(options.log.toUpperCase());
+    }
+}
+</validateOptionsAndSetLog>
+
+<parseVersionToInt>
+function parseIntVersion(vstr) {
+    <parseIntVersionLogic>
+    if (!vstr || vstr=='') return 0;
+    var ar = vstr.split('.');
+    var iVer = 0;
+    for (var i=0; i<ar.length; i++) {
+        iVer *= 1000;
+        iVer += ar[i] >> 0;
+    }
+    </parseIntVersionLogic>
+    return iVer;
+}
+</parseVersionToInt>
+```

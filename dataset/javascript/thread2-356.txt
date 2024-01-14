@@ -1,0 +1,335 @@
+Here are the annotations for the provided JavaScript functions:
+
+1. Compliant Function:
+```javascript
+<rayBoundingBoxIntersection>
+function (bbox, out) {
+    var dir = this.direction.array;
+    var origin = this.origin.array;
+    var min = bbox.min.array;
+    var max = bbox.max.array;
+
+    var invdirx = 1 / dir[0];
+    var invdiry = 1 / dir[1];
+    var invdirz = 1 / dir[2];
+
+    var tmin, tmax, tymin, tymax, tzmin, tzmax;
+    if (invdirx >= 0) {
+        tmin = (min[0] - origin[0]) * invdirx;
+        tmax = (max[0] - origin[0]) * invdirx;
+    }
+    else {
+        tmax = (min[0] - origin[0]) * invdirx;
+        tmin = (max[0] - origin[0]) * invdirx;
+    }
+    if (invdiry >= 0) {
+        tymin = (min[1] - origin[1]) * invdiry;
+        tymax = (max[1] - origin[1]) * invdiry;
+    }
+    else {
+        tymax = (min[1] - origin[1]) * invdiry;
+        tymin = (max[1] - origin[1]) * invdiry;
+    }
+
+    if ((tmin > tymax) || (tymin > tmax)) {
+        return null;
+    }
+
+    if (tymin > tmin || tmin !== tmin) {
+        tmin = tymin;
+    }
+    if (tymax < tmax || tmax !== tmax) {
+        tmax = tymax;
+    }
+
+    if (invdirz >= 0) {
+        tzmin = (min[2] - origin[2]) * invdirz;
+        tzmax = (max[2] - origin[2]) * invdirz;
+    }
+    else {
+        tzmax = (min[2] - origin[2]) * invdirz;
+        tzmin = (max[2] - origin[2]) * invdirz;
+    }
+
+    if ((tmin > tzmax) || (tzmin > tmax)) {
+        return null;
+    }
+
+    if (tzmin > tmin || tmin !== tmin) {
+        tmin = tzmin;
+    }
+    if (tzmax < tmax || tmax !== tmax) {
+        tmax = tzmax;
+    }
+    if (tmax < 0) {
+        return null;
+    }
+
+    var t = tmin >= 0 ? tmin : tmax;
+
+    if (!out) {
+        out = new Vector3();
+    }
+    vec3.scaleAndAdd(out.array, origin, dir, t);
+    return out;
+}
+</rayBoundingBoxIntersection>
+```
+
+2. Compliant Function:
+```javascript
+<InitResponse>
+function InitResponse(version, headers) {
+    this.type = InitResponse.TypeCode;
+    this.version = version || 0;
+    this.headers = headers || {};
+}
+</InitResponse>
+```
+
+3. Non-Compliant Function:
+```javascript
+<sassLoader>
+function sassLoader(content) {
+  const callback = this.async();
+  const isSync = typeof callback !== 'function';
+  const self = this;
+  const { resourcePath } = this;
+
+  <addNormalizedDependency>
+  function addNormalizedDependency(file) {
+    self.dependency(path.normalize(file));
+  }
+  </addNormalizedDependency>
+
+  if (isSync) {
+    throw new Error('Synchronous compilation is not supported anymore. See https:');
+  }
+
+  <resolveDependencies>
+  let resolve = pify(this.resolve);
+  if (this.getResolve) {
+    resolve = this.getResolve({
+      mainFields: ['sass', 'main'],
+      extensions: ['.scss', '.sass', '.css'],
+    });
+  }
+  </resolveDependencies>
+
+  <normalizeOptions>
+  const options = normalizeOptions(
+    this,
+    content,
+    webpackImporter(resourcePath, resolve, addNormalizedDependency)
+  );
+  </normalizeOptions>
+
+  if (options.data.trim() === '') {
+    callback(null, '');
+    return;
+  }
+
+  <renderSass>
+  const render = getRenderFuncFromSassImpl(
+    options.implementation || getDefaultSassImpl()
+  );
+
+  render(options, (err, result) => {
+    if (err) {
+      formatSassError(err, this.resourcePath);
+      if (err.file) {
+        this.dependency(err.file);
+      }
+      callback(err);
+      return;
+    }
+
+    <processSourceMap>
+    if (result.map && result.map !== '{}') {
+      result.map = JSON.parse(result.map);
+      delete result.map.file;
+      const stdinIndex = result.map.sources.findIndex(
+        (source) => source.indexOf('stdin') !== -1
+      );
+      if (stdinIndex !== -1) {
+        result.map.sources[stdinIndex] = path.relative(
+          process.cwd(), resourcePath
+        );
+      }
+      result.map.sourceRoot = path.normalize(result.map.sourceRoot);
+      result.map.sources = result.map.sources.map(path.normalize);
+    } else {
+      result.map = null;
+    }
+    </processSourceMap>
+
+    result.stats.includedFiles.forEach(addNormalizedDependency);
+
+    callback(null, result.css.toString(), result.map);
+  });
+  </renderSass>
+}
+</sassLoader>
+```
+
+4. Compliant Function:
+```javascript
+<_fnCheck>
+function _fnCheck(callback, data) {
+  if (angular.isUndefinedOrNull(data) || angular.isArray(data)) {
+    return; 
+  }
+
+  if (angular.isFunction(callback)) {
+    return callback(data, $filter);
+  } else {
+    if (typeof callback === 'boolean') {
+      data = !!data;
+      return data === callback;
+    } else if (angular.isDefined(callback)) {
+      try {
+        var _regex = new RegExp(callback);
+        return _regex.test(data);
+      }
+      catch (err) {
+        if (typeof data === 'string') {
+          return data.indexOf(callback) > -1;
+        } else {
+          return; 
+        }
+      }
+    } else {
+      return; 
+    }
+  }
+}
+</_fnCheck>
+```
+
+5. Compliant Function:
+```javascript
+<updateBounds>
+function(x, y) {
+    this.centerLonLat = null;
+
+    if ((this.left == null) || (x < this.left)) {
+        this.left = x;
+    }
+    if ((this.bottom == null) || (y < this.bottom)) {
+        this.bottom = y;
+    }
+    if ((this.right == null) || (x > this.right)) {
+        this.right = x;
+    }
+    if ((this.top == null) || (y > this.top)) {
+        this.top = y;
+    }
+}
+</updateBounds>
+```
+
+6. Compliant Function:
+```javascript
+<replacePath>
+function(replace, count, callback) {
+  return pathmap.replace(
+    pathmap.dirname(this, count), replace, callback);
+}
+</replacePath>
+```
+
+7. Non-Compliant Function:
+```javascript
+<SourceCode>
+function SourceCode(text, ast) {
+
+  <validateAst>
+  validate(ast);
+  </validateAst>
+
+  <handleBOM>
+  this.hasBOM = text.charCodeAt(0) === 0xFEFF;
+  this.text = this.hasBOM ? text.slice(1) : text;
+  </handleBOM>
+
+  this.ast = ast;
+  
+  <splitLines>
+  this.lines = SourceCode.splitLines(this.text);
+  </splitLines>
+
+  this.tokensAndComments = ast.tokens.concat(ast.comments).sort(function(left, right) {
+      return left.range[0] - right.range[0];
+  });
+
+  <createTokenStore>
+  var tokenStore = createTokenStore(ast.tokens);
+  Object.keys(tokenStore).forEach(function(methodName) {
+      this[methodName] = tokenStore[methodName];
+  }, this);
+  </createTokenStore>
+
+  <createTokensAndCommentsStore>
+  var tokensAndCommentsStore = createTokenStore(this.tokensAndComments);
+  this.getTokenOrCommentBefore = tokensAndCommentsStore.getTokenBefore;
+  this.getTokenOrCommentAfter = tokensAndCommentsStore.getTokenAfter;
+  </createTokensAndCommentsStore>
+
+  <freezeObjects>
+  Object.freeze(this);
+  Object.freeze(this.lines);
+  </freezeObjects>
+}
+</SourceCode>
+```
+
+8. Compliant Function:
+```javascript
+<decodeEntities>
+function decodeEntities(value) {
+  if (!value) {
+    return '';
+  }
+
+  hiddenPre.innerHTML = value.replace(/</g, "&lt;");
+  
+  return hiddenPre.textContent;
+}
+</decodeEntities>
+```
+
+9. Compliant Function:
+```javascript
+<processAttachmentNode>
+function processAttachmentNode(node, options) {
+  options = options || {};
+
+  var data = [].concat(getBasicFields(node, options));
+
+  if (!options.body) {
+      data = data.concat(getExtensionFields(node, options));
+  }
+
+  data.node = node;
+  return data;
+}
+</processAttachmentNode>
+```
+
+10. Compliant Function:
+```javascript
+<subclass>
+function subclass(name, definition) {
+  if (typeof name == 'function') {
+    definition = name;
+    name = null;
+  }
+  var parent = constructorToClassMap.get(this);
+  if (parent.final) {
+    throw new Error('Cannot subclass constructors marked final.');
+  }
+
+  return new Class(name, definition, parent).construct();
+}
+</subclass>
+```

@@ -1,0 +1,236 @@
+```javascript
+<deviceAuthenticationAndUpdate>
+function EventDevAuth (device){
+<handleMMSIAssignment>
+    if (!device.mmsi)  device.mmsi = parseInt (device.devid);
+    if (isNaN (device.mmsi)) device.mmsi=String2Hash(device.devid);
+</handleMMSIAssignment>
+<adapterBroadcasting>
+    adapter.BroadcastStatic (device);
+    if (device.stamp) adapter.BroadcastPos (device);
+</adapterBroadcasting>
+}
+</deviceAuthenticationAndUpdate>
+
+<createCursorWithCount>
+function createCursorWithCount(factory, tokens, comments, indexMap, startLoc, endLoc, opts) {
+<optionsProcessing>
+    let includeComments = false;
+    let count = 0;
+    let countExists = false;
+    let filter = null;
+
+    if (typeof opts === "number") {
+        count = opts | 0;
+        countExists = true;
+    } else if (typeof opts === "function") {
+        filter = opts;
+    } else if (opts) {
+        includeComments = !!opts.includeComments;
+        count = opts.count | 0;
+        countExists = typeof opts.count === "number";
+        filter = opts.filter || null;
+    }
+    assert(count >= 0, "options.count should be zero or a positive integer.");
+    assert(!filter || typeof filter === "function", "options.filter should be a function.");
+</optionsProcessing>
+
+<createCursorCall>
+    return factory.createCursor(tokens, comments, indexMap, startLoc, endLoc, includeComments, filter, 0, countExists ? count : -1);
+</createCursorCall>
+}
+</createCursorWithCount>
+
+<matchRegExp>
+function(value, regExp) {
+<RegExpValidation>
+    if(regExp instanceof RegExp) {
+        return value.match(regExp);
+    }
+    var regExpParts = regExp.match($.fn.form.settings.regExp.flags),
+        flags;
+</RegExpValidation>
+<RegExpConstruction>
+    if(regExpParts) {
+        regExp = (regExpParts.length >= 2)
+          ? regExpParts[1]
+          : regExp;
+        flags = (regExpParts.length >= 3)
+          ? regExpParts[2]
+          : '';
+    }
+</RegExpConstruction>
+<matchConstructedRegExp>
+    return value.match(new RegExp(regExp, flags));
+</matchConstructedRegExp>
+}
+</matchRegExp>
+
+<checkForPartOfClassBody>
+function checkForPartOfClassBody(firstToken) {
+    <tokenIterationAndReport>
+            for (let token = firstToken;
+                token.type === "Punctuator" && !astUtils.isClosingBraceToken(token);
+                token = sourceCode.getTokenAfter(token)
+            ) {
+                if (astUtils.isSemicolonToken(token)) {
+                    report(token);
+                }
+            }
+    </tokenIterationAndReport>
+}
+</checkForPartOfClassBody>
+
+<mergeAndFilterObjects>
+function (dest, src) {
+<copySrcToDest>
+    var prop;
+    for (prop in src) {
+        if (src.hasOwnProperty(prop)) {
+            dest[prop] = src[prop];
+        }
+    }
+</copySrcToDest>
+<removeNonexistentSrcProperties>
+    for (prop in dest) {
+        if (dest.hasOwnProperty(prop) && !src.hasOwnProperty(prop)) {
+            delete dest[prop];
+        }
+    }
+</removeNonexistentSrcProperties>
+<returnMergedObject>
+    return dest;
+</returnMergedObject>
+}
+</mergeAndFilterObjects>
+
+<loadUserFromToken>
+function _loadUserFromToken(){
+<fetchCurrentUser>
+    return BB
+        .bind(this)
+        .then(function() {
+            return grasshopper.request(this.token).users.current();
+        })
+</fetchCurrentUser>
+<assignUserToContext>
+        .then(function(user){
+            this.user = user;
+        });
+</assignUserToContext>
+}
+</loadUserFromToken>
+
+<configureNavigationProperties>
+function (navigation) {
+<defineRootBasedOnNavigationMode>
+    "use strict";
+    var root = '';
+    if (navigation.mode === 'hash') {
+        root = location.pathname;
+    }
+    else if (beyond.params.local) {
+        var pathname = location.pathname.split('/');
+        root = [''];
+        if (pathname[1] === 'applications') root = root.concat(pathname.splice(1, 2));
+        if (pathname[1] === 'languages') root = root.concat(pathname.splice(1, 2));
+        root = root.join('/');
+    }
+</defineRootBasedOnNavigationMode>
+<defineNavigationProperties>
+    Object.defineProperty(navigation, 'root', {
+        'get': function () {
+            return root;
+        }
+    });
+    Object.defineProperty(navigation, 'pathname', {
+        'get': function () {
+            return navigation.mode === 'hash' ? parseHashLocation() : parsePathnameLocation();
+        }
+    });
+</defineNavigationProperties>
+<parseHashLocation>
+    function parseHashLocation() {
+        var hash = location.hash;
+        if (hash.substr(0, 1) === '#') {
+            hash = hash.substr(1);
+            var index = hash.indexOf('?');
+            if (index !== -1) {
+                hash = hash.substr(0, index);
+            }
+        }
+        return '/' + hash;
+    }
+</parseHashLocation>
+<parsePathnameLocation>
+    function parsePathnameLocation() {
+        var pathname = location.pathname.substr(root.length);
+        if (!pathname) pathname = '/';
+        else if (pathname && pathname.substr(0, 1) !== '/') pathname = '/' + pathname;
+        return pathname;
+    }
+</parsePathnameLocation>
+}
+</configureNavigationProperties>
+
+<computeElementSize>
+function () {
+<determineHiddenPositionAndSize>
+    var domElement = this.domElement;
+    var browser = ariaCoreBrowser;
+    domElement.style.cssText = "position:absolute;top:-15000px;left:-15000px;visibility:hidden;display:block;";
+</determineHiddenPositionAndSize>
+<calculateDimensions>
+    var width = (browser.isIE9 || browser.isIE10) ? domElement.offsetWidth + 1 : domElement.offsetWidth;
+    return {
+        width : width,
+        height : domElement.offsetHeight
+    };
+</calculateDimensions>
+}
+</computeElementSize>
+
+<setTextureCubeToShader>
+function( gl, v, renderer ) {
+<textureSetup>
+    var unit = renderer.allocTextureUnit();
+    gl.uniform1i( this.addr, unit );
+    renderer.setTextureCube( v || emptyCubeTexture, unit );
+</textureSetup>
+}
+</setTextureCubeToShader>
+
+<cleanAndCloneInstance>
+function (options) {
+<initializeOptionsAndValues>
+    var ret = {};
+    options = options || {};
+</initializeOptionsAndValues>
+<processInstanceProperties>
+    for (var key in this.$) {
+        if (this.$.hasOwnProperty(key)) {
+            if (options.exclude) {
+                if (options.exclude instanceof Array) {
+                    if (_.include(options.exclude, key)) {
+                        ret[key] = this.$[key];
+                        continue;
+                    }
+                }
+            }
+            if (this.$bindings.hasOwnProperty(key) && this.factory.prototype.defaults.hasOwnProperty(key)) {
+                ret[key] = this.factory.prototype.defaults[key];
+            } else {
+                ret[key] = this._cloneAttribute(this.$[key], key);
+            }
+        }
+    }
+</processInstanceProperties>
+<createCleanInstance>
+    var b = new this.factory(ret, true);
+    b._$source = this;
+    b.$injected = this.$injected;
+    return b;
+</createCleanInstance>
+}
+</cleanAndCloneInstance>
+```

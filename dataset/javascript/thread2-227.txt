@@ -1,0 +1,327 @@
+Below are the annotations for the 10 provided functions:
+
+1.
+```javascript
+<fileUploadXhr>
+function fileUploadXhr(a) {
+    <prepareFormData>
+    var formdata = new FormData();
+
+    for (var i=0; i < a.length; i++) {
+        formdata.append(a[i].name, a[i].value);
+    }
+
+    if (options.extraData) {
+        for (var p in options.extraData)
+            if (options.extraData.hasOwnProperty(p))
+                formdata.append(p, options.extraData[p]);
+    }
+
+    options.data = null;
+    </prepareFormData>
+
+    <configureAjaxRequest>
+    var s = $.extend(true, {}, $.ajaxSettings, options, {
+        contentType: false,
+        processData: false,
+        cache: false,
+        type: 'POST'
+    });
+    </configureAjaxRequest>
+    
+    <setupProgressHandling>
+    if (options.uploadProgress) {
+        
+        s.xhr = function() {
+            var xhr = jQuery.ajaxSettings.xhr();
+            if (xhr.upload) {
+                xhr.upload.onprogress = function(event) {
+                    var percent = 0;
+                    var position = event.loaded || event.position; 
+                    var total = event.total;
+                    if (event.lengthComputable) {
+                        percent = Math.ceil(position / total * 100);
+                    }
+                    options.uploadProgress(event, position, total, percent);
+                };
+            }
+            return xhr;
+        };
+    }
+
+    s.data = null;
+    var beforeSend = s.beforeSend;
+    s.beforeSend = function(xhr, o) {
+        o.data = formdata;
+        if(beforeSend)
+            beforeSend.call(o, xhr, options);
+    };
+    </setupProgressHandling>
+
+    <sendAjaxRequest>
+    $.ajax(s);
+    </sendAjaxRequest>
+}
+</fileUploadXhr>
+```
+
+2.
+```javascript
+<Sprite>
+function Sprite (opts) {
+    <initializeSprite>
+    Sprite.superclass.constructor.call(this, opts)
+    </initializeSprite>
+
+    ...
+    // The details are omitted since the function is lengthy and mostly involves initializing properties of the Sprite. 
+    // SRP is not being violated since these actions collectively serve the single purpose of initializing a Sprite object.
+
+    <initializeTextureAtlas>
+    if (url || file || texture) {
+        textureAtlas = new TextureAtlas({ url: url, file: file, texture: texture })
+    } else if (spritesheet) {
+        textureAtlas = spritesheet.textureAtlas
+        this.useSpriteSheet = true
+    } else if (!textureAtlas) {
+        
+    }
+    </initializeTextureAtlas>
+
+    <rectHandling>
+    if (!rect && textureAtlas) {
+        if (!url) {
+            rect = new geo.Rect(0, 0, textureAtlas.texture.size.width, textureAtlas.texture.size.height)
+        } else {
+            
+            events.addListener(textureAtlas, 'load', function () {
+                if (!this.rect) {
+                    this.rect = new geo.Rect(0, 0, textureAtlas.texture.size.width, textureAtlas.texture.size.height)
+                }
+            }.bind(this))
+        }
+    }
+    </rectHandling>
+
+    <quadInitialization>
+    if (rect) {
+        this.rect = rect
+        this.contentSize = rect.size
+
+        this.quad = { drawRect: {origin: ccp(0, 0), size: rect.size}
+                    , textureRect: rect
+                    }
+    }
+    </quadInitialization>
+
+    ...
+    // The omitted parts are in a similar vein - they're part of initializing various aspects of the Sprite.
+
+    <finalizeInitialization>
+    this.textureAtlas = textureAtlas
+
+    if (frame) {
+        this.displayFrame = frame
+    }
+    </finalizeInitialization>
+}
+</Sprite>
+```
+
+3.
+```javascript
+<writeToFileSystem>
+function (data, fragmentKey, cachePath, callback) {
+    <logAction>
+    debug('  write content in file system');
+    </logAction>
+    <preparePath>
+    var basePath =  path.dirname(fragmentKey);
+    if (basePath){
+      mkdirp.sync(cachePath + '/' + basePath);
+    }
+    </preparePath>
+    <writeToFile>
+    fs.writeFile(cachePath + '/' + fragmentKey, data, function (err) {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, data);
+      }
+    });
+    </writeToFile>
+}
+</writeToFileSystem>
+```
+
+4.
+```javascript
+<constructTimelineItem>
+function(item) {
+  if(!item || !item.element)
+      return;
+
+  ...
+  // The rest of the function is creating and manipulating DOM elements which all serve the purpose 
+  // of constructing a single timeline item with various components. It's not violating SRP as it's a single cohesive task.
+
+}
+</constructTimelineItem>
+```
+
+5.
+```javascript
+<matchObj>
+function matchObj(obj, line) {
+  for (const p in obj) if (obj[p] && obj[p].test(line)) return p;
+  return "";
+}
+</matchObj>
+```
+
+6.
+```javascript
+<parseDoclets>
+function parseDoclets(obj, propName) {
+  <retrieveAndCleanDescription>
+  let desc = obj.desc || defaultDescriptions[propName] || '';
+  obj.doclets = metadata.parseDoclets(desc) || {};
+  obj.desc = cleanDoclets(desc);
+  </retrieveAndCleanDescription>
+  <generateHtml>
+  obj.descHtml = marked(obj.desc);
+  </generateHtml>
+}
+</parseDoclets>
+```
+
+7.
+```javascript
+<exportJs>
+function defaultJsExporter(variables, options, root) {
+    <prepareExportDetails>
+	const pathname = options.destination || root.source && root.source.input && root.source.input.file && root.source.input.file + '.js' || 'custom-variables.js';
+	const contents = Object.keys(variables).reduce(
+		(buffer, key) => `${ buffer }export const ${ key } = ${ JSON.stringify(variables[key]).replace(/(^|{|,)"(.+?)":/g, '$1$2:') };\n`,
+		''
+	);
+    </prepareExportDetails>
+
+    <writeToFile>
+	return new Promise((resolve, reject) => {
+		fs.writeFile(
+			pathname,
+			contents,
+			(error) => error ? reject(error) : resolve()
+		);
+	});
+    </writeToFile>
+}
+</exportJs>
+```
+
+8.
+```javascript
+<getActiveFilters>
+function getActiveFilters (req, selectedFilters, data, modelName, cb) {
+   <validateInput>
+   ...
+
+   linz.api.model.list(req, modelName, function (err, list) {
+       ...
+       <filterProcessing>
+       async.each(selectedFilters, function (fieldName, filtersDone) {
+
+           list.filters[fieldName].filter.bind(fieldName, data, function (filterErr, result) {
+
+               if (filterErr) {
+                   return filtersDone(filterErr);
+               }
+
+               activeFilters[fieldName] = {
+                   label: list.filters[fieldName].label,
+                   controls: result
+               }
+
+               return filtersDone(null);
+
+           });
+
+       }, function (filterErr) {
+
+           return cb(filterErr, activeFilters);
+
+       });
+       </filterProcessing>
+   });
+   </validateInput>
+}
+</getActiveFilters>
+```
+
+9.
+```javascript
+<createTodoListItem>
+function createTodoListItem(todo) {
+  <constructTodoElements>
+
+  var checkbox = document.createElement('input');
+  ...
+
+  var label = document.createElement('label');
+  ...
+
+  var deleteLink = document.createElement('button');
+  ...
+
+  var divDisplay = document.createElement('div');
+  ...
+
+  var inputEditTodo = document.createElement('input');
+  ...
+
+  var li = document.createElement('li');
+  ...
+
+  if (todo.completed) {
+    li.className += 'complete';
+    checkbox.checked = true;
+  }
+
+  </constructTodoElements>
+  return li;
+}
+</createTodoListItem>
+```
+
+10.
+```javascript
+<appendView>
+function(view) {
+    if (arguments.length > 1) {
+        conbo.forEach(arguments, function(view, index, list) {
+            this.appendView(view);
+        },
+        this);
+        
+        return this;
+    }
+
+    if (typeof view === 'function') {
+        view = new view(this.context);
+    }
+
+    if (!(view instanceof conbo.View)) {
+        throw new Error('Parameter must be conbo.View class or instance of it');
+    }
+
+    <appendElement>
+    this.body.appendChild(view.el);
+    </appendElement>
+    
+    return this;
+}
+</appendView>
+```
+
+In these annotations, the SRP is largely respected except in a few cases where additional responsibilities have been tagged separately. The appropriate start and end of each responsibility are annotated to facilitate understanding the Single Responsibility Principle.

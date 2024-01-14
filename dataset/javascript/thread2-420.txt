@@ -1,0 +1,214 @@
+
+<function>
+function (runtime, modNames, refModName) {
+    <normalizeModuleNames>
+    return Utils.unalias(runtime, Utils.normalizeModNamesWithAlias(runtime, modNames, refModName));
+    </normalizeModuleNames>
+}
+</function>
+
+<check>
+function check(node) {
+    <analyzeNode>
+    if (
+        node.arguments.length !== 1 &&
+        node.callee.type === "Identifier" &&
+        node.callee.name === "Array" &&
+        !node.typeParameters
+    ) {
+        <reportProblem>
+        context.report({
+            node,
+            message: "The array literal notation [] is preferable.",
+            fix(fixer) {
+                <fixSyntax>
+                if (node.arguments.length === 0) {
+                    return fixer.replaceText(node, "[]");
+                }
+                const fullText = context.getSourceCode().getText(node);
+                const preambleLength = node.callee.range[1] - node.range[0];
+                return fixer.replaceText(node, `[${fullText.slice(preambleLength + 1, -1)}]`);
+                </fixSyntax>
+            },
+        });
+        </reportProblem>
+    }
+    </analyzeNode>
+}
+</check>
+
+<getMonthDays>
+function getMonthDays(year, month) {
+    <calculateDays>
+    let NUM = 30;
+    if ([1, 3, 5, 7, 8, 10, 12].indexOf(month) !== -1) {
+        NUM = 31;
+    }
+    if (month === 2) {
+        NUM = isLeapYear(year) ? 29 : 28;
+    }
+    </calculateDays>
+    return NUM;
+}
+</getMonthDays>
+
+<function>
+function (options, callback) {
+    <setupVariables>
+    var self = this;
+    var events = options.events || ['all'];
+    var year = options.date.getFullYear();
+    var month = options.date.getMonth() + 1;
+    var day = options.date.getDate();
+    var direction = /^dep/i.test(options.direction) ? 'departing' : 'arriving';
+
+    var path = '/alerts/rest/v1/json/create/' +
+      options.airlineCode + '/' + options.flightNumber +
+      '/from/' + options.departureAirport +
+      '/to/' + options.arrivalAirport +
+      '/' + direction + '/' + year + '/' + month + '/' + day;
+
+    var extensions = ['includeNewFields', 'useInlinedReferences'];
+    if (Array.isArray(options.extendedOptions)) {
+        extensions = extensions.concat(options.extendedOptions);
+    }
+
+    var query = {
+        name: options.name,
+        desc: options.desc,
+        codeType: options.codeType,
+        events: events.join(),
+        deliverTo: options.deliverTo,
+        type: options.type || 'JSON',
+    };
+    </setupVariables>
+
+    <processAdditionalData>
+    if (options.data != null) {
+        Object.keys(options.data).forEach(function (k) {
+            query['_' + k] = options.data[k];
+        });
+    }
+    </processAdditionalData>
+
+    <makeApiCall>
+    return this.client._clientRequest({
+        url: path,
+        extendedOptions: extensions,
+        qs: query,
+    }, function (error, data) {
+        callback.call(self.client, error, data);
+    });
+    </makeApiCall>
+}
+</function>
+
+<function>
+function (coordsArr) {
+    <checkDisabledState>
+    if (this.disabled) {
+        return;
+    }
+    </checkDisabledState>
+
+    <calculateHandlePosition>
+    var $td, tdOffset, containerOffset, top, left, height, width;
+    var corners = this.instance.getCornerCoords(coordsArr);
+    $td = $(this.instance.getCell(corners.BR.row, corners.BR.col));
+    tdOffset = $td.offset();
+    containerOffset = this.$container.offset();
+    top = tdOffset.top - containerOffset.top + this.$container.scrollTop() - 1;
+    left = tdOffset.left - containerOffset.left + this.$container.scrollLeft() - 1;
+    height = $td.outerHeight();
+    width = $td.outerWidth();
+    </calculateHandlePosition>
+
+    <updateHandleStyle>
+    this.handle.style.top = top + height - 3 + 'px';
+    this.handle.style.left = left + width - 3 + 'px';
+    this.handle.style.display = 'block';
+    </updateHandleStyle>
+}
+</function>
+
+<strToNumber>
+function strToNumber(value) {
+    <convertStringToNumber>
+    if (typeof value === 'string' && !isNaN(Number(value) - parseFloat(value))) {
+        return Number(value);
+    }
+    </convertStringToNumber>
+    
+    <validateNumberType>
+    if (typeof value !== 'number') {
+        throw new Error(value + " is not a number");
+    }
+    </validateNumberType>
+    
+    return value;
+}
+</strToNumber>
+
+<luPack>
+function luPack() {
+    <performLuDecomposition>
+    var lu = lapack$1.lu(this.elements);
+    </performLuDecomposition>
+    
+    <packageResults>
+    return {
+        L: $M(lu.L),
+        U: $M(lu.U),
+        P: $M(lu.P)
+    };
+    </packageResults>
+}
+</luPack>
+
+<camelToKebab>
+function camelToKebab(str) {
+    <convertCase>
+    return str.replace(/([a-zA-Z])([A-Z][a-z])/g, (match, before, after) =>
+        `${before.toLowerCase()}-${after.toLowerCase()}`
+    ).toLowerCase();
+    </convertCase>
+}
+</camelToKebab>
+
+<isStage1ClassDescriptor>
+function isStage1ClassDescriptor(possibleDesc) {
+    <analyzeDescriptor>
+    let [target] = possibleDesc;
+    return (
+        possibleDesc.length === 1 &&
+        typeof target === 'function' &&
+        'prototype' in target &&
+        !target.__isComputedDecorator
+    );
+    </analyzeDescriptor>
+}
+</isStage1ClassDescriptor>
+
+<function>
+function (name) {
+    <constructIdentifier>
+    if (isString(name)) {
+        var parts = this._splitString(name),
+            schema = parts[0], table = parts[1], alias = parts[2],
+            identifier;
+        if (schema && table && alias) {
+            identifier = new AliasedExpression(new QualifiedIdentifier(schema, table), alias);
+        } else if (schema && table) {
+            identifier = new QualifiedIdentifier(schema, table);
+        } else if (table && alias) {
+            identifier = new AliasedExpression(new Identifier(table), alias);
+        } else {
+            identifier = new Identifier(table);
+        }
+        return identifier;
+    } else {
+        return name;
+    }
+    </constructIdentifier>
+}
+</function>

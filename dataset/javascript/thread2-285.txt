@@ -1,0 +1,217 @@
+<copyOwnProperties>
+function copyOwnProperties(dst, src) {
+  for (var prop in src) {
+    <hasOwnPropertyCheck>
+    if (src.hasOwnProperty(prop)) {
+      dst[prop] = src[prop];
+    }
+    </hasOwnPropertyCheck>
+  }
+}
+</copyOwnProperties>
+
+<isFunction>
+function isFunction(value) {
+  <isObjectCheck>
+  if (!isObject$1(value)) {
+    return false;
+  }
+  </isObjectCheck>
+  
+  <tagRetrieval>
+  var tag = baseGetTag(value);
+  </tagRetrieval>
+  <isSpecificFunctionType>
+  return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
+  </isSpecificFunctionType>
+}
+</isFunction>
+
+<anonymousFunction1>
+function (key, fn) {
+    <handlerSetup>
+    if (typeof key === 'function') {
+      fn = key;
+      key = null;
+    }
+    if (typeof fn !== 'function') {
+      fn = this.pickOption('renameKey');
+    }
+    if (typeof fn !== 'function') {
+      fn = utils.identity;
+    }
+    </handlerSetup>
+    
+    <setRenameKeyOption>
+    this.options.renameKey = fn;
+    </setRenameKeyOption>
+    
+    <keyHandling>
+    if (arguments.length === 2) {
+      return fn(key);
+    }
+    if (typeof key === 'string') {
+      return fn(key);
+    }
+    </keyHandling>
+    
+    <returnFunction>
+    return fn;
+    </returnFunction>
+}
+</anonymousFunction1>
+
+<anonymousFunction2>
+function () {
+    <arithmeticProcess>
+    var t = this.dpop() | 0;
+    var n = this.dpop() | 0;
+    var m = this.dpop() | 0;
+    var ddd = Long.fromInt(m);
+    ddd = ddd.mul(Long.fromInt(n));
+    ddd = ddd.div(Long.fromInt(t));
+    ddd = ddd.toInt();
+    this.dpush(ddd | 0);
+    </arithmeticProcess>
+}
+</anonymousFunction2>
+
+<setupPrompt>
+function (local, opts, actions, m) {
+  <setActions>
+  local.context.ACTIONS = actions
+  </setActions>
+  <getAndSetPrompt>
+  local._prompt = getPrompt(opts, m[ 2 ])
+  </getAndSetPrompt>
+  <invokePrompt>
+  local.prompt()
+  </invokePrompt>
+}
+</setupPrompt>
+
+<css>
+function css() {
+  <gulpPipelineSetup>
+  return gulp
+    .src("./scss*.scss")
+    .pipe(plumber())
+    .pipe(sass({
+      outputStyle: "expanded",
+      includePaths: "./node_modules",
+    }))
+    .on("error", sass.logError)
+    .pipe(autoprefixer({
+      browsers: ['last 2 versions'],
+      cascade: false
+    }))
+    .pipe(header(banner, {
+      pkg: pkg
+    }))
+    .pipe(gulp.dest("./css"))
+    .pipe(rename({
+      suffix: ".min"
+    }))
+    .pipe(cleanCSS())
+    .pipe(gulp.dest("./css"))
+    .pipe(browsersync.stream());
+    </gulpPipelineSetup>
+}
+</css>
+
+<moveSelection>
+function moveSelection(
+    opts: Options,
+    change: Change,
+    x: number,
+    y: number
+): Change {
+    <retrieveValueAndPosition>
+    const { value } = change;
+    const { startKey } = value;
+    const pos = TablePosition.create(opts, value.document, startKey);
+    </retrieveValueAndPosition>
+
+    <validateCellPosition>
+    if (!pos.isInCell()) {
+        throw new Error('moveSelection can only be applied from within a cell');
+    }
+    </validateCellPosition>
+
+    <identifyDestination>
+    const { table } = pos;
+    const row = table.nodes.get(y);
+    const cell = row.nodes.get(x);
+    </identifyDestination>
+
+    <collapseChange>
+    return change.collapseToStartOf(cell);
+    </collapseChange>
+}
+</moveSelection>
+
+<parseJson>
+function parseJson(data) {
+  <setupParseParameters>
+  const parseError = [];
+  const parseOptions = {
+    disallowComments: false,
+    allowTrailingComma: true
+  };
+  </setupParseParameters>
+  
+  <parseAttempt>
+  const jsonData = jsonc.parse(data, parseError, parseOptions);
+  </parseAttempt>
+  
+  <errorHandling>
+  if (parseError.length !== 0) {
+    return data;
+  }
+  </errorHandling>
+  
+  <stringifyParsedData>
+  return JSON.stringify(jsonData);
+  </stringifyParsedData>
+}
+</parseJson>
+
+<showSnackbar>
+function showsnackbar(y) {
+    <getElementAndShow>
+    var x = document.getElementById(y);
+    x.className = x.className.replace("snackbar", "snackbar show");
+    </getElementAndShow>
+    <setHideTimeout>
+    setTimeout(function() {
+        x.className = x.className.replace("show", "");
+    }, 3000);
+    </setHideTimeout>
+}
+</showSnackbar>
+
+<expectSpaceAfter>
+function expectSpaceAfter(token, pattern) {
+    <retrieveNextToken>
+    const nextToken = sourceCode.getTokenAfter(token);
+    </retrieveNextToken>
+
+    <checkSpacingAndReport>
+    if (nextToken &&
+        (CHECK_TYPE.test(nextToken.type) || pattern.test(nextToken.value)) &&
+        !isCloseParenOfTemplate(nextToken) &&
+        astUtils.isTokenOnSameLine(token, nextToken) &&
+        !sourceCode.isSpaceBetweenTokens(token, nextToken)
+    ) {
+        context.report({
+            loc: token.loc.start,
+            messageId: "expectedAfter",
+            data: token,
+            fix(fixer) {
+                return fixer.insertTextAfter(token, " ");
+            }
+        });
+    }
+    </checkSpacingAndReport>
+}
+</expectSpaceAfter>

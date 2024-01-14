@@ -1,0 +1,224 @@
+```javascript
+<processLogicalOr>
+function processLogicalOr(tokenizer, scope) {
+  let node = processLogicalAnd(tokenizer, scope);
+
+  while (tokenizer.token.match(types.LOGICAL_OR)) {
+    node = createOperatorNode(tokenizer.token.value, [node, processLogicalAnd(tokenizer.skipToken(), scope)]);
+  }
+
+  return node;
+}
+</processLogicalOr>
+
+<function>
+function(target) {
+			var id = target[0].id.replace(/([^A-Za-z0-9_-])/g, '\\\\$1');
+			return {
+				id: id,
+				input: target,
+				uid: Math.floor(Math.random() * 99999999),
+				isOpen: FALSE,
+				isDisabled: FALSE,
+				settings: {}
+			};
+		}
+</function>
+
+<main>
+function main(env, cb) {
+    <parseOptions>
+    var options = {
+        port: ~~env.args.shift(),
+        context: util.parseCsvObj(env.opts.context),
+        perf: env.opts.perf
+    };
+    </parseOptions>
+
+    <configureLogging>
+    if (env.opts.loglevel) {
+        log.level = env.opts.loglevel;
+    }
+    </configureLogging>
+
+    <validateEnvironment>
+    if (!env.app) {
+        cb(util.error(1, 'No package.json, please re-try from your application’s directory.'));
+        return;
+    }
+    </validateEnvironment>
+    
+    <validateDependencies>
+    if (!(env.app.dependencies && env.app.dependencies.mojito)) {
+        log.error('The current directory doesn’t appear to be a Mojito application.');
+        cb(util.error(3, 'Mojito isn’t a dependency in package.json. Try `npm i --save mojito`.'));
+        return;
+    }
+    </validateDependencies>
+    
+    <validateInstallation>
+    if (!env.mojito) {
+        cb(util.error(3, 'Mojito is not installed locally. Try `npm i mojito`'));
+        return;
+    }
+    </validateInstallation>
+    
+    <getAppConfiguration>
+    appConfig = getAppConfig(env.mojito.path, env.cwd, options.context);
+    </getAppConfiguration>
+    
+    <handleAppConfigErrors>
+    if (!appConfig) {
+        cb(util.error(3, 'Cannot read application.json.'));
+        return;
+    }
+    </handleAppConfigErrors>
+    
+    <setDefaultPort>
+    if (!options.port) {
+        options.port = process.env.PORT || appConfig.appPort || 8666;
+    }
+    </setDefaultPort>
+
+    <executeApplication>
+    exec(env, options, cb);
+    </executeApplication>
+}
+</main>
+
+<addOnce>
+function (listener, listenerContext, priority) {
+            validateListener(listener, 'addOnce');
+            return this._registerListener(listener, true, listenerContext, priority);
+        }
+</addOnce>
+
+<LocalStorage>
+function (options, storage, throwIfMissing) {
+        this.$AbstractStorage.constructor.call(this, options);
+
+        this.type = storage;
+        this.storage = Aria.$window[storage];
+        this._browserEventCb = null;
+
+        <handleStorageAvailability>
+        if (!this.storage && throwIfMissing !== false) {
+            if (this._disposeSerializer && this.serializer) {
+                this.serializer.$dispose();
+            }
+
+            this.$logError(this.UNAVAILABLE, [this.type]);
+            throw new Error(this.type);
+        }
+        </handleStorageAvailability>
+}
+</LocalStorage>
+
+<toCamelCase>
+function(dashed) {
+  var i;
+  var camel = '';
+  var nextCap = false;
+  for (i = 0; i < dashed.length; i++) {
+    if (dashed[i] !== '-') {
+      camel += nextCap ? dashed[i].toUpperCase() : dashed[i];
+      nextCap = false;
+    } else {
+      nextCap = true;
+    }
+  }
+  return camel;
+}
+</toCamelCase>
+
+<ZDuplex>
+function ZDuplex(options) {
+	<processOptions>
+	if(options) {
+		if(options.objectMode) {
+			options.readableObjectMode = true;
+			options.writableObjectMode = true;
+		}
+		if(options.readableObjectMode && options.writableObjectMode) {
+			options.objectMode = true;
+		}
+		
+		if(typeof options.read === 'function') {
+			this._read = options.read;
+		}
+		if(typeof options.write === 'function') {
+			this._write = options.write;
+		}
+		if(typeof options.flush === 'function') {
+			this._flush = options.flush;
+		}
+	}
+	</processOptions>
+	<initializeDuplex>
+	Duplex.call(this, options);
+	</initializeDuplex>
+	
+	<setupDuplex>
+	this._duplexFinished = false;
+	this.once('finish', this._duplexPrefinish.bind(this));
+	this.once('prefinish', this._duplexPrefinish.bind(this));
+	</setupDuplex>
+	
+	<adjustObjectModes>
+	if(options && !options.objectMode && (!options.readableObjectMode) !== (!options.writableObjectMode)) {
+		this._writableState.objectMode = !!options.writableObjectMode;
+		this._readableState.objectMode = !!options.readableObjectMode;
+	}
+	if(options && options.readableObjectMode) {
+		this._readableState.highWaterMark = 16;
+	}
+	if(options && options.writableObjectMode) {
+		this._writableState.highWaterMark = 16;
+	}
+	</adjustObjectModes>
+	<applyMixins>
+	streamMixins.call(this, Duplex.prototype, options);
+	readableMixins.call(this, options);
+	writableMixins.call(this, options);
+	</applyMixins>
+}
+</ZDuplex>
+
+<once>
+function once(eventName, handler, context, args) {
+    this.on(eventName, handler, context, args, true);
+}
+</once>
+
+<updateAndroidManifest>
+function updateAndroidManifest(targetFilePath, configItems) {
+        var tempManifest = fileUtils.parseElementtreeSync(targetFilePath),
+            root = tempManifest.getroot();
+
+        <processConfigItems>
+        _.each(configItems, function (item) {
+            // A block of instructions related to processing the configuration items.
+            // Code has been omitted for brevity.
+        });
+        </processConfigItems>
+
+        <writeToFile>
+        fs.writeFileSync(targetFilePath, tempManifest.write({indent: 4}), 'utf-8');
+        </writeToFile>
+    }
+</updateAndroidManifest>
+
+<_resetSearchInput>
+function _resetSearchInput() {
+    if (ctrl.resetSearchInput || (ctrl.resetSearchInput === undefined && uiSelectConfig.resetSearchInput)) {
+      ctrl.search = EMPTY_SEARCH;
+      
+      <setActiveIndex>
+      if (ctrl.selected && ctrl.items.length && !ctrl.multiple) {
+        ctrl.activeIndex = ctrl.items.indexOf(ctrl.selected);
+      }
+      </setActiveIndex>
+    }
+}
+</_resetSearchInput>
+```

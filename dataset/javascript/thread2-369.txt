@@ -1,0 +1,161 @@
+Let's annotate each function with respect to SRP compliance.
+
+1. KboxRequireError
+
+<function KboxRequireError>
+function KboxRequireError(id, err) {
+  Error.call(this);
+  this.message = [id, err.message].join(' -> ');
+  this.stack = [this.message, err.stack].join('\n');
+}
+</function KboxRequireError>
+SRP Compliant: The function 'KboxRequireError' adheres to the Single Responsibility Principle as it has one responsibility: to format and assign error information for a custom error.
+
+2. getStartTagIgnoreTokens
+
+<function getStartTagIgnoreTokens>
+function getStartTagIgnoreTokens(startTag) {
+  if (!skipAttrValues) {
+    return []
+  }
+  const tokens = []
+
+  for (const attr of startTag.attributes) {
+    tokens.push(attr.valueToken)
+  }
+  for (const attr of startTag.ignoredAttributes) {
+    tokens.push(attr.valueToken)
+  }
+  return tokens.filter(t => Boolean(t))
+}
+</function getStartTagIgnoreTokens>
+SRP Compliant: The function 'getStartTagIgnoreTokens' adheres to the Single Responsibility Principle as it solely focuses on extracting tokens from a given 'startTag' object.
+
+3. Anonymous function (Array manipulation)
+
+<function ArrayManipulation>
+function (items) {
+  var self = this, len = self.length, i;
+
+  self.length = 0;
+  self.add(items);
+  
+  for (i = self.length; i < len; i++) {
+    delete self[i];
+  }
+
+  return self;
+}
+</function ArrayManipulation>
+SRP Compliant: This anonymous function appears to reset the array, add new items, and delete leftover properties. It's difficult to judge SRP compliance without more context. If considered a compound operation, it could be SRP compliant.
+
+4. verify
+
+<function verify>
+function verify(postedMessage) {
+  if (
+    typeof postedMessage === 'object' &&
+    typeof postedMessage.uuid === 'string' &&
+    postedMessage._respondable === true
+  ) {
+    var messageSource = _getSource();
+    return (
+      postedMessage._source === messageSource ||
+      postedMessage._source === 'axeAPI.x.y.z' ||
+      messageSource === 'axeAPI.x.y.z'
+    );
+  }
+  return false;
+}
+</function verify>
+SRP Compliant: The function 'verify' adheres to the Single Responsibility Principle as it is only tasked with validating a posted message against specific criteria.
+
+5. getActiveKey
+
+<function getActiveKey>
+function getActiveKey(keyName) {
+  var keys = osk.keys[keyName];
+  if (!keys)
+    return null;
+
+  for (var i = keys.length - 1; i >= 0; i--) {
+    var candidate = keys[i];
+    if (modifiersPressed(candidate.requires))
+      return candidate;
+  }
+  return null;
+}
+</function getActiveKey>
+SRP Compliant: The function 'getActiveKey' sticks to the Single Responsibility Principle by simply retrieving the active key based on the provided 'keyName' and certain conditions.
+
+6. generateCanonicalRequestMessage
+
+<function generateCanonicalRequestMessage>
+function generateCanonicalRequestMessage(params) {
+  var msg = (params.method === undefined ? "GET" : params.method.toUpperCase()) + "\n" + params.uri.path + "\n" + (params.queryParams ? params.queryParams : "") + "\n";
+  params.headers.headerNames.forEach(function(name) {
+    msg += name + ":" + params.headers.headers[name] + "\n";
+  });
+  msg += params.headers.headerNames.join(";") + "\n";
+  msg += CryptoJS.enc.Hex.stringify(params.bodyDigest);
+  return msg;
+}
+</function generateCanonicalRequestMessage>
+SRP Compliant: The function 'generateCanonicalRequestMessage' adheres to the Single Responsibility Principle as its sole purpose is to generate a canonicalized string representation of an HTTP request for signing or comparison purposes.
+
+7. makeRe
+
+<function makeRe>
+function makeRe(pattern, options) {
+  /// ... Code omitted for brevity. This entire function handles the creation 
+  /// of a regular expression from a pattern and options, including caching,
+  /// configuration of regex characteristics, and error handling.
+  ///
+  /// The function is long and does several things, but all operations serve
+  /// the single goal of creating and configuring a regular expression, thus
+  /// it is considered SRP compliant as a whole.
+}
+</function makeRe>
+SRP Compliant: The function 'makeRe' performs multiple operations, but they all serve the single responsibility of constructing and configuring a regular expression object.
+
+8. transformClassName
+
+<function transformClassName>
+function transformClassName(name, item, entityType) {
+  /// ... Code omitted for brevity. The entire function is dedicated to
+  /// transforming class names based on provided entities, depth, and specific
+  /// patterns. Despite multiple operations, they all work together towards the
+  /// singular responsibility of name transformation.
+}
+</function transformClassName>
+SRP Compliant: The function 'transformClassName' observes the Single Responsibility Principle by only focusing on modifying class names according to BEM conventions.
+
+9. Anonymous function (Popup dialog)
+
+<function PopupDialog>
+function(node, message, yesString, noString, defaultInput, modal, onConfirm, positionString) {
+  var position = null;
+  if(positionString === "below"){position = ["below", "right", "above", "left"];}
+  /// ... Code continues defining position based on the string provided.
+  ///
+  /// The function prepares the parameters and then invokes another function
+  /// '_popupDialog' with these parameters. Conceptually, it is setting up and
+  /// displaying a popup, which can be seen as a single responsibility
+  /// despite variations based on position.
+}
+</function PopupDialog>
+SRP Compliant: This anonymously declared function is compliant with the Single Responsibility Principle because it encapsulates the logic necessary to define position-related options and make a call to a popup dialog utility.
+
+10. parseData
+
+<function parseData>
+function parseData(data, mode) {
+  /// ... Code omitted for brevity. This function reads through provided 
+  /// 'data', splits it into parameters, decodes unicode, and rebuilds it
+  /// in different formats based on the 'mode'. It performs various steps
+  /// in processing input data, but since these steps all contribute to 
+  /// parsing and preparing that data, it can be seen as fulfilling a
+  /// single responsibility.
+}
+</function parseData>
+SRP Compliant: The function 'parseData' adheres to the Single Responsibility Principle as it only deals with parsing and processing the given input data in various modes.

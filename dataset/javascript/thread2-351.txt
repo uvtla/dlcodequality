@@ -1,0 +1,219 @@
+```javascript
+function sendSPrintFError(res, errorArray, code, internalCode) {
+  <errorFormatting>
+  var obj = { success: false };
+  obj[res ? 'description' : 'reason'] = errorArray;
+  </errorFormatting>
+  return sendError(res, obj, code, internalCode);
+}
+
+<searchItems>
+function (term) {
+  return this.get('/storesearch', {
+    'term': term
+  }).then(function (body) {
+    var items = body.items;
+    return Promise.resolve(items);
+  });
+}
+</searchItems>
+
+<phoneNumberValidation>
+function isValid(number, countryCode) {
+  try {
+      var phoneUtil = i18n.phonenumbers.PhoneNumberUtil.getInstance();
+      var numberObj = phoneUtil.parseAndKeepRawInput(number, countryCode);
+      return phoneUtil.isValidNumber(numberObj);
+  } catch (e) {
+      return false;
+  }
+}
+</phoneNumberValidation>
+
+<processDocument>
+function(doc) {
+  var that = this;
+  <mapDocument>
+  doc = that._in_map(doc);
+  </mapDocument>
+
+  return this._init.then(function() {
+    <checkAdmissibility>
+    return that.isAdmissible(doc);
+    </checkAdmissibility>
+  }).then(function(admissible) {
+    if (!admissible) {
+      throw new Error('Document not admissible');
+    }
+
+    <cleanDocument>
+    doc = that.clean(doc);
+    </cleanDocument>
+
+    if (that._index) {
+      <removeIndexProperty>
+      delete doc[that._index];
+      </removeIndexProperty>
+    }
+
+    return that.getNextIndex();
+  }).then(function(max) {
+    if (that._index && typeof max === 'number') {
+      <assignNewIndex>
+      doc[that._index] = max;
+      </assignNewIndex>
+    }
+
+    return that._dbApi.create(doc).then(function(doc) {
+      if (!doc) {
+        throw new Error('Document not created');
+      }
+
+      return doc;
+    });
+  });
+}
+</processDocument>
+
+<parsePayload>
+function extractPayload(content) {
+  var payload = {};
+
+  <handleTextNode>
+  if (content[0] !== "<") {
+    payload.nodeType = 3;
+    payload.nodeValue = content;
+  } 
+  </handleTextNode>
+  <handleCommentNode>
+  else if (content.substr(0, 4) === "<!--") {
+    payload.nodeType = 8;
+    payload.nodeValue = content.substr(4, content.length - 7);
+  }
+  </handleCommentNode>
+  <handleDoctypeNode>
+  else if (content[1] === "!") {
+    payload.nodeType = 10;
+  }
+  </handleDoctypeNode>
+  <handleElementNode>
+  else {
+    payload.nodeType = 1;
+    payload.nodeName = /^<([^>\s]+)/.exec(content)[1].toUpperCase();
+    payload.attributes = _extractAttributes(content);
+
+    <handleClosingTags>
+    if (payload.nodeName[0] === "/") {
+      payload.nodeName = payload.nodeName.substr(1);
+      payload.closing = true;
+    }
+    </handleClosingTags>
+    
+    <handleSelfClosingTags>
+    if (content[content.length - 2] === "/") {
+      payload.closed = true;
+    }
+    </handleSelfClosingTags>
+    
+    <handleSpecialCaseElements>
+    if (payload.nodeName === "SCRIPT" || payload.nodeName === "STYLE") {
+      payload.closed = true;
+    }
+    </handleSpecialCaseElements>
+  }
+  </handleElementNode>
+  return payload;
+}
+</parsePayload>
+
+<addErrorControl>
+function addControl(ucode, umessage, uaux){
+  <checkAndSetAuxColor>
+  if(uaux && !terminal.colors.aux) terminal.colors.aux=terminal.colors.info;
+  </checkAndSetAuxColor>
+  <initializeErrorList>
+  if(!terminal.errors) terminal.errors=[];
+  </initializeErrorList>
+  <createAndAddErrorObject>
+  var errObject={code: ucode, message: umessage, aux: uaux};
+  terminal.errors.push(errObject);
+  </createAndAddErrorObject>
+}
+</addErrorControl>
+
+<configureBoxStyle>
+function _setColor(box, color) {
+  <standardizeColor>
+  color = color.toLowerCase();
+  </standardizeColor>
+  <setBackgroundColor>
+  box.css('background-color', color);
+  </setBackgroundColor>
+  <setTextColor>
+  if (color) {
+      box.css('color', color === '#000000' ? '#FFFFFF' : '#000000');
+  }
+  </setTextColor>
+  <setValueOrText>
+  box.name === 'input' ? box.val(color) : box.html(color);
+  </setValueOrText>
+}
+</configureBoxStyle>
+
+<handleMoveEvent>
+function sendMove(ev) {
+  <getPressedStatus>
+  var button = pressed
+  </getPressedStatus>
+  , pos;
+
+  <getCoordinates>
+  pos = getCoords(ev);
+  if (!pos) return;
+  </getCoordinates>
+
+  <calculateButtonCode>
+  button += 32;
+  </calculateButtonCode>
+  
+  <emitEvent>
+  sendEvent(button, pos);
+  </emitEvent>
+}
+</handleMoveEvent>
+
+<funcBind>
+function bind (callback, context) {
+  <sliceInitialArguments>
+  var args = arraySlice(arguments, 2)
+  </sliceInitialArguments>
+  
+  <determineContext>
+  context = context || this
+  </determineContext>
+  
+  <returnBoundFunction>
+  return function () {
+    return callback.apply(context, arraySlice(arguments).concat(args))
+  }
+  </returnBoundFunction>
+}
+</funcBind>
+
+<loadPlugins>
+function (pluginsPath) {
+  <readPluginsDirectory>
+  var plugins = fs.readdirSync(pluginsPath);
+  </readPluginsDirectory>
+  var loadedPlugin = [];
+  <importPluginModules>
+  plugins.forEach(function (pluginName) {
+    if (pluginName !== 'index.js') {
+        loadedPlugin.push(require(path.resolve(pluginsPath, path.basename(pluginName, '.js'))));
+    }
+  });
+  </importPluginModules>
+  return loadedPlugin;
+}
+</loadPlugins>
+```

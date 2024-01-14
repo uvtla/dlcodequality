@@ -1,0 +1,290 @@
+```javascript
+<set>
+function set(key, value, lineno, child) {
+  
+  <normalizeKey>
+  key = '' + key;
+  </normalizeKey>
+
+  <initializeVariables>
+  var typedef = Types[key]
+    , exists = this._data[key]
+    , val = exists || {value: null, lineno: !child ? lineno : undefined}
+    , changed = false;
+  </initializeVariables>
+
+  <checkAndUpdateExistence>
+  if(!lineno && !child) {
+    changed = !exists || exists && exists.value !== value;
+  }
+  </checkAndUpdateExistence>
+
+  <handleTypedefRepeats>
+  if(typedef && typedef.repeats) {
+    if(!lineno && !child) changed = true;
+    if(!exists) {
+      val.value = [value];
+      this._data[key] = val;
+    }else{
+      exists.value.push(value);
+    }
+  </handleTypedefRepeats>
+  <setValue>
+  else{
+    val.value = value;
+    this._data[key] = val;
+  }
+  </setValue>
+
+  <processLinesModification>
+  if(lineno === undefined && !child) {
+    if(typedef.repeats || !exists) {
+      if(!Object.keys(this._added).length) {
+        this._lines.push(GENERATED);
+      }
+      this._added[key] = value;
+      this._lines.push(this.encode(key, value));
+    }
+
+    if(exists && !this._added[key]) {
+      this._modified[exists.lineno] = key;
+      this._lines[exists.lineno - 1] = this.encode(key, value);
+    }
+  }
+  </processLinesModification>
+
+  <emitChangeEvents>
+  if(changed) {
+    this.emit('change',
+      key, value, (exists ? exists.value : undefined), val, exists);
+
+    this.emit(key,
+      key, value, (exists ? exists.value : undefined), val, exists);
+  }
+  </emitChangeEvents>
+
+  <handleIncludeKey>
+  if(key === Types.INCLUDE && value) {
+    this.emit('include', value, this._file, lineno);
+  }
+  </handleIncludeKey>
+}
+</set>
+
+<getKinesisShardIdAndEventNoFromEventID>
+function getKinesisShardIdAndEventNoFromEventID(eventID) {
+  if (eventID) {
+    const sepPos = eventID.indexOf(':');
+    return sepPos !== -1 ?
+      [eventID.substring(0, sepPos), eventID.substring(sepPos + 1),] : ['', ''];
+  }
+  return ['', ''];
+}
+</getKinesisShardIdAndEventNoFromEventID>
+
+<guessAtomElementFromName>
+function guessAtomElementFromName(fourLetterName) {
+  if (fourLetterName[0] !== ' ') {
+    var trimmed = fourLetterName.trim();
+    if (trimmed.length === 4) {
+      <findValidChar>
+      var i = 0;
+      var charCode = trimmed.charCodeAt(i);
+      while (i < 4 && (charCode < 65 || charCode > 122 ||
+             (charCode > 90 && charCode < 97))) {
+        ++i;
+        charCode = trimmed.charCodeAt(i);
+      }
+      </findValidChar>
+      return trimmed[i];
+    }
+    
+    <processNumericPrefix>
+    var firstCharCode = trimmed.charCodeAt(0);
+    if (firstCharCode >= 48 && firstCharCode <= 57) {
+      return trimmed[1];
+    }
+    </processNumericPrefix>
+    return trimmed.substr(0, 2);
+  }
+  return fourLetterName[1];
+}
+</guessAtomElementFromName>
+
+<DepNodeConstructor>
+function DepNode(id, options) {
+  
+  <validateInput>
+  debug('new DepNode(%s)', id);
+  if('string' != typeof id) {
+    throw new Error('Invalid argument : id must be a string');
+  }
+  checkOptions(options);
+  </validateInput>
+
+  <initializeProperties>
+  this.parent = null;
+  this.children = [];
+  this.id = id;
+  this.modules = [];
+  this.options = options
+  this.fromSize = 0;
+  this.toSize = 0;
+  </initializeProperties>
+}
+</DepNodeConstructor>
+
+<modelSaveMethod>
+function(_options){
+  <validateModel>
+  if(this.validate() !== true) return false;
+  </validateModel>
+
+  <saveModel>
+  var self = this, 
+      options = _options || {},
+      success = options.success, 
+      method = this.isNew() ? 'create' : 'update';
+
+  options.success = function(data){
+    if(method === 'create') self.id(data[self.idAttribute]);
+    if(success) success(self, data);
+  };
+  </saveModel>
+
+  <performSync>
+  return this.sync.call(this, method, this, options);
+  </performSync>
+}
+</modelSaveMethod>
+
+<struct>
+function struct (type, stateDefinitions, contractName, location) {
+  <parseType>
+  var match = type.match(/struct (\S*?)( storage ref| storage pointer| memory| calldata)?$/)
+  if (match) {
+    if (!location) {
+      location = match[2].trim()
+    }
+  </parseType>
+
+  <getMemberDetails>
+    var memberDetails = getStructMembers(match[1], stateDefinitions, contractName, location) 
+    if (!memberDetails) return null
+    return new StructType(memberDetails, location, match[1])
+  </getMemberDetails>
+  } else {
+    return null
+  }
+}
+</struct>
+
+<getWidgetsByName>
+function(name) {
+  <findWidgets>
+  var result = [],
+      i = 0;
+
+  for (; i < this._count; i++) {
+    if (this._content[i].isWidget && this._content[i].name == name) {
+      result.push(this._content[i]);
+    }
+  }
+  </findWidgets>
+  return result;
+}
+</getWidgetsByName>
+
+<getHelpContentsForService>
+function getHelpContentsForService(serviceManifest) {
+  const { operation } = serviceManifest;
+
+  <initializeSections>
+  const sections = [];
+  </initializeSections>
+  
+  <buildHelpSections>
+  if (serviceManifest.operation) {
+    let paramsHelp = { head: '', table: [] };
+    if (serviceManifest.operation.params) {
+      <buildParamsHelp>
+      const { params } = operation;
+      paramsHelp = {
+        head: `Command arguments are:`,
+        table: params.map(param => [chalk.cyan.bold(`--${param.alias || param.name} <${param.type}>${param.required ? ' (required)' : ''}`), param.description])
+      };
+      if (operation.entityName) {
+        paramsHelp.table.unshift([chalk.cyan.bold(`--in ${operation.entityType}.json`), `The ${operation.entityType} object to send in the body of the request`],
+            ['', chalk.dim(getEntityTypeExample(operation.entityType))]);
+      }
+      </buildParamsHelp>
+    } else if (operation.entityName) {
+      <processEntityOnly>
+      paramsHelp = {
+        head: `Command arguments are:`,
+        table: [
+          [chalk.cyan.bold(`--in ${operation.entityType}.json`), `The ${operation.entityType} object to send in the body of the request`],
+          ['', chalk.dim(getEntityTypeExample(operation.entityType))]
+        ]
+      };
+      </processEntityOnly>
+    }
+    if (operation.name == 'createKnowledgebase' || operation.name == 'getKnowledgebaseDetails') {
+      <msbotOption>
+      paramsHelp.table.push([chalk.cyan.bold(`--msbot`), `(OPTIONAL) Format the output as json for piping into msbot connect qna command`]);
+      </msbotOption>
+    }
+    if (paramsHelp.table.length > 0)
+      sections.push(paramsHelp);
+  }
+  <addConfigAndGlobal>
+  sections.push(configSection);
+  sections.push(globalArgs);
+  </addConfigAndGlobal>
+  </buildHelpSections>
+  
+  return sections;
+}
+</getHelpContentsForService>
+
+<MIDIParserErrorConstructor>
+function MIDIParserError(actual, expected, byte) {
+  <initErrorInstance>
+  Error.call(this);
+  Error.captureStackTrace(this, this.constructor);
+  this.name = this.constructor.name;
+  this.actual = actual;
+  this.expected = expected;
+  </initErrorInstance>
+
+  <formatAndSetMessage>
+  actual = format(actual);
+  expected = format(expected);
+  this.message = 'Invalid MIDI file: expected ' +
+      expected + ' but found ' + actual;
+  if (byte !== undefined) {
+    this.byte = byte;
+    this.message += ' (at byte ' + byte + ')';
+  }
+  </formatAndSetMessage>
+}
+</MIDIParserErrorConstructor>
+
+<setEventMappings>
+function (mappings) {
+  <validateMappings>
+  if (!mappings || !_.isObject(mappings)) {
+    var err = new Error('Please pass a valid mapping values!');
+    debug(err);
+    throw err;
+  }
+  </validateMappings>
+
+  <setMappings>
+  this.eventMappings = mappings;
+  </setMappings>
+
+  return this;
+}
+</setEventMappings>
+```

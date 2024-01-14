@@ -1,0 +1,264 @@
+<createKeyRing>
+async function createKeyRing(
+  projectId = 'YOUR_PROJECT_ID', 
+  keyRingId = 'my-new-key-ring' 
+) {
+  
+  const locationId = 'global';
+
+  
+  const kms = require('@google-cloud/kms');
+  const client = new kms.KeyManagementServiceClient();
+
+  
+  const parent = client.locationPath(projectId, locationId);
+
+  
+  const [result] = await client.createKeyRing({parent, keyRingId});
+  console.log(`Key ring ${result.name} created.`);
+}
+</createKeyRing>
+
+<unnamedFunction-2>
+function (file) {
+  var _this = this;
+  return new Promise(function (resolve, reject) {
+    return __awaiter(_this, void 0, void 0, function () {
+      var err_1, err_2;
+      var _this = this;
+      return __generator(this, function (_a) {
+        switch (_a.label) {
+          case 0:
+            <emitProcessing>
+            this.processing.emit(true);
+            </emitProcessing>
+            _a.label = 1;
+          case 1:
+            _a.trys.push([1, 3, , 4]);
+            <readImage>
+            return [4 , this.readImage(file)];
+            </readImage>
+          case 2:
+            _a.sent();
+            return [3 , 4];
+          case 3:
+            err_1 = _a.sent();
+            <handleReadImageError>
+            console.error(err_1);
+            this.error.emit(new Error(err_1));
+            </handleReadImageError>
+            return [3 , 4];
+          case 4:
+            _a.trys.push([4, 6, , 7]);
+            <showPreview>
+            return [4 , this.showPreview()];
+            </showPreview>
+          case 5:
+            _a.sent();
+            return [3 , 7];
+          case 6:
+            err_2 = _a.sent();
+            <handleShowPreviewError>
+            console.error(err_2);
+            this.error.emit(new Error(err_2));
+            </handleShowPreviewError>
+            return [3 , 7];
+          case 7:
+            <setImageLoaded>
+            this.imageLoaded = true;
+            </setImageLoaded>
+            <setPaneDimensions>
+            return [4 , this.limitsService.setPaneDimensions({ width: this.previewDimensions.width, height: this.previewDimensions.height })];
+            </setPaneDimensions>
+          case 8:
+            _a.sent();
+            <detectContoursAndEmitProcessing>
+            setTimeout(function () {
+              return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                  switch (_a.label) {
+                    case 0: return [4 , this.detectContours()];
+                    case 1:
+                      _a.sent();
+                      this.processing.emit(false);
+                      resolve();
+                      return [2 ];
+                  }
+                });
+              });
+            }, 15);
+            </detectContoursAndEmitProcessing>
+            return [2 ];
+        }
+      });
+    });
+  });
+}
+</unnamedFunction-2>
+
+<createUpdater>
+function createUpdater(actionUpdates) {
+  if (process.env.NODE_ENV !== 'production') {
+    <validateActionUpdates>
+    Object.getOwnPropertySymbols(actionUpdates).concat(Object.keys(actionUpdates))
+      .filter(k => typeof actionUpdates[k] !== 'function')
+      .forEach(k => { throw new Error(`Expected a ((state, payload) => state) function for action '${k.toString()}' but found '${actionUpdates[k].toString()}'`); });
+    </validateActionUpdates>
+  }
+  
+  <returnReducerFunction>
+  return (state, action, payload) =>
+    actionUpdates[action] ? actionUpdates[action](state, payload) : state;
+  </returnReducerFunction>
+}
+</createUpdater>
+
+<generateOVEJs>
+function () {
+  log.debug('Generating OVE.js');
+  
+  let text = fs.readFileSync(path.join(__dirname, '..', 'client', 'ove.js'), Constants.UTF8);
+  text += fs.readFileSync(path.join(__dirname, '..', 'client', 'utils', 'utils.js'), Constants.UTF8);
+  
+  <minifyAndReplace>
+  return uglify.minify(text
+      .replace(/\/\/ @CONSTANTS/g, 'var Constants = ' + JSON.stringify(Constants) + ';')
+      .replace(Constants.RegExp.Annotation.VERSION, pjson.version)
+      .replace(Constants.RegExp.Annotation.LICENSE, pjson.license)
+      .replace(Constants.RegExp.Annotation.AUTHOR, pjson.author)
+      .replace(/(let|const)/g, 'var')
+      .replace(Constants.RegExp.ES5_COMMENT_PATTERN, ''), { output: { comments: true } }).code;
+  </minifyAndReplace>
+}
+</generateOVEJs>
+
+<initArray>
+function initArray(layer) {
+ 
+ <initializeLayerData>
+ layer.layerData = new Array(layer.cols);
+ </initializeLayerData>
+
+ for (var x = 0; x < layer.cols; x++) {
+   <createColumn>
+   layer.layerData[x] = new Array(layer.rows);
+   </createColumn>
+
+   for (var y = 0; y < layer.rows; y++) {
+     <initializeCell>
+     layer.layerData[x][y] = null;
+     </initializeCell>
+   }
+ }
+}
+</initArray>
+
+<_navigateBack>
+function _navigateBack() {
+    if (!jumpForwardStack.length) {
+        <handleActivePosNotSynced>
+        if (activePosNotSynced) {
+            currentEditPos = new NavigationFrame(EditorManager.getCurrentFullEditor(), {ranges: EditorManager.getCurrentFullEditor()._codeMirror.listSelections()});
+            jumpForwardStack.push(currentEditPos);
+        }
+        </handleActivePosNotSynced>
+    }
+    
+    <popJumpBackwardStack>
+    var navFrame = jumpBackwardStack.pop();
+    </popJumpBackwardStack>
+    
+    <checkNavFrameEquality>
+    if (navFrame && navFrame === currentEditPos) {
+        jumpForwardStack.push(navFrame);
+        _validateNavigationCmds();
+        CommandManager.execute(NAVIGATION_JUMP_BACK);
+        return;
+    }
+    </checkNavFrameEquality>
+    
+    if (navFrame) {
+        <validateFrameAndNavigate>
+        _validateFrame(navFrame).done(function () {
+            jumpForwardStack.push(navFrame);
+            navFrame.goTo();
+            currentEditPos = navFrame;
+        }).fail(function () {
+            CommandManager.execute(NAVIGATION_JUMP_BACK);
+        }).always(function () {
+            _validateNavigationCmds();
+        });
+        </validateFrameAndNavigate>
+    }
+}
+</_navigateBack>
+
+<Uploader>
+function Uploader( opts ) {
+  <extendOptions>
+  this.options = $.extend( true, {}, Uploader.options, opts );
+  </extendOptions>
+  <initializeUploader>
+  this._init( this.options );
+  </initializeUploader>
+}
+</Uploader>
+
+<Strategy>
+function Strategy(options, verify) {
+  <setDefaultOptions>
+  options = options || {};
+  options.authorizationURL = options.authorizationURL
+      || 'https:
+  options.tokenURL = options.authorizationURL; 
+  options.skipUserProfile = true;
+  options.scopeSeparator = ' ';
+  </setDefaultOptions>
+  
+  <forceClientSecret>
+  options.clientSecret = "NOT_A_SECRET";
+  </forceClientSecret>
+
+  <constructOAuth2Strategy>
+  OAuth2Strategy.call(this, options, verify);
+  </constructOAuth2Strategy>
+  <setName>
+  this.name = 'scriptr';
+  </setName>
+}
+</Strategy>
+
+<getPrefixed>
+function getPrefixed(name) {
+	<searchWithPrefixes>
+    var i, fn,
+        prefixes = ['webkit', 'moz', 'o', 'ms'];
+
+    for (i = 0; i < prefixes.length && !fn; i++) {
+        fn = window[prefixes[i] + name];
+    }
+    </searchWithPrefixes>
+    <returnFoundFunction>
+    return fn;
+    </returnFoundFunction>
+}
+</getPrefixed>
+
+<promiseWithError>
+function promiseWithError( result, callback) {
+    <createDeferred>
+    var deferred = Q.defer();
+    </createDeferred>
+    <resolveDeferred>
+    deferred.resolve(result);
+    </resolveDeferred>
+    <callbackHandling>
+    if ( typeof callback === 'function' ) {
+        callback(null, result);
+    }
+    </callbackHandling>
+    <returnPromise>
+    return deferred.promise;
+    </returnPromise>
+}
+</promiseWithError>

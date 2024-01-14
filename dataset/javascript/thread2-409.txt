@@ -1,0 +1,294 @@
+<handleScrollEnd>
+function handleScrollEnd() {
+    scrollingStarted = false;
+    ghostScrollStart = null;
+    clearTimeout(scrollendTID);
+    scope.broadcast('scrollend', buildEventData());
+}
+</handleScrollEnd>
+
+<Communications>
+function Communications(f1, options) {
+  <determineOptions>
+  var opts = options || {
+    resourceName: 'communication'
+  }
+  if (!opts.resourceName) {
+    opts.resourceName = 'communication'
+  }
+  </determineOptions>
+  F1Resource.call(this, f1, opts)
+}
+</Communications>
+
+<findProxyName>
+function findProxyName(moduleName, proxyName, uri, callback) {
+    var base = path.basename(moduleName),
+        proxyUri = path.join(uri, proxyName, base)
+
+    <checkInitialProxyUri>
+    fs.stat(proxyUri, checkIfProxyExists)
+    </checkInitialProxyUri>
+
+    function checkIfProxyExists(err, stat) {
+        if (err) {
+            <adjustProxyUriOnError>
+            if (proxyUri.substr(-3, 3) === ".js") {
+                proxyUri = proxyUri.substr(0, proxyUri.length - 3)
+            } else {
+                proxyUri = proxyUri + ".js"
+            }
+            </adjustProxyUriOnError>
+
+            <recheckProxyUri>
+            fs.stat(proxyUri, checkIfChangedUriHelped)
+            </recheckProxyUri>
+        } else {
+            <successfulProxyCallback>
+            callback(null, path.relative(uri, proxyUri))
+            </successfulProxyCallback>
+        }
+    }
+
+    function checkIfChangedUriHelped(err, stat) {
+        if (err) {
+            <recurseOnSameDirectory>
+            moduleName = path.dirname(moduleName)
+
+            findProxyName(moduleName, proxyName, uri, callback)
+            </recurseOnSameDirectory>
+        } else {
+            <handleExtensionCheck>
+            if (proxyUri.substr(-3, 3) === ".js") {
+                callback(null, path.relative(uri, proxyUri))
+            } else {
+                findProxyObject(uri, path.relative(uri, proxyUri),
+                    callback)
+            }
+            </handleExtensionCheck>
+        }
+    }
+}
+</findProxyName>
+
+<syntaxTreeConstruction>
+function (index, blocks, out) {
+    <initializeLocals>
+    var length = blocks.length, buffer = [];
+    var nextIndex = index, goAhead = (length > nextIndex), block;
+    </initializeLocals>
+
+    <processBlocks>
+    while (goAhead) {
+        block = blocks[nextIndex];
+        if (block.type === "text") {
+            if (block.value !== "") {
+                <handleTextBlock>
+                try {
+                  block.value = htmlEntitiesToUtf8(block.value);
+                  buffer.push(block);
+                } catch (e) {
+                  this._logError(e.message, block);
+                }
+                </handleTextBlock>
+            }
+        } else if (block.type === "expression") {
+            <processExpressionBlock>
+            if (this._validateExpressionBlock(block)) {
+                buffer.push(block);
+            }
+            </processExpressionBlock>
+        } else if (block.type === "comment") {
+            
+        } else {
+            goAhead = false;
+        }
+
+        if (goAhead) {
+            nextIndex++;
+            goAhead = (length > nextIndex);
+        }
+    }
+    </processBlocks>
+
+    <constructNodeFromBuffer>
+    var node = null;
+    if (buffer.length === 1 && buffer[0].type === "text") {
+        
+        node = new Node("text");
+        node.value = buffer[0].value;
+    } else if (buffer.length > 0) {
+        
+        var onlyText=true;
+        for (var i = 0; i < buffer.length; i++) {
+            if (buffer[i].type !== "text") {
+                onlyText = false;
+                break;
+            }
+        }
+        if (onlyText) {
+            var texts=[];
+            for (var i = 0; i < buffer.length; i++) {
+                texts.push(buffer[i].value);
+            }
+            node = new Node("text");
+            node.value = texts.join('');
+        } else {
+            
+            node = new Node("textblock");
+            node.content = buffer;
+        }
+    }
+    if (node) {
+        out.push(node);
+    }
+    </constructNodeFromBuffer>
+
+    
+    return nextIndex > index ? nextIndex - 1 : index;
+}
+</syntaxTreeConstruction>
+
+<updateSearchFieldState>
+function (oThis) {
+    <retrieveElements>
+    var $this = oThis.$(),
+        $ico = oThis._ctrl.$("searchico");
+    </retrieveElements>
+
+    <updateTitleAttribute>
+    if ($this.hasClass("sapUiSearchFieldClear") && $this.hasClass("sapUiSearchFieldVal")) {
+        $ico.attr("title", oThis._clearTooltipText);
+    } else {
+        $ico.removeAttr("title");
+    }
+    </updateTitleAttribute>
+}
+</updateSearchFieldState>
+
+<sha1hex>
+function sha1hex(source) {
+  <generateHash>
+  var hash = crypto.createHash(SHA1);
+  hash.update(new Buffer('' + source));
+  return hash.digest(ENCODING);
+  </generateHash>
+}
+</sha1hex>
+
+<Server>
+function Server(clientListener) {
+  <initiateServer>
+  net.Server.call(this);
+  </initiateServer>
+  this._services = [];
+  
+  <attachClientListener>
+  if (clientListener) { this.addListener('client', clientListener); }
+  </attachClientListener>
+  
+  <setupConnectionListener>
+  var self = this;
+  this.addListener('connection', function (socket) {
+    var connection = new Connection(socket);
+    connection.once('connect', function (remote) {
+      self.emit('client', connection, remote);
+    });
+    connection.on('error', function (err) {
+      self.emit('clientError', err, this);
+    });
+    
+    <exposeServices>
+    self._services.forEach(function (service) {
+      connection.expose(service.name, service.service);
+    });
+    </exposeServices>
+  });
+  </setupConnectionListener>
+}
+</Server>
+
+<construct_guesses>
+function construct_guesses(parts) {
+    <baseCase>
+    if (parts.length === 1) {
+        return [parts];
+    }
+    </baseCase>
+
+    <recursiveConstruction>
+    const last = parts.pop();
+    const rest = construct_guesses(parts);
+    </recursiveConstruction>
+
+    <createGuesses>
+    const guesses = [];
+    for (const guess of rest) {
+        const one = clone(guess);
+        one.push('/~/');
+        one.push(last);
+
+        const two = clone(guess);
+        two.push('/node_modules/');
+        two.push(last);
+
+        guesses.push(one);
+        guesses.push(two);
+    }
+    </createGuesses>
+
+    return guesses;
+}
+</construct_guesses>
+
+<errorHandler>
+function errorHandler(err, req, res, next) {
+
+    <logError>
+    console.log('# Docloop error handler:');
+    console.error(err);
+    </logError>
+
+    <handleDocloopError>
+    if (err instanceof DocloopError) return res.status(err.status).send(err.toString());
+    </handleDocloopError>
+
+    <handleGenericError>
+    res.status(500).send(err.toString());
+    </handleGenericError>
+}
+</errorHandler>
+
+<assertFragmentMap>
+function assertFragmentMap(
+  componentName: string,
+  fragmentSpec: GeneratedNodeMap,
+): void {
+  <assertFragmentSpecStructure>
+  invariant(
+    fragmentSpec && typeof fragmentSpec === 'object',
+    'Could not create Relay Container for `%s`. ' +
+      'Expected a set of GraphQL fragments, got `%s` instead.',
+    componentName,
+    fragmentSpec,
+  );
+  </assertFragmentSpecStructure>
+
+  <assertEachFragment>
+  for (const key in fragmentSpec) {
+    if (fragmentSpec.hasOwnProperty(key)) {
+      const fragment = fragmentSpec[key];
+      invariant(
+        fragment &&
+          (typeof fragment === 'object' || typeof fragment === 'function'),
+        'Could not create Relay Container for `%s`. ' +
+          'The value of fragment `%s` was expected to be a fragment, got `%s` instead.',
+        componentName,
+        key,
+        fragment,
+      );
+    }
+  }
+  </assertEachFragment>
+}
+</assertFragmentMap>

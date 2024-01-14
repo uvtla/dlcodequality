@@ -1,0 +1,245 @@
+<function _link>
+function _link(input, options) {
+  <inputValidation>
+  if (typeof input !== 'string') return null
+  </inputValidation>
+
+  var linked, matches, namepath
+  var output = {}
+
+  <inputExtraction>
+  if ((matches = input.match(/.*?<(.*?)>/))) {
+    namepath = matches[1]
+  } else {
+    namepath = input
+  }
+  </inputExtraction>
+
+  <optionsFormatting>
+  options.hash = { id: namepath }
+  linked = dmd._identifier(options)
+  if (!linked) {
+    options.hash = { longname: namepath }
+    linked = dmd._identifier(options)
+  }
+  </optionsFormatting>
+  
+  <outputConstruction>
+  if (!linked) {
+    output = { name: input, url: null }
+  } else {
+    output.name = input.replace(namepath, linked.name)
+    if (dmd.isExternal.call(linked)) {
+      <externalUrlConstruction>
+      if (linked.description) {
+        output.url = 'external#' + dmd.anchorName.call(linked, options)
+      } else {
+        if (linked.see && linked.see.length) {
+          var firstLink = dmd.arseLink(linked.see[0])[0]
+          output.url = firstLink ? firstLink.url : linked.see[0]
+        } else {
+          output.url = null
+        }
+      }
+      </externalUrlConstruction>
+    } else {
+      <internalUrlConstruction>
+      const pre = linked.scope === 'global' ? linked.kind : ''
+      output.url = pre + '#' + dmd.anchorName.call(linked, options)
+      </internalUrlConstruction>
+    }
+  }
+  </outputConstruction>
+  
+  return output
+}
+</function _link>
+
+<function match_>
+function match_(newHash, parents, hashes) {
+    <recursiveMatching>
+    parents.push(parents[hashes.length].parentElement.closest(selClass));
+    hashes.push(parents[hashes.length].getAttribute('hash'));
+
+    if (parents[hashes.length]) {
+      return match_(newHash, parents, hashes);
+    } else {
+      return hashes.slice(0, hashes.length).reverse().join('/');
+    }
+    </recursiveMatching>
+  }
+</function match_>
+
+<function setEventGetter>
+function setEventGetter(Class, name, Self, { async: _async = false, once = false, } = { }) {
+	<gettersSetup>
+	name =  name.replace(/^./, _=>_.toUpperCase()); const on = 'on'+ name, fire = 'fire'+ name;
+	return Object.defineProperty(Class.prototype, on, { get() {
+		const self = Self.get(this); if (self[on]) { return self[on]; }
+		self[fire] = setEvent(self, on, { async: _async, once, });
+		return self[on];
+	}, configurable, });
+	</gettersSetup>
+}
+</function setEventGetter>
+
+<function unnamedGaugeChart>
+function () {
+	<gaugeChartDrawing>
+			.... // omitted for brevity
+	</gaugeChartDrawing>
+}
+</function unnamedGaugeChart>
+
+<function extractProtocolHost>
+function extractProtocolHost(url) {
+    <urlParsing>
+    const urlNoQuery = url.split('?')[0];
+    const [protocol, hostAndPath] = urlNoQuery.split('//');
+    const host = hostAndPath.split('/')[0];
+    </urlParsing>
+    
+    <protocolHostFormatting>
+    return `${protocol}//${host}`;
+    </protocolHostFormatting>
+}
+</function extractProtocolHost>
+
+<function unnamedRequest>
+function () {
+	<requestInitialization>
+            if (this._isProcessing) {
+                return;
+            }
+            this.$assert(33, this._logicalPaths.length > 0);
+            this._isProcessing = true;
+	</requestInitialization>
+	
+	<asyncRequestHandling>
+            (require("./IO")).asyncRequest({
+                sender : {
+                    classpath : this.$classpath,
+                    logicalPaths : this._logicalPaths
+                },
+                url : require("./DownloadMgr").getURLWithTimestamp(this._url), 
+                
+                callback : {
+                    fn : this._onFileReceive,
+                    onerror : this._onFileReceive,
+                    scope : this
+                },
+                expectedResponseType : "text"
+            });
+    </asyncRequestHandling>
+}
+</function unnamedRequest>
+
+<function keysIndexes>
+function keysIndexes(children, startIndex, endIndex) {
+  <keyIndexMapping>
+  var i, keys = Object.create(null), key;
+  for (i = startIndex; i <= endIndex; ++i) {
+    if (children[i]) {
+      key = children[i].key;
+      if (key !== undefined) {
+        keys[key] = i;
+      }
+    }
+  }
+  </keyIndexMapping>
+  return keys;
+}
+</function keysIndexes>
+
+<function unnamedTextureHandling>
+function(width, height, format, type, data, genMipmaps) {
+	<textureSetup>
+		var gl = this.gl;
+
+		format = format || gl.RGBA;
+		type = type || gl.UNSIGNED_BYTE;
+		data = data || null; 
+
+		this.width = (width || width==0) ? width : this.width;
+		this.height = (height || height==0) ? height : this.height;
+
+		this._checkPOT();
+
+		this.bind();
+
+		gl.texImage2D(this.target, 0, format, 
+					  this.width, this.height, 0, format,
+					  type, data);
+
+		if (genMipmaps)
+			gl.generateMipmap(this.target);
+	</textureSetup>
+}
+</function unnamedTextureHandling>
+
+<function unnamedRowFormatting>
+function(elTr, oRecord) {
+    <rowFormatting>
+    var ok = this.get("formatRow") ? this.get("formatRow").call(this, elTr, oRecord) : true;
+    if(ok) {
+        
+        elTr.style.display = 'none';
+        
+        ... // omitted for brevity
+        
+        elTr.style.display = '';
+    }
+    </rowFormatting>
+    
+    <rowIdSetting>
+    elTr.id = oRecord.getId();
+    </rowIdSetting> 
+    return elTr;
+}
+</function unnamedRowFormatting>
+
+<function formy>
+function formy(ctx, opts) {
+  <promiseHandling>
+  return new Promise(function (resolve, reject) {
+    <formDataProcessing>
+    var fields = {};
+    var files = {};
+    var form = new forms.IncomingForm(opts);
+    form.on('end', function () {
+      return resolve({
+        fields: fields,
+        files: files
+      });
+    }).on('error', function (err) {
+      return reject(err);
+    }).on('field', function (field, value) {
+      if (fields[field]) {
+        if (Array.isArray(fields[field])) {
+          fields[field].push(value);
+        } else {
+          fields[field] = [fields[field], value];
+        }
+      } else {
+        fields[field] = value;
+      }
+    }).on('file', function (field, file) {
+      if (files[field]) {
+        if (Array.isArray(files[field])) {
+          files[field].push(file);
+        } else {
+          files[field] = [files[field], file];
+        }
+      } else {
+        files[field] = file;
+      }
+    });
+    if (opts.onFileBegin) {
+      form.on('fileBegin', opts.onFileBegin);
+    }
+    form.parse(ctx.req);
+    </formDataProcessing>
+  });
+  </promiseHandling>
+}
+</function formy>

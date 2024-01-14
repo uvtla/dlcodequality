@@ -1,0 +1,271 @@
+```javascript
+<calculateNewLocationHash>
+function() {
+				var start = usersList.queryObject.start - usersList.queryObject.rows;
+				if (start < 0) {
+					start = 0;
+				}
+				return window.location.pathname + "#?start=" + start + "&rows=" + usersList.queryObject.rows; 
+			}
+</calculateNewLocationHash>
+
+<loadConceptIdsAndNameMap>
+function loadConceptIdsAndConceptNameMap(item) {
+  if (!defined(item._loadConceptIdsAndNameMapPromise)) {
+    var parameters = {
+      method: "GetDatasetConcepts",
+      datasetid: item.datasetId,
+      format: "json"
+    };
+    var datasetConceptsUrl = item._baseUrl + "?" + objectToQuery(parameters);
+
+    <fetchAndProcessDatasetConcepts>
+    var loadDatasetConceptsPromise = loadJson(datasetConceptsUrl)
+      .then(function(json) {
+        item._conceptIds = json.concepts;
+        if (
+          json.concepts.indexOf(item.regionConcept) === -1 ||
+          json.concepts.indexOf("REGIONTYPE") === -1
+        ) {
+          throw new DeveloperError(
+            "datasetId " +
+              item.datasetId +
+              " concepts [" +
+              json.concepts.join(", ") +
+              '] do not include "' +
+              item.regionConcept +
+              '" and "REGIONTYPE".'
+          );
+        }
+      })
+      .otherwise(throwLoadError.bind(null, item, "GetDatasetConcepts"));
+    </fetchAndProcessDatasetConcepts>
+
+    <fetchAndStoreConceptNames>
+    var loadConceptNamesPromise = loadJson(item.conceptNamesUrl).then(function(
+      json
+    ) {
+      item._conceptNamesMap = json;
+    });
+    </fetchAndStoreConceptNames>
+
+    item._loadConceptIdsAndNameMapPromise = when.all([
+      loadConceptNamesPromise,
+      loadDatasetConceptsPromise
+    ]);
+    
+  }
+  return item._loadConceptIdsAndNameMapPromise;
+}
+</loadConceptIdsAndNameMap>
+
+<synchronizeAuthData>
+function() {
+        var authData = this.get('authData');
+        if (!authData) {
+          return;
+        }
+
+        var self = this;
+
+        <iterateAuthData>
+        AV._objectEach(this.get('authData'), function(value, key) {
+          self._synchronizeAuthData(key);
+        });
+        </iterateAuthData>
+      }
+</synchronizeAuthData>
+
+<addModelAndRow>
+function (model) {
+            var added;
+            model = model || new this.collection.model();
+            added = this.collection.add(model);
+            
+            <checkModelType>
+            if (!(added instanceof Backbone.Collection)) {
+                model = added;
+            }
+            </checkModelType>
+
+            <renderAndAppendRow>
+            this._addRow(model).subs.newest.render().$el
+                .appendTo(this.getRowWrapper());
+            </renderAndAppendRow>
+            return this;
+        }
+</addModelAndRow>
+
+<loadAndDisplayTwitterMedia>
+function() {
+		var api_url,
+			self = this;
+					
+		
+		this._el.content_item = TL.Dom.create("div", "tl-media-twitter", this._el.content);
+		this._el.content_container.className = "tl-media-content-container tl-media-content-container-text";
+        		
+    <extractMediaId>
+    if(this.data.url.match("^(https?:)?\/*(www.)?twitter\.com"))
+    {
+		if (this.data.url.match("status\/")) {
+			this.media_id = this.data.url.split("status\/")[1];
+		} else if (this.data.url.match("statuses\/")) {
+			this.media_id = this.data.url.split("statuses\/")[1];
+		} else {
+			this.media_id = "";
+		}
+    }
+    
+    else if(this.data.url.match("<blockquote class=['\"]twitter-tweet['\"]")) {
+		
+        var found = this.data.url.match(/(status|statuses)\/(\d+)/);
+		if (found && found.length > 2) {
+		    this.media_id = found[2];
+		} else {
+		    self.loadErrorDisplay(self._("twitterembed_invalidurl_err"));
+		    return;
+		}
+    }
+    </extractMediaId>
+        
+    <prepareAndMakeRequest>
+    api_url = "https:
+		
+		
+		TL.ajax({
+			type: 'GET',
+			url: api_url,
+			dataType: 'json', 
+			success: function(d){
+				self.createMedia(d);
+			},
+			error:function(xhr, type){
+				var error_text = "";
+				error_text += self._("twitter_load_err") + "<br/>" + self.media_id + "<br/>" + type;
+				self.loadErrorDisplay(error_text);
+			}
+		});
+    </prepareAndMakeRequest>
+		 
+	}
+</loadAndDisplayTwitterMedia>
+
+<convertElementsTo2DArray>
+function() {
+      var array = [],
+          i, j, ilen, jlen;
+      for(i = 0, ilen = this.elements.length; i < ilen; i++) {
+        var row = [];
+        for(j = 0, jlen = this.column_names.length; j < jlen ; j++) {
+          row.push( this.elements[i][ this.column_names[j] ] );
+        }
+        array.push(row);
+      }
+      return array;
+    }
+</convertElementsTo2DArray>
+
+<manageTooltipDisplay>
+function showTooltipBind() {
+              if(hasEnableExp && !scope.$eval(attrs[prefix+'Enable'])) {
+                return;
+              }
+              if ( scope.tt_popupDelay ) {
+                popupTimeout = $timeout( show, scope.tt_popupDelay, false );
+                popupTimeout.then(function(reposition){reposition();});
+              } else {
+                show()();
+              }
+            }
+</manageTooltipDisplay>
+
+<constructPriorityButton>
+function(value){
+    var self = this;
+    this.value = value;
+    this.button = $('<div class="priority"></div>');
+    this.selected = false;
+    this.color = todo.priority_colors[value]
+    
+    <buttonClickAndStyle>
+    $(this.button).click(function(){
+      self.select();
+    }).css({
+      'background-image': 'url("priority_' + value + '.png")'
+    });
+    </buttonClickAndStyle>
+    return this
+  }
+</constructPriorityButton>
+
+<renderPaginationTemplate>
+function() {
+    var template
+      , site = this;
+
+    <defineTemplate>
+    template = ''
+      + '- for (var i = 0; i < paginator.items.length; i++)\n'
+      + '  !{hNews(paginator.items[i], true)}\n';
+    </defineTemplate>
+
+    <renderTemplateWithHelpers>
+    return helpers.render(template, { locals: site.applyHelpers({ paginator: site.paginator }) });
+    </renderTemplateWithHelpers>
+  }
+</renderPaginationTemplate>
+
+<createUserInDatabase>
+function createUser(name, pass, cb) {
+  
+  <validateName>
+  if(!isValidName(name)) return cb(new Error('Invalid name "'+name+'"'))
+  </validateName>
+
+  <validatePassword>
+  if(!isValidPass(pass)) return cb(new Error('Invalid pass: "'+pass+'"'))
+  </validatePassword>
+
+  <generateSalt>
+  var salt = crypto.randomBytes(16).toString('hex')
+  </generateSalt>
+
+  <generatePasswordHash>
+  var hash = crypto.createHash('sha1')
+  hash.update(pass)
+  hash.update(salt)
+  var password_sha = hash.digest('hex')
+  </generatePasswordHash>
+
+  <prepareUserDocument>
+  var new_doc =
+      { _id: user_namespace+':'+name
+      , name: name
+      , roles: []
+      , type: 'user'
+      , password_sha: password_sha
+      , salt: salt
+      }
+    ;
+  </prepareUserDocument>
+
+  <insertUserIntoDB>
+  nano().use(user_dbname).insert(new_doc, function(err, doc, h) {
+    if(err) return cb(err)
+  </insertUserIntoDB>
+
+    <createDatabaseForUser>
+    createDatabase(name, function(err) {
+      if(err) return cb(err)
+    </createDatabaseForUser>
+
+      <setDatabaseSecurity>
+      setDatabaseSecurity(name, function(err) {
+        if(err) return cb(err)
+        cb(null, doc.id, doc.rev)
+      })
+      </setDatabaseSecurity>
+  </createDatabaseForUser>
+</createUserInDatabase>
+```

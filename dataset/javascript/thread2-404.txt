@@ -1,0 +1,324 @@
+```javascript
+<unnamed>
+function() {
+    <calculateDependencies>
+    var dependencies = this.__all__.reduce(function(all, mixin) {
+      return mixin instanceof Mixin.__class__ ?
+        all.concat(mixin.__mixins__()) :
+        all;
+    }, []);
+    return dependencies
+      .concat([this]); </calculateDependencies>
+}
+</unnamed>
+
+<ShimEvent>
+function ShimEvent(type, debug) {
+  <initializeEventProperties>
+  this.type = type;
+  this.debug = debug;
+  this.bubbles = false;
+  this.cancelable = false;
+  this.eventPhase = 0;
+  this.timeStamp = new Date().valueOf(); </initializeEventProperties>
+}
+</ShimEvent>
+
+<validateForm>
+function(formName) {
+    <validateFormFields>
+    this.currentForm = formName;
+    this.errors = {};
+
+    for (var fieldName in this.validationInformation[formName]) {
+        this.currentField = fieldName;
+        currentFieldsValidations = this.validationInformation[formName][fieldName];
+        currentFieldsValue = this.utils.getFieldsValue(this.currentForm, this.currentField);
+
+        for (i = 0; i < currentFieldsValidations.length; i++) {
+            var method,
+                parameters = [];
+
+            currentValidationMethodAndParameters = this.getValidationMethodAndParameters(currentFieldsValidations[i]);
+            method = currentValidationMethodAndParameters[0];
+
+            
+            if (currentValidationMethodAndParameters.length === 2) {
+                parameters = currentValidationMethodAndParameters[1];
+            }
+
+            if (! this.callValidationMethodWithParameters(method, parameters, currentFieldsValue)) {
+                parameters.shift();
+                this.messages.addValidationErrorMessage(method, parameters);
+            }
+        }
+    }
+    </validateFormFields>
+
+    
+    return this.utils.isEmptyObject(this.errors); </checkIfValidationPassed>
+}
+</validateForm>
+
+<_initConverter>
+function _initConverter(){
+    <setupCSVConverter>
+    var csvConverter = new Converter_1();
+    var started = false;
+    var writeStream = process.stdout;
+    csvConverter.on("record_parsed",function(rowJSON){
+        if (started){
+            writeStream.write(",\n");
+        }
+        writeStream.write(JSON.stringify(rowJSON));  
+        if (started === false){
+            started = true;
+        }
+    });
+    writeStream.write("[\n"); 
+
+    csvConverter.on("end_parsed",function(){
+        writeStream.write("\n]"); 
+    });
+    csvConverter.on("error",function(err){
+        console.error(err);
+        process.exit(-1);
+    });
+    </setupCSVConverter>
+    return csvConverter;
+}
+</_initConverter>
+
+<webpack_require>
+function (module, exports, __webpack_require__) {
+
+  "use strict";
+
+  
+  
+
+  <checkPrerequisites>
+  if (__webpack_require__(6)) { </checkPrerequisites>
+    <webpack_module_implementation>
+    
+    </webpack_module_implementation>
+  <defaultCase>
+  } else module.exports = function () {}; </defaultCase>
+
+  
+}
+</webpack_require>
+
+<buildCatTasks>
+function buildCatTasks (opts) {
+  
+  <retrieveUtilities>
+  const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts </retrieveUtilities>
+  
+
+  <defineAcceptedParameters>
+  const acceptedQuerystring = [
+    'format',
+    'node_id',
+    'actions',
+    'detailed',
+    'parent_task',
+    'h',
+    'help',
+    's',
+    'v',
+    'pretty',
+    'human',
+    'error_trace',
+    'source',
+    'filter_path'
+  ] </defineAcceptedParameters>
+
+  <mapParametersToSnakeCase>
+  const snakeCase = {
+    nodeId: 'node_id',
+    parentTask: 'parent_task',
+    errorTrace: 'error_trace',
+    filterPath: 'filter_path'
+  } </mapParametersToSnakeCase>
+
+  <catTasksFunction>
+  return function catTasks (params, options, callback) { </catTasksFunction>
+    <handleOptions>
+    options = options || {}
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
+    if (typeof params === 'function' || params == null) {
+      callback = params
+      params = {}
+      options = {}
+    } </handleOptions>
+
+    
+    <validateRequestBody>
+    if (params.body != null) {
+      const err = new ConfigurationError('This API does not require a body')
+      return handleError(err, callback)
+    } </validateRequestBody>
+
+    
+    <validateHeaders>
+    if (options.headers != null && typeof options.headers !== 'object') {
+      const err = new ConfigurationError(`Headers should be an object, instead got: ${typeof options.headers}`)
+      return handleError(err, callback)
+    } </validateHeaders>
+
+    <variableDeclarations>
+    var warnings = []
+    var { method, body, ...querystring } = params
+    querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
+    </variableDeclarations>
+
+    <defaultRequestMethod>
+    if (method == null) {
+      method = 'GET'
+    } </defaultRequestMethod>
+
+    <handleIgnoreOption>
+    var ignore = options.ignore
+    if (typeof ignore === 'number') {
+      options.ignore = [ignore]
+    } </handleIgnoreOption>
+
+    <defineRequestPath>
+    var path = ''
+
+    path = '/' + '_cat' + '/' + 'tasks' </defineRequestPath>
+
+    
+    <createRequestObject>
+    const request = {
+      method,
+      path,
+      body: null,
+      querystring
+    } </createRequestObject>
+
+    <assignWarnings>
+    options.warnings = warnings.length === 0 ? null : warnings </assignWarnings>
+    <makeAPIRequest>
+    return makeRequest(request, options, callback)
+    </makeAPIRequest>
+  }
+}
+</buildCatTasks>
+
+<getDescription>
+function getDescription(conversation) {
+    <constructDescription>
+    if (conversation.metadata.conversationersationName) {
+      return 'The Conversation ' + conversation.metadata.conversationersationName + ' has been deleted';
+    } else {
+      return 'The Conversation with ' +
+        conversation.participants.join(', ').replace(/(.*),(.*)/, '$1 and$2') +
+        ' has been deleted';
+    } </constructDescription>
+}
+</getDescription>
+
+<filterDeps>
+function filterDeps (deps) {
+  <handleEmptyFilterList>
+  if (!filterList.length) return deps </handleEmptyFilterList>
+
+  <filterDependencies>
+  return Object.keys(deps).reduce(function (filteredDeps, name) {
+    if (filterList.indexOf(name) !== -1) {
+      filteredDeps[name] = deps[name]
+    }
+    return filteredDeps
+  }, {}) </filterDependencies>
+}
+</filterDeps>
+
+<unnamed>
+function() {
+    <initializeRomProperties>
+		this.prgBanks = this.header[4];
+		this.chrBanks = this.header[5];
+		this.ramBanks = this.header[8] || 1;
+
+		this.prgSize = this.prgBanks * 16 * 1024;
+		this.chrSize = this.chrBanks * 8 * 1024;
+		this.ramSize = this.ramBanks * 8 * 1024;
+
+		this.prgData = this.data.subarray( 0, this.prgSize );
+
+		if ( this.chrBanks ) {
+			this.chrData = this.data.subarray( this.prgSize, this.prgSize + this.chrSize );
+		} else {
+			
+			this.chrData = new Uint8Array( 0x2000 );
+		}
+
+		this.ramData = new Uint8Array( this.ramSize );
+
+		this.initMapper();
+		</initializeRomProperties>
+}
+</unnamed>
+
+<getLinks>
+function getLinks(db, callback) {
+
+  
+  <manageCacheSetup>
+  let cacheKey = db.id + "-" + 'links';
+  let cache = cache_links.get(cacheKey);
+  if ( cache !== null ) {
+    return callback(null, cache);
+  } </manageCacheSetup>
+
+  
+  <executeDbQuery>
+  let select = "SELECT link_category_title, link_title, link_description, link_url FROM rt_links;";
+
+  
+  db.select(select, function(err, results) {
+
+    
+    if ( err ) {
+      return callback(err);
+    } </executeDbQuery>
+
+    
+    <prepareResponse>
+    let rtn = [];
+
+    
+    for ( let i = 0; i < results.length; i++ ) {
+      let row = results[i];
+
+      
+      let link = new Link(
+        row.link_category_title,
+        row.link_title,
+        row.link_description,
+        row.link_url
+      );
+
+      
+      rtn.push(link);
+    } </prepareResponse>
+
+    
+    <cacheResponse>
+    cache_links.put(cacheKey, rtn); </cacheResponse>
+
+    
+    <returnCallback>
+    return callback(null, rtn);
+    </returnCallback>
+
+  });
+
+}
+</getLinks>
+```

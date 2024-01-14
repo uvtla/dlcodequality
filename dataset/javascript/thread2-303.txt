@@ -1,0 +1,488 @@
+<fetchExternals>
+function fetchExternals(request, body) {
+
+    <parseIncluding>
+    var includes = parseIncludes(request);</parseIncluding>
+    
+    <getUser>
+    var user = request.user;</getUser>
+    
+    <groupIncludesByType>
+    var requestsByType = groupIncludes(includes, body);</groupIncludesByType>
+
+    <fetchDataAndMerge>
+    return when.all(_.map(requestsByType, function(requestData, ancestorType) {
+        <getUniqueIds>
+        var ids = _.uniq(requestData.ids);</getUniqueIds>
+        <fetchAncestors>
+        return fetchAncestor(ancestorType, ids, _.compact(_.map(requestData.includes, function(i) { return _.rest(i).join("."); })).join(","), request)</fetchAncestors>
+          <handleAncestorResponse>
+          .then(function(response){
+            return response;
+          })
+          .then(function(data) {
+            _.each(requestData.includes, function(split) {
+              mergeAncestorData(body, split, ancestorType, data);
+            });
+          })</handleAncestorResponse>
+          <handleFetchError>
+          .catch(function(err) { console.trace(err.stack || err); });</handleFetchError>
+      })).then(function() {
+        return body;
+      });</fetchDataAndMerge>
+  }
+</fetchExternals>
+
+<sortChildrenByType>
+function( element )
+				{
+					<getChildrenAndSort>
+					var children = element.children;
+					children.sort( function ( node1, node2 )
+								   {
+									   return node1.type == CKEDITOR.NODE_ELEMENT && node2.type == node1.type ?
+											CKEDITOR.tools.indexOf( tableOrder, node1.name )  > CKEDITOR.tools.indexOf( tableOrder, node2.name ) ? 1 : -1 : 0;
+								   } );</getChildrenAndSort>
+				}
+</sortChildrenByType>
+
+<drawCanvasShape>
+function(type, pos, dim, canvas){
+      <getCanvasContext>
+      var ctx = canvas.getCtx(),</getCanvasContext>
+      
+      <calculateCoordinates>
+      c1x = pos.x, 
+      c1y = pos.y - dim, 
+      c2x = c1x - dim, 
+      c2y = pos.y + dim, 
+      c3x = c1x + dim, 
+      c3y = c2y;</calculateCoordinates>
+      
+      <drawShape>
+      ctx.beginPath();
+      ctx.moveTo(c1x, c1y);
+      ctx.lineTo(c2x, c2y);
+      ctx.lineTo(c3x, c3y);
+      ctx.closePath();
+      ctx[type]();</drawShape>
+    }
+</drawCanvasShape>
+
+<createImboUrlInstance>
+function(options) {
+        <constructImboUrl>
+        return new ImboUrl({
+            baseUrl: this.options.hosts[0],
+            user: typeof options.user !== 'undefined' ? options.user : this.options.user,
+            publicKey: this.options.publicKey,
+            privateKey: this.options.privateKey,
+            queryString: options.query,
+            path: options.path
+        });</constructImboUrl>
+    }
+</createImboUrlInstance>
+
+<makeSolarSystems>
+function makeSolarSystems(agent) {
+    <solarSystemFunctor>
+    let functor = function (id) {
+        if (id === undefined) {
+            return agent.request('get_universe_systems', undefined);
+        }
+        else {
+            return new SolarSystemImpl(agent, id);
+        }
+    };</solarSystemFunctor>
+    
+    <searchSolarsystem>
+    functor.search = search_1.makeDefaultSearch(agent, "solarsystem" );</searchSolarsystem>
+    
+    <jumpStats>
+    functor.jumpStats = function () {
+        return agent.request('get_universe_system_jumps', undefined);
+    };</jumpStats>
+    
+    <killStats>
+    functor.killStats = function () {
+        return agent.request('get_universe_system_kills', undefined);
+    };</killStats>
+    
+    <solarSystemNames>
+    functor.names = function (ids) {
+        if (ids === undefined) {
+            return functor().then(allIds => functor.names(allIds));
+        }
+        else {
+            return names_1.getNames(agent, "solar_system" , ids);
+        }
+    };</solarSystemNames>
+    
+    return functor;
+}
+</makeSolarSystems>
+
+<iceCandidateBatchingSignalling>
+function IceCandidateBatchingSignallingService(asyncExecService, signallingService, batchingDelayMs) {
+
+    <initialize>
+    Utils.checkArguments(arguments, 3);
+
+    var queuedCandidates = {};
+    var deliveryPromises = {};</initialize>
+
+    <proxySignallingServiceMethods>
+    this.on = function () {
+        return signallingService.on.apply(signallingService, arguments);
+    };
+
+    this.removeAllListeners = function () {
+        return signallingService.removeAllListeners.apply(signallingService, arguments);
+    };
+
+    this.connect = function () {
+        return signallingService.connect.apply(signallingService, arguments);
+    };
+
+    this.sendOffer = function () {
+        return signallingService.sendOffer.apply(signallingService, arguments);
+    };
+
+    this.waitForAnswer = function (correlationId) {
+        return signallingService.waitForAnswer.apply(signallingService, arguments);
+    };
+
+    this.createNewPointer = function () {
+        return signallingService.createNewPointer.apply(signallingService, arguments);
+    };
+
+    this.getLocalId = function () {
+        return signallingService.getLocalId.apply(signallingService, arguments);
+    };
+
+    this.sendAnswer = function () {
+        return signallingService.sendAnswer.apply(signallingService, arguments);
+    };</proxySignallingServiceMethods>
+
+    <candidateQueueManagement>
+    this.sendIceCandidates = function (destinationNode, correlationId, iceCandidates) {
+        var newQueue = iceCandidates;
+        var existingQueue = getQueue(destinationNode.id, correlationId);
+        if (existingQueue) {
+            newQueue = existingQueue.concat(iceCandidates);
+        }
+        else {
+            
+            setPromise(destinationNode.id, correlationId, scheduleCandidateDelivery(destinationNode, correlationId));
+        }
+        setQueue(destinationNode.id, correlationId, newQueue);
+        return getPromise(destinationNode.id, correlationId);
+    };
+
+    function getPromise(destinationNodeId, correlationId) {
+        if (deliveryPromises.hasOwnProperty(destinationNodeId) && deliveryPromises[destinationNodeId].hasOwnProperty(correlationId)) {
+            return deliveryPromises[destinationNodeId][correlationId];
+        }
+        else {
+            throw new Error("Couldn't locate promise for send?! (this should never happen)");
+        }
+    }
+
+    function setPromise(nodeId, correlationId, newPromise) {
+        if (!deliveryPromises.hasOwnProperty(nodeId)) {
+            deliveryPromises[nodeId] = {};
+        }
+        deliveryPromises[nodeId][correlationId] = newPromise;
+    }
+
+    function deletePromise(nodeId, correlationId) {
+        delete deliveryPromises[nodeId][correlationId];
+        if (Object.keys(deliveryPromises[nodeId]).length === 0) {
+            delete deliveryPromises[nodeId];
+        }
+    }
+
+    function getQueue(nodeId, correlationId) {
+        if (queuedCandidates.hasOwnProperty(nodeId) && queuedCandidates[nodeId].hasOwnProperty(correlationId)) {
+            return queuedCandidates[nodeId][correlationId];
+        }
+        return null;
+    }
+
+    function setQueue(nodeId, correlationId, newQueue) {
+        if (!queuedCandidates.hasOwnProperty(nodeId)) {
+            queuedCandidates[nodeId] = {};
+        }
+        queuedCandidates[nodeId][correlationId] = newQueue;
+    }
+
+    function deleteQueue(nodeId, correlationId) {
+        delete queuedCandidates[nodeId][correlationId];
+        if (Object.keys(queuedCandidates[nodeId]).length === 0) {
+            delete queuedCandidates[nodeId];
+        }
+    }</candidateQueueManagement>
+
+    <scheduleDelivery>
+    function scheduleCandidateDelivery(destinationNode, correlationId) {
+        return new Promise(function (resolve, reject) {
+            asyncExecService.setTimeout(function () {
+                var queueToSend = getQueue(destinationNode.id, correlationId);
+                deleteQueue(destinationNode.id, correlationId);
+                deletePromise(destinationNode.id, correlationId);
+                signallingService.sendIceCandidates(destinationNode, correlationId, queueToSend)
+                    .then(resolve, reject);
+            }, batchingDelayMs);
+        });
+    }</scheduleDelivery>
+}
+</iceCandidateBatchingSignalling>
+
+<bindKey>
+function bindKey(object, key) {
+      <createWrapperWithArgs>
+      return arguments.length < 3
+        ? createWrapper(key, BIND_FLAG | BIND_KEY_FLAG, null, object)
+        : createWrapper(key, BIND_FLAG | BIND_KEY_FLAG | PARTIAL_FLAG, null, object, slice(arguments, 2));</createWrapperWithArgs>
+    }
+</bindKey>
+
+<executeSteal>
+function(name){
+			
+			<setupStealObject>
+			var stel = steal.p.make( name );
+			stel.loading = true;</setupStealObject>
+			
+			<convertAndPreload>
+			convert(stel, "complete");
+			
+			steal.preloaded(stel);</convertAndPreload>
+			
+			<setLoaded>
+			stel.loaded()</setLoaded>
+			return steal;
+		}
+</executeSteal>
+
+<hashFunction>
+function(options) {
+      
+      <configureHashOptions>
+      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false,
+        
+        b64pad = (options && typeof options.pad === 'string') ? options.pad : '=',
+        
+        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true,</configureHashOptions>
+        
+        <initializeSha512_k>
+        sha512_k;</initializeSha512_k>
+
+      <exposeHashMethods>
+      this.hex = function(s) {
+        return rstr2hex(rstr(s));
+      };
+      this.b64 = function(s) {
+        return rstr2b64(rstr(s), b64pad);
+      };
+      this.any = function(s, e) {
+        return rstr2any(rstr(s), e);
+      };
+      this.raw = function(s) {
+        return rstr(s, utf8);
+      };
+      this.hex_hmac = function(k, d) {
+        return rstr2hex(rstr_hmac(k, d));
+      };
+      this.b64_hmac = function(k, d) {
+        return rstr2b64(rstr_hmac(k, d), b64pad);
+      };
+      this.any_hmac = function(k, d, e) {
+        return rstr2any(rstr_hmac(k, d), e);
+      };</exposeHashMethods>
+      
+      <testAndConfiguration>
+      this.vm_test = function() {
+        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
+      };
+      
+      this.setUpperCase = function(a) {
+        if (typeof a === 'boolean') {
+          hexcase = a;
+        }
+        return this;
+      };
+      
+      this.setPad = function(a) {
+        b64pad = a || b64pad;
+        return this;
+      };
+      
+      this.setUTF8 = function(a) {
+        if (typeof a === 'boolean') {
+          utf8 = a;
+        }
+        return this;
+      };</testAndConfiguration>
+
+      <hashCore>
+      function rstr(s) {
+        s = (utf8) ? utf8Encode(s) : s;
+        return binb2rstr(binb(rstr2binb(s), s.length * 8));
+      }</hashCore>
+      
+      <hmacCore>
+      function rstr_hmac(key, data) {
+        key = (utf8) ? utf8Encode(key) : key;
+        data = (utf8) ? utf8Encode(data) : data;
+
+        var hash, i = 0,
+          bkey = rstr2binb(key),
+          ipad = Array(32),
+          opad = Array(32);
+
+        if (bkey.length > 32) {
+          bkey = binb(bkey, key.length * 8);
+        }
+
+        for (; i < 32; i += 1) {
+          ipad[i] = bkey[i] ^ 0x36363636;
+          opad[i] = bkey[i] ^ 0x5C5C5C5C;
+        }
+
+        hash = binb(ipad.concat(rstr2binb(data)), 1024 + data.length * 8);
+        return binb2rstr(binb(opad.concat(hash), 1024 + 512));
+      }</hmacCore>
+
+      <crucialBinbFunction>
+      function binb(x, len) {
+        var j, i, l,
+          W = new Array(80),
+          hash = new Array(16),
+          
+          H = [
+            new int64(0x6a09e667, -205731576),
+            new int64(-1150833019, -2067093701),
+            new int64(0x3c6ef372, -23791573),
+            new int64(-1521486534, 0x5f1d36f1),
+            new int64(0x510e527f, -1377402159),
+            new int64(-1694144372, 0x2b3e6c1f),
+            new int64(0x1f83d9ab, -79577749),
+            new int64(0x5be0cd19, 0x137e2179)
+          ],
+          T1 = new int64(0, 0),
+          T2 = new int64(0, 0),
+          a = new int64(0, 0),
+          b = new int64(0, 0),
+          c = new int64(0, 0),
+          d = new int64(0, 0),
+          e = new int64(0, 0),
+          f = new int64(0, 0),
+          g = new int64(0, 0),
+          h = new int64(0, 0),
+          
+          s0 = new int64(0, 0),
+          s1 = new int64(0, 0),
+          Ch = new int64(0, 0),
+          Maj = new int64(0, 0),
+          r1 = new int64(0, 0),
+          r2 = new int64(0, 0),
+          r3 = new int64(0, 0);
+
+        <initializeHashConstants>
+        if (sha512_k === undefined) {
+          
+          sha512_k = [
+           ... //omitted for brevity
+          ];
+        }</initializeHashConstants>
+
+        for (i = 0; i < 80; i += 1) {
+          W[i] = new int64(0, 0);
+        }
+
+        
+        x[len >> 5] |= 0x80 << (24 - (len & 0x1f));
+        x[((len + 128 >> 10) << 5) + 31] = len;
+        l = x.length;
+        for (i = 0; i < l; i += 32) { 
+          int64copy(a, H[0]);
+          int64copy(b, H[1]);
+          int64copy(c, H[2]);
+          int64copy(d, H[3]);
+          int64copy(e, H[4]);
+          int64copy(f, H[5]);
+          int64copy(g, H[6]);
+          int64copy(h, H[7]);
+
+          for (j = 0; j < 16; j += 1) {
+            W[j].h = x[i + 2 * j];
+            W[j].l = x[i + 2 * j + 1];
+          }
+
+          for (j = 16; j < 80; j += 1) {
+            
+            int64rrot(r1, W[j - 2], 19);
+            int64revrrot(r2, W[j - 2], 29);
+            int64shr(r3, W[j - 2], 6);
+            s1.l = r1.l ^ r2.l ^ r3.l;
+            s1.h = r1.h ^ r2.h ^ r3.h;
+            
+            int64rrot(r1, W[j - 15], 1);
+            int64rrot(r2, W[j - 15], 8);
+            int64shr(r3, W[j - 15], 7);
+            s0.l = r1.l ^ r2.l ^ r3.l;
+            s0.h = r1.h ^ r2.h ^ r3.h;
+
+            int64add4(W[j], s1, W[j - 7], s0, W[j - 16]);
+          }
+
+          for (j = 0; j < 80; j += 1) {
+            
+            Ch.l = (e.l & f.l) ^ (~e.l & g.l);
+            Ch.h = (e.h & f.h) ^ (~e.h & g.h);
+
+            
+            int64rrot(r1, e, 14);
+            int64rrot(r2, e, 18);
+            int64revrrot(r3, e, 9);
+            s1.l = r1.l ^ r2.l ^ r3.l;
+            s1.h = r1.h ^ r2.h ^ r3.h;
+
+            
+            int64rrot(r1, a, 28);
+            int64revrrot(r2, a, 2);
+            int64revrrot(r3, a, 7);
+            s0.l = r1.l ^ r2.l ^ r3.l;
+            s0.h = r1.h ^ r2.h ^ r3.h;
+
+            
+            Maj.l = (a.l & b.l) ^ (a.l & c.l) ^ (b.l & c.l);
+            Maj.h = (a.h & b.h) ^ (a.h & c.h) ^ (b.h & c.h);
+
+            int64add5(T1, h, s1, Ch, sha512_k[j], W[j]);
+            int64add(T2, s0, Maj);
+
+            int64copy(h, g);
+            int64copy(g, f);
+            int64copy(f, e);
+            int64add(e, d, T1);
+            int64copy(d, c);
+            int64copy(c, b);
+            int64copy(b, a);
+            int64add(a, T1, T2);
+          }
+          int64add(H[0], H[0], a);
+          int64add(H[1], H[1], b);
+          int64add(H[2], H[2], c);
+          int64add(H[3], H[3], d);
+          int64add(H[4], H[4], e);
+          int64add(H[5], H[5], f);
+          int64add(H[6], H[6], g);
+          int64add(H[7], H[7], h);
+        }
+
+        
+        for (i = 0; i < 8; i += 1) {
+          hash[2 * i] = H[i].h;
+          hash[2 * i + 1

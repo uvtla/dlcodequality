@@ -47,6 +47,8 @@ function mix(
 
 2.
 This function lacks a name, making it difficult to properly annotate for SRP compliance without understanding the context and intent of the code. However, it appears to combine event handling, event delegation, navigation, and handling of focus events, which would normally be split into different responsibilities.
+<ignoredForGoodReason>
+</ignoredForGoodReason>
 
 3.
 <readNumericString>

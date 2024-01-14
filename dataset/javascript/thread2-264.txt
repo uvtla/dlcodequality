@@ -1,0 +1,264 @@
+```javascript
+<record>
+function record(buffer, variable, recordDimension) {
+  
+  const type = types.str2num(variable.type);
+  const width = variable.size ? variable.size / types.num2bytes(type) : 1;
+
+  var size = recordDimension.length;
+  var data = new Array(size);
+  const step = recordDimension.recordStep;
+
+  for (var i = 0; i < size; i++) {
+    var currentOffset = buffer.offset;
+    data[i] = types.readType(buffer, type, width);
+    buffer.seek(currentOffset + step);
+  }
+
+  return data;
+}
+</record>
+
+<usageRead>
+function usageRead(opts, cb) {
+  <handleOptsFunction>
+  if (typeof opts === 'function') {
+    cb = opts;
+    opts = {
+      sectorSizeBytes: 512,
+      sampleMs: 1000,
+      device: 'sda',
+      units: 'bytes',
+    };
+  } else {
+    opts.sectorSizeBytes = opts.sectorSizeBytes || 512;
+    opts.sampleMs = opts.sampleMs || 1000;
+    opts.device =  opts.device || 'sda';
+    opts.units =  opts.units || 'bytes';
+  }
+  </handleOptsFunction>
+
+  <measureDiskReadPerformance>
+  var time;
+  var delta1;
+  var delta0 = _parseProcDiskstats()[opts.device].sectorsRead;
+  time = process.hrtime();
+  setTimeout(function() {
+    delta1 = _parseProcDiskstats()[opts.device].sectorsRead;
+
+    var diff = process.hrtime(time);
+    var diffSeconds = diff[0] + diff[1] * 1e-9;
+
+    var totalBytes = (delta1 - delta0) * opts.sectorSizeBytes;
+    var totalBytesPerSecond = totalBytes / (diffSeconds * diffSeconds);
+    var converted = _bytesTo(totalBytesPerSecond, opts.units);
+
+    return cb(converted);
+  }, opts.sampleMs);
+  </measureDiskReadPerformance>
+}
+</usageRead>
+
+<contoursTransform>
+function contoursTransform(contours, transforms) {
+  if (!contours || !contours.length || !transforms || !transforms.length) {
+    return contours;
+  }
+
+  contours.forEach(function (p) {
+    <applyTransformsToPath>
+    for (var i = 0, l = transforms.length; i < l; i++) {
+      var transform = transforms[i];
+      var params = transform.params;
+      switch (transform.name) {
+        case 'translate':
+          pathAdjust(p, 1, 1, params[0], params[1]);
+          break;
+        case 'scale':
+          pathAdjust(p, params[0], params[1]);
+          break;
+        case 'matrix':
+          pathTransform(p, params[0], params[1], params[2], params[3], params[4], params[5]);
+          break;
+      }
+    }
+    </applyTransformsToPath>
+  });
+
+  return contours;
+}
+</contoursTransform>
+
+<RequestorCreator>
+function (sServiceUrl, oModelInterface, mHeaders, mQueryParams, sODataVersion) {
+  <createRequestor>
+  var oRequestor = new Requestor(sServiceUrl, mHeaders, mQueryParams, oModelInterface);
+  </createRequestor>
+
+  <adaptToODataVersion>
+  if (sODataVersion === "2.0") {
+    asV2Requestor(oRequestor);
+  }
+  </adaptToODataVersion>
+
+  return oRequestor;
+}
+</RequestorCreator>
+
+<createGridHelper>
+function () {
+  var scene = this.el.object3D;
+  var data = this.data;
+
+  var size = data.size;
+  var divisions = data.divisions;
+  var colorCenterLine = data.colorCenterLine;
+  var colorGrid = data.colorGrid;
+
+  var gridHelper = new THREE.GridHelper( size, divisions, colorCenterLine, colorGrid );
+  gridHelper.name = "gridHelper";
+  scene.add(gridHelper);
+}
+</createGridHelper>
+
+<raycasterCheck>
+function (time) {
+  var el = this.el;
+  var data = this.data;
+  var intersectedEls;
+  var intersections;
+  var prevCheckTime = this.prevCheckTime;
+  var prevIntersectedEls;
+
+  <checkInterval>
+  if (prevCheckTime && (time - prevCheckTime < data.interval)) { return; }
+  </checkInterval>
+
+  <updateState>
+  prevIntersectedEls = this.intersectedEls.slice();
+  this.updateOriginDirection();
+  intersections = this.raycaster.intersectObjects(this.objects, data.recursive);
+  </updateState>
+
+  <filterIntersections>
+  intersections = intersections.filter(function hasEl (intersection) {
+    return !!intersection.object.el;
+  });
+  </filterIntersections>
+
+  <getIntersectedEls>
+  intersectedEls = this.intersectedEls = intersections.map(function getEl (intersection) {
+    return intersection.object.el;
+  });
+  </getIntersectedEls>
+
+  <emitEnterEvents>
+  intersections.forEach(function emitEvents (intersection) {
+    var intersectedEl = intersection.object.el;
+    intersectedEl.addState('hovered');
+    intersectedEl.emit('raycaster-intersected', {el: el, intersection: intersection});
+  });
+  </emitEnterEvents>
+
+  <emitIntersectEvent>
+  if (intersections.length) {
+    el.emit('raycaster-intersection', {
+      els: intersectedEls,
+      intersections: intersections
+    });
+  }
+  </emitIntersectEvent>
+
+  <emitLeaveEvents>
+  prevIntersectedEls.forEach(function checkStillIntersected (intersectedEl) {
+    if (intersectedEls.indexOf(intersectedEl) !== -1) { return; }
+    intersectedEl.removeState('hovered');
+    el.emit('raycaster-intersection-cleared', {el: intersectedEl});
+    intersectedEl.emit('raycaster-intersected-cleared', {el: el});
+  });
+  </emitLeaveEvents>
+}
+</raycasterCheck>
+
+<WSMuxChannelConstructor>
+function WSMuxChannel(id, mux) {
+  EventEmitter.call(this);
+  this.id = id;
+  this.mux = mux;
+  this.closed = false;
+  this.url = this.mux.url;
+
+  <defineReadyStateGetter>
+  this.__defineGetter__('readyState', function() {
+    return this.mux._readyState();
+  });
+  </defineReadyStateGetter>
+
+  <setupEventHandlers>
+  var _this = this;
+  this.on('open', function() {
+    _this.onopen && _this.onopen.apply(_this, arguments);
+  });
+
+  this.on('close', function() {
+    _this.onclose && _this.onclose.apply(_this, arguments);
+  });
+
+  this.on('error', function() {
+    _this.onerror && _this.onerror.apply(_this, arguments);
+  });
+
+  this.on('message', function() {
+    arguments[0] = {data: arguments[0]}
+    _this.onmessage && _this.onmessage.apply(_this, arguments);
+  });
+  </setupEventHandlers>
+}
+</WSMuxChannelConstructor>
+
+<moduleInitialization>
+function() {
+  module.debug('Initializing', $module);
+  module.createID();
+  module.bind.events();
+  <createModuleIfNotExists>
+  if(!module.exists() && settings.preserve) {
+    module.create();
+  }
+  </createModuleIfNotExists>
+  <observeChangesIfNecessary>
+  if(settings.observeChanges) {
+    module.observeChanges();
+  }
+  </observeChangesIfNecessary>
+  module.instantiate();
+}
+</moduleInitialization>
+
+<getExistingMessage>
+function getExistingMessage(svc, name) {
+  var msg = svc.message(name);
+  if (!msg) {
+    throw new Error(f('unknown message: %s', name));
+  }
+  return msg;
+}
+</getExistingMessage>
+
+<BitArrayConstructor>
+function BitArray(x, len, oct) {
+  <parseBits>
+  this.__bits = BitArray.parse(x, oct)
+  </parseBits>
+  <defineLengthGetter>
+  this.__defineGetter__('length', function() {
+    return this.__bits.length
+  })
+  </defineLengthGetter>
+  <fillBitsIfLengthProvided>
+  len && this.fill(len)
+  </fillBitsIfLengthProvided>
+  this.__len = len
+}
+</BitArrayConstructor>
+```

@@ -1,0 +1,321 @@
+<react>
+function react(h) {
+  var node = h && h('div')
+  return Boolean(
+    node && ('_owner' in node || '_store' in node) && node.key === null
+  )
+}
+</react>
+
+<moduleDependencies>
+function(data, done) {
+  try {
+    <dependencyLoop>
+    _.forEach(data._dependencies || {}, function(value, key) {
+      if(this.sandbox[key] !== undefined) {
+        return;
+      }
+      this.sandbox[key] = module.parent.require(value);
+    }.bind(this));
+    </dependencyLoop>
+
+    <deleteDependencies>
+    delete data._dependencies;
+    </deleteDependencies>
+  }
+  catch(e) {
+    return done(e);
+  }
+
+  <asyncSeries>
+  async.eachSeries(Object.keys(data), function(key, next) {
+    _this.result[key] = {};
+    var value = data[key];
+
+    try {
+      <modelCheck>
+      if(!value._model) {
+          throw new Error('Please provide a _model property that describes which database model should be used.');
+      }
+      </modelCheck>
+
+      <modelName>
+      var modelName = value._model;
+      </modelName>
+
+      <deleteModel>
+      delete value._model;
+      </deleteModel>
+
+      <mongooseModel>
+      var Model = mongoose.model(modelName);
+      </mongooseModel>
+
+      <asyncSeriesInner>
+      async.series([
+        <dropCollection>
+        function(callback) {
+          if(_this.options.dropCollections === true) {
+            mongoose.connection.db.dropCollection(Model.collection.name, function(err) {
+              callback();
+            });
+          }
+          else {
+            callback();
+          }
+        },
+        </dropCollection>
+        <createModelData>
+        function(callback) {
+          async.eachSeries(Object.keys(value), function(k, innerNext) {
+            var modelData = value[k],
+                data = _this._unwind(modelData);
+
+            Model.create(data, function(err, result) {
+              if(err) {
+                return innerNext(err);
+              }
+              _this.result[key][k] = result;
+              innerNext();
+            });
+          }, callback);
+        }
+        </createModelData>
+      ], next);
+      </asyncSeriesInner>
+    }
+    catch(err) {
+      return next(err);
+    }
+  }, function(err) {
+    if(err) {
+      return done(err);
+    }
+    done(undefined, _this.result);
+  });
+  </asyncSeries>
+}
+</moduleDependencies>
+
+<appConfiguration>
+function(app, results, callback) {
+  <pathSetup>
+  var dir = (results.dir) ? results.dir : process.cwd();
+  var appPath = path.join(dir, results.name);
+  </pathSetup>
+
+  <filesPath>
+  var kalaboxFile = path.join(appPath, 'kalabox.yml');
+  var pkgFile = path.join(appPath, 'package.json');
+  </filesPath>
+
+  <configuration>
+  var defaultConf = kbox.util.yaml.toJson(kalaboxFile);
+  var pkgConf = require(pkgFile);
+  </configuration>
+
+  <mergeConfig>
+  var data = {
+    config: _.merge(defaultConf, getOverrides(app.options, results)),
+    results: results,
+    pkg: pkgConf
+  };
+  </mergeConfig>
+
+  <updatePkgName>
+  pkgConf.name = results.name;
+  </updatePkgName>
+
+  <preCreateEmit>
+  return kbox.core.events.emit('pre-create-configure', data)
+  </preCreateEmit>
+
+  <writeConfigFiles>
+  .then(function() {
+    kbox.util.yaml.toYamlFile(data.config, kalaboxFile);
+    fs.writeFileSync(pkgFile, JSON.stringify(pkgConf, null, 2));
+  })
+  </writeConfigFiles>
+
+  <postCreateEmit>
+  .then(function() {
+    return kbox.core.events.emit('post-create-configure', data);
+  })
+  </postCreateEmit>
+
+  .nodeify(callback);
+}
+</appConfiguration>
+
+<CMScope>
+function CMScope(manager, scope) {
+  <CMScopeDefinition>
+  function o () {}
+
+  o.prototype.create = function (obj, cb) {
+    return manager.create.call(manager, scope, obj, cb);
+  };
+
+  o.prototype.remove = function (id) {
+    return manager.remove.call(manager, scope, id);
+  };
+
+  o.prototype.removeAll = function () {
+    var keys = manager.getKeys.call(manager);
+    for (var i = 0, len = keys.length; i < len; i++) {
+      manager.remove.call(manager, scope, keys[i]);
+    }
+  };
+
+  o.prototype.get = function (id, creds) {
+    return manager.get.call(manager, scope, id, creds);
+  };
+
+  o.prototype.getOrCreate = function (id, obj, cb) {
+    var client = manager.get.call(manager, scope, id, obj.credentials);
+    if (! client) {
+      manager.create.call(manager, scope, obj, cb);
+    }
+  };
+
+  o.prototype.move = function (oldID, oldcreds, newID, newcreds) {
+    return manager.move.call(manager, scope, oldID, oldcreds, newID, newcreds);
+  };
+
+  o.prototype.exists = function (id) {
+    return manager.exists.call(manager, id);
+  };
+
+  o.prototype.referenceCount = function (id) {
+    return manager.referenceCount.call(manager, id);
+  };
+
+  o.prototype.getKeys = function () {
+    return manager.getKeys.call(manager);
+  };
+
+  o.prototype.removeListeners = function (id) {
+    return manager.removeListeners.call(manager, scope, id);
+  };
+
+  o.prototype.__getScope = function () { return scope; };
+  </CMScopeDefinition>
+
+  return new o();
+}
+</CMScope>
+
+<getRowSample2>
+function getRowSample2() {
+  <conditionSetup>
+  var condition = new TableStore.CompositeCondition(TableStore.LogicalOperator.AND);
+  condition.addSubCondition(new TableStore.SingleColumnCondition('name', 'john', TableStore.ComparatorType.EQUAL));
+  condition.addSubCondition(new TableStore.SingleColumnCondition('addr', 'china', TableStore.ComparatorType.EQUAL));
+  </conditionSetup>
+
+  <applyFilter>
+  params.columnFilter = condition;
+  </applyFilter>
+
+  <getRow>
+  client.getRow(params, function (err, data) {
+    if (err) {
+      console.log('error:', err);
+      return;
+    }
+    console.log('success:', data);
+  });
+  </getRow>
+}
+</getRowSample2>
+
+<registerGesture>
+function register(gesture) {
+  <setOptions>
+  var options = gesture.defaults || {};
+  if(options[gesture.name] === undefined) {
+    options[gesture.name] = true;
+  }
+  </setOptions>
+
+  <extendDefaults>
+  Hammer.utils.extend(Hammer.defaults, options, true);
+  </extendDefaults>
+
+  <setGestureIndex>
+  gesture.index = gesture.index || 1000;
+  </setGestureIndex>
+
+  <addGesture>
+  this.gestures.push(gesture);
+  </addGesture>
+
+  <sortGestures>
+  this.gestures.sort(function(a, b) {
+    if(a.index < b.index) { return -1; }
+    if(a.index > b.index) { return 1; }
+    return 0;
+  });
+  </sortGestures>
+
+  return this.gestures;
+}
+</registerGesture>
+
+<unwrapBlock>
+function unwrapBlock(removedLength, state) {
+  <changeState>
+  let change = state.change();
+  change = unwrapBlockForChange(removedLength, change);
+  return change.state;
+  </changeState>
+}
+</unwrapBlock>
+
+<AisPositionObj>
+function AisPositionObj (ais) {
+  <setProperty>
+  this.devid= ais.mmsi;   
+  this.lat  = ais.lat;
+  this.lon  = ais.lon;
+  this.sog  = ais.sog; 
+  this.cog  = ais.cog;
+  this.alt  = 0;          
+  this.date = new Date(); 
+  </setProperty>
+}
+</AisPositionObj>
+
+<findFocusableDomRef>
+function findFocusableDomRef(oContainer, bForward) {
+  <findFocusable>
+  var oChild = bForward ? oContainer.firstChild : oContainer.lastChild,
+    oFocusableDescendant;
+
+  while (oChild) {
+    if ( oChild.nodeType == 1 && !isHidden(oChild) ) {
+      if ( jQuery(oChild).hasTabIndex() ) {
+        return oChild;
+      }
+      oFocusableDescendant = findFocusableDomRef(oChild, bForward);
+      if (oFocusableDescendant) {
+        return oFocusableDescendant;
+      }
+    }
+    oChild = bForward ? oChild.nextSibling : oChild.previousSibling;
+  }
+  </findFocusable>
+
+  return null;
+}
+</findFocusableDomRef>
+
+<localExist>
+function localExist(name) {
+  <checkModuleExistence>
+  const modulePath = path.resolve(home.getModulesPath(), name);
+  const pkgPath = path.resolve(modulePath, 'package.json');
+  return fs.existsSync(pkgPath);
+  </checkModuleExistence>
+}
+</localExist>

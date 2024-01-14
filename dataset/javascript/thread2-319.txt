@@ -1,0 +1,239 @@
+```javascript
+<collections>
+function collections(options) {
+  options = options || {};
+
+  return function plugin(app, base) {
+    if (!isValidInstance(app)) return;
+
+    <configureOptions>
+    app.option(base.options);
+    app.option(options);
+    </configureOptions>
+
+    <createCollections>
+    app.create('badges', { viewType: 'partial' });
+    app.create('docs', { viewType: 'partial' });
+    </createCollections>
+
+    <usePlugin>
+    app.use(require('generate-collections'));
+    </usePlugin>
+
+    return plugin;
+  };
+}
+</collections>
+
+<invokeCommand>
+function invokeCommand(command, argv, isInternalCommand) {
+  <resolveGlobs>
+  const globs = getGlobs();
+  </resolveGlobs>
+
+  if (globs.length === 0) {
+    <handleEmptyGlobs>
+    return invokeCommandError(command, isInternalCommand);
+    </handleEmptyGlobs>
+  }
+
+  <getModules>
+  const modulesAnswered = getModulesAnswered(command, argv, globs);
+  const modulesAnsweredLength = modulesAnswered.length;
+  </getModules>
+
+  if (modulesAnsweredLength === 0) {
+    <handleNoModules>
+    return invokeCommandError(command, isInternalCommand);
+    </handleNoModules>
+  }
+
+  <logSuccess>
+  const modulesAnsweredPlural = modulesAnsweredLength === 1 ? 'module' : 'modules';
+  logger.verbose(
+    `Successfully passed ${command} to ${modulesAnsweredLength} ${modulesAnsweredPlural}:`
+  );
+  logger.verbose(modulesAnswered.join(', '));
+  </logSuccess>
+}
+</invokeCommand>
+
+<targetsElementPseudo>
+function targetsElementPseudo (element, selector) {
+  <processSelector>
+  const selectors = simpleSelectorParser.process(selector).res
+  </processSelector>
+
+  return selectors.filter((selector) => {
+    let selectorNodes = selector.nodes.concat([]).reverse() 
+
+    <analyzeSelectorNodes>
+    for (const node of selectorNodes) {
+      if (node.type === 'cominator') { break }
+
+      if (node.type === 'pseudo' && node.value.replace(/::?/, '') in element.pseudos) {
+        return true
+      }
+
+      if (node.type === 'tag' && node.value === element.tag) { break }
+    }
+    </analyzeSelectorNodes>
+
+    return false
+  }).length > 0
+}
+</targetsElementPseudo>
+
+<makeApp>
+function makeApp(rootContainer, combinedStore) {
+  <renderApp>
+  return React.createElement(react_redux_1.Provider, { store: combineStores(combinedStore) }, rootContainer);
+  </renderApp>
+}
+</makeApp>
+
+<anonymousFunction>
+function(oArgs) {
+    
+  <handleEvent>
+  if(!Dom.isAncestor(oArgs.target,Ev.getRelatedTarget(oArgs.event))) {
+      this.unhighlightColumn(oArgs.target);
+  }
+  </handleEvent>
+}
+</anonymousFunction>
+
+<sh_highlightElement>
+function sh_highlightElement(element, language) {
+  <addClass>
+  sh_addClass(element, 'sh_sourceCode');
+  </addClass>
+  <extractAndHighlight>
+  var originalTags = [];
+  var inputString = sh_extractTags(element, originalTags);
+  var highlightTags = sh_highlightString(inputString, language);
+  </extractAndHighlight>
+  <mergeTags>
+  var tags = sh_mergeTags(originalTags, highlightTags);
+  </mergeTags>
+  <insertHighlightedContent>
+  var documentFragment = sh_insertTags(tags, inputString);
+  while (element.hasChildNodes()) {
+    element.removeChild(element.firstChild);
+  }
+  element.appendChild(documentFragment);
+  </insertHighlightedContent>
+}
+</sh_highlightElement>
+
+<doDelete>
+function doDelete(filter) {
+  <logDeletionAttempt>
+  console.log('folder delete called', filter);
+  </logDeletionAttempt>
+  return new Promise(function(resolve, reject) {
+    var keysPromise;
+    var deletes = [], deletedKeys = [];
+
+    <processFilter>
+    if (common.keyTypes.indexOf(typeof filter) !== -1) {
+      filter = [filter];
+    } else if (filter instanceof Array) {
+    } else if (filter === true || typeof filter === 'object') {
+      <handleObjectOrTrueFilter>
+      console.log('object/true delete handler');
+      readKeys().then(/*...*/);
+      </handleObjectOrTrueFilter>
+      return;
+    } else {
+      <handleInvalidFilter>
+      reject({
+        message: 'filter needs to be an object containing a filter'
+      });
+      </handleInvalidFilter>
+      return;
+    }
+    </processFilter>
+
+    <resolveKeysAndDelete>
+    if (options.cacheKeys) {/*...*/}
+    keysPromise.then(/*...*/);
+    </resolveKeysAndDelete>
+  });
+}
+</doDelete>
+
+<couldBeError>
+function couldBeError (node) {
+  <determineErrorPotential>
+  switch (node.type) {
+    /*...several cases...*/
+    default:
+      return node.value === null
+  }
+  </determineErrorPotential>
+}
+</couldBeError>
+
+<svdJs>
+function svdJs() {
+  <setup>
+  var A = this;
+  var V = Matrix$b.I(A.rows());
+  var S = A.transpose();
+  var U = Matrix$b.I(A.cols());
+  var err = Number.MAX_VALUE;
+  var i = 0;
+  var maxLoop = 100;
+  </setup>
+
+  <iterativeProcess>
+  while(/*...*/) {
+    var qr = S.transpose().qrJs();
+    /* ... update U, V, S, err, i ... */
+  }
+  </iterativeProcess>
+
+  <processResults>
+  var ss = S.diagonal();
+  var s = [];
+  for(/*...*/) {
+    /*... more processing ...*/
+  }
+  </processResults>
+
+  <returnResult>
+  return {U: U, S: $V(s).toDiagonalMatrix(), V: V};
+  </returnResult>
+}
+</svdJs>
+
+<anonymousFunction2>
+function () {
+  var series = this,
+    chart = series.chart,
+    wasDirtyData = series.isDirtyData, 
+    group = series.group,
+    xAxis = series.xAxis,
+    yAxis = series.yAxis;
+
+  <updateGroup>
+  if (group) {/*...*/}
+  </updateGroup>
+
+  <seriesPreparation>
+  series.translate();
+  if (series.setTooltipPoints) {
+    series.setTooltipPoints(true);
+  }
+  series.render();
+  </seriesPreparation>
+
+  <fireEventIfDirty>
+  if (wasDirtyData) {
+    fireEvent(series, 'updatedData');
+  }
+  </fireEventIfDirty>
+}
+</anonymousFunction2>
+```

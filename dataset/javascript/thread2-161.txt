@@ -1,11 +1,13 @@
 1. Function: Conditional Content Escaping or Processing
 
 ```javascript
+<conditionalEscapeAndProcess>
 function (txt, tag) {
   return (typeof txt === 'string' || typeof txt === 'number') ?
     string.esc(txt) :
     contentText(txt, tag);
 }
+</conditionalEscapeAndProcess>
 ```
 This function complies with SRP, encapsulating the single responsibility of conditionally escaping or processing content based on type.
 
@@ -14,6 +16,7 @@ This function complies with SRP, encapsulating the single responsibility of cond
 2. Function: Error Handling and Result Processing Callback
 
 ```javascript
+<errorHandlingAndResultProcessingCallback>
 function callback(req, res, resolve, reject, error, result, permissions, action) {
   <handleError>
   if (error) {
@@ -59,6 +62,7 @@ function callback(req, res, resolve, reject, error, result, permissions, action)
   }
   </filterAttributes>
 }
+</errorHandlingAndResultProcessingCallback>
 ```
 The function violates SRP as it handles errors, processes result, and filters attributes, which are separate responsibilities.
 
@@ -67,6 +71,7 @@ The function violates SRP as it handles errors, processes result, and filters at
 3. Function: Parsing Selector Strings
 
 ```javascript
+<parseSelector>
 function parseSelector(rawSelector) {
   const parsedSelector = tryParseSelector(rawSelector)
 
@@ -76,6 +81,7 @@ function parseSelector(rawSelector) {
     parsedSelector,
   }
 }
+</parseSelector>
 ```
 This function complies with SRP, dedicated solely to parsing a selector string.
 
@@ -84,9 +90,11 @@ This function complies with SRP, dedicated solely to parsing a selector string.
 4. Function: Replacing Argument Expressions
 
 ```javascript
+<replaceArgsExpr>
 function replaceArgsExpr(ctx, forms, expansioncode, replacements, isrestarg) {
   // SRP Annotation is not provided for this function as it seems to involve a complex macro expansion operation that likely has single responsibility within its context. Additional context is needed for accurate SRP assessment.
 }
+</replaceArgsExpr>
 ```
 Without further context, it's unclear whether this function violates SRP. It seems to be handling macro expansion logic, which might be a single, albeit complex, responsibility.
 
@@ -95,6 +103,7 @@ Without further context, it's unclear whether this function violates SRP. It see
 5. Function: Mouse Event Handlers Removal
 
 ```javascript
+<mouseEventHandlersRemoval>
 function(element) {
   <removeEventHandlers>
   if (!(element && element.nodeType === 1)) {
@@ -115,6 +124,7 @@ function(element) {
   delete _mouseHandlers[element.zcClippingId];
   </removeEventHandlers>
 }
+</mouseEventHandlersRemoval>
 ```
 This function complies with SRP, focusing solely on removing mouse event handlers for an element.
 
@@ -123,6 +133,7 @@ This function complies with SRP, focusing solely on removing mouse event handler
 6. Function: Blob Resolution with Git and FileSystem
 
 ```javascript
+<resolveBlob>
 async function resolveBlob(dir, ref, pathName, includeUncommitted) {
   <resolveCommitSha>
   const commitSha = await resolveCommit(dir, ref);
@@ -156,6 +167,7 @@ async function resolveBlob(dir, ref, pathName, includeUncommitted) {
   });
   </writeUncommittedObject>
 }
+</resolveBlob>
 ```
 The function violates SRP as it performs several distinct actions: resolving commit SHAs, reading committed objects, handling uncommitted changes, and writing uncommitted objects.
 
@@ -164,6 +176,7 @@ The function violates SRP as it performs several distinct actions: resolving com
 7. Function: Element Error Handling
 
 ```javascript
+<elementErrorHandling>
 function(reason, element) {
     <popElementHandleError>
 	if (elements.length > 0) {
@@ -175,6 +188,7 @@ function(reason, element) {
 	}
 	</popElementHandleError>
 }
+</elementErrorHandling>
 ```
 This function is SRP compliant as it deals with the singular task of handling errors for a popped element.
 
@@ -183,6 +197,7 @@ This function is SRP compliant as it deals with the singular task of handling er
 8. Function: Measurement Finalization
 
 ```javascript
+<finalizeMeasurement>
 function finalizeMeasurement(id) {
     <deleteActiveTest>
     if (activeTests[id.id]) {
@@ -196,6 +211,7 @@ function finalizeMeasurement(id) {
     }
     </deleteUpdatableTest>
 }
+</finalizeMeasurement>
 ```
 The function violates SRP by managing two different kinds of tests, which are distinct actions: deleting active tests and deleting updatable tests.
 
@@ -204,6 +220,7 @@ The function violates SRP by managing two different kinds of tests, which are di
 9. Function: Positioning within Safe Area Constraints
 
 ```javascript
+<fitPositionIntoSafeArea>
 function fitPositionIntoSafeArea(position, layouts) {
     <fitIntoSafeArea>
     var windowLayout = layouts.windowLayout,
@@ -234,6 +251,7 @@ function fitPositionIntoSafeArea(position, layouts) {
       right: right
     };
   }
+</fitPositionIntoSafeArea>
 ```
 This function complies with SRP, managing only the responsibility of fitting a position within the constraints of a safe area.
 
@@ -242,6 +260,7 @@ This function complies with SRP, managing only the responsibility of fitting a p
 10. Function: Tooltip Base Model Generation
 
 ```javascript
+<getBaseModel>
 function getBaseModel(tooltipOpts) {
 		var globalDefaults = Chart.defaults.global;
 		var getValueOrDefault = helpers.getValueOrDefault;
@@ -285,5 +304,6 @@ function getBaseModel(tooltipOpts) {
 			</buildBaseModelProps>
 		};
 	}
+</getBaseModel>
 ```
 This function is SRP compliant, having the single responsibility of constructing the base model for a tooltip's configuration.

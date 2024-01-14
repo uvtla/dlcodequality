@@ -1,0 +1,365 @@
+```javascript
+<functionUnnamed>
+function(languageSlug, projectSlug, resourceSlug) {
+    <queryDatabase>
+    let result = query('select r.*, lri.translation_words_assignments_url from resource as r' +
+        ' left join legacy_resource_info as lri on lri.resource_id=r.id' +
+        ' where r.slug=? and r.project_id in (' +
+        '  select id from project where slug=? and source_language_id in (' +
+        '   select id from source_language where slug=?)' +
+        ' )' +
+        ' limit 1', [resourceSlug, projectSlug, languageSlug]);
+    </queryDatabase>
+    if(result.length > 0) {
+        let res = result[0];
+        
+        <restructureResult>
+        res.status = {
+            translate_mode: res.translate_mode,
+            checking_level: res.checking_level,
+            comments: res.comments,
+            pub_date: res.pub_date,
+            license: res.license,
+            version: res.version
+        };
+        delete res.translate_mode;
+        delete res.checking_level;
+        delete res.comments;
+        delete res.pub_date;
+        delete res.license;
+        delete res.version;
+        </restructureResult>
+
+        <setLanguageAndProjectSlugs>
+        res.source_language_slug = languageSlug;
+        res.project_slug = projectSlug;
+        </setLanguageAndProjectSlugs>
+
+        <formatResultsRetrievalAndProcessing>
+        res.formats = [];
+        let formatResults = query('select * from resource_format' +
+            ' where resource_id=?', [res.id]);
+        res.imported = false;
+        for(let format of formatResults) {
+            delete format.id;
+            delete format.resource_id;
+            format.imported = !!format.imported;
+            res.formats.push(format);
+            
+            if(format.imported) res.imported = true;
+        }
+        </formatResultsRetrievalAndProcessing>
+
+        return res;
+    }
+    return null;
+}
+</functionUnnamed>
+
+<swap>
+function swap(cpu, n) {
+    <bitwiseOperations>
+    const r = n << 4 | n >> 4;
+    </bitwiseOperations>
+
+    <cpuFlagsUpdate>
+    cpu.f = 0;
+    if ((r & 0xff) == 0) cpu.f |= FLAG_Z;
+    </cpuFlagsUpdate>
+
+    return r;
+}
+</swap>
+
+<getTilesetByGid>
+function getTilesetByGid(gid) {
+    <initializeInvalidRange>
+    var invalidRange = -1; 
+    </initializeInvalidRange>
+
+    <clearGidMask>
+    gid &= TMX_CLEAR_BIT_MASK; 
+    </clearGidMask>
+
+    <searchForTileset>
+    for (var i = 0, len = this.tilesets.length; i < len; i++) {
+        if (this.tilesets[i].contains(gid)) {
+            return this.tilesets[i];
+        }
+
+        if (this.tilesets[i].firstgid === this.tilesets[i].lastgid && gid >= this.tilesets[i].firstgid) {
+            invalidRange = i;
+        }
+    }
+    </searchForTileset>
+
+    <processInvalidRange>
+    if (invalidRange !== -1) {
+        return this.tilesets[invalidRange];
+    } else {
+        throw new Error("no matching tileset found for gid " + gid);
+    }
+    </processInvalidRange>
+}
+</getTilesetByGid>
+
+<Toast>
+function Toast(beyond) {
+    "use strict";
+
+    <setupVariables>
+    var events = new Events({'bind': this});
+    const MESSAGE_TYPE = Object.freeze({
+        'GENERAL_MESSAGE': 1,
+        'GENERAL_ERROR': 2,
+        'CONNECTION_ERROR': 3,
+        'WARNING': 4
+    });
+    const DURATION_DEFAULT = 3000;
+    var messages = new Messages();
+    var autoincrement = 0;
+    </setupVariables>
+
+    <exposeMessageType>
+    Object.defineProperty(this, 'MESSAGE_TYPE', {
+        'get': function () {
+            return MESSAGE_TYPE;
+        }
+    });
+    </exposeMessageType>
+
+    <showMessage>
+    beyond.showMessage = function (specs, duration) { 
+        // code removed for brevity
+    };
+    </showMessage>
+
+    <helperMethods>
+    beyond.showConnectionError = function (callback) {
+        // code removed for brevity
+    };
+    beyond.showWarning = function (text, duration) {
+        // code removed for brevity
+    };
+    this.removeMessage = function (id) {
+        // code removed for brevity
+    };
+    beyond.removeMessage = this.removeMessage;
+    this.retry = function () {
+        // code removed for brevity
+    };
+    this.close = function () {
+        // code removed for brevity
+    };
+    </helperMethods>
+
+    <accessMessage>
+    Object.defineProperty(this, 'message', {
+        'get': function () {
+            // code removed for brevity
+        }
+    });
+    </accessMessage>
+}
+</Toast>
+
+<generateTableDataInsideScores>
+function generateTableDataInsideScores(table) {
+    <initializeVariables>
+    table = table || this;
+    var columns = table.columns*1;
+    </initializeVariables>
+
+    <validateScores>
+    var scores = table.scores;
+    if(!scores)
+        console.log('Table is empty!');
+    </validateScores>
+
+    <evaluationMethodExtraction>
+    var evalMethod = getMethodFor(table.evaluateMethod);
+    </evaluationMethodExtraction>
+
+    <initializeKeysToSort>
+    var keysToSort = ['final'];
+    </initializeKeysToSort>
+
+    <processingScores>
+    _(scores).forEach(function(score) {
+        // code removed for brevity
+    });
+    </processingScores>
+
+    <sortingAndRanking>
+    var finalData = _.sortBy(scores, keysToSort);
+    if(table.sort == 'desc')
+        finalData = finalData.reverse();
+    // code removed for brevity
+    </sortingAndRanking>
+
+    <applyFinalData>
+    this.scores = finalData;
+    </applyFinalData>
+
+    <returnScores>
+    return this.scores;
+    </returnScores>
+}
+</generateTableDataInsideScores>
+
+<getConf>
+function getConf(app, mod) {
+    <setupPathsAndConfigs>
+    var appConf = null;
+    var moduleConf = null;
+    var buildType = '';
+    app = app ? app : '';
+    mod = (mod && typeof mod === 'string') ? mod : '';
+    var appPath = path.join(rootPath, app);
+    var appConfPath = path.join(appPath, 'app-conf.js');
+    var modulePath = path.join(rootPath, app, mod);
+    var moduleConfPath = path.join(modulePath, 'module-conf.js');
+    // ... code removed for readability ...
+    </setupPathsAndConfigs>
+
+    <determineBuildTypeAndPaths>
+    // Conditional logic for determining build type based on
+    // existing configurations is wrapped by these tags.
+    // ... code removed for readability ...
+    </determineBuildTypeAndPaths>
+
+    <returnConfiguration>
+    return {
+        appConf: appConf,
+        moduleConf: moduleConf,
+        buildType: buildType,
+        appPath: appPath,
+        modulePath: modulePath
+    };
+    </returnConfiguration>
+}
+</getConf>
+
+<functionUnnamed_2>
+function(sHTML, sClassName) {
+    <updateMessageContent>
+    var elCell = this._elMsgTd;
+    if(lang.isString(sHTML)) {
+        elCell.firstChild.innerHTML = sHTML;
+    }
+    if(lang.isString(sClassName)) {
+        Dom.addClass(elCell.firstChild, sClassName);
+    }
+    </updateMessageContent>
+
+    <adjustTableWidth>
+    var elThead = this.getTheadEl();
+    var elTable = elThead.parentNode;
+    var newWidth = elTable.offsetWidth;
+    this._elMsgTbody.parentNode.style.width = this.getTheadEl().parentNode.offsetWidth + "px";
+    </adjustTableWidth>
+
+    <displayMessage>
+    this._elMsgTbody.style.display = "";
+    </displayMessage>
+
+    <fireEvent>
+    this.fireEvent("tableMsgShowEvent", {html:sHTML, className:sClassName});
+    YAHOO.log("DataTable showing message: " + sHTML, "info", this.toString());
+    </fireEvent>
+}
+</functionUnnamed_2>
+
+<updateDependency>
+async function updateDependency(content, upgrade) {
+  logger.trace('updateDependency()');
+  <initializeVariables>
+  let newContent = content;
+  let newUrl;
+  let file;
+  </initializeVariables>
+
+  <parseOldUrl>
+  const oldParsedUrlPath = parseUrlPath(upgrade.url);
+  if (!oldParsedUrlPath) {
+    logger.debug(
+      `Failed to update - upgrade.url is invalid ${upgrade.depName}`
+    );
+    return content;
+  }
+  </parseOldUrl>
+
+  <downloadAndParseNewUrl>
+  try {
+    newUrl = `https://github.com/${upgrade.depName}/releases/download/${upgrade.newValue}/${upgrade.repoName}-${coerce(upgrade.newValue)}.tar.gz`;
+    file = (await got(newUrl, { encoding: null })).body;
+  } catch (errOuter) {
+    logger.debug(
+      `Failed to download release download for ${upgrade.depName} - trying archive instead`
+    );
+    try {
+      newUrl = `https://github.com/${upgrade.depName}/archive/${upgrade.newValue}.tar.gz`;
+      file = (await got(newUrl, { encoding: null })).body;
+    } catch (errInner) {
+      logger.debug(
+        `Failed to download archive download for ${upgrade.depName} - update failed`
+      );
+      return content;
+    }
+  }
+  </downloadAndParseNewUrl>
+
+  <parseNewUrlAndUpdateContent>
+  const newParsedUrlPath = parseUrlPath(newUrl);
+  if (!newParsedUrlPath) {
+    logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
+    return content;
+  }
+  if (upgrade.newValue !== newParsedUrlPath.currentValue) {
+    logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
+    return content;
+  }
+  const newSha256 = crypto
+    .createHash('sha256')
+    .update(file)
+    .digest('hex');
+  newContent = updateUrl(content, upgrade.url, newUrl);
+  if (!newContent) {
+    logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
+    return content;
+  }
+  newContent = updateSha256(newContent, upgrade.sha256, newSha256);
+  if (!newContent) {
+    logger.debug(`Failed to update sha256 for dependency ${upgrade.depName}`);
+    return content;
+  }
+  </parseNewUrlAndUpdateContent>
+
+  <returnNewContent>
+  return newContent;
+  </returnNewContent>
+}
+</updateDependency>
+
+<postRevocRegDefRequestToLedger>
+async function postRevocRegDefRequestToLedger(poolHandle, wallet, did, revRegDef) {
+    <buildAndSubmitRequest>
+    const revocRegRequest = await indy.buildRevocRegDefRequest(did, revRegDef)
+    await ensureSignAndSubmitRequest(poolHandle, wallet, did, revocRegRequest)
+    </buildAndSubmitRequest>
+}
+</postRevocRegDefRequestToLedger>
+
+<functionUnnamed_3>
+function(src, dst) {
+    <setBlendFunc>
+    this._dat[0 | BLEND_FUNC_C_SRC] = src;
+    this._dat[0 | BLEND_FUNC_C_DST] = dst;
+    this._set = this._set & ~BLEND_FUNC_A_SET | (~~BLEND_FUNC_SET);
+    </setBlendFunc>
+    return this;
+}
+</functionUnnamed_3>
+```
+
+Each function has been annotated to highlight separate responsibilities within the functions. The tags denote separate block actions and are indicative of SRP adherence or violations. Note that simple variable assignments and condition checks are not annotated as separate responsibilities since, in the context of these functions, they are part of a larger cohesive operation unless they distinctly serve a different specific purpose.

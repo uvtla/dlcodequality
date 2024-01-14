@@ -1,0 +1,257 @@
+```javascript
+<initialize>
+function(serviceRegistry, commandRegistry) {
+    this._serviceRegistry = serviceRegistry;
+    this._commandRegistry = commandRegistry;
+    this._dumbHover = new mDebugDumbHover.DebugDumbHover();
+
+    
+    this._debugSockets = {};
+
+    this._debugPanes = null;
+
+    
+    serviceRegistry.registerService("orion.project.deploy", this, {
+        id: "org.eclipse.orion.client.debug.deploy",
+        deployTypes: ["Native"],
+        priorityForDefault: 8,
+        name: messages["createNew"],
+        tooltip: messages["createNewTooltip"]
+    });
+}
+</initialize>
+
+<getFmtmap>
+function getFmtmap(fmt_info){
+    var fmtmap = [];
+    if(fmt_info){
+        if(fmt_info.indexOf('%')!==-1)  fmt_info = decodeURIComponent(fmt_info);
+
+        var dset = fmt_info.split(',');
+        for (var i = 0; i < dset.length; i++){
+            var sub_inf = parse_info(dset[i]);
+            
+            for(var k in sub_inf){
+                if(sub_inf[k].indexOf('%')!==-1) sub_inf[k] = decodeURIComponent(sub_inf[k]);
+            }			
+
+            if(sub_inf.stream) {
+                var stream_info = parse_info(sub_inf.stream);
+
+                if(stream_info.s) stream_info.s = re_hash(stream_info.s);
+                if(sub_inf.conn) sub_inf.url = sub_inf.conn+"?";
+
+                for(var k in stream_info){
+                    if(stream_info[k].indexOf('%')!==-1) stream_info[k] = decodeURIComponent(stream_info[k]);
+                    sub_inf.url += k+"="+stream_info[k]+"&";
+                }
+            }
+            
+            if(sub_inf.s) sub_inf.s = re_hash(sub_inf.s);
+            if(sub_inf.url) sub_inf.url = decodeURIComponent(sub_inf.url);
+            if(sub_inf.itag) sub_inf.itag = parseInt(sub_inf.itag);
+            if(!mdata.data[sub_inf.itag])mdata.data[sub_inf.itag]=decodeURIComponent(sub_inf.type);
+            fmtmap.push( sub_inf );
+        }
+    }
+    return fmtmap;
+}
+</getFmtmap>
+
+<checkHandlerAttached>
+function(name, action) {
+    var handlers = this.__handlers__;
+
+    if (! handlers ||
+        ! handlers[name]) {
+        return false;
+    }
+    var hdls = handlers[name];
+    for (var i = 0; i < hdls.length; i++) {
+        if (hdls[i].action === action) {
+            return true;
+        }
+    }
+}
+</checkHandlerAttached>
+
+<dragStartEvents>
+function(x, y) {
+    if (this.dragCurrent && this.dragCurrent.useShim) {
+        this._shimState = this.useShim;
+        this.useShim = true;
+    }
+    this._activateShim();
+    YAHOO.log("firing drag start events", "info", "DragDropMgr");
+    clearTimeout(this.clickTimeout);
+    var dc = this.dragCurrent;
+    if (dc && dc.events.b4StartDrag) {
+        dc.b4StartDrag(x, y);
+        dc.fireEvent('b4StartDragEvent', { x: x, y: y });
+    }
+    if (dc && dc.events.startDrag) {
+        dc.startDrag(x, y);
+        dc.fireEvent('startDragEvent', { x: x, y: y });
+    }
+    this.dragThreshMet = true;
+}
+</dragStartEvents>
+
+<removeMenuItemEventListeners>
+function removeMenuItemEventListeners(menuItem) {
+    menuItem._command
+        .off("enabledStateChange", menuItem._enabledChanged)
+        .off("checkedStateChange", menuItem._checkedChanged)
+        .off("nameChange", menuItem._nameChanged)
+        .off("keyBindingAdded", menuItem._keyBindingAdded)
+        .off("keyBindingRemoved", menuItem._keyBindingRemoved);
+}
+</removeMenuItemEventListeners>
+
+<setupAndRunMochaTests>
+function() {
+    require('coffee-script')
+    var path = require('path')
+    var fs = require('fs')
+    var Mocha = require('mocha')
+
+    
+    process.setMaxListeners(0)
+
+    var testDir = path.resolve(__dirname, '../test')
+    var files = fs.readdirSync(testDir).filter(function(f) {
+        return f.match(/\.js$/)
+    })
+
+    var mocha = new Mocha({
+        reporter: 'spec'
+    })
+
+    for (var i = 0; i < files.length; i++) {
+        var file = files[i]
+        mocha.addFile(path.resolve(testDir, file))
+    }
+
+    mocha.run(function(failures) {
+        var exitCode = failures === 0 ? 0 : 1
+
+        process.send({
+            type: 'shutdown',
+            code: exitCode
+        })
+        process.exit(failures)
+    })
+}
+</setupAndRunMochaTests>
+
+<updateInViewport>
+function updateInViewport(cm, from, to) {
+    var vp = cm.getViewport(), state = cm.state.foldGutter;
+    from = isNaN(from) ? vp.from : from;
+    to = isNaN(to) ? vp.to : to;
+
+    if (!state) { return; }
+    cm.operation(function () {
+        updateFoldInfo(cm, from, to);
+    });
+    state.from = from;
+    state.to = to;
+}
+</updateInViewport>
+
+<composeAnimationProperty>
+function compose(property) {
+    var settings = Glide.settings;
+
+    if (!disabled) {
+        return property + ' ' + this.duration + 'ms ' + settings.animationTimingFunc;
+    }
+
+    return property + ' 0ms ' + settings.animationTimingFunc;
+}
+</composeAnimationProperty>
+
+<triangulatePolygon>
+function ( contour, indices ) {
+    var n = contour.length;
+
+    if ( n < 3 ) return null;
+
+    <triangulationPreparation>
+    var result = [],
+        verts = [],
+        vertIndices = [];
+    
+    var u, v, w;
+    if ( area( contour ) > 0.0 ) {
+        for ( v = 0; v < n; v ++ ) verts[ v ] = v;
+    } else {
+        for ( v = 0; v < n; v ++ ) verts[ v ] = ( n - 1 ) - v;
+    }
+
+    var nv = n;
+    </triangulationPreparation>
+
+    var count = 2 * nv;   
+    for ( v = nv - 1; nv > 2; ) {
+        if ( ( count -- ) <= 0 ) {
+            console.log( 'Warning, unable to triangulate polygon!' );
+            if ( indices ) return vertIndices;
+            return result;
+        }
+
+        u = v; 	 	if ( nv <= u ) u = 0;     
+        v = u + 1;  if ( nv <= v ) v = 0;     
+        w = v + 1;  if ( nv <= w ) w = 0;     
+
+        if ( snip( contour, u, v, w, nv, verts ) ) {
+            var a, b, c, s, t;
+
+            a = verts[ u ];
+            b = verts[ v ];
+            c = verts[ w ];
+
+            result.push( [ contour[ a ],
+                contour[ b ],
+                contour[ c ] ] );
+
+            vertIndices.push( [ verts[ u ], verts[ v ], verts[ w ] ] );
+
+            for ( s = v, t = v + 1; t < nv; s++, t++ ) {
+                verts[ s ] = verts[ t ];
+            }
+
+            nv --;
+
+            count = 2 * nv;
+        }
+    }
+
+    if ( indices ) return vertIndices;
+    return result;
+}
+</triangulatePolygon>
+
+<findFocusableElements>
+function(root) {
+    root = root || this.innerElement;
+    var focusable = {};
+
+    <populateFocusableList>
+    for (var i = 0; i < Panel.FOCUSABLE.length; i++) {
+        focusable[Panel.FOCUSABLE[i]] = true;
+    }
+    </populateFocusableList>
+
+    function isFocusable(el) {
+        if (el.focus && el.type !== "hidden" && !el.disabled && focusable[el.tagName.toLowerCase()]) {
+            return true;
+        }
+        return false;
+    }
+
+    
+    return Dom.getElementsBy(isFocusable, null, root);
+}
+</findFocusableElements>
+```

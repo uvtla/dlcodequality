@@ -1,0 +1,195 @@
+<getOpenshiftEnvVars>
+function getOpenshiftEnvVars(params){
+  <parseMbaasUrl>
+  var appMbaas = params.appMbaas;
+  var mbaasUrl = _parseMbaasUrl(appMbaas.mbaasUrl);
+  </parseMbaasUrl>
+
+  <setEnvironmentVariables>
+  var appEnvs = {};
+  appEnvs.FH_MBAAS_PROTOCOL = mbaasUrl.protocol;
+  appEnvs.FH_MBAAS_HOST = mbaasUrl.host;
+  appEnvs.FH_MBAAS_ENV_ACCESS_KEY = appMbaas.accessKey;
+  
+  
+  if(appMbaas.isServiceApp){
+    appEnvs.FH_SERVICE_ACCESS_KEY = appMbaas.serviceAccessKey;
+  }
+  </setEnvironmentVariables>
+
+  return appEnvs;
+}
+</getOpenshiftEnvVars>
+
+<getSignedUrl>
+function getSignedUrl(operation, params, callback) {
+    params = AWS.util.copy(params || {});
+    <expiresConfiguration>
+    var expires = params.Expires || 900;
+    </expiresConfiguration>
+
+    <deleteExpiresParameter>
+    delete params.Expires; 
+    </deleteExpiresParameter>
+
+    <makeRequest>
+    var request = this.makeRequest(operation, params);
+    </makeRequest>
+
+    <presignRequest>
+    if (callback) {
+      AWS.util.defer(function() {
+        request.presign(expires, callback);
+      });
+    } else {
+      return request.presign(expires, callback);
+    }
+    </presignRequest>
+  }
+</getSignedUrl>
+
+<initIframeForUpload>
+function initIframeForUpload(name) {
+  <createElementAndConfigure>
+  var iframe = qq.toElement("<iframe src='javascript:false;' name='" + name + "' />");
+
+  iframe.setAttribute("id", name);
+
+  iframe.style.display = "none";
+  </createElementAndConfigure>
+
+  <appendToDocument>
+  document.body.appendChild(iframe);
+  </appendToDocument>
+
+  return iframe;
+}
+</initIframeForUpload>
+
+<anonymousFunctionCoordinates>
+function (x, y, w, h) {
+  <setCoordinates>
+	this.__coord = [x * this.__tile + this.__padding[0] + this.__trim[0],
+					y * this.__tileh + this.__padding[1] + this.__trim[1],
+					this.__trim[2] || w * this.__tile || this.__tile,
+					this.__trim[3] || h * this.__tileh || this.__tileh];
+  </setCoordinates>
+
+  <triggerChangeEvent>
+	this.trigger("Change");
+  </triggerChangeEvent>
+
+	return this;
+}
+</anonymousFunctionCoordinates>
+
+<validateEndpointData>
+function validateEndpointData(
+  data,
+  { prettyErrorMessage = 'invalid response data', includeKeys = false } = {}
+) {
+  <validateDataWithSchema>
+  return validate(
+    {
+      ErrorClass: InvalidResponse,
+      prettyErrorMessage,
+      includeKeys,
+      traceErrorMessage: 'Response did not match schema',
+      traceSuccessMessage: 'Response after validation',
+      allowAndStripUnknownKeys: false,
+    },
+    data,
+    endpointSchema
+  )
+  </validateDataWithSchema>
+}
+</validateEndpointData>
+
+<checkIgnore>
+function checkIgnore (predicate, name, value, defaultPredicate) {
+  <evaluateValuePresence>
+  if (!value) {
+    return true
+  }
+  </evaluateValuePresence>
+
+  <evaluatePredicate>
+  const check = predicate || defaultPredicate
+  if (!check) {
+    return false
+  }
+  return check(name, value, defaultPredicate)
+  </evaluatePredicate>
+}
+</checkIgnore>
+
+<constructUserObject>
+function(messageContent) {
+  <mapMessageContentToUser>
+  var user = {
+      id: messageContent.id,
+      name: messageContent.name,
+      email: messageContent.email,
+      cellphoneNumber: messageContent.cellphoneNumber,
+      image: messageContent.image,
+      lastSeen: messageContent.lastSeen,
+      sendEnable: messageContent.sendEnable,
+      receiveEnable: messageContent.receiveEnable
+  };
+  </mapMessageContentToUser>
+
+  return user;
+}
+</constructUserObject>
+
+<initOptions>
+function initOptions(toOptions, fromOptions) {
+    <initializeAlignmentOptions>
+    if (typeof fromOptions.align === "object") {
+        toOptions.align = initOptionProperty({}, fromOptions.align);
+        toOptions.align.on = fromOptions.align.on || "colon";
+        toOptions.align.mode = fromOptions.align.mode || "strict";
+    </initializeAlignmentOptions>
+
+    <initializeMultiLineAndSingleLineOptions>
+    toOptions.multiLine = initOptionProperty({}, (fromOptions.multiLine || fromOptions));
+    toOptions.singleLine = initOptionProperty({}, (fromOptions.singleLine || fromOptions));
+    </initializeMultiLineAndSingleLineOptions>
+
+    <additionalAlignmentOptionsBasedOnMultiLine>
+    if (toOptions.multiLine.align) {
+        toOptions.align = {
+            on: toOptions.multiLine.align.on,
+            mode: toOptions.multiLine.align.mode || toOptions.multiLine.mode,
+            beforeColon: toOptions.multiLine.align.beforeColon,
+            afterColon: toOptions.multiLine.align.afterColon
+        };
+    }
+    </additionalAlignmentOptionsBasedOnMultiLine>
+
+    return toOptions;
+}
+</initOptions>
+
+<PromiseDecorator>
+function PromiseDecorator(cache) {
+  <callBaseDecorator>
+  BaseDecorator.call(this, cache);
+  </callBaseDecorator>
+
+  <promisifyCacheMethods>
+  this.get = promisify(this.get.bind(this));
+  this.set = promisify(this.set.bind(this));
+  this.del = promisify(this.del.bind(this));
+  </promisifyCacheMethods>
+}
+</PromiseDecorator>
+
+<TrackPlayedSchema>
+function TrackPlayedSchema() {
+  <createTrackAndAlbumPrototypes>
+  this.track = Object.create(Track.prototype);  
+  this.album = Object.create(Album.prototype);
+  </createTrackAndAlbumPrototypes>
+}
+</TrackPlayedSchema>

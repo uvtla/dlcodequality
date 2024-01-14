@@ -1,0 +1,207 @@
+<getLineInfo>
+function getLineInfo(input, offset) {
+  for (var line = 0, cur = 0;;) {
+    _whitespace.lineBreakG.lastIndex = cur;
+    var match = _whitespace.lineBreakG.exec(input);
+    if (match && match.index < offset) {
+      ++line;
+      cur = match.index + match[0].length;
+    } else {
+      return new Position(line, offset - cur);
+    }
+  }
+}
+</getLineInfo>
+
+<CFClientException>
+function CFClientException(err, cause) {
+    var rtn = {
+        name: 'CFClientException',
+        type: 'CFClientException',
+        message: '',
+        cause: cause,
+        fileName: 'cfclient.js',
+        lineNumber: '',
+        stack: '',
+        toString: function () {
+            return this.message + ' ::: ' + this.cause;
+        }
+    };
+    
+    <errorObjectHandling>
+    if (typeof err === 'object' && err.name === 'Error') {
+        rtn.name = err.name;
+        rtn.message = err.message;
+        rtn.fileName = err.fileName || 'cfclient.js';
+        rtn.lineNumber = err.lineNumber;
+        rtn.stack = err.stack;
+    }
+    </errorObjectHandling>
+    return rtn;
+}
+</CFClientException>
+
+<anonymousFunctionWithCredentials>
+function (credentials) {
+    return function () {
+        <thenOpenAuthentication>
+        return this.thenOpen(globals.adminUrl).then(function () {
+            this.fill('#login-form', credentials || globals.credentials, true);
+        }).waitForResource(/login/).
+        </thenOpenAuthentication>
+        <clearLocalStorage>
+        thenEvaluate(function () {
+            localStorage.clear();
+        });
+        </clearLocalStorage>
+    };
+}
+</anonymousFunctionWithCredentials>
+
+<DELETE_PROP_SUBPROP>
+function DELETE_PROP_SUBPROP(state) {
+      <splitPropSubprop>
+      var propsArray = PROP_SUBPROP.includes('.') ? PROP_SUBPROP.split('.') : [PROP_SUBPROP];
+      var lastProp = propsArray.pop();
+      var propsWithoutLast = propsArray.join('.');
+      </splitPropSubprop>
+      <getDeepReference>
+      var ref = getDeepRef(state, propsWithoutLast);
+      </getDeepReference>
+      return Vue.delete(ref, lastProp);
+}
+</DELETE_PROP_SUBPROP>
+
+<massageSelector>
+function massageSelector(input) {
+  var result = utils.clone(input);
+  var wasAnded = false;
+  if ('$and' in result) {
+    <mergeAndedSelectors>
+    result = mergeAndedSelectors(result['$and']);
+    wasAnded = true;
+    </mergeAndedSelectors>
+  }
+
+  if ('$not' in result) {
+    <mergeAndedSelectorsForNot>
+    result['$not'] = mergeAndedSelectors([result['$not']]);
+    </mergeAndedSelectorsForNot>
+  }
+
+  <normalizeMatchers>
+  var fields = Object.keys(result);
+  for (var i = 0; i < fields.length; i++) {
+    var field = fields[i];
+    var matcher = result[field];
+
+    if (typeof matcher !== 'object' || matcher === null) {
+      matcher = {$eq: matcher};
+    } else if ('$ne' in matcher && !wasAnded) {
+      matcher.$ne = [matcher.$ne];
+    }
+    result[field] = matcher;
+  }
+  </normalizeMatchers>
+
+  return result;
+}
+</massageSelector>
+
+<f_kullanici_tahta_idleri>
+function f_kullanici_tahta_idleri(kul_id) {
+    <getUserBoardsQuery>
+    return [
+        result.dbQ.sunion(
+            result.kp.kullanici.ssetSahipOlduguTahtalari(kul_id, true),
+            result.kp.kullanici.ssetUyeOlduguTahtalari(kul_id, true)
+        ),
+        result.dbQ.smembers(result.kp.tahta.ssetSilinen) 
+    ].allX().then(function (_arrReplies) {
+        <processBoardQueryResults>
+        var arrAktifTahtalar = _arrReplies[0],
+            arrPasifTahtalar = _arrReplies[1],
+            kullaniciTahtalari = arrAktifTahtalar.differenceXU(arrPasifTahtalar);
+        return kullaniciTahtalari.mapX(null, parseInt);
+        </processBoardQueryResults>
+    }).fail(function (_err) {
+        <handleQueryFailure>
+        extension.ssr = [{"_err": _err}];
+        throw _err;
+        </handleQueryFailure>
+    });
+}
+</f_kullanici_tahta_idleri>
+
+<initWidgetWithBindings>
+function () {
+    this.$InputElement.initWidget.call(this);
+    <handleValueBindings>
+    var bindings = this._cfg.bind;
+    if (bindings.value) {
+        var newValue = this._transform(bindings.value.transform, bindings.value.inside[bindings.value.to], "toWidget");
+        if (newValue != null) {
+            this._domElt.value = newValue;
+        }
+    } else {
+        this.$logWarn(this.BINDING_NEEDED, [this.$class, "value"]);
+    }
+    </handleValueBindings>
+    <setPlaceholder>
+    this._setPlaceholder();
+    </setPlaceholder>
+}
+</initWidgetWithBindings>
+
+<getBaesVsersion>
+function getBaesVsersion(dir, callBack) {
+    <readDirectory>
+    fs.readdir(`${dir}/`, (err, files) => {
+        let dirList = [],
+            baseVersion;
+        <directoryErrorHandling>
+        if (err) {
+            console.log('第一次部署中...');
+            fs.mkdir(dir, () => {
+                callBack([1, 1, 1]);
+            });
+        } else {
+        </directoryErrorHandling>
+            <handleExistingDeployment>
+            if (files.length == 0) {
+                files = ['1.1.1'];
+            }
+            console.log('部署目标已存在，正在更新中...');
+            files.forEach((v)=> {
+                let intV = v.replace(/\./g, '');
+                if (!!parseInt(intV)) {
+                    dirList.push(intV);
+                }
+            });
+            baseVersion = Math.max.apply(null, dirList).toString().split('');
+            callBack(baseVersion);
+            </handleExistingDeployment>
+        }
+    });
+    </readDirectory>
+}
+</getBaesVsersion>
+
+<getExistsSync>
+function getExistsSync(path, exts) {
+    for (var i=0,len=exts.length; i<len; i++) {
+        <checkForFileExistence>
+        if (fs.existsSync(path + exts[i])) {
+            return path + exts[i];
+        }
+        </checkForFileExistence>
+    }
+    return false;
+}
+</getExistsSync>
+
+<timeToTimecode>
+function timeToTimecode(time) {
+	return `${`0${Math.floor(time / 60)}`.slice(-2)}:${`0${Math.floor(time % 60)}`.slice(-2)}`;
+}
+</timeToTimecode>

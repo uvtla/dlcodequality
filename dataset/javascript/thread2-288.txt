@@ -1,0 +1,193 @@
+<serializeHash>
+function serializeHash() {
+  var hash = {}
+  eachFormElement.apply(function (name, value) {
+    if (name in hash) {
+      hash[name] && !isArray(hash[name]) && (hash[name] = [hash[name]])
+      hash[name].push(value)
+    } else hash[name] = value
+  }, arguments)
+  return hash
+}
+</serializeHash>
+
+<unnamed>
+function(file, regFilter, cb) {
+  <errorHandling>
+  cb = arguments[arguments.length-1];
+  if(!file || !fs.existsSync(file)) {
+    cb(true);
+    return ;
+  }
+  </errorHandling>
+
+  <filteringHandling>
+  var fileName = path.basename(file);
+  if(regFilter && regFilter.test && regFilter.test(fileName)) {
+    return ;
+  }
+  </filteringHandling>
+
+  <traversingHandling>
+  if(fs.lstatSync(file).isFile()) {
+    cb(false, file);
+    return ;
+  } else if(fs.lstatSync(file).isDirectory()) {
+    (fs.readdirSync(file)).forEach(function(item) {
+      utils.traverseFolderSync(path.join(file, item), regFilter, cb);
+    });
+  }
+  </traversingHandling>
+}
+</unnamed>
+
+<one>
+function one(node) {
+  <collectWordNodes>
+  var children = node.children
+  var length = children.length
+  var index = -1
+  var values = []
+  var words = []
+  var child
+  while (++index < length) {
+    child = children[index]
+    if (child.type === 'WordNode') {
+      values.push(toString(child))
+      words.push(child)
+    }
+  }
+  </collectWordNodes>
+  <tagWords>
+  var tags = tagger.tag(values)
+  index = -1
+  length = tags.length
+  while (++index < length) {
+    patch(words[index], tags[index][1])
+  }
+  </tagWords>
+}
+</one>
+
+<addDecorative>
+function addDecorative(c) {
+  <decorateComponent>
+  if (c.$isDecorative !== true) {
+      c.$$isDecorative = true;
+  }
+  </decorateComponent>
+  <callSuperInsertMethod>
+  this.$getSuper("insert").call(this, this.kids.length, null, c);
+  </callSuperInsertMethod>
+}
+</addDecorative>
+
+<unnamed>
+function (keyOrList, func) {
+  <addListener>
+  listeners.unshift({ keys: toArray(keyOrList), cb: func,
+    calls: Infinity });
+  return me;
+  </addListener>
+}
+</unnamed>
+
+<Manager>
+function Manager(store, channel) {
+  <initializeManager>
+  this.store = store;
+  this.store.on('message', this.handleStoreMessage.bind(this));
+  this.channel = channel;
+  </initializeManager>
+
+  <initializeDataStores>
+  this.flags = {};
+  this.servers = {};
+  this.connections = {};
+  this.connectionCount = 0;
+  </initializeDataStores>
+
+  <registerEventHandlers>
+  channel.on('connection:message', this.handleConnectionMessage.bind(this));
+  channel.on('server:message', this.handleServerMessage.bind(this));
+  </registerEventHandlers>
+}
+</Manager>
+
+<unnamed>
+function (oDraggedControl, iKeyCode) {
+  <initialize>
+  var $DraggedControl = oDraggedControl.$(),
+    aItems = this.getItems(),
+    iBeginDragIndex = this.indexOfItem(oDraggedControl),
+    bRtl = sap.ui.getCore().getConfiguration().getRTL(),
+    iNewDropIndex,
+    $DroppedControl,
+    oKeyCodes = KeyCodes;
+  </initialize>
+
+  <handleKeyOperation>
+  switch (iKeyCode) {
+    // Key handling code omitted for brevity...
+  }
+  </handleKeyOperation>
+
+  <executeDragAndDrop>
+  $DroppedControl = aItems[iNewDropIndex].$();
+  IconTabBarDragAndDropUtil._insertControl(sInsertAfterBeforePosition, $DraggedControl, $DroppedControl);
+  IconTabBarDragAndDropUtil._handleConfigurationAfterDragAndDrop.call(this, oDraggedControl, iNewDropIndex);
+  </executeDragAndDrop>
+
+  <returnResult>
+  return true;
+  </returnResult>
+}
+</unnamed>
+
+<unnamed>
+function(mac) {
+  <lookupOrCreateApplianceInstance>
+  if (listOfAppliances[mac]) {
+      return listOfAppliances[mac];
+  }
+  </lookupOrCreateApplianceInstance>
+  
+  <createApplianceInstance>
+  var internal = new (function(mac){ 
+    // Internal appliance instance code omitted for brevity...
+  })(mac);
+  </createApplianceInstance>
+
+  <assignApplianceInstance>
+  listOfAppliances[mac] = internal;
+  </assignApplianceInstance>
+
+  <returnApplianceInstance>
+  return internal;
+  </returnApplianceInstance>
+}
+</unnamed>
+
+<unwatchFile>
+function unwatchFile(watcher, filename) {
+  <executeUnwatch>
+  if (watcher) {
+      watcher.close && watcher.close();
+  } else {
+      fs.unwatchFile(filename);
+  }
+  </executeUnwatch>
+}
+</unwatchFile>
+
+<maybe_>
+function maybe_(thunk) {
+  <handlingMaybe>
+  return function(f) {
+    return function(maybe) {
+      return maybe.isJust ? f (maybe.value) : thunk ();
+    };
+  };
+  </handlingMaybe>
+}
+</maybe_>

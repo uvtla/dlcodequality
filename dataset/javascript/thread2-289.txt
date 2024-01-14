@@ -1,0 +1,218 @@
+<getYearsList>
+function getYearsList() {
+  var yearsList = [];
+  for (var i = 2005; i <= moment().year(); i++) {
+    yearsList.push(i);
+  }
+  return yearsList;
+}
+</getYearsList>
+
+<handleDocumentQueryRender>
+function () {
+  
+  let fn = function handleDocumentQueryRender (opts = {}, callback) {
+    let { extname, viewname, themefileext, viewfileext, responseData } = opts;
+    let themename = this.theme;
+    let fileext = (typeof themefileext === 'string') ? themefileext : viewfileext;
+    return <generateRender>
+    this._utility_responder.render(responseData || {}, Object.assign(opts, { themename, fileext, skip_response: true }))
+    </generateRender>
+      .then(result => {
+        <respondToClient>
+        this.protocol.respond(opts.req, opts.res, {
+          responder_override: result
+        });
+        </respondToClient>
+        if (typeof callback === 'function') callback(null, result);
+        else return Promisie.resolve(result);
+      })
+      .catch(e => {
+        <handleError>
+        this.protocol.error(opts.req, opts.res, { err: e });
+        </handleError>
+        if (typeof callback === 'function') callback(e);
+        else return Promisie.reject(e);
+      });
+  };
+  let message = 'CoreController.handleDocumentQueryRender: Use CoreController.responder.render with an HTML adapter or CoreController._utility_responder.render instead';
+  return <issueDeprecationWarning>
+  wrapWithDeprecationWarning.call(this, fn, message);
+  </issueDeprecationWarning>
+}
+</handleDocumentQueryRender>
+
+<getBackgroundPosition>
+function getBackgroundPosition(image) {
+  var logicValue = image.isSVG ? 1 : -1;
+  var x = logicValue * (image.ratio > 1 ? image.coordinates.x / image.ratio : image.coordinates.x);
+  var y = logicValue * (image.ratio > 1 ? image.coordinates.y / image.ratio : image.coordinates.y);
+  <generateCssTemplate>
+  var template = _.template('<%= (x ? x + "px" : x) %> <%= (y ? y + "px" : y) %>');
+  return template({x: x, y: y});
+  </generateCssTemplate>
+}
+</getBackgroundPosition>
+
+<chainListeners>
+function (listeners, context) {
+  if (listeners.type) {
+    <setupKeydownListener>
+    this._chainListener(listeners, "keydown", {
+      fn : keyDownToType,
+      scope : this,
+      args : ariaUtilsType.isArray(listeners.type) ? listeners.type : [listeners.type]
+    });
+    </setupKeydownListener>
+    <cleanupListeners>
+    delete listeners.type;
+    </cleanupListeners>
+  }
+}
+</chainListeners>
+
+<complexRequestHandler>
+function (transport, method, path, plain, header, session, callback){
+  var self = this,
+      err;
+  if (transport === 'http' || transport === 'ws') {
+    log.debug('%s perform a %s request', app.name, (transport === 'ws' ? 'websocket' : 'http'));
+    
+    <composeRequest>
+    this.composeRequest(header, path, method, transport);
+    </composeRequest>
+    
+    this.request.end(function(err, res) {
+      <logAndHandleResponse>
+      logResponse(err, res);
+      </logAndHandleResponse>
+      if (err) {
+        callback(err, res);
+
+      } else if (path === my.config.logoutPath) {
+        
+        <destroySession>
+        sessionStore.destroy.call(sessionStore, my.config.urlBase);
+        </destroySession>
+        
+        callback(null, res);
+      } else {
+        <processHeader>
+        my.processHeader(res, function(procErr, result) {
+        </processHeader>
+          
+          if (!procErr) {
+            
+            <saveSessionToken>
+            session.token = result.parsedHeader.content.token;
+            </saveSessionToken>
+            <saveSession>
+            sessionStore.save(my.config.urlBase, session, function(saveErr) {
+            </saveSession>
+              if (!saveErr) {
+                log.debug('%s saved session', app.name);
+                log.debug(session);
+                if (!(plain || self._noAuthHeader || path === my.config.logoutPath)) {
+                  
+                  <decryptResponseBody>
+                  res.body = my.decryptBody(result, header);
+                  </decryptResponseBody>
+                }
+                callback(err, result);
+              } else {
+                err = 'save session error';
+                log.error('%s %s', app.name, err);
+                callback(err);
+              }
+            });
+          } else {
+            callback(procErr);
+          }
+        });
+      }
+    });
+  } else {
+    err = 'unknown transport';
+    log.error('%s %s %s', app.name, err, transport);
+    callback(err);
+  }
+}
+</complexRequestHandler>
+
+<updateSiblingsGraphics>
+function ($oneSibling, siblingCount, existingSibligCount) {
+  var lines = '';
+  for (var i = 0; i < existingSibligCount; i++) {
+    lines += '<td class="leftLine topLine"></td><td class="rightLine topLine"></td>';
+  }
+  <updateDOM>
+  $oneSibling.parent().prevAll('tr:gt(0)').children().attr('colspan', siblingCount * 2)
+    .end().next().children(':first').after(lines);
+  </updateDOM>
+}
+</updateSiblingsGraphics>
+
+<computeDGammaFunction>
+function dgamma(a, s, logp) {
+  logp = logp === true;
+
+  return <calculateDGamma>
+  function(x) {
+     return logp ? dgammaLog(a, s)(x) : Math.exp(dgammaLog(a, s)(x));
+  };
+  </calculateDGamma>
+}
+</computeDGammaFunction>
+
+<setPositionCorners>
+function(obj, o, v){
+  if('string' === typeof v) {
+    <setCornerValue>
+    this.position[o] = obj[o] = new CORNER(v, o === 'at');
+    </setCornerValue>
+  }
+}
+</setPositionCorners>
+
+<enumerateValues>
+function enumerate(object, kind) {
+
+  if (typeof object === 'string') {
+    return <enumeratingStringValues>
+    StringIterators[kind || KIND_VALUES](object);
+    </enumeratingStringValues>
+  } else if (Array.isArray(object)) {
+    return <enumeratingArrayValues>
+    ArrayIterators[kind || KIND_VALUES](object);
+    </enumeratingArrayValues>
+
+  } else if (object[Symbol.iterator]) {
+    return <enumeratingIterableObject>
+    object[Symbol.iterator]();
+    </enumeratingIterableObject>
+
+  } else {
+    return <enumeratingGenericValues>
+    GenericIterators[kind || KIND_ENTRIES](object);
+    </enumeratingGenericValues>
+  }
+}
+</enumerateValues>
+
+<writeCommentExtFunction>
+function writeCommentExt() {
+    <writeStartOfExtensionBlock>
+    out.writeByte(0x21); 
+    out.writeByte(0xfe); 
+    </writeStartOfExtensionBlock>
+    <writeCommentLength>
+    out.writeByte(comment.length); 
+    </writeCommentLength>
+    <writeCommentBody>
+    out.writeUTFBytes(comment);
+    </writeCommentBody>
+    <writeEndOfExtensionBlock>
+    out.writeByte(0); 
+    </writeEndOfExtensionBlock>
+}
+</writeCommentExtFunction>

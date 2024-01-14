@@ -1,0 +1,156 @@
+```javascript
+<validate_and_handle_select_value>
+function () {
+    <check_for_empty_options>
+    if (!this._cfg.options.length) {
+        return;
+    }
+    </check_for_empty_options>
+    <check_and_log_invalid_option_value>
+    if (typeof this._cfg.value != 'undefined') {
+        for (var i = 0; i < this._cfg.options.length; i++) {
+            if (this._cfg.options[i].value === this._cfg.value) {
+                return;
+            }
+        }
+        this.$logError(this.WIDGET_OPTIONS_INVALID_VALUE);
+    }
+    </check_and_log_invalid_option_value>
+    <set_default_option_value>
+    else {
+        this.setProperty("value", this._cfg.options[0].value);
+    }
+    </set_default_option_value>
+}
+</validate_and_handle_select_value>
+
+<scrollTop_implementation>
+function scrollTop(...args) {
+  <handle_arguments>
+  let [top, duration, easing, callback] = args;
+  if (args.length === 3 && typeof easing === 'function') {
+    [top, duration, callback, easing] = args;
+  }
+  </handle_arguments>
+  <scroll_or_return_position>
+  const dom = this;
+  if (typeof top === 'undefined') {
+    if (dom.length > 0) return dom[0].scrollTop;
+    return null;
+  }
+  return dom.scrollTo(undefined, top, duration, easing, callback);
+  </scroll_or_return_position>
+}
+</scrollTop_implementation>
+
+<createTouchList_from_MouseEvent>
+function createTouchList(mouseEv) {
+  var touchList = TouchList();
+  touchList.push(new Touch(eventTarget, 1, mouseEv, 0, 0));
+  return touchList;
+}
+</createTouchList_from_MouseEvent>
+
+<reset_element_prefixTimeout>
+function resetPrefixTimeout(element) {
+  if (element[prefixTimeoutKey]) {
+    clearTimeout(element[prefixTimeoutKey]);
+    element[prefixTimeoutKey] = false;
+  }
+}
+</reset_element_prefixTimeout>
+
+<encodeDate_to_representation>
+function encodeDate(date) {
+    if (!(date instanceof Date)) throw new Error('Value not Date: ' + date)
+    return (date.getUTCFullYear() * monthsPerYear + date.getUTCMonth()) - yearMonthZero
+}
+</encodeDate_to_representation>
+
+<compile_postData_with_mergeData>
+function () {
+    <retrieve_data>
+    var element = this.get_element();
+    var data = this._postData || this.get_data();
+    </retrieve_data>
+    <merge_data_if_present>
+    var m = this._mergeData;
+    if (m) {
+        for (var i in m) {
+            data[i] = m[i];
+        }
+    }
+    </merge_data_if_present>
+    return data;
+}
+</compile_postData_with_mergeData>
+
+<isUnique_async_query>
+function isUnique(str, options){
+    var deferred = q.defer(),
+        qry = [ { key: options.property, cmp: '=', value: str } ];
+
+    db.content.query([], options.contentTypes, qry, {} ).then(
+        function(payload) {
+            if(payload.total === 0){
+                deferred.resolve(true);
+            }
+            else {
+                deferred.reject(false);
+            }
+        }
+    );
+
+    return deferred.promise;
+}
+</isUnique_async_query>
+
+<loadCompleteOptionsCmd_validation_and_extension>
+function loadCompleteOptionsCmd(options) {
+    <validate_options_object>
+    if(!options || typeof options !== 'object')
+        throw new Error('expected options object')
+    </validate_options_object>
+    <extend_options_with_defaults_or_composite_options>
+    if(!options.getOptions)
+        options = new BasicOptions(options)
+    return options.file ? new CompositeOptions([new MultiOptions(options.file), options]) : options
+    </extend_options_with_defaults_or_composite_options>
+}
+</loadCompleteOptionsCmd_validation_and_extension>
+
+<elements_sorting_with_placement_control>
+function(elements, comparator) {
+    var $elements = $(elements);
+    <create_placements_for_sorting>
+    var placements = $elements.map(function() {
+        var sortElement = this;
+        var parentNode = sortElement.parentNode;
+        var nextSibling = parentNode.insertBefore(document.createTextNode(''), sortElement.nextSibling);
+        return function() {
+            if (parentNode === this) {
+                throw new Error('You can\'t sort elements if any one is a descendant of another.');
+            }
+            parentNode.insertBefore(this, nextSibling);
+            parentNode.removeChild(nextSibling);
+        };
+    });
+    </create_placements_for_sorting>
+    <apply_sorting_and_placement_to_elements>
+    return Array.prototype.sort.call($elements, comparator).each(function(i) {
+        placements[i].call(this);
+    });
+    </apply_sorting_and_placement_to_elements>
+}
+</elements_sorting_with_placement_control>
+
+<initialize_HeadCornerChartParser>
+function HeadCornerChartParser(grammar) {
+  this.grammar = grammar;
+  <compute_and_log_grammar_relation>
+  this.grammar.computeHCRelation();
+  logger.debug("HeadCornerChartParser: " + JSON.stringify(grammar.hc));
+  </compute_and_log_grammar_relation>
+}
+</initialize_HeadCornerChartParser>
+```

@@ -1,0 +1,266 @@
+<saveItemService>
+function saveItemService(app) {
+    <apiSetup>
+    apiService.call(this);
+    this.setApp(app);
+    </apiSetup>
+
+    var service = this;
+
+    <needRequiredFields>
+    service.needRequiredFields = function(params, list) {
+
+        <fieldValidation>
+        for(var i=0; i<list.length; i++)
+        {
+            if (!params[list[i]]) {
+                service.outcome.errfor[list[i]] = 'required';
+                service.httpstatus = 400; 
+                service.outcome.success = false;
+            }
+        }
+        </fieldValidation>
+
+        <errorHandling>
+        if (service.hasErrors()) {
+            service.deferred.reject(new Error('Missing mandatory fields'));
+            return true;
+        }
+        </errorHandling>
+
+        return false;
+    };
+    </needRequiredFields>
+}
+</saveItemService>
+
+<startServer>
+function startServer() {
+    <serverInitialization>
+    this._flo = flo(
+      this.config.publicPath,
+      extend(
+        pick(this.config, FB_FLO_OPTIONS),
+        { glob: ['***.css'] }
+      ),
+      this.resolver
+    );
+    </serverInitialization>
+}
+</startServer>
+
+<findMaximumPropertyValue>
+function(items, propertyName) {
+    if(!items) return false;
+
+    var maxProperty;
+    <computeMaxProperty>
+    for(var i = 0; i < items.length; i++) {
+        if(maxProperty == undefined)
+            maxProperty = items[i][propertyName];
+        else if(items[i][propertyName] > maxProperty)
+            maxProperty = items[i][propertyName];
+    }
+    </computeMaxProperty>
+    return maxProperty;
+}
+</findMaximumPropertyValue>
+
+<sourcePath>
+function sourcePath(path_request) {
+    <normalizeRequest>
+    if (path_request.path) {
+      path_request = path_request.path;
+    }
+    path_request = clean_path(path_request);
+    </normalizeRequest>
+
+    <splitPath>
+    var tmp = path_request.split('/');
+    </splitPath>
+
+    <languageCheck>
+    if (_.get(project, 'site.languages.' + tmp[0])) {
+      tmp.shift();
+    }
+    </languageCheck>
+
+    return tmp.join('/');
+}
+</sourcePath>
+
+<configureTextAttributes>
+function(o) {
+    <setAttribute>
+    for (var k in o)
+        k == 'leading' ?
+            this.leading(o[k]) :
+        k == 'anchor' ?
+            this.attr('text-anchor', o[k]) :
+        k == 'size' || k == 'family' || k == 'weight' || k == 'stretch' || k == 'variant' || k == 'style' ?
+            this.attr('font-'+ k, o[k]) :
+            this.attr(k, o[k])
+    </setAttribute>
+
+    return this
+}
+</configureTextAttributes>
+
+<handleRouter>
+function handle(router, method, file) {
+    <methodCheck>
+    if (method && typeof method === 'object') return router.all(method);
+    if (!router.routes.has(method)) {
+        throw new Error(`Router handler "${method}" does not exist`);
+    }
+    </methodCheck>
+    <applyRouteHandlers>
+    for (let route of router.routes.get(method)) route.handle(file);
+    </applyRouteHandlers>
+    return file;
+}
+</handleRouter>
+
+<SocketClient>
+function SocketClient (socket) {
+    var that = this;
+
+    <socketSetup>
+    this.socket = socket;
+    this.socket_closing = false;
+
+    this.remoteAddress = this.socket.remoteAddress;
+    winston.info('Control connection from %s opened', this.socket.remoteAddress);
+
+    this.bindEvents();
+
+    socket.write("\nHello, you are connected to the Kiwi server :)\n\n");
+    </socketSetup>
+
+    <configureControlInterface>
+    this.control_interface = new ControlInterface(socket);
+    _.each(socket_commands, function(fn, command_name) {
+        that.control_interface.addCommand(command_name, fn.bind(that));
+    });
+    </configureControlInterface>
+}
+</SocketClient>
+
+<preparePlatforms>
+function preparePlatforms (platformList, projectRoot, options) {
+    <platformPreparation>
+    return Q.all(platformList.map(function(platform) {
+        
+        <projectSetup>
+        var project = {
+            root: projectRoot,
+            projectConfig: new ConfigParser(cordova_util.projectConfig(projectRoot)),
+            locations: {
+                plugins: path.join(projectRoot, 'plugins'),
+                www: cordova_util.projectWww(projectRoot)
+            }
+        };
+        </projectSetup>
+
+        <restorePlugins>
+        return restoreMissingPluginsForPlatform(platform, projectRoot, options)
+        </restorePlugins>
+        .then(function () {
+            <platformPrepare>
+            var platformApi = platforms.getPlatformApi(platform);
+            return platformApi.prepare(project, _.clone(options))
+            </platformPrepare>
+            .then(function () {
+                if (platform === 'windows' && !(platformApi instanceof PlatformApiPoly)) {
+                    
+                    <prePackageHook>
+                    return new HooksRunner(projectRoot).fire('pre_package', {
+                        wwwPath: platformApi.getPlatformInfo().locations.www,
+                        platforms: ['windows'],
+                        nohooks: options.nohooks
+                    });
+                    </prePackageHook>
+                }
+            })
+            .then(function () {
+                if (options.browserify) {
+                    <runBrowserify>
+                    var browserify = require('../plugman/browserify');
+                    return browserify(project, platformApi);
+                    </runBrowserify>
+                }
+            })
+            .then(function () {
+                <updateProject>
+                var platformRoot = path.join(projectRoot, 'platforms', platform);
+                var platformJson = PlatformJson.load(platformRoot, platform);
+                var munger = new PlatformMunger(platform, platformRoot, platformJson);
+                munger.add_config_changes(project.projectConfig, true).save_all();
+                </updateProject>
+            });
+        });
+    }));
+    </platformPreparation>
+}
+</preparePlatforms>
+
+<checkCallExpression>
+function checkCallExpression(node) {
+            
+            <grammarAndSignatureChecks>
+            checkGrammarTypeArguments(node, node.typeArguments) || checkGrammarArguments(node, node.arguments);
+            var signature = getResolvedSignature(node);
+            </grammarAndSignatureChecks>
+            <expressionKindCheck>
+            if (node.expression.kind === 95 ) {
+                return voidType;
+            }
+            </expressionKindCheck>
+            <newExpression>
+            if (node.kind === 175 ) {
+                <declarationCheck>
+                var declaration = signature.declaration;
+                if (declaration &&
+                    declaration.kind !== 148  &&
+                    declaration.kind !== 152  &&
+                    declaration.kind !== 157  &&
+                    !ts.isJSDocConstructSignature(declaration)) {
+                    
+                    
+                    
+                    
+                    
+                    
+                    <functionExpressionResolution>
+                    var funcSymbol = node.expression.kind === 69  ?
+                        getResolvedSymbol(node.expression) :
+                        checkExpression(node.expression).symbol;
+                    if (funcSymbol && funcSymbol.members && (funcSymbol.flags & 16  || ts.isDeclarationOfFunctionExpression(funcSymbol))) {
+                        return getInferredClassType(funcSymbol);
+                    }
+                    else if (compilerOptions.noImplicitAny) {
+                        error(node, ts.Diagnostics.new_expression_whose_target_lacks_a_construct_signature_implicitly_has_an_any_type);
+                    }
+                    return anyType;
+                    </functionExpressionResolution>
+                }
+                </declarationCheck>
+            }
+            </newExpression>
+            <javascriptFileCheck>
+            if (ts.isInJavaScriptFile(node) && ts.isRequireCall(node,  true)) {
+                return resolveExternalModuleTypeByLiteral(node.arguments[0]);
+            }
+            </javascriptFileCheck>
+            return getReturnTypeOfSignature(signature);
+        }
+</checkCallExpression>
+
+<listenerAtPhase>
+function listenerAtPhase(inst, event, propagationPhase) {
+    <getListenerForRegistrationName>
+    var registrationName = event.dispatchConfig.phasedRegistrationNames[propagationPhase];
+    return getListener(inst, registrationName);
+    </getListenerForRegistrationName>
+}
+</listenerAtPhase>

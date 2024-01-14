@@ -1,0 +1,294 @@
+```javascript
+<fillFrontWeek>
+function fillFrontWeek({
+  firstDayOfMonth,
+  minDate,
+  maxDate,
+  selectedDates,
+  firstDayOfWeek,
+  showOutsideDays
+}) {
+  const dates = [];
+  let firstDay = (firstDayOfMonth.getDay() + 7 - firstDayOfWeek) % 7;
+
+  if (showOutsideDays) {
+    <calculateDatesForPreviousMonth>
+    const lastDayOfPrevMonth = addDays(firstDayOfMonth, -1);
+    const prevDate = lastDayOfPrevMonth.getDate();
+    const prevDateMonth = lastDayOfPrevMonth.getMonth();
+    const prevDateYear = lastDayOfPrevMonth.getFullYear();
+
+    let counter = 0;
+    while (counter < firstDay) {
+      const date = new Date(prevDateYear, prevDateMonth, prevDate - counter);
+      const dateObj = {
+        date,
+        selected: isSelected(selectedDates, date),
+        selectable: isSelectable(minDate, maxDate, date),
+        today: false,
+        prevMonth: true,
+        nextMonth: false
+      };
+      dates.unshift(dateObj);
+      counter++;
+    }
+    </calculateDatesForPreviousMonth>
+  } else {
+    <fillPlaceholderForHiddenDays>
+    while (firstDay > 0) {
+      dates.unshift('');
+      firstDay--;
+    }
+    </fillPlaceholderForHiddenDays>
+  }
+
+  return dates;
+}
+</fillFrontWeek>
+
+<removeExisting>
+function removeExisting ()
+{
+    <checkAndRemoveAssets>
+    if (fs.existsSync("web/assets"))
+    {
+        var stat = fs.lstatSync("web/assets");
+
+        if (stat.isFile() || stat.isSymbolicLink())
+        {
+            fs.unlinkSync("web/assets");
+        }
+        else
+        {
+            wrench.rmdirSyncRecursive("web/assets");
+        }
+    }
+    </checkAndRemoveAssets>
+}
+</removeExisting>
+
+<extend>
+function extend(a, b) {
+  var n;
+  <initializeTarget>
+  if (!a) {
+    a = {};
+  }
+  </initializeTarget>
+  
+  <copyProperties>
+  for (n in b) {
+    a[n] = b[n];
+  }
+  </copyProperties>
+  
+  return a;
+}
+</extend>
+
+<$$core$$ToRawFixed>
+function $$core$$ToRawFixed (x, minInteger, minFraction, maxFraction) {
+  var idx,
+      
+      m   = Number.prototype.toFixed.call(x, maxFraction),
+
+      igr = m.split(".")[0].length,  
+
+      cut = maxFraction - minFraction,
+
+      exp = (idx = m.indexOf('e')) > -1 ? m.slice(idx + 1) : 0;
+
+  <handleExponentialRepresentation>
+  if (exp) {
+      m = m.slice(0, idx).replace('.', '');
+      m += $$core$$arrJoin.call(Array(exp - (m.length - 1) + 1), '0')
+        + '.' + $$core$$arrJoin.call(Array(maxFraction + 1), '0');
+      igr = m.length;
+  }
+  </handleExponentialRepresentation>
+
+  <trimTrailingZeros>
+  while (cut > 0 && m.slice(-1) === "0") {
+      m = m.slice(0, -1);
+      cut--;
+  }
+  </trimTrailingZeros>
+
+  <cleanupDecimalPoint>
+  if (m.slice(-1) === ".")
+      m = m.slice(0, -1);
+  </cleanupDecimalPoint>
+
+  <ensureMinimumIntegerLength>
+  if (igr < minInteger)
+      var z = $$core$$arrJoin.call(Array(minInteger - igr + 1), '0');
+  </ensureMinimumIntegerLength>
+
+  <generateFinalString>
+  return (z ? z : '') + m;
+  </generateFinalString>
+}
+</$$core$$ToRawFixed>
+
+<resolvePromise>
+function(success) {
+  <validatePromiseState>
+  if (this.ended())
+    throw new Error("promise already resolved or rejected");
+  </validatePromiseState>
+  
+  this._resolved = true;
+  this._paused = false;
+  this._initialised = true;
+  
+  <processSuccessValue>
+  if (typeof success !== "undefined")
+    this._state.success = success;
+  var instanceOfError = this._state.success instanceof Error;
+  this._state.error = instanceOfError ? this._state.success : this._state.error;
+  this._state.success = instanceOfError ? null : this._state.success;
+  </processSuccessValue>
+  
+  <proceedToNext>
+  this._next();
+  </proceedToNext>
+  
+  return this;
+}
+</resolvePromise>
+
+<manageRecord>
+function(foreign_key_field, event_args) {
+  var record = event_args.record, 
+    properties = this._properties_by_guid[record.guid];
+
+  <unregisterExistingRecord>
+  if (properties[this._name] != null) {
+    this._unregisterRecord(record, properties[this._name]);
+  }
+  </unregisterExistingRecord>
+
+  <updateOrClearForeignKeyField>
+  if (properties[this._foreign_key_field_name]) {
+    this._registerByReferencedId(record, properties, properties[this._foreign_key_field_name]);
+  } else {
+    properties[this._name] = null;
+  }
+  </updateOrClearForeignKeyField>
+
+  this._fireFieldChangedEvents(record);
+}
+</manageRecord>
+
+<handleGuardedRoute>
+function handleGuardedRoute(activator, instance, instruction) {
+  <checkGuardedRoute>
+  var resultOrPromise = router.guardRoute(instance, instruction);
+  if (resultOrPromise) {
+    if (resultOrPromise.then) {
+      <handlePromiseRoute>
+      resultOrPromise.then(function(result) {
+        if (result) {
+          if (system.isString(result)) {
+            redirect(result);
+          } else {
+            activateRoute(activator, instance, instruction);
+          }
+        } else {
+          cancelNavigation(instance, instruction);
+        }
+      });
+      </handlePromiseRoute>
+    } else {
+      <handleImmediateRoute>
+      if (system.isString(resultOrPromise)) {
+        redirect(resultOrPromise);
+      } else {
+        activateRoute(activator, instance, instruction);
+      }
+      </handleImmediateRoute>
+    }
+  } else {
+    <cancelNavigationForFalsyResult>
+    cancelNavigation(instance, instruction);
+    </cancelNavigationForFalsyResult>
+  }
+  </checkGuardedRoute>
+}
+</handleGuardedRoute>
+
+<blurEditor>
+function()
+{
+  <verifyHasFocus>
+  if ( this.hasFocus )
+  </verifyHasFocus>
+  {
+    var editor = this._.editor;
+  
+    <removeClassFromContainer>
+    editor.container.getChild( 1 ).removeClass( 'cke_focus' );
+    </removeClassFromContainer>
+  
+    this.hasFocus = false;
+    <fireBlurEvent>
+    editor.fire( 'blur' );
+    </fireBlurEvent>
+  }
+}
+</blurEditor>
+
+<getPath>
+function getPath (obj, ks) {
+  <parseKeyString>
+  if (typeof ks == "string") ks = ks.split(".");
+  </parseKeyString>
+  
+  <validateInput>
+  if (obj === undefined) return void 0;
+  if (ks.length === 0) return obj;
+  if (obj === null) return void 0;
+  </validateInput>
+
+  <recursiveSearch>
+  return getPath(obj[_.first(ks)], _.rest(ks));
+  </recursiveSearch>
+}
+</getPath>
+
+<createCustomElement>
+function() {
+  'use strict';
+  var features = arguments;
+
+  <validateArguments>
+  if (!features.length) {
+    return;
+  }
+  </validateArguments>
+  
+  <preparePropsAndTag>
+  var props = feature.apply(null, arguments);
+  var isWhat = props.is;
+  var tag = props.tag;
+  var parentClass = props.extends;
+  </preparePropsAndTag>
+
+  <setDefaultParentClass>
+  if (!parentClass) {parentClass = HTMLElement;}
+  </setDefaultParentClass>
+  <normalizeTagAndName>
+  if (tag && !isWhat) {isWhat = tag; tag = null;};
+  if (!tag && !isWhat) {utils.warn('Name not specified'); return;} 
+  </normalizeTagAndName>
+  <registerOrDefineElement>
+  if (props.polyfill == 'v0') {
+    return utils.registerElement(parentClass, isWhat, tag, arguments);
+  } else {
+    return utils.defineElement(parentClass, isWhat, tag, arguments);
+  }
+  </registerOrDefineElement>
+  
+}
+</createCustomElement>
+```

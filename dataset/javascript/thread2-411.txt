@@ -1,0 +1,239 @@
+```javascript
+<resolve>
+function resolve(filePath, relativeTo) {
+    const fullPath = path.resolve(relativeTo || '', filePath);
+    return { filePath: fullPath, configFullName: fullPath };
+}
+</resolve>
+
+<_linkOrCreateUser>
+function _linkOrCreateUser() {
+    if(this.userInfo){ 
+        return _linkIdentity(this.userInfo._id, 'facebook', this.socialUserInfo, this.creds);
+    }
+    else {
+        return _createNewFacebookUser.call(this)
+                .then(function(user){
+                    this.userInfo = user;
+                }.bind(this));
+    }
+}
+</_linkOrCreateUser>
+
+<stripSpace>
+function stripSpace() {
+      if (hasTag && !nonSpace) {
+        while (spaces.length) {
+          tokens.splice(spaces.pop(), 1);
+        }
+      } else {
+        spaces = [];
+      }
+
+      hasTag = false;
+      nonSpace = false;
+}
+</stripSpace>
+
+<anonymized-function>
+function(mu, uriString, filename) {
+    console.info('#green{[convert file]} ' + filename + ' #green{to data uri]}\n');
+    return mu.replace(uriString, [
+        'data:',
+        mime.getType(filename),
+        ';base64,',
+        fs.readFileSync(filename).toString('base64')
+    ].join(''));
+}
+</anonymized-function>
+
+<postJson>
+function postJson({ url, payload, contentType, useBearer }) {
+  return ajax({
+    url,
+    method: 'post',
+    body: JSON.stringify( payload || {} ),
+    contentType,
+    useBearer
+  })
+}
+</postJson>
+
+<_handleWriteMultipleRegisters>
+function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) {
+    <parse-request>
+    var address = requestBuffer.readUInt16BE(2);
+    var length = requestBuffer.readUInt16BE(4);
+
+    if (requestBuffer.length !== (7 + length * 2 + 2)) {
+        return;
+    }
+    </parse-request>
+
+    <build-response>
+    var responseBuffer = Buffer.alloc(8);
+    responseBuffer.writeUInt16BE(address, 2);
+    responseBuffer.writeUInt16BE(length, 4);
+    </build-response>
+
+    <handle-callbacks>
+    var callbackInvoked = false;
+    var cbCount = 0;
+    var buildCb = function() {
+        return function(err) {
+            if (err) {
+                if (!callbackInvoked) {
+                    callbackInvoked = true;
+                    callback(err);
+                }
+                return;
+            }
+            cbCount = cbCount + 1;
+            if (cbCount === length && !callbackInvoked) {
+                modbusSerialDebug({ action: "FC16 response", responseBuffer: responseBuffer });
+                callbackInvoked = true;
+                callback(null, responseBuffer);
+            }
+        };
+    };
+    </handle-callbacks>
+
+    <error-check>
+    if (length === 0) {
+        callback({
+            modbusErrorCode: 0x02, 
+            msg: "Invalid length"
+        });
+    }
+    </error-check>
+
+    <set-registers>
+    if (vector.setRegister) {
+        var value;
+        for (var i = 0; i < length; i++) {
+            var cb = buildCb(i);
+            value = requestBuffer.readUInt16BE(7 + i * 2);
+            try {
+                if (vector.setRegister.length === 4) {
+                    vector.setRegister(address + i, value, unitID, cb);
+                }
+                else {
+                    var promiseOrValue = vector.setRegister(address + i, value, unitID);
+                    _handlePromiseOrValue(promiseOrValue, cb);
+                }
+            }
+            catch(err) {
+                cb(err);
+            }
+        }
+    } else if (vector.setRegisterArray) {
+        value = [];
+        for (i = 0; i < length; i++) {
+            cb = buildCb(i);
+            value.push(requestBuffer.readUInt16BE(7 + i * 2));
+            _handlePromiseOrValue(value, cb);
+        }
+        try {
+            if (vector.setRegisterArray.length === 6) {
+                vector.setRegisterArray(address, value, unitID, cb);
+            }
+            else {
+                vector.setRegisterArray(address, value, unitID);
+            }
+        }
+        catch (err) {
+            cb(err);
+        }
+    }
+    </set-registers>
+}
+</_handleWriteMultipleRegisters>
+
+<doesStoreContainField>
+function doesStoreContainField(store, fieldName) {
+      var model = store.first();
+      if (typeof model.get(fieldName) !== 'undefined') {
+        return true;
+      }
+      return model.getField(fieldName) != null;
+}
+</doesStoreContainField>
+
+<handleRequest>
+async function handleRequest(url, request, response) {
+    <log-request>
+    if(logger) {
+        logger.trace("Received request body");
+    }
+    </log-request>
+
+    <process-url>
+    var store = Store(tools.actions, tools.decorators);
+    var route = store.processURL(url);
+    </process-url>
+
+    <handle-route-null>
+    if(route === null) {
+      if(logger) {
+          logger.debug("No route for URL: " + url);
+      }
+      response.writeHead(404);
+      response.end();
+      return;
+    }
+    </handle-route-null>
+
+    <parse-body>
+    if(request.method !== "GET") {
+        ...
+    }
+    </parse-body>
+
+    <prepare-and-send-response>
+    // The main logic of this block handles a lot of responsibilities related to rendering and responding.
+    // This is split into multiple sections, such as handling GET and POST requests differently,
+    // unlinking files, gzipping responses, and more. Therefore, the entire block is non-compliant.
+    ...
+    </prepare-and-send-response>
+}
+</handleRequest>
+
+<ngAnimateSwap>
+function(scope, $element, attrs, ctrl, $transclude) {
+      <watch-and-animate>
+      var previousElement, previousScope;
+      scope.$watchCollection(attrs.ngAnimateSwap || attrs['for'], function(value) {
+        if (previousElement) {
+          $animate.leave(previousElement);
+        }
+        if (previousScope) {
+          previousScope.$destroy();
+          previousScope = null;
+        }
+        if (value || value === 0) {
+          previousScope = scope.$new();
+          $transclude(previousScope, function(element) {
+            previousElement = element;
+            $animate.enter(element, null, $element);
+          });
+        }
+      });
+      </watch-and-animate>
+}
+</ngAnimateSwap>
+
+<initLibraries>
+function initLibraries(cfg = {}) {
+  <configure-libraries>
+	_.each(configMap, (keys, libName) => {
+		let lib = libs[libName];
+		let options = {};
+		_.each(keys, (key) => options[key] = cfg[key]);
+		lib.setOptions && lib.setOptions(options);
+	});
+  </configure-libraries>
+}
+</initLibraries>
+``` 
+
+In the example for `<handleRequest>`, instead of breaking down into more SRP tags since the function is quite large and handles several responsibilities which are not consecutively grouped in the code, I tagged the whole main response handling as non-compliant, indicating that ideally, it should be refactored into smaller, more focused functions.

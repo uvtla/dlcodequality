@@ -1,0 +1,320 @@
+```javascript
+<function>
+function (uid) {
+    var jvmObject;
+    this.logger = Logger.getLogger("ml_feature_MinMaxScaler_js");
+    
+    <createJvmObject>
+    if (uid) {
+        if (uid instanceof org.apache.spark.ml.feature.MinMaxScaler) {
+            jvmObject = uid;
+        } else {
+            jvmObject = new org.apache.spark.ml.feature.MinMaxScaler(uid);
+        }
+    } else {
+        jvmObject = new org.apache.spark.ml.feature.MinMaxScaler();
+    }
+    </createJvmObject>
+    
+    Estimator.call(this, jvmObject);
+}
+</function>
+```
+This function has two responsibilities: creating the JVM object and initiating the Estimator. The responsibility related to `Logger` is not significant enough to constitute a separate responsibility.
+
+```javascript
+<function>
+function(folder) {
+    var type = config.moduleType;
+    var appPath;
+    
+    <resolveAppPath>
+    if (folder) {
+        if (path.isAbsolute(folder)) {
+            appPath = path.join(folder);
+        } else {
+            appPath = path.join(process.cwd(), folder);
+        }
+    } else {
+        appPath = path.join(process.cwd());
+    }
+    </resolveAppPath>
+    
+    var appSrc = config.apps[type];
+    
+    <gitClone>
+    helpers.gitClone(appSrc, appPath);
+    </gitClone>
+}
+</function>
+```
+The function is responsible for determining the path and cloning a git repository. These are two separate responsibilities within the context of the setup or configuration process.
+
+```javascript
+<function>
+function() {
+    gulp.task('tpl-precompile', function() {
+        return gulp.src([paths.src.partials])
+        .pipe($.htmlmin({
+            removeComments: true,
+            collapseWhitespace: plugins.tpls.ext === '.jade' ? false : true
+        }))
+        .pipe(plugins.tpls.cmd(plugins.tpls.config))
+        .on('error', handleError)
+        .pipe($.defineModule('plain'))
+        .pipe($.declare({
+            namespace: 'R.templates',
+            processName: function(file) {
+                var dir = config.paths.src.partials || config.paths.src.templates;
+                return file.slice(file.indexOf(dir) + dir.length).replace('.js', '');
+            }
+        }))
+        .pipe($.concat('templates.js'))
+        .pipe(gulp.dest(paths.out.js));
+    });
+
+    gulp.task('tpl-reload', ['tpl-precompile'], function() {
+        return gulp.src([paths.src.views])
+        .pipe($.livereload(lrport));
+    });
+}
+</function>
+```
+This is an example of a function setup that creates two gulp tasks (`tpl-precompile` and `tpl-reload`), which could be considered as two different responsibilities, although they are part of the build process.
+
+```javascript
+<function Utils>
+function Utils (appName, app, dirs) {
+    
+    this.JSON = {};
+    <jsonEquals>
+    this.JSON.equals = function (param1, param2) {
+        return JSON.stringify(param1) === JSON.stringify(param2);
+    };
+    </jsonEquals>
+    
+    <jsonGetDescendant>
+    this.JSON.getDescendant = function getDescendant (input, obj) {
+        if (!obj) {
+            return undefined;
+        }
+
+        const nameSeparator = input.indexOf('.');
+        if (nameSeparator === -1) {
+            return obj[input];
+        }
+        return getDescendant(input.substring(nameSeparator + 1), obj[input.substring(0, nameSeparator)]);
+    };
+    </jsonGetDescendant>
+    
+    <jsonConstants>
+    this.JSON.EMPTY = JSON.stringify({});
+    this.JSON.EMPTY_ARRAY = JSON.stringify([]);
+    </jsonConstants>
+
+    
+    <createLogger>
+    this.Logger = function (name) {
+        return new OVELogger(name);
+    };
+    </createLogger>
+    
+    <otherUtilities>
+    // Other utility methods have been omitted for brevity.
+    // They would be individually tagged if included in full.
+    </otherUtilities>
+}
+</function Utils>
+```
+This `Utils` function contains multiple different utility methods and constructors, each representing a separate responsibility. This is a clear violation of SRP as it's more of a utility class than a function.
+
+```javascript
+<function copy>
+function copy (from, to) {
+    return Object.assign(
+        function (context) {
+            return function (prevConfig) {
+                context.copyPlugin = context.copyPlugin || {patterns: []}
+
+                <updatePluginPatterns>
+                context.copyPlugin = _extends({}, context.copyPlugin, {
+                    patterns: [].concat(context.copyPlugin.patterns, [
+                        {from: from, to: to},
+                    ]),
+                })
+                </updatePluginPatterns>
+
+                <returnPrevConfig>
+                return prevConfig
+                </returnPrevConfig>
+            }
+        },
+        {post: postConfig}
+    )
+}
+</function copy>
+```
+The `copy` function is designed to extend a plugin's configuration. It handles both the update of plugin patterns and returning the previous configuration which are part of the same overarching responsibility of configuring a plugin; thus, there is no violation of SRP.
+
+```javascript
+<function checkShow>
+function checkShow(){
+    
+    <isVisible>
+    function isVisible(element){
+        if (getComputedStyle(element, 'visibility') != 'visible')
+            return false;
+
+        var box = getBoundingRect(element);
+
+        if (!box.width || !box.height)
+            return false;
+
+        return true;
+    }
+    </isVisible>
+
+    <showEventTracking>
+    var list = getSelectorList(SHOW_EVENT);
+
+    for (var i = 0; i < list.length; i++)
+    {
+        var selector = list[i];
+        var elements = document.querySelectorAll(getCssSelectorFromPath(selector.selector, true));
+        var visibleElement = basis.array.search(basis.array(elements), true, isVisible);
+        var visible = Boolean(visibleElement);
+        var state;
+
+        if (!hasOwnProperty.call(list.visible, selector.selectorStr))
+            state = list.visible[selector.selectorStr] = false;
+        else
+            state = list.visible[selector.selectorStr];
+
+        list.visible[selector.selectorStr] = visible;
+
+        if (state == false && visible)
+            track({
+                type: 'ui',
+                path: stringifyPath(getPathByNode(visibleElement)),
+                selector: selector.selectorStr,
+                event: SHOW_EVENT,
+                data: selector.data
+            });
+    }
+    </showEventTracking>
+}
+</function checkShow>
+```
+The `checkShow` function has two responsibilities: determining element visibility and tracking show events. These should be separated into distinct functionalities.
+
+```javascript
+<function>
+function(regex){
+        
+        <compileRegex>
+        if(!regex.global)
+            regex.compile(regex.source, flags(regex));
+        </compileRegex>
+
+        regex.lastIndex = this.position;
+        
+        <execRegex>
+        var m = regex.exec(this.source);
+        </execRegex>
+
+        
+        <checkPositionMatch>
+        if(m && m.index!=this.position){
+            return null;
+        }
+        </checkPositionMatch>
+
+        <updatePosition>
+        if(m) this.position += m[0].length;
+        </updatePosition>
+        
+        return m;
+    }
+</function>
+```
+This function deals with regex matching at a specific position in the source string. For maintainability, one could argue that compiling the regex and executing it could be separated; however, the overarching responsibility is to perform a regex match operation at a given position, so it does not violate SRP.
+
+```javascript
+<function manageIfFewItems>
+function manageIfFewItems() {
+    
+    <getItemsCount>
+    const itemsCount = getLength.call( this, this.items );
+    </getItemsCount>
+
+    <decisionMaking>
+    if ( itemsCount < 2 ) return true;
+    if ( itemsCount === 2 ) {
+        this.index = 1 - this.index;
+        this.expanded = false;
+        return true;
+    }
+    </decisionMaking>
+    
+    return false;
+}
+</function manageIfFewItems>
+```
+The `manageIfFewItems` function is checking the number of items and making decisions based on that count. It's a single responsibility related to managing items, which does not violate SRP.
+
+```javascript
+<function setColumnWidth>
+function setColumnWidth(column, newWidth) {
+    
+    <updateColumnWidth>
+    if (newWidth > this.minColumnWidth || newWidth == this.minColumnWidth) {
+        var nowVisibleThIndex = this.getVisibleIndexOfColumn(column),
+            oldWidth = column.options.width,
+            changeWidth = newWidth - oldWidth,
+            cWidth = this.contentWidth + changeWidth;
+        this.contentWidth = this.contentWidthChange(cWidth);
+        $('#' + this.options.id + '_header_table col:eq(' + nowVisibleThIndex + ')').css('width', newWidth + "px");
+        $('#' + this.options.id + '_content_table col:eq(' + nowVisibleThIndex + ')').css('width', newWidth + "px");
+        column.options.width = newWidth;
+        column.options.realWidth = newWidth;
+        this.resetThVariable();
+        this.saveGridCompColumnArrToLocal();
+    }
+    </updateColumnWidth>
+
+    <resetLastVisibleColumn>
+    this.resetLastVisibleColumnWidth();
+    </resetLastVisibleColumn>
+
+    <columnsVisibleFun>
+    this.columnsVisibleFun();
+    </columnsVisibleFun>
+    
+}
+</function setColumnWidth>
+```
+The `setColumnWidth` function manages the column width adjustments and related UI updates, which collectively serve the responsibility of setting column width. Despite multiple steps, they work together for a single purpose, adhering to SRP.
+
+```javascript
+<function current_word_is_url>
+function current_word_is_url(tagged_sentence, i, parameter) {
+              
+    <checkIfUrl>
+    var is_url = false;
+    if (tagged_sentence[i][0].indexOf(".") > -1) {
+        
+        <validateUrl>
+        if (/[a-zA-Z]{2}/.test(tagged_sentence[i][0])) {
+            is_url = true;
+        }
+        </validateUrl>
+    }
+    </checkIfUrl>
+
+    <returnBasedOnParameter>
+    return((parameter === "YES") ? is_url : !is_url);
+    </returnBasedOnParameter>
+}
+</function current_word_is_url>
+```
+The `current_word_is_url` function is responsible for determining whether the current word is a URL based on a parameter. This does not violate SRP as it's a single, specific check with an adjustable return value based on a parameter.

@@ -1,0 +1,334 @@
+```javascript
+<moduleOrPromise>
+function moduleOrPromise(module) {
+  <checkModuleType>
+  if (module instanceof Module) return module;
+  </checkModuleType>
+
+  <handleStringModule>
+  if (typeof(module) === 'string') {
+    <resolveExistingModule>
+    if (modules[module]) return modules[module];
+    if (deferredModules[module]) return deferredModules[module].promise;
+    </resolveExistingModule>
+    
+    <registerGlobalModule>
+    if (isGlobal(module)) return modules[module] = new GlobalModule(module);
+    </registerGlobalModule>
+
+    <deferModule>
+    var deferred = new Deferred(globalTimeout / 2, new NoModuleError(module));
+    deferredModules[module] = deferred;
+    return deferred.promise;
+    </deferModule>
+  }
+  </handleStringModule>
+
+  <rejectPromise>
+  return Promise.reject("Unable to resolve module of type " + typeof(module));
+  </rejectPromise>
+}
+</moduleOrPromise>
+
+<valueToMeta>
+function (sender, contextId, value, optimizeSimpleObject = false) {
+  
+  <initializeMetaData>
+  const meta = { type: typeof value }
+  </initializeMetaData>
+
+  <categorizeValue>
+  if (meta.type === 'object') {
+    if (value === null) {
+      meta.type = 'value'
+    } else if (bufferUtils.isBuffer(value)) {
+      meta.type = 'buffer'
+    } else if (Array.isArray(value)) {
+      meta.type = 'array'
+    } else if (value instanceof Error) {
+      meta.type = 'error'
+    } else if (value instanceof Date) {
+      meta.type = 'date'
+    } else if (isPromise(value)) {
+      meta.type = 'promise'
+    } else if (hasProp.call(value, 'callee') && value.length != null) {
+      meta.type = 'array'
+    } else if (optimizeSimpleObject && v8Util.getHiddenValue(value, 'simple')) {
+      meta.type = 'value'
+    }
+  }
+  </categorizeValue>
+
+  <processArrayMeta>
+  if (meta.type === 'array') {
+    meta.members = value.map((el) => valueToMeta(sender, contextId, el, optimizeSimpleObject))
+  }
+  </processArrayMeta>
+
+  <processObjectFunctionMeta>
+  else if (meta.type === 'object' || meta.type === 'function') {
+    meta.name = value.constructor ? value.constructor.name : ''
+    meta.id = objectsRegistry.add(sender, contextId, value)
+    meta.members = getObjectMembers(value)
+    meta.proto = getObjectPrototype(value)
+  }
+  </processObjectFunctionMeta>
+
+  <processBufferMeta>
+  else if (meta.type === 'buffer') {
+    meta.value = bufferUtils.bufferToMeta(value)
+  }
+  </processBufferMeta>
+
+  <processPromiseMeta>
+  else if (meta.type === 'promise') {
+    value.then(function () {}, function () {})
+    meta.then = valueToMeta(sender, contextId, function (onFulfilled, onRejected) {
+      value.then(onFulfilled, onRejected)
+    })
+  }
+  </processPromiseMeta>
+
+  <processErrorMeta>
+  else if (meta.type === 'error') {
+    meta.members = plainObjectToMeta(value)
+    meta.members.push({
+      name: 'name',
+      value: value.name
+    })
+  }
+  </processErrorMeta>
+
+  <processDateMeta>
+  else if (meta.type === 'date') {
+    meta.value = value.getTime()
+  }
+  </processDateMeta>
+
+  <processSimpleValueMeta>
+  else {
+    meta.type = 'value'
+    meta.value = value
+  }
+  </processSimpleValueMeta>
+
+  return meta
+}
+</valueToMeta>
+
+<attachEventHandlers>
+function () {
+  var that    = this;
+  var dt      = this.s.dt;
+  var details = this.c.details;
+
+  <setDetailsTarget>
+  if (details.type === 'inline') {
+    details.target = 'td:first-child';
+  }
+  </setDetailsTarget>
+
+  <resolveSelector>
+  var target   = details.target;
+  var selector = typeof target === 'string' ? target : 'td';
+  </resolveSelector>
+
+  <bindClickEvent>
+  $(dt.table().body()).on('click', selector, function (e) {
+    <checkTableClass>
+    if (!$(dt.table().node()).hasClass('collapsed')) {
+      return;
+    }
+    </checkTableClass>
+
+    <checkRowPresence>
+    if (!dt.row($(this).closest('tr')).length) {
+      return;
+    }
+    </checkRowPresence>
+
+    <checkColumnTarget>
+    if (typeof target === 'number') {
+      var targetIdx = target < 0 ?
+        dt.columns().eq(0).length + target :
+        target;
+      if (dt.cell(this).index().column !== targetIdx) {
+        return;
+      }
+    }
+    </checkColumnTarget>
+
+    <toggleChildRow>
+    var row = dt.row($(this).closest('tr'));
+    if (row.child.isShown()) {
+      row.child(false);
+      $(row.node()).removeClass('parent');
+    } else {
+      var info = that.c.details.renderer(dt, row[0]);
+      row.child(info, 'child').show();
+      $(row.node()).addClass('parent');
+    }
+    </toggleChildRow>
+  });
+  </bindClickEvent>
+}
+</attachEventHandlers>
+
+<customizer>
+function customizer(destination, source) {
+  <returnSourceDirectly>
+  if (!isPlain(source)) {
+    return source;
+  }
+  </returnSourceDirectly>
+
+  <returnMergedOptions>
+  if (!isPlain(destination)) {
+    return mergeOptions(source);
+  }
+  </returnMergedOptions>
+}
+</customizer>
+
+<partition>
+function partition(collection, fn) {
+  <initializePartitions>
+  var result = { lhs: [], rhs: [] };
+  </initializePartitions>
+
+  <categorizeElements>
+  _.forEach(collection, function(value) {
+    if (fn(value)) {
+      result.lhs.push(value);
+    } else {
+      result.rhs.push(value);
+    }
+  });
+  </categorizeElements>
+
+  return result;
+}
+</partition>
+
+<execute>
+function execute(args) {
+  <parseAndExecuteOptions>
+  try {
+    const currentOptions = options.parse(args)
+    return executeOptions(currentOptions)
+  } catch (error) {
+    console.error(error.message)
+    return 1
+  }
+  </parseAndExecuteOptions>
+}
+</execute>
+
+<goBin>
+function goBin(opts) {
+  <initializeOptions>
+  opts = opts || {}
+  let tag = typeof opts === 'string' ? opts : opts.version
+  if (!tag) return Promise.reject(new Error('Target version not specified'))
+  let noTag = opts.includeTag === false
+  let baseDir = path.resolve(opts.dir || path.resolve(__dirname, 'vendor'))
+  let goDir = noTag ? baseDir : path.join(baseDir, `go-${tag}`)
+  let pkg = `go${tag}.${platform}-${arch}.${fileType}`
+  let pkgUrl = `${goRelUrl}/${pkg}`
+  let zipDest = path.join(baseDir, pkg)
+  </initializeOptions>
+
+  <downloadAndExtractPackage>
+  return new Promise((resolve, reject) => {
+    <createTargetDirectory>
+    mkdirp(goDir, (err) => {
+      if (err) return Promise.reject(err)
+      </createTargetDirectory>
+      
+      <writeArchiveToFile>
+      let arc = fs.createWriteStream(zipDest)
+      arc.on('error', reject)
+      https.get(pkgUrl, (res) => {
+        res.pipe(arc).on('error', reject).on('close', () => {
+          <decompressArchive>
+          let decompOpts = {strip: 1, plugins: [zip(), tar()]}
+          decompress(zipDest, goDir, decompOpts).then(() => {
+            <cleanupDownloadedArchive>
+            fs.unlink(zipDest, (err) => { if (err) console.warn(err) })
+            </cleanupDownloadedArchive>
+            return resolve(goDir)
+          }).catch(reject)
+          </decompressArchive>
+        })
+      }).on('error', reject)
+      </writeArchiveToFile>
+    })
+  })
+  </downloadAndExtractPackage>
+}
+</goBin>
+
+<initializeTimeComponent>
+function(aSeconds) {
+  <explicitTimeConversionAndInitialization>
+  var secs = Math.abs(aSeconds);
+  this.factor = aSeconds < 0 ? -1 : 1;
+  this.hours = ICAL.helpers.trunc(secs / 3600);
+  secs -= (this.hours * 3600);
+  this.minutes = ICAL.helpers.trunc(secs / 60);
+  return this;
+  </explicitTimeConversionAndInitialization>
+}
+</initializeTimeComponent>
+
+<removeModal>
+function() {
+  <findFrameAndDialog>
+  if (!this.$frame) {
+    return;
+  }
+  if (modalDialogManager.dialog === this) {
+    modalDialogManager.dialog = null;
+  }
+  </findFrameAndDialog>
+
+  <enableFrames>
+  lib.setFramesEnabled(true);
+  </enableFrames>
+
+  <removeBackdrop>
+  if (this._addedBackdrop && this._addedBackdrop.length > 0) {
+    this._addedBackdrop.forEach(function(node) { 
+      node.classList.remove("modalBackdrop"); 
+    });
+  }
+  </removeBackdrop>
+
+  <removeDialogListenersAndElement>
+  this.$frameParent.removeEventListener("focus", this._modalListener, true); 
+  this.$frameParent.removeEventListener("click", this._modalListener, true); 
+  this.$frameParent.removeChild(this.$frame);
+  this.$frame = undefined;
+  this.$parent = undefined;
+  </removeDialogListenersAndElement>
+}
+</removeModal>
+
+<parsePostfixExpression>
+function parsePostfixExpression() {
+  <parseLeftHandSideExpression>
+  var expr = parseLeftHandSideExpressionAllowCall();
+  </parseLeftHandSideExpression>
+
+  <checkForPostfixOperators>
+  if (lookahead.type === TokenPunctuator) {
+    if ((match('++') || match('--'))) {
+      throw new Error(DISABLED);
+    }
+  }
+  </checkForPostfixOperators>
+
+  return expr;
+}
+</parsePostfixExpression>
+```

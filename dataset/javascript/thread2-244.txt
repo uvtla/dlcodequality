@@ -1,0 +1,304 @@
+```javascript
+<executeCommand>
+function executeCommand(parameters) {
+    <checkAndSetDefaultColors>
+    if (parameters.colors === undefined) {
+      parameters.colors = myrmex.getConfig('colors');
+    }
+    </checkAndSetDefaultColors>
+    <serializeConfig>
+    let config = JSON.stringify(myrmex.getConfig(), null, 2);
+    </serializeConfig>
+    <highlightConfig>
+    if (parameters.colors) {
+      config = icli.highlight(config, { json: true });
+    }
+    </highlightConfig>
+    <printConfig>
+    icli.print(config);
+    </printConfig>
+  }
+</executeCommand>
+
+<getRect>
+function getRect(elem) {
+  <checkElement>
+  if (elem && !elem.nodeType) {
+    elem = elem[0];
+  }
+  if (!elem || 1 !== elem.nodeType) {
+    return false;
+  }
+  </checkElement>
+  <calculateBounds>
+  var bounds = elem.getBoundingClientRect();
+  </calculateBounds>
+  <returnRectObject>
+  return {
+    height: bounds.bottom - bounds.top,
+    width: bounds.right - bounds.left,
+    top: bounds.top,
+    left: bounds.left
+  };
+  </returnRectObject>
+}
+</getRect>
+
+<addToQueue>
+function () {
+	var now = new Date();
+	
+	for (var i = 0, l = arguments.length; i < l; i++ ) {
+		<cloneAndSetTime>
+		var item = UTIL.clone(arguments[i]);
+		if (item && item !== null) {
+			item._time = now;
+			this[this.length] = item;
+		}
+		else </cloneAndSetTime> <logError>
+		{
+			LOG.error('push data is null', 'SR.Sync');
+		}
+		</logError>
+	}
+	<returnQueueLength>
+	return this.length;
+	</returnQueueLength>
+}
+</addToQueue>
+
+<compareMappingsDeep>
+function compareMappingsDeep(mapping1, mapping2) {
+  <deepComparison>
+  return _.isEqualWith(mapping1, mapping2, (object1, object2, prop) => {
+    let mapping1 = { [prop]: object1 }
+    let mapping2 = { [prop]: object2 }
+    <compareSpecificProperties>
+    if (prop == "from" || prop == "to") {
+      if (!_.isEqual(Object.getOwnPropertyNames(_.get(object1, prop, {})), Object.getOwnPropertyNames(_.get(object2, prop, {})))) {
+        return false
+      }
+      return _.isEqualWith(conceptsOfMapping(mapping1, prop), conceptsOfMapping(mapping2, prop), (concept1, concept2, index) => {
+        if (index != undefined) {
+          return compare(concept1, concept2)
+        }
+        return undefined
+      })
+    }
+    </compareSpecificProperties>
+    <compareSchemes>
+    if (prop == "fromScheme" || prop == "toScheme") {
+      return compare(object1, object2)
+    }
+    </compareSchemes>
+    return undefined
+  })
+  </deepComparison>
+}
+</compareMappingsDeep>
+
+<showPrompt>
+function showPrompt() {
+    <constructPrompt>
+    let prompt = ""
+    for (i = 1; i <= 9; i++) {
+      prompt += numChar[i] + " :" + fruitCharacter[i] + "  "
+    }
+    let iprompt = interactive ? `'x' to eXit.` : ""
+    </constructPrompt>
+    <logPrompt>
+    log(
+      `Press a number to download a fruit (higher numbers take longer). ${iprompt}
+  ${prompt}
+      `
+    )
+    </logPrompt>
+  }
+</showPrompt>
+
+<writeHead>
+function writeHead(context, statusCode, statusMessage, headers) {
+  <validateStatusCode>
+  statusCode |= 0; 
+  if (statusCode < 100 || statusCode > 999) {
+    throw new RangeError(`Invalid status code: ${statusCode}`);
+  }
+  </validateStatusCode>
+  <setStatusMessage>
+  if (typeof statusMessage === "string") {
+    this.statusMessage = statusMessage;
+  } else {
+    this.statusMessage = statusCodes[statusCode] || "unknown";
+  }
+  </setStatusMessage>
+  <setHeaders>
+  if (typeof statusMessage === "object" && typeof headers === "undefined") {
+    headers = statusMessage; 
+  }
+  if (this._headers) {
+    if (headers) {
+      const keys = Object.keys(headers);
+      for (let i = 0; i < keys.length; i++) {
+        const k = keys[i];
+        if (k) {
+          this.setHeader(k, headers[k]);
+        }
+      }
+    }
+    headers = this._renderHeaders(); 
+  }
+  </setHeaders>
+  <applyStatusAndHeaders>
+  context.res.status = statusCode;
+  context.res.headers = headers || {};
+  </applyStatusAndHeaders>
+}
+</writeHead>
+
+<manageCarouselItems>
+function (obj) {
+    var carousel = this,
+        carouselEl = carousel._carouselEl,
+        itemsTable = carousel._itemsTable,
+        len = itemsTable.items.length,
+        sibling,
+        el,
+        j;
+
+    <locateNextSibling>
+    sibling = itemsTable.items[obj.last + 1];
+    if(!sibling && obj.last < len){
+        j = obj.first;
+        do {
+            sibling = itemsTable.items[j];
+            j++;
+        } while (j<len && !sibling);
+    }
+    </locateNextSibling>
+
+    <appendLoadingItems>
+    for (var i = obj.first; i <= obj.last; i++) {
+        if(JS.isUndefined(itemsTable.loading[i]) && JS.isUndefined(itemsTable.items[i])){
+            el = carousel._createCarouselItem({
+                className : carousel.CLASSES.ITEM_LOADING,
+                content   : carousel.STRINGS.ITEM_LOADING_CONTENT,
+                id        : Dom.generateId(),
+                pos       : i
+            });
+            if (el) {
+                if (sibling) {
+                    sibling = Dom.get(sibling.id);
+                    if (sibling) {
+                        carouselEl.insertBefore(el, sibling);
+                    } else {
+                        YAHOO.log("Unable to find sibling", "error",
+                                WidgetName);
+                    }
+                } else {
+                    carouselEl.appendChild(el);
+                }
+            }
+            itemsTable.loading[i] = el;
+        }
+    }
+    </appendLoadingItems>
+    
+    <syncUiItems>
+    carousel._syncUiItems();
+    </syncUiItems>
+}
+</manageCarouselItems>
+
+<calcMainfileDL>
+function calcMainfileDL() {
+    <initCommonFiles>
+    var common_js = prj_conf.common_js,
+        use_common = !!common_js,
+        commoned,
+        commoned_list;
+    if (use_common) {
+        calcDependList('main/'+common_js);
+        commoned = depended;
+        commoned_list = depended_list;
+    }
+    </initCommonFiles>
+
+    <processMainFiles>
+    var main_files = [];
+    readMainFiles(prj_path+'main', main_files);
+    main_files.sort();
+
+    var main_len = main_files.length,
+        i = 0, j, len, main_file;
+    for (; i < main_len; i++) {
+        main_file = main_files[i];
+        calcing = {};
+        depended = {};
+        if (use_common) {
+            if (main_file === common_js) { 
+                depended_list = commoned_list;
+                depended_list.unshift('1'); 
+            } else {
+                for (j in commoned) {
+                    depended[j] = true;
+                }
+                depended_list = [];
+                calcDependList('main/'+main_file);
+            }
+        } else {
+            depended_list = ['1']; 
+            calcDependList('main/'+main_file);
+        }
+
+        main_file_dl.push('"'+main_file.slice(0, -3)+'":"'+
+            depended_list.join(',')+'"');
+        all_files['main/'+main_file] +=
+            '\r\nrequire("main/'+main_file.slice(0, -3)+'");';
+    }
+    </processMainFiles>
+}
+</calcMainfileDL>
+
+<handleTileEvents>
+function(evt) {
+    <imageTileEvents>
+    if (evt.tile instanceof OpenLayers.Tile.Image) {
+        evt.tile.events.on({
+            beforedraw: this.queueTileDraw,
+            beforeload: this.manageTileCache,
+            loadend: this.addToCache,
+            unload: this.unloadTile,
+            scope: this
+        });        
+    } </imageTileEvents>
+    else <removeNonImageLayer>
+    {
+        
+        this.removeLayer({layer: evt.tile.layer});
+    }
+    </removeNonImageLayer>
+}
+</handleTileEvents>
+
+<wrap>
+function wrap(fn) {
+    return function() {
+        <setupUserData>
+        body.appendChild(el);
+        el.addBehavior('#default#userData');
+        el.load(sn);
+        </setupUserData>
+        <invokeFunction>
+        var ret = fn.apply(store._area, arguments);
+        </invokeFunction>
+        <cleanupUserData>
+        el.save(sn);
+        body.removeChild(el);
+        </cleanupUserData>
+        <returnFunctionResult>
+        return ret;
+        </returnFunctionResult>
+    };
+}
+</wrap>
+```

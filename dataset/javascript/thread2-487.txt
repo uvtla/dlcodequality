@@ -1,0 +1,257 @@
+```javascript
+<tick>
+function tick() {
+  <calculatePositions>
+  var moment = (new Date().getTime() - startDate)/1000;
+  x = Math.round(150 * Math.sin(moment));
+  y = Math.round(150 * Math.cos(moment));
+  </calculatePositions>
+  <requestNextFrame>
+  requestAnimationFrame(tick);
+  </requestNextFrame>
+}
+</tick>
+
+<propIsRequired>
+function propIsRequired (prop) {
+  const propRequiredNode = prop.value.properties
+    .find(p =>
+      p.type === 'Property' &&
+      p.key.name === 'required' &&
+      p.value.type === 'Literal' &&
+      p.value.value === true
+    )
+  return Boolean(propRequiredNode)
+}
+</propIsRequired>
+
+<anonymousFunctionWithEventBindings>
+function() {
+  var self = this;
+
+  <bindSelectAllEventHandler>
+  this.$main.on('click.bizTableSelectAll', '.biz-table-head .select-col .biz-label', function(e) {
+      if ($(this).hasClass('biz-checkbox-unchecked-disabled')) {
+          return;
+      }
+
+      var selected = $(this).hasClass('biz-checkbox-checked'),
+          checkbox = self.$tableBody.find('.select-col :checkbox').filter(':not(:disabled)'),
+          tr = self.$tableBody.find('tr[class!="sum"]').filter('[class!="select-disabled"]');
+
+      if (selected) {
+          checkbox.bizCheckbox('check');
+          tr.addClass('selected');
+      } else {
+          checkbox.bizCheckbox('uncheck');
+          tr.removeClass('selected');
+      }
+
+      if (self.options.onSelect) {
+          self.options.onSelect.call(self, self.getSelected(), e);
+      }
+  })
+  </bindSelectAllEventHandler>
+
+  <bindSelectOneEventHandler>
+  .on('click.bizTableSelectOne', '.biz-table-body .select-col .biz-label', function(e) {
+      if ($(this).hasClass('biz-checkbox-unchecked-disabled')) {
+          return;
+      }
+
+      var selected = $(this).hasClass('biz-checkbox-checked'),
+          tr = $(this).parent().parent();
+      if (selected) {
+          tr.addClass('selected');
+      } else {
+          tr.removeClass('selected');
+      }
+
+      var selectedCount = self.$tableBody.find('.select-col .biz-checkbox-checked').length,
+          checkboxCount = self.$tableBody.find('.select-col :checkbox').filter(':not(:disabled)').length,
+          selectAll = self.$tableHead.find('.select-col :checkbox');
+      if (selectedCount === checkboxCount) {
+          selectAll.bizCheckbox('check');
+      } else {
+          selectAll.bizCheckbox('uncheck');
+      }
+
+      if (self.options.onSelect) {
+          self.options.onSelect.call(self, self.getSelected(), e);
+      }
+  });
+  </bindSelectOneEventHandler>
+
+}
+</anonymousFunctionWithEventBindings>
+
+<findAuthAndExecCallback>
+function(criteria, cb){
+  var self = this;
+  <findAndPopulateAuth>
+  waterlock.Auth.findOne(criteria).populate('user')
+  .exec(function(err, auth){
+    <invertAuthAndExecuteCB>
+    cb(err, self._invertAuth(auth));
+    </invertAuthAndExecuteCB>
+  });
+  </findAndPopulateAuth>
+}
+</findAuthAndExecCallback>
+
+<benchBatch>
+function benchBatch(targets, cb, idx) {
+  idx |= 0;
+  if (targets.length == 0) return cb(idx);
+
+  <iterateAndBenchmarkTargets>
+  var target = targets.shift();
+  process.stdout.write(util.format('[%s] ', idx+1));
+  try {
+    main.bench(target.name, target.func);
+    idx++;
+  } catch (err) {
+    console.log('%s failed!', target.name);
+  }
+  </iterateAndBenchmarkTargets>
+
+  <checkCompletionAndContinue>
+  if (targets.length == 0) return cb(idx);
+  
+  setTimeout(function() {
+    benchBatch(targets, cb, idx); 
+  }, 10000);
+  </checkCompletionAndContinue>
+}
+</benchBatch>
+
+<writeFabricServiceGradleHook>
+function writeFabricServiceGradleHook(config) {
+  console.log("Install Fabric-build-gradle hook.");
+  <createDirectoriesAndWriteScripts>
+  try {
+    if (!fs.existsSync(path.join(appRoot, "hooks"))) {
+        fs.mkdirSync(path.join(appRoot, "hooks"));
+    }
+    if (!fs.existsSync(path.join(appRoot, "hooks", "after-prepare"))) {
+        fs.mkdirSync(path.join(appRoot, "hooks", "after-prepare"));
+    }
+    var scriptContent = `...`;
+    console.log("Writing 'nativescript-fabric-gradle.js' to " + appRoot + "hooks/after-prepare");
+    var scriptPath = path.join(appRoot, "hooks", "after-prepare", "nativescript-fabric-gradle.js");
+    fs.writeFileSync(scriptPath, scriptContent);
+  } catch (e) {
+    console.log("Failed to install nativescript-fabric-gradle hook.");
+    console.log(e);
+    throw e;
+  }
+  </createDirectoriesAndWriteScripts>
+}
+</writeFabricServiceGradleHook>
+
+<equals>
+function equals(first, second){
+  <compareValues>
+		if (first === second)
+			return true;
+			
+		
+		if (first == second)
+			return true;
+			
+		
+		if (typeof first != typeof second)
+			return false;
+			
+		
+		if (typeof first != "object")
+			return first == second;
+  </compareValues>
+			
+  <compareObjects>
+		for (var current in first){
+			var firstValue = first[current];
+			var secondValue = second[current];
+			var isEqual = (typeof firstValue === 'object') ? equals(firstValue, secondValue) : firstValue == secondValue;
+			if (!isEqual)
+				return false;
+		}
+  </compareObjects>
+
+  <finalTrue>
+		return true;
+  </finalTrue>
+}
+</equals>
+
+<updateLastMousePositionAndSendEvent>
+function (position, callback) {
+  <updatePosition>
+  var lastPosition = this._lastMousePosition;
+  lastPosition.x = position.x;
+  lastPosition.y = position.y;
+  </updatePosition>
+  <sendEvent>
+  this._sendEvent('mousemove', position.x, position.y);
+  </sendEvent>
+  <executeCallback>
+  this._callCallback(callback);
+  </executeCallback>
+}
+</updateLastMousePositionAndSendEvent>
+
+<validateGreaterThan>
+function( value, comparator ) {
+  <validateAndCreateError>
+  var error;
+  if ( value <= parseFloat( comparator ) ) {
+    error = {
+      "rule": "greater_than",
+      "message": "ERROR:provided value [" + value + "] is not greater than " + parseFloat( comparator )
+    };
+    return [ error ];
+  }
+  </validateAndCreateError>
+  <noErrors>
+  return;
+  </noErrors>
+}
+</validateGreaterThan>
+
+<switchActiveTab>
+function( contentItem ) {
+  <checkActiveTabAndUpdate>
+  var i, j, isActive, activeTab;
+
+  if (this.activeContentItem === contentItem) return;
+  
+  for( i = 0; i < this.tabs.length; i++ ) {
+    isActive = this.tabs[ i ].contentItem === contentItem;
+    this.tabs[ i ].setActive( isActive );
+    if( isActive === true ) {
+      this.activeContentItem = contentItem;
+      this.parent.config.activeItemIndex = i;
+    }
+  }
+  </checkActiveTabAndUpdate>
+
+  <reorderAndUpdateTabs>
+  if (this.layoutManager.config.settings.reorderOnTabMenuClick) {
+    if (this._lastVisibleTabIndex !== -1 && this.parent.config.activeItemIndex > this._lastVisibleTabIndex) {
+      activeTab = this.tabs[this.parent.config.activeItemIndex];
+      for ( j = this.parent.config.activeItemIndex; j > 0; j-- ) {
+        this.tabs[j] = this.tabs[j - 1];
+      }
+      this.tabs[0] = activeTab;
+      this.parent.config.activeItemIndex = 0;
+    }
+  }
+  </reorderAndUpdateTabs>
+
+  <updateState>
+  this._updateTabSizes();
+  this.parent.emitBubblingEvent( 'stateChanged' );
+  </updateState>
+}
+</switchActiveTab>
+```

@@ -1,0 +1,290 @@
+```
+<nodeHasNeighbor>
+function nodeHasNeighbor(graph, type, direction, node, neighbor) {
+
+  const nodeData = graph._nodes.get(node);
+
+  if (type !== 'undirected') {
+    <checkOutgoingEdges>
+    if (direction !== 'out' && typeof nodeData.in !== 'undefined') {
+      for (const k in nodeData.in)
+        if (k === neighbor)
+          return true;
+    </checkOutgoingEdges>
+    <checkIncomingEdges>
+    if (direction !== 'in' && typeof nodeData.out !== 'undefined') {
+      for (const k in nodeData.out)
+        if (k === neighbor)
+          return true;
+    </checkIncomingEdges>
+  }
+
+  <checkUndirectedEdges>
+  if (type !== 'directed' && typeof nodeData.undirected !== 'undefined') {
+    for (const k in nodeData.undirected)
+        if (k === neighbor)
+          return true;
+  }
+  </checkUndirectedEdges>
+
+  return false;
+}
+</nodeHasNeighbor>
+```
+
+```
+<makeError>
+function makeError(code, text) {
+  var err = new Error(text);
+  err.code = code;
+  return err;
+}
+</makeError>
+```
+
+```
+<getSignature>
+function getSignature(blob) {
+  return new Promise(function (callback) {
+    var reader = new FileReader();
+    reader.onloadend = function () {
+      <parseSignature>
+      var arr = new Uint8Array(reader.result).subarray(0, 4);
+      var signature = '';
+      for (var i = 0; i < arr.length; i++) {
+        signature += arr[i].toString(16);
+      }
+      </parseSignature>
+      callback(signature);
+    };
+    reader.readAsArrayBuffer(blob);
+  });
+}
+</getSignature>
+```
+
+```
+<tokenizeSelector>
+function(selector) {
+  var token = {},
+      tokens = [],
+      id,
+      found = false,
+      patterns = Y.Selector._patterns,
+      match;
+
+  <preprocessSelector>
+  selector = Y.Selector._replaceShorthand(selector);
+  </preprocessSelector>
+
+  do {
+    found = false;
+    for (var re in patterns) {
+      if (YAHOO.lang.hasOwnProperty(patterns, re)) {
+        if (re != 'tag' && re != 'combinator') {
+          token[re] = token[re] || [];
+        }
+        if ( (match = patterns[re].exec(selector)) ) {
+          found = true;
+          <extractToken>
+          if (re != 'tag' && re != 'combinator') {
+            if (re === 'attributes' && match[1] === 'id') {
+              token.id = match[3];
+            }
+            token[re].push(match.slice(1));
+          } else {
+            token[re] = match[1];
+          }
+          selector = selector.replace(match[0], '');
+          </extractToken>
+          <finalizeTokens>
+          if (re === 'combinator' || !selector.length) {
+            token.attributes = Y.Selector._fixAttributes(token.attributes);
+            token.pseudos = token.pseudos || [];
+            token.tag = token.tag ? token.tag.toUpperCase() : '*';
+            tokens.push(token);
+            token = {
+              previous: token
+            };
+          }
+          </finalizeTokens>
+        }
+      }
+    }
+  } while (found);
+
+  return tokens;
+}
+</tokenizeSelector>
+```
+
+```
+<_gpfProcessDefineParams>
+function _gpfProcessDefineParams (rootNamespace, defaultSuper, params) {
+  _gpfProcessDefineParamNoSuperUsed(defaultSuper, params);
+  _gpfProcessDefineParamCheckIfRelativeName(rootNamespace, params);
+  _gpfProcessDefineParamDefaultSuper(defaultSuper, params);
+  _gpfProcessDefineParamDefaultDefinition(params);
+  _gpfProcessDefineParamResolveBase(params);
+  _gpfProcessDefineParamsCheck(params);
+}
+</_gpfProcessDefineParams>
+```
+
+```
+<addItemToList>
+function (item, before) {
+  if (!_.isObject(item)) { return; }
+  
+  var duplicate = this.indexOf(item),
+      index;
+
+  <removeItemFromPreviousParent>
+  PropertyList.isPropertyList(item[__PARENT]) && (item[__PARENT] !== this) && item[__PARENT].remove(item);
+  </removeItemFromPreviousParent>
+  
+  <setParentReference>
+  _.assignHidden(item, __PARENT, this);
+  </setParentReference>
+
+  <removeDuplicate>
+  (duplicate > -1) && this.members.splice(duplicate, 1);
+  </removeDuplicate>
+  
+  <findInsertionIndex>
+  before && (before = this.indexOf(before));
+  </findInsertionIndex>
+  
+  <insertItem>
+  (before > -1) ? this.members.splice(before, 0, item) : this.members.push(item);
+  </insertItem>
+
+  <addToIndex>
+  if ((index = item[this._postman_listIndexKey]) && (index = String(index))) {
+    <normalizeIndex>
+    this._postman_listIndexCaseInsensitive && (index = index.toLowerCase());
+    </normalizeIndex>
+    
+    <handleMultipleValues>
+    if (this._postman_listAllowsMultipleValues && this.reference.hasOwnProperty(index)) {
+      <convertToArrayList>
+      !_.isArray(this.reference[index]) && (this.reference[index] = [this.reference[index]]);
+      </convertToArrayList>
+      <appendToList>
+      this.reference[index].push(item);
+      </appendToList>
+    }
+    else {
+      this.reference[index] = item;
+    }
+    </handleMultipleValues>
+  }
+  </addToIndex>
+
+}
+</addItemToList>
+```
+
+```
+<parseConfig>
+function parseConfig(contents) {
+  var config = {};
+
+  contents = contents.replace(rSeajsConfig, function ($) {
+    $.replace(rAlias, function (_, $1) {
+      config.alias = evalConfig($1);
+    });
+
+    $.replace(rPaths, function (_, $1) {
+      config.paths = evalConfig($1);
+    });
+
+    $.replace(rVars, function (_, $1) {
+      config.vars = evalConfig($1);
+    });
+
+    return '';
+  });
+
+  return {
+    contents: contents,
+    config: config
+  };
+}
+</parseConfig>
+```
+
+```
+<findClosestPoint>
+function findClosestPoint (sources, target) {
+  const distances = [];
+  let minDistance;
+  <calculateDistances>
+  sources.forEach(function (source, index) {
+    const d = distance(source, target);
+    distances.push(d);
+    if (index === 0) {
+      minDistance = d;
+    } else {
+      minDistance = Math.min(d, minDistance);
+    }
+  });
+  </calculateDistances>
+
+  <findMinimumDistanceIndex>
+  const index = distances.indexOf(minDistance);
+  </findMinimumDistanceIndex>
+
+  <returnClosestSource>
+  return sources[index];
+  </returnClosestSource>
+}
+</findClosestPoint>
+```
+
+```
+<isDomNodeList>
+function (variable) {
+  <checkIsObjectAndNodeList>
+  return typeof variable === "object" &&
+      /^\[object (HTMLCollection|NodeList|Object)\]$/.test(Object.prototype.toString.call(variable)) &&
+      variable.length !== undefined &&
+      (variable.length === 0 || (typeof variable[0] === "object" && variable[0].nodeType > 0));
+  </checkIsObjectAndNodeList>
+}
+</isDomNodeList>
+```
+
+```
+<index>
+function index(options) {
+  const {
+    file,
+    config,
+    logStart,
+    logNotFound,
+    logEnd,
+    defaultContent = defaultFileContent,
+  } = options;
+
+  <logIndexStarting>
+  logger.log(logStart);
+  </logIndexStarting>
+
+  <processIndexing>
+  return readConfig(config)
+    .then(input => validateExtensions(input))
+    .then(input => createStrings(input))
+    .then(input => writeExtensionFile({
+      input,
+      file,
+      defaultContent,
+      logNotFound,
+      logEnd,
+    }));
+  </processIndexing>
+}
+</index>
+```
+
+In the functions provided, care has been taken to ensure that annotations are applied consistently with respect to the Single Responsibility Principle. Sections of code that collectively serve a single responsibility have been encapsulated with tags, and an effort has been made to neither over-segment nor under-segment the given functions. Responsibilities are defined as coherent blocks of instructions that achieve a specific task or purpose within the function.

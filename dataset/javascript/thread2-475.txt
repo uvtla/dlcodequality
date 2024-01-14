@@ -1,0 +1,394 @@
+<initRelease>
+function initRelease(fis) {
+    <requireDependencies>
+    var path = require('path');
+
+    var plugins = {
+        concat: require('./prepackager/concat')
+    };
+    </requireDependencies>
+
+    <pluginFunction>
+    var plugin = function (name, options) {
+        var localPlugin = plugins[name];
+        if (typeof localPlugin === 'function') {
+            localPlugin.options = options;
+            return localPlugin
+        } else {
+            return fis.plugin.apply(fis, arguments)
+        }
+    };
+    </pluginFunction>
+
+    <fisConfiguration>
+    fis
+        <projectFiles>
+        .set('project.files', ['views'])
+        </projectFiles>
+        <fileMatchConfigurations>
+        .match('**', {
+            useHash: false,
+        })
+        [...]
+        .match(/^\/components\/framework\/dialog\/(.*)\.html$/i, {
+            url: '/assets/$1.html',
+            release: '${statics}/${name}/${version}/assets/$1.html'
+        })
+        </fileMatchConfigurations>
+        <packageConfigurations>
+        .match('::package', {
+            spriter: plugin('csssprites', {
+                htmlUseSprite: true,
+                layout: 'matrix',
+                margin: '15',
+                styleReg: /(<style(?:(?=\s)[\s\S]*?["'\s\w\/\-]>|>))([\s\S]*?)(<\/style\s*>|$)/ig
+            }),
+            [...]
+            packager: plugin('map')
+        })
+        </packageConfigurations>
+
+        <productionEnvironmentConfigurations>
+        fis.media('prod')
+        [...]
+        .match("component_modules*.(css)", {
+            packTo: "/vendor.css"
+        });
+        </productionEnvironmentConfigurations>
+
+        <conditionalComboHandling>
+        if(frameworkConfig.combo) {
+            fis.media('prod').match("components/framework*.js", {
+                packTo: "/framework.js"
+            })
+            [...]
+            });
+        }
+        else {
+            fis.media('prod').match("components*.js", {
+                preprocessor: plugin('annotate'),
+                optimizer: plugin('uglify-js', {
+                    compress: {
+                        warnings: false,
+                        drop_console: true,
+                        dead_code: true,
+                    },
+                    output: {
+                        ascii_only: true
+                    },
+                    comments: true,
+                    mangle: frameworkConfig.mangleJS || false
+                }),
+                packTo: "/modules.js"
+            });
+        }
+        </conditionalComboHandling>
+
+        <domainConfiguration>
+        var map = {
+            'rd': {
+                host: '',
+                path: ''
+            },
+            [...]
+        };
+        </domainConfiguration>
+
+        <mediaConfiguration>
+        Object.keys(map).forEach(function (v) {
+            var o = map[v];
+            var domain = o.host + o.path;
+
+            fis.media(v)
+            [...]
+            .match('/modules/app/**.{es,js}', {
+                packTo: '/pkg/aio.js'
+            });
+        });
+        </mediaConfiguration>
+
+        <compressionOptimization>
+        Object.keys(map)
+        .filter(function (v) {
+            return v.indexOf('debug') < 0
+        })
+        [...]
+        </compressionOptimization>
+
+        <productionDeployConfiguration>
+        fis.media('production')
+        [...]
+        });
+        </productionDeployConfiguration>
+
+        <developmentDeployConfiguration>
+        ['rd', 'rd-debug'].forEach(function (v) {
+            fis.media(v)
+            [...]
+            });
+        });
+        </developmentDeployConfiguration>
+    });
+}
+</initRelease>
+
+<processMultiBytePacket>
+function processMultiBytePacket (o) {
+  <multiPacketBufferHandling>
+  if (o.multiPacketBuffer) {
+    o.multiPacketBuffer = Buffer.concat([Buffer.from(o.multiPacketBuffer), Buffer.from(o.rawDataPacket.slice(k.OBCIGanglionPacket19Bit.dataStart, k.OBCIGanglionPacket19Bit.dataStop))]);
+  } else {
+    o.multiPacketBuffer = o.rawDataPacket.slice(k.OBCIGanglionPacket19Bit.dataStart, k.OBCIGanglionPacket19Bit.dataStop);
+  }
+  </multiPacketBufferHandling>
+}
+</processMultiBytePacket>
+
+<init>
+function init(options, callback, proxies, logLevel) {
+    <defaultOptionsLoading>
+    globalOptions = createDefaultOptions();
+    </defaultOptionsLoading>
+
+    <optionsExtension>
+    if (options) {
+        _.extend(globalOptions, options);
+    }
+    </optionsExtension>
+
+    <rateLimitsAdjustment>
+    if (globalOptions.rateLimits !== 0) {
+        globalOptions.maxConnections = 1;
+    }
+    </rateLimitsAdjustment>
+
+    <storeInitialization>
+    store.createStore(globalOptions.storeModuleName, globalOptions.storeParams ? globalOptions.storeParams : null);
+    </storeInitialization>
+
+    <updateDepth>
+    if (globalOptions.updateDepth) {
+        updateDepthFn = globalOptions.updateDepth;
+    }
+    </updateDepth>
+
+    <endCallbackSetting>
+    endCallback = callback;
+    requestQueue.init(globalOptions, crawl, recrawl, endCallback, proxies);
+    </endCallbackSetting>
+
+    <logLevelSetting>
+    if (logLevel) {
+        console.log("Change Log level into :" + logLevel);
+        log.level(logLevel);
+    }
+    else {
+        log.level("info"); // If log level is not passed, set to 'info' by default
+    }
+    </logLevelSetting>
+
+    <callbackVerification>
+    if (!callback) {
+        log.error("The end callback is not defined");
+    }
+    </callbackVerification>
+}
+</init>
+
+<settingsApiHttpHandling>
+function () {
+    <apiRequest>
+    var self = this;
+    $http.get(settingsApi)
+      .success(function (data) {
+        self.set(data);
+        $timeout(function () {
+          self.loaded = true;
+        });
+      })
+      .error(function () {
+        self.reset();
+        $timeout(function () {
+          self.loaded = true;
+        });
+      });
+    </apiRequest>
+  }
+</settingsApiHttpHandling>
+
+<processFilterRestrictions>
+function (oProperty, oEntitySet) {
+    <filterRestrictionsInitialization>
+    var aFilterRestrictions,
+        sFilterRestrictionValue = mFilterRestrictions[oProperty["sap:filter-restriction"]];
+    </filterRestrictionsInitialization>
+
+    aFilterRestrictions = oEntitySet["com.sap.vocabularies.Common.v1.FilterExpressionRestrictions"] || [];
+
+    aFilterRestrictions.push({
+        "Property" : { "PropertyPath" : oProperty.name},
+        "AllowedExpressions" : {
+            "EnumMember" : "com.sap.vocabularies.Common.v1.FilterExpressionType/"
+                + sFilterRestrictionValue
+        }
+    });
+    oEntitySet["com.sap.vocabularies.Common.v1.FilterExpressionRestrictions"] = aFilterRestrictions;
+
+    <warningUnsupportedFilterRestriction>
+    if (!sFilterRestrictionValue) {
+        if (Log.isLoggable(iWARNING, sLoggingModule)) {
+            Log.warning("Unsupported sap:filter-restriction: "
+                    + oProperty["sap:filter-restriction"],
+                oEntitySet.entityType + "." + oProperty.name, sLoggingModule);
+        }
+        return;
+    }
+    </warningUnsupportedFilterRestriction>
+}
+</processFilterRestrictions>
+
+<rename>
+function rename(filepath, options) {
+    <filepathProcessing>
+    var base = filepath.substr(0, filepath.lastIndexOf('.'));
+    return base + (options.extname || '.html');
+    </filepathProcessing>
+}
+</rename>
+
+<convertTextNode>
+function convertTextNode(node) {
+    <processLeaves>
+    if (node.leaves) {
+        const processedLeaves = node.leaves.map(processLeaves);
+        [...]
+        const condensedNodes = processedLeaves.reduce(condenseNodesReducer, { nodes: [] });
+        return condensedNodes.nodes;
+    }
+    </processLeaves>
+
+    <inlineNodesTransform>
+    if (node.object === 'inline') {
+        return transform(node);
+    }
+    </inlineNodesTransform>
+
+    <textNodeCreation>
+    return u('html', node.text);
+    </textNodeCreation>
+}
+</convertTextNode>
+
+<horizontalBarsTween>
+function horizontalBarsTween(d) {
+    <interpolationFunction>
+    let node = d3Selection.select(this),
+        i = d3Interpolate.interpolateRound(0, xScale(getValue(d))),
+        j = d3Interpolate.interpolateNumber(0, 1);
+
+    return function (t) {
+        node.attr('width', i(t))
+            .style('opacity', j(t));
+    }
+    </interpolationFunction>
+}
+</horizontalBarsTween>
+
+<labJackResults>
+function(me) {
+    <resultsInitialization>
+    var results = {
+        'deviceType': me.deviceType,
+        'deviceTypeNum': me.devType,
+        'connectionType': me.connectionType,
+        'connectionTypeNum': me.connType,
+    };
+    </resultsInitialization>
+
+    <openedDevices>
+    var numOpened = me.numOpened.deref();
+    var handles = [];
+    for(var i = 0; i < numOpened; i++) {
+        var handle = me.aHandles.readInt32LE(i * ARCH_INT_NUM_BYTES);
+        handles.push(handle);
+    }
+    results.numOpened = numOpened;
+    results.handles = handles;
+    </openedDevices>
+
+    <errorAnalysis>
+    var numErrors = me.numErrors.deref();
+    var failedOpens = [];
+    results.numErrors = numErrors;
+    results.failedOpens = failedOpens;
+
+    var errorHandle = me.errorHandle.readInt32LE(0);
+
+    var pointerToCharStar = ref.readPointer(me.errors, 0, ARCH_POINTER_SIZE);
+    var parsedCharStar = ref.readCString(pointerToCharStar, 0);
+    var errorsString = parsedCharStar;
+    var errorsObj = {};
+    try {
+        errorsObj = JSON.parse(errorsString);
+    } catch(err) {
+        errorsObj = {
+            'exceptions': [],
+            'networkInterfaces': [],
+            'returnedDevices': [],
+            'specificIPs': [],
+        };
+    }
+
+    results.errorHandle = errorHandle;
+    results.errors = errorsObj;
+    </errorAnalysis>
+
+    <returnResults>
+    return results;
+    </returnResults>
+}
+</labJackResults>
+
+<main>
+function main(args, pid) {
+    <usageValidation>
+    if (args.length <3) {
+        console.log('Usage: fuck [you] PROCESS_NAME');
+        process.exit(1);
+    }
+    </usageValidation>
+
+    <processPattern>
+    var pattern = last(args).get();
+    </processPattern>
+    
+    <processFiltering>
+    var processes = ps.list();
+    </processFiltering>
+
+    <processKilling>
+    var killed = processes.map(function(data) {
+                    return data.filter(match(pid, pattern))
+                               .map(kill);
+                  });
+    </processKilling>
+
+    <killSequence>
+    killed.chain(sequence(Task)).map(collectUnique).fork(
+        function onError(e) {
+            console.log('');
+            shock('It’s not very effective...');
+        },
+        function onSuccess(xs) {
+            console.log('');
+            if (xs.length > 0)
+                xs.forEach(function(process){
+                    rage(flip(process.name), '(x', process.pids.length, ': ', process.pids.join(', '), ')');
+                });
+            else
+                shock('I’ve got nothing on ', pattern);
+        }
+    );
+    </killSequence>
+}
+</main>

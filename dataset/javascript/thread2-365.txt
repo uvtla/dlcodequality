@@ -1,0 +1,176 @@
+<setConfigurationAndOptions>
+function setConfigurationAndOptions(pcConfig) {
+	
+	this.pcConfig = merge(true, pcConfig);
+
+	<fixPeerConnectionConfig>
+	Adapter.fixPeerConnectionConfig(this.pcConfig);
+	</fixPeerConnectionConfig>
+
+	this.options = {
+		iceTransportsRelay: (this.pcConfig.iceTransports === 'relay'),
+		iceTransportsNone: (this.pcConfig.iceTransports === 'none'),
+		gatheringTimeout: this.pcConfig.gatheringTimeout,
+		gatheringTimeoutAfterRelay: this.pcConfig.gatheringTimeoutAfterRelay
+	};
+
+	<cleanupConfig>
+	delete this.pcConfig.gatheringTimeout;
+	delete this.pcConfig.gatheringTimeoutAfterRelay;
+	</cleanupConfig>
+
+	debug('setConfigurationAndOptions | processed pcConfig: %o', this.pcConfig);
+}
+</setConfigurationAndOptions>
+
+<cacher>
+function cacher(f, scope, postprocessor) {
+	<repushFunction>
+	function repush(array, item) {
+		for (var i = 0, ii = array.length; i < ii; i++)
+			if (array[i] === item) {
+				return array.push(array.splice(i, 1)[0]);
+			}
+	}
+	</repushFunction>
+
+	<cachingFunction>
+	function newf() {
+		var arg = Array.prototype.slice.call(arguments, 0),
+			args = arg.join('\u2400'),
+			cache = newf.cache = newf.cache || {},
+			count = newf.count = newf.count || [];
+		if (cache.hasOwnProperty(args)) {
+			repush(count, args);
+			return postprocessor ? postprocessor(cache[args]) : cache[args];
+		}
+		if (count.length >= 1e3) {
+			delete cache[count.shift()];
+		}
+		count.push(args);
+		cache[args] = f.apply(scope, arg);
+		return postprocessor ? postprocessor(cache[args]) : cache[args];
+	}
+	</cachingFunction>
+	return newf;
+}
+</cacher>
+
+<alignTicksCondition>
+function () {
+	if (this.options.chart.alignTicks !== false) {
+		each(this.axes, function (axis) {
+			<adjustTickAmount>
+			axis.adjustTickAmount();
+			</adjustTickAmount>
+		});
+	}
+	this.maxTicks = null;
+}
+</alignTicksCondition>
+
+<appendToData>
+function(data){
+	data = data || {timestamps:[]};
+	data.timestamps.push(new Date().getTime());
+	<sendPing>
+	send(connection, "Ping", data);
+	</sendPing>
+}
+</appendToData>
+
+<fromArray>
+function fromArray(data){
+	<validateData>
+	var self = this;
+
+	if (!Array.isArray(data)){
+		throw new TypeError('The data argument should be an array of time series values.');
+	}
+	</validateData>
+
+	<processSpikes>
+	var spikes = data
+		.map(self.getValueY.bind(self))
+		.map(self.filterDataItem.bind(self))
+		.map(self.algorithm.bind(self, self.config.minPeakDistance))
+		.map(commons.objectMapper.bind(self, data))
+		.filter(commons.cleanEmptyElement.bind(null, self.config.transformedValueProperty));
+	</processSpikes>
+	<resolvePromise>
+	return new Promise(function(resolve) {
+		resolve(spikes);
+	});
+	</resolvePromise>
+}
+</fromArray>
+
+<publishAreaVisibility>
+function publishAreaVisibility() {
+	<calculateVisibility>
+	const showing = visibilityIsChanging ? !$scope.model.areaShowing : $scope.model.areaShowing;
+	</calculateVisibility>
+	<updateVisibility>
+	return visibility.updateAreaVisibility( { [ $scope.features.area.name ]: showing } );
+	</updateVisibility>
+}
+</publishAreaVisibility>
+
+<normalize>
+function normalize() {
+	<calculateLength>
+	var d = this.length();
+	</calculateLength>
+	<setScale>
+	if (d > 0) {
+		return this._set(this._x / d, this._y / d, this._z / d);
+	}
+	</setScale>
+
+	return this;
+}
+</normalize>
+
+<removeBlockSelection>
+function(e) {
+	<iterateBlocks>
+	var blocks = this.workspace_.getTopBlocks(false);
+	for (var i = 0, block; block = blocks[i]; i++) {
+		block.removeSelect();
+	}
+	</iterateBlocks>
+}
+</removeBlockSelection>
+
+<sameArrayCheck>
+function _same_array(one, two){
+	<compareArraySize>
+	var retval = true;
+	if( one.length != two.length ){
+		retval = false;
+	}else{
+	</compareArraySize>
+		<compareArrayElements>
+		for( var i = 0; i < one.length; i++ ){
+			if( one[i] != two[i] ){
+				retval = false;
+				break;
+			}
+		}
+		</compareArrayElements>
+	}
+	return retval;
+}
+</sameArrayCheck>
+
+<executeTestCallback>
+function (test) {
+	<checkCallback>
+	if (test.callback) {
+		<applyCallback>
+		test.callback.fn.apply(test.callback.scope, test.callback.args);
+		</applyCallback>
+	}
+	</checkCallback>
+}
+</executeTestCallback>

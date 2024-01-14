@@ -1,0 +1,338 @@
+```javascript
+<addToWorkingSet>
+function addToWorkingSet(file, index, forceRedraw) {
+    DeprecationWarning.deprecationWarning("Use MainViewManager.addToWorkingSet() instead of DocumentManager.addToWorkingSet()", true);
+    MainViewManager.addToWorkingSet(MainViewManager.ACTIVE_PANE, file, index, forceRedraw);
+}
+</addToWorkingSet>
+
+<fetchDeviceInfo>
+async function fetchDeviceInfo(){
+
+    <executeNodeInfoCommand>
+    let {response} = await _virtualTerminal.executeCommand(_luaCommandBuilder.command.nodeInfo);
+    </executeNodeInfoCommand>
+
+    <processResponse>
+    const p = response.replace(/\s+/gi, '-').split('-');
+    </processResponse>
+
+    
+    if (p.length === 8){
+        <buildEsp8266Response>
+        return {
+            version: p[0] + '.' + p[1] + '.' + p[2],
+            arch: 'esp8266',
+            chipID: parseInt(p[3]).toString(16),
+            flashID: parseInt(p[4]).toString(16),
+            flashsize: p[5] + 'kB',
+            flashmode: p[6],
+            flashspeed: parseInt(p[7]) / 1000000 + 'MHz'
+        };
+        </buildEsp8266Response>
+
+    
+    }else{
+        <executeChipIdCommand>
+        try{
+            ({response} = await _virtualTerminal.executeCommand(_luaCommandBuilder.command.chipid));
+        }
+        </executeChipIdCommand>
+
+        <processChipIdResponse>
+        const chipid = response.match(/^0x(\w+)/);
+
+        if (chipid){
+            <buildEsp32Response>
+            return {
+                version: 'unknown',
+                arch: 'esp32',
+                chipID: chipid[1],
+                flashID: 'unknown',
+                flashsize: 'unknown',
+                flashmode:'unknown',
+                flashspeed: 'unknown'
+            };
+            </buildEsp32Response>
+        }else{
+            <throwChipIdError>
+            throw new Error('Invalid node.chipid() Response: ' + response);
+            </throwChipIdError>
+        }
+        </processChipIdResponse>
+
+        <catchChipIdError>
+        }catch(e){
+            _logger.debug(e);
+            throw new Error('Invalid node.chipid() Response: ' + response);
+        }
+        </catchChipIdError>
+    }
+}
+</fetchDeviceInfo>
+
+<archive>
+function archive(cb) {
+  <getClient>
+  db.getClient(function(err, client, done) {
+    <queryDatabase>
+    client.query(qb.select() + ' WHERE published = true', function(err, r) {
+      if(err) {
+        <handleError>
+        cb(err);
+        done(err);
+        </handleError>
+      } else {
+        <sendResults>
+        cb(null, r.rows);
+        done();
+        </sendResults>
+      }
+    });
+    </queryDatabase>
+  });
+  </getClient>
+}
+</archive>
+
+<onClientError>
+function onClientError(err) {
+    
+    if ((err || {}).errno !== 'ECONNRESET') {
+      <logAndEmitError>
+      log.error('An unhandled error occured when searching for the root DSE at "%s". Error: %j', url, err);
+      if (hasEvents.call(self, 'error')) self.emit('error', err)
+      </logAndEmitError>
+    }
+  }
+</onClientError>
+
+<setEnvVariable>
+function set(path, value, opts) {
+  <setDefaultOptions>
+  if (typeof opts === 'undefined') {
+    opts = {};
+  }
+  </setDefaultOptions>
+
+  <envVariableFormatting>
+  let env = toUnderscore(path);
+  if (!opts.caseSensitive) {
+    env = env.toUpperCase();
+  }
+  </envVariableFormatting>
+
+  <deleteThenSetEnvVariable>
+  del(path, opts);
+  process.env[env] = stringify(value, opts);
+  </deleteThenSetEnvVariable>
+}
+</setEnvVariable>
+
+<AdapterJsRTCObjectFactory>
+function AdapterJsRTCObjectFactory(logger) {
+
+    Utils.checkArguments(arguments, 1);
+
+    this.createIceServers = function (urls, username, password) {
+        <iceServersFactory>
+        if (typeof(createIceServers) !== "undefined") {
+            return createIceServers(urls, username, password);
+        }
+        else {
+            logger.error("adapter.js not present or unsupported browser!");
+            return null;
+        }
+        </iceServersFactory>
+    };
+
+    this.createRTCSessionDescription = function (sessionDescriptionString) {
+        <RTCSessionDescriptionFactory>
+        if (typeof(RTCSessionDescription) !== "undefined") {
+            return new RTCSessionDescription(sessionDescriptionString);
+        }
+        else {
+            logger.error("adapter.js not present or unsupported browser!");
+            return null;
+        }
+        </RTCSessionDescriptionFactory>
+    };
+
+    this.createRTCIceCandidate = function (rtcIceCandidateString) {
+        <RTCIceCandidateFactory>
+        if (typeof(RTCIceCandidate) !== "undefined") {
+            return new RTCIceCandidate(rtcIceCandidateString);
+        }
+        else {
+            logger.error("adapter.js not present or unsupported browser!");
+            return null;
+        }
+        </RTCIceCandidateFactory>
+    };
+
+    this.createRTCPeerConnection = function (config) {
+        <RTCPeerConnectionFactory>
+        if (typeof(RTCPeerConnection) !== "undefined") {
+            return new RTCPeerConnection(config);
+        }
+        else {
+            logger.error("adapter.js not present or unsupported browser!");
+            return null;
+        }
+        </RTCPeerConnectionFactory>
+    };
+}
+</AdapterJsRTCObjectFactory>
+
+<calculateSegmentLength>
+function(t, opt) {
+
+            var segments = this.segments;
+            <validateSegments>
+            var numSegments = segments.length;
+            if (numSegments === 0) return 0; 
+            </validateSegments>
+
+            <initializeSegmentIndex>
+            var segmentIndex = t.segmentIndex;
+            if (segmentIndex < 0) return 0; 
+            </initializeSegmentIndex>
+
+            <clampTValue>
+            var tValue = t.value;
+            if (segmentIndex >= numSegments) {
+                segmentIndex = numSegments - 1;
+                tValue = 1;
+            }
+            else if (tValue < 0) tValue = 0;
+            else if (tValue > 1) tValue = 1;
+            </clampTValue>
+
+            <setDefaultOptions>
+            opt = opt || {};
+            var precision = (opt.precision === undefined) ? this.PRECISION : opt.precision;
+            var segmentSubdivisions = (opt.segmentSubdivisions === undefined) ? this.getSegmentSubdivisions({ precision: precision }) : opt.segmentSubdivisions;
+            </setDefaultOptions>
+            
+
+            <calculateLength>
+            var subdivisions;
+            var length = 0;
+            for (var i = 0; i < segmentIndex; i++) {
+
+                <computeSegmentLength>
+                var segment = segments[i];
+                subdivisions = segmentSubdivisions[i];
+                length += segment.length({ precisison: precision, subdivisions: subdivisions });
+                </computeSegmentLength>
+            }
+
+            <computeLengthAtT>
+            segment = segments[segmentIndex];
+            subdivisions = segmentSubdivisions[segmentIndex];
+            length += segment.lengthAtT(tValue, { precisison: precision, subdivisions: subdivisions });
+            </computeLengthAtT>
+            </calculateLength>
+
+            return length;
+        }
+</calculateSegmentLength>
+
+<extractStateDefinitions>
+function extractStateDefinitions (contractName, sourcesList, contracts) {
+  <initializeContracts>
+  if (!contracts) {
+    contracts = extractContractDefinitions(sourcesList)
+  }
+  </initializeContracts>
+  <findContractNode>
+  var node = contracts.contractsByName[contractName]
+  </findContractNode>
+
+  if (node) {
+    <collectStateItems>
+    var stateItems = []
+    var stateVar = []
+    var baseContracts = getLinearizedBaseContracts(node.id, contracts.contractsById)
+    baseContracts.reverse()
+    for (var k in baseContracts) {
+      var ctr = baseContracts[k]
+      for (var i in ctr.children) {
+        var item = ctr.children[i]
+        stateItems.push(item)
+        if (item.name === 'VariableDeclaration') {
+          stateVar.push(item)
+        }
+      }
+    }
+    </collectStateItems>
+
+    <returnStateDefinitions>
+    return {
+      stateDefinitions: stateItems,
+      stateVariables: stateVar
+    }
+    </returnStateDefinitions>
+  }
+  return null
+}
+</extractStateDefinitions>
+
+<generateNavGrid>
+function generateNavGrid(domNodeWrapperList, domNode, widget, onClick, showOutline) {
+		if(isPad){
+			return;
+		}
+		if(!domNodeWrapperList){
+			return;
+		}
+		<addToDomNodeWrapperList>
+		domNodeWrapperList.push({domNode: domNode});
+		</addToDomNodeWrapperList>
+
+		<applyOutline>
+		if (!showOutline) {
+			domNode.style.outline = "none"; 
+		}
+		</applyOutline>
+
+	}
+</generateNavGrid>
+
+<setCheckboxState>
+function setCheckboxState(page, ph, selectorAndState, callback) {
+    <evaluatePage>
+    page.evaluate(function (selectorAndState) {
+        try {
+            <getSelectorAndState>
+            var selector = selectorAndState[0];
+            var state = selectorAndState[1];
+            </getSelectorAndState>
+
+            <updateCheckbox>
+            var element = document.querySelector(selector);
+            element.checked = state;
+            </updateCheckbox>
+
+            <dispatchChangeEvent>
+            var event = document.createEvent('Event');
+            event.initEvent('change', true, false);
+            element.dispatchEvent(event);
+            </dispatchChangeEvent>
+
+            return null;
+        } catch (error) {
+            return error;
+        }
+    }, <handleEvaluation>
+    function (error) {
+        
+        if (error) {
+            callback(error, page, ph);
+            return;
+        }
+        callback(null, page, ph);
+    </handleEvaluation>, selectorAndState);
+}
+</setCheckboxState> 
+```

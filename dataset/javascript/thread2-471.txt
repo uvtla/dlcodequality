@@ -1,0 +1,199 @@
+```javascript
+<nextValidStart>
+function nextValidStart(schedules) {
+    var latest;
+    for(var i = 0, len = schedules.length; i < len; i++) {
+      var end = schedules[i].range[1];
+      latest = !latest || end < latest ? end : latest;
+    }
+
+    return latest;
+}
+</nextValidStart>
+
+<resolverOpts>
+function resolverOpts(resolveMode, maxLen, index, dtypes) {
+  index = isUndefined(index) ? null : index;
+  dtypes = isUndefined(dtypes) ? null : dtypes;
+  return {
+    resolveMode: resolveMode,
+    maxLen: maxLen,
+    index: index,
+    dtypes: dtypes,
+  };
+}
+</resolverOpts>
+
+<selectValueType>
+function selectValueType(props, propName, componentName) {
+  if (props[propName] == null) {
+    return null;
+  }
+  if (props.multiple) {
+    if (!Array.isArray(props[propName])) {
+      return new Error(
+        ("The `" + propName + "` prop supplied to <select> must be an array if ") +
+        ("`multiple` is true.")
+      );
+    }
+  } else {
+    if (Array.isArray(props[propName])) {
+      return new Error(
+        ("The `" + propName + "` prop supplied to <select> must be a scalar ") +
+        ("value if `multiple` is false.")
+      );
+    }
+  }
+}
+</selectValueType>
+
+<encodeSpecialChars>
+function encodeSpecialChars(str, specialCharsReg) {
+  return encodeURI(str).replace(specialCharsReg, function (m) {
+    return '%' + padding2(m.charCodeAt(0).toString(16));
+  });
+}
+</encodeSpecialChars>
+
+<EUCJPDecoder>
+function EUCJPDecoder(options) {
+    var fatal = options.fatal;
+    var eucjp_jis0212_flag = false,
+        eucjp_lead = 0x00;
+
+    this.handler = function(stream, bite) {
+      
+      if (bite === end_of_stream && eucjp_lead !== 0x00) {
+        eucjp_lead = 0x00;
+        return decoderError(fatal);
+      }
+
+      if (bite === end_of_stream && eucjp_lead === 0x00)
+        return finished;
+
+      if (eucjp_lead === 0x8E && inRange(bite, 0xA1, 0xDF)) {
+        eucjp_lead = 0x00;
+        return 0xFF61 + bite - 0xA1;
+      }
+
+      if (eucjp_lead === 0x8F && inRange(bite, 0xA1, 0xFE)) {
+        eucjp_jis0212_flag = true;
+        eucjp_lead = bite;
+        return null;
+      }
+
+      if (eucjp_lead !== 0x00) {
+        var lead = eucjp_lead;
+        eucjp_lead = 0x00;
+        var code_point = null;
+        
+        if (inRange(lead, 0xA1, 0xFE) && inRange(bite, 0xA1, 0xFE)) {
+          code_point = indexCodePointFor(
+            (lead - 0xA1) * 94 + (bite - 0xA1),
+            index(!eucjp_jis0212_flag ? 'jis0208' : 'jis0212'));
+        }
+        eucjp_jis0212_flag = false;
+        if (!inRange(bite, 0xA1, 0xFE))
+          stream.prepend(bite);
+        if (code_point === null)
+          return decoderError(fatal);
+        return code_point;
+      }
+
+      if (isASCIIByte(bite))
+        return bite;
+
+      if (bite === 0x8E || bite === 0x8F || inRange(bite, 0xA1, 0xFE)) {
+        eucjp_lead = bite;
+        return null;
+      }
+
+      return decoderError(fatal);
+    };
+  }
+</EUCJPDecoder>
+
+<updateMathJax>
+function() {
+  for (var i = 0, all = MathJax.Hub.getAllJax(), jax; jax = all[i]; i++) {
+    var math = document.getElementById(jax.inputID + '-Frame');
+    if (math) {
+      math.removeAttribute('hasSpeech');
+      Explorer.AddSpeech(math);
+    }
+  }
+}
+</updateMathJax>
+
+<getCharacteristicDescriptors>
+function (successCallback, errorCallback, deviceHandle, charHandle) {
+	winble.logger.logDebug("getCharacteristicDescriptors", "deviceHandle='" + deviceHandle + ", charHandle='" + charHandle + "'");
+	var device = winble.deviceManager.getDeviceFromHandle(deviceHandle, "getCharacteristicDescriptors", errorCallback);
+	if (device == null)
+		return;
+	var characteristic = winble.deviceManager.getCharacteristicFromHandle(device, charHandle, "getCharacteristicDescriptors", errorCallback);
+	if (characteristic == null)
+		return;
+	var descList = characteristic.gattChar.getAllDescriptors();
+	var descListOut = [];
+	for (var i = 0; i < descList.length; i++) {
+		winble.logger.logDebug("getCharacteristicDescriptors", "Found " + characteristic.gattChar.uuid + " descriptor '" + descList[i].uuid + "'");
+		var descStore = {
+			"gattDesc": descList[i],
+			"handle": winble.nextGattHandle++
+		};
+		device.descList[descStore.handle] = descStore;
+		var charOut = {
+			"handle": descStore.handle,
+			"uuid": descStore.gattDesc.uuid,
+			"permissions": winble.deviceManager.permissionsFromProtectionLevel(descStore.gattDesc.protectionLevel)
+		};
+		descListOut.push(charOut);
+	}
+	successCallback(descListOut);
+}
+</getCharacteristicDescriptors>
+
+<getTreeBox>
+function(nodes) {
+    var i, node, matrix, treeBox;
+    var box = new kity.Box();
+    if (!(nodes instanceof Array)) nodes = [ nodes ];
+    for (i = 0; i < nodes.length; i++) {
+        node = nodes[i];
+        matrix = node.getLayoutTransform();
+        treeBox = node.getContentBox();
+        if (node.isExpanded() && node.children.length) {
+            treeBox = treeBox.merge(this.getTreeBox(node.children));
+        }
+        box = box.merge(matrix.transformBox(treeBox));
+    }
+    return box;
+}
+</getTreeBox>
+
+<truncate>
+function truncate() {
+	const oldValue = goblin.db;
+	goblin.db = {};
+	goblin.goblinDataEmitter.emit('change', {
+		type: 'truncate',
+		value: goblin.db,
+		oldValue: oldValue
+	});
+}
+</truncate>
+
+<newInstance>
+function newInstance(clazz, args) {
+    if (arguments.length > 1 && args.length > 0) {
+        var f = function () {};
+        f.prototype = clazz.prototype;
+        var o = new f();
+        clazz.apply(o, args);
+        return o;
+    }
+    return new clazz();
+}
+</newInstance>
+```

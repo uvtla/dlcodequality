@@ -1,0 +1,227 @@
+```javascript
+<closestPoint0d>
+function closestPoint0d(a, x, result) {
+  var d = 0.0;
+  for(var i=0; i<x.length; ++i) {
+    result[i] = a[i];
+    var t = a[i] - x[i];
+    d += t * t;
+  }
+  return d;
+}
+</closestPoint0d>
+
+<unnamedMatrixVectorMultiplication>
+function (m, u) {
+  return [
+    m[0][0] * u[0] + m[0][1] * u[1] + m[0][2] * u[2],
+    m[1][0] * u[0] + m[1][1] * u[1] + m[1][2] * u[2],
+    m[2][0] * u[0] + m[2][1] * u[1] + m[2][2] * u[2]
+  ];
+}
+</unnamedMatrixVectorMultiplication>
+
+<doResolve>
+function doResolve(result) {
+  let self = this;
+  if (result === self) {
+    return doReject.call(
+      self,
+      new TypeError("Can not resolve 'Promise' itself")
+    );
+  }
+  
+  try {
+    // Determine if the result has a 'then' method, signifying it is a Promise-like object
+    <determineThen>
+    let then = safelyToThen(result);
+    </determineThen>
+    <handleThenable>
+    if (then) {
+      safelyToExecutor(self, then.bind(result));
+    } else {
+    </handleThenable>
+      // Handle non-thenable results
+      <handleNonThenable>
+      setTimeout(function() {
+        if (self.currentState === Shared.PENDING) {
+          self.currentState = Shared.FULFILLED;
+          self.valOrErr = result;
+          for (let i = 0; i < self.onFulfilledCallback.length; i++) {
+            self.onFulfilledCallback[i](result);
+          }
+          self.onFulfilledCallback = [];
+        }
+      }, 0);
+      </handleNonThenable>
+    }
+    
+    return self;
+  } catch (error) {
+    return doReject.call(self, error);
+  }
+}
+</doResolve>
+
+<isConfigurationParametersDefinedCorrectly>
+function isConfigurationParametersDefinedCorrectly(config) {
+  if (!config) {
+    gutil.log('license-check', gutil.colors.red('Config must be defined to run the plugin'));
+    return false;
+  }
+
+  if (!config.path) {
+    gutil.log('license-check', gutil.colors.red('License header property {path} must be defined to run the plugin'));
+    return false;
+  }
+
+  return true;
+}
+</isConfigurationParametersDefinedCorrectly>
+
+<unnamedCleanupCallbacks>
+function() {
+  if (!this._callbacks) return;
+  this.__callbacksFrozen = false;
+  for (var event in this._callbacks) {
+    if (this._callbacks[event]) {
+      // Unbind all event callbacks
+      <unbindEventCallbacks>
+      this._unbindCallbacks(event);
+      </unbindEventCallbacks>
+      // Remove the event handler reference
+      <removeEventHandlerReference>
+      delete handlers[event][this[0]];
+      </removeEventHandlerReference>
+    }
+  }
+}
+</unnamedCleanupCallbacks>
+
+<parse>
+function parse(tokens, basePath, iterSuffix) {
+  const len = tokens.length;
+  const body = [];
+
+  let i = 0;
+  while (i < len) {
+    const token = tokens[i];
+    if (subroutines[token.tokenType]) {
+      const rest = tokens.slice(i + 1);
+      // Execute the subroutine for the current token and process the result
+      <executeSubroutine>
+      const [
+        branches,
+        tokensHandled,
+        shouldBreak,
+      ] = subroutines[token.tokenType](token, rest, basePath, iterSuffix);
+      </executeSubroutine>
+
+      body.push(...branches);
+
+      i += tokensHandled;
+
+      if (shouldBreak) {
+        break;
+      }
+    } else {
+      i += 1;
+    }
+  }
+
+  return [body, i + 1];
+}
+</parse>
+
+<fileExists>
+function fileExists(fileName) {
+  // Return a promise that resolves with the existence status of the file
+  return new BbPromise((resolve) => {
+    fs.exists(fileName, (exists) => resolve(exists));
+  });
+}
+</fileExists>
+
+<Star>
+function Star( x, y, starSize, ctx, fgCanvas, analyser, streamData ){
+  this.x = x;
+  this.y = y;
+  this.angle = Math.atan( Math.abs(y) / Math.abs(x) );
+  this.starSize = starSize;
+  this.ctx = ctx;
+  this.high = 0;
+  this.fgCanvas = fgCanvas;
+  this.analyser = analyser;
+  this.streamData = streamData;
+}
+</Star>
+
+<explore>
+function explore(start, callfile, calldir, options, done) {
+  const argsLen = arguments.length;
+
+  // Argument handling logic
+  <handleArguments>
+  switch (argsLen) {
+    case 0:
+    case 1:
+      throw new Error("Too few arguments");
+    case 2:
+      break;
+    case 3:
+      if (isFunction(calldir)) {
+        done = calldir;
+      } else if (isObject(calldir)) {
+        options = calldir;
+      }
+      calldir = null;
+      break;
+    case 4:
+      if (isFunction(options)) {
+        done = options;
+        options = null;
+      }
+
+      if (isObject(calldir)) {
+        options = calldir;
+        calldir = null;
+      }
+      break;
+    default:
+      // No specific operations to annotate
+  }
+  </handleArguments>
+
+  // Validate function types and set defaults
+  <validateAndSetDefaults>
+  if (!isFunction(callfile)) {
+    throw new Error("callfile must be a function");
+  }
+
+  options = Object.assign({}, defaultOptions, options);
+
+  if (!isFunction(calldir)) {
+    calldir = nextDirectoryFn;
+  }
+
+  if (!isFunction(done)) {
+    done = emptyFn;
+  }
+  </validateAndSetDefaults>
+
+  _explore(start, callfile, calldir, options, done);
+}
+</explore>
+
+<createFeatureTags>
+function(feature, node) {
+  // Attach feature attributes as tags to an XML node
+  for (var key in feature.attributes) {
+    var tag = this.createElementNS(null, "tag");
+    tag.setAttribute("k", key);
+    tag.setAttribute("v", feature.attributes[key]);
+    node.appendChild(tag);
+  }
+}
+</createFeatureTags>
+```

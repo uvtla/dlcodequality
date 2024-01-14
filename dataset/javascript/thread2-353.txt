@@ -1,0 +1,191 @@
+<hasField>
+function hasField(selection, fieldNames) {
+  if (!selection || selection.type === 'empty') {
+    return false;
+  }
+  const fieldsToLookup = [].concat(fieldNames);
+
+  if (selection.type === 'range') {
+    const fields = Object.keys(selection.range.variables);
+    const match = intersect(fieldsToLookup, fields);
+    return match.length > 0;
+  }
+  if (selection.type === 'partition') {
+    return fieldsToLookup.indexOf(selection.partition.variable) !== -1;
+  }
+
+  console.log(
+    'SelectionBuilder::hasField does not handle selection of type',
+    selection.type
+  );
+
+  return false;
+}
+</hasField>
+
+<fold>
+function fold(count, buf)
+{
+  if(!count || buf.length % 2) return buf;
+  var ret = buf.slice(0,buf.length/2);
+  for(i = 0; i < ret.length; i++) ret[i] = ret[i] ^ buf[i+ret.length];
+  return fold(count-1,ret);
+}
+</fold>
+  
+```javascript
+// This function does not have a name and is likely meant to be provided as a method, hence the presence of 'this' keyword. Additionally, the function signature seems incorrect for an 'async function'.
+<asyncFunction>
+async function() {
+    const oThis = this
+      , existingBrandedTokens = await oThis._loadBrandedTokenConfig()
+    ;
+
+    if (existingBrandedTokens[oThis.uuid]) {
+      logger.error("* Branded token uuid already registered and present in BT config file");
+      process.exit(1);
+    }
+
+    existingBrandedTokens[oThis.uuid] = {
+      Name: oThis.btName,
+      Symbol: oThis.btSymbol,
+      ConversionFactor: oThis.btConversionFactor,
+      Reserve: oThis.reserveAddress,
+      ReservePassphrase: oThis.reservePassphrase,
+      UUID: oThis.uuid,
+      ERC20: oThis.erc20
+    };
+
+    logger.info("* Branded token config:", existingBrandedTokens[oThis.uuid]);
+
+    return tokenHelper.addBrandedToken(existingBrandedTokens);
+  }
+</asyncFunction>
+
+<unknownFunction>
+function ( sx ) {
+  if( !this.autoWidth ) return;
+  this.w = sx;
+  if( this.simple ){
+    this.sb = this.w - this.sa;
+  } else {
+    var pp = this.w * ( this.p / 100 );
+    this.sa = Math.floor( pp + 10 );
+    this.sb = Math.floor( this.w - pp - 20 );
+  }
+}
+</unknownFunction>
+
+<Heap>
+function Heap(compare) {
+  if (!(this instanceof Heap))
+    return new Heap(compare);
+  this.items = [];
+  <setComparer>
+  this.compare = comparator;
+  if (compare)
+    this.set(compare);
+  </setComparer>
+}
+</Heap>
+
+<isEqual>
+function (list) {
+  if (list.size() !== this.size()) {
+    return false;
+  }
+  var isEqual = true,
+      a, b;
+  for (var i = 0; i < this.$items.length; i++) {
+    a = this.$items[i];
+    b = list.at(i);
+    if (a instanceof Bindable && b instanceof Bindable) {
+      if (!a.isDeepEqual(b)) {
+        return false;
+      }
+    } else if (a instanceof Bindable || b instanceof Bindable) {
+      return false;
+    } else {
+      isEqual = _.isEqual(a, b);
+    }
+  }
+  return isEqual;
+}
+</isEqual>
+
+<containsWithoutPseudos>
+function containsWithoutPseudos(selector, potentialMatch) {
+  var classesInPotentialMatch = getCssClasses(potentialMatch).map(stripPseudos)
+  return classesInPotentialMatch.some(function (c) {
+    return selector === c
+  })
+}
+</containsWithoutPseudos>
+
+<getInstance>
+function(configStrategy) {
+    let instanceKey = getInstanceKey(configStrategy);
+
+    let _instance = instanceMap[instanceKey];
+
+    if (!_instance) {
+      _instance = new OSTCache(configStrategy);
+      instanceMap[instanceKey] = _instance;
+    }
+
+    return _instance;
+  }
+</getInstance>
+
+<safelyRenderSubtree>
+function (parentComponent, nextElement, container, callback) {
+    <validateReactComponent>
+    !(parentComponent != null && ReactInstanceMap.has(parentComponent)) ? "development" !== 'production' ? invariant(false, 'parentComponent must be a valid React Component') : _prodInvariant('38') : void 0;
+    </validateReactComponent>
+    return ReactMount._renderSubtreeIntoContainer(parentComponent, nextElement, container, callback);
+  }
+</safelyRenderSubtree>
+
+<indexOfFilter>
+function indexOfFilter(input, filter, startingPos) {
+  if (filter.length > input.length) {
+    return -1;
+  }
+
+  let filterParts = filter.split('^');
+  let index = startingPos;
+  let beginIndex = -1;
+  let prefixedSeparatorChar = false;
+
+  for (let f = 0; f < filterParts.length; f++) {
+    if (filterParts[f] === '') {
+      prefixedSeparatorChar = true;
+      continue;
+    }
+
+    index = input.indexOf(filterParts[f], index);
+    if (index === -1) {
+      return -1;
+    }
+    if (beginIndex === -1) {
+      beginIndex = index;
+    }
+
+    if (prefixedSeparatorChar) {
+      if (separatorCharacters.indexOf(input[index - 1]) === -1) {
+        return -1;
+      }
+    }
+    
+    if (f + 1 < filterParts.length &&
+        input.length > index + filterParts[f].length) {
+      if (separatorCharacters.indexOf(input[index + filterParts[f].length]) === -1) {
+        return -1;
+      }
+    }
+
+    prefixedSeparatorChar = false;
+  }
+  return beginIndex;
+}
+</indexOfFilter>

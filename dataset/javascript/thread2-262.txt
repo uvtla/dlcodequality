@@ -1,0 +1,178 @@
+```javascript
+<saveDocumentToLocal>
+function(doc) {
+  try {
+    localStorage.setItem(prefix + doc.id, doc.serialize());
+    return true;
+  } catch (error) {
+    console.error("Error while saving document to local storage", error);
+    return false;
+  }
+}
+</saveDocumentToLocal>
+
+<IdConstructor>
+function Id(bracket, round, match) {
+  if (!(this instanceof Id)) {
+    return new Id(bracket, round, match);
+  }
+  this.s = bracket;
+  this.r = round;
+  this.m = match;
+}
+</IdConstructor>
+
+<stopClipWithData>
+function stopClipWithData(playClipData) {
+  const id = playClipData.intervalId;
+
+  <checkAndClearInterval>
+  if (typeof id !== 'undefined') {
+    playClipData.intervalId = undefined;
+    if (playClipData.usingFrameTimeVector) {
+      clearTimeout(id);
+    } else {
+      clearInterval(id);
+    }
+  }
+  </checkAndClearInterval>
+}
+</stopClipWithData>
+
+<addCompressionToFile>
+function addCompressionToFile(filePath, compression) {
+  var srcFilePath = filePath.replace(rootFolder, "").replace(compression.fileExtension, "");
+  var existingFile = files[srcFilePath];
+  
+  <updateFileCompressions>
+  if (!existingFile) {
+    files[srcFilePath] = { compressions: [compression] };
+  } else {
+    existingFile.compressions.push(compression);
+  }
+  </updateFileCompressions>
+}
+</addCompressionToFile>
+
+<getPluginNameFunction>
+function getPluginName(plugin) {
+  <returnNullIfFunction>
+  if (isPluginFunction(plugin)) return null;
+  </returnNullIfFunction>
+
+  <returnPluginNameOrHead>
+  return _.isString(plugin) ? plugin : _.head(plugin);
+  </returnPluginNameOrHead>
+}
+</getPluginNameFunction>
+
+<filterValidPaths>
+function filterValidPaths(type, paths, version) {
+  var valid = [];
+  
+  version = env.schema[version] || env.schema['5.1'];
+  
+  <collectValidPaths>
+  _.forEach(paths, function(p) {
+    if (env.schema.hasProperty(version, type, p)) {
+      valid.push(p);
+    }
+  });
+  </collectValidPaths>
+  
+  return valid;
+}
+</filterValidPaths>
+
+<stopWatchingForValueChange>
+function stopWatchingForValueChange() {
+  if (!activeElement) {
+    return;
+  }
+
+  <removeValueChangeHandler>
+  delete activeElement.value;
+
+  if (activeElement.detachEvent) {
+    activeElement.detachEvent('onpropertychange', handlePropertyChange);
+  } else {
+    activeElement.removeEventListener('propertychange', handlePropertyChange, false);
+  }
+  </removeValueChangeHandler>
+
+  <clearReferences>
+  activeElement = null;
+  activeElementInst = null;
+  activeElementValue = null;
+  activeElementValueProp = null;
+  </clearReferences>
+}
+</stopWatchingForValueChange>
+
+<GoogleOAuth2StrategyConstructor>
+function GoogleOAuth2Strategy(options, verify) {
+  var self = this;
+   
+  <handleOptionsAndVerify>
+  if (typeof options === 'function') {
+    verify = options;
+    options = {};
+  }
+  if (!verify) {
+    throw new Error('GoogleOAuth2Strategy requires a verify callback');
+  }
+  
+  requiredArgs.forEach(function (arg) {
+    if (!options[arg.name]) {
+      throw new Error(util.format('GoogleOAuth2Strategy requires a [%s]', arg.name));
+    } else if (typeof options[arg.name] !== arg.type) {
+      throw new Error(util.format('GoogleOAuth2Strategy expects [%s] to be a [%s] but it was a [%s]', arg.name, arg.type, typeof options[arg.name]));
+    }
+    
+    self[arg.name] = options[arg.name];
+  });
+  
+  optionalArgs.forEach(function (arg) {
+    if (options[arg.name] && typeof options[arg.name] !== arg.type) {
+      throw new Error(util.format('GoogleOAuth2Strategy expects [%s] to be a [%s] but it was a [%s]', arg.name, arg.type, typeof options[arg.name]));
+    }
+    
+    self[arg.name] = options[arg.name];
+  });
+
+  if (options.scope && (typeof options.scope !== 'string' && !Array.isArray(options.scope))) {
+    throw new Error(util.format('GoogleOAuth2Strategy expects [%s] to be a [%s] but it was a [%s]', 'scope', 'array or string', typeof options.scope));
+  }
+
+  self.scope = options.scope || 'https:...</scope>'
+  </handleOptionsAndVerify>
+
+  <setStrategyProperties>
+  passport.Strategy.call(self);
+  self.name = 'google';
+  self.verify = verify;
+
+  if (!self.skipUserProfile) {
+    self.googlePlus = gapi.plus('v1');
+  }
+  </setStrategyProperties>
+}
+<GoogleOAuth2StrategyConstructor>
+
+<processAndRemoveObjEntries>
+function(obj, fn) {
+  for (var key in obj) {
+    if (fn(obj[key], key)) delete obj[key];
+  }
+
+  return obj;
+}
+</processAndRemoveObjEntries>
+
+<getResourcePathAndFetch>
+function (spaceIdentifier, params) {
+  var path = this.constructPath(constants.SPACES, spaceIdentifier);
+  return this.Core.GET(path, params);
+}
+</getResourcePathAndFetch>
+```

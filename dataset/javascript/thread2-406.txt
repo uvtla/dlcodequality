@@ -1,0 +1,237 @@
+<qsort>
+function qsort(array, l, r, func) {
+    if(l < r) {
+        var i = l, j = r;
+        var x = array[l];
+
+        while(i < j) {
+            while(i < j && func(x, array[j])) j--;
+            array[i] = array[j];
+            while(i < j && func(array[i], x)) i++;
+            array[j] = array[i];
+        }
+        array[i] = x;
+
+        qsort(array, l, i - 1, func);
+        qsort(array, i + 1, r, func);
+    }
+}
+</qsort>
+
+<deserializeConstructor>
+function(key, value, getTypeId, getConstructor) {
+    var typeId = getTypeId(value);
+    if (typeId) {
+        var ctor = getConstructor(typeId);
+        if (ctor) {
+            if (ctor.fromJSON) {
+                return ctor.fromJSON(value);
+            }
+
+            return new ctor(value);
+        }
+    }
+
+    return value;
+}
+</deserializeConstructor>
+
+<generateSidebar>
+function generateSidebar(statusMap, nextPipelineId, rootElement) {
+  var currentElement = null;
+
+  if (nextPipelineId) {
+    currentElement = $('<li>');
+    currentElement.attr('id', 'item-pipeline-' + nextPipelineId);
+  } else {
+    currentElement = rootElement;
+    nextPipelineId = statusMap.rootPipelineId;
+  }
+
+  var parentInfoMap = statusMap.pipelines[nextPipelineId];
+  currentElement.append(
+      constructStageNode(nextPipelineId, parentInfoMap, true));
+
+  if (statusMap.pipelines[nextPipelineId]) {
+    var children = statusMap.pipelines[nextPipelineId].children;
+    if (children.length > 0) {
+      var treeElement = null;
+      if (rootElement) {
+        treeElement =
+            $('<ul id="pipeline-tree" class="treeview-black treeview">');
+      } else {
+        treeElement = $('<ul>');
+      }
+
+      $.each(children, function(index, childPipelineId) {
+        var childElement = generateSidebar(statusMap, childPipelineId);
+        treeElement.append(childElement);
+      });
+      currentElement.append(treeElement);
+    }
+  }
+  return currentElement;
+}
+</generateSidebar>
+
+<JsonParserToMinifiy>
+function JsonParserToMinifiy() {
+    Parser.call(this, allTokens)
+    var $ = this
+
+    this.RULE("json", function() {
+        $.OR([
+            {ALT: function() {$.SUBRULE($.object)}},
+            {ALT: function() {$.SUBRULE($.array)}}
+        ])
+    })
+
+    this.RULE("object", function() {
+        $.CONSUME(LCurly)
+        $.OPTION(function() {
+            $.SUBRULE($.objectItem)
+            $.MANY(function() {
+                $.CONSUME(Comma)
+                $.SUBRULE2($.objectItem)
+            })
+        })
+        $.CONSUME(RCurly)
+    })
+
+    this.RULE("objectItem", function() {
+        $.CONSUME(StringLiteral)
+        $.CONSUME(Colon)
+        $.SUBRULE($.value)
+    })
+
+    this.RULE("array", function() {
+        $.CONSUME(LSquare)
+        $.OPTION(function() {
+            $.SUBRULE($.value)
+            $.MANY(function() {
+                $.CONSUME(Comma)
+                $.SUBRULE2($.value)
+            })
+        })
+        $.CONSUME(RSquare)
+    })
+
+    this.RULE("value", function() {
+        $.OR([
+            {ALT: function() {$.CONSUME(StringLiteral)}},
+            {ALT: function() {$.CONSUME(NumberLiteral)}},
+            {ALT: function() {$.SUBRULE($.object)}},
+            {ALT: function() {$.SUBRULE($.array)}},
+            {ALT: function() {$.CONSUME(True)}},
+            {ALT: function() {$.CONSUME(False)}},
+            {ALT: function() {$.CONSUME(Null)}}
+        ])
+    })
+
+    this.performSelfAnalysis()
+}
+</JsonParserToMinifiy>
+
+<encodeSysexEvent>
+function encodeSysexEvent(event) {
+    var cursor, length;
+
+    length = encodeVarInt(event.data.length);
+    cursor = new BufferCursor(new buffer.Buffer(
+        1 + length.length + event.data.length
+    ));
+
+    cursor.writeUInt8(0xF0 | event.type);
+    cursor.copy(length);
+    cursor.copy(event.data);
+
+    return cursor.buffer;
+}
+</encodeSysexEvent>
+
+<_getPadding>
+function _getPadding (source, char, len) {
+    if (!isNil(source) && type(source) !== "String") {
+        source = String(source);
+    }
+
+    return _repeat(String(char)[0] || "", Math.ceil(len - source.length));
+}
+</_getPadding>
+
+<manageMarkerSelection>
+function(evt) {
+    var sameMarkerClicked = (this == this.layer.selectedFeature);
+    this.layer.selectedFeature = (!sameMarkerClicked) ? this : null;
+    for(var i=0, len=this.layer.map.popups.length; i<len; i++) {
+        this.layer.map.removePopup(this.layer.map.popups[i]);
+    }
+    if (!sameMarkerClicked) {
+        this.layer.map.addPopup(this.createPopup()); 
+    }
+    OpenLayers.Event.stop(evt);
+}
+</manageMarkerSelection>
+
+<resolveType>
+function resolveType(o) {
+    var FNType;
+    if (typeof o.type === "string" ) {
+        if ( o.type[0] === "." ) {
+            FNType = ObjectPath.get(o.type.slice(1), oEnv.oContext);
+        } else {
+            FNType = ObjectPath.get(o.type);
+        }
+        
+        if (typeof FNType === "function") {
+            o.type = new FNType(o.formatOptions, o.constraints);
+        } else {
+            o.type = FNType;
+        }
+        
+        delete o.formatOptions;
+        delete o.constraints;
+    }
+}
+</resolveType>
+
+<ADXL345>
+function ADXL345(board) {
+    Module.call(this);
+    this._board = board;
+    this._baseAxis = 'z';
+    this._sensitive = 10;
+    this._detectTime = 50;
+    this._messageHandler = onMessage.bind(this);
+    this._init = false;
+    this._info = {
+      x: 0,
+      y: 0,
+      z: 0,
+      fXg: 0,
+      fYg: 0,
+      fZg: 0
+    };
+    this._callback = function () {};
+    this._board.send([0xf0, 0x04, 0x0b, 0x00, 0xf7]);
+}
+</ADXL345>
+
+<knFetchAll>
+function knFetchAll(args, callback)
+{
+    var sources;
+
+    sources = args['sources'];
+    knValidateSources(sources);
+
+    <fetchAll>
+    knFetchSnapshots(sources, args['clientOptions'] || {},
+        function (err, snapshots) {
+            if (snapshots)
+                snapshots = knMergeSnapshots(snapshots);
+            callback(err, snapshots);
+        });
+    </fetchAll>
+}
+</knFetchAll>

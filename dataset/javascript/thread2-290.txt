@@ -1,0 +1,271 @@
+```javascript
+<validateTarget>
+function validateTarget(target, coIndex) {
+    var ok = true;
+    var stype = target.entityType || target.complexType;
+    var aspect = target.entityAspect || target.complexAspect;
+    <initializeEntityAspect>
+    var entityAspect = target.entityAspect || target.complexAspect.getEntityAspect();</initializeEntityAspect>
+    <createInitialContext>
+    var context = { entity: entityAspect.entity  };
+    if (coIndex !== undefined) {
+      context.index = coIndex;
+    }</createInitialContext>
+
+    <validateProperties>
+    stype.getProperties().forEach(function (p) {
+      var value = target.getProperty(p.name);
+      <retrieveValidators>
+      var validators = p.getAllValidators();</retrieveValidators>
+      if (validators.length > 0) {
+        <setupValidationContext>
+        context.property = p;
+        context.propertyName = aspect.getPropertyPath(p.name);</setupValidationContext>
+        <validateIndividualProperty>
+        ok = entityAspect._validateProperty(value, context) && ok;</validateIndividualProperty>
+      }
+      <validateComplexProperties>
+      if (p.isComplexProperty) {
+        if (p.isScalar) {
+          ok = validateTarget(value) && ok;
+        } else {
+          ok = value.reduce(function (pv, cv, ix) {
+            return validateTarget(cv, ix) && pv;
+          }, ok);
+        }
+      }</validateComplexProperties>
+    });</validateProperties>
+
+    <validateWithTypeValidators>
+    stype.getAllValidators().forEach(function (validator) {
+      ok = validate(entityAspect, validator, target) && ok;
+    });</validateWithTypeValidators>
+    return ok;
+  }
+</validateTarget>
+
+<resolveModuleOrGetExports>
+function resolveModuleOrGetExports(baseOrModule, relative, resolved) {
+    
+    <throwExistingError>
+    if (baseOrModule.e) {
+      throw baseOrModule.e;
+    }</throwExistingError>
+
+    <resolveRelativeModule>
+    if (relative) {
+      baseElement.href = baseOrModule;
+      
+      <determineHref>
+      relativeElement.href = (relative[0] != "." && relative[0] != "/") ? "./node_modules/" + relative : relative;</determineHref>
+
+      <addJSExtension>
+      resolved = relativeElement.href.substr(-3).toLowerCase() == ".js" ?
+        relativeElement.href :
+        relativeElement.href + ".js";</addJSExtension>
+
+      baseElement.href = "";
+      return (MODULES[resolved] = MODULES[resolved] || {l: resolved});
+    }</resolveRelativeModule>
+
+    <resolveBaseModule>
+    if (baseOrModule.n) {
+      return resolveModuleOrGetExports(baseOrModule.n);
+    }</resolveBaseModule>
+
+    <executeModuleFactory>
+    if (!baseOrModule[tmp]) {
+      (baseOrModule.f || globalEval("(function(require,"+tmp+",module){" + baseOrModule.t + "\n})")
+        function require (id) {
+          return resolveModuleOrGetExports(resolveModuleOrGetExports(baseOrModule.l, id));
+        }, 
+        baseOrModule[tmp] = {}, 
+        baseOrModule 
+      );
+    }</executeModuleFactory>
+
+    return baseOrModule[tmp];
+  }
+</resolveModuleOrGetExports>
+
+<checkBlobSupport>
+function checkBlobSupport(txn) {
+  return new Promise(function (resolve) {
+    var blob$$1 = pouchdbBinaryUtils.blob(['']);
+    <initiateBlobPut>
+    var req = txn.objectStore(DETECT_BLOB_SUPPORT_STORE).put(blob$$1, 'key');</initiateBlobPut>
+
+    <successfulPut>
+    req.onsuccess = function () {
+      var matchedChrome = navigator.userAgent.match(/Chrome\/(\d+)/);
+      var matchedEdge = navigator.userAgent.match(/Edge/</successfulPut>
+      
+      <resolveBrowserSupport>
+      resolve(matchedEdge || !matchedChrome ||
+        parseInt(matchedChrome[1], 10) >= 43);</resolveBrowserSupport>
+    };
+
+    <abortTransaction>
+    txn.onabort = function (e) {
+      
+      e.preventDefault();
+      e.stopPropagation();
+      resolve(false);
+    };</abortTransaction>
+  }).catch(function () {
+    return false; 
+  });
+}
+</checkBlobSupport>
+
+<encodeCharacter>
+function encodeCharacter (chr) {
+        var result = '',
+            <encodeToUTF8>
+            octets = utf8.encode(chr),</encodeToUTF8>
+            octet,
+            index;
+        <generatePercentEncodedString>
+        for (index = 0; index < octets.length; index += 1) {
+            octet = octets.charCodeAt(index);
+            result += '%' + (octet < 0x10 ? '0' : '') + octet.toString(16).toUpperCase();
+        }</generatePercentEncodedString>
+        return result;
+    }
+</encodeCharacter>
+
+<functionAudioPlaybuffer>
+function (data) {
+    try {
+        <createAudioBuffer>
+        var audioBuffer = audioContext.createBuffer(captureCfg.channels, (data.length / captureCfg.channels),
+            captureCfg.sampleRate);</createAudioBuffer>
+
+        <splitChannels>
+        if (captureCfg.channels > 1) {
+            
+            for (var i = 0; i < captureCfg.channels; i++) {
+                var chdata = [],
+                    index = 0;
+
+                while (index < data.length) {
+                    chdata.push(data[index + i]);
+                    index += parseInt(captureCfg.channels);
+                }
+
+                audioBuffer.getChannelData(i).set(chdata);
+            }
+        }</splitChannels>
+        <handleMonoChannel>
+        else {
+            
+            audioBuffer.getChannelData(0).set(data);
+        }</handleMonoChannel>
+
+        <createBufferSource>
+        var source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;</createBufferSource>
+
+        <setupAudioNode>
+        source.connect(micGainNode);</setupAudioNode>
+
+        <startPlayback>
+        source.start(0);</startPlayback>
+
+        <trackPlayedData>
+        totalPlayedData += data.length;</trackPlayedData>
+
+        return audioBuffer.duration;
+    }</functionAudioPlaybuffer>
+    catch(e) {
+        <handleException>
+        alert("playAudio exception: " + e);</handleException>
+        return 100;
+    }
+}
+
+<Branch>
+function Branch(source, githubClient) {
+    <initializeGithubClient>
+    this.gh = githubClient;
+    this.ref = source.ref;
+    this.sha = source.object.sha;
+    this.commit = undefined;</initializeGithubClient>
+}
+</Branch>
+
+<Pilot>
+function Pilot(cockpit) {
+                console.log("Loading Pilot plugin.");
+                <initializeCockpit>
+                this.cockpit = cockpit;
+                this.speed = 0;
+                this.moving = false;
+                this.keys = {};</initializeCockpit>
+
+                <appendHTMLControls>
+                $('#controls').append('<input type="button" id="ftrim" value="Flat trim">');
+                $('#controls').append('<input type="button" id="calibratemagneto" value="Calibrate magneto">');</appendHTMLControls>
+
+                <disableMagnetoCalibration>
+                $('#calibratemagneto').prop('disabled', true);</disableMagnetoCalibration>
+
+                <setUpListening>
+                this.listen();</setUpListening>
+
+                <setUpCommandSending>
+                var self = this;
+                setInterval(function(){self.sendCommands()},100);</setUpCommandSending>
+        }
+</Pilot>
+
+<functionMatchesSelector>
+function (s, r) {
+        var i, l
+        <compareSelectors>
+        for (i = 0, l = this.length; i < l; i++) {
+          if (nw.match(this[i], s, r)) {
+            return true
+          }
+        }</compareSelectors>
+        return false
+      }
+</functionMatchesSelector>
+
+<each>
+function each(iterator) {
+    <iterateOverCollection>
+    for (var i = 0, length = this.length; i < length; i++)
+      iterator(this[i]);</iterateOverCollection>
+  }
+</each>
+
+<tagRegistration>
+function tag$1(name, tmpl, css, attrs, fn) {
+  <checkAndAssignAttributes>
+  if (isFunction(attrs)) {
+    fn = attrs;
+
+    if (/^[\w\-]+\s?=/.test(css)) {
+      attrs = css;
+      css = '';
+    } else
+      { attrs = ''; }
+  }</checkAndAssignAttributes>
+
+  <addCSS>
+  if (css) {
+    if (isFunction(css))
+      { fn = css; }
+    else
+      { styleManager.add(css); }
+  }</addCSS>
+
+  <registerTagImplementation>
+  name = name.toLowerCase();
+  __TAG_IMPL[name] = { name: name, tmpl: tmpl, attrs: attrs, fn: fn };</registerTagImplementation>
+
+  return name
+}
+</tagRegistration>
+```

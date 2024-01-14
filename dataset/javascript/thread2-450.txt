@@ -1,0 +1,238 @@
+```javascript
+<function1>
+function(str, filter, settings) {
+  <determine_style>
+  var style;
+  if (filter.hasStyle() && settings.style.isOverrideAllowed) {
+    style = _.findWhere(settings.styles, { name: filter.style });
+  }
+  if (_.isUndefined(style)) {
+    style = settings.style;
+  }
+  </determine_style>
+  
+  <determine_replacement>
+  var repl;
+  if (!settings.isRandom && style.hasFixed(filter.word)) {
+    repl = style.getFixed(filter.word);
+  } else {
+    repl = generateGrawlix(str, filter, style);
+  }
+  </determine_replacement>
+  
+  <apply_template_if_needed>
+  if (filter.hasTemplate()) {
+    repl = filter.template(repl);
+  }
+  </apply_template_if_needed>
+  
+  return str.replace(filter.regex, repl);
+}
+</function1>
+
+<function2>
+function(keepCurrentModal) {
+			<restore_focus_and_state>
+			lib.returnFocus(this.$frameParent, this.$originalFocus, function() {
+				if(!keepCurrentModal && modalDialogManager.dialog === this) {
+					modalDialogManager.dialog = null;
+				}
+				if (typeof this._beforeHiding === "function") { 
+					this._beforeHiding();
+				}
+				if (this._modalListener) {
+					this.$frameParent.removeEventListener("focus", this._modalListener, true);  
+					this.$frameParent.removeEventListener("click", this._modalListener, true);  
+				}
+	
+				this.$frame.classList.remove("dialogShowing"); 
+				lib.setFramesEnabled(true);
+				if (typeof this._afterHiding === "function") { 
+					this._afterHiding();
+				}
+			}.bind(this));
+			</restore_focus_and_state>
+			<destroy_modal_if_needed>
+			var self = this;
+			if (!this.keepAlive) {
+				window.setTimeout(function() { self.destroy(); }, 0);
+			}
+			</destroy_modal_if_needed>
+		}
+</function2>
+
+<function3>
+function responseCallback(response, model, success) {
+        
+        <record_response>
+        responses[model.cid] = {
+            success: success,
+            response: response
+          };
+        </record_response>
+        
+        <handle_responses_completion>
+        if (responsesFailed + responsesSucceeded === numberOfSaves) {
+          <handle_failures>
+          if (responsesFailed > 0) {
+            <rollback_changes_if_needed>
+            if (options.rollback) {
+              _.each(formModel.getTrackedModels(), function(model) {
+                model.set(oldValues[model.cid]);
+                if (responses[model.cid].success) {
+                  model.save();
+                }
+              });
+            }
+            </rollback_changes_if_needed>
+            formModel.trigger('save-fail', responses);
+            deferred.reject(responses);
+          </handle_failures>
+          } else {
+            formModel.trigger('save-success', responses);
+            deferred.resolve(responses);
+          }
+        }
+        </handle_responses_completion>
+      }
+</function3>
+
+<function4>
+function _get_npm_installed_path(){
+	var path_arr, npm_installed_path;
+	
+	path_arr = __dirname.split('/');
+	path_arr.pop();
+	return path_arr.join("/");
+}
+</function4>
+
+<parseSLComment>
+function parseSLComment(css) {
+    var start = pos;
+
+    <parse_until_end_of_comment>
+    for (pos += 2; pos < css.length; pos++) {
+      if (css.charAt(pos) === '\n' || css.charAt(pos) === '\r') {
+        break;
+      }
+    }
+    </parse_until_end_of_comment>
+
+    <record_comment_token>
+    pushToken(TokenType.CommentSL, css.substring(start, pos--), col);
+    col += pos - start;
+    </record_comment_token>
+  }
+</parseSLComment>
+
+<firstOf>
+function firstOf(items, evaluate) {
+  return new Promise((accept, reject) => {
+    (function next(i) {
+      <iterate_until_condition_met>
+      if (i >= items.length) {
+        accept(null);
+        return;
+      }
+
+      setImmediate(() => evaluate(items[i], (err, value) => {
+        if (err) {
+          reject(err);
+        } else if (value) {
+          accept(value);
+        } else {
+          next(i + 1);
+        }
+      }));
+      </iterate_until_condition_met>
+    })(0);
+  });
+}
+</firstOf>
+
+<function7>
+function (logicalPath) {
+        <generate_scripts_tags>
+        var assets = self.getAssetsForLogicalPath(logicalPath);
+        return assets.map(function (asset) {
+          return '<script src="' + self.prefix + '/' + asset + '"></script>';
+        }).join('\n');
+        </generate_scripts_tags>
+      }
+</function7>
+
+<assert>
+function assert(condition, message, strings) {
+        <throw_error_if_condition_false>
+        if (!condition) {
+            var err = _.template(message);
+            throw "[MetaModelManager] " + err(strings);
+        }
+        </throw_error_if_condition_false>
+    }
+</assert>
+
+<function9>
+function() {
+            var headerID = this.id + '__header';
+            var $header = this.$pinny.find('h1, .' + classes.TITLE).first();
+            var $wrapper = this.$pinny.find('.' + classes.WRAPPER);
+
+            <update_aria_and_role_attributes>
+            this.$container.attr('aria-hidden', 'false');
+
+            this.$pinny
+                .attr('role', 'dialog')
+                .attr('aria-labelledby', headerID)
+                .attr('aria-hidden', 'true')
+                .attr('tabindex', '-1');
+
+            $wrapper
+                .attr('role', 'document');
+
+            $header
+                .attr('id', headerID);
+            </update_aria_and_role_attributes>
+        }
+</function9>
+
+<function10>
+function createNamespaceTree() {
+	<create_namespace_tree_logic>
+	info("create namespace tree (" + __db().count() + " symbols)");
+
+	var aRootNamespaces = [];
+	var aTypes = __db(function() { return isFirstClassSymbol(this); }).get();
+
+	for (var i = 0; i < aTypes.length; i++) { 
+
+		var symbol = aTypes[i];
+		if ( symbol.memberof ) {
+
+			var parent = lookup(symbol.memberof);
+			if ( !parent ) {
+				warning("create missing namespace '" + symbol.memberof + "' (referenced by " + symbol.longname + ")");
+				parent = makeNamespace(symbol.memberof);
+				__longnames[symbol.memberof] = parent;
+				__db.insert(parent);
+				aTypes.push(parent); 
+			}
+			symbol.__ui5.parent = parent;
+			parent.__ui5.children = parent.__ui5.children || [];
+			parent.__ui5.children.push(symbol);
+
+		} else if ( symbol.longname !== ANONYMOUS_LONGNAME ) {
+
+			aRootNamespaces.push(symbol);
+
+		}
+	}
+
+	return aRootNamespaces;
+	</create_namespace_tree_logic>
+}
+</function10>
+```
+
+For function 1, 2, 3, 5, 7, and 10, I have annotated multiple responsibilities within the function, which means they are possibly violating the SRP. Functions 4, 6, 8, and 9 appear to have a single responsibility, hence no nested tags are needed.

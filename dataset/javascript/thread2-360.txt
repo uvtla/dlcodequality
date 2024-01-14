@@ -1,0 +1,211 @@
+<identity>
+function identity(f) {
+    return forAll(_.Int).satisfy(function(a) {
+      <returnSelf>
+      function returnSelf(b) {
+        return b;
+      }
+      </returnSelf>
+
+      <mapAndCompare>
+      return f(a).map(returnSelf).isEqual(f(a));
+      </mapAndCompare>
+    });
+}
+</identity>
+
+<addChildView>
+function(view, childView, options) {
+    var buffer = view.buffer;
+    var _childViews = view._childViews;
+
+    <createChildView>
+    childView = view.createChildView(childView, options);
+    </createChildView>
+
+    <addChildViewToBuffer>
+    if (!_childViews.length) { _childViews = view._childViews = _childViews.slice(); }
+    _childViews.push(childView);
+
+    if (!childView._morph) {
+      buffer.pushChildView(childView);
+    }
+    </addChildViewToBuffer>
+
+    <notifyPropertyChange>
+    view.propertyDidChange('childViews');
+    </notifyPropertyChange>
+
+    return childView;
+}
+</addChildView>
+
+<invariant>
+function invariant(predicate, Err, ...format) {
+  <checkPredicate>
+  if (Boolean(predicate) === false) {
+    return undefined
+  }
+  </checkPredicate>
+  
+  <throwStringError>
+  if (typeof Err === "string") {
+    throw new Error(fmt(Err, ...format))
+  }
+  </throwStringError>
+
+  <throwFunctionError>
+  if (typeof Err === "function") {
+    const message = format.shift()
+
+    throw new Err(fmt(message, ...format))
+  }
+  </throwFunctionError>
+
+  <throwError>
+  throw Err
+  </throwError>
+}
+</invariant>
+
+<stop>
+function stop() {
+  var time;
+  <checkEnabled>
+  if(!this.enabled) return false;
+  </checkEnabled>
+  
+  <recordTime>
+  time = this._record.isSlowerThan(this._slowerThan);
+  </recordTime>
+
+  <unshiftRecord>
+  if(this._record && time > -1) {
+    this._records.unshift(this._record.toArray(id++, time));
+    if(this._records.length >= this._maxLen) {
+      this._records.pop();
+    }
+  }
+  </unshiftRecord>
+}
+</stop>
+
+<validateInterval>
+function( value, interval ) {
+			var error;
+
+			<splitInterval>
+			interval = interval.split( ',' );
+			</splitInterval>
+
+			<checkLowerBound>
+			if ( value < parseFloat( interval[ 0 ] ) ) {
+				error = {
+					"rule": "interval",
+					"message": "ERROR:provided value exceeds the lower bound: " + interval[ 0 ]
+				};
+				return [ error ];
+			}
+			</checkLowerBound>
+			<checkUpperBound>
+			if ( value > parseFloat( interval[ 1 ] ) ) {
+				error = {
+					"rule": "interval",
+					"message": "ERROR:provided value exceeds the upper bound: " + interval[ 1 ]
+				};
+				return [ error ];
+			}
+			</checkUpperBound>
+			return;
+		}
+</validateInterval>
+
+<createCheck>
+function createCheck(src) {
+  <normalizeSrc>
+  src = normalizeKeys(src);
+  </normalizeSrc>
+
+  <createServiceCheck>
+  var dst = _createServiceCheck(src);
+  </createServiceCheck>
+
+  <assignName>
+  if (src.name) {
+    dst.Name = src.name;
+  } else {
+    throw new Error('name required');
+  }
+  </assignName>
+
+  <assignOptionalProperties>
+  if (src.hasOwnProperty('id')) dst.ID = src.id;
+  if (src.hasOwnProperty('serviceid')) dst.ServiceID = src.serviceid;
+  </assignOptionalProperties>
+
+  return dst;
+}
+</createCheck>
+
+<RegionConstructor>
+function Region(name, state) {
+    var _this = _super.call(this, name, state) || this;
+    
+    <initializeVertices>
+    _this.vertices = new Array();
+    </initializeVertices>
+    <addToParentRegions>
+    _this.parent.regions.push(_this);
+    </addToParentRegions>
+    <markRootDirty>
+    _this.getRoot().clean = false;
+    </markRootDirty>
+    return _this;
+}
+</RegionConstructor>
+
+<registerDirective>
+function registerDirective(Vue, name, definition) {
+    <initializeDirectivesStorage>
+    Vue._shards_vue_directives_ = Vue._shards_vue_directives_ || {};
+    </initializeDirectivesStorage>
+    var loaded = Vue._shards_vue_directives_[name];
+
+    <registerIfNotLoaded>
+    if (!loaded && definition && name) {
+        Vue._shards_vue_directives_[name] = true;
+        Vue.directive(name, definition);
+    }
+    </registerIfNotLoaded>
+
+    return loaded
+}
+</registerDirective>
+
+<smaller>
+function smaller(tree, n, m, depth) {
+  <calculateIndexes>
+  var _n2 = n * 2;
+  var _m2 = m * 2;
+  </calculateIndexes>
+
+  <compareValues>
+  return (tree[_n2] < tree[_m2] ||
+         (tree[_n2] === tree[_m2] && depth[n] <= depth[m]));
+  </compareValues>
+}
+</smaller>
+
+<uuids>
+function uuids (count, callback) {
+    <handleArguments>
+    if (typeof count === 'function') {
+      callback = count
+      count = 1
+    }
+    </handleArguments>
+    <requestUuids>
+    return relax({ method: 'GET', path: '_uuids', qs: { count: count } }, callback)
+    </requestUuids>
+}
+</uuids>

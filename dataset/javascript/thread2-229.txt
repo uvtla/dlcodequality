@@ -1,0 +1,388 @@
+```javascript
+<koifyRouter>
+function koifyRouter(Router) {
+  <declareRouterPrototype>
+  let routerPrototype = Router; 
+  </declareRouterPrototype>
+
+  <initializeRouterPrototypeCopy>
+  let routerPrototype_ = {}; 
+  </initializeRouterPrototypeCopy>
+
+  <getAndSortRouterMethods>
+  let routerMethods = Object.keys(routerPrototype).sort(); 
+  </getAndSortRouterMethods>
+
+  <defineIsRouterFunction>
+  function isRouter(someRouter) {
+    let someRouterPrototype = Object.getPrototypeOf(someRouter);
+    let someRouterMethods = Object.keys(someRouterPrototype).sort();
+
+    return arrayEqual(someRouterMethods, routerMethods) && (typeof someRouterPrototype === 'function');
+  }
+  </defineIsRouterFunction>
+
+  <overrideUseMethod>
+  routerPrototype_.use = routerPrototype.use;
+  routerPrototype.use = function () {
+    let args = slice.call(arguments);
+
+    for (let i = 0; i < args.length; i++) {
+      let handler = args[i];
+
+      if (isFunction(handler) && !isRouter(handler)) {
+        args[i] = ko.ko(handler);
+      }
+    }
+
+    return routerPrototype_.use.apply(this, args);
+  };
+  </overrideUseMethod>
+
+  <overrideParamMethod>
+  routerPrototype_.param = routerPrototype.param;
+  routerPrototype.param = function () {
+    let args = slice.call(arguments);
+
+    let handler = args[1];
+
+    if (isFunction(handler)) {
+      args[1] = ko.ko(handler, true);
+    }
+
+    return routerPrototype_.param.apply(this, args);
+  };
+  </overrideParamMethod>
+
+  <defineRouterProperty>
+  Object.defineProperty(routerPrototype, '$$koified', {
+    configurable: true,
+    writable: true,
+    value: false
+  });
+  </defineRouterProperty>
+
+  return Router;
+}
+</koifyRouter>
+
+<parseLineForBeatmap>
+function (line) {
+  <splitLineIntoMembers>
+  members = line.split(',');
+  </splitLineIntoMembers>
+
+  <handleBackgroundInfo>
+  if (members[0] == '0' && members[1] == '0' && members[2]) {
+    var bgName = members[2].trim();
+    if (bgName.charAt(0) == '"' && bgName.charAt(bgName.length - 1) == '"') {
+      beatmap.bgFilename = bgName.substring(1, bgName.length - 1);
+    } else {
+      beatmap.bgFilename = bgName;
+    }
+  }
+  </handleBackgroundInfo>
+  <handleBreakTimesInfo>
+  else if (members[0] == '2' && /^[0-9]+$/.test(members[1]) && /^[0-9]+$/.test(members[2])) {
+    beatmap.breakTimes.push({
+      startTime: parseInt(members[1]),
+      endTime: parseInt(members[2])
+    });
+  }
+  </handleBreakTimesInfo>
+}
+</parseLineForBeatmap>
+
+<createCustomElement>
+function () {
+  function impl (element) {
+    customElement.call(this, element)
+  }
+  <inheritCustomElement>
+  impl.prototype = Object.create(customElement.prototype)
+  </inheritCustomElement>
+  return impl
+}
+</createCustomElement>
+
+<calculateAbsolutePath>
+function(){
+  var args = arrayFrom(arguments).reverse();
+  <initializePath>
+  var path = [];
+  var absoluteFound = false;
+  </initializePath>
+
+  <processPathArguments>
+  for (var i = 0; !absoluteFound && i < args.length; i++)
+    if (typeof args[i] == 'string')
+    {
+      path.unshift(args[i]);
+      absoluteFound = ABSOLUTE_RX.test(args[i]);
+    }
+  </processPathArguments>
+
+  <handleBaseURI>
+  if (!absoluteFound)
+    path.unshift(baseURI == '/' ? '' : baseURI);
+  else if (path.length && path[0] == '/')
+    path[0] = '';
+  </handleBaseURI>
+
+  <normalizeAndReturnPath>
+  return utils.normalize(path.join('/'));
+  </normalizeAndReturnPath>
+}
+</calculateAbsolutePath>
+
+<hasSimilarSelectors>
+function hasSimilarSelectors(selectors1, selectors2) {
+  <traverseFirstSelectorList>
+  var cursor1 = selectors1.head;
+
+  while (cursor1 !== null) {
+    <traverseSecondSelectorList>
+    var cursor2 = selectors2.head;
+
+    while (cursor2 !== null) {
+      <compareSelectors>
+      if (cursor1.data.compareMarker === cursor2.data.compareMarker) {
+        return true;
+      }
+      </compareSelectors>
+
+      cursor2 = cursor2.next;
+    }
+    </traverseSecondSelectorList>
+
+    cursor1 = cursor1.next;
+  }
+  </traverseFirstSelectorList>
+
+  return false;
+}
+</hasSimilarSelectors>
+
+<setCopyrightInfo>
+function setCopyrightInfo_(map) {
+  <initializeDiv>
+  var div = null;
+  </initializeDiv>
+
+  <findExistingcopyrightDiv>
+  if (map) {
+    var mvc = map.controls[G.ControlPosition.BOTTOM_RIGHT];
+    if (mvc) {
+      for (var i = 0, c = mvc.getLength(); i < c; i++) {
+        if (mvc.getAt(i).id === 'agsCopyrights') {
+          div = mvc.getAt(i);
+          break;
+        }
+      }
+    }
+  </findExistingcopyrightDiv>
+  <createNewCopyrightDiv>
+  if (!div) {
+    div = document.createElement('div');
+    div.style.fontFamily = 'Arial,sans-serif';
+    div.style.fontSize = '10px';
+    div.style.textAlign = 'right';
+    div.id = 'agsCopyrights';
+    map.controls[G.ControlPosition.BOTTOM_RIGHT].push(div);
+    G.event.addListener(map, 'maptypeid_changed', function() {
+      setCopyrightInfo_(map);
+    });
+  }
+  </createNewCopyrightDiv>
+  <aggregateCopyrightInfo>
+  var ovs = map.agsOverlays;
+  var cp = [];
+  var svc, type;
+  if (ovs) {
+    for (var i = 0, c = ovs.getLength(); i < c; i++) {
+      <addCopyrightInfoToOverlay>
+      addCopyrightInfo_(cp, ovs.getAt(i).mapService_, map);
+      </addCopyrightInfoToOverlay>
+    }
+  }
+  </aggregateCopyrightInfo>
+  <handleOverlayMapTypes>
+  var ovTypes = map.overlayMapTypes;
+  if (ovTypes) {
+    for (var i = 0, c = ovTypes.getLength(); i < c; i++) {
+      type = ovTypes.getAt(i);
+      if (type instanceof MapType) {
+        for (var j = 0, cj = type.tileLayers_.length; j < cj; j++) {
+          <addCopyrightInfoToTileLayer>
+          addCopyrightInfo_(cp, type.tileLayers_[j].mapService_, map);
+          </addCopyrightInfoToTileLayer>
+        }
+      }
+    }
+  }
+  </handleOverlayMapTypes>
+  <handleMapType>
+  type = map.mapTypes.get(map.getMapTypeId());
+  if (type instanceof MapType) {
+    for (var i = 0, c = type.tileLayers_.length; i < c; i++) {
+      <addCopyrightInfoToMapType>
+      addCopyrightInfo_(cp, type.tileLayers_[i].mapService_, map);
+      </addCopyrightInfoToMapType>
+      <handleTextColour>
+      if (type.negative) {
+        div.style.color = '#ffffff';
+      } else {
+        div.style.color = '#000000';
+      }
+      </handleTextColour>
+    }
+  }
+  </handleMapType>
+  <updateCopyrightInnerHTML>
+  div.innerHTML = cp.join('<br/>');
+  </updateCopyrightInnerHTML>
+}
+</setCopyrightInfo>
+
+<middleware>
+function mw(store) {
+  <ensureSingleStoreAssignment>
+  if (savedStore && savedStore !== store) {
+    throw new Error('cannot assign logicMiddleware instance to multiple stores, create separate instance for each');
+  }
+  </ensureSingleStoreAssignment>
+  <assignStoreToSavedStore>
+  savedStore = store;
+  </assignStoreToSavedStore>
+
+  <returnMiddlewareFunction>
+  return next => {
+    savedNext = next;
+    const { action$, sub, logicCount: cnt } =
+          applyLogic(arrLogic, savedStore, savedNext,
+                     logicSub, actionSrc$, deps, logicCount,
+                     monitor$);
+    actionEnd$ = action$;
+    logicSub = sub;
+    logicCount = cnt;
+
+    return action => {
+      <logActionStart>
+      debug('starting off', action);
+      </logActionStart>
+      <notifyMonitorTopOperation>
+      monitor$.next({ action, op: 'top' });
+      </notifyMonitorTopOperation>
+      <pushActionIntoStream>
+      actionSrc$.next(action);
+      </pushActionIntoStream>
+      return action;
+    };
+  };
+  </returnMiddlewareFunction>
+}
+</middleware>
+
+<ApplicationConstructor>
+function Application(config, dataReplace) {
+  <validateConfigParameter>
+  if (!Helper.isObject(config) && !Helper.isArray(config)) {
+    throw BaseError({
+      title: 'The first parameter must be an array or object.',
+    });
+  }
+  </validateConfigParameter>
+  <assignConfig>
+  this._data = config;
+  </assignConfig>
+  <handleTemplateReplacement>
+  if (Helper.isObject(dataReplace) || Helper.isArray(dataReplace)) {
+    this.template(dataReplace);
+  }
+  </handleTemplateReplacement>
+}
+</ApplicationConstructor>
+
+<initiateOrResetDataSource>
+function()
+{
+  <checkInitialization>
+  if(!this._initialized)
+  {
+    return;
+  }
+  </checkInitialization>
+  
+  if(this._dataSource !== null)
+  {
+    <handleExistingPolling>
+    if(this._pollingID !== null)
+    {
+      this._dataSource.clearInterval(this._pollingID);
+      this._pollingID = null;
+    }
+    </handleExistingPolling>
+    
+    <setupNewPollingInterval>
+    if(this._pollingInterval > 0)
+    {
+      this._pollingID = this._dataSource.setInterval(this._pollingInterval, this._request, this._loadDataHandler, this);
+    }
+    </setupNewPollingInterval>
+    <sendRequestToDataSource>
+    this._dataSource.sendRequest(this._request, this._loadDataHandler, this);
+    </sendRequestToDataSource>
+  }
+}
+</initiateOrResetDataSource>
+
+<updateUser>
+function update(form) {
+  <formValidation>
+  if (!vm.user._id || form && !form.$valid) {
+    return;
+  }
+  </formValidation>
+
+  <requestUserUpdate>
+  UserService.update(vm.user)
+    .then(updateUserSuccess)
+    .catch(updateUserCatch);
+  </requestUserUpdate>
+
+  <updateSuccessLogic>
+  function updateUserSuccess(updatedUser) {
+    vm.displayName = updatedUser.name;
+    <displaySuccessToast>
+    Toast.show({text: 'User ' + updatedUser.name + ' updated'});
+    </displaySuccessToast>
+    <resetFormPristine>
+    if (form) {
+      form.$setPristine();
+    }
+    </resetFormPristine>
+  }
+  </updateSuccessLogic>
+
+  <handleUpdateError>
+  function updateUserCatch(err) {
+    <displayWarningToast>
+    Toast.show({
+      type: 'warn',
+      text: 'Error while updating user ' + vm.displayName,
+      link: {state: $state.$current, params: $stateParams}
+    });
+    </displayWarningToast>
+
+    <setResponseErrorsOnForm>
+    if (form && err) {
+      form.setResponseErrors(err.data);
+    }
+    </setResponseErrorsOnForm>
+  }
+  </handleUpdateError>
+}
+</updateUser>
+```
+
+Some functions have a single responsibility and therefore are entirely enclosed with a single tag. Others violate the SRP and have nested tags representing distinct responsibilities. Tags are placed around coherent blocks that represent a specific task or purpose within the function. Simple variable assignments or return statements are not considered separate responsibilities unless they form part of a larger, distinct block of code.

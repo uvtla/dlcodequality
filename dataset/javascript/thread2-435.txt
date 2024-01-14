@@ -1,0 +1,221 @@
+```javascript
+<setValue>
+function setValue(value) {
+    <beforeSetValueHook>
+    value = this.beforeSetValue(value);
+    </beforeSetValueHook>
+    <formattingValue>
+    this.trueValue = this.formater ? this.formater.format(value) : value;
+    this.showValue = this.masker ? this.masker.format(this.trueValue).value : this.trueValue;
+    </formattingValue>
+    <updatingUI>
+    this.setShowValue(this.showValue);
+    </updatingUI>
+    <updateDataModel>
+    this.slice = true;
+    if (parseInt(this.options.rowIndex) > -1) {
+        if ((this.options.rowIndex + '').indexOf('.') > 0) {
+            var childObj = this.getChildVariable();
+            var lastRow = childObj.lastRow;
+            var lastField = childObj.lastField;
+            if (lastRow) lastRow.setValue(lastField, this.trueValue);
+        } else {
+            var rowObj = this.dataModel.getRow(this.options.rowIndex);
+            if (rowObj) rowObj.setValue(this.field, this.trueValue, undefined, undefined, this.validType); 
+        }
+    } else {
+        this.dataModel.setValue(this.field, this.trueValue, undefined, undefined, this.validType); 
+    }
+    this.slice = false;
+    </updateDataModel>
+}
+</setValue>
+
+<eventBindings>
+function () {
+    <bindingTimeNavEvents>
+    this._timenav.on('change', this._onTimeNavChange, this);
+    this._timenav.on('zoomtoggle', this._onZoomToggle, this);
+    </bindingTimeNavEvents>
+    
+    <bindingStorySliderEvents>
+    this._storyslider.on('change', this._onSlideChange, this);
+    this._storyslider.on('colorchange', this._onColorChange, this);
+    this._storyslider.on('nav_next', this._onStorySliderNext, this);
+    this._storyslider.on('nav_previous', this._onStorySliderPrevious, this);
+    </bindingStorySliderEvents>
+    
+    <bindingMenuBarEvents>
+    this._menubar.on('zoom_in', this._onZoomIn, this);
+    this._menubar.on('zoom_out', this._onZoomOut, this);
+    this._menubar.on('back_to_start', this._onBackToStart, this);
+    </bindingMenuBarEvents>
+}
+</eventBindings>
+
+<getterFunction>
+function() {
+    var val = this.value;
+    <customGetterLogic>
+    if (this.getter) {
+        val = this.getter.call(this.owner, this.name, val);
+    }
+    </customGetterLogic>
+    return val;
+}
+</getterFunction>
+
+<resizerStyleSetting>
+function() {
+    var resizerStyle = YAHOO.util.Dom.get(this.handleElId).style;
+    resizerStyle.left = "auto";
+    resizerStyle.right = 0;
+    resizerStyle.top = "auto";
+    resizerStyle.bottom = 0;
+    resizerStyle.height = this.headCell.offsetHeight+"px";
+}
+</resizerStyleSetting>
+
+<initVivaGraph>
+function initVivaGraph(){
+    <setupInitialVariables>
+    g = Viva.Graph.graph();
+    isPaused = false;
+    divGraph = document.getElementById('divGraph');
+    </setupInitialVariables>
+    <appendLoadingMessage>
+    $('#divGraph').append("<div id='loadingText' class='hero-body has-text-centered'><h1 class='title'>Loading...</h1></div>");
+    </appendLoadingMessage>
+    <processNodesFromGraph>
+    console.time("nodesFromMWG");
+    graph.indexes(WORLD, TIME, function (indexNames) {
+        <processIndexNames>
+        var defer = graph.newCounter(indexNames.length);
+        for (var i = 0; i < indexNames.length; ++i) {
+            const indexName = indexNames[i];
+            graph.findAll(WORLD, TIME, indexName, function (nodes) {
+                <addToGlobalNodesProcess>
+                for (var j = 0; j < nodes.length; ++j){
+                    addToGlobalNodes(nodes[j]);
+                }
+                </addToGlobalNodesProcess>
+                defer.count();
+            });
+        }
+        </processIndexNames>
+        </processIndexNames>
+        defer.then(function() {
+            console.timeEnd("nodesFromMWG");
+            console.time("nodesToVivagraph");
+            <addNodesToGraph>
+            var nbNodesToDisplay = (gAllNodes.length > NB_NODES_TO_DISPLAY ? NB_NODES_TO_DISPLAY : gAllNodes.length);
+            for (var i = 0; i < nbNodesToDisplay; ++i){
+                addNodeToGraph(gAllNodes[i]);
+            }
+            for (var i = 0; i < gNodesWithRel.length; ++i){
+                addRelToGraph(gNodesWithRel[i]);
+            }
+            gRootNodes = _.difference(gAllNodes, gChildrenNodes);
+            createTree();
+            var maxChildNodes = getMaxChildNodes();
+            console.timeEnd("nodesToVivagraph");
+            </addNodesToGraph>
+            console.time("rendering+loading");
+            <setupGraphicsAndLayout>
+            graphics = Viva.Graph.View.webglGraphics();
+            graphics
+                .node(function(node){
+                    return Viva.Graph.View.webglSquare(NODE_SIZE, colorsByNodeType[node.data._type]);
+                })
+                .link(function(link) {
+                    return Viva.Graph.View.webglLine(colorsByLinkType[link.data]);
+                });
+            layout = Viva.Graph.Layout.forceDirected(g, {
+                springLength: 200, // default spring length
+                springCoeff: 0.0008,
+                dragCoeff: 0.02
+            });
+            </setupGraphicsAndLayout>
+            <initRendering>
+            renderer = Viva.Graph.View.renderer(g, {
+                graphics: graphics,
+                layout: layout,
+                container: divGraph,
+                prerender: 50
+            });
+            $('#loadingText').hide();
+            renderer.run();
+            </initRendering>
+            console.timeEnd("rendering+loading");
+            console.time("table+events");
+            <postRenderingSetup>
+            createTableLayout();
+            initJQueryEvents();
+            </postRenderingSetup>
+            console.timeEnd("table+events");
+            console.timeEnd("all");
+        });
+    });
+}
+</initVivaGraph>
+
+<normalizeVector>
+function(n){
+    var mult = Math.sqrt(n*n/this.dot(this));
+    return new Vec2(this.x*mult, this.y*mult);
+}
+</normalizeVector>
+
+<geometryModelToViewConverter>
+function(geometryModel) {
+    if(geometryModel.isPoint()) {
+        return new cdb.geo.gmaps.PointView(geometryModel);
+    }
+    return new cdb.geo.gmaps.PathView(geometryModel);
+}
+</geometryModelToViewConverter>
+
+<normalizeAttributes>
+function normalizeAttributes(selector) {
+    selector.walkAttributes((node) => {
+        if (node.value) {
+            <sanitizeAttributeValue>
+            node.value = node.value.replace(/'|\\'|"|\\"/g, '');
+            </sanitizeAttributeValue>
+        }
+    });
+}
+</normalizeAttributes>
+
+<blockquoteFormat>
+function blockquote(node) {
+    var self = this;
+    self.level++;
+    <combineBlockquoteContent>
+    value = self.all(node).join('\n');
+    </combineBlockquoteContent>
+    self.level--;
+    <formatBlockquoteValue>
+    value = '.RS ' + (self.level ? 4 : 0) + '\n' + value + '\n.RE 0\n';
+    </formatBlockquoteValue>
+    return value;
+}
+</blockquoteFormat>
+
+<renderBilevelSunburstChart>
+function() {
+    var self = this;
+    <clearChartContainer>
+    $('#' + self.getId('chart')).html('');
+    </clearChartContainer>
+    <initializeBilevelSunburst>
+    $('#' + self.getId('chart')).bilevelSunburst(
+        { date: self.options.date }, 
+        self.treemapData
+    );
+    </initializeBilevelSunburst>
+}
+</renderBilevelSunburstChart>
+```
+
+These annotations identify distinct responsibilities within the provided JavaScript functions, thereby assessing their compliance or violation of the Single Responsibility Principle (SRP). Each annotated section is marked to show whether the functions contain multiple responsibilities or are compliant with SRP. Some functions were divided into annotations to highlight separate cohesive blocks that perform specific tasks, while others were not divided since they perform a single cohesive responsibility.

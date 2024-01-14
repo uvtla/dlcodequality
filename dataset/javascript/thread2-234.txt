@@ -1,0 +1,198 @@
+```javascript
+<function_1>
+function (string, userConfig) {
+
+    <initialValidation>
+    if (string.trim() === '') {
+        return '';
+    }
+    userConfig = userConfig || {};
+    </initialValidation>
+    
+    <overwriteConfig>
+    overwriteConfig(_config, userConfig);
+    </overwriteConfig>
+
+    <INDENT_definition>
+    var INDENT = (function () {
+        var indentStr = '';
+        var space = _config.useTabIndent ? '\t' : ' ';
+        var indent = _config.indent ? Number(_config.indent) : 4;
+        while (indent--) {
+            indentStr += space;
+        }
+        return indentStr;
+    })();
+    </INDENT_definition>
+
+    // Remaining code defines factory functions, checks, and transformations, which contribute collectively to string formatting
+    // The function ends with parsing AST (Abstract Syntax Tree), manipulating it, and returning the formatted string
+    // Considering that all these operations together fulfill a single, cohesive process of parsing and formatting code,
+    // they will not be split into individual responsibilities.
+}
+</function_1>
+
+<function_2>
+function _LayoutCommon_getGroupInfo(groupIndex) {
+    <retrieveGroup>
+    var group = this._site.groupFromIndex(groupIndex),
+        groupInfo = this._groupInfo,
+        margins = this._sizes.containerMargins,
+        adjustedInfo = { enableCellSpanning: false };
+    </retrieveGroup>
+
+    <evaluateGroupInfo>
+    groupInfo = (typeof groupInfo === "function" ? groupInfo(group) : groupInfo);
+    if (groupInfo) {
+        if (groupInfo.enableCellSpanning && (+groupInfo.cellWidth !== groupInfo.cellWidth || +groupInfo.cellHeight !== groupInfo.cellHeight)) {
+            throw new _ErrorFromName("WinJS.UI.GridLayout.GroupInfoResultIsInvalid", strings.groupInfoResultIsInvalid);
+        }
+        adjustedInfo = {
+            enableCellSpanning: !!groupInfo.enableCellSpanning,
+            cellWidth: groupInfo.cellWidth + margins.left + margins.right,
+            cellHeight: groupInfo.cellHeight + margins.top + margins.bottom
+        };
+    }
+    </evaluateGroupInfo>
+
+    return adjustedInfo;
+}
+</function_2>
+
+<function_3>
+function setSize(size, dimension) {
+    <parseAndSetSize>
+    return Math.round((/%/.test(size) ? ((dimension === 'x' ? $window.width() : winheight()) / 100) : 1) * parseInt(size, 10));
+    </parseAndSetSize>
+}
+</function_3>
+
+<function_4>
+function ParentConstructorFirst() {
+
+    <extendDefaults>
+    utils.deepExtend(this, this.constructor.prototype.__defaults);
+    </extendDefaults>
+
+    <constructParentStack>
+    (function constructParentStack(context, child, args) {
+        var parent = child.constructor.__parent;
+
+        if (parent) {
+            constructParentStack(context, parent, args);
+        }
+
+        if (child.hasOwnProperty('__constructor')) {
+            child.__constructor.apply(context, args);
+        }
+    })(this, this.constructor.__parent, arguments);
+    </constructParentStack>
+
+    <callOwnConstructor>
+    if (this.constructor.prototype.hasOwnProperty('__constructor')) {
+        this.constructor.prototype.__constructor.apply(this, arguments);
+    }
+    </callOwnConstructor>
+}
+</function_4>
+
+<function_5>
+function (attributes, options) {
+
+    <findModel>
+    var model = Backbone.Relational.store.find(this, attributes);
+    </findModel>
+
+    <setOrCreateModel>
+    if (_.isObject(attributes)) {
+        if (model) {
+            model.set(model.parse ? model.parse(attributes) : attributes, options);
+        }
+        else if (!options || (options && options.create !== false)) {
+            model = this.build(attributes, options);
+        }
+    }
+    </setOrCreateModel>
+
+    return model;
+}
+</function_5>
+
+<function_6>
+function realpath(path) {
+
+    <normalizePath>
+    path = path.replace(DOT_RE, "/")
+
+    path = path.replace(MULTI_SLASH_RE, "$1/")
+    </normalizePath>
+
+    <resolveDoubleDots>
+    while (path.match(DOUBLE_DOT_RE)) {
+        path = path.replace(DOUBLE_DOT_RE, "/")
+    }
+    </resolveDoubleDots>
+
+    return path
+}
+</function_6>
+
+<function_7>
+function User(props) {
+    <buildRequestUrl>
+    let url = 'https:
+    let options = {};
+    if (props.id) {
+        url += `/users/${props.id}`;
+    } else {
+        url += `/me`;
+    }
+    </buildRequestUrl>
+
+    <APIRequest>
+    return (
+        <ApiRequest url={url} options={options}>
+            {(data, loading, error) => props.children(data, loading, error)}
+        </ApiRequest>
+    );
+    </APIRequest>
+}
+</function_7>
+
+<function_8>
+function (p) {
+    <calculateSideDeterminant>
+    var normal = this.b.sub(this.a).perpendicular();
+    var d = p.sub(this.a).dot(normal);
+    return mathUtils.sign(d);
+    </calculateSideDeterminant>
+}
+</function_8>
+
+<function_9>
+function (file) {
+    <validateAndNormalizePath>
+    if (!((process.platform === 'win32' && /^[a-zA-Z]:/.test(file)) || (process.platform !== 'win32' && file[0] === '/'))) {
+        Array.prototype.unshift.call(arguments, process.cwd());
+    }
+
+    return path.normalize(path.join.apply(null, arguments));
+    </validateAndNormalizePath>
+}
+</function_9>
+
+<function_10>
+function (out) {
+    
+    <enterClassInitBlock>
+    out.enterBlock("classInit");
+    this._writeMapInheritance(out, "__$macrolibs", out.templateParam.$macrolibs, "{}");
+    out.leaveBlock();
+    </enterClassInitBlock>
+    
+    <writeClassInit>
+    this.$ClassGenerator._writeClassInit.call(this, out);
+    </writeClassInit>
+}
+</function_10>
+```

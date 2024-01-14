@@ -1,0 +1,200 @@
+```javascript
+<storeResponse>
+function storeResponse(message, id, dest) {
+  var response = {
+    message: message,
+    timeout: setTimeout(function() {
+      responses.remove(id, dest);
+    },
+    response_timeout)
+  };
+  responses.set(response, id, dest);
+}
+</storeResponse>
+
+<sortData>
+function sortData(data, columnId, sortDirection, columns) {
+  var column = getColumnById(columns, columnId);
+  
+  if (!column) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('No column found by ID', columnId, columns);
+    }
+    return data;
+  }
+  
+  <determineSortType>
+  var sortType = column.sortType == null ? column.type : column.sortType;
+  </determineSortType>
+
+  <getComparatorAndInitialData>
+  var comparator = getSortComparator(sortType);
+  var dataToSort = data.map(function (rowData, index) {
+    return {
+      rowData: rowData,
+      index: index,
+      sortValue: getSortValue(column, rowData, index, data, columns)
+    };
+  });
+  </getComparatorAndInitialData>
+
+  <performSorting>
+  var sortedData = void 0;
+  if (alreadySorted(!sortDirection, dataToSort, comparator)) {
+    sortedData = dataToSort.reverse();
+  } else {
+    sortedData = (0, _stable2.default)(dataToSort, comparator);
+    if (sortDirection === _SortDirection2.default.Descending) {
+      sortedData.reverse();
+    }
+  }
+  </performSorting>
+
+  <postProcessSortedData>
+  sortedData = sortedData.map(function (sortItem) {
+    return sortItem.rowData;
+  });
+  </postProcessSortedData>
+
+  return sortedData;
+}
+</sortData>
+
+<atom>
+function atom(value, options) {
+  if(isList(value) || (!isPrimitive(value) && value.__isatom)) {
+    return value;
+  }
+  if(!options && value && isToken(value)) {
+    options = {token: value};
+    value = value.text;
+  }
+  options = options || {};
+  var atomized = {};
+  if(options.token) {
+    options.token.category = options.category || options.token.category;
+    utils.mergeInto(atomized, options.token);
+    if(options.tokenType === "end") {
+      <simplifyTokenType>
+      atomized.line = options.token.endLine;
+      atomized.col = options.token.endCol;
+      delete atomized.endLine;
+      delete atomized.endCol;
+      </simplifyTokenType>
+    }
+  }
+  <setDefaultAtomProperties>
+  atomized.value = value;
+  atomized.parent = options.parent;
+  atomized.toString = function() { return toString(atomized); };
+  atomized.toQuotedString = function() { return addQuotes(toString(atomized)); };
+  atomized.toUnquotedString = function() { return stripQuotes(toString(atomized)); };
+  atomized.toJSON = function() { return toJSON(atomized); };
+  atomized.error = function(msg, locator) {
+    lexerOf(atomized).error(msg, locator || atomized);
+  };
+  atomized.transform = options.transform;
+  atomized.__isatom = true;
+  </setDefaultAtomProperties>
+  return atomized;
+}
+</atom>
+
+<calculateCartesianProduct>
+function calculateCartesianProduct(keyRangeSets) {
+  goog.asserts.assert(
+      keyRangeSets.length > 1,
+      'Should only be called for cross-column indices.'
+  );
+  var keyRangeSetsAsArrays = keyRangeSets.map(
+      function(keyRangeSet) {
+        return keyRangeSet.getValues();
+      }
+  );
+  var it = goog.iter.product.apply(null, keyRangeSetsAsArrays);
+  var combinations = [];
+  goog.iter.forEach(it, function(value) {
+    combinations.push(value);
+  });
+  return combinations;
+}
+</calculateCartesianProduct>
+
+<transformV1Request>
+function (requestV1, collectionId, skipResponses) {
+  // the function's code has been omitted for brevity
+}
+</transformV1Request>
+
+<applyStyle>
+function (node, selText, cssText) {
+  if(!cssText) return
+  var parent = getParent(node);
+  var parentRule = node.parentRule;
+  <applyOrRemoveCSSRule>
+  if (validParent(node))
+    return node.omRule = addCSSRule(parent, selText, cssText, node)
+  else if (parentRule) {
+    if (parentRule.mediaEnabled) {
+      [].concat(node.omRule).forEach(removeOneRule);
+      return node.omRule = addCSSRule(parent, selText, cssText, node)
+    } else if (node.omRule) {
+      node.omRule.forEach(removeOneRule);
+      delete node.omRule;
+    }
+  }
+  </applyOrRemoveCSSRule>
+}
+</applyStyle>
+
+<checkDep>
+function (deps, dep, ext) {
+  if (deps.indexOf(dep + ext) !== -1) {
+    return {
+      isPublicDeps : true,
+      dep : dep
+    };
+  }else {
+    return {
+      isPublicDeps : false,
+      dep : null
+    };
+  }
+}
+</checkDep>
+
+<vectorLengthsAreEqual>
+function vectorLengthsAreEqual (x, y, eps) {
+  return isZero(x.length() - y.length(), eps);
+}
+</vectorLengthsAreEqual>
+
+<checkColumnTemplate>
+function checkColumnTemplate(fnDoCheck, oScope, sType) {
+  var aTables = SupportHelper.find(oScope, true, "sap.ui.table.Table");
+  var aColumns, oTemplate;
+  for (var i = 0; i < aTables.length; i++) {
+    aColumns = aTables[i].getColumns();
+    for (var k = 0; k < aColumns.length; k++) {
+      oTemplate = aColumns[k].getTemplate();
+      if (oTemplate && oTemplate.isA(sType)) {
+        fnDoCheck(aTables[i], aColumns[k], oTemplate);
+      }
+    }
+  }
+}
+</checkColumnTemplate>
+
+<serializeToXML>
+function(o) {
+  if(!XML || !YAHOO.lang.isFunction(XML.ObjTree)) {
+    alert("ObjTree.js not loaded.");
+    return null;
+  }
+  var xotree = new XML.ObjTree();
+  return xotree.writeXML(o);
+}
+</serializeToXML>
+```
+
+For several cases, I've provided the overarching SRP annotation, like `<storeResponse>`, `<atom>`, and `<checkColumnTemplate>`, which captures their core functionalities. For others, more detailed annotations, like `<applyOrRemoveCSSRule>`, highlight specific responsibilities within a function.

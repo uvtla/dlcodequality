@@ -1,0 +1,285 @@
+```javascript
+<proxyProperty>
+function proxyProperty(name) {
+  self.__defineGetter__(name, function(){
+    return self._native[name];
+  });
+  self.__defineSetter__(name, function(val){
+    self._native[name] = val;
+  });
+}
+</proxyProperty>
+
+<fixempty>
+function fixempty(str, limit) {
+  var i,
+      n = limit - str.length;
+  <handleNegativePadding>
+  if (n < 0) {
+      n = 0;
+  }
+  </handleNegativePadding>
+  return str + function () {
+      var _i,
+          _results = [];
+      for (i = _i = 0; 0 <= n ? _i <= n : _i >= n; i = 0 <= n ? ++_i : --_i) {
+          _results.push(" ");
+      }
+      return _results;
+  }().join('');
+}
+</fixempty>
+
+<generateEvents>
+function generateEvents(boxes) {
+	var events = new Array();
+	var event = new Object();
+	
+	for (i = 0; i < boxes.length; i++) {  
+		var leftx = Math.min(boxes[i][0][0], boxes[i][1][0]);
+		var rightx = Math.max(boxes[i][0][0], boxes[i][1][0]);
+		
+		event = new Object();
+		event.x = leftx;
+		event.type = "add";
+		event.index = i;
+		events.unshift(event);
+		
+		event = new Object();
+		event.x = rightx;
+		event.type = "remove";
+		event.index = i;
+		events.push(event);
+	}
+	return events;
+}
+</generateEvents>
+
+<makeDirTree>
+async function makeDirTree() {
+    console.log('Creating Directory Tree ...');
+    let dirTree = {},
+        dirs = [],
+        relative = '';
+    AllFiles = {};
+    idx = 0;
+    id = 0;
+
+    dirs.push({ name: 'root', type: 'dir', path: `.`, files: {} });
+    dirTree['root'] = { name: 'root', type: 'dir', path: `.`, files: {} };
+    return new Promise(async(res, rej) => {
+        console.log('Reading files ...');
+        while (dirs.length > 0) {
+            let activeDir = dirs.shift(),
+                files = await walkTree(activeDir.path);
+            if (files.length > 0) {
+                for (const i of files) {
+                    let name = i.type === 'dir' ? i.name : idx++;
+                    if (i.type === 'dir' && !i.path.match(/node_modules|.git|bower/)) {
+                        dirs.push(i);
+                    }
+                    activeDir.files[name] = i;
+                }
+            }
+            dirTree[activeDir.name] = activeDir;
+        }
+        dirTree = dirTree.root;
+        res([dirTree, AllFiles]);
+    })
+}
+</makeDirTree>
+
+<purgeCache>
+function purgeCache(moduleName) {
+  return searchAndProcessCache(moduleName, function (mod) {
+    delete require.cache[mod.id];
+  })
+  .then(() => {
+    _.forEach(_.keys(module.constructor._pathCache), function(cacheKey) {
+      if (cacheKey.indexOf(moduleName)>0) {
+        delete module.constructor._pathCache[cacheKey];
+      }
+    });
+    return BbPromise.resolve();
+  });
+}
+</purgeCache>
+
+<undefinedFunctionName>
+function(tablename, context, definer) {
+  <initialSetup>
+	var me = {};
+	var db = common.config.database;
+
+	me.act = new NobleMachine(); 
+
+	var needsTableCreation = (context == 'create');
+  </initialSetup>
+
+	function nextQuery(query) {
+		me.act.next(db.query(query));
+	}
+
+	var definitions = {
+		add_column: function(name, type, options) {
+			var col = { name: name, type: type };
+			_.extend(col, options);
+			
+			<conditionalTableCreation>
+			if (needsTableCreation) {
+				nextQuery("CREATE TABLE `" + tablename + "` ( " + columnToSQL(col) + " ) ENGINE=INNODB;");
+				needsTableCreation = false;
+			} else {
+				nextQuery("ALTER TABLE `" + tablename + "` ADD " + columnToSQL(col) + ";");
+			}
+			</conditionalTableCreation>
+		},
+
+		timestamps: function(options) {
+			this.column('createdAt', 'datetime', options);
+			this.column('updatedAt', 'datetime', options);
+		}
+	};
+
+	definitions.column = definitions.add_column;
+	
+	if (context == 'alter') {
+		_.extend(definitions, {
+			change_column: function(name, type, options) {
+				var col = { name: name, type: type };
+				_.extend(col, options);
+
+				nextQuery("ALTER TABLE `" + tablename + "` MODIFY " + columnToSQL(col) + ";");
+			},
+
+			remove_column: function(name) {
+				nextQuery("ALTER TABLE `" + tablename + "` DROP COLUMN `" + name + "`;");
+			},
+
+			rename_column: function(name, newname) {
+				var act = new NobleMachine(function() {
+					act.toNext(db.query("SHOW COLUMNS FROM `" + tablename + "`;"));
+				});
+
+				act.next(function(result) {
+					var sql = "ALTER TABLE `" + tablename + "` CHANGE `" + name + "` `" + newname + "`";
+
+					result.forEach(function(coldatum) {
+						if (coldatum['Field'] == name) {
+							sql += " " + coldatum['Type'];
+							
+							if (coldatum['Null'] == 'NO') {
+								sql += " NOT NULL";
+							}
+
+							if (coldatum['Key'] == 'PRI') {
+								sql += " PRIMARY KEY";
+							}
+
+							sql += coldatum['Extra'];
+
+							if (coldatum['Default'] != 'NULL') {
+								sql += " DEFAULT " + coldatum['Default'];
+							}
+						}
+					});
+					sql += ";";
+
+					act.toNext(db.query(sql));
+				});
+
+				me.act.next(act);
+			},
+		});
+	}
+
+	var types = ['primary_key', 'string', 'text', 'integer', 'boolean', 'datetime', 'timestamp']
+	types.forEach(function(type) {
+		definitions[type] = function() {
+			var options = {}; defs = this;
+
+			var args = Array.prototype.slice.call(arguments);
+
+			args.forEach(function(arg) {
+				if (typeof arg == "object") {
+					_.extend(options, arg);
+				} 
+			});
+
+			args.forEach(function(arg) {
+				if (typeof arg == "string") {
+					defs.column(arg, type, options);
+				}
+			});
+		}
+	});
+
+	definer(definitions);
+
+	return me;
+}
+</undefinedFunctionName>
+
+<evaluateValueCondition>
+function(d, val) {
+    return later.wm.val(d) === (val || later.wm.extent(d)[1]);
+}
+</evaluateValueCondition>
+
+<getWitnessesFromHub>
+function getWitnessesFromHub(cb){
+	console.log('getWitnessesFromHub');
+	if (!my_device_hub){
+		console.log('getWitnessesFromHub: no hub yet');
+		<handleMissingHub>
+		return setTimeout(function(){
+			getWitnessesFromHub(cb);
+		}, 2000);
+		</handleMissingHub>
+	}
+	network.findOutboundPeerOrConnect(conf.WS_PROTOCOL+my_device_hub, function(err, ws){
+		if (err)
+			return cb(err);
+		network.sendRequest(ws, 'get_witnesses', null, false, function(ws, request, response){
+			if (response.error)
+				return cb(response.error);
+			var arrWitnessesFromHub = response;
+			cb(null, arrWitnessesFromHub);
+		});
+	});
+}
+</getWitnessesFromHub>
+
+<appendCacheHeaders>
+function appendCacheHeaders (headers, cacheTimeInSeconds) {
+	headers['Cache-Control'] = (cacheTimeInSeconds > 1 ? 'private, max-age=' + cacheTimeInSeconds : 'no-cache, no-store, must-revalidate');
+	headers.Expires = (cacheTimeInSeconds > 1 ? (new Date(Date.now() + (cacheTimeInSeconds * 1000))).toUTCString() : '0');
+
+	<addNoCacheHeaders>
+	if (cacheTimeInSeconds < 1) {
+		headers.Pragma = 'no-cache';
+	}
+	</addNoCacheHeaders>
+
+	return headers;
+}
+</appendCacheHeaders>
+
+<UserAgent>
+function UserAgent(userAgent, options) { 
+  <disableCacheCheck>
+  if (UserAgent["DISABLE_CACHE"]) {
+    return UserAgent_parse(userAgent, options || {});
+  }
+  </disableCacheCheck>
+  <cacheInitialization>
+  if (!UserAgent["cache"]) {
+    UserAgent["cache"] = UserAgent_parse(userAgent, options || {});
+  }
+  </cacheInitialization>
+  return UserAgent["cache"];
+}
+</UserAgent>
+```
+
+All the functions provided have been annotated according to SRP. Some functions are compliant as they perform a single responsibility within the provided context, while others have been annotated to highlight distinct responsibilities that could potentially violate SRP depending on the overarching context and design intentions. Please note that in some cases, the function name is not provided or clear, so I've used a placeholder tag like `<undefinedFunctionName>` for clarity in annotations.

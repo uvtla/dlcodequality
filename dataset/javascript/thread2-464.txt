@@ -1,0 +1,272 @@
+```javascript
+<getValueText>
+function getValueText(data) {
+    let value = data[valueLabel];
+    let valueText;
+
+    if (data.missingValue) {
+        valueText = '-';
+    } else {
+        <getFormattedValueToString>
+        valueText = getFormattedValue(value).toString();
+        </getFormattedValueToString>
+    }
+
+    return valueText;
+}
+</getValueText>
+
+<svgnode2contours>
+function svgnode2contours(xmlNodes) {
+    var i;
+    var length;
+    var j;
+    var jlength;
+    var segment;
+    var parsedSegments = [];
+
+    <parseXmlNodes>
+    if (xmlNodes.length) {
+        for (i = 0, length = xmlNodes.length; i < length; i++) {
+            var node = xmlNodes[i];
+            var name = node.tagName;
+            if (support[name]) {
+                var supportParams = support[name].params;
+                var params = [];
+                for (j = 0, jlength = supportParams.length; j < jlength; j++) {
+                    params.push(node.getAttribute(supportParams[j]));
+                }
+
+                segment = {
+                    name: name,
+                    params: params,
+                    transform: parseTransform(node.getAttribute('transform'))
+                };
+
+                if (node.parentNode) {
+                    var curNode = node.parentNode;
+                    var transforms = segment.transform || [];
+                    var transAttr;
+                    var iterator = function (t) {
+                        transforms.unshift(t);
+                    };
+                    while (curNode !== null && curNode.tagName !== 'svg') {
+                        transAttr = curNode.getAttribute('transform');
+                        if (transAttr) {
+                            parseTransform(transAttr).reverse().forEach(iterator);
+                        }
+                        curNode = curNode.parentNode;
+                    }
+
+                    segment.transform = transforms.length ? transforms : null;
+                }
+                parsedSegments.push(segment);
+            }
+        }
+    }
+    </parseXmlNodes>
+
+    <generateContours>
+    if (parsedSegments.length) {
+        var result = [];
+        for (i = 0, length = parsedSegments.length; i < length; i++) {
+            segment = parsedSegments[i];
+            var parser = support[segment.name];
+            var contour = parser.parse.apply(null, segment.params);
+            if (contour && contour.length) {
+                var contours = parser.contours ? contour : [contour];
+
+                if (segment.transform) {
+                    contours = contoursTransform(contours, segment.transform);
+                }
+
+                for (j = 0, jlength = contours.length; j < jlength; j++) {
+                    result.push(contours[j]);
+                }
+            }
+        }
+        return result;
+    }
+    </generateContours>
+
+    return false;
+}
+</svgnode2contours>
+
+<max>
+function max(x) {
+    var value;
+    <findMaxValue>
+    for (var i = 0; i < x.length; i++) {
+        if (x[i] > value || value === undefined) value = x[i];
+    }
+    </findMaxValue>
+    return value;
+}
+</max>
+
+<PlainOverlay>
+function PlainOverlay(target, options) {
+    _classCallCheck(this, PlainOverlay);
+
+    <getTarget>
+    function getTarget(target) {
+        // ... Code that processes the target ...
+    }
+    </getTarget>
+
+    <initProps>
+    var props = {
+        // ... Code that initializes properties ...
+    };
+    </initProps>
+
+    <processOptions>
+    if (arguments.length === 1) {
+        // ... Code that processes the options if there's only one argument ...
+    } else {
+        // ... Code that processes the options if there are multiple arguments ...
+    }
+    if (!options) {
+        // ... Code that assigns default options if none provided ...
+    }
+    </processOptions>
+
+    <handleDOMStructure>
+    // ... Code that sets up the DOM structure and styles for the overlay ...
+    </handleDOMStructure>
+
+    <defineTransition>
+    // ... Code that defines transitions for the overlay ...
+    </defineTransition>
+
+    <addEventListeners>
+    // ... Code that adds various event listeners ...
+    </addEventListeners>
+
+    <handleResize>
+    // ... Code that handles resize events ...
+    </handleResize>
+
+    <initOptions>
+    if (!options.hasOwnProperty('face')) {
+        options.face = null;
+    }
+
+    _setOptions(props, options);
+    </initOptions>
+}
+</PlainOverlay>
+
+<handleWheelEvent>
+function (WheelEvent) {
+    var PinsElement = document.getElementById('PinControl-Pins');
+    if (WheelEvent.deltaY) {
+        PinsElement.scrollTop = PinsElement.scrollTop + WheelEvent.deltaY * 10;
+    }
+    WheelEvent.stopPropagation();
+}
+</handleWheelEvent>
+
+<createRecordConfiguration>
+function (attributes, record) {
+    var configuration = {};
+    configuration.name = attributes.values.name || attributes.values.Name || attributes.values.NAME;
+
+    <checkPointType>
+    if (record.isPointType()) {
+        // ... Code configuring point type entities ...
+    }
+    </checkPointType>
+
+    <checkPolygonType>
+    else if (record.isPolygonType()) {
+        // ... Code configuring polygon type entities ...
+    }
+    </checkPolygonType>
+
+    return configuration;
+}
+</createRecordConfiguration>
+
+<TouchHandlerValidation>
+function (e) {
+    var allow = true;
+
+    <preventDefaultOnTouch>
+    if (
+      TouchHandler.touches &&
+      [
+        'mousedown',
+        'mouseup',
+        'mousemove',
+        'click',
+        'mouseover',
+        'mouseout',
+        'mouseenter',
+        'mouseleave',
+      ].indexOf(e.type) > -1
+    ) {
+        allow = false;
+    }
+    </preventDefaultOnTouch>
+
+    return allow;
+}
+</TouchHandlerValidation>
+
+<getBundleIdentifier>
+function getBundleIdentifier(projectObject) {
+    <processPackageName>
+    var packageName = projectObject.getPackageName();
+    var bundleIdentifier = packageName;
+
+    var variables = packageName.match(/\$\((\w+)\)/);
+    if (variables && variables.length >= 2) {
+        bundleIdentifier = projectObject.xcode.getBuildProperty(variables[1]);
+    }
+    </processPackageName>
+
+    return bundleIdentifier;
+}
+</getBundleIdentifier>
+
+<makeErr>
+function makeErr(linter, result, context = {}) {
+    <checkErrorStatus>
+    context.hasErrors = true
+    const { stdout, stderr, killed, signal } = result
+    if (killed || (signal && signal !== '')) {
+        return throwError(
+            `${symbols.warning} ${chalk.yellow(`${linter} was terminated with ${signal}`)}`
+        )
+    }
+    return throwError(dedent`${symbols.error} ${chalk.redBright(
+        `${linter} found some errors. Please fix them and try committing again.`
+    )}
+    ${stdout}
+    ${stderr}
+    `)
+    </checkErrorStatus>
+}
+</makeErr>
+
+<getAdditionalParams>
+function getAdditionalParams() {
+    <buildReturnValues>
+    var retval = {};
+    var installDir = FileUtils.getNativeBracketsDirectoryPath();
+
+    if (installDir) {
+        // ... Code that determines the app path and name ...
+        retval = {
+            installDir: installDir,
+            appName: appName,
+            updateDir: updateDir
+        };
+    }
+    </buildReturnValues>
+    return retval;
+}
+</getAdditionalParams>
+```

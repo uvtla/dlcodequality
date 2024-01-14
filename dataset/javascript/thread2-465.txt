@@ -1,0 +1,191 @@
+```javascript
+<removeRootIds>
+function(rootNode){
+  var arr,
+    i;
+
+  arr = modules.domUtils.getNodesByAttribute(rootNode, 'rootids');
+  i = arr.length;
+  while(i--) {
+    modules.domUtils.removeAttribute(arr[i],'rootids');
+  }
+}
+</removeRootIds>
+
+<generateLowerTriangularMatrix>
+function tril(A, k) {
+  <validateMatrix>
+  if (k === void 0) { k = 0; }
+  if (A.shape.length !== 2) {
+    throw new Error('Input is not matrix');
+  }
+  </validateMatrix>
+  
+  <cloneAndZeroElements>
+  var copyA = A.clone();
+  for (var i = 0; i < copyA.shape[0]; i++) {
+    for (var j = 0; j < copyA.shape[1]; j++) {
+      if (i < j - k) {
+        copyA.set(i, j, 0);
+      }
+    }
+  }
+  </cloneAndZeroElements>
+  
+  return copyA;
+}
+</generateLowerTriangularMatrix>
+
+<updatePositioningAndClasses>
+function (leftFlushPt, rightFlushPt) {
+  <initializePositioning>
+  if (!this.initHorizontalPositioning()) {
+    return false;
+  }
+
+  var clientRect = this.getBoundingRect(this.node);
+  var innerHeight = this.getViewHeight();
+  </initializePositioning>
+  
+  <applyVerticalPositioningAndClasses>
+  if (this.floating){
+    <floatingHigh>
+    if (this.activatorOffset.top < (innerHeight/2)){
+      this.applyPosition({top: this.activatorOffset.top + this.activatorOffset.height/2});
+      this.addRemoveClass('high', true);
+    }
+    </floatingHigh>
+    <floatingLow>
+    else {
+      this.applyPosition({top:this.activatorOffset.top + this.activatorOffset.height/2 - clientRect.height});
+      this.addRemoveClass('low', true);
+    }
+    </floatingLow>
+  } else {
+    <nonFloatingAdjustment>
+    if (((clientRect.top + clientRect.height) > innerHeight) && ((innerHeight - clientRect.bottom) < (clientRect.top - clientRect.height))) {
+      this.applyPosition({top: clientRect.top - clientRect.height - this.activatorOffset.top - this.activatorOffset.height/2});
+      this.addRemoveClass('low', true);
+    }
+    </nonFloatingAdjustment>
+    <nonFloatingDefault>
+    else {
+      this.applyPosition({top: this.activatorOffset.height/2});
+      this.addRemoveClass('high', true);
+    }
+    </nonFloatingDefault>
+  }
+  </applyVerticalPositioningAndClasses>
+
+  <applyCornerClass>
+  if ((this.activatorOffset.left + this.activatorOffset.width) < leftFlushPt){
+    this.addClass('left');
+    this.addClass('corner');
+    return true;
+  }
+  </applyCornerClass>
+  <applyCornerClass>
+  else if (this.activatorOffset.left > rightFlushPt) {
+    this.addClass('right');
+    this.addClass('corner');
+    return true;
+  }
+  </applyCornerClass>
+
+  return false;
+}
+</updatePositioningAndClasses>
+
+<iterateStringCharacters>
+function string(obj, fn, ctx) {
+  for (var i = 0; i < obj.length; ++i) {
+    fn.call(ctx, obj.charAt(i), i);
+  }
+}
+</iterateStringCharacters>
+
+<isPlainObject>
+function isPlainObject(value) {
+  return t.binaryExpression(
+    "===",
+    toFunctionCall(t.identifier("String"), [value]),
+    t.stringLiteral("[object Object]")
+  );
+}
+</isPlainObject>
+
+<hasBlockElement>
+function(node) {
+  return (this.hasTagsInContent(node) && this.isBlock(node) 
+    || <determineIfChildIsBlock>
+    node.children.some(function(child) {
+      return this.isBlock(child);
+    }, this));
+    </determineIfChildIsBlock>
+}
+</hasBlockElement>
+
+<handleMouseMoveEvent>
+function mousemove(inEvent) {
+  <eventFilter>
+  if (!this.isEventSimulatedFromTouch_(inEvent)) {
+  </eventFilter>
+    <prepareAndDispatchEvent>
+    const e = prepareEvent(inEvent, this.dispatcher);
+    this.dispatcher.move(e, inEvent);
+    </prepareAndDispatchEvent>
+  }
+}
+</handleMouseMoveEvent>
+
+<exportTypeDeclaration>
+function exportType(name: string, type: BabelAST) {
+  return t.exportNamedDeclaration(
+    t.typeAlias(t.identifier(name), null, type),
+    [],
+    null,
+  );
+}
+</exportTypeDeclaration>
+
+<handleCharacterInput>
+function handlePlainCharacter(element, char) {
+  <updateTextPrefix>
+  const prefix = element[typedPrefixKey] || '';
+  element[typedPrefixKey] = prefix + char;
+  </updateTextPrefix>
+  
+  <selectItemWithPrefix>
+  element.selectItemWithTextPrefix(element[typedPrefixKey]);
+  </selectItemWithPrefix>
+
+  <triggerPrefixTimeout>
+  setPrefixTimeout(element);
+  </triggerPrefixTimeout>
+}
+</handleCharacterInput>
+
+<calculateAndApplyPhysics>
+function( body, view ){
+  <calculatePosition>
+  var pos = body.state.pos,
+    v = body.state.vel,
+    os = body.offset,
+    t = this._interpolateTime || 0,
+    x,
+    y,
+    ang;
+  </calculatePosition>
+
+  <applyPhysicsToView>
+  x = pos._[0] + v._[0] * t;
+  y = pos._[1] + v._[1] * t;
+  ang = body.state.angular.pos + body.state.angular.vel * t;
+
+  view.position.set( x, y );
+  view.pivot.set( -os._[0], -os._[1] );
+  view.rotation = ang;
+  </applyPhysicsToView>
+}
+</calculateAndApplyPhysics>
+```

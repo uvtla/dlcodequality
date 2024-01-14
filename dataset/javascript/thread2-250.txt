@@ -1,0 +1,573 @@
+<Compiler>
+function Compiler(handleImportCall) {
+  var self = this;
+  <initializeEventManager>
+  this.event = new EventManager();
+  </initializeEventManager>
+
+  <initializeProperties>
+  var compileJSON;
+  var worker = null;
+  var currentVersion;
+  var optimize = false;
+  var compilationStartTime = null;
+  </initializeProperties>
+
+  <setOptimize>
+  this.setOptimize = function (_optimize) {
+    optimize = _optimize;
+  };
+  </setOptimize>
+
+  <registerEventHandlers>
+  this.event.register('compilationFinished', (success, data, source) => {
+    if (success && compilationStartTime) {
+      this.event.trigger('compilationDuration', [(new Date().getTime()) - compilationStartTime]);
+    }
+    compilationStartTime = null;
+  });
+
+  this.event.register('compilationStarted', () => {
+    compilationStartTime = new Date().getTime();
+  });
+  </registerEventHandlers>
+
+  <internalCompile>
+  var internalCompile = function (files, target, missingInputs) {
+    gatherImports(files, target, missingInputs, function (error, input) {
+      if (error) {
+        self.lastCompilationResult = null;
+        self.event.trigger('compilationFinished', [false, { 'error': { formattedMessage: error, severity: 'error' } }, files]);
+      } else {
+        compileJSON(input, optimize ? 1 : 0);
+      }
+    });
+  };
+  </internalCompile>
+
+  <compileFunction>
+  var compile = function (files, target) {
+    self.event.trigger('compilationStarted', []);
+    internalCompile(files, target);
+  };
+  this.compile = compile;
+  </compileFunction>
+
+  <setCompileJSON>
+  function setCompileJSON(_compileJSON) {
+    compileJSON = _compileJSON;
+  }
+  this.setCompileJSON = setCompileJSON;
+  </setCompileJSON>
+
+  <onCompilerLoaded>
+  function onCompilerLoaded(version) {
+    currentVersion = version;
+    self.event.trigger('compilerLoaded', [version]);
+  }
+  </onCompilerLoaded>
+
+  <onInternalCompilerLoaded>
+  function onInternalCompilerLoaded() {
+    if (worker === null) {
+      var compiler;
+      var userAgent = (typeof (navigator) !== 'undefined') && navigator.userAgent ? navigator.userAgent.toLowerCase() : '-';
+      if (typeof (window) === 'undefined' || userAgent.indexOf(' electron/') > -1) {
+        compiler = require('@dexon-foundation/dsolc');
+      } else {
+        compiler = solc(window.Module);
+      }
+
+      <setCompileJSON>
+      compileJSON = function (source, optimize, cb) {
+        <compileAndProcessResult>
+        var missingInputs = [];
+        var missingInputsCallback = function (path) {
+          missingInputs.push(path);
+          return { error: 'Deferred import' };
+        };
+
+        var result;
+        try {
+          var input = compilerInput(source.sources, { optimize: optimize, target: source.target });
+          result = compiler.compile(input, missingInputsCallback);
+          result = JSON.parse(result);
+        } catch (exception) {
+          result = { error: { formattedMessage: 'Uncaught JavaScript exception:\n' + exception, severity: 'error', mode: 'panic' } };
+        }
+
+        compilationFinished(result, missingInputs, source);
+        </compileAndProcessResult>
+      };
+      </setCompileJSON>
+
+      onCompilerLoaded(compiler.version());
+    }
+  }
+  this.onInternalCompilerLoaded = onInternalCompilerLoaded;
+  </onInternalCompilerLoaded>
+
+  <initializeLastCompilationResult>
+  this.lastCompilationResult = {
+    data: null,
+    source: null
+  };
+  </initializeLastCompilationResult>
+
+  <contractInteractionMethods>
+  this.getContract = (name) => {
+    if (this.lastCompilationResult.data && this.lastCompilationResult.data.contracts) {
+      return txHelper.getContract(name, this.lastCompilationResult.data.contracts);
+    }
+    return null;
+  };
+
+  this.visitContracts = (cb) => {
+    if (this.lastCompilationResult.data && this.lastCompilationResult.data.contracts) {
+      return txHelper.visitContracts(this.lastCompilationResult.data.contracts, cb);
+    }
+    return null;
+  };
+
+  this.getContracts = () => {
+    if (this.lastCompilationResult.data && this.lastCompilationResult.data.contracts) {
+      return this.lastCompilationResult.data.contracts;
+    }
+    return null;
+  };
+
+  this.getSources = () => {
+    if (this.lastCompilationResult.source) {
+      return this.lastCompilationResult.source.sources;
+    }
+    return null;
+  };
+
+  this.getSource = (fileName) => {
+    if (this.lastCompilationResult.source) {
+      return this.lastCompilationResult.source.sources[fileName];
+    }
+    return null;
+  };
+
+  this.getSourceName = (index) => {
+    if (this.lastCompilationResult.data && this.lastCompilationResult.data.sources) {
+      return Object.keys(this.lastCompilationResult.data.sources)[index];
+    }
+    return null;
+  };
+  </contractInteractionMethods>
+
+  <compilationFinished>
+  function compilationFinished(data, missingInputs, source) {
+    <checkForFatalErrors>
+    var noFatalErrors = true;
+
+    function isValidError(error) {
+      if (/Deferred import/.exec(error.message)) {
+        return false;
+      }
+
+      return error.severity !== 'warning';
+    }
+
+    if (data['error'] !== undefined) {
+      if (isValidError(data['error'])) {
+        noFatalErrors = false;
+      }
+    }
+    if (data['errors'] !== undefined) {
+      data['errors'].forEach(function (err) {
+        if (isValidError(err)) {
+          noFatalErrors = false;
+        }
+      });
+    }
+    </checkForFatalErrors>
+
+    <finishCompilation>
+    if (!noFatalErrors) {
+      self.lastCompilationResult = null;
+      self.event.trigger('compilationFinished', [false, data, source]);
+    } else if (missingInputs !== undefined && missingInputs.length > 0) {
+      internalCompile(source.sources, source.target, missingInputs);
+    } else {
+      data = updateInterface(data);
+
+      self.lastCompilationResult = {
+        data: data,
+        source: source
+      };
+      self.event.trigger('compilationFinished', [true, data, source]);
+    }
+    </finishCompilation>
+  }
+  </compilationFinished>
+
+  <loadVersion>
+  this.loadVersion = function (usingWorker, url) {
+    console.log('Loading ' + url + ' ' + (usingWorker ? 'with worker' : 'without worker'));
+    self.event.trigger('loadingCompiler', [url, usingWorker]);
+
+    if (usingWorker) {
+      loadWorker(url);
+    } else {
+      loadInternal(url);
+    }
+  };
+  </loadVersion>
+
+  <loadInternal>
+  function loadInternal(url) {
+    delete window.Module;
+
+    window.Module = undefined;
+
+    setCompileJSON(function (source, optimize) {
+      compilationFinished({ error: { formattedMessage: 'Compiler not yet loaded.' } });
+    });
+
+    var newScript = document.createElement('script');
+    newScript.type = 'text/javascript';
+    newScript.src = url;
+    document.getElementsByTagName('head')[0].appendChild(newScript);
+    var check = window.setInterval(function () {
+      if (!window.Module) {
+        return;
+      }
+      window.clearInterval(check);
+      onInternalCompilerLoaded();
+    }, 200);
+  }
+  </loadInternal>
+
+  <loadWorker>
+  function loadWorker(url) {
+    if (worker !== null) {
+      worker.terminate();
+    }
+    worker = webworkify(require('./compiler-worker.js'));
+    var jobs = [];
+    worker.addEventListener('message', function (msg) {
+      var data = msg.data;
+      switch (data.cmd) {
+        case 'versionLoaded':
+          onCompilerLoaded(data.data);
+          break;
+        case 'compiled':
+          var result;
+          try {
+            result = JSON.parse(data.data);
+          } catch (exception) {
+            result = { 'error': 'Invalid JSON output from the compiler: ' + exception };
+          }
+          var sources = {};
+          if (data.job in jobs !== undefined) {
+            sources = jobs[data.job].sources;
+            delete jobs[data.job];
+          }
+          compilationFinished(result, data.missingInputs, sources);
+          break;
+      }
+    });
+    worker.onerror = function (msg) {
+      compilationFinished({ error: 'Worker error: ' + msg.data });
+    };
+    worker.addEventListener('error', function (msg) {
+      compilationFinished({ error: 'Worker error: ' + msg.data });
+    });
+    compileJSON = function (source, optimize) {
+      jobs.push({ sources: source });
+      worker.postMessage({ cmd: 'compile', job: jobs.length - 1, input: compilerInput(source.sources, { optimize: optimize, target: source.target }) });
+    };
+    worker.postMessage({ cmd: 'loadVersion', data: url });
+  }
+  </loadWorker>
+
+  <gatherImports>
+  function gatherImports(files, target, importHints, cb) {
+    importHints = importHints || [];
+
+    var importRegex = /^\s*import\s*[\'\"]([^\'\"]+)[\'\"];/g;
+
+    for (var fileName in files) {
+      var match;
+      while ((match = importRegex.exec(files[fileName].content))) {
+        var importFilePath = match[1];
+        if (importFilePath.startsWith('./')) {
+          var path = /(.*\/).*/.exec(fileName);
+          if (path !== null) {
+            importFilePath = importFilePath.replace('./', path[1]);
+          } else {
+            importFilePath = importFilePath.slice(2);
+          }
+        }
+
+        if (importHints.indexOf(importFilePath) === -1) {
+          importHints.push(importFilePath);
+        }
+      }
+    }
+
+    while (importHints.length > 0) {
+      var m = importHints.pop();
+      if (m in files) {
+        continue;
+      }
+
+      if (handleImportCall) {
+        handleImportCall(m, function (err, content) {
+          if (err) {
+            cb(err);
+          } else {
+            files[m] = { content };
+            gatherImports(files, target, importHints, cb);
+          }
+        });
+      }
+
+      return;
+    }
+
+    cb(null, { 'sources': files, 'target': target });
+  }
+  </gatherImports>
+
+  <truncateVersion>
+  function truncateVersion(version) {
+    var tmp = /^(\d+.\d+.\d+)/.exec(version);
+    if (tmp) {
+      return tmp[1];
+    }
+    return version;
+  }
+  </truncateVersion>
+
+  <updateInterface>
+  function updateInterface(data) {
+    txHelper.visitContracts(data.contracts, (contract) => {
+      data.contracts[contract.file][contract.name].abi = solcABI.update(truncateVersion(currentVersion), contract.object.abi);
+    });
+    return data;
+  }
+  </updateInterface>
+}
+</Compiler>
+
+<assignDeep>
+function (target, source) {
+  var assignDeep = target[canSymbol.for("can.assignDeep")];
+  if (assignDeep) {
+    assignDeep.call(target, source);
+  } else if (typeReflections.isMoreListLikeThanMapLike(source)) {
+    shapeReflections.assignDeepList(target, source);
+  } else {
+    shapeReflections.assignDeepMap(target, source);
+  }
+  return target;
+}
+</assignDeep>
+
+<update>
+function update(element, name, oldValue, newValue) {
+  if (!TRIGGER_LIFE_CYCLE_METHODS) {
+    return false;
+  }
+  element = DOM.getNodeComponent(element) || element;
+  if (element[DNA_SYMBOL]) {
+    let attrs = element.constructor.observedAttributes || [];
+    if (attrs.indexOf(name) !== -1) {
+      element[DOM.UPDATED].call(element, name, oldValue, newValue);
+      return true;
+    }
+  }
+  return false;
+}
+</update>
+
+<CruxAngularIndex>
+function CruxAngularIndex(config, name) {
+  Interface.apply(this, arguments);
+  this.name = name + ':index';
+
+  <modifyConfig>
+  this.config.output = this.config.output.replace('$module', this.config.module).replace('$environment', global['NODE_ENV']);
+  this.config.path = this.__fullPath(this.config.path);
+  </modifyConfig>
+}
+</CruxAngularIndex>
+
+<dispatch>
+function dispatch(provider, req, res, next, options, callback) {
+  
+  <strategyInitialization>
+  var baseStrategy = strategies[provider];
+  if (!baseStrategy) {
+    var cb = callback || next;
+    return cb(new Error(
+      'No strategy defined for provider \'' +
+      provider + '\''
+    ));
+  }
+
+  if (!callback && typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
+
+  var strategy = Object.create(baseStrategy);
+  </strategyInitialization>
+
+  <strategyMethods>
+  strategy.success = function (user, info) {
+    req.user = user;
+    if (callback) {
+      callback(null, user, info);
+    } else {
+      next();
+    }
+  };
+
+  strategy.fail = function (info, status) {
+    if (callback) {
+      callback(null, null, info);
+    } else {
+      setUserOnRequest(req, res, next);
+    }
+  };
+
+  strategy.pass = function () {
+    next();
+  };
+
+  strategy.error = function (err) {
+    if (callback) {
+      callback(err);
+    } else {
+      next(err);
+    }
+  };
+
+  strategy.redirect = function (url, status) {
+    res.redirect(status || 302, url);
+  };
+  </strategyMethods>
+
+  <strategyAuthenticate>
+  strategy.authenticate(req, options);
+  </strategyAuthenticate>
+}
+</dispatch>
+
+<getVariantTechnicalParameter>
+function (oComponent) {
+  <retrieveTechnicalParameters>
+  var aTechnicalParameters = flUtils.getTechnicalParametersForComponent(oComponent);
+  return aTechnicalParameters
+    && aTechnicalParameters[VariantUtil.variantTechnicalParameterName]
+    && Array.isArray(aTechnicalParameters[VariantUtil.variantTechnicalParameterName])
+    && aTechnicalParameters[VariantUtil.variantTechnicalParameterName][0];
+  </retrieveTechnicalParameters>
+}
+</getVariantTechnicalParameter>
+
+<ifTemplate>
+function (context, node, args, container) {
+  var xpr = args[0],
+    index = args[1],
+    templ = args[2],
+    val = xpr.__interpolable__ ? xpr.output(context) : xpr,
+    rest = new Template(templ._queue.slice(index)),
+    instance;
+  if (val)
+    rest.toDOM(node, context, container);
+  else if (xpr.__interpolable__)
+    instance = xpr.subscribeTo(context, function (value, type, path) {
+      if (value) {
+        instance.destroy();
+        rest.toDOM(node, context, container);
+      }
+    });
+}
+</ifTemplate>
+
+<LogStream>
+function LogStream(connection, id) {
+  Readable.call(this, {
+    objectMode: true
+  });
+
+  <initializeProperties>
+  this.connection = connection;
+  this.stopped = false;
+  this._id = id;
+  </initializeProperties>
+
+  <bindEventHandlers>
+  this._bindedOnlog = this._onlog.bind(this);
+  connection._peer.on('stream', this._bindedOnlog);
+  connection.once('close', this._stop.bind(this));
+  </bindEventHandlers>
+}
+</LogStream>
+
+<isPromiseRejectCall>
+function isPromiseRejectCall(node) {
+  <identifyPromiseReject>
+  return node.callee.type === "MemberExpression" &&
+    node.callee.object.type === "Identifier" && node.callee.object.name === "Promise" &&
+    node.callee.property.type === "Identifier" && node.callee.property.name === "reject";
+  </identifyPromiseReject>
+}
+</isPromiseRejectCall>
+
+<calculateElementPosition>
+function (elem, offsetParent) {
+  var offset, parentOffset;
+
+  if (window.jQuery) {
+    if (!offsetParent) {
+      return window.jQuery(elem).position();
+    }
+
+    offset = window.jQuery(elem).offset();
+    parentOffset = window.jQuery(offsetParent).offset();
+
+    
+    return {
+      top: offset.top - parentOffset.top,
+      left: offset.left - parentOffset.left
+    };
+  }
+
+  parentOffset = { top: 0, left: 0 };
+
+  
+  if (window.getComputedStyle(elem).position === 'fixed') {
+    
+    offset = elem.getBoundingClientRect();
+  }
+  else {
+    if (!offsetParent) {
+      
+      offsetParent = position.offsetParent(elem);
+    }
+
+    
+    offset = offsetFunc(elem);
+    if (offsetParent.nodeName !== 'HTML') {
+      parentOffset = offsetFunc(offsetParent);
+    }
+
+    
+    parentOffset.top += parseInt(window.getComputedStyle(offsetParent).borderTopWidth, 10);
+    parentOffset.left += parseInt(window.getComputedStyle(offsetParent).borderLeftWidth, 10);
+  }
+
+  
+  return {
+    top: offset.top - parentOffset.top - parseInt(window.getComputedStyle(elem).marginTop, 10),
+    left: offset.left - parentOffset.left - parseInt(window.getComputedStyle(elem).marginLeft, 10)
+  };
+}
+</calculateElementPosition>

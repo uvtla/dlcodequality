@@ -1,0 +1,230 @@
+```javascript
+<initializeOrUpdateRegions>
+function() {
+    <handleChangeIfClosed>
+    if (this.isClosed) {
+      this._initializeRegions();
+    }
+    </handleChangeIfClosed>
+    <handleFirstRender>
+    if (this._firstRender) {
+      this._firstRender = false;
+    } else if (!this.isClosed) {
+      this._reInitializeRegions();
+    }
+    </handleFirstRender>
+
+    var args = Array.prototype.slice.apply(arguments);
+    var result = Marionette.ItemView.prototype.render.apply(this, args);
+
+    return result;
+}
+</initializeOrUpdateRegions>
+
+<createRelationships>
+function createRelationships(rhapsodyApp) {
+    var relationshipModel, relationshipName, relationship, relatedModel;
+    this.relationships = this.relationships || {};
+    for(relationshipName in this.relationships) {
+        relationship = this.relationships[relationshipName];
+        <validateAndSetUpRelationships>
+        if(this.serverModel[relationship.type]) {
+            relatedModel = rhapsodyApp.requireModel(relationship['with']);
+            relationshipModel = rhapsodyApp.requireModel(relationship.through);
+            if(relatedModel) {
+                if(relationship.type === 'hasAndBelongsToMany') {
+                    this.serverModel.hasAndBelongsToMany(relationshipName, {
+                        model: relatedModel,
+                        through: relationshipModel
+                    });
+                }
+                else {
+                    this.serverModel[relationship.type](relatedModel, {
+                        as: relationshipName,
+                        foreignKey: relationship.foreignKey
+                    });
+                }
+            }
+            else {
+                utils.Logger.error('Relationship error', '"' + relationship['with'] + '" related with "' + this.name + '" does not exist.');
+            }
+        }
+        else {
+            utils.Logger.error('Relationship error', relationship.type + ' in "' + this.name + '" is not a valid relationship');
+        }
+        </validateAndSetUpRelationships>
+    }
+}
+</createRelationships>
+
+<clearPerformanceEntries>
+function clear (entry) {
+    var type = entry.entryType
+    <clearAppropriatePerformanceEntry>
+    if (type === 'measure') window.performance.clearMeasures(entry.name)
+    else if (type === 'resource') window.performance.clearResourceTimings()
+    </clearAppropriatePerformanceEntry>
+}
+</clearPerformanceEntries>
+
+<removeTableView>
+function() {
+    this.$('tfoot').remove();
+    this.$('tr.noRows').remove();
+    var rowView = null;
+    <cleanRowViews>
+    while(rowView = this.rowViews.pop()) {
+      rowView.unbind(null, null, this);
+      rowView.clean();
+    }
+    </cleanRowViews>
+    <resetRowViewsArray>
+    this.rowViews = [];
+    </resetRowViewsArray>
+}
+</removeTableView>
+
+<handleDoneOperation>
+function done(context, err, message) {
+    <handlePotentialFailure>
+    if (err) return fail(context, err);
+    </handlePotentialFailure>
+    <handleMessageIfProvided>
+    if (typeof message !== "undefined") shell.write(message);
+    </handleMessageIfProvided>
+    <endContext>
+    context.end();
+    </endContext>
+}
+</handleDoneOperation>
+
+<init>
+function Init(arg) {
+    <initializeArrayWithArguments>
+    array.push.apply(this, arg && (arg.nodeType || /^o/.test(typeof arg)) && !u.isArray(arg) && arg !== null ? [arg] : u.isArray(arg) ? arg : '' + arg === arg ? u.isHtml(arg) ? u.toHtml(arg) : document.querySelectorAll(arg) : undefined);
+    </initializeArrayWithArguments>
+}
+</init>
+
+<addFilterCondition>
+function(sPropertyName, aValues) {
+    <findPropertyByName>
+    var oProperty = this._oEntityType.findPropertyByName(sPropertyName);
+    </findPropertyByName>
+    <checkPropertyValidity>
+    if (oProperty == null) {
+        throw "Cannot add filter condition for unknown property name " + sPropertyName; 
+    }
+    var aFilterablePropertyNames = this._oEntityType.getFilterablePropertyNames();
+    if (((aFilterablePropertyNames ? Array.prototype.indexOf.call(aFilterablePropertyNames, sPropertyName) : -1)) === -1) {
+        throw "Cannot add filter condition for not filterable property name " + sPropertyName; 
+    }
+    </checkPropertyValidity>
+    <createFilterConditions>
+    for (var i = -1, oValue; (oValue = aValues[++i]) !== undefined;) {
+        this._addCondition(sPropertyName, FilterOperator.EQ, oValue);
+    }
+    </createFilterConditions>
+    return this;
+}
+</addFilterCondition>
+
+<pieceParserFunctionFactory>
+function pieceParser (eq, unesc) {
+  return <parsePiece>
+  function parsePiece (key, val) {
+    
+    <processKeyValueForParsing>
+    if (arguments.length !== 2) {
+      
+      key = key.split(eq);
+      return parsePiece(
+        unesc(key.shift()),
+        unesc(key.join(eq))
+      );
+    }
+    </processKeyValueForParsing>
+    <trimKeyAndValue>
+    key = key.replace(/^\s+|\s+$/g, '');
+    if (braintree_util.isString(val)) {
+      val = val.replace(/^\s+|\s+$/g, '');
+      
+      <convertStringNumberToNumber>
+      if (!isNaN(val)) {
+        var numVal = +val;
+        if (val === numVal.toString(10)) val = numVal;
+      }
+      </convertStringNumberToNumber>
+    }
+    </trimKeyAndValue>
+    
+    <sliceKeyForBrackets>
+    var sliced = /(.*)\[([^\]]*)\]$/.exec(key);
+    </sliceKeyForBrackets>
+    <handleSlicedKey>
+    if (!sliced) {
+      var ret = {};
+      if (key) ret[key] = val;
+      return ret;
+    }
+    
+    var tail = sliced[2], head = sliced[1];
+    </handleSlicedKey>
+    
+    <handleEmptyTail>
+    if (!tail) return parsePiece(head, [val]);
+    </handleEmptyTail>
+    
+    <buildReturnObject>
+    var ret = {};
+    ret[tail] = val;
+    return parsePiece(head, ret);
+    </buildReturnObject>
+  };
+  </parsePiece>
+}
+</pieceParserFunctionFactory>
+
+<handleVirtualListScroll>
+function(e) {
+  var self = this;
+  <calculateVirtualScrollParameters>
+  if (self.isVirtual) {
+    var itemHeight = self.itemHeight;
+    var scrollHeight = e.target.scrollHeight;
+    var viewportHeight = self.el.parentNode.offsetHeight;
+    var highWater = Math.max(0, e.scrollTop + self.virtualRemoveThreshold);
+    var lowWater = Math.min(scrollHeight, Math.abs(e.scrollTop) + viewportHeight + self.virtualAddThreshold);
+    </calculateVirtualScrollParameters>
+    <determineViewportItems>
+    var first = parseInt(Math.abs(highWater / itemHeight), 10);
+    var last = parseInt(Math.abs(lowWater / itemHeight), 10);
+    </determineViewportItems>
+    <selectItemsToRemove>
+    self._virtualItemsToRemove = Array.prototype.slice.call(self.listEl.children, 0, first);
+    </selectItemsToRemove>
+    <triggerRenderViewport>
+    self.renderViewport && self.renderViewport(highWater, lowWater, first, last);
+    </triggerRenderViewport>
+  }
+}
+</handleVirtualListScroll>
+
+<emptyLocaleObject>
+function empty() {
+  return {
+    language: null,
+    extendedLanguageSubtags: [],
+    script: null,
+    region: null,
+    variants: [],
+    extensions: [],
+    privateuse: [],
+    irregular: null,
+    regular: null
+  }
+}
+</emptyLocaleObject>
+```
+
+Each function has been annotated according to the SRP annotation instructions given. Blocks of code are labeled with the responsibility they address for better readability and understanding of the code segments.

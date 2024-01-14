@@ -1,0 +1,265 @@
+1. Function with no clear indication of responsibility:
+
+```javascript
+function (cb) {
+    return this.get(1).chain(function (res) {
+        return isUndefinedOrNull(res) || res.length === 0;
+    }.bind(this)).classic(cb);
+}
+```
+
+2. <tlNavigationConstructor>
+```javascript
+function(data, options, add_to_container) {
+		
+		this._el = {
+			container: {},
+			content_container: {},
+			icon: {},
+			title: {},
+			description: {}
+		};
+	
+		this.mediatype = {};
+		
+		this.data = {
+			title: "Navigation",
+			description: "Description",
+			date: "Date"
+		};
+	
+		this.options = {
+			direction: "previous"
+		};
+	
+		this.animator = null;
+		
+		
+		TL.Util.mergeData(this.options, options);
+		TL.Util.mergeData(this.data, data);
+		
+		
+		this._el.container = TL.Dom.create("div", "tl-slidenav-" + this.options.direction);
+		
+		if (TL.Browser.mobile) {
+			this._el.container.setAttribute("ontouchstart"," ");
+		}
+		
+		this._initLayout();
+		this._initEvents();
+		
+		if (add_to_container) {
+			add_to_container.appendChild(this._el.container);
+		};
+		
+	}
+</tlNavigationConstructor>
+
+3. <processFiles>
+```javascript
+function getData (allFiles = [], config) {
+  <filterAndConstructFiles>
+  const files = allFiles.reduce((memo, iteratee) => {
+    <parseFilePath>
+    const filePath = path.parse(iteratee);
+    </parseFilePath>
+    if (config.include.includes(filePath.ext) && !config.exclude.includes(filePath.base)) {
+      <fileDataConstruction>
+      const newFile = {
+        file: iteratee.replace(config.content, ''),
+        dir: filePath.dir.replace(config.content, ''),
+        name: filePath.name,
+        base: filePath.base,
+        ext: filePath.ext,
+      };
+      </fileDataConstruction>
+      <processMarkdownFiles>
+      if (filePath.ext === '.md') {
+        const file = fs.readFileSync(iteratee, { encoding: 'utf8' })
+        const frontMatter = fm(file);
+        newFile.attr = frontMatter.attributes;
+        newFile.body = frontMatter.body;
+      }
+      </processMarkdownFiles>
+      <processImageFiles>
+      else if (filePath.ext === '.png') {
+        const image = new PNG.load(iteratee);
+        newFile.width = image.width;
+        newFile.height = image.height;
+      }
+      </processImageFiles>
+      memo.push(newFile);
+    }
+    return memo;
+  }, []);
+  </filterAndConstructFiles>
+  return files;
+}
+</processFiles>
+
+4. Function with no clear indication of multiple responsibilities:
+
+```javascript
+function updateSvgTransformAttr(window, element) {
+    if (!element.namespaceURI || element.namespaceURI.indexOf('/svg') == -1) {
+      return false;
+    }
+    if (!(SVG_TRANSFORM_PROP in window)) {
+      window[SVG_TRANSFORM_PROP] =
+          /Trident|MSIE|IEMobile|Edge|Android 4/i.test(window.navigator.userAgent);
+    }
+    return window[SVG_TRANSFORM_PROP];
+}
+```
+
+5. Function with no clear indication of multiple responsibilities:
+
+```javascript
+function(manager, resource, config) {
+  this.api = manager.api;
+  this.debug = manager.debug;
+  this.location = config.location;
+  this.resource = resource;
+
+  this.config = config;
+  this.runtimes = [];
+  this.policies = [];
+  this.pending = {};
+  util.handleEvents(this);
+
+  this.add(manager, config.policy);
+  this.runtimes[0].local = true;
+}
+```
+
+6. <makeCopyAndRemoveAtIndex>
+```javascript
+function removeAt(items, index) {
+  <copyItems>
+  var copy = items.slice();
+  </copyItems>
+  <removeAtIndex>
+  copy.splice(index, 1);
+  </removeAtIndex>
+  return copy;
+}
+</makeCopyAndRemoveAtIndex>
+
+7. <parseArgumentsFunction>
+```javascript
+function parseArguments(opts, callback) {
+  if ('function' === typeof opts) {
+    callback = opts;
+    opts = {};
+  }
+
+  opts = opts || {};
+  opts.callback = callback;
+
+  return opts;
+}
+</parseArgumentsFunction>
+
+8. <locateTableCell>
+```javascript
+function(cell) {
+    <locateTableElement>
+    var elCell;
+    var el = Dom.get(cell);
+
+    if(el && (el.ownerDocument == document)) {
+        if(el.nodeName.toLowerCase() != "td") {
+            elCell = Dom.getAncestorByTagName(el, "td");
+        }
+        else {
+            elCell = el;
+        }
+        
+        if(elCell && ((elCell.parentNode.parentNode == this._elTbody) || (elCell.parentNode.parentNode === null))) {
+            return elCell;
+        }
+    }
+    </locateTableElement>
+    <locateCellByRecordColumn>
+    else if(cell) {
+        var oRecord, nColKeyIndex;
+
+        if(lang.isString(cell.columnKey) && lang.isString(cell.recordId)) {
+            oRecord = this.getRecord(cell.recordId);
+            var oColumn = this.getColumn(cell.columnKey);
+            if(oColumn) {
+                nColKeyIndex = oColumn.getKeyIndex();
+            }
+        }
+        
+        if(cell.record && cell.column && cell.column.getKeyIndex) {
+            oRecord = cell.record;
+            nColKeyIndex = cell.column.getKeyIndex();
+        }
+        
+        var elRow = this.getTrEl(oRecord);
+        if((nColKeyIndex !== null) && elRow && elRow.cells && elRow.cells.length > 0) {
+            return elRow.cells[nColKeyIndex] || null;
+        }
+    }
+    </locateCellByRecordColumn>
+
+    return null;
+}
+</locateTableCell>
+
+9. Function with no clear indication of multiple responsibilities:
+
+```javascript
+function initializeNodeDepth(nodesByBreadth, edges, height, width, nodeGap, orient) {
+    var minKy = Infinity;
+    zrUtil.each(nodesByBreadth, function (nodes) {
+        var n = nodes.length;
+        var sum = 0;
+        zrUtil.each(nodes, function (node) {
+            sum += node.getLayout().value;
+        });
+        var ky = orient === 'vertical'
+                    ? (width - (n - 1) * nodeGap) / sum
+                    : (height - (n - 1) * nodeGap) / sum;
+
+        if (ky < minKy) {
+            minKy = ky;
+        }
+    });
+
+    zrUtil.each(nodesByBreadth, function (nodes) {
+        zrUtil.each(nodes, function (node, i) {
+            var nodeDy = node.getLayout().value * minKy;
+            if (orient === 'vertical') {
+                node.setLayout({x: i}, true);
+                node.setLayout({dx: nodeDy}, true);
+            }
+            else {
+                node.setLayout({y: i}, true);
+                node.setLayout({dy: nodeDy}, true);
+            }
+        });
+    });
+
+    zrUtil.each(edges, function (edge) {
+        var edgeDy = +edge.getValue() * minKy;
+        edge.setLayout({dy: edgeDy}, true);
+    });
+}
+```
+
+10. Async function with no clear indication of multiple responsibilities:
+
+```javascript
+async function update (nameId, target, options = {}) {
+  const opt = R.merge(this.Ae.defaults, options)
+  const nameUpdateTx = await this.nameUpdateTx(R.merge(opt, {
+    nameId: nameId,
+    accountId: await this.address(),
+    pointers: [R.fromPairs([['id', target], ['key', classify(target)]])]
+  }))
+
+  return this.send(nameUpdateTx, opt)
+}
+```

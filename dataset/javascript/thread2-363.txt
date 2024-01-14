@@ -1,0 +1,354 @@
+<functionMirrorObject>
+function(obj) {
+    var key;
+    var mirrored = {};
+
+    if (obj && typeof obj === 'object') {
+        for (key in obj) {
+            <checkHasOwnProperty>
+            if (obj.hasOwnProperty(key)) {
+                mirrored[key] = key;
+            }
+            </checkHasOwnProperty>
+        }
+    }
+    return mirrored;
+}
+</functionMirrorObject>
+
+<functionParseBarsComment>
+function parseBarsComment(mode, code, tokens, flags, scope, parseMode) {
+    var index = code.index + 2,
+        length = code.length;
+
+    <checkSpecialCharacters>
+    if (
+        code.codePointAt(index) === 0x0021
+    ) {
+        if (
+            code.codePointAt(++index) === 0x002d &&
+            code.codePointAt(++index) === 0x002d
+        ) {
+            index++;
+
+            <parseLongComment>
+            for (; index < length; index++) {
+                if (
+                    code.codePointAt(index) === 0x002d &&
+                    code.codePointAt(index + 1) === 0x002d &&
+                    code.codePointAt(index + 2) === 0x007d &&
+                    code.codePointAt(index + 3) === 0x007d
+                ) {
+                    index += 4;
+                    code.index = index;
+
+                    <closeParseMode>
+                    parseMode.close();
+                    </closeParseMode>
+
+                    if (flags.keepComments) {
+                        // No specific operation here
+                    }
+
+                    return true;
+                }
+            }
+            </parseLongComment>
+
+            throw code.makeError(
+                'Unclosed Comment: Expected "--}}" to fallow "{{!--".',
+                5
+            );
+        }
+
+        index++;
+
+        <parseShortComment>
+        for (; index < length; index++) {
+
+            if (
+                code.codePointAt(index) === 0x007d &&
+                code.codePointAt(index + 1) === 0x007d
+            ) {
+                index += 2;
+                code.index = index;
+
+                <closeParseMode>
+                parseMode.close();
+                </closeParseMode>
+
+                if (flags.keepComments) {
+                    // No specific operation here
+                }
+
+                return true;
+            }
+        }
+        </parseShortComment>
+
+        throw code.makeError(
+            code.index, code.index + 3,
+            'Unclosed Comment: Expected "}}" to fallow "{{!".'
+        );
+    }
+    </checkSpecialCharacters>
+
+    return null;
+}
+</functionParseBarsComment>
+
+<functionTextureTile>
+function (sector, level, row, column) {
+    <callSuperConstructor>
+    TextureTile.call(this, sector, level, row, column);
+    </callSuperConstructor>
+
+    <initializeProperties>
+    this.surfaceShapes = [];
+    this.surfaceShapeStateKeys = [];
+    this.asRenderedSurfaceShapeStateKeys = [];
+    this.sector = sector;
+    this.cacheKey = null;
+    this.pickSequence = 0;
+    </initializeProperties>
+
+    <createCtx2D>
+    this.createCtx2D();
+    </createCtx2D>
+}
+</functionTextureTile>
+
+<functionEditDataSource>
+function() {
+    <getPropertyAssignments>
+    var editDataSource = this.getProperty('editDataSource');
+    var destinationDataSource = this.getProperty('destinationDataSource');
+    var destinationProperty = this.getProperty('destinationProperty');
+    </getPropertyAssignments>
+
+    <handleEditDataSource>
+    if (this._isObjectDataSource(editDataSource)) {
+        var editedItem = editDataSource.getSelectedItem();
+        var originItem = destinationDataSource.getProperty(destinationProperty);
+
+        if (this._isRootElementPath(destinationProperty)) {
+            <overrideOriginItem>
+            this._overrideOriginItem(originItem, editedItem);
+            destinationDataSource._includeItemToModifiedSet(originItem);
+            destinationDataSource.saveItem(originItem, function() {
+                destinationDataSource.updateItems();
+            });
+            </overrideOriginItem>
+        } else {
+            <setEditedProperty>
+            destinationDataSource.setProperty(destinationProperty, editedItem);
+            </setEditedProperty>
+        }
+
+    } else {
+        <updateDestinationItems>
+        destinationDataSource.updateItems();
+        </updateDestinationItems>
+    }
+    </handleEditDataSource>
+}
+</functionEditDataSource>
+
+<functionEndpoint>
+function Endpoint(spec, resourcePath, method) {
+    <initializeEndpoint>
+    this.method = method;
+    this.resourcePath = resourcePath || '/';
+    this.spec = spec;
+    </initializeEndpoint>
+}
+</functionEndpoint>
+
+<functionGetMaskComponents>
+function getMaskComponents() {
+    var maskPlaceholderChars = maskPlaceholder.split(''),
+        maskPlaceholderCopy, components;
+
+    <setPlaceholderChars>
+    if (maskCaretMap && !isNaN(maskCaretMap[0])) {
+        angular.forEach(maskCaretMap, function(value) {
+            maskPlaceholderChars[value] = '_';
+        });
+    }
+    </setPlaceholderChars>
+    maskPlaceholderCopy = maskPlaceholderChars.join('');
+    components = maskPlaceholderCopy.replace(/[_]+/g, '_').split('_');
+    components = components.filter(function(s) {
+        return s !== '';
+    });
+
+    <mapComponents>
+    var offset = 0;
+    return components.map(function(c) {
+        var componentPosition = maskPlaceholderCopy.indexOf(c, offset);
+        offset = componentPosition + 1;
+        return {
+            value: c,
+            position: componentPosition
+        };
+    });
+    </mapComponents>
+}
+</functionGetMaskComponents>
+
+<functionEscapeString>
+function escapeString(str) {
+    <checkStringValidity>
+    if (str === undefined) {
+        throw new Error('\'str\' is required');
+    }
+    if (str === null) {
+        throw new Error('\'str\' must not be null');
+    }
+    if (typeof str !== 'string') {
+        throw new Error('\'str\' must be a string');
+    }
+    </checkStringValidity>
+
+    <escapeCharacters>
+    var escaped_str = str;
+    escaped_str = escaped_str.replace(/\\/g, '\\\\');
+    escaped_str = escaped_str.replace(/'/g, '\\\'');
+    escaped_str = escaped_str.replace(/"/g, '\\"');
+    </escapeCharacters>
+
+    return escaped_str;
+}
+</functionEscapeString>
+
+<functionAxisRotate>
+function axisRotate(m, axis, angleInRadians, dst) {
+    <calculateAxisRotation>
+    dst = dst || new MatType(16);
+    let x = axis[0];
+    let y = axis[1];
+    let z = axis[2];
+    const n = Math.sqrt(x * x + y * y + z * z);
+    x /= n;
+    y /= n;
+    z /= n;
+    const xx = x * x;
+    const yy = y * y;
+    const zz = z * z;
+    const c = Math.cos(angleInRadians);
+    const s = Math.sin(angleInRadians);
+    const oneMinusCosine = 1 - c;
+    </calculateAxisRotation>
+
+    <computeRotationMatrix>
+    // Calculation of the rotation matrix elements...
+    </computeRotationMatrix>
+
+    <applyRotationToMatrix>
+    // Application of the rotation matrix to 'm' and assigning to 'dst'...
+    </applyRotationToMatrix>
+
+    <copyRemainingElements>
+    if (m !== dst) {
+        dst[12] = m[12];
+        dst[13] = m[13];
+        dst[14] = m[14];
+        dst[15] = m[15];
+    }
+    </copyRemainingElements>
+
+    return dst;
+}
+</functionAxisRotate>
+
+<functionTiledImageLayer>
+function (sector, levelZeroDelta, numLevels, imageFormat, cachePath,
+                                                tileWidth, tileHeight) {
+    <callSuperConstructor>
+    TiledImageLayer.call(this,
+        sector, levelZeroDelta, numLevels, imageFormat, cachePath, tileWidth, tileHeight);
+    </callSuperConstructor>
+
+    <initializeProperties>
+    this.detectBlankImages = false;
+    this.testPixels = [
+        new Vec2(20, 20),
+        new Vec2(235, 20),
+        new Vec2(20, 235),
+        new Vec2(235, 235)
+    ];
+    this.destCanvas = document.createElement("canvas");
+    this.destContext = this.destCanvas.getContext("2d");
+    </initializeProperties>
+}
+</functionTiledImageLayer>
+
+<functionFilter>
+function filter(data, route) {
+    var res = this,
+        statusCode = res.statusCode,
+        validator = route.Router.App.getValidator(),
+        schemaId,
+        schema;
+
+    <determineStatusCode>
+    if (!statusCode) {
+        statusCode = 200;
+    }
+    </determineStatusCode>
+
+    <checkResponseSchema>
+    if (!route.description.responses.hasOwnProperty(statusCode) ||
+        !route.description.responses[statusCode].length ||
+        !route.description.responses[statusCode][0].schema
+    ) {
+        throw new Error(`There is no response data format set for status code: ${statusCode}. Can't filter response data`);
+    }
+    </checkResponseSchema>
+
+    <handleDataToJson>
+    if (!_.isPlainObject(data) && data && data.toJSON instanceof Function) {
+        data = data.toJSON();
+    }
+    </handleDataToJson>
+
+    <setupValidationSchema>
+    schema = route.description.responses[statusCode][0].schema;
+    if (typeof schema === 'string') {
+        schemaId = schema;
+    } else {
+        schemaId = route.uid + '-RES';
+        if (!validator.getSchema(schemaId)) {
+            validator.addSchema(schema, schemaId);
+        }
+    }
+    </setupValidationSchema>
+
+    <validateData>
+    if (!validator.validate(schemaId, data)) {
+        let err = validator.errors.shift();
+        if (err && !err.dataPath) {
+            err.dataPath = '<response>';
+        }
+        throw new Response.ValidationError(err);
+    }
+    </validateData>
+
+    <createProxy>
+    return new Proxy(res, {
+        get: function(target, name, receiver) {
+            if (proxyResponsePrototypeProps.hasOwnProperty(name)) {
+                if (proxyResponsePrototypeProps[name]) {
+                    return function() {
+                        target[name](data);
+                        return receiver;
+                    };
+                }
+
+                return Reflect.get(target, name, receiver);
+            }
+        }
+    });
+    </createProxy>
+}
+</functionFilter>

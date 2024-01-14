@@ -1,0 +1,298 @@
+```javascript
+<ensureContainerStateIdentifiers>
+function ensureContainerStateIdentifiers (container) {
+  <getElementAndTemplate>
+  const domElement = container[$domElement]
+  const template = getTemplateFromDomElement(domElement)
+  </getElementAndTemplate>
+
+  <processTemplate>
+  const tokens = getTokens(template)
+  const identifiers = getIdentifiersFromTokens(tokens)
+  </processTemplate>
+
+  <updateState>
+  const update = {}
+  const state = container.state
+  if (identifiers) {
+    for (let key in identifiers) {
+      if (undefined === state[key])
+        update[key] = identifiers[key]
+    }
+  </updateState>
+
+  <defineNewState>
+    container.define(update)
+  }
+  </defineNewState>
+
+  return identifiers || null
+}
+</ensureContainerStateIdentifiers>
+```
+
+```javascript
+<getMatchingFiles>
+function getMatchingFiles(directory, matchPattern, options, callback) {
+  options = options || {};
+  var matchedFiles = [],
+      recurse = options.recurse || false;
+
+  <readDirectory>
+  fs.readdir(directory, function(err, files) {
+    if (err) {
+      callback(null, matchedFiles);
+      return;
+    }
+  </readDirectory>
+
+    <fileEvaluation>
+    async.forEach(files, function(file, callback) {
+      var filePath = path.join(directory, file);
+      fs.stat(filePath, function(err, stats) {
+        if (err) {
+          callback();
+        }
+        else if (stats.isDirectory() && recurse) {
+          getMatchingFiles(filePath, matchPattern, options, callback);
+        }
+        else if (matchPattern.test(file)) {
+          matchedFiles.push(filePath);
+          callback();
+        }
+        else {
+          callback();
+        }
+      });
+    },
+    </fileEvaluation>
+
+    <finalizeResults>
+    function(err) {
+      callback(err, matchedFiles);
+    });
+  </finalizeResults>
+}
+</getMatchingFiles>
+```
+
+```javascript
+<handleRequest>
+function(url) {
+        if (this.useIFrame === true) {
+            <handleIFrameRequest>
+            if (url) {
+                var form = this.createRequestForm();
+                this.frame.appendChild(form);
+                form.submit();
+                this.frame.removeChild(form);
+            } else if (this.imgDiv.parentNode === this.frame) {
+                
+                this.frame.removeChild(this.imgDiv);
+                this.imgDiv = null;
+            }
+            </handleIFrameRequest>
+        } else {
+            <handleImageRequest>
+            OpenLayers.Tile.Image.prototype.setImgSrc.apply(this, arguments);
+            </handleImageRequest>
+        }
+    }
+</handleRequest>
+```
+
+```javascript
+<createCustomProperty>
+function(name) {
+    <defineCustomProperty>
+    var CustomProperty = lib.method.createMethod(name,function() {});
+    lib.inherits.inherits(CustomProperty,Property);
+    </defineCustomProperty>
+
+    <extendCustomProperty>
+    lib.extend.extend(CustomProperty,{ name: name });
+    </extendCustomProperty>
+
+    return CustomProperty;
+  }
+</createCustomProperty>
+```
+
+```javascript
+<retrieveItem>
+function(key) {
+    <checkExpiry>
+    if (this.isExpired(key)) {
+      <removeExpiredItem>
+      this.remove(key);
+      </removeExpiredItem>
+    }
+    </checkExpiry>
+
+    return decode(this.ls.getItem(this._prefix(key)));
+}
+</retrieveItem>
+```
+
+```javascript
+<normalParseFunction>
+function normal(source, state) {
+        var plug;
+
+        <handleCommands>
+        if (source.match(/^\\[a-zA-Z@]+/)) {
+            var cmdName = source.current().slice(1);
+            plug = plugins[cmdName] || plugins["DEFAULT"];
+            plug = new plug();
+            pushCommand(state, plug);
+            setState(state, beginParams);
+            return plug.style;
+        }
+        </handleCommands>
+
+        <handleSpecialCharacters>
+        if (source.match(/^\\[$&%#{}_]/)) {
+          return "tag";
+        }
+        if (source.match(/^\\[,;!\/\\]/)) {
+          return "tag";
+        }
+        </handleSpecialCharacters>
+
+        <handleMathMode>
+        if (source.match("\\[")) {
+            setState(state, function(source, state){ return inMathMode(source, state, "\\]"); });
+            return "keyword";
+        }
+        if (source.match("$$")) {
+            setState(state, function(source, state){ return inMathMode(source, state, "$$"); });
+            return "keyword";
+        }
+        if (source.match("$")) {
+            setState(state, function(source, state){ return inMathMode(source, state, "$"); });
+            return "keyword";
+        }
+        </handleMathMode>
+
+        var ch = source.next();
+        <handleComments>
+        if (ch == "%") {
+            if (!source.eol()) {
+              setState(state, inCComment);
+            }
+            return "comment";
+        }
+        </handleComments>
+        else if (ch == '}' || ch == ']') {
+            <handleBrackets>
+            plug = peekCommand(state);
+            if (plug) {
+                plug.closeBracket(ch);
+                setState(state, beginParams);
+            } else {
+                return "error";
+            }
+            return "bracket";
+            </handleBrackets>
+        } else if (ch == '{' || ch == '[') {
+            <handleDefaultPlugin>
+            plug = plugins["DEFAULT"];
+            plug = new plug();
+            pushCommand(state, plug);
+            return "bracket";
+            </handleDefaultPlugin>
+        }
+        else if (/\d/.test(ch)) {
+            <handleNumerics>
+            source.eatWhile(/[\w.%]/);
+            return "atom";
+            </handleNumerics>
+        }
+        else {
+            <handleIdentifiers>
+            source.eatWhile(/[\w\-_]/);
+            plug = getMostPowerful(state);
+            if (plug.name == 'begin') {
+                plug.argument = source.current();
+            }
+            return plug.styleIdentifier();
+            </handleIdentifiers>
+        }
+    }
+</normalParseFunction>
+```
+
+```javascript
+<initializeChain>
+function Chain(val, name) {
+    if (!(this instanceof Chain)) return new Chain(val, name);
+
+
+	this._val = val;
+	this._name = name;
+
+	this.clear();
+
+	return this;
+
+}
+</initializeChain>
+```
+
+```javascript
+<mergeMutable>
+function mutable()
+{
+  <setupArguments>
+  var args   = Array.prototype.slice.call(arguments)
+    , result = args.shift()
+    ;
+  </setupArguments>
+  
+  <mergeObjects>
+  while (args.length)
+  {
+    result = merge.call(this, result, args.shift());
+  }
+  </mergeObjects>
+
+  return result;
+}
+</mergeMutable>
+```
+
+```javascript
+<getAttributeWrapper>
+function(el, attr) {
+            return Y.Dom.batch(el, Y.Dom._getAttribute, attr);
+        }
+</getAttributeWrapper>
+```
+
+```javascript
+<displayMessageBox>
+function msgBox(messageHTML) {
+        <setupMessageBox>
+        var msgEl = document.querySelector('.msg-box'),
+            rect = this.getBoundingClientRect();
+
+        msgEl.style.top = window.scrollY + rect.bottom + 8 + 'px';
+        msgEl.style.left = window.scrollX + rect.left + 8 + 'px';
+
+        msgEl.style.display = 'block';
+        </setupMessageBox>
+
+        <addCloseEventHandler>
+        msgEl.querySelector('.msg-box-close').addEventListener('click', closeMsgBox);
+        </addCloseEventHandler>
+
+        <setMessageContent>
+        msgEl.querySelector('.msg-box-content').innerHTML = messageHTML;
+        </setMessageContent>
+
+        <addClassToCaller>
+        this.classList.add('filter-box-warn');
+        </addClassToCaller>
+    }
+</displayMessageBox>
+```

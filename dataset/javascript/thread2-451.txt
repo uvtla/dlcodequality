@@ -1,0 +1,270 @@
+```javascript
+<updateActionsAndBindings>
+function ( deltaTime ) {
+	deltaTime *= this.timeScale;
+
+	var actions = this._actions,
+		nActions = this._nActiveActions,
+
+		time = this.time += deltaTime,
+		timeDirection = Math.sign( deltaTime ),
+
+		accuIndex = this._accuIndex ^= 1;
+	
+	<updateActions>
+	for ( var i = 0; i !== nActions; ++ i ) {
+		var action = actions[ i ];
+		action._update( time, deltaTime, timeDirection, accuIndex );
+	}
+	</updateActions>
+	
+	<updateBindings>
+	var bindings = this._bindings,
+		nBindings = this._nActiveBindings;
+	for ( var i = 0; i !== nBindings; ++ i ) {
+		bindings[ i ].apply( accuIndex );
+	}
+	</updateBindings>
+	return this;
+}
+</updateActionsAndBindings>
+
+<baseConfig>
+function baseConfig() {
+	return {
+		output: {
+			format: 'umd',
+			sourcemap: true,
+			banner: ``,
+		},
+		plugins: [
+			resolve({
+				jsnext: true,
+				main: true,
+				browser: true,
+			}),
+			commonjs({
+				extensions: [
+					'.js',
+					'.jsx',
+					'.json',
+				],
+			}),
+		],
+	}
+}
+</baseConfig>
+
+<sanitizeLines>
+function sanitizeLines(frame) {
+	lines = stripAnsi(frame)
+		.replace(/\r/g, '')
+		.split('\n')
+		.map(l => l.replace(/\t/g, '  '))
+	
+	var leftCaretLine = lines.find(l => l.startsWith('>'))
+	if (leftCaretLine) {
+		lines[lines.indexOf(leftCaretLine)] = leftCaretLine.replace('>', ' ')
+	}
+	
+	<trimLeadingSpaces>
+	while (lines.find(l => !l.startsWith(' ')) == undefined) {
+		lines = lines.map(l => l.slice(1))
+	}
+	</trimLeadingSpaces>
+	return lines
+}
+</sanitizeLines>
+
+<popinOpen>
+function popinOpen(name) {
+	var $overlay = instance.target.childNodes[0];
+
+	<overlayClickListener>
+	addListener(gina, $overlay, 'click', function(event) {
+		if ( /gina-popin-is-active/.test(event.target.className) ) {
+			removeListener(gina, event.target, 'click');
+			<closeButtonActions>
+			var $close = [], $buttonsTMP = [];
+			// Code block to find and push buttons, divs, and anchors with a certain class into $close array
+			// and then remove their listeners and call popinClose.
+			</closeButtonActions>
+			popinClose(name);
+		}
+	});
+	</overlayClickListener>
+
+	<initializePopin>
+	var id = null, $el = null;
+	// Code block for setting up the pop-in element's ID and class
+	</initializePopin>
+
+	<closeButtonClickLogic>
+	var $close = [], $buttonsTMP = [];
+	// Code block to find close buttons and attach click events to them
+	for (var b = 0, len = $close.length; b < len; ++b) {
+		// Code block to ensure the closing functionality on close buttons anchors
+	}
+	</closeButtonClickLogic>
+
+	<additionalCleanUp>
+	if ( /gina-popin-is-active/.test(event.target.className) ) {
+		removeListener(gina, event.target, event.target.getAttribute('id'))
+	}
+	</additionalCleanUp>
+
+	$updatePopinState
+	$popin.isOpen = true;
+	$popin.target = $el;
+	</updatePopinState>
+
+	<updateGinaToolbar>
+	var XHRData = document.getElementById('gina-without-layout-xhr-data');
+	if (gina && typeof(window.ginaToolbar) == "object" && XHRData) {
+		try {
+			if (typeof(XHRData.value) != 'undefined' && XHRData.value) {
+				XHRData = JSON.parse(decodeURIComponent(XHRData.value));
+				ginaToolbar.update("data-xhr", null);
+				ginaToolbar.update("data-xhr", XHRData);
+			}
+		} catch (err) {
+			throw err
+		}
+	}
+	</updateGinaToolbar>
+
+	<triggerPopinEvent>
+	triggerEvent(gina, instance.target, 'open.'+ $popin.id, $popin);
+	</triggerPopinEvent>
+}
+</popinOpen>
+
+<renewNodeLease>
+function(cb0) {
+	try {
+		if (nodeId) {
+			$._.$[ns].renewNodeLease(privateNodeId, leaseTimeout, cb0);
+		} else {
+			cb0(null);
+		}
+	} catch (err) {
+		cb0(err);
+	}
+}
+</renewNodeLease>
+
+<getNextSiblingNode>
+function( evaluator ) {
+	var next = this.$, retval;
+	do {
+		next = next.nextSibling;
+		retval = next && new CKEDITOR.dom.node( next );
+	}
+	while ( retval && evaluator && !evaluator( retval ) )
+	return retval;
+}
+</getNextSiblingNode>
+
+<getStorage>
+function getStorage() {
+	const storageChoice = config.get('storage:active');
+	let storageConfig,
+		CustomStorage,
+		customStorage;
+
+	storageConfig = config.get('storage')[storageChoice];
+
+	<validateStorageChoice>
+	if (!storageChoice) {
+		throw new common.errors.IncorrectUsageError({
+			message: 'No adapter found'
+		});
+	}
+	</validateStorageChoice>
+
+	<storageRetrieval>
+	if (storage[storageChoice]) {
+		return storage[storageChoice];
+	}
+	</storageRetrieval>
+
+	<customStorageLoading>
+	try {
+		CustomStorage = require(`${config.getContentPath('storage')}${storageChoice}`);
+	} catch (err) {
+		// Catch block code handling various errors in module loading
+	}
+	try {
+		CustomStorage = CustomStorage || require(`${config.get('paths').internalStoragePath}${storageChoice}`);
+	} catch (err) {
+		// Catch block code handling errors in module loading from a different path
+	}
+	</customStorageLoading>
+
+	<storageInstantiation>
+	customStorage = new CustomStorage(storageConfig);
+	// Various checks for correctness of the custom storage following its instantiation
+	</storageInstantiation>
+
+	storage[storageChoice] = customStorage;
+	return storage[storageChoice];
+}
+</getStorage>
+
+<getRoute>
+function getRoute(exportFuncs, cb, ctrlpath, curCtrlname) {
+	ctrlpath = ctrlpath || [];
+	<earlyReturnConditions>
+	// Code block for early return conditions
+	</earlyReturnConditions>
+
+	<handleRoute>
+	let totalCtrlname = curCtrlname ? ctrlpath.concat([curCtrlname]) : ctrlpath;
+	if (typeof exportFuncs === 'function') {
+		cb(exportFuncs, totalCtrlname);
+	} else {
+		// Code block for handling the route recursion
+	}
+	</handleRoute>
+}
+</getRoute>
+
+<MatrixInitialization>
+function Matrix(arg) {
+	if (arg && arguments.length === 1) {
+		if (arg instanceof window.SVGMatrix) this.mtx = arg.scale(1);
+		else if (arg instanceof Matrix) this.mtx = arg.mtx.scale(1);
+		else if (typeof arg == "string") return Matrix.parse(arg);
+		else throw new Error(arg + " : argument incorrect pour Matrix.");
+	}
+	else {
+		this.mtx = svg && svg.createSVGMatrix();
+		if (arguments.length === 6) {
+			var a = arguments, that = this;
+			['a', 'b', 'c', 'd', 'e', 'f'].forEach(function(prop, ind) { that[prop] = a[ind]; });
+		}
+	}
+}
+</MatrixInitialization>
+
+<ProblemsViewConstructor>
+function ProblemsView(options, slideout) {
+	if (slideout) {
+		<extendSlideoutViewMode>
+		SlideoutViewMode.call(this, slideout);
+		</extendSlideoutViewMode>
+	}
+	this._parent = lib.node(options.parentId ? options.parentId : "orion.PropertyPanel.container");
+	this.serviceRegistry = options.serviceRegistry;
+	this.commandRegistry = options.commandRegistry;
+	this.preferences = options.preferences;
+	this.fileClient = options.fileClient;
+	this.contentTypeRegistry = options.contentTypeRegistry;
+	<initializeProblemsView>
+	this._init(slideout);
+	</initializeProblemsView>
+}
+</ProblemsViewConstructor>
+```
+
+The functions are all wrapped in tags based on their primary responsibility, with subsections within the functions tagged if they carry out distinct tasks that could be considered separate responsibilities. These sub-tags assist in identifying complex elements that might be a violation of the Single Responsibility Principle.

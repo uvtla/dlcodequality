@@ -1,0 +1,387 @@
+```javascript
+<Naivebayes>
+function Naivebayes(options) {
+  
+  <HandleOptions>
+  this.options = {};
+  if (typeof options !== 'undefined') {
+    if (!options || typeof options !== 'object' || Array.isArray(options)) {
+      throw TypeError(
+        `NaiveBayes got invalid 'options': ${options}'. Pass in an object.`
+      );
+    }
+    this.options = options;
+  }
+  </HandleOptions>
+
+  <InitializeProperties>
+  this.tokenizer = this.options.tokenizer || defaultTokenizer;
+  this.alpha = this.options.alpha || DEFAULT_ALPHA;
+  this.fitPrior = this.options.fitPrior === undefined ? DEFAULT_FIT_PRIOR : this.options.fitPrior;
+  this.vocabulary = {};
+  this.vocabularySize = 0;
+  this.totalDocuments = 0;
+  this.docCount = {};
+  this.wordCount = {};
+  this.wordFrequencyCount = {};
+  this.categories = {};
+  </InitializeProperties>
+}
+</Naivebayes>
+
+<handleHashChange>
+function handleHashChange() {
+  var prefix = '#pipeline-';
+  var hash = location.hash;
+
+  <ExtractPipelineId>
+  var pieces = hash.split(';', 2);
+  var pipelineId = null;
+  if (pieces[0].indexOf(prefix) == 0) {
+    pipelineId = pieces[0].substr(prefix.length);
+  } else {
+    location.hash = '';
+    return;
+  }
+  </ExtractPipelineId>
+
+  <DefaultPipelineId>
+  if (!pipelineId) {
+    pipelineId = STATUS_MAP.rootPipelineId;
+  }
+  </DefaultPipelineId>
+  
+  <ValidatePipeline>
+  var rootMap = STATUS_MAP.pipelines[STATUS_MAP.rootPipelineId];
+  var infoMap = STATUS_MAP.pipelines[pipelineId];
+  if (!rootMap || !infoMap) {
+    return;
+  }
+  </ValidatePipeline>
+
+  <UpdateUI>
+  <UnselectLinks>
+  $('.selected-link').removeClass('selected-link');
+  </UnselectLinks>
+  <UpdateStatusConsoleAndSelectLink>
+  if (pieces[1]) {
+    var statusLink = $(getTreePipelineElementId(pipelineId)).find('.status-links>a:contains("' + pieces[1] + '")');
+    if (statusLink.size() > 0) {
+      var selectedLink = $(statusLink[0]);
+      selectedLink.addClass('selected-link');
+      $('#status-console').attr('src', selectedLink.attr('href'));
+      $('#status-console').show();
+    } else {
+      $('#status-console').hide();
+    }
+  } else {
+    var consoleLink = $(getTreePipelineElementId(pipelineId)).find('a.status-console');
+    if (consoleLink.size() > 0) {
+      var selectedLink = $(consoleLink[0]);
+      selectedLink.addClass('selected-link');
+      $('#status-console').attr('src', selectedLink.attr('href'));
+      $('#status-console').show();
+    } else {
+      $('#status-console').hide();
+    }
+  }
+  </UpdateStatusConsoleAndSelectLink>
+  <SelectAndHighlightPipeline>
+  var selected = $('#link-pipeline-' + pipelineId);
+  selected.addClass('selected-link');
+  selected.parents('.status-box').addClass('selected-link');
+  </SelectAndHighlightPipeline>
+  <UpdateDocumentTitle>
+  document.title = rootMap.classPath + ' - ID #' + STATUS_MAP.rootPipelineId;
+  </UpdateDocumentTitle>
+  <CreateAndInjectStageNode>
+  var stageNode = constructStageNode(pipelineId, infoMap, false);
+  $('#overview').remove();
+  stageNode.attr('id', 'overview');
+  $('#detail').append(stageNode);
+  </CreateAndInjectStageNode>
+  <AdjustStatusConsole>
+  adjustStatusConsole();
+  </AdjustStatusConsole>
+  </UpdateUI>
+}
+</handleHashChange>
+
+<LGraphFXVigneting>
+function LGraphFXVigneting() {
+  <InitializeNode>
+  this.addInput("Tex.", "Texture");
+  this.addInput("intensity", "number");
+  this.addOutput("Texture", "Texture");
+  this.properties = {
+    intensity: 1,
+    invert: false,
+    precision: LGraphTexture.DEFAULT
+  };
+  </InitializeNode>
+
+  <CompileShader>
+  if (!LGraphFXVigneting._shader) {
+    LGraphFXVigneting._shader = new GL.Shader(
+      Shader.SCREEN_VERTEX_SHADER,
+      LGraphFXVigneting.pixel_shader
+    );
+  }
+  </CompileShader>
+}
+</LGraphFXVigneting>
+
+<ParseHtml>
+function(){
+  <InitializeParser>
+  this._domParser = modules.domUtils.getDOMParser();
+  </InitializeParser>
+  <SetHtmlString>
+  this._html = '<base id="base" href=""></base><a id="link" href=""></a>';
+  </SetHtmlString>
+  <ParseHtmlString>
+  this._nodes = this._domParser.parseFromString( this._html, 'text/html' );
+  this._baseNode =  modules.domUtils.getElementById(this._nodes,'base');
+  this._linkNode =  modules.domUtils.getElementById(this._nodes,'link');
+  </ParseHtmlString>
+}
+</ParseHtml>
+
+<wrap>
+function wrap (rule) {
+  return ($) => {
+    let value = rule($)
+
+    <ValidateValue>
+    if (typeof value !== 'string') return
+    if (isUrl(value)) return
+    if (value.indexOf('www.') === 0) return
+    if (value.includes('|')) return
+    </ValidateValue>
+
+    <PrepareValue>
+    value = value.replace(/\s+/g, ' ')
+    value = value.trim()
+    value = value.replace(/^[\s\n]*by[\s\n]*/im, '')
+    value = toTitleCase(value)
+    </PrepareValue>
+
+    return value
+  }
+}
+</wrap>
+
+<ModifiedDateParser>
+function (module, exports, __webpack_require__) {
+  <RequireDependencies>
+  var $parseInt = __webpack_require__(2).parseInt
+    , $trim = __webpack_require__(81).trim
+    , ws = __webpack_require__(82)
+    , hex = /^[\-+]?0[xX]/;
+  </RequireDependencies>
+
+  <ExportParser>
+  module.exports = $parseInt(ws + '08') !== 8 || $parseInt(ws + '0x16') !== 22 ? function parseInt(str, radix) {
+    var string = $trim(String(str), 3);
+    return $parseInt(string, (radix >>> 0) || (hex.test(string) ? 16 : 10));
+  } : $parseInt;
+  </ExportParser>
+}
+</ModifiedDateParser>
+
+<isTypeOfKind>
+function isTypeOfKind(type, kind) {
+  <CheckType>
+  if (type.flags & kind) {
+    return true;
+  }
+  </CheckType>
+  <CheckUnionType>
+  if (type.flags & 524288 ) {
+    var types = type.types;
+    for (var _i = 0, types_14 = types; _i < types_14.length; _i++) {
+      var t = types_14[_i];
+      if (!isTypeOfKind(t, kind)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  </CheckUnionType>
+  <CheckIntersectionType>
+  if (type.flags & 1048576 ) {
+    var types = type.types;
+    for (var _a = 0, types_15 = types; _a < types_15.length; _a++) {
+      var t = types_15[_a];
+      if (isTypeOfKind(t, kind)) {
+        return true;
+      }
+    }
+  }
+  </CheckIntersectionType>
+  return false;
+}
+</isTypeOfKind>
+
+<ParseDateStrings>
+function(sDates) {
+  <InitializeArray>
+  var aReturn = [],
+    aDates = sDates.split(this.Locale.DATE_DELIMITER);
+  </InitializeArray>
+  
+  <ProcessDateStrings>
+  for (var d=0;d<aDates.length;++d) {
+    var sDate = aDates[d];
+  
+    <HandleDateRange>
+    if (sDate.indexOf(this.Locale.DATE_RANGE_DELIMITER) != -1) {
+      var aRange = sDate.split(this.Locale.DATE_RANGE_DELIMITER),
+        dateStart = this._parseDate(aRange[0]),
+        dateEnd = this._parseDate(aRange[1]),
+        fullRange = this._parseRange(dateStart, dateEnd);
+      aReturn = aReturn.concat(fullRange);
+    } 
+    </HandleDateRange>
+    <HandleSingleDate>
+    else {
+      var aDate = this._parseDate(sDate);
+      aReturn.push(aDate);
+    }
+    </HandleSingleDate>
+  }
+  </ProcessDateStrings>
+  
+  return aReturn;
+}
+</ParseDateStrings>
+
+<verifyModifier>
+function verifyModifier(predicate, defaultMessage) {
+  return function () {
+    <ValidatePredicate>
+    var message;
+    if (predicate.apply(null, arguments) === false) {
+      message = arguments[arguments.length - 1];
+      throw new Error(check.unemptyString(message) ? message : defaultMessage);
+    }
+    </ValidatePredicate>
+  };
+}
+</verifyModifier>
+
+<Dictionary>
+function Dictionary(obj) {
+  <ValidateInput>
+  common.arg({ name: 'obj', value: obj, type: Object, required: false });
+  </ValidateInput>
+
+  <InitializeProperties>
+  var self = this,
+    innerDictionary = {};
+  this.onItemAdded = new Event();
+  this.onItemRemoved = new Event();
+  this.onItemChanged = new Event();
+  this.count = 0;
+  this.hasAny = false;
+  </InitializeProperties>
+
+  <DictionaryMethods>
+  <GetItem>
+  this.get = function (key) {
+    common.arg({ name: 'key', value: key, type: String, required: true });
+    return innerDictionary[key];
+  };
+  </GetItem>
+  <DictionaryToObject>
+  this.toObject = function () {
+    return objects.clone(innerDictionary);
+  };
+  </DictionaryToObject>
+  <ForEachItem>
+  this.forEach = function (fn) {
+    objects.forEach(innerDictionary, function (value, key, innerDict) {
+      fn(value, key);
+    });
+    return self;
+  };
+  </ForEachItem>
+  <ClearDictionary>
+  this.clear = function () {
+    self.forEach(function (item, key) {
+      self.remove(key, item);
+    });
+    return self;
+  };
+  </ClearDictionary>
+  <GetKeys>
+  this.getKeys = function () {
+    return Object.keys(innerDictionary);
+  };
+  </GetKeys>
+  <CheckKeyExistence>
+  this.containsKey = function (key) {
+    common.arg({ name: 'key', value: key, type: String, required: true });
+    return arrays.contains(self.getKeys(), key);
+  };
+  </CheckKeyExistence>
+  <RemoveItem>
+  this.remove = function (key) {
+    common.arg({ name: 'key', value: key, type: String, required: true });
+    var item;
+    if (self.containsKey(key)) {
+      item = self.get(key);
+      delete innerDictionary[key];
+      self.count -= 1;
+      self.hasAny = self.count > 0;
+      self.onItemRemoved.raise(item, key);
+    }
+    return self;
+  };
+  </RemoveItem>
+  <SetItem>
+  this.set = function (key, value) {
+    common.arg({ name: 'key', value: key, type: String, required: true });
+    common.arg({ name: 'value', value: value, required: true });
+    if (!self.containsKey(key)) {
+      throw new common.Exception("Key '" + key + "' does not exist");
+    }
+    innerDictionary[key] = value;
+    self.onItemChanged.raise(value, key);
+    return self;
+  };
+  </SetItem>
+  <AddItem>
+  this.add = function (key, value) {
+    common.arg({ name: 'key', value: key, type: String, required: true });
+    common.arg({ name: 'value', value: value });
+    if (self.containsKey(key)) {
+      throw new common.Exception("Key '" + key + "' already exists");
+    }
+    innerDictionary[key] = value;
+    self.count += 1;
+    self.hasAny = true;
+    self.onItemAdded.raise(value, key);
+    return self;
+  };
+  </AddItem>
+  <AddManyItems>
+  this.addMany = function (obj) {
+    common.arg({ name: 'obj', value: obj, type: Object, required: true });
+    self.clear();
+    objects.forEach(obj, function (item, key) {
+      self.add(key, item);
+    });
+    return self;
+  };
+  </AddManyItems>
+  </DictionaryMethods>
+
+  <InitializeWithObject>
+  if (obj) {
+    self.addMany(obj);
+  }
+  </InitializeWithObject>
+}
+</Dictionary>
+```

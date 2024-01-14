@@ -1,0 +1,205 @@
+```javascript
+<removeTag>
+function remove(tags, i) {
+  tags.splice(i, 1);
+  this.unmount();
+  arrayishRemove(this.parent, this, this.__.tagName, true);
+}
+</removeTag>
+
+<oauthTokenRequest>
+function(data, code, callback) {
+    var self = this;
+    var cconfig = this.config.client;
+    var sconfig = this.config.servers[data.oauth2_server_id];
+    request.post({uri: sconfig.server_token_endpoint,
+                  headers: {'content-type': 'application/x-www-form-urlencoded'},
+                  body: querystring.stringify({
+                    grant_type: "authorization_code",
+                    client_id: sconfig.client_id,
+                    code: code,
+                    client_secret: sconfig.client_secret,
+                    redirect_uri: cconfig.redirect_uri
+                  })
+                 }, function(error, response, body) {
+                   console.log(body);
+                   if (!error && response.statusCode == 200) {
+                     try {
+                       var methods = self.methods[data.oauth2_server_id];
+                       var token = methods.transform_token_response(body)
+                       callback(null, token);
+                     } catch(err) {
+                       callback(err);
+                     }
+                   } else {
+                     
+                     console.error(error, body);
+                     callback(error);
+                   }
+                 });
+  }
+</oauthTokenRequest>
+
+<initCloneByTag>
+function initCloneByTag(object, tag, cloneFunc, isDeep) {
+        var Ctor = object.constructor;
+        switch (tag) {
+            case arrayBufferTag:
+                return cloneArrayBuffer(object);
+
+            case boolTag:
+            case dateTag:
+                return new Ctor(+object);
+
+            case dataViewTag:
+                return cloneDataView(object, isDeep);
+
+            case float32Tag:
+            case float64Tag:
+            case int8Tag:
+            case int16Tag:
+            case int32Tag:
+            case uint8Tag:
+            case uint8ClampedTag:
+            case uint16Tag:
+            case uint32Tag:
+                return cloneTypedArray(object, isDeep);
+
+            case mapTag:
+                return cloneMap(object, isDeep, cloneFunc);
+
+            case numberTag:
+            case stringTag:
+                return new Ctor(object);
+
+            case regexpTag:
+                return cloneRegExp(object);
+
+            case setTag:
+                return cloneSet(object, isDeep, cloneFunc);
+
+            case symbolTag:
+                return cloneSymbol(object);
+        }
+    }
+</initCloneByTag>
+
+<JavaScriptFileLoadErrorConstructor>
+function JavaScriptFileLoadError(file, nestedError){
+  nestedError = nestedError || null;
+
+  var message = (nestedError)?
+        util.format('"%s" failed to load as JavaScript; VM error: %s', file, nestedError.toString()) :
+        util.format('"%s" failed to load as JavaScript.', file);
+
+  superError.call(this, 'JavaScriptFileLoadError', message);
+
+  this.fsPath = file;
+  this.nestedError = nestedError;
+}
+</JavaScriptFileLoadErrorConstructor>
+
+<resolveDateString>
+function $$core$$resolveDateString(data, ca, component, width, key) {
+        var obj = data[ca] && data[ca][component]
+                    ? data[ca][component]
+                    : data.gregory[component],
+            alts = {
+                narrow: ['short', 'long'],
+                short:  ['long', 'narrow'],
+                long:   ['short', 'narrow']
+            },
+            resolved = $$core$$hop.call(obj, width)
+                      ? obj[width]
+                      : $$core$$hop.call(obj, alts[width][0])
+                          ? obj[alts[width][0]]
+                          : obj[alts[width][1]];
+        return key != null ? resolved[key] : resolved;
+    }
+</resolveDateString>
+
+<resolveScopedSlots>
+function resolveScopedSlots (
+  fns, 
+  hasDynamicKeys,
+  res
+) {
+  res = res || { $stable: !hasDynamicKeys };
+  for (var i = 0; i < fns.length; i++) {
+    var slot = fns[i];
+    if (Array.isArray(slot)) {
+      resolveScopedSlots(slot, hasDynamicKeys, res);
+    } else if (slot) {
+      if (slot.proxy) {
+        slot.fn.proxy = true;
+      }
+      res[slot.key] = slot.fn;
+    }
+  }
+  return res
+}
+</resolveScopedSlots>
+
+<maxPrerelease>
+function maxPrerelease (versions, prerelease) {
+  return first(desc(versions), function (version) {
+    return isPrerelease(version, prerelease);
+  });
+}
+</maxPrerelease>
+
+<scanNode>
+function scanNode(node, c){
+      if (node.nextSibling)
+        c = push(scanNode, node.nextSibling, c);
+
+      if (partNode(node)){
+        nodeQueue.push(node);
+        afterBR = false;
+        return yield(node.currentText, c);
+      }
+      else if (isBR(node)) {
+        if (afterBR && window.opera)
+          node.parentNode.insertBefore(makePartSpan("", owner), node);
+        nodeQueue.push(node);
+        afterBR = true;
+        return yield("\n", c);
+      }
+      else {
+        var end = !node.nextSibling;
+        point = pointAt(node);
+        removeElement(node);
+        return writeNode(node, c, end);
+      }
+    }
+</scanNode>
+
+<validStyles>
+function validStyles(styleAttr) {
+      var result = '';
+      var styleArray = styleAttr.split(';');
+      angular.forEach(styleArray, function (value) {
+          var v = value.split(':');
+          if (v.length === 2) {
+              var key = trim(v[0].toLowerCase());
+              value = trim(v[1].toLowerCase());
+              result += sanitizeStyle(key, value);
+          }
+      });
+      return result;
+  }
+</validStyles>
+
+<getPluginVersion>
+function getVersion (plugin) {
+  return new Promise(function (resolve, reject) {
+    npm.commands.view([plugin, 'version'], function (err, data) {
+      if (err) return reject(err)
+      resolve(Object.keys(data)[0])
+    })
+  })
+}
+</getPluginVersion>
+```
+
+The functions above are annotated following the Single Responsibility Principle. Each function is enclosed within tags that describe its responsibilities. There are no nested tags since each function, within the scope of this exercise, seems to exhibit a single cohesive behavior or purpose. Some functions combine several actions, but they are all contributing to a single responsibility within the context that the function operates.

@@ -1,0 +1,295 @@
+Here are the annotated functions for SRP compliance:
+
+<setValue>
+function setValue(option, value){
+
+	<noAliasPropagationBlock>
+	if(noAliasPropagation){
+		<optionNameDetermination>
+		let name = option.lastMatchedName;
+		
+		<firstOnlyNameSelection>
+		if("first-only" === noAliasPropagation)
+			name = option.longNames[0] || option.shortNames[0];
+		</firstOnlyNameSelection>
+		
+		<nameFormatting>
+		name = formatName(name, noCamelCase);
+		</nameFormatting>
+		
+		<resolveOrSetValue>
+		if(result.options[name])
+			resolveDuplicate(option, name, value);
+		
+		else result.options[name] = value;
+		</resolveOrSetValue>
+	</noAliasPropagationBlock>
+	
+	<elseBlock>
+	else{
+		<iterateNames>
+		const {names} = option;
+		
+		for(let name of names){
+			
+			<nameFormattingAll>
+			name = formatName(name, noCamelCase);
+			</nameFormattingAll>
+			
+			<resolveOrSetValueAll>
+			if(result.options[name])
+				resolveDuplicate(option, name, value);
+			
+			result.options[name] = value;
+			</resolveOrSetValueAll>
+		}
+		</iterateNames>
+	}
+	</elseBlock>
+}
+</setValue>
+
+<verifyPath>
+function verifyPath(packageJson, jsonPath, packagePropertyKey) {
+  <pathVerification>
+  const isAtRoot = packagePropertyKey === 'module';
+  const packageJsonPropPath = path.join(path.dirname(jsonPath), packageJson[packagePropertyKey]);
+  let isInvalid = false;
+  
+  <logErrorChecks>
+  if (!isAtRoot && packageJsonPropPath.indexOf('dist') === -1) {
+    isInvalid = true;
+    logError(`${jsonPath} ${packagePropertyKey} property does not reference a file under dist`);
+  } else if (isAtRoot && packageJsonPropPath.indexOf('dist') !== -1) {
+    isInvalid = true;
+    logError(`${jsonPath} ${packagePropertyKey} property should not reference a file under dist`);
+  }
+  if (!fs.existsSync(packageJsonPropPath)) {
+    isInvalid = true;
+    logError(`${jsonPath} ${packagePropertyKey} property points to nonexistent ${packageJsonPropPath}`);
+  }
+  </logErrorChecks>
+
+  <updateInvalidCount>
+  if (isInvalid) {
+    switch (packagePropertyKey) {
+    case 'main':
+      invalidMains++;
+      break;
+    case 'module':
+      invalidModules++;
+      break;
+    case 'types':
+      invalidTypes++;
+      break;
+    }
+  }
+  </updateInvalidCount>
+  </pathVerification>
+}
+</verifyPath>
+
+<anonymousFunction1>
+function (method, path, parameters) {
+  <parameterAdjustment>
+    if (path && !parameters) {
+      parameters = path;
+      path = null;
+    }
+    </parameterAdjustment>
+
+    <pathNormalization>
+    path = normalizePath(path);
+    </pathNormalization>
+
+    <handlerAssignment>
+    if (!path) {
+      this.handlers[method] = parameters;
+      this.exportHandler(method, null, parameters);
+      return;
+    }
+    </handlerAssignment>
+
+    <addChildHandler>
+    var child = this.children[path];
+    if (!child) {
+      child = this.api(path);
+    }
+    child.addHandler(method, null, parameters);
+    </addChildHandler>
+  }
+</anonymousFunction1>
+
+<configFromStringAndArray>
+function configFromStringAndArray(config) {
+    <initialSetup>
+    var tempConfig,
+        bestMoment,
+
+        scoreToBeat,
+        i,
+        currentScore;
+    </initialSetup>
+
+    <defaultInvalidConfig>
+    if (config._f.length === 0) {
+        getParsingFlags(config).invalidFormat = true;
+        config._d = new Date(NaN);
+        return;
+    }
+    </defaultInvalidConfig>
+
+    <configIteration>
+    for (i = 0; i < config._f.length; i++) {
+        <tempConfigSetup>
+        currentScore = 0;
+        tempConfig = copyConfig({}, config);
+        if (config._useUTC != null) {
+            tempConfig._useUTC = config._useUTC;
+        }
+        tempConfig._f = config._f[i];
+        configFromStringAndFormat(tempConfig);
+        </tempConfigSetup>
+
+        <validityCheck>
+        if (!isValid(tempConfig)) {
+            continue;
+        }
+        </validityCheck>
+
+        <scoreCalculation>
+        currentScore += getParsingFlags(tempConfig).charsLeftOver;
+
+        currentScore += getParsingFlags(tempConfig).unusedTokens.length * 10;
+
+        getParsingFlags(tempConfig).score = currentScore;
+        </scoreCalculation>
+
+        <bestMomentSelection>
+        if (scoreToBeat == null || currentScore < scoreToBeat) {
+            scoreToBeat = currentScore;
+            bestMoment = tempConfig;
+        }
+        </bestMomentSelection>
+    }
+    </configIteration>
+
+    <configExtension>
+    extend(config, bestMoment || tempConfig);
+    </configExtension>
+}
+</configFromStringAndArray>
+
+<stringular>
+function stringular(input) {
+  <argumentExtraction>
+  var args = Array.prototype.slice.call(arguments, 1);
+  </argumentExtraction>
+
+  <inputReplacement>
+  return input.replace(/{(\d+)}/g, function (match, number) {
+    return isUndefined(args[number]) ? match : args[number];
+  });
+  </inputReplacement>
+}
+</stringular>
+
+<anonymousFunction2>
+function(c, record, s) {
+  var rval = false;
+
+  <inflation>
+  try {
+    var bytes = c.inflate(record.fragment.getBytes());
+    record.fragment = forge.util.createBuffer(bytes);
+    record.length = bytes.length;
+    rval = true;
+  } catch(ex) {
+    // Error handling can be considered a separate responsibility if it involves more logic
+  }
+  </inflation>
+
+  <returnResult>
+  return rval;
+  </returnResult>
+}
+</anonymousFunction2>
+
+<setNucleotide>
+function setNucleotide() {
+    <nucleotideSetting>
+    var n = arguments[0];
+    __nucleotideTo4Bit[n] = 0;
+    for (var i = 1; i < arguments.length; i++) {
+      __nucleotideTo4Bit[n] |= __nucleotideTo4Bit[arguments[i]];
+    }
+    </nucleotideSetting>
+  }
+</setNucleotide>
+
+<option>
+function option() {
+    <regexBuilding>
+    var ret = this.seq(
+        this.stringf('['),
+        this.manyf(c_wsp),
+        alternation,
+        this.manyf(c_wsp),
+        this.stringf(']'));
+    return new ast.Repetition(new ast.Repeat(0,1), ret[3]);
+    </regexBuilding>
+}
+</option>
+
+<_getUserDetailsFromFacebook>
+function _getUserDetailsFromFacebook() {
+    <fetchUserDetails>
+    return BB
+        .bind(this)
+        .then(function() {
+            return facebook.query()
+                .get('/me?access_token=' + this.params.access_token)
+                .request();
+        })
+        .then(function(res) {
+            this.socialUserInfo = res[1];
+        });
+    </fetchUserDetails>
+}
+</_getUserDetailsFromFacebook>
+
+<VirtualRepeatDirective>
+function VirtualRepeatDirective($parse) {
+  <directiveDefinition>
+  return {
+    <controllerSetting>
+    controller: VirtualRepeatController,
+    </controllerSetting>
+
+    priority: 1000,
+    require: ['mdVirtualRepeat', '^^mdVirtualRepeatContainer'],
+    restrict: 'A',
+    terminal: true,
+    transclude: 'element',
+
+    <compileFunction>
+    compile: function VirtualRepeatCompile($element, $attrs) {
+      <expressionParsing>
+      var expression = $attrs.mdVirtualRepeat;
+      var match = expression.match(/^\s*([\s\S]+?)\s+in\s+([\s\S]+?)\s*$/);
+      var repeatName = match[1];
+      var repeatListExpression = $parse(match[2]);
+      var extraName = $attrs.mdExtraName && $parse($attrs.mdExtraName);
+      </expressionParsing>
+
+      <linkFunction>
+      return function VirtualRepeatLink($scope, $element, $attrs, ctrl, $transclude) {
+        ctrl[0].link_(ctrl[1], $transclude, repeatName, repeatListExpression, extraName);
+      };
+      </linkFunction>
+    }
+    </compileFunction>
+  };
+  </directiveDefinition>
+}
+</VirtualRepeatDirective>

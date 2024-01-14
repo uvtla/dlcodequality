@@ -1,0 +1,267 @@
+```javascript
+<canResultsBeSummed>
+function canResultsBeSummed(item) {
+  var result = true;
+  <checkCannotSumProperty>
+  if (defined(item.cannotSum)) {
+    if (typeof item.cannotSum === "object") {
+      var conceptItems = item._concepts[0].items;
+      conceptItems.forEach(concept => {
+        var valuesThatCannotDisplayPercent = item.cannotSum[concept.id];
+        if (defined(valuesThatCannotDisplayPercent)) {
+          var activeValueIds = concept.activeItems.map(
+            activeConcept => activeConcept.id
+          );
+          if (
+            valuesThatCannotDisplayPercent.some(
+              cannotValue => activeValueIds.indexOf(cannotValue) >= 0
+            )
+          ) {
+            result = false;
+          }
+        }
+      });
+    } else {
+      result = !item.cannotSum; 
+    }
+  }
+  </checkCannotSumProperty>
+  return result;
+}
+</canResultsBeSummed>
+
+<constructPaths>
+function constructPaths(xmlElement) {
+  <initializePath>
+  if (xmlElement['path'] == null) {
+    return ['*'];
+  }
+  </initializePath>
+
+  var paths = [];
+  <buildPaths>
+  xmlElement.path.some(function(pathElement) {
+    var url = pathElement['$']['url'];
+
+    
+    if (url === '*') {
+      paths = ['*'];
+      return true;
+    }
+
+    paths.push(url);
+  });
+  </buildPaths>
+
+  return paths;
+}
+</constructPaths>
+
+<createExternsFromConstructor>
+function createExternsFromConstructor(className, constructorNode) {
+  <extractStatements>
+  var expressionStatements = getAllExpressionStatements(constructorNode);
+  </extractStatements>
+  var externString = '';
+
+  <createExternString>
+  expressionStatements.forEach(function(statement) {
+    var left = statement.expression.left;
+    var right = statement.expression.right;
+
+    
+    if (statement.expression.type != 'AssignmentExpression' ||
+        left.type != 'MemberExpression' ||
+        left.object.type != 'ThisExpression')
+      return;
+
+    console.assert(left);
+    console.assert(right);
+
+    
+    var comment = getLeadingBlockComment(statement);
+    if (!EXPORT_REGEX.test(comment))
+      return;
+
+    comment = removeExportAnnotationsFromComment(comment);
+
+    console.assert(left.property.type == 'Identifier');
+    var name = className + '.prototype.' + left.property.name;
+    externString += comment + '\n' + name + ';\n';
+  });
+  </createExternString>
+
+  return externString;
+}
+</createExternsFromConstructor>
+
+<spin>
+function spin(color, amount) {
+    <adjustHue>
+    var hsl = tinycolor(color).toHsl();
+    var hue = (hsl.h + amount) % 360;
+    hsl.h = hue < 0 ? 360 + hue : hue;
+    return tinycolor(hsl);
+    </adjustHue>
+}
+</spin>
+
+<generateWMSURL>
+function( wmsBaseUrl, queryOptions ) {
+		<processBbox>
+    var bbox = queryOptions.bbox;
+		if ( typeof bbox !== 'string' ) {
+			bbox = this.extentToBbox( bbox.minx,
+				bbox.miny,
+				bbox.maxx,
+				bbox.maxy );
+			delete queryOptions.bbox;
+		}
+    </processBbox>
+		<buildQueryOptions>
+    queryOptions = extend( {
+			request: 'GetMap',
+			version: this.version,
+			service: 'wms',
+			format: 'image/png',
+			styles: '',
+			width: '256',
+			height: '256',
+			bbox: bbox
+		}, queryOptions );
+    </buildQueryOptions>
+		<composeURL>
+    var url = new urijs( wmsBaseUrl ).addQuery( queryOptions );
+		return url.toString();
+    </composeURL>
+	}
+</generateWMSURL>
+
+<flattenObject>
+function flatten(object, options) {
+  <initialize>
+  var i, j, value, result, flattened = {};
+  options = options || {};
+  var check = options.check || isNotObject;
+  var separator = options.separator || '.';
+  var affix = options.affix ? separator + options.affix + separator : separator;
+  </initialize>
+
+  <flattenRecursively>
+  for (i in object) {
+    value = object[i]
+    if (check(value)) {
+      flattened[i] = value;
+      continue;
+    }
+    result = flatten(value, check);
+
+    if (Array.isArray(value)) {
+      for (j in result) {
+        flattened[(i + '[' + j + ']').split(affix).join(separator)] = result[j];
+      }
+    } else {
+      for (j in result) {
+        flattened[(i + separator + j).split(affix).join(separator)] = result[j];
+      }
+    }
+  }
+  </flattenRecursively>
+  return flattened;
+}
+</flattenObject>
+
+<loginHandlerFactory>
+function login(options) {
+  <setHost>
+  const defaultHost = options.host;
+  </setHost> 
+  return <generateLoginHandler> async function loginHandler(ctx) {
+    <setSession>
+    const loginCallbackPath = options.loginCallbackPath;
+    const loginPath = options.loginPath;
+    
+    if (ctx.session) {
+      ctx.session.userauthLoginReferer = formatReferer(ctx, loginPath, options.rootPath);
+      debug('set loginReferer into session: %s', ctx.session.userauthLoginReferer);
+    }
+    </setSession>
+
+    <redirectUser>
+    const host = defaultHost || ctx.host;
+    const protocol = options.protocol || ctx.protocol;
+    const currentURL = protocol + ':
+    const loginURL = options.loginURLFormatter(currentURL, options.rootPath, ctx);
+    debug('login redrect to loginURL: %s', loginURL);
+    redirect(ctx, loginURL);
+    </redirectUser>
+  };
+  </generateLoginHandler>
+}
+</loginHandlerFactory>
+
+<Logo>
+function Logo () {
+  return (
+    <renderSvg>
+    <svg width="36px" height="36px" viewBox="0 0 134 134">
+        
+        {...}
+        
+    </svg>
+    </renderSvg>
+  )
+}
+</Logo>
+
+<dataTypeValueGenerator>
+function (dataType) {
+      
+      <evaluateGenExpression>
+      if (!dataType.defaultValue && dataType.genExpression) {
+        return this._evalExp(dataType.genExpression, dataType, this.ds);
+      }
+      </evaluateGenExpression>
+
+      <defaultValueSwitch>
+      switch (dataType.id.toString()) {
+        case '10001':
+          <getDefaultValue10001>
+          return dataType.defaultValue || this._getStr(null, null, dataType.name);
+          </getDefaultValue10001>
+        case '10002':
+          <getDefaultValue10002>
+          var num = parseFloat(dataType.defaultValue);
+          return isNaN(num) ? this._getNum(null, 0, dataType.name) : num;
+          </getDefaultValue10002>
+        case '10003':
+          <getDefaultValue10003>
+          var dv = dataType.defaultValue;
+          return dv ? !/(^false|0)$/i.test(dv.toLowerCase()) : this._getBool();
+          </getDefaultValue10003>
+        case '10000':
+          <getDefaultValue10000>
+          return this._getVar();
+          </getDefaultValue10000>
+        case '9999':
+          <getDefaultValue9999>
+          return null;
+          </getDefaultValue9999>
+        default:
+          return null;
+      }
+      </defaultValueSwitch>
+    }
+</dataTypeValueGenerator>
+
+<normalizePath>
+function (path) {
+        <trimTrailingSlash>
+        if (path[path.length - 1] === '/') {
+            path = path.substr(0, path.length - 1);
+        }
+        </trimTrailingSlash>
+        return path;
+    }
+</normalizePath>
+```

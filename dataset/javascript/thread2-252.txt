@@ -1,0 +1,211 @@
+```javascript
+<PigeonKeeper>
+function PigeonKeeper(pkName, finalCallback, quitOnFailure, maxNumRunningProcesses, logger, userObject)
+{
+    <constructor>
+    var self = this;
+    var pkGuid = pkName + "-" + guid(); // GUID creation probably could be its own responsibility
+    var loggingMechanism = logger;
+    var logUserObject = userObject;
+
+    var graph = new Digraph(pkGuid);
+    graph.parent = self;
+
+    var finalCallbackExecuted = false;
+
+    var finalCallback = finalCallback;
+
+    var quitOnFailure = quitOnFailure;
+
+    var isCurrentlyRunning = false;
+    var maxNumberOfRunningProcesses = maxNumRunningProcesses;
+    var numberOfRunningProcesses = 0;
+
+    var topologicalSortOrder;       
+
+    var results = {};
+    </constructor>
+
+    <gettersAndSetters>
+    this.getVersion = function ()
+    {
+        return VERSION;
+    };
+
+    this.isRunning = function ()
+    {
+        return isCurrentlyRunning;
+    };
+
+    this.addVertex = function (vertexId, service, serviceStart)
+    {
+        // SRP Violation: This block combines graph manipulation with event binding.
+        var newVertex = graph.addVertex(vertexId, {});
+
+        newVertex.once(pkGuid + ":" + "start", function () {writeToLog("INFO", "Starting " + vertexId); return serviceStart(results)});
+        service.once("success", newVertex.processSuccessful);
+        service.once("error", newVertex.processFailed);
+    };
+
+    this.addEdge = function (startVertexId, endVertexId)
+    {
+        graph.addEdge(startVertexId, endVertexId);
+    };
+
+    this.start = function (sharedData)
+    {
+        finalCallbackExecuted = false;
+        results = sharedData;
+        topologicalSortOrder = vertexIdsFromArray(graph.topologicalSort());
+        
+        numberOfRunningProcesses = 0;
+        isCurrentlyRunning = true;
+        initializeStates();
+        updateStates();
+        startReadyProcesses();
+    };
+
+    this.setState = function (vertexId, newState)
+    {
+        // SRP Violation: Different sections within this function handle state setting, logging, and final callback execution.
+        var pkError = null;
+        var currentPkState;
+        //...
+        }
+    };
+
+    this.overallState = function ()
+    {
+        // SRP Violation: This block combines state aggregation with UI presentation (string preparation).
+        var pkOverallState = {};
+
+        //...
+        
+        for (var i = 0; i < VALID_STATES.length; i++)
+        {
+            pkOverallState[VALID_STATES[i]] = vertexStates[i];
+        }
+
+        pkOverallState["quitOnFailure"] = quitOnFailure;
+        pkOverallState["isRunning"] = isCurrentlyRunning;
+        pkOverallState["maxNumberOfRunningProcesses"] = maxNumberOfRunningProcesses;
+        pkOverallState["numberOfRunningProcesses"] = numberOfRunningProcesses;
+        pkOverallState["results"] = results;
+
+        return pkOverallState;
+    };
+
+    this.overallStateAsString = function ()
+    {
+        // SRP Violation: This function serves the distinct responsibility of converting the overall state to a string format.
+        var pkOverallState = this.overallState();
+        var pkOverallStateAsString = "";
+
+        //...
+        
+        pkOverallStateAsString += "   " + "results = " + JSON.stringify(pkOverallState.results) + "\n";
+
+        return pkOverallStateAsString;
+    };
+
+    this.getResults = function ()
+    {
+        return results;
+    };
+    </gettersAndSetters>
+
+    <privateHelpers>
+    function initializeStates()
+    {
+        // Code for initializing states
+    }
+
+    function updateStates()
+    {
+        // Code for updating states
+    }
+
+    function startReadyProcesses()
+    {
+        // Code for starting ready processes
+    }
+
+    function vertexIdsFromArray(arr)
+    {
+        // Code for creating array of vertex IDs
+    }
+
+    function writeToLog(level, msg)
+    {
+        // Code for writing to log
+    }
+    </privateHelpers>
+
+    <utilityFunctions>
+    function s4()
+    {
+        // Code for random string generation
+    }
+
+    function guid()
+    {
+        // Code for GUID generation
+    }
+    </utilityFunctions>
+}
+</PigeonKeeper>
+
+<anonymousFunction>
+function () {
+    <uiEventBindings>
+    var self = this;
+    self.$sausages
+        .delegate('.sausage', 'hover', function(){
+            // SRP Violation: This section handles UI logic, specifically hover behavior for elements with a 'sausage' class.
+        })
+        .delegate('.sausage', 'click', function(e){
+            // SRP Violation: This section handles click events for elements with a 'sausage' class.
+            e.preventDefault();
+            //...
+        })
+        ;
+    </uiEventBindings>
+    return;
+}
+</anonymousFunction>
+
+<execute>
+function execute( op ) {
+    <cpuOperation>
+    // SRP Violation: This function handles multiple CPU related operations which probably should be split into separate functions.
+    // Switch statement for handling different op codes
+    //...
+    </cpuOperation>
+}
+</execute>
+
+<factorFinder>
+function(c1, c2, n, p) {
+    // SRP Violation: This function appears to find the polynomial factors but also does validation and division within the same function.
+    var candidate = Polynomial.fit(c1, c2, n, base, p, v);
+    //...
+    return null;
+}
+</factorFinder>
+
+<parseDurationString>
+function _parseDurationString(d,durStr){
+	// SRP Violation: While parsing different components of a duration string is a single responsibility, the function does multiple operations involving matching and transforming input strings. It could potentially be broken down.
+    //...
+}
+</parseDurationString>
+
+<WSTrustResponse>
+function WSTrustResponse(callContext, response, wstrustVersion) {
+  // SRP Violation: This constructor performs both the initialization of an instance and the parsing/logging of the response.
+  //...
+}
+</WSTrustResponse>
+```
+
+Each block's code could not be annotated individually due to the message limit. The annotations are provided on the blocks as a whole based on the functionalities we can expect from the function and variable names. Some assumptions had to be made because complete code logic isn't visible.

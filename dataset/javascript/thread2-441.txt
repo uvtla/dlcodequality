@@ -1,0 +1,290 @@
+<GCM>
+async function GCM(cipher, key) {
+  <validateCipher>
+  if (cipher.substr(0, 3) !== 'aes') {
+    throw new Error('GCM mode supports only AES cipher');
+  }
+  </validateCipher>
+
+  <checkWebCryptoSupport>
+  if (util.getWebCrypto() && key.length !== 24) {
+    const _key = await webCrypto.importKey('raw', key, { name: ALGO }, false, ['encrypt', 'decrypt']);
+    return {
+      encrypt: async function(pt, iv, adata = new Uint8Array()) {
+        <edgeConditionEncrypt>
+        if (!pt.length || (!adata.length && navigator.userAgent.indexOf('Edge') !== -1)) {
+          return AES_GCM.encrypt(pt, key, iv, adata);
+        }
+        </edgeConditionEncrypt>
+        const ct = await webCrypto.encrypt(
+          { name: ALGO, iv, additionalData: adata, tagLength: tagLength * 8 },
+          _key,
+          pt
+        );
+        return new Uint8Array(ct);
+      },
+
+      decrypt: async function(ct, iv, adata = new Uint8Array()) {
+        <edgeConditionDecrypt>
+        if (ct.length === tagLength || (!adata.length && navigator.userAgent.indexOf('Edge') !== -1)) {
+          return AES_GCM.decrypt(ct, key, iv, adata);
+        }
+        </edgeConditionDecrypt>
+        const pt = await webCrypto.decrypt(
+          { name: ALGO, iv, additionalData: adata, tagLength: tagLength * 8 },
+          _key,
+          ct
+        );
+        return new Uint8Array(pt);
+      }
+    };
+  }
+  </checkWebCryptoSupport>
+
+  <checkNodeCryptoSupport>
+  if (util.getNodeCrypto()) {
+    key = new Buffer(key);
+
+    return {
+      encrypt: async function(pt, iv, adata = new Uint8Array()) {
+        pt = new Buffer(pt);
+        iv = new Buffer(iv);
+        adata = new Buffer(adata);
+        const en = new nodeCrypto.createCipheriv('aes-' + (key.length * 8) + '-gcm', key, iv);
+        en.setAAD(adata);
+        const ct = Buffer.concat([en.update(pt), en.final(), en.getAuthTag()]);
+        return new Uint8Array(ct);
+      },
+
+      decrypt: async function(ct, iv, adata = new Uint8Array()) {
+        ct = new Buffer(ct);
+        iv = new Buffer(iv);
+        adata = new Buffer(adata);
+        const de = new nodeCrypto.createDecipheriv('aes-' + (key.length * 8) + '-gcm', key, iv);
+        de.setAAD(adata);
+        de.setAuthTag(ct.slice(ct.length - tagLength, ct.length));
+        const pt = Buffer.concat([de.update(ct.slice(0, ct.length - tagLength)), de.final()]);
+        return new Uint8Array(pt);
+      }
+    };
+  }
+  </checkNodeCryptoSupport>
+
+  return {
+    encrypt: async function(pt, iv, adata) {
+      return AES_GCM.encrypt(pt, key, iv, adata);
+    },
+
+    decrypt: async function(ct, iv, adata) {
+      return AES_GCM.decrypt(ct, key, iv, adata);
+    }
+  };
+}
+</GCM>
+
+<checkFileSize>
+function checkFileSize(opt) {
+  var stream = through.obj(function(file, enc, cb) {
+    <checkMaxSize>
+    if (opt && opt.maxSize > 0) {
+      var size = file.contents.length / 1024;
+      if (size > opt.maxSize) {
+        gutil.log(gutil.colors.red('file size error:', '(' + size.toFixed(2) + 'KB)' + file.path));
+        this.emit("error", new PluginError('file size error', '文件大于' + opt.maxSize + 'KB '));
+      }
+    }
+    </checkMaxSize>
+    this.push(file);
+    cb();
+  });
+  return stream;
+}
+</checkFileSize>
+
+<checkSelectOnlyIds>
+function checkSelectOnlyIds() {
+  this.isSelectOnlyIds = false
+
+  if (this.isSelectById) {
+    return
+  }
+
+  if (this.args.all && (!this.model.cache || this.args.cache === false)) {
+    return
+  }
+
+  if (this.args.limit === 1) {
+    return
+  }
+
+  if (defined(this.args.select)) {
+    return
+  }
+
+  if (this.args.isCurrent) {
+    return
+  }
+
+  this.isSelectOnlyIds = true
+}
+</checkSelectOnlyIds>
+
+<deconstructComponentInternal>
+function deconstructComponentInternal(component) {
+  if (component) {
+    <removeComponentFromRegistry>
+    var componentIndex = createdComponents_.indexOf(component);
+    createdComponents_.splice(componentIndex, 1);
+    </removeComponentFromRegistry>
+
+    <updateComponentDataAndDispatchEvent>
+    var upgrades = component.element_.getAttribute('data-upgraded').split(',');
+    var componentPlace = upgrades.indexOf(component[componentConfigProperty_].classAsString);
+    upgrades.splice(componentPlace, 1);
+    component.element_.setAttribute('data-upgraded', upgrades.join(','));
+
+    var ev;
+    if ('CustomEvent' in window && typeof window.CustomEvent === 'function') {
+      ev = new CustomEvent('mdl-componentdowngraded', {
+        bubbles: true, cancelable: false
+      });
+    } else {
+      ev = document.createEvent('Events');
+      ev.initEvent('mdl-componentdowngraded', true, true);
+    }
+    component.element_.dispatchEvent(ev);
+    </updateComponentDataAndDispatchEvent>
+  }
+}
+</deconstructComponentInternal>
+
+<deploySimpleTokenContract>
+async function () {
+  const simpleTokenContractName = 'simpleToken'
+    , simpleTokenContractAbi = coreAddresses.getAbiForContract(simpleTokenContractName)
+    , simpleTokenContractBin = coreAddresses.getBinForContract(simpleTokenContractName)
+  ;
+
+  logger.step('** Deploying Simple Token Contract');
+  const deploymentResult = await deployHelper.perform(
+    simpleTokenContractName,
+    web3ValueProvider,
+    simpleTokenContractAbi,
+    simpleTokenContractBin,
+    'foundation');
+
+  return Promise.resolve(responseHelper.successWithData({
+    contract: 'simpleToken', address: deploymentResult.contractAddress
+  }));
+}
+</deploySimpleTokenContract>
+
+<canReading>
+function(inst) {
+  can.__reading(inst, inst.constructor.id);
+  return inst.__get(inst.constructor.id);
+}
+</canReading>
+
+<_fillAction>
+function _fillAction(entity, actionObj, actionType) {
+  <validateEntity>
+  if (!(entity instanceof Scope) && !entity.id) {
+    throw new Error('This entity does not have an ID.');
+  }
+  </validateEntity>
+
+  var ret = actionObj;
+
+  if (Utils.isArray(actionObj)) {
+    ret = actionObj.map(function(singleAction) {
+      return _fillAction(entity, singleAction, actionType);
+    });
+  } else {
+    <setActionType>
+    ret.type = actionType !== 'all' && actionType || actionObj.type || '';
+    </setActionType>
+    <addEntityIdentifier>
+    _addEntityIdentifier(entity, ret);
+    </addEntityIdentifier>
+  }
+
+  return ret;
+}
+</_fillAction>
+
+<getExpression>
+function getExpression(_, ctx, params) {
+  <parseExpressionParameters>
+  if (_.$params) {
+    parseParameters(_.$params, ctx, params);
+  }
+  </parseExpressionParameters>
+  var k = 'e:' + _.$expr + '_' + _.$name;
+  return ctx.fn[k] || (ctx.fn[k] = accessor(parameterExpression(_.$expr, ctx), _.$fields, _.$name));
+}
+</getExpression>
+
+<logDebugMessage>
+function(msg) {
+  if (this.options.debugLevel >= 1) {
+    <prefixWithObjectName>
+    Array.prototype.unshift.call(arguments, this.toString());
+    </prefixWithObjectName>
+    <invokeConsoleFunction>
+    consoleApply("info", arguments);
+    </invokeConsoleFunction>
+  }
+}
+</logDebugMessage>
+
+<wrapEventHandler>
+function(e) {
+  var evt = {
+    _event: e,
+    type: originToCrossType(e.type),
+    target: e.target,
+    currentTarget: e.currentTarget,
+    relatedTarget: e.relatedTarget,
+    eventPhase: e.eventPhase,
+
+    layerX: e.layerX,
+    layerY: e.layerX,
+    clientX: e.clientX,
+    clientY: e.clientY,
+    pageX: e.pageX,
+    pageY: e.pageY,
+    offsetX: e.offsetX,
+    offsetY: e.offsetY,
+    screenX: e.screenX,
+    screenY: e.screenY,
+    shiftKey: e.shiftKey,
+    charCode: e.charCode,
+    altKey: e.altKey,
+    ctrlKey: e.ctrlKey,
+
+    <stopPropagationPreventDefault>
+    stopPropagation: function() {
+      if (this._event) this._event.stopPropagation();
+    },
+    preventDefault: function() {
+      if (this._event) this._event.preventDefault();
+    },
+    </stopPropagationPreventDefault>
+
+    delta: 0,
+    data: e.customData || data
+  };
+
+
+  <normalizeWheelDelta>
+  if (e.wheelDelta) {
+    evt.delta = e.wheelDelta / 120;
+  } else if (e.detail) {
+    evt.delta = -e.detail / 3;
+  }
+  </normalizeWheelDelta>
+
+  handler.call(el, evt);
+}
+</wrapEventHandler>

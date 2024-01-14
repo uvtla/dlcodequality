@@ -1,0 +1,200 @@
+<checkNamespaces>
+function (checkNamespaces) {
+  var i, j
+  if (!checkNamespaces)
+    return true
+  if (!this.namespaces)
+    return false
+  for (i = checkNamespaces.length; i--;) {
+    for (j = this.namespaces.length; j--;) {
+      if (checkNamespaces[i] === this.namespaces[j])
+        return true
+    }
+  }
+  return false
+}
+</checkNamespaces>
+
+<coverage>
+function coverage(data, type) {
+  var comparisionFunc;
+  var n = 0;
+
+  <defineComparisionFunc>
+  function isCovered(val) {
+    return (val > 0);
+  }
+
+  function isMissed(val) {
+    return !isCovered(val);
+  }
+
+  if (type === 'covered') {
+    comparisionFunc = isCovered;
+  }
+  else if (type === 'missed') {
+    comparisionFunc = isMissed;
+  }
+  else {
+    throw new Error('Invalid type: ' + type);
+  }
+  </defineComparisionFunc>
+
+  var len = Object.keys(data.lines).length;
+
+  for (var i = 0; i < len; ++i) {
+    if (data.lines[i] !== null && comparisionFunc(data.lines[i])) {
+      ++n;
+    }
+  }
+
+  return n;
+}
+</coverage>
+
+<uploadMap>
+function uploadMap(map, e) {
+    let reader = new window.FileReader();
+
+    <readFile>
+    reader.readAsText(e.target.files[0]);
+    </readFile>
+
+    <processFile>
+    reader.onload = function () {
+        let data = JSON.parse(event.target.result);
+        map.new(data);
+    };
+    </processFile>
+}
+</uploadMap>
+
+<compareCharacters>
+function compareCharacters(theChar, before, after){
+  var theType = charType(theChar),
+      beforeType = charType(before),
+      afterType = charType(after);
+
+  return relevanceMatrix[theType][beforeType] +
+   0.4 * relevanceMatrix[theType][afterType];
+}
+</compareCharacters>
+
+<errHandler>
+function errHandler(err, req, res, next) {
+  <logError>
+  console.log(addTimestamp("Internal error: " + util.inspect(err)));
+  console.error(addTimestamp("Internal error: " + util.inspect(err)));
+  if (err && err.stack) {
+    console.error(err.stack);
+  }
+  </logError>
+
+  <generateErrorMessage>
+  var errorMessage = {
+    msg: 'Internal error: ' + util.inspect(err),
+    error: util.inspect(err)
+  };
+  </generateErrorMessage>
+
+  <sendResponse>
+  if (res) {
+    res.statusCode = 500;
+    res.end(JSON.stringify(errorMessage));
+  }
+  </sendResponse>
+
+  return errorMessage;
+}
+</errHandler>
+
+<lightNg>
+function lightNg(moduleName) {
+  if (!moduleName) {
+    throw 'lightNg moduleName Required';
+  }
+
+  var module = Modules[moduleName];
+
+  <moduleCheck>
+  if (module) {
+    return module;
+  } else {
+    module = new lightNgModuleConstructor();
+    Modules[moduleName] = module;
+    return module;
+  }
+  </moduleCheck>
+}
+</lightNg>
+
+<run>
+function run(element, cb) {
+  <level>
+  return function level(error, content) {
+    <debugMessage>
+    debug('Traversing children of element %s', element.name);
+    </debugMessage>
+
+    <traverserExecution>
+    if (sync) {
+      return traverser(element, content, cb)();
+    }
+
+    setImmediate(traverser(element, content, cb));
+    </traverserExecution>
+  }
+  </level>
+}
+</run>
+
+<getMeasureNames>
+function() {
+  if (this._aMeasureNames) {
+    return this._aMeasureNames;
+  }
+
+  <computeMeasureNames>
+  this._aMeasureNames = [];
+
+  for ( var sName in this._oMeasureSet) {
+    this._aMeasureNames.push(this._oMeasureSet[sName].getName());
+  }
+  </computeMeasureNames>
+
+  return this._aMeasureNames;
+}
+</getMeasureNames>
+
+<setChecked>
+function setChecked(newArr, oldArr) {
+  <beforeChangeCheck>
+  if (checklistBeforeChange && (checklistBeforeChange(scope) === false)) {
+    setValueInChecklistModel(getChecklistValue(), ngModelGetter(scope));
+    return;
+  }
+  </beforeChangeCheck>
+
+  <updateChecklistModel>
+  ngModelGetter.assign(scope, contains(newArr, getChecklistValue(), comparator));
+  </updateChecklistModel>
+}
+</setChecked>
+
+<_hash>
+function _hash() {
+  <mapArguments>
+  var set = Array.prototype.map.call(arguments, function(v) {
+      return typeof v === 'string' ? v : Object.keys(v).join(' ');
+  }).join(' ');
+  </mapArguments>
+
+  <createHash>
+  return set.split(/\s+/)
+    .reduce(function(res, keyword) {
+        res[keyword] = true;
+        return res;
+    }, {});
+  </createHash>
+}
+</_hash>

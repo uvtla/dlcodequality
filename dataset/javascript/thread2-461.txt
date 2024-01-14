@@ -1,0 +1,201 @@
+```javascript
+<deactivateControls>
+function() {
+        <deactivateIndividualControls>
+        if (this.pinchZoom) {
+            this.pinchZoom.deactivate();
+        }
+        this.zoomBox.deactivate();
+        this.dragPan.deactivate();
+        this.handlers.click.deactivate();
+        this.handlers.wheel.deactivate();
+        </deactivateIndividualControls>
+        return OpenLayers.Control.prototype.deactivate.apply(this, arguments);
+    }
+</deactivateControls>
+
+<buildPath>
+function buildPath(lines, jumpSize, jumpType) {
+
+        var path = new g.Path();
+        var segment;
+        
+        <initializePath>
+        segment = g.Path.createSegment('M', lines[0].start);
+        path.appendSegment(segment);
+        </initializePath>
+
+        <appendToPath>
+        joint.util.toArray(lines).forEach(function(line, index) {
+            if (line.isJump) {
+                var angle, diff;
+                var control1, control2;
+                <handleJumpTypes>
+                if (jumpType === 'arc') { 
+                    // ... implementation for 'arc' jump type
+                } else if (jumpType === 'gap') {
+                    // ... implementation for 'gap' jump type
+                } else if (jumpType === 'cubic') { 
+                    // ... implementation for 'cubic' jump type
+                }
+                </handleJumpTypes>
+            } else {
+                <handleLineSegment>
+                segment = g.Path.createSegment('L', line.end);
+                path.appendSegment(segment);
+                </handleLineSegment>
+            }
+        });
+        </appendToPath>
+
+        return path;
+    }
+</buildPath>
+
+<equals>
+function equals(obj) {
+  <initialChecks>
+  if (obj == null) return false;
+  if (!(obj instanceof BigDecimal)) return false;
+  </initialChecks>
+  
+  var rhs = obj; 
+  
+  <simpleEqualityCheck>
+  if (this.ind != rhs.ind) return false;
+  if (this.mant.length == rhs.mant.length && this.exp == rhs.exp && this.form == rhs.form) {
+    for (var i = 0; i < this.mant.length; i++) {
+      if (this.mant[i] != rhs.mant[i]) return false;
+    }
+  }
+  </simpleEqualityCheck>
+  else {
+    <complexEqualityCheck>
+    var lca = this.layout(); 
+    var rca = rhs.layout();
+    if (lca.length != rca.length) return false;
+    for (var i = 0; i < lca.length; i++) {
+      if (lca[i] != rca[i]) return false;
+    }
+    </complexEqualityCheck>
+  }
+  return true;
+}
+</equals>
+
+<initFromScratch>
+function initFromScratch(cbsConfigFromFile) {
+    <initializeState>
+    cbsConfigFromFile.initialState.forEach(function (item) {
+        return saveItemToBrowserStorage(item);
+    });
+    </initializeState>
+    
+    <returnNewState>
+    return {
+        [browser_storage_config_1.browserStorageConfig.DB_INITIAL_KEY]: cbsConfigFromFile.initialState
+    };
+    </returnNewState>
+}
+</initFromScratch>
+
+<getSinglePath>
+function getSinglePath(points, smooth, isInCircle, cfg) {
+  <pathCreation>
+  var path = void 0;
+  if (!smooth) {
+    path = PathUtil.getLinePath(points, false);
+    if (isInCircle) {
+      path.push(['Z']);
+    }
+  } else {
+    var constraint = cfg.constraint;
+    if (isInCircle && points.length) {
+      points.push({ x: points[0].x, y: points[0].y });
+    }
+    path = PathUtil.getSplinePath(points, false, constraint);
+  }
+  </pathCreation>
+
+  return path;
+}
+</getSinglePath>
+
+<generateDefaultName>
+function(name) {
+    <defaultNamingConvention>
+    if (/[A-Z]/.test(name.charAt(0)))
+        return "default" + name;
+    var firstLetter = name.charAt(0);
+    return "default" + firstLetter.toUpperCase() + name.substring(1);
+    </defaultNamingConvention>
+}
+</generateDefaultName>
+
+<defaultWorkerPolicies>
+function defaultWorkerPolicies(version, workspaceSid, workerSid) {
+  <createPolicies>
+  var activities = new Policy({
+      // ... policy details for activities
+  });
+  var tasks = new Policy({
+      // ... policy details for tasks
+  });
+  var reservations = new Policy({
+      // ... policy details for reservations
+  });
+  var workerFetch = new Policy({
+      // ... policy details for worker fetch
+  });
+  </createPolicies>
+  
+  return [activities, tasks, reservations, workerFetch];
+}
+</defaultWorkerPolicies>
+
+<dive>
+function dive(name) {
+    <recursionHandling>
+    if (dive[name]) {
+        return;
+    }
+    dive[name] = true;
+    dive.required.push(name);
+
+    var deps = allModules[name] || [];
+    deps.forEach(function (item) {
+        dive(item);
+    });
+    </recursionHandling>
+}
+</dive>
+
+<map>
+function map(str, props, fn) {
+  <replaceMatching>
+  var re = /\.\w+|\w+ *\(|"[^"]*"|'[^']*'|\/([^/]+)\/|[a-zA-Z_]\w*/g;
+  return str.replace(re, function (_) {
+    if ('(' == _[_.length - 1]) return fn(_);
+    if (!~props.indexOf(_)) return _;
+    return fn(_);
+  });
+  </replaceMatching>
+}
+</map>
+
+<dispatchMessages>
+function (data) {
+    <prepareDataAndDispatch>
+    var self = this;
+
+    if (typeof data === 'object') {
+      data = EJSON.stringify(data);
+    }
+
+    _.each(self.callbacks['message'], function (cb) {
+      cb(data);
+    });
+    </prepareDataAndDispatch>
+}
+</dispatchMessages>
+```

@@ -1,0 +1,195 @@
+```javascript
+<functionGetAllFilesWithExtension>
+function (handler, directory) {
+        <getExtensionGlobPattern>
+        var globPattern = this.getExtensionGlob(handler.extensions, ALL_DIRS); 
+        </getExtensionGlobPattern>
+        
+        <constructFileObjects>
+        return _.map(glob.sync(globPattern, {cwd: directory}), function (file) {
+            return {name: file, path: path.join(directory, file)};
+        });
+        </constructFileObjects>
+}
+</functionGetAllFilesWithExtension>
+
+<functionHttpContext>
+function HttpContext(httpRequest, httpResponse) {
+    // not annotated as no distinct blocks identified
+    
+    this.application = null;
+
+    
+    this.request = httpRequest;
+    
+    this.response = httpResponse;
+    
+    // Below are property definitions that are part of the HttpContext setup
+    // Following the balanced SRP approach, these are not individually annotated
+    // as they collectively represent the responsibility of defining the context   
+    
+    // omitted other similar definitions for brevity
+}
+</functionHttpContext>
+
+<functionRegisterPostMessageCallback>
+function registerPostMessageCallback(iframe, callback) {
+        <initializeVariables>
+        var iframeName = iframe.id,
+            fileId = getFileIdForIframeName(iframeName),
+            uuid = getUuid(fileId);
+        </initializeVariables>
+
+        <storeCallback>
+        onloadCallbacks[uuid] = callback;
+        </storeCallback>
+
+        <setupIframeLoadEvent>
+        detachLoadEvents[fileId] = qq(iframe).attach("load", function() { /* implementation omitted */ });
+        </setupIframeLoadEvent>
+
+        <startMessageReceiver>
+        corsMessageReceiver.receiveMessage(iframeName, function(message) { /* implementation omitted */ });
+        </startMessageReceiver>
+}
+</functionRegisterPostMessageCallback>
+
+<functionToJSON>
+function toJSONMethod() {
+    <prepareSerialization>
+    function toJSON(item) {
+      return item.toJSON();
+    }
+
+    var result = Object.create(null);
+    result.ruleIterators = this.ruleIterators.map(toJSON);
+    /* omitted similar lines for brevity */
+    result.dtstart = this.dtstart.toJSON();
+    result.complete = this.complete;
+    </prepareSerialization>
+
+    <returnSerializedObject>
+    return result;
+    </returnSerializedObject>
+}
+</functionToJSON>
+
+<functionCsvToMarkdown>
+function csvToMarkdown(csvContent, delimiter, hasHeader) {
+    <initializeDefaults>
+    if (delimiter === void 0) { delimiter = "\t"; }
+    if (hasHeader === void 0) { hasHeader = false; }
+    </initializeDefaults>
+
+    <prepareContentFormatting>
+    if (delimiter != "\t") {
+        csvContent = csvContent.replace(/\t/g, "    ");
+    }
+    </prepareContentFormatting>
+
+    <parseCsvContent>
+    var columns = csvContent.split("\n");
+    /* omitted similar lines for brevity */
+    </parseCsvContent>
+
+    <generateMarkdownOutput>
+    var headerOutput = "";
+    var seperatorOutput = "";
+    /* omitted similar lines for brevity */
+    return "" + headerOutput + seperatorOutput + rowOutput;
+    </generateMarkdownOutput>
+}
+</functionCsvToMarkdown>
+
+<functionEventKeyUp>
+function eventKeyUp(e) {
+  <getKeyCode>
+  var keycode = ('which' in e) ? e.which : e.keyCode;
+  </getKeyCode>
+
+  <triggerKeyUp>
+  keyUp(keycode);
+  </triggerKeyUp>
+}
+</functionEventKeyUp>
+
+<functionHasTextMimeType>
+function hasTextMimetype(types) {
+      <checkForTextMimeType>
+      if (!types) return true;
+      for (var i = 0; i < types.length; i++) {
+        if (types[i] === 'Text' || types[i] === 'text/plain') return true;
+      }
+      </checkForTextMimeType>
+      
+      <returnDefault>
+      return false;
+      </returnDefault>
+}
+</functionHasTextMimeType>
+
+<functionNextLine>
+function next_line() {
+            <prepareForNextLine>
+            var at;
+            if (line >= lines.length) {
+                return false;
+            }
+            </prepareForNextLine>
+            
+            <analyzeAndValidateLine>
+            character = 1;
+            /* omitted lines for brevity */
+            if (option.maxlen && option.maxlen < source_row.length) {
+                warn_at('too_long', line, source_row.length);
+            }
+            </analyzeAndValidateLine>
+            
+            <returnSuccess>
+            return true;
+            </returnSuccess>
+}
+</functionNextLine>
+
+<functionParseAttributes>
+function parseAttributes(attrStr) {
+    <parseAttributresRegex>
+    var reAttributes = /([^=<>\"\'\s]+)\s*(?:=\s*["']?([^"']*)["']?)?/g;
+    var result = {};
+    var match;
+    </parseAttributresRegex>
+
+    <matchAndStoreAttributes>
+    if (attrStr) {
+        while (match = reAttributes.exec(attrStr)) {
+            result[match[1]] = match[2] || true;
+        }
+    }
+    </matchAndStoreAttributes>
+
+    <returnAttributeObject>
+    return result;
+    </returnAttributeObject>
+}
+</functionParseAttributes>
+
+<functionAddToChildRegistry>
+function addToChildRegistry(childRegistry, child, name) {
+    <assertParameters>
+    assertType(childRegistry, 'object', false, 'Invalid child registry specified');
+    assertType(child, [Node, Array], false, 'Invalid child(ren) specified');
+    assertType(name, 'string', true, 'Invalid name specified');
+    </assertParameters>
+
+    <addChildToRegistry>
+    let inferredName = getInstanceNameFromElement(child);
+    /* omitted lines for brevity */
+    childRegistry[name] = child;
+    </addChildToRegistry>
+
+    <returnSuccess>
+    return true;
+    </returnSuccess>
+}
+</functionAddToChildRegistry>
+```

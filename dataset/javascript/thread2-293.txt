@@ -1,0 +1,244 @@
+```javascript
+<safelyUnmountComponent>
+function (safely) {
+  <tagSwitch>
+  switch (this._tag) {
+    case 'audio':
+    case 'form':
+    case 'iframe':
+    case 'img':
+    case 'link':
+    case 'object':
+    case 'source':
+    case 'video':
+      <removeListeners>
+      var listeners = this._wrapperState.listeners;
+      if (listeners) {
+        for (var i = 0; i < listeners.length; i++) {
+          listeners[i].remove();
+        }
+      }
+      </removeListeners>
+      break;
+    case 'html':
+    case 'head':
+    case 'body':
+      <handleUnremovableComponents>
+      true ?  false ? invariant(false, '<%s> tried to unmount. Because of cross-browser quirks it is impossible to unmount some top-level components (eg <html>, <head>, and <body>) reliably and efficiently. To fix this, have a single top-level component that never unmounts render these elements.', this._tag) : _prodInvariant('66', this._tag) : void 0;
+      </handleUnremovableComponents>
+      break;
+  }
+  </tagSwitch>
+
+  <cleanUpComponent>
+  this.unmountChildren(safely);
+  ReactDOMComponentTree.uncacheNode(this);
+  EventPluginHub.deleteAllListeners(this);
+  this._rootNodeID = 0;
+  this._domID = 0;
+  this._wrapperState = null;
+  </cleanUpComponent>
+
+  <devEnvironmentCleanup>
+  if (false) {
+    setAndValidateContentChildDev.call(this, null);
+  }
+  </devEnvironmentCleanup>
+}
+</safelyUnmountComponent>
+
+<copyRuntimeFiles>
+function () {
+  var outputDir = path.join(copyDir, jalangiRuntimeDir);
+  mkdirp.sync(outputDir);
+  var copyFile = function (srcFile) {
+    if (jalangiRoot) {
+      srcFile = path.join(jalangiRoot, srcFile);
+    }
+    var outputFile = path.join(outputDir, path.basename(srcFile));
+    fs.writeFileSync(outputFile, String(fs.readFileSync(srcFile)));
+  };
+  instUtil.headerSources.forEach(copyFile);
+  if (analyses) {
+    analyses.forEach(function (f) {
+      var outputFile = path.join(outputDir, path.basename(f));
+      fs.writeFileSync(outputFile, String(fs.readFileSync(f)));
+    });
+  }
+}
+</copyRuntimeFiles>
+
+<setupShapeColor>
+function setupShapeColor() {
+  var bgOpy = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : bgOpacity;
+  r.eleFillStyle(context, node, bgOpy);
+}
+</setupShapeColor>
+
+<setupContainerStyles>
+function($container) {
+  <retrieveStyles>
+  var styles = window.getComputedStyle($container, null);
+  var position = styles.getPropertyValue("position");
+  var overflow = styles.getPropertyValue("overflow");
+  var display = styles.getPropertyValue("display");
+  </retrieveStyles>
+
+  <modifyStyles>
+  if (!position || position === "static") {
+    $container.style.position = "relative";
+  }
+  if (overflow !== "hidden") {
+    $container.style.overflow = "hidden";
+  }
+  if (!display || display === "inline") {
+    $container.style.display = "block";
+  }
+  if ($container.clientHeight === 0) {
+    $container.style.height = "100%";
+  }
+  </modifyStyles>
+
+  <addClassToContainer>
+  if ($container.className.indexOf("object-fit-polyfill") === -1) {
+    $container.className = $container.className + " object-fit-polyfill";
+  }
+  </addClassToContainer>
+}
+</setupContainerStyles>
+
+<ScrapeErrorConstructor>
+function ScrapeError(msg, response, bodyString) {
+  Error.call(this, msg);
+
+  this.response = response;
+  this.bodyString = bodyString;
+}
+</ScrapeErrorConstructor>
+
+<processResponseSuggestions>
+function (response) {
+  var that = this,
+      suggestions;
+
+  <validateResponse>
+  if (!response || !$.isArray(response.suggestions)) {
+      return false;
+  }
+  </validateResponse>
+
+  <verifyAndSetSuggestions>
+  that.verifySuggestionsFormat(response.suggestions);
+  that.setUnrestrictedValues(response.suggestions);
+  </verifyAndSetSuggestions>
+
+  <applyCustomFetchFunction>
+  if ($.isFunction(that.options.onSuggestionsFetch)) {
+      suggestions = that.options.onSuggestionsFetch.call(that.element, response.suggestions);
+      if ($.isArray(suggestions)) {
+          response.suggestions = suggestions;
+      }
+  }
+  </applyCustomFetchFunction>
+
+  return true;
+}
+</processResponseSuggestions>
+
+<NativePullQueueConstructor>
+function NativePullQueue(obj) {
+  if (!(this instanceof NativePullQueue)) {
+    return new NativePullQueue(obj);
+  }
+  EventEmitter.call(this);
+
+  obj = obj || {};
+
+  this.name = obj.name || '';
+  this.type = 'pull';
+  this.queue = obj.queue || null;
+}
+</NativePullQueueConstructor>
+
+<getDomainKeys>
+function() {
+  "use strict";
+
+  return this._domains.keys()
+    .map(function(d) { return parseInt(d, 10); })
+    .sort(function(a,b) { return a-b; });
+}
+</getDomainKeys>
+
+<initializeModbusSerial>
+function(path, options) {
+  var modbus = this;
+
+  options = options || {};
+
+  <configureOptions>
+  options.autoOpen = false;
+  </configureOptions>
+
+  <initializeBufferAndCommands>
+  this._buffer = Buffer.from("");
+  this._id = 0;
+  this._cmd = 0;
+  this._length = 0;
+  </initializeBufferAndCommands>
+
+  <createSerialPortClient>
+  this._client = new SerialPort(path, options);
+  </createSerialPortClient>
+
+  <setupClientDataHandler>
+  this._client.on("data", function(data) {
+    modbus._buffer = Buffer.concat([modbus._buffer, data]);
+    modbusSerialDebug({ action: "receive serial ascii port", data: data, buffer: modbus._buffer });
+    var sdIndex = modbus._buffer.indexOf(0x3A); 
+    if(sdIndex === -1) {
+      modbus._buffer = Buffer.from("");
+      return;
+    }
+    if(sdIndex > 0) {
+      modbus._buffer = modbus._buffer.slice(sdIndex);
+    }
+    if(modbus._buffer.includes("\r\n", 1, "ascii") === true) {
+      var edIndex = modbus._buffer.indexOf(0x0A); 
+      if(edIndex !== modbus._buffer.length - 1) {
+        modbus._buffer = modbus._buffer.slice(0, edIndex + 1);
+      }
+      var _data = _asciiDecodeResponseBuffer(modbus._buffer);
+      if(_data !== null) {
+        if (_checkData(modbus, _data)) {
+          modbus.emit("data", _data);
+        }
+      }
+      modbus._buffer = Buffer.from("");
+    }
+  });
+  </setupClientDataHandler>
+
+  <defineIsOpenProperty>
+  Object.defineProperty(this, "isOpen", {
+      enumerable: true,
+      get: function() {
+          return this._client.isOpen;
+      }
+  });
+  </defineIsOpenProperty>
+
+  EventEmitter.call(this);
+}
+</initializeModbusSerial>
+
+<calculateWidth>
+function w(d, outer) {
+  var width = self.options.cellSize*self._domainType[self.options.subDomain].column(d) + self.options.cellPadding*self._domainType[self.options.subDomain].column(d);
+  if (arguments.length === 2 && outer === true) {
+    return width += self.domainHorizontalLabelWidth + self.options.domainGutter + self.options.domainMargin[1] + self.options.domainMargin[3];
+  }
+  return width;
+}
+</calculateWidth>
+```

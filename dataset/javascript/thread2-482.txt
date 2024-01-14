@@ -1,0 +1,285 @@
+```javascript
+<f_todo_secildi>
+function f_todo_secildi(_uyari) { 
+  <logging_activity>
+  l.info("f_todo_secildi");
+  </logging_activity>
+
+  <create_user_ids>
+  var kullanici_idleri = f_uye_id_array(_uyari);
+  </create_user_ids>
+
+  <map_and_process>
+  return _uyari.RENDER.Sonuc.Data.map(function (_elm) {
+    <generate_details>
+    var detay = f_detay_olustur(schema.SABIT.UYARI.TODO, _uyari, _elm);
+    </generate_details>
+    
+    <add_and_process_alert_result>
+    return f_uyari_sonucu_ekle(detay)
+      .then(function (_id) {
+        <require_database_task>
+        var db_gorev = require('./db_gorev');
+        </require_database_task>
+        
+        <map_and_add_task>
+        return kullanici_idleri.mapX(null, db_gorev.f_db_gorev_ekle, _id).allX();
+        </map_and_add_task>
+      });
+    </add_and_process_alert_result>
+  }).allX();
+  </map_and_process>
+}
+</f_todo_secildi>
+```
+
+```javascript
+<prependTo>
+function prependTo(newNode, parentNode, siblingNode) {
+  parentNode.insertBefore(newNode, siblingNode || parentNode.firstChild);
+}
+</prependTo>
+```
+
+```javascript
+<generateUniqueKey>
+function generateUniqueKey(index, initialKey) {
+  <initialize_key_and_counter>
+  var currentCandidate = initialKey;
+  var counter = 0;
+  </initialize_key_and_counter>
+
+  <key_conflict_resolution>
+  while (index[currentCandidate]) {
+    var numberAtEndOfKeyMatches = currentCandidate.match(NUMBER_AT_END_OF_KEY_REGEX);
+    if (numberAtEndOfKeyMatches !== null) {
+      var nextNumber = parseInt(numberAtEndOfKeyMatches[1], 10) + 1;
+      currentCandidate = currentCandidate.replace(NUMBER_AT_END_OF_KEY_REGEX, "(" + nextNumber + ")");
+    } else {
+      currentCandidate += " (1)";
+    }
+    
+    counter++;
+    if (counter >= 100000) {
+      throw new DeveloperError("Was not able to find a unique key for " + initialKey + " after 100000 iterations." +
+      " This is probably because the regex for matching keys was somehow unable to work for that key.");
+    }
+  }
+  </key_conflict_resolution>
+
+  return currentCandidate;
+}
+</generateUniqueKey>
+```
+
+```javascript
+<AsyncSlice>
+function AsyncSlice(category, title, colorId, start, args, duration, opt_isTopLevel, opt_cpuStart, opt_cpuDuration,
+                      opt_argsStripped) {
+    tr.model.TimedEvent.call(this, start);
+
+    <initialization>
+    this.category = category || '';
+    this.originalTitle = title;
+    this.title = title;
+    this.colorId = colorId;
+    this.args = args;
+    this.startStackFrame = undefined;
+    this.endStackFrame = undefined;
+    this.didNotFinish = false;
+    this.important = false;
+    this.subSlices = [];
+    this.parentContainer = undefined;
+
+    this.id = undefined;
+    this.startThread = undefined;
+    this.endThread = undefined;
+    this.cpuStart = undefined;
+    this.cpuDuration = undefined;
+    this.argsStripped = false;
+
+    this.startStackFrame = undefined;
+    this.endStackFrame = undefined;
+
+    this.duration = duration;
+    this.isTopLevel = (opt_isTopLevel === true);
+    </initialization>
+
+    <optional_parameters>
+    if (opt_cpuStart !== undefined) this.cpuStart = opt_cpuStart;
+    if (opt_cpuDuration !== undefined) this.cpuDuration = opt_cpuDuration;
+    if (opt_argsStripped !== undefined) this.argsStripped = opt_argsStripped;
+    </optional_parameters>
+}
+</AsyncSlice>
+```
+
+```javascript
+<_toBuffer>
+function _toBuffer(buffer) {
+    <buffer_initialization>
+    var _buffer, nums;
+
+    if (Buffer.isBuffer(buffer)) {
+        _buffer = new Buffer(buffer.length);
+        buffer.copy(_buffer);
+    } else if (Array.isArray(buffer)) {
+        _buffer = new Buffer(buffer);
+    } else if (typeof buffer === 'string') {
+        nums = buffer.replace(/^0x/i, '').match(/.{1,2}(?=(..)+(?!.))|..?$/g);
+        _buffer = new Buffer(nums.length);
+
+        _buffer.fill(0);
+
+        <parse_and_write_nums_to_buffer>
+        for (var i = nums.length - 1; i >= 0; i--) {
+            _buffer.writeUInt8(parseInt(nums[i], 16), i);
+        }
+        </parse_and_write_nums_to_buffer>
+    }
+    </buffer_initialization>
+
+    return _buffer;
+}
+</_toBuffer>
+```
+
+```javascript
+<splitValue>
+function splitValue(value, separator) {
+    <prepare_regexp>
+    var separatorRegexp = new RegExp(separator);
+    var escapedSeparatorRegexp = new RegExp('\\\\' + separator, 'g');
+    </prepare_regexp>
+
+    <escape_and_split>
+    value = value.replace(escapedSeparatorRegexp, 'ΩΩΩ');
+    if (value.match(separatorRegexp)) {
+        value = value.split(separator);
+
+        <un_escape_split_values>
+        value = value.map(function (item) {
+            return item.replace(/ΩΩΩ/g, separator);
+        });
+        </un_escape_split_values>
+    } else {
+        value = value.replace(/ΩΩΩ/g, separator);
+    }
+    </escape_and_split>
+    
+    return value;
+}
+</splitValue>
+```
+
+```javascript
+<unnamed_location_handler>
+function() {
+  <initialization_and_checks>
+  var location = this.options.location, latLng;
+  if (!location) { return; }
+  </initialization_and_checks>
+
+  <location_processing>
+  if (typeof location == 'string') {
+    this.find(location);
+    return;
+  }
+  if (location instanceof Array) {
+    latLng = new google.maps.LatLng(location[0], location[1]);
+  }
+  if (location instanceof google.maps.LatLng){
+    latLng = location;
+  }
+  </location_processing>
+
+  <update_map_and_marker>
+  if (latLng){
+    if (this.map){ this.map.setCenter(latLng); }
+    if (this.marker){ this.marker.setPosition(latLng); }
+  }
+  </update_map_and_marker>
+}
+</unnamed_location_handler>
+```
+
+```javascript
+<CompositeDisposable>
+function CompositeDisposable () {
+  <argument_handling>
+  var args = [], i, len;
+  if (Array.isArray(arguments[0])) {
+    args = arguments[0];
+    len = args.length;
+  } else {
+    len = arguments.length;
+    args = new Array(len);
+    for(i = 0; i < len; i++) { args[i] = arguments[i]; }
+  }
+  this._disposables = args;
+  </argument_handling>
+  
+  <properties_initialization>
+  this.isDisposed = false;
+  this.length = args.length;
+  </properties_initialization>
+}
+</CompositeDisposable>
+```
+
+```javascript
+<computeFactorial>
+function computeFactorial(number) {
+    <validate_and_prepare_number>
+    number = Number(number);
+    if (!(_regex.regex.positiveInteger.test(String(number)) || number === 0)) {
+        throw new Error("number should be 0 or positiveNumber but got " + number);
+    }
+    if (number === 0) {
+        return 1;
+    }
+    </validate_and_prepare_number>
+
+    <calculate_factorial>
+    var result = 1;
+    for (var i = 2; i <= number; i++) {
+        result *= i;
+    }
+    </calculate_factorial>
+
+    return result;
+}
+</computeFactorial>
+```
+
+```javascript
+<reset_deprecated_application_instance>
+function () {
+  <assert_globals_mode>
+  _emberMetalDebug.assert('Calling reset() on instances of `Ember.Application` is not supported when globals mode is disabled; call `visit()` to create new `Ember.ApplicationInstance`s and dispose them via their `destroy()` method instead.', this._globalsMode && this.autoboot);
+  </assert_globals_mode>
+
+  <initialize_and_destroy>
+  var instance = this.__deprecatedInstance__;
+  this._readinessDeferrals = 1;
+  this._bootPromise = null;
+  this._bootResolver = null;
+  this._booted = false;
+
+  
+  <handle_reset>
+  function handleReset() {
+    _emberMetalRun_loop.default(instance, 'destroy');
+    this._buildDeprecatedInstance();
+    _emberMetalRun_loop.default.schedule('actions', this, '_bootSync');
+  }
+  </handle_reset>
+
+  <join_run_loop>
+  _emberMetalRun_loop.default.join(this, handleReset);
+  </join_run_loop>
+}
+</reset_deprecated_application_instance>
+```
+
+Most of the functions above are compliant with the Single Responsibility Principle, except for a few which are annotated with multiple responsibilities within the enclosing function. Tags are placed around blocks of code that represent different responsibilities, which involve more than just a single line or simple instruction.

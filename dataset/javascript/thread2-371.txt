@@ -1,0 +1,237 @@
+```javascript
+<PacketPong>
+function PacketPong(properties) {
+  <propertyInitialization>
+  if (properties)
+    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+      if (properties[keys[i]] != null)
+        this[keys[i]] = properties[keys[i]];
+  </propertyInitialization>
+}
+</PacketPong>
+
+<parseArgs>
+function parseArgs(args) {
+  <optionInitialization>
+  var options = {
+    arch: process.arch,
+    platform: process.platform,
+    force: process.env.npm_config_force === 'true',
+  };
+  </optionInitialization>
+
+  <argsFiltering>
+  options.args = args.filter(function(arg) {
+    if (arg === '-f' || arg === '--force') {
+      options.force = true;
+      return false;
+    } else if (arg.substring(0, 13) === '--target_arch') {
+      options.arch = arg.substring(14);
+    } else if (arg === '-d' || arg === '--debug') {
+      options.debug = true;
+    } else if (arg.substring(0, 13) === '--libsass_ext' && arg.substring(14) !== 'no') {
+      options.libsassExt = true;
+    }
+
+    return true;
+  });
+  </argsFiltering>
+
+  return options;
+}
+</parseArgs>
+
+<exec>
+function exec(prop, action) {
+  <delayedAction>
+  if (!prop.delay) action();
+  else {
+    clearTimeout(prop.timeout);
+    prop.timeout = setTimeout(action, prop.delay);
+  }
+  </delayedAction>
+}
+</exec>
+
+<call>
+function call(key) {
+  <initializations>
+  var node = this.node;
+  if (!node) return;
+  
+  var opts = this.opts;
+  </initializations>
+
+  <processingCallbacks>
+  var _arr = [opts[key], opts[node.type] && opts[node.type][key]];
+  for (var _i = 0; _i < _arr.length; _i++) {
+    var fns = _arr[_i];
+    if (!fns) continue;
+
+    for (var _i2 = 0; _i2 < fns.length; _i2++) {
+      var fn = fns[_i2];
+      if (!fn) continue;
+
+      if (!this.node) return;
+
+      var previousType = this.type;
+
+      var replacement = fn.call(this, this.node, this.parent, this.scope, this.state);
+
+      if (replacement) {
+        this.replaceWith(replacement, true);
+      }
+
+      if (this.shouldStop || this.shouldSkip || this.removed) return;
+
+      if (previousType !== this.type) {
+        this.queueNode(this);
+        return;
+      }
+    }
+  }
+  </processingCallbacks>
+}
+</call>
+
+<anonymousSetCookie>
+function(name, value, options) {
+  <optionsMerge>
+  options = angular.extend(angular.extend({}, defaultOptions), options || {});
+  </optionsMerge>
+
+  <setCookie>
+  document.cookie = cookie.serialize(name, value, options);
+  </setCookie>
+}
+</anonymousSetCookie>
+
+<_getBulletList>
+function _getBulletList(list) {
+  <buildHTMLList>
+  var message = "<ul class='dialog-list'>";
+  list.forEach(function (info) {
+    message += "<li>" + info + "</li>";
+  });
+  message += "</ul>";
+  </buildHTMLList>
+
+  return message;
+}
+</_getBulletList>
+
+<generateScopeList>
+function generateScopeList(hiddenValues) {
+  <initialSetup>
+  hiddenValues = hiddenValues || [];
+  var htmlString = "";
+  </initialSetup>
+
+  <buildHTMLString>
+  var ieClass = util.isIE ? "-ie" : "";
+  for (var i = 0; i < scopeList.length; i++) {
+    htmlString += generateHTMLListItem(scopeList[i], hiddenValues, ieClass);
+  }
+  </buildHTMLString>
+
+  return htmlString;
+}
+</generateScopeList>
+
+<generateHTMLListItem>
+function generateHTMLListItem(item, hiddenValues, ieClass) {
+  var htmlString = "";
+  // Distinguish between 'editorThemeFontSize' and other types of items.
+  return htmlString;
+}
+</generateHTMLListItem>
+
+<processEnumType>
+function processEnumType(type) {
+  <enumValueProcessing>
+  var fields = _.map(type.enumValues, enumValue => {
+    var field = _.cloneDeep(enumValue)
+    field.isEnumValue = true
+    return field
+  });
+  </enumValueProcessing>
+
+  <createEnumType>
+  return {
+    name: type.name,
+    isEnumType: true,
+    fields: fields
+  };
+  </createEnumType>
+}
+</processEnumType>
+
+<parser>
+function parser(content, options, fn) {
+  <configInitialization>
+  var jshintrc = path.join(process.env.HOME || process.env.USERPROFILE, '.jshintrc'),
+      jshintninja = configurator(jshintrc),
+      config = options.jshint;
+  </configInitialization>
+
+  <configMerge>
+  config = _.extend(config, jshintninja);
+  </configMerge>
+
+  <linting>
+  canihaz.jshint(function lazyload(err, jshint) {
+    if (err) return fn(err);
+
+    var validates = jshint.JSHINT(content, config),
+        errors;
+
+    if (!validates) errors = formatters.js(jshint.JSHINT.errors);
+    fn(null, errors);
+  });
+  </linting>
+}
+</parser>
+
+<Surround>
+function Surround(obj, pattern) {
+  <selfInitialization>
+  var self = this;
+  </selfInitialization>
+
+  <regexSetup>
+  var regEX = new RegExp(pattern);
+  </regexSetup>
+
+  <functionWrapping>
+  for (var fn in obj) {
+    var orig = obj[fn];
+
+    if (typeof(orig) != "function" || !regEX.test(fn))
+      continue;
+
+    if (obj[fn].__stacks) {
+      this.stacks = obj[fn].__stacks;
+      return this;
+    }
+
+    this.stacks = this.defaults();
+
+    obj[fn] = function() {
+      self.stacks.before
+        .concat([orig], self.stacks.after)
+        .forEach(function(fn) {
+          fn.apply(obj, arguments);
+        });
+    };
+
+    obj[fn].reset = function() {
+      obj[fn] = orig;
+      self.stacks = self.defaults();
+    };
+
+    obj[fn].__stacks = this.stacks;
+  }
+  </functionWrapping>
+}
+</Surround>
+```

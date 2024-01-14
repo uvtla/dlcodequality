@@ -1,0 +1,334 @@
+Here are the annotated functions for SRP compliance or violations:
+
+1. Function _createHandler()
+
+<createHandler>
+async function _createHandler(model, request, Log) {
+  let payload = null
+
+  try {
+    <handlePayloadFormatting>
+    let isArray = true
+    if (!_.isArray(request.payload)) {
+      payload = [Object.assign({}, request.payload)]
+      isArray = false
+    } else {
+      payload = request.payload.map(item => {
+        return _.isObject(item) ? _.assignIn({}, item) : item
+      })
+    }
+    </handlePayloadFormatting>
+
+    <preprocessing>
+    try {
+      if (
+        model.routeOptions &&
+        model.routeOptions.create &&
+        model.routeOptions.create.pre
+      ) {
+        for (let document of payload) {
+          await model.routeOptions.create.pre(document, request, Log)
+        }
+      }
+    } catch (err) {
+      handleError(
+        err,
+        'There was a preprocessing error creating the resource.',
+        Boom.badRequest,
+        Log
+      )
+    }
+    </preprocessing>
+
+    <applyCreatedAt>
+    if (config.enableCreatedAt) {
+      for (let document of payload) {
+        document.createdAt = new Date()
+      }
+    }
+    </applyCreatedAt>
+
+    <createModel>
+    let data
+    try {
+      data = await model.create(payload)
+    } catch (err) {
+      Log.error(err)
+      if (err.code === 11000) {
+        throw Boom.conflict('There was a duplicate key error.')
+      } else {
+        throw Boom.badImplementation(
+          'There was an error creating the resource.'
+        )
+      }
+    }
+    </createModel>
+
+    <queryResponseData>
+    let attributes = QueryHelper.createAttributesFilter({}, model, Log)
+
+    data = data.map(item => {
+      return item._id
+    })
+
+    let result = await model
+      .find()
+      .where({ _id: { $in: data } })
+      .select(attributes)
+      .lean()
+      .exec()
+    </queryResponseData>
+
+    <postprocessing>
+    try {
+      if (
+        model.routeOptions &&
+        model.routeOptions.create &&
+        model.routeOptions.create.post
+      ) {
+        for (let document of result) {
+          await model.routeOptions.create.post(document, request, result, Log)
+        }
+      }
+    } catch (err) {
+      handleError(
+        err,
+        'There was a postprocessing error creating the resource.',
+        Boom.badRequest,
+        Log
+      )
+    }
+    </postprocessing>
+
+    <returnResult>
+    if (isArray) {
+      return result
+    } else {
+      return result[0]
+    }
+    </returnResult>
+  } catch (err) {
+    handleError(err, null, null, Log)
+  }
+}
+</createHandler>
+
+2. Function for creating and placing labels on nodes
+
+<createAndPlaceLabel>
+function(canvas, node, controller) {
+  var id = node.id, tag = this.getLabel(id);
+  if(!tag && !(tag = document.getElementById(id))) {
+    <createNewLabel>
+    var ns = 'http://www.w3.org/2000/svg';
+    tag = document.createElementNS(ns, 'svg:text');
+    var tspan = document.createElementNS(ns, 'svg:tspan');
+    tag.appendChild(tspan);
+    var container = this.getLabelContainer();
+    tag.setAttribute('id', id);
+    tag.setAttribute('class', 'node');
+    container.appendChild(tag);
+    controller.onCreateLabel(tag, node);
+    this.labels[node.id] = tag;
+    </createNewLabel>
+  }
+  <placeExistingLabel>
+  this.placeLabel(tag, node, controller);
+  </placeExistingLabel>
+}
+</createAndPlaceLabel>
+
+3. Function formatting the ticks on a chart
+
+<formatChartTicks>
+function(tickValue, index, ticks) {
+  <calculateDelta>
+  var delta = ticks.length > 3 ? ticks[2] - ticks[1] : ticks[1] - ticks[0];
+  </calculateDelta>
+
+  <adjustDeltaForFractionalValues>
+  if (Math.abs(delta) > 1) {
+    if (tickValue !== Math.floor(tickValue)) {
+      delta = tickValue - Math.floor(tickValue);
+    }
+  }
+  </adjustDeltaForFractionalValues>
+
+  <calculateTickString>
+  var logDelta = helpers.log10(Math.abs(delta));
+  var tickString = '';
+
+  if (tickValue !== 0) {
+    var numDecimal = -1 * Math.floor(logDelta);
+    numDecimal = Math.max(Math.min(numDecimal, 20), 0);
+    tickString = tickValue.toFixed(numDecimal);
+  } else {
+    tickString = '0';
+  }
+  </calculateTickString>
+
+  return tickString;
+}
+</formatChartTicks>
+
+4. Function extracting the method name from a syntax tree
+
+<extractMethodName>
+function methodNameFromTree(tree) {
+  <handleComputedPropertyName>
+  if (tree.type === COMPUTED_PROPERTY_NAME) {
+    return '';
+  }
+  </handleComputedPropertyName>
+
+  <handleStringLiteralToken>
+  if (tree.literalToken && tree.literalToken.type === STRING) {
+    return tree.getStringValue().substr(1, -1);
+  }
+  </handleStringLiteralToken>
+
+  <getStringValue>
+  return tree.getStringValue();
+  </getStringValue>
+}
+</extractMethodName>
+
+5. Function creating a CSS object
+
+<createCSSObject>
+function cssobj$1 (obj, config, state) {
+  <setConfigDefaults>
+  config = config || {};
+
+  var local = config.local;
+  config.local = !local
+    ? {space: ''}
+    : local && typeof local === 'object' ? local : {};
+
+  config.plugins = [].concat(
+    config.plugins || [],
+    cssobj_plugin_selector_localize(config.local),
+    cssobj_plugin_post_cssom(config.cssom)
+  );
+  </setConfigDefaults>
+
+  <initializeCSSObject>
+  return cssobj(config)(obj, state)
+  </initializeCSSObject>
+}
+</createCSSObject>
+
+6. Function fetching relations for a model
+
+<fetchRelations>
+function(options) {
+  options = options || {};
+  var self = this;
+  var fns = [];
+
+  <gatherFetchFunctions>
+  _.each(self.relationDefinitions, function(relationAttributes, relationKey) {
+    if (_.isArray(options.onlyRelations)) {
+      if (options.onlyRelations.indexOf(relationKey) === -1) return;
+    }
+    var relation = self.get(relationKey);
+    if (relation && !relation.url) {
+      return;
+    }
+    if (relation && relation.fetch) {
+      var fetchOpts = _.has(options.relation, relationKey)
+        ? _.clone(options.relation[relationKey])
+        : _.clone(options);
+      fns.push(_.bind(relation.fetch, relation, fetchOpts));
+    }
+  }, this);
+  </gatherFetchFunctions>
+
+  <executeFetchFunctions>
+  return parallel(fns)
+    .then(function relationsFetched() {
+      self.fetchStatus = 'all_fetched';
+      return self;
+    }, function error(err) {
+      if (options.ignoreFailures) {
+        self.fetchStatus = 'all_fetched';
+        return when.resolve(self);
+      }
+      return when.reject(err);
+    });
+    </executeFetchFunctions>
+}
+</fetchRelations>
+
+7. Function processing API response in XML format
+
+<processAPIResponse>
+function apiResponded(apiResponse) {
+  <initializeParser>
+  var parser = new xml2js.Parser({explicitArray:false});
+  </initializeParser>
+
+  <parseXMLResponse>
+  parser.parseString(apiResponse, function (err, result) {
+    <processParsedResponse>
+    if(typeof a.processor !== 'undefined')
+      a.processor(result.response, a.callback);
+    else
+      a.callback(result.response);
+    </processParsedResponse>
+  });
+  </parseXMLResponse>
+}
+</processAPIResponse>
+
+8. Function that invokes a callback if a value exists in an object
+
+<invokeCallbackOnValueMatch>
+function(o,value,fn){
+  <forEachValueMatch>
+  this.forEach(o,function everymover(e,i,b){
+    if(e === value){
+     if(fn) fn.call(this,e,i,b);
+    }
+  },this);
+  </forEachValueMatch>
+  return;
+}
+</invokeCallbackOnValueMatch>
+
+9. Function that searches within a range quadtree
+
+<searchRangeQuadTree>
+function(queryLow, queryHigh) {
+  <validateArguments>
+  this.validateFindArguments_(queryLow, queryHigh);
+  </validateArguments>
+
+  if (this.root_ === undefined)
+    return [];
+
+  <findIntersections>
+  var ret = [];
+  this.root_.appendIntersectionsInto_(ret, queryLow, queryHigh);
+  </findIntersections>
+
+  return ret;
+}
+</searchRangeQuadTree>
+
+10. Function that determines the type of a value
+
+<getType>
+function getType (val) {
+  if (val === null) {
+    return 'null'
+  } else if (val === void 0) {
+    return 'undefined'
+  }
+  <determineType>
+  return Object.prototype.toString.call(val)
+    .replace(/^\[.+\s(.+?)]$/, '$1')
+    .toLowerCase()
+  </determineType>
+}
+</getType>

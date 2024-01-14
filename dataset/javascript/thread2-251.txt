@@ -1,0 +1,287 @@
+```javascript
+<isWindowObject>
+function(o) {
+    return o && o.document && o.location && o.alert && o.setInterval;
+}
+</isWindowObject>
+
+<searchBase>
+function searchBase(base) {
+    <resolveBaseName>
+    var basename = path.resolve(base, modulename);
+    </resolveBaseName>
+
+    <searchForExactFileName>
+    var filename = searchArray(dirMap, basename);
+    if (filename) return filename;
+    </searchForExactFileName>
+
+    <searchForJSExtension>
+    filename = searchArray(dirMap, basename + '.js');
+    if (filename) return filename;
+    </searchForJSExtension>
+
+    <searchForJSONExtension>
+    filename = searchArray(dirMap, basename + '.json');
+    if (filename) return filename;
+    </searchForJSONExtension>
+
+    <checkForPathValidity>
+    if (isPath) return false;
+    </checkForPathValidity>
+
+    <searchForPackage>
+    if (packageMap[basename]) {
+      return packageMap[basename];
+    }
+    </searchForPackage>
+
+    <searchForIndexJSFile>
+    return searchArray(dirMap, basename + '/index.js');
+    </searchForIndexJSFile>
+}
+</searchBase>
+
+<repack>
+function repack(obj) {
+  var outp = [];
+  <convertObjectToArray>
+  Object.keys(obj||{}).forEach(function(k){
+    outp.push({name:k, version:obj[k]});
+  });
+  </convertObjectToArray>
+  return outp;
+}
+</repack>
+
+<rollback>
+function rollback() {
+    <ensureConfigAndGetName>
+    var parsed = ensureConfig();
+    var name = parsed.name;
+    </ensureConfigAndGetName>
+
+    <parseIndexIfNumeric>
+    try {
+        var idx = void 0;
+        if (/^[0-9]+$/.test(name)) {
+            idx = parseInt(parsed.name) - 1;
+            if (idx >= 0) {
+                var keys = Object.keys(mu.rollbacks);
+                var key = keys[idx];
+                if (key)
+                    name = key;
+            }
+        }
+    }
+    catch (ex) { }
+    </parseIndexIfNumeric>
+
+    <performRollback>
+    mu.rollback(parsed.name, parsed.output);
+    </performRollback>
+}
+</rollback>
+
+<promiseAssertionHandler>
+function (resolved, val) {
+    <setupAssertion>
+    var should = (negate ?
+        (new Assertion(val)).not :
+        (new Assertion(val))
+    );
+    </setupAssertion>
+
+    <handleThrowableAssert>
+    if (storedAssertions[0][0] !== 'throw' && !resolved) {
+        throw val;
+    }
+    </handleThrowableAssert>
+
+    <processAssertions>
+    var result = storedAssertions.reduce(function (accum, cur) {
+        <handleThrowAssertion>
+        if (cur[0] === 'throw') {
+            var obj = accum.obj;
+            accum.obj = function () {
+                if (resolved) { return obj; }
+                else { throw obj; }
+            };
+        }
+        </handleThrowAssertion>
+
+        <validateResolution>
+        if (cur[0] === 'throw') {
+            if (resolved === !!accum.negate) {
+                caught = true;
+            } else {
+                throw new AssertionError({
+                    message: 'Expected promise to be ' + (negate ? 'resolved' : 'rejected') +
+                        ' but instead it was ' + (resolved ? 'resolved' : 'rejected') + ' with ' + inspect(val),
+                    actual: val
+                });
+            }
+        }
+        </validateResolution>
+
+        <assertCurArguments>
+        if (cur.length === 1) {
+            return accum[cur[0]];
+        } else {
+            return accum[cur[0]].apply(accum, cur[1]);
+        }
+        </assertCurArguments>
+    }, should); 
+    </processAssertions>
+
+    <throwOnUnresolvedRejection>
+    if (!resolved && !caught) {
+        throw new AssertionError({
+            message: 'Promise was rejected unexpectedly with ' + inspect(val),
+            actual: val
+        });
+    }
+    </throwOnUnresolvedRejection>
+
+    return result;
+}
+</promiseAssertionHandler>
+
+<collationNotSupported>
+function collationNotSupported(server, cmd) {
+  return cmd && cmd.collation && server.ismaster && server.ismaster.maxWireVersion < 5;
+}
+</collationNotSupported>
+
+<getCookieByName>
+function(name) {
+    var cookie = document.cookie, e, p = name + "=", b;
+
+    <checkIfCookieExists>
+    if ( !cookie )
+        return;
+    </checkIfCookieExists>
+
+    <findCookie>
+    b = cookie.indexOf("; " + p);
+
+    if ( b == -1 ) {
+        b = cookie.indexOf(p);
+
+        if ( b != 0 )
+            return null;
+
+    } else {
+        b += 2;
+    }
+    </findCookie>
+
+    <extractCookieValue>
+    e = cookie.indexOf(";", b);
+
+    if ( e == -1 )
+        e = cookie.length;
+
+    return decodeURIComponent( cookie.substring(b + p.length, e) );
+    </extractCookieValue>
+}
+</getCookieByName>
+
+<DOMViewControllerMixin>
+function DOMViewControllerMixin(view) {
+
+  <attachEventsToView>
+  function attachEvents() {
+
+    <retrieveEvents>
+    var events;
+    if (isFunction(view.events)) {
+      events = view.events();
+    } else {
+      events = view.events || {};
+    }
+    </retrieveEvents>
+
+    <bindEvents>
+    for (var key in events) {
+      if (events.hasOwnProperty(key)) {
+        var fn;
+
+        <bindEvent>
+        (function () {
+          var firstSpaceIndex = key.indexOf(' ');
+          var type = undefined;
+          var selector = undefined;
+          if (firstSpaceIndex === -1) {
+            type = key;
+          } else {
+            type = key.substr(0, firstSpaceIndex);
+            selector = key.substr(firstSpaceIndex + 1);
+          }
+          fn = events[key];
+
+          <invokeEventHandler>
+          (function (fn) {
+            view.$el.on(type, selector, function (event) {
+              if (_this[fn] === undefined) {
+                throw new Error('mixin target has no function: ' + fn);
+              }
+              _this[fn](event, view);
+            });
+          })(fn);
+          </invokeEventHandler>
+        })();
+        </bindEvent>
+
+      }
+    }
+    </bindEvents>
+  }
+  </attachEventsToView>
+
+  attachEvents();
+}
+</DOMViewControllerMixin>
+
+<createEntryFacade>
+function createEntryFacade(entry) {
+    <validateEntry>
+    if (entry instanceof Entry !== true) {
+        throw new Error("Failed creating entry facade: Provided item is not an Entry");
+    }
+    </validateEntry>
+
+    <getFacadeTypeAndFields>
+    const facadeType = getEntryFacadeType(entry);
+    const createFields = facadeFieldFactories[facadeType];
+    if (!createFields) {
+        throw new Error(`Failed creating entry facade: No factory found for type "${facadeType}"`);
+    }
+    const fields = createFields(entry);
+    </getFacadeTypeAndFields>
+
+    <createFacade>
+    return {
+        type: facadeType,
+        fields: addExtraFieldsNonDestructive(entry, fields)
+    };
+    </createFacade>
+}
+</createEntryFacade>
+
+<registerTypeAlias>
+function(alias, type) {
+    <parseAndResolveType>
+    var parameters = {},
+        __type = parse_type(type, parameters).toLowerCase(),
+        constructor = resolve_ctr(__type, parameters);
+    if (!constructor)
+        throw new TypeError('Type ' + __type + ' not registered!');
+    </parseAndResolveType>
+
+    <setAlias>
+    this[alias.toLowerCase()] = { __type: __type, parameters: parameters, isAlias: true };
+    </setAlias>
+}
+</registerTypeAlias>
+```

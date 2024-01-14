@@ -1,0 +1,180 @@
+```javascript
+<jsonToQueryString>
+function jsonToQueryString(json) {
+    return '?' +
+        Object
+        .keys(json)
+        .map(function (key) {
+            if (json[key] !== null) {
+                return encodeURIComponent(key) + '=' +
+                    encodeURIComponent(json[key]);
+            }
+        })
+        .join('&');
+}
+</jsonToQueryString>
+
+<anonymousFunction-1>
+function (value) {
+    if (!findFilterRes && value.filterClasspath === findFilterSearch.classpath && value.hasOwnProperty("initArgs")
+            && value.initArgs === findFilterSearch.initArgs) {
+        findFilterRes = value;
+        return false;
+    }
+    return true;
+}
+</anonymousFunction-1>
+
+<readJson>
+function readJson(filePath) {
+  try {
+    
+    const content = require(filePath)
+    delete require.cache[require.resolve(filePath)]
+    return content
+  } catch (err) {
+    return null
+  }
+}
+</readJson>
+
+<copyFont>
+function copyFont(dir) {
+  gulp.src(src.font)
+    .pipe(gulp.dest(dir));
+}
+</copyFont>
+
+<setSingleSchedule>
+function setSingleSchedule (date) {
+  if (typeof date !== 'string') {
+    throw new JError.InvalidArgumentError('date must be set to the string.')
+  }
+  var single = {
+    'time': date
+  }
+  this.trigger = JUtil.extend(this.trigger, {
+    'single': single
+  })
+  return this
+}
+</setSingleSchedule>
+
+<retrieveCategoriesFromDB>
+function(db, callback) {
+
+  <cacheRetrieval>
+  let cacheKey = db.id + "-" + 'categories';
+  let cache = cache_linkCategories.get(cacheKey);
+  if ( cache !== null ) {
+    return callback(null, cache);
+  }
+  </cacheRetrieval>
+
+  <queryExecution>
+  let select = "SELECT DISTINCT link_category_title FROM rt_links";
+
+  db.select(select, function(err, results) {
+    if ( err ) {
+      return callback(err);
+    }
+
+    <resultsProcessing>
+    let rtn = [];
+    for ( let i = 0; i < results.length; i++ ) {
+      let row = results[i];
+      rtn.push(row.link_category_title);
+    }
+    cache_linkCategories.put(cacheKey, rtn);
+    </resultsProcessing>
+
+    return callback(null, rtn);
+
+  });
+  </queryExecution>
+
+}
+</retrieveCategoriesFromDB>
+
+<useLocale>
+function useLocale( languageTag, locale = 'default') {
+  testEventBus.publish( `didChangeLocale.${locale}`, {
+     locale,
+     languageTag
+  } );
+  testEventBus.flush();
+}
+</useLocale>
+
+<EMOGenInitializer>
+function(grunt, gruntFilesArray, gruntOptions) {
+    
+    this.grunt = grunt;
+    
+    this.gruntFilesArray = gruntFilesArray;
+    
+    this.gruntOptions = objectAssign(StyleGuideGenerator.OPTIONS, gruntOptions);
+    
+    this.generator = new EMOGen(
+        this.gruntOptions,
+        this.gruntOptions.nunjucksOptions
+    );
+}
+</EMOGenInitializer>
+
+<removeNotNeededNodes>
+function removeNotNeededNodes(parentElements, newChildren, oldChildren) {
+  let remaining = parentElements.childNodes.length;
+  if (oldChildren.length !== remaining) {
+    console.warn(
+      "ZLIQ: Something other then ZLIQ has manipulated the children of the element",
+      parentElements,
+      ". This can lead to sideffects. Consider using the 'isolated' attribute for this element to prevent updates."
+    );
+  }
+
+  for (; remaining > newChildren.length; remaining--) {
+    let childToRemove = parentElements.childNodes[remaining - 1];
+    parentElements.removeChild(childToRemove);
+
+    if (oldChildren.length < remaining) {
+      continue;
+    } else {
+      let { cycle } = oldChildren[remaining - 1];
+
+      triggerLifecycle(childToRemove, { cycle }, "removed");
+    }
+  }
+}
+</removeNotNeededNodes>
+
+<isStorableFunction>
+function isStorableFunction(funcNode, rhsNode) {
+  var node = funcNode;
+  var prnt = funcNode.parent;
+  while (prnt && isInside(prnt, rhsNode)) {
+    switch (prnt.type) {
+      case "SequenceExpression":
+        if (prnt.expressions[prnt.expressions.length - 1] !== node) {
+          return false;
+        }
+        break;
+      case "CallExpression":
+      case "NewExpression":
+        return prnt.callee !== node;
+      case "AssignmentExpression":
+      case "TaggedTemplateExpression":
+      case "YieldExpression":
+        return true;
+      default:
+        if (STATEMENT_TYPE.test(prnt.type)) {
+          return true;
+        }
+    }
+    node = prnt;
+    prnt = prnt.parent;
+  }
+  return false;
+}
+</isStorableFunction>
+```

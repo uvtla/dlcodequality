@@ -1,0 +1,242 @@
+```javascript
+
+<calculateMissingPosition>
+function calculateMissingPosition(lookedUpVal, domain, sort) {
+  let i = -1;
+  let length = domain.length;
+  let found = domain[length - 1];
+
+  while(++i < length) {
+    let item = domain[i];
+
+    if(sort(lookedUpVal, item) < 0) {
+      found = item;
+      break;
+    }
+  }
+
+  return found;
+}
+</calculateMissingPosition>
+
+<predicateExprHasPositionalSelector>
+function predicateExprHasPositionalSelector(expr, isRecursiveCall) {
+  if (!expr) {
+    return false;
+  }
+  if (!isRecursiveCall && exprReturnsNumberValue(expr)) {
+    <exprReturnsNumberValue>
+    return true;
+    </exprReturnsNumberValue>
+  }
+  if (expr instanceof FunctionCallExpr) {
+    var value = expr.name.value;
+    <checkForPositionalSelector>
+    return (value == 'last' || value == 'position');
+    </checkForPositionalSelector>
+  }
+  if (expr instanceof BinaryExpr) {
+    <recursivePositionalSelectorDetection>
+    return (
+      predicateExprHasPositionalSelector(expr.expr1, true) ||
+      predicateExprHasPositionalSelector(expr.expr2, true));
+    </recursivePositionalSelectorDetection>
+  }
+  return false;
+}
+</predicateExprHasPositionalSelector>
+
+<unDashHyphen>
+function unDashHyphen (str) {
+  <normalizeString>
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/[-_\s]+(.)?/g, function (match, c) {
+      return c ? c.toUpperCase() : "";
+    });
+  </normalizeString>
+}
+</unDashHyphen>
+
+<anonymousFunction_threadProcess>
+function(threadId, active, callback) {
+  <checkForActiveState>
+  if (active) {
+    <checkForCache>
+    if (hasCache && typeof queueDb == 'object') {
+      <queryWaitQueue>
+      queueDb.waitQ.where('threadId')
+        .equals(threadId)
+        .and(function(item) {
+          return item.owner == parseInt(userInfo.id);
+        })
+        .toArray()
+        .then(function(waitQueueOnCache) {
+          <processWaitQueueData>
+          var uniqueIds = [];
+          // Processing for waitQueueOnCache...
+          // Omitted repeated code for brevity...
+          callback && callback(waitQueueOnCache);
+          </processWaitQueueData>
+        })
+        .catch(function(error) {
+          <handleError>
+          fireEvent('error', {
+            code: error.code,
+            message: error.message,
+            error: error
+          });
+          </handleError>
+        });
+      </queryWaitQueue>
+    }
+    else {
+      <processChatWaitQueue>
+      var uniqueIds = [];
+      // Processing for chatWaitQueue...
+      // Omitted repeated code for brevity...
+      callback && callback([]);
+      </processChatWaitQueue>
+    }
+    </checkForCache>
+  }
+  else {
+    <handleInactiveState>
+    callback && callback([]);
+    </handleInactiveState>
+  }
+  </checkForActiveState>
+}
+</anonymousFunction_threadProcess>
+
+<_tripGoesTo>
+function _tripGoesTo(trip, origin, destination) {
+  <checkTripStops>
+  let originFound = false;
+  for ( let i = 0; i < trip.stopTimes.length; i++ ) {
+    if ( !originFound && trip.stopTimes[i].stop.id === origin.id ) {
+      originFound = true;
+    }
+    else if ( originFound ) {
+      if ( trip.stopTimes[i].stop.id === destination.id ) {
+        return true;
+      }
+    }
+  }
+  return false;
+  </checkTripStops>
+}
+</_tripGoesTo>
+
+<combineProfiles>
+function combineProfiles(profiles, logger){
+  <logBuildingProfile>
+  logger.info('building combined profile');
+  </logBuildingProfile>
+
+  <initializeVariables>
+  var i = profiles.length,
+      x = 0
+      out = {};
+  </initializeVariables>
+
+  <processProfiles>
+  while (x < i) {
+    // Processing individual profile properties...
+    // Omitted repeated code for brevity...
+    x++;
+  }
+  </processProfiles>
+
+  return {type: ['h-card'], properties: out};
+}
+</combineProfiles>
+
+<getParentsSelector>
+function (selector) {
+  <findParentControls>
+  var self = this, ctrl, parents = new Collection();
+  for (ctrl = self.parent(); ctrl; ctrl = ctrl.parent()) {
+    parents.add(ctrl);
+  }
+  </findParentControls>
+
+  <applySelectorFilter>
+  if (selector) {
+    parents = parents.filter(selector);
+  }
+  </applySelectorFilter>
+
+  return parents;
+}
+</getParentsSelector>
+
+<PeersConstructor>
+function Peers(options) {
+  <initializeOptions>
+  options = options || {}
+  if (typeof options === "string") {
+    options = { id: options }
+  }
+  </initializeOptions>
+
+  <setupPeers>
+  var peers = new ExpiryModel(),
+      interval = options.interval || 5000,
+      timeout = options.timeout || 1000 * 60,
+      heartbeats = {},
+      closed,
+      id,
+      timer;
+  </setupPeers>
+
+  <assignPeersMethods>
+  peers.close = close;
+  peers.join = join;
+  peers.on("update", onupdate);
+  </assignPeersMethods>
+
+  return peers;
+
+  // Rest of the functions have been omitted for brevity.
+  // They each represent different responsibilities within this larger context,
+  // such as handling the heartbeat, and dealing with updates and closing events.
+}
+</PeersConstructor>
+
+<resubscribeService>
+function (service, sid, timeout) {
+  <setupResubscription>
+  var self = this;
+  this.service = service;
+  this.sid = sid; 
+  this.timeout = timeout; 
+  this.timer = setTimeout(function () {
+    self._resubscribe();
+  }, (this.timeout * 1000) - 5000);
+  </setupResubscription>
+}
+</resubscribeService>
+
+<getSchema>
+function getSchema(path) {
+  <splitPath>
+  var parts = path.split('.');
+  var collectionName = parts[0];
+  var fieldName = parts[1];
+  </splitPath>
+
+  <validateSchema>
+  if (parts.length !== 2 || !schemaDefinitions[collectionName] || !schemaDefinitions[collectionName][fieldName]) {
+    <logError>
+    log.error('No schemaDefinitions for : ' + path, null);
+    </logError>
+    return {};
+  }
+  </validateSchema>
+
+  return schemaDefinitions[collectionName][fieldName];
+}
+</getSchema>
+```

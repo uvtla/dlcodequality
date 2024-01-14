@@ -50,7 +50,7 @@ function (node) {
 }
 </testingNodeClass>
 
-<httpListener>
+<shinyProxy>
 function ShinyProxy(router, schedulerRegistry) {
   <httpListener>
   this.httpListener = function(req, res) {
@@ -84,7 +84,7 @@ function ShinyProxy(router, schedulerRegistry) {
   
   ...
 }
-</httpListener>
+</shinyProxy>
 
 <getInputTypeForCommand>
 function inputTypeForCommand (cmd) {
@@ -102,3 +102,9 @@ function getModulesAnswered(command, argv, globs) {
 The `markExtension` function is too complex for one single annotation due to various responsibilities like initialization, handling events, and more. Please provide a breakdown of this function if you want it analyzed for SRP compliance.
 
 The `renderPartial` and `stylingContext` functions are too small for accurate SRP annotation as they seem to perform a single task, but more context might be necessary to make a definitive judgement. Please provide the entire functions if you would like a further analysis.
+
+
+<ignoredForGoodReason></ignoredForGoodReason>
+<ignoredForGoodReason></ignoredForGoodReason>
+<ignoredForGoodReason></ignoredForGoodReason>
+<ignoredForGoodReason></ignoredForGoodReason>

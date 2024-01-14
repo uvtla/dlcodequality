@@ -1,0 +1,293 @@
+```javascript
+<pageHeight>
+function pageHeight() {
+  return win.innerHeight != null ? win.innerHeight : doc.documentElement && doc.documentElement.clientHeight != null ? doc.documentElement.clientHeight : doc.body != null ? doc.body.clientHeight : null;
+}
+</pageHeight>
+
+<checkForMissingParams>
+function(req, requiredParams) {
+
+  var missingParams = [];
+  _.forEach(requiredParams, function(requiredParam) {
+    if (
+      Mixins.isNullOrUndefined(req.params && req.params[requiredParam]) &&
+      Mixins.isNullOrUndefined(req.query && req.query[requiredParam]) &&
+      Mixins.isNullOrUndefined(req.body && req.body[requiredParam])
+    ) {
+      missingParams.push(requiredParam);
+    }
+  });
+  return missingParams;
+}
+</checkForMissingParams>
+
+<modifyFeatureTransform>
+function(mods) {
+  <validateModification>
+  if(!this._setfeature) {
+      this.scale *= (mods.scale || 1);
+      this.ratio *= (mods.ratio || 1);
+      var oldRotation = this.rotation;
+      this.rotation = (this.rotation + (mods.rotation || 0)) % 360;
+  </validateModification>
+  
+  <applyTransformationAndRedraw>
+  if(this.events.triggerEvent("beforetransform", mods) !== false) {
+      var feature = this.feature;
+      var geom = feature.geometry;
+      var center = this.center;
+      geom.rotate(-oldRotation, center);
+      if(mods.scale || mods.ratio) {
+          geom.resize(mods.scale, center, mods.ratio);
+      } else if(mods.center) {
+          feature.move(mods.center.getBounds().getCenterLonLat());
+      }
+      geom.rotate(this.rotation, center);
+      this.layer.drawFeature(feature);
+      feature.toState(OpenLayers.State.UPDATE);
+      this.events.triggerEvent("transform", mods);
+  }
+  </applyTransformationAndRedraw>
+
+  <finalizeModification>
+  this.layer.drawFeature(this.box, this.renderIntent);
+  this.drawHandles();
+  </finalizeModification>
+}
+</modifyFeatureTransform>
+
+<helpCmdAliasesProcess>
+function func_help_cmd_aliases(arg_terminal_feature, arg_response, cmd, opd1, opd2, opd3)
+{
+  <retrieveAliases>
+  arg_response.result.value = []
+  if ( arg_terminal_feature && arg_terminal_feature.is_terminal_feature && arg_terminal_feature._terminal)
+  {
+      const features = arg_terminal_feature._terminal.get_features()
+
+      const feature_name = opd1 ? opd1 : arg_terminal_feature._terminal.get_mode()
+      if (! feature_name)
+      {
+          arg_response.result.error = 'no selected feature for command :[' + cmd + ']'
+          return arg_response
+      }
+
+      const feature = (feature_name in features) ? features[feature_name] : undefined
+      if (! feature)
+      {
+          arg_response.result.error = 'no feature [' + feature_name + '] for command :[' + cmd + ']'
+          return arg_response
+      }
+
+      const aliases = feature.get_aliases()
+      console.log(context + ':eval aliases=', aliases)
+
+      
+      arg_response.result.value = aliases
+      </retrieveAliases>
+      <formatAliases>
+      arg_response.result.str = func_help_format_aliases(aliases)
+      </formatAliases>
+  }
+}
+</helpCmdAliasesProcess>
+
+<cubeCreation>
+function (options) {
+  <prepareParameters>
+  let c
+  let r
+  let corner1
+  let corner2
+  options = options || {}
+  if (('corner1' in options) || ('corner2' in options)) {
+    if (('center' in options) || ('radius' in options)) {
+      throw new Error('cube: should either give a radius and center parameter, or a corner1 and corner2 parameter')
+    }
+    corner1 = parseOptionAs3DVector(options, 'corner1', [0, 0, 0])
+    corner2 = parseOptionAs3DVector(options, 'corner2', [1, 1, 1])
+    c = corner1.plus(corner2).times(0.5)
+    r = corner2.minus(corner1).times(0.5)
+  } else {
+    c = parseOptionAs3DVector(options, 'center', [0, 0, 0])
+    r = parseOptionAs3DVector(options, 'radius', [1, 1, 1])
+  }
+  r = r.abs() 
+  </prepareParameters>
+
+  <constructCube>
+  let result = fromPolygons([
+    // Polygon construction data,
+    // ...
+  ].map(function (info) {
+    let vertices = info[0].map(function (i) {
+      let pos = new Vector3(
+        c.x + r.x * (2 * !!(i & 1) - 1), c.y + r.y * (2 * !!(i & 2) - 1), c.z + r.z * (2 * !!(i & 4) - 1))
+      return new Vertex3(pos)
+    })
+    return new Polygon3(vertices, null )
+  }))
+  </constructCube>
+
+  <setProperties>
+  result.properties.cube = new Properties()
+  result.properties.cube.center = new Vector3(c)
+  
+  result.properties.cube.facecenters = [
+    // Connectors construction data,
+    // ...
+  ]
+  </setProperties>
+
+  return result
+}
+</cubeCreation>
+
+<dynamicEntriesSetup>
+function entries(lowestTier) {
+  const max = 3;
+  const obj = {
+    additionalProperties: {
+      type: 'object',
+      oneOf: [],
+    },
+    description: 'An object.',
+  };
+  for (let i = lowestTier; i <= max; i += 1) {
+    obj.additionalProperties.oneOf.push({
+      $ref: `#/definitions/entity-tier${i}`,
+    });
+  }
+  return obj;
+}
+</dynamicEntriesSetup>
+
+<initializerWithBroadcast>
+function() {
+  <initializeAttributesAndStates>
+  this.attributes = ["gui"];
+  this._arrivals = Object.create(null);
+  this._channels = [];
+  this._spirits = {
+    incoming: [], 
+    inside: Object.create(null), 
+    outside: Object.create(null) 
+  };
+  </initializeAttributesAndStates>
+
+  <setupBroadcastListener>
+  gui.Broadcast.add(gui.BROADCAST_TODOM, {
+    onbroadcast: function() {
+      gui._getready();
+      gui.Guide.$startGuiding();
+      gui._nowready();
+    }
+  });
+  </setupBroadcastListener>
+
+  return this;
+}
+</initializerWithBroadcast>
+
+<createBlockTemplate>
+function (data) {
+  <calculateRewards>
+  var reward = data.coinbasevalue;
+  var rewardToPool = reward;
+  var txOutputBuffers = [];
+
+  for (var i = 0; i < context.fees.recipients.length; i++) {
+    {
+      var recipient = context.fees.recipients[i];
+      var recipientReward = Math.floor(recipient.percent * reward);
+      rewardToPool -= recipientReward;
+      txOutputBuffers.push(Buffer.concat([
+          utils.packInt64LE(recipientReward),
+          utils.varIntBuffer(recipient.script.length),
+          recipient.script
+      ]));
+    }
+  </calculateRewards>
+
+  <preparePoolReward>
+  txOutputBuffers.unshift(Buffer.concat([
+          utils.packInt64LE(rewardToPool),
+          utils.varIntBuffer(context.wallet.central.script.length),
+          context.wallet.central.script
+      ]));
+  </preparePoolReward>
+
+  <assembleTransactionOutputs>
+  return Buffer.concat([
+    utils.varIntBuffer(txOutputBuffers.length),
+    Buffer.concat(txOutputBuffers)
+  ]);
+  </assembleTransactionOutputs>
+}
+</createBlockTemplate>
+
+<pathMatching>
+function isMatchingPath(parentIndex, indexOrKey) {
+  <evaluateMatchingPath>
+  var pane = lxSelect.choicesViewSize === 'large' ? lxSelect.panes[parentIndex] : lxSelect.openedPanes[parentIndex];
+
+  if (angular.isUndefined(pane)) {
+      return;
+  }
+
+  var key = indexOrKey;
+  if (angular.isObject(pane) && angular.isNumber(indexOrKey)) {
+      key = (Object.keys(pane) || [])[indexOrKey];
+  }
+
+  if (parentIndex === 0) {
+      return _findIndex(lxSelect.matchingPaths, key) !== -1;
+  }
+
+  var previous = toggledPanes[parentIndex - 1];
+  if (angular.isUndefined(previous)) {
+      return false;
+  }
+
+  return _findIndex(lxSelect.matchingPaths, previous.path + '.' + key) !== -1;
+  </evaluateMatchingPath>
+}
+</pathMatching>
+
+<compileQueryDefinition>
+function queryDef(flags, id, bindings) {
+  <constructQueryDefinition>
+  var bindingDefs = [];
+  for (var propName in bindings) {
+      var bindingType = bindings[propName];
+      bindingDefs.push({ propName: propName, bindingType: bindingType });
+  }
+  return {
+      nodeIndex: -1,
+      parent: null,
+      renderParent: null,
+      bindingIndex: -1,
+      outputIndex: -1,
+      checkIndex: -1, flags: flags,
+      childFlags: 0,
+      directChildFlags: 0,
+      childMatchedQueries: 0,
+      ngContentIndex: -1,
+      matchedQueries: {},
+      matchedQueryIds: 0,
+      references: {},
+      childCount: 0,
+      bindings: [],
+      bindingFlags: 0,
+      outputs: [],
+      element: null,
+      provider: null,
+      text: null,
+      query: { id: id, filterId: filterQueryId(id), bindings: bindingDefs },
+      ngContent: null
+  };
+  </constructQueryDefinition>
+}
+</compileQueryDefinition>
+```

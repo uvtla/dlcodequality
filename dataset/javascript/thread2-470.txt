@@ -1,0 +1,209 @@
+```javascript
+<getFunction>
+function getFunction(value, replacement) {
+    return baseGetType(_.isFunction, _.noop, value, replacement);
+}
+</getFunction>
+
+<pathFilter>
+function (item) {
+    const resolvedPath = path.resolve(item);
+    const ignore = (resolvedPath.indexOf(srcPath) === -1);
+    return ignore;
+}
+</pathFilter>
+
+<removeItemFromStorage>
+function (key) {
+  if (!browserSupportsLocalStorage || self.storageType === 'cookie') {
+    <handleUnsupportedLocalStorage>
+    if (!browserSupportsLocalStorage) {
+      $rootScope.$broadcast('LocalStorageModule.notification.warning', 'LOCAL_STORAGE_NOT_SUPPORTED');
+    }
+    </handleUnsupportedLocalStorage>
+
+    <notifyRemoveItemCookie>
+    if (notify.removeItem) {
+      $rootScope.$broadcast('LocalStorageModule.notification.removeitem', {key: key, storageType: 'cookie'});
+    }
+    </notifyRemoveItemCookie>
+    return removeFromCookies(key);
+  }
+
+  try {
+    <removeItemFromWebStorage>
+    webStorage.removeItem(deriveQualifiedKey(key));
+    </removeItemFromWebStorage>
+
+    <notifyRemoveItemWebStorage>
+    if (notify.removeItem) {
+      $rootScope.$broadcast('LocalStorageModule.notification.removeitem', {key: key, storageType: self.storageType});
+    }
+    </notifyRemoveItemWebStorage>
+  } catch (e) {
+    <handleStorageError>
+    $rootScope.$broadcast('LocalStorageModule.notification.error', e.message);
+    return removeFromCookies(key);
+    </handleStorageError>
+  }
+  return true;
+}
+</removeItemFromStorage>
+
+<toggleFitToView>
+function ( action ) {
+	if (F.isOpen) {
+		<updateFitToViewStatus>
+		F.current.fitToView = $.type(action) === "boolean" ? action : !F.current.fitToView;
+		</updateFitToViewStatus>
+
+		<handleTouchEvent>
+		if (isTouch) {
+			F.wrap.removeAttr('style').addClass('fancybox-tmp');
+
+			F.trigger('onUpdate');
+		}
+		</handleTouchEvent>
+
+		<updateFancybox>
+		F.update();
+		</updateFancybox>
+	}
+}
+</toggleFitToView>
+
+<createRouter>
+function Router() {
+    if(!(this instanceof Router))
+        return new Router
+
+    <initializeRouter>
+    var router = function (req, res, next) {
+        router.handle(req, res, next)
+    }
+
+    router.prototype = router.__proto__ = Router.prototype
+
+    router.init()
+    </initializeRouter>
+
+    return router
+}
+</createRouter>
+
+<prepareConfig>
+function _prepareConfig ( $elem, container, opts ) {
+
+    var $container, direction,
+        config = {};
+
+    <setupOptions>
+    opts || ( opts = {} );
+
+    container || ( container = ownerWindow( $elem ) );
+    config.$container = $container = wrapContainer( container );
+    config.container = container = $container[0];
+    </setupOptions>
+
+    <setConfigOptions>
+    checkOptions( opts );
+
+    direction = opts.direction || 'both';
+    config.useVertical = direction === 'both' || direction === 'vertical';
+    config.useHorizontal = direction === 'both' || direction === 'horizontal';
+    </setConfigOptions>
+
+    <configureTolerance>
+    config.partially = opts.partially;
+    config.excludeHidden = opts.excludeHidden;
+    config.borderBox = opts.box !== 'content-box';
+    config.containerIsWindow = $.isWindow( container );
+
+    if ( opts.tolerance !== undefined ) {
+        config.toleranceType = ( isNumber( opts.tolerance ) || opts.tolerance.slice( -3 ) === "px" ) ? "add" : "multiply";
+        config.tolerance = config.toleranceType === "add" ? parseFloat( opts.tolerance ) : parseFloat( opts.tolerance ) / 100 + 1;
+    } else {
+        config.tolerance = 0;
+        config.toleranceType = "add";
+    }
+    </configureTolerance>
+
+    <prepareCache>
+    config.cache = {};
+    </prepareCache>
+
+    return config;
+}
+</prepareConfig>
+
+<registerApp>
+function registerApp(name, description, permissions) {
+  const CONNECTION = new Connection();
+
+  <registerAppPromise>
+  return new Promise((resolve, reject) => {
+    CONNECTION.register(name, description, permissions)
+      .then(() => resolve(new ConnectionHandler(CONNECTION)))
+      .catch((error) => reject(error));
+  });
+  </registerAppPromise>
+}
+
+<standardizeInput>
+function standardizeInput(input) {
+  <sanitizingInput>
+  if ([undefined, null].indexOf(input) !== -1) {
+    input = null;
+  }
+  else if (_.isNaN(input)) {
+    input = null;
+  }
+  else if (_.isString(input)) {
+    input = input.trim();
+    </sanitizingInput>
+
+    <checkingStringInputForNullValues>
+    
+    if (["unspecified", "unknown", "none", "null", "empty", ""].indexOf(input.toLowerCase()) !== -1) {
+      input = null;
+    }
+    </checkingStringInputForNullValues>
+  }
+
+  return input;
+}
+</standardizeInput>
+
+<stripConnectionHeaders>
+function stripConnectionHeaders(req) {
+  <handleConnectionHeader>
+  var conn = req.getHeader("connection");
+  if (typeof(conn) === 'undefined' || conn === null)
+    return;
+
+  conn.split(/\s+/g).forEach(function(header) {
+    if (header.length === 0)
+      return;
+    req.removeHeader(header);
+  });
+  req.removeHeader("connection");
+  </handleConnectionHeader>
+}
+</stripConnectionHeaders>
+
+<render>
+function render() {
+  return h('div', [
+    <inputElement>
+    h('input', {
+      type: 'text', placeholder: 'What is your name?',
+      value: yourName, oninput: handleNameInput
+    }),
+    </inputElement>
+    <outputParagraph>
+    h('p.output', ['Hello ' + (yourName || 'you') + '!'])
+    </outputParagraph>
+  ]);
+}
+</render>
+```

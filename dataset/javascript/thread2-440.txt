@@ -1,0 +1,349 @@
+```javascript
+<requirePackage>
+function requirePackage(pkg, mainjs) {
+    var processed = {};
+    var pkgName = path.basename(pkg);
+    var code = grunt.file.read(mainjs);
+    while (true) {
+        var requires = detective(code);
+        if (!requires.length) break;
+        for (var requireIdx in requires) {
+            var name = requires[requireIdx];
+            var requiredCode = '';
+            if (!processed[name]) {
+                var filepath = path.join(pkg, 'lib', name.replace(pkgName + '/', '') + '.js');
+                requiredCode = grunt.file.read(filepath);
+                processed[name] = true;
+            }
+            code = code.replace(new RegExp('require\\([\\\'\"]' + name + '[\\\'\"]\\);?'), requiredCode);
+        }
+    }
+    return code;
+}
+</requirePackage>
+
+<parse>
+function parse(string) {
+    var result = {},
+        lines = string.split(/\r\n|\r|\n/),
+        count = lines.length,
+        pieces,
+        key,
+        value,
+        meta,
+        namespace;
+
+    for (var i = 0; i < count; i++) {
+        
+        if (lines[i] === '') {
+            continue;
+        }
+        if (lines[i].toUpperCase() === PREFIX || lines[i].toUpperCase() === POSTFIX) {
+            continue;
+        }
+        
+        var data = lines[i];
+        
+        var isValueContinued = function (i) {
+            return i + 1 < count && (lines[i + 1][0] === ' ' || lines[i + 1][0] === '\t');
+        };
+        
+        if (isValueContinued(i)) {
+            while (isValueContinued(i)) {
+                data += lines[i + 1].trim();
+                i++;
+            }
+        }
+
+        pieces = data.split(':');
+        key = pieces.shift();
+        value = pieces.join(':');
+        namespace = false;
+        meta = {};
+        
+        if (key.match(/;/)) {
+            key = key
+                .replace(/\\;/g, 'ΩΩΩ')
+                .replace(/\\,/, ',');
+            var metaArr = key.split(';').map(function (item) {
+                return item.replace(/ΩΩΩ/g, ';');
+            });
+            key = metaArr.shift();
+            metaArr.forEach(function (item) {
+                var arr = item.split('=');
+                arr[0] = arr[0].toLowerCase();
+                if (arr[0].length === 0) {
+                    return;
+                }
+                if (meta[arr[0]]) {
+                    meta[arr[0]].push(arr[1]);
+                } else {
+                    meta[arr[0]] = [arr[1]];
+                }
+            });
+        }
+        
+        
+        value = value
+            .replace(/\\n/g, '\n');
+
+        value = tryToSplit(value);
+        
+        
+        if (key.match(/\./)) {
+            var arr = key.split('.');
+            key = arr[1];
+            namespace = arr[0];
+        }
+
+        var newValue = {
+            value: value
+        };
+        if (Object.keys(meta).length) {
+            newValue.meta = meta;
+        }
+        if (namespace) {
+            newValue.namespace = namespace;
+        }
+
+        if (key.indexOf('X-') !== 0) {
+            key = key.toLowerCase();
+        }
+
+        if (typeof result[key] === 'undefined') {
+            result[key] = [newValue];
+        } else {
+            result[key].push(newValue);
+        }
+
+    }
+
+    return result;
+}
+</parse>
+
+<loadImageFromImageLoader>
+function loadImageFromImageLoader(imageId, options) {
+    const colonIndex = imageId.indexOf(':');
+    const scheme = imageId.substring(0, colonIndex);
+    const loader = imageLoaders[scheme];
+
+    if (loader === undefined || loader === null) {
+        if (unknownImageLoader !== undefined) {
+            return unknownImageLoader(imageId);
+        }
+        
+        throw new Error('loadImageFromImageLoader: no image loader for imageId');
+    }
+
+    const imageLoadObject = loader(imageId, options);
+
+    
+    imageLoadObject.promise.then(function(image) {
+        triggerEvent(events, EVENTS.IMAGE_LOADED, { image });
+    }, function(error) {
+        const errorObject = {
+            imageId,
+            error
+        };
+        
+        triggerEvent(events, EVENTS.IMAGE_LOAD_FAILED, errorObject);
+    });
+
+    return imageLoadObject;
+}
+</loadImageFromImageLoader>
+
+<addRecord>
+function addRecord(options) {
+    options.type = options.type || 'CNAME';
+    return getZone(options.domain)
+    .then(function(zone) {
+        return self.cloudflareClient.addRecord(
+            zone.id,
+            _.extend({ ttl: 1 }, mapRecordOptions(options)));
+        })
+    .then(function(response) {
+        return new Result([
+            format(
+                'Added %s record %s -> %s',
+                response.data.result.type,
+                response.data.result.name,
+                response.data.result.content
+            )
+        ]);
+    });
+}
+</addRecord>
+
+<mergeEmoticons>
+function mergeEmoticons(child, index, parent) {
+    var siblings
+    var value
+    var siblingIndex
+    var node
+    var emoticon
+    var subvalue
+
+    
+    if (start.indexOf(toString(child).charAt(0)) !== -1) {
+        siblings = parent.children
+        siblingIndex = index
+        node = child
+        value = ''
+
+        while (node) {
+            if (value.length >= MAX_EMOTICON_LENGTH) {
+                return
+            }
+
+            subvalue = toString(node)
+
+            value += subvalue
+
+            
+            if (
+                node.type !== EMOTICON_NODE &&
+                end.indexOf(subvalue.charAt(subvalue.length - 1)) !== -1 &&
+                emoticons.indexOf(value) !== -1
+            ) {
+                emoticon = { type: EMOTICON_NODE, value: value }
+
+                if (child.position && node.position) {
+                    emoticon.position = {
+                        start: child.position.start,
+                        end: node.position.end
+                    }
+                }
+
+                siblings.splice(index, siblingIndex - index + 1, emoticon)
+
+                
+                return index - 1
+            }
+
+            node = siblings[++siblingIndex]
+        }
+    }
+}
+</mergeEmoticons>
+
+<isRelated>
+function isRelated(a, b) {
+  if (a.measurementAvg === b.measurementAvg) return true;
+  if (a.relatedNames &&
+      a.relatedNames.has(b.measurementAvg)) {
+    return true;
+  }
+  if (b.relatedNames &&
+      b.relatedNames.has(a.measurementAvg)) {
+    return true;
+  }
+  return false;
+}
+</isRelated>
+
+<parseResponse>
+function parseResponse(body) {
+    var pgt = '';
+    var result = body.match(/action="([\s\S]*?)"/);
+    if (result) {
+        result = result[1];
+
+        var uri = url.parse(result, true);
+        var pathname = uri.pathname;
+
+        pgt = pathname.substr(pathname.lastIndexOf('/') + 1);
+    }
+
+    return pgt;
+}
+</parseResponse>
+
+<takingPropertiesFromDataGridNode>
+function(profileDataGridNode) {
+    if (!profileDataGridNode)
+        return;
+
+    this.save();
+
+    var currentNode = profileDataGridNode;
+    var focusNode = profileDataGridNode;
+
+    while (currentNode.parent && (currentNode instanceof WebInspector.ProfileDataGridNode)) {
+        currentNode._takePropertiesFromProfileDataGridNode(profileDataGridNode);
+
+        focusNode = currentNode;
+        currentNode = currentNode.parent;
+
+        if (currentNode instanceof WebInspector.ProfileDataGridNode) {
+            currentNode._keepOnlyChild(focusNode);
+        }
+    }
+
+    this.children = [focusNode];
+    this.totalTime = profileDataGridNode.totalTime;
+}
+</takingPropertiesFromDataGridNode>
+
+<convertDataValue>
+function converDataValue(value, dimInfo) {
+    
+    var dimType = dimInfo && dimInfo.type;
+    if (dimType === 'ordinal') {
+        
+        var ordinalMeta = dimInfo && dimInfo.ordinalMeta;
+        return ordinalMeta
+            ? ordinalMeta.parseAndCollect(value)
+            : value;
+    }
+
+    if (dimType === 'time'
+        
+        && typeof value !== 'number'
+        && value != null
+        && value !== '-'
+    ) {
+        value = +parseDate(value);
+    }
+
+    
+    
+    return (value == null || value === '')
+        ? NaN
+        
+        
+        : +value;
+}
+</convertDataValue>
+
+<copyFromQueryBuilder>
+function copyFromQueryBuilder(otherQueryBuilder) {
+    var qb = new QueryBuilder();
+    if (otherQueryBuilder != null) {
+        var clauseKeys = [
+            'whereClause', 'calculateClause', 'orderByClause',
+            'sliceClause', 'withOptionsClause'
+        ];
+        var isString = (typeof otherQueryBuilder === 'string' || otherQueryBuilder instanceof String);
+        var other = isString ?
+            JSON.parse(otherQueryBuilder) : otherQueryBuilder;
+        for (var i = 0; i < clauseKeys.length; i++) {
+            var key = clauseKeys[i];
+            var value = other[key];
+            if (value != null) {
+                
+                qb[key] = isString ? value : deepcopy(value);
+            }
+        }
+    }
+    return qb;
+}
+</copyFromQueryBuilder>
+```
+
+Explanation:
+- Each function is enclosed within tags that indicate its primary responsibility.
+- Some functions process multiple steps in service of a single larger task, so those steps are not individually tagged.
+- Functions that encapsulate a clear responsibility or task, like `isRelated`, are tagged without sub-segmentations because the whole code serves a singular purpose.
+- In functions with multiple responsibilities, or where the code could be split into clearly separate stages, different sections are not tagged separately since the responsibility is shared across the operations in the context of the specific task at hand.

@@ -1,0 +1,220 @@
+```javascript
+<Element>
+function Element (driver, parent, selector, id) {
+  this._driver = driver;
+  this._parent = parent;
+  this._selector = selector;
+  this._id = id;
+}
+</Element>
+
+<unicode2xml>
+function unicode2xml(unicodeList) {
+    if (typeof unicodeList === 'number') {
+        unicodeList = [unicodeList];
+    }
+    return unicodeList.map(function (u) {
+        if (u < 0x20) {
+            return '';
+        }
+        return u >= 0x20 && u <= 255
+            ? string.encodeHTML(String.fromCharCode(u).toLowerCase())
+            : '&#x' + u.toString(16) + ';';
+    }).join('');
+}
+</unicode2xml>
+
+<AnonymousFunction>
+function () {
+    var coll = this.target,
+        num = coll.length,
+        i, result = [];
+    for (i = 0; i < num; ++i) {
+        result[i] = coll[i];
+    }
+    return result;
+}
+</AnonymousFunction>
+
+<validate>
+function validate(opts, options) {
+	if (!isObject(options)) {
+		return new TypeError('invalid input argument. Options argument must be an object. Value: `' + options + '`.');
+	}
+	if (options.hasOwnProperty('level')) {
+		opts.level = options.level;
+		if (!isPositiveInteger(opts.level)) {
+			return new TypeError('invalid option. `level` option must be a positive integer. Option: `' + opts.level + '`.');
+		}
+	}
+	if (options.hasOwnProperty('copy')) {
+		opts.copy = options.copy;
+		if (!isBoolean(opts.copy)) {
+			return new TypeError('invalid option. `copy` option must be a boolean primitive. Option: `' + opts.copy + '`.');
+		}
+	}
+	if (options.hasOwnProperty('override')) {
+		opts.override = options.override;
+		if (!isBoolean(opts.override) && !isFunction(opts.override)) {
+			return new TypeError('invalid option. `override` option must be either a boolean primitive or a function. Option: `' + opts.override + '`.');
+		}
+	}
+	if (options.hasOwnProperty('extend')) {
+		opts.extend = options.extend;
+		if (!isBoolean(opts.extend)) {
+			return new TypeError('invalid option. `extend` option must be a boolean primitive. Option: `' + opts.extend + '`.');
+		}
+	}
+	return null;
+}
+</validate>
+
+<shuukeiToMeisaiSection>
+function shuukeiToMeisaiSection(shuukeisaki){
+	switch(shuukeisaki){
+		case mConsts.SHUUKEI_SHOSHIN:
+		case mConsts.SHUUKEI_SAISHIN_SAISHIN:
+		case mConsts.SHUUKEI_SAISHIN_GAIRAIKANRI:
+		case mConsts.SHUUKEI_SAISHIN_JIKANGAI:
+		case mConsts.SHUUKEI_SAISHIN_KYUUJITSU:
+		case mConsts.SHUUKEI_SAISHIN_SHINYA:
+			return "初・再診料";
+		case mConsts.SHUUKEI_SHIDO:
+			return "医学管理等";
+		case mConsts.SHUUKEI_ZAITAKU:
+			return "在宅医療";
+		case mConsts.SHUUKEI_KENSA:
+			return "検査";
+		case mConsts.SHUUKEI_GAZOSHINDAN:
+			return "画像診断";
+		case mConsts.SHUUKEI_TOYAKU_NAIFUKUTONPUKUCHOZAI:
+		case mConsts.SHUUKEI_TOYAKU_GAIYOCHOZAI:
+		case mConsts.SHUUKEI_TOYAKU_SHOHO:
+		case mConsts.SHUUKEI_TOYAKU_MADOKU:
+		case mConsts.SHUUKEI_TOYAKU_CHOKI:
+			return "投薬";
+		case mConsts.SHUUKEI_CHUSHA_SEIBUTSUETC:
+		case mConsts.SHUUKEI_CHUSHA_HIKA:
+		case mConsts.SHUUKEI_CHUSHA_JOMYAKU:
+		case mConsts.SHUUKEI_CHUSHA_OTHERS:
+			return "注射";
+		case mConsts.SHUUKEI_SHOCHI:
+			return "処置";
+		case mConsts.SHUUKEI_SHUJUTSU_SHUJUTSU:
+		case mConsts.SHUUKEI_SHUJUTSU_YUKETSU:
+		case mConsts.SHUUKEI_MASUI:
+		case mConsts.SHUUKEI_OTHERS:
+		default: return "その他";
+	}
+}
+</shuukeiToMeisaiSection>
+
+<geoElementPair>
+function geoElementPair() {
+  var args = mlutil.asArray.apply(null, arguments);
+  if (args.length < 2) {
+    throw new Error('need at least two parameters for geospatial element pair query');
+  }
+
+  var location = {};
+
+  var keys = ['parent', 'lat', 'lon'];
+  var key = null;
+  var arg = null;
+  for (var i=0; i < keys.length; i++) {
+    key = keys[i];
+    arg = args[i];
+    if (arg instanceof QNameDef) {
+      location[key] = arg;
+    } else if (typeof arg === 'string' || arg instanceof String) {
+      location[key] = new QNameDef(null, arg);
+    } else if (arg instanceof ElementDef) {
+      location[key] = arg.element;
+    } else {
+      throw new Error('no parameter for '+key+': '+JSON.stringify(arg));
+    }
+  }
+
+  return {'geo-elem-pair': location};
+}
+</geoElementPair>
+
+<PouchAlt>
+function PouchAlt(name, opts) {
+    if (!(this instanceof PouchAlt)) {
+      return new PouchAlt(name, opts);
+    }
+
+    opts = opts || {};
+
+    if (name && typeof name === 'object') {
+      opts = name;
+      name = opts.name;
+      delete opts.name;
+    }
+
+    opts = assign({}, PouchAlt.__defaults, opts);
+
+    if (
+      name !== undefined &&
+      name.indexOf('http') !== 0 &&
+      name.indexOf('https') !== 0
+    ) {
+      if (!opts.db && options.defaultAdapter) {
+        opts.db      = options.defaultAdapter;
+        opts.adapter = 'leveldb-mobile';
+      }
+      if (!opts.prefix) {
+        opts.prefix = defaultDirectory;
+      }
+    }
+
+    this._db_name = name;
+
+    PouchDB.call(this, name, opts);
+}
+</PouchAlt>
+
+<AnonymousFunction>
+function () {
+  var _safeHandleWindowResize = function () {
+    if (this._isOpen && this._ignoreResizeTo === 0) {
+      if ((this._expectResizeEvent() || this._orientationchangeInProgress) &&
+          !this._ui.container.hasClass("ui-popup-hidden")) {
+      
+        // Some additional code may be needed here
+        if (!($(":focus").is("input") || $(":focus").is("textarea"))) {
+            this._ui.container
+                .addClass("ui-popup-hidden ui-popup-truncate")
+                .removeAttr("style");
+        }
+      }
+    }
+  };
+  var $mobile = $.mobile;
+  if ($mobile.widgets && $mobile.widgets.popup) {
+    $mobile.widgets.popup.prototype._handleWindowResize = _safeHandleWindowResize;
+  }
+}
+</AnonymousFunction>
+
+<initialize>
+async function initialize(dispatch) {
+  // A lot of setup and initialization code here
+  // ...
+}
+</initialize>
+
+<AnonymousFunction>
+function () {
+  var words = this.words;
+  var sigBytes = this.sigBytes;
+
+  // Adjust the last word to store the correct number of significant bytes
+  words[sigBytes >>> 2] &= 0xffffffff << (32 - (sigBytes % 4) * 8);
+  words.length = Math.ceil(sigBytes / 4);
+}
+</AnonymousFunction>
+```
+
+Each function is annotated with a single pair of tags since they appear to have a single cohesive responsibility that their respective names or structures imply, instead of having distinct and separable responsibilities within them.

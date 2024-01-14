@@ -1,0 +1,180 @@
+```javascript
+<hashString>
+function hashString(string) {
+  let hashed = 0;
+  for (let ii = 0; ii < string.length; ii++) {
+    hashed = (31 * hashed + string.charCodeAt(ii)) | 0;
+  }
+  return smi(hashed);
+}
+</hashString>
+
+<checkFieldLength>
+function checkFieldLength(parsed, field, length) {
+  length = length || transactionFields[field].options.length;
+  if (parsed.transactions[field] && parsed.transactions[field].toString().length > length) {
+    console.log(parsed.transactions);
+    console.log(field, parsed.transactions[field]);
+  }
+}
+</checkFieldLength>
+
+<function>
+function(obj, num, chordPos) {
+        <findAvailableChordPosition>
+        if (currSlur[chordPos] === undefined) {
+          for (x = 0; x < currSlur.length; x++) {
+            if (currSlur[x] !== undefined) {
+              chordPos = x;
+              break;
+            }
+          }
+          if (currSlur[chordPos] === undefined) {
+            var offNum = chordPos*100+1;
+            Common.each(obj.endSlur, function(x) { if (offNum === x) --offNum; });
+            currSlur[chordPos] = [offNum];
+          }
+        }
+        </findAvailableChordPosition>
+        
+        <assignSlurNumbers>
+        var slurNum;
+        for (var i = 0; i < num; i++) {
+          slurNum = currSlur[chordPos].pop();
+          obj.endSlur.push(slurNum);
+        }
+        </assignSlurNumbers>
+        
+        <cleanupIfNecessary>
+        if (currSlur[chordPos].length === 0)
+          delete currSlur[chordPos];
+        </cleanupIfNecessary>
+        
+        return slurNum;
+      }
+</function>
+
+<concatStrat>
+function concatStrat(parentVal, childVal) {
+    parentVal = parentVal && !isArray(parentVal) ? [parentVal] : parentVal;
+
+    return childVal
+        ? parentVal
+            ? parentVal.concat(childVal)
+            : isArray(childVal)
+                ? childVal
+                : [childVal]
+        : parentVal;
+}
+</concatStrat>
+
+<reportError>
+function reportError(node, initial, result, type) {
+    const name = initial.type === "Identifier" ? initial.name : initial.value;
+    
+    return context.report({
+        node,
+        message: "{{type}} {{name}} unnecessarily renamed.",
+        data: {
+            name,
+            type
+        },
+        fix(fixer) {
+            return fixer.replaceTextRange([
+                initial.range[0],
+                result.range[1]
+            ], name);
+        }
+    });
+}
+</reportError>
+
+<getTouchList>
+function getTouchList(ev) {
+  if(ionic.Gestures.HAS_POINTEREVENTS) {
+    return ionic.Gestures.PointerEvent.getTouchList();
+  }
+  
+  else if(ev.touches) {
+    return ev.touches;
+  }
+  
+  else {
+    ev.identifier = 1;
+    return [ev];
+  }
+}
+</getTouchList>
+
+<readStdin>
+async function readStdin() {
+  let code = "";
+  const stdin = process.stdin;
+  return new Promise(resolve => {
+    stdin.setEncoding("utf8");
+    stdin.on("readable", () => {
+      const chunk = process.stdin.read();
+      if (chunk !== null) code += chunk;
+    });
+    stdin.on("end", () => {
+      resolve(code);
+    });
+  });
+}
+</readStdin>
+
+<verbositySetting>
+function (program) {
+    var verbosity = program.verbose
+    if (program.quiet) {
+      verbosity = 0
+    } else if (typeof verbosity === 'undefined') {
+      verbosity = 1
+    }
+    return verbosity
+}
+</verbositySetting>
+
+<rootExperiments>
+function rootExperiments(fn) {
+  enqueue(function() {
+    var data = {};
+    var experimentIds = window._vwo_exp_ids;
+    if (!experimentIds) return fn();
+    each(experimentIds, function(experimentId) {
+      var variationName = variation(experimentId);
+      if (variationName) data[experimentId] = variationName;
+    });
+    fn(null, data);
+  });
+}
+</rootExperiments>
+
+<hasMagic>
+function hasMagic(pattern, options) {
+  
+  if (pattern instanceof RegExp) {
+    return {
+      match: function match(str) {
+        return pattern.test(str);
+      }
+    };
+  }
+
+  var minimatch = new _minimatch.Minimatch(pattern, options);
+  var set = minimatch.set;
+
+  if (set.length > 1) {
+    return minimatch;
+  }
+
+  for (var j = 0; j < set[0].length; j++) {
+    if (typeof set[0][j] !== 'string') {
+      return minimatch;
+    }
+  }
+
+  return false;
+}
+</hasMagic>
+```

@@ -1,0 +1,209 @@
+<fileToURL>
+function fileToURL(output, filePath) {
+    <getOptions>
+    var options = output.getOptions();
+    var directoryIndex = options.get('directoryIndex');
+    </getOptions>
+
+    <fileToOutputConversion>
+    filePath = fileToOutput(output, filePath);
+    </fileToOutputConversion>
+
+    <handleDirectoryIndex>
+    if (directoryIndex && path.basename(filePath) == 'index.html') {
+        filePath = path.dirname(filePath) + '/';
+    }
+    </handleDirectoryIndex>
+
+    return LocationUtils.normalize(filePath);
+}
+</fileToURL>
+
+<addWindowEventListeners>
+function addWindowEventListeners() {
+    <addMouseEvents>
+    if(window.onMouseDown){
+        mouse.addEventListener(MouseEvent.MOUSE_DOWN, window.onMouseDown.bind(window));
+    }
+    if(window.onMouseUp){
+        mouse.addEventListener(MouseEvent.MOUSE_UP, window.onMouseUp.bind(window));
+    }
+    if(window.onMouseMove){
+        mouse.addEventListener(MouseEvent.MOUSE_MOVE, window.onMouseMove.bind(window));
+    }
+    if(window.onMouseDrag){
+        mouse.addEventListener(MouseEvent.MOUSE_DRAG, window.onMouseDrag.bind(window));
+    }
+    if(window.onMouseScroll){
+        mouse.addEventListener(MouseEvent.MOUSE_SCROLL, window.onMouseScroll.bind(window));
+    }
+    </addMouseEvents>
+
+    <addKeyboardEvents>
+    if(window.onKeyDown){
+        keyboard.addEventListener(KeyboardEvent.KEY_DOWN, window.onKeyDown.bind(window));
+    }
+    if(window.onKeyPress){
+        keyboard.addEventListener(KeyboardEvent.KEY_PRESS, window.onKeyPress.bind(window));
+    }
+    if(window.onKeyUp){
+        keyboard.addEventListener(KeyboardEvent.KEY_UP, window.onKeyUp.bind(window));
+    }
+    </addKeyboardEvents>
+
+    <addWindowResizeEvent>
+    if(window.onWindowResize) {
+        window.addEventListener(WindowEvent.WINDOW_RESIZE, window.onWindowResize.bind(window));
+    }
+    </addWindowResizeEvent>
+}
+</addWindowEventListeners>
+
+Unnamed-Function-1 (Please provide an appropriate name to understand the function's responsibility better)
+
+<createTouchList>
+function createTouchList(mouseEv) {
+    <touchListInitialization>
+    var touchList = new TouchList();
+    </touchListInitialization>
+
+    <handleMultiTouch>
+    if (isMultiTouch) {
+        var f = TouchEmulator.multiTouchOffset;
+        var deltaX = multiTouchStartPos.pageX - mouseEv.pageX;
+        var deltaY = multiTouchStartPos.pageY - mouseEv.pageY;
+
+        touchList.push(new Touch(eventTarget, 1, multiTouchStartPos, (deltaX*-1) - f, (deltaY*-1) + f));
+        touchList.push(new Touch(eventTarget, 2, multiTouchStartPos, deltaX+f, deltaY-f));
+    } 
+    </handleMultiTouch>
+
+    <handleSingleTouch>
+    else {
+        touchList.push(new Touch(eventTarget, 1, mouseEv, 0, 0));
+    }
+    </handleSingleTouch>
+
+    return touchList;
+}
+</createTouchList>
+
+<setup>
+function setup(connection) {
+    <initialSetup>
+    node.connection = connection;
+    node.status({ fill: 'green', shape: 'dot', text: 'connected' });
+    </initialSetup>
+
+    <optionsConfiguration>
+    var options = {
+        target: {
+            address: node.address,
+            dynamic: node.dynamic,
+            durable: node.durable,
+            expiry_policy: node.expirypolicy
+        },
+        autosettle: node.autosettle,
+        snd_settle_mode: node.sndsettlemode,
+        rcv_settle_mode: node.rcvsettlemode
+    };
+    node.sender = node.connection.open_sender(options);
+    </optionsConfiguration>
+
+    <senderEventListeners>
+    node.sender.on('accepted', function(context) {
+        var msg = outDelivery(node, context.delivery);
+        node.send(msg);
+    });
+
+    node.sender.on('released', function(context) {
+        var msg = outDelivery(node, context.delivery);
+        node.send(msg);
+    });
+
+    node.sender.on('rejected', function(context) {
+        var msg = outDelivery(node, context.delivery);
+        node.send(msg);
+    });
+    </senderEventListeners>
+
+    <connectionEventListeners>
+    node.connection.on('disconnected', function(context) {
+        node.status({fill: 'red', shape: 'dot', text: 'disconnected' });
+    });
+    </connectionEventListeners>
+
+    <inputEventListener>
+    node.on('input', function(msg) {
+        if (node.sender.sendable()) {
+            node.sender.send(msg.payload);
+        }
+    });
+    </inputEventListener>
+
+    <closeEventListener>
+    node.on('close', function() {
+        if (node.sender != null)
+            node.sender.detach();
+        node.connection.close();
+    });
+    </closeEventListener>
+}
+</setup>
+
+Unnamed-Function-2 (Please provide an appropriate name to understand the function's responsibility better)
+
+Unnamed-Function-3 (Please provide an appropriate name to understand the function's responsibility better)
+
+<stylesheet>
+function stylesheet() {
+    <gatherRules>
+    var rulesList = rules();
+    </gatherRules>
+
+    return {
+      type: 'stylesheet',
+      stylesheet: {
+        source: options.source,
+        rules: rulesList,
+        parsingErrors: errorsList
+      }
+    };
+}
+</stylesheet>
+
+<append_nested>
+function append_nested(concater,items){
+    <initiateEnumeration>
+    concater += `\\begin{enumerate}\n`;
+    </initiateEnumeration>
+
+    <processItems>
+    for(var index in items){
+        concater += `\\item ${items[index].name}\n`;
+        
+        <handleSubitems>
+        if(items[index].subitems != undefined){
+            concater = append_nested(concater,items[index].subitems); 
+        }
+        </handleSubitems>
+    }
+    </processItems>
+
+    <endEnumeration>
+    concater += `\\end{enumerate}\n`;
+    </endEnumeration>
+    
+    return concater;
+}
+</append_nested>
+
+<parse>
+function parse (event) {
+    var parts = event.split(/ +/)
+    return {
+        name: parts.shift(),
+        selector: parts.join(' ')
+    }
+}
+</parse>

@@ -1,0 +1,310 @@
+```javascript
+<copy>
+function copy(obj) {
+  <checkForNull>
+  if (obj == null) {
+    return obj;
+  }</checkForNull>
+
+  <handleArray>
+  if (array(obj)) {
+    return obj.slice();
+  }</handleArray>
+  <handlePlainObject>
+  else if (plainObject(obj)) {
+    return clone(obj);
+  }</handlePlainObject>
+  <returnObject>
+  else {
+    return obj;
+  }</returnObject>
+}
+</copy>
+```
+
+```javascript
+<SetResponse>
+function SetResponse(model, args, isJSONGraph, isProgressive) {
+  <initializeProperties>
+  this._model = model;
+  this._isJSONGraph = isJSONGraph || false;
+  this._isProgressive = isProgressive || false;
+  this._initialArgs = args;
+  this._value = [{}];</initializeProperties>
+
+  <setupGroups>
+  var groups = [];
+  var group, groupType;
+  var argIndex = -1;
+  var argCount = args.length;
+
+  while (++argIndex < argCount) {
+    <determineArgumentType>
+    var arg = args[argIndex];
+    var argType;
+    if (isArray(arg) || typeof arg === "string") {
+      arg = pathSyntax.fromPath(arg);
+      argType = "PathValues";
+    } else if (isPathValue(arg)) {
+      arg.path = pathSyntax.fromPath(arg.path);
+      argType = "PathValues";
+    } else if (isJSONGraphEnvelope(arg)) {
+      argType = "JSONGs";
+    } else if (isJSONEnvelope(arg)) {
+      argType = "PathMaps";
+    }</determineArgumentType>
+
+    <groupArguments>
+    if (groupType !== argType) {
+      groupType = argType;
+      group = {
+        inputType: argType,
+        arguments: []
+      };
+      groups.push(group);
+    }
+    group.arguments.push(arg);
+  }</groupArguments>
+  this._groups = groups;</setupGroups>
+}
+</SetResponse>
+```
+
+```javascript
+<lintFile>
+function lintFile (linter, fileName) {
+  <readFileAndValidate>
+  const fileContents = fs.readFileSync(fileName, {encoding: 'utf8'}).toString()
+  const report = linter.validate(fileContents)
+  const errors = report.error.count
+  const warnings = report.warn.count</readFileAndValidate>
+
+  <logIssues>
+  if (errors || warnings) {
+    this.printFilePath(fileName)
+
+    report.error.data.forEach(logItem.bind(this))
+    report.warn.data.forEach(logItem.bind(this))
+
+    console.log('') 
+  }</logIssues>
+
+  <returnReport>
+  return report</returnReport>
+}
+</lintFile>
+```
+
+```javascript
+<generate>
+function generate(initialStateOrOptions, condition, iterate, resultSelectorOrObservable, scheduler) {
+  <parseArguments>
+  var resultSelector;
+  var initialState;
+  if (arguments.length == 1) {
+      var options = initialStateOrOptions;
+      initialState = options.initialState;
+      condition = options.condition;
+      iterate = options.iterate;
+      resultSelector = options.resultSelector || _util_identity__WEBPACK_IMPORTED_MODULE_1__["identity"];
+      scheduler = options.scheduler;
+  }
+  else if (resultSelectorOrObservable === undefined || Object(_util_isScheduler__WEBPACK_IMPORTED_MODULE_2__["isScheduler"])(resultSelectorOrObservable)) {
+      initialState = initialStateOrOptions;
+      resultSelector = _util_identity__WEBPACK_IMPORTED_MODULE_1__["identity"];
+      scheduler = resultSelectorOrObservable;
+  }
+  else {
+      initialState = initialStateOrOptions;
+      resultSelector = resultSelectorOrObservable;
+  }</parseArguments>
+  
+  <createObservable>
+  return new _Observable__WEBPACK_IMPORTED_MODULE_0__["Observable"](function (subscriber) {
+    <observableLogic>
+    var state = initialState;
+    if (scheduler) {
+      return scheduler.schedule(dispatch, 0, {
+          subscriber: subscriber,
+          iterate: iterate,
+          condition: condition,
+          resultSelector: resultSelector,
+          state: state
+      });
+    }
+    do {
+      <conditionalLogic>
+      if (condition) {
+          var conditionResult = void 0;
+          try {
+              conditionResult = condition(state);
+          }
+          catch (err) {
+              subscriber.error(err);
+              return undefined;
+          }
+          if (!conditionResult) {
+              subscriber.complete();
+              break;
+          }
+      }</conditionalLogic>
+      
+      <executionAndErrorHandling>
+      var value = void 0;
+      try {
+          value = resultSelector(state);
+      }
+      catch (err) {
+          subscriber.error(err);
+          return undefined;
+      }
+      subscriber.next(value);
+      if (subscriber.closed) {
+          break;
+      }
+      try {
+          state = iterate(state);
+      }
+      catch (err) {
+          subscriber.error(err);
+          return undefined;
+      }
+      </executionAndErrorHandling>
+    } while (true);
+    return undefined;</observableLogic>
+  });</createObservable>
+}
+</generate>
+```
+
+```javascript
+<anonymous>
+function(model, settings, objs, options, cb) {
+  <defaultParameters>
+  var m;
+  if (settings == null) {
+    settings = {};
+  }
+  if (objs == null) {
+    objs = {};
+  }
+  if (options == null) {
+    options = {};
+  }
+  if (cb == null) {
+    cb = function() {};
+  }</defaultParameters>
+
+  <validateModel>
+  Hoek.assert(model, i18n.assertModuleRequired);</validateModel>
+  
+  <handleFunctionAsOption>
+  if (_.isFunction(options)) {
+    cb = options;
+    options = {};
+  }</handleFunctionAsOption>
+
+  <createAndSaveModel>
+  m = new model(objs);
+  return m.save(function(err) {
+    if (err) {
+      return cb(err);
+    }
+    return cb(null, m, true);
+  });</createAndSaveModel>
+}
+</anonymous>
+```
+
+```javascript
+<calculateScale>
+function( viewportZoom ) {
+  <scaleComputation>
+  var ratio = this._scaleSpring.current.value *
+          this.viewport._containerInnerSize.x / this.source.dimensions.x;
+  return ratio * viewportZoom;</scaleComputation>
+}
+</calculateScale>
+```
+
+```javascript
+<calculateAdjustedMonth>
+function(year, month) {
+	<calculate>
+	var date = this._validate(year, month, this.minDay,
+		$.calendars.local.invalidMonth || $.calendars.regionalOptions[''].invalidMonth);
+	return (date.month() + this.monthsInYear(date) - this.firstMonth) %
+		this.monthsInYear(date) + this.minMonth;</calculate>
+}
+</calculateAdjustedMonth>
+```
+
+```javascript
+<applyModelMethods>
+function applyModelMethods (model, definition) {
+	for (var i in definition.methods) {
+		<validateMethod>
+		if (i === 'definition') {
+			throw new Error('Invalid model definition provided. "definition" is a reserved word');
+		}</validateMethod>
+
+		<assignMethod>
+		model.prototype[i] = definition.methods[i];</assignMethod>
+	}
+}
+</applyModelMethods>
+```
+
+```javascript
+<mergeConstraints>
+function mergeConstraints(env, oldConstraints, newConstraints) {
+	<initializeConstraints>
+	const res = {
+		min: Math.max(oldConstraints.min || 0, newConstraints.min || 0),
+		max: Math.min(
+			oldConstraints.max !== undefined ? oldConstraints.max : 2,
+			newConstraints.max !== undefined ? newConstraints.max : 2
+		),
+		force: oldConstraints.force || newConstraints.force,
+	};</initializeConstraints>
+
+	<adjustIncompatibleConstraints>
+	if (res.min > res.max) {
+		
+		if (!oldConstraints.force) {
+			
+			if (newConstraints.max !== undefined && newConstraints.max > res.min) {
+				res.max = newConstraints.max;
+			} else if (newConstraints.min && newConstraints.min < res.min) {
+				res.min = newConstraints.min;
+			}
+		}
+		res.max = res.min;
+		env.log("info/html2wt", 'Incompatible constraints (merge):', res,
+			loggableConstraints(oldConstraints), loggableConstraints(newConstraints));
+	}</adjustIncompatibleConstraints>
+
+	<returnConstraints>
+	return res;</returnConstraints>
+}
+</mergeConstraints>
+```
+
+```javascript
+<walk>
+function walk(arr, key, fn) {
+  <walkArray>
+  var l = arr.length,
+      children;
+
+  while (l--) {
+      children = arr[l][key];
+
+      if (children) {
+          walk(children, key, fn);
+      }
+      fn(arr[l]);
+  }</walkArray>
+}
+</walk>
+```

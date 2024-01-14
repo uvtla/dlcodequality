@@ -1,0 +1,270 @@
+```javascript
+<determineGetMapURL>
+function determineGetMapURL(json, version) {
+  <extractURL>
+  var url = '';
+  // Code specific to each version is omitted for brevity; please assume it follows similar patterns
+  // and includes structured conditional logic tailored to extract a URL based on the version.
+  return url;
+  </extractURL>
+}
+</determineGetMapURL>
+
+<pushPart>
+function pushPart (parts, file) {
+<getFileExtension>
+  let ext = getExtname(file.path)
+</getFileExtension>
+<findTypeAndGroupFile>
+  let type = Object.keys(EXT_TYPES).find(key => {
+    return EXT_TYPES[key].includes(ext)
+  })
+  parts[type.toLowerCase()].push(file)
+</findTypeAndGroupFile>
+}
+</pushPart>
+
+<S3getObjectConfiguration>
+function(next) {
+  S3.getObject({
+    Bucket: S3Handler.options.S3BucketName, 
+    Key: S3Handler.options.mboxName + S3Handler.options.S3MessageListKeySuffix
+  }, 
+    next
+  );
+}
+</S3getObjectConfiguration>
+
+<Template>
+function Template(style, fields, opts) {
+<validateStyle>
+  if (passFields.STYLES.indexOf(style) === -1) {
+    throw new Error('Incorrect passbook style ' + style)
+  }
+</validateStyle>
+<initializeTemplate>
+  this.style  = style
+  this.opts   = opts   || {}
+  this.fields = fields || {}
+</initializeTemplate>
+<setDefaultField>
+  this.fields.formatVersion = 1
+</setDefaultField>
+}
+</Template>
+
+<SelectBoxControllerConstructor>
+function (cfg, ctxt, lineNumber) {
+<initializeController>
+  var controller = new ariaWidgetsControllersSelectBoxController();
+  this.$DropDownTextInput.constructor.call(this, cfg, ctxt, lineNumber, controller);
+</initializeController>
+<configureController>
+  this.controller.setListOptions(this._cfg.options);
+</configureController>
+<setAdditionalProperties>
+  this._freePopupWidth = false;
+  this._waiSuggestionsChangedListener = null;
+</setAdditionalProperties>
+}
+</SelectBoxControllerConstructor>
+
+<dynamicStateRetriever>
+function(name) {
+<initialize>
+  name = name || '';
+  var state = null;
+</initialize>
+<validateStateName>
+  if(!_validateStateName(name)) {
+    return null;
+  }
+</validateStateName>
+<retrieveCachedState>
+  else if(_stateCache[name]) {
+    return _stateCache[name];
+  }
+</retrieveCachedState>
+<assembleStateChain>
+  var nameChain = _getNameChain(name);
+  var stateChain = nameChain
+    .map(function(name, i) {
+      var item = angular.copy(_stateLibrary[name]);
+      return item;
+    })
+    .filter(function(parent) {
+      return !!parent;
+    });
+</assembleStateChain>
+<mergeStateChain>
+  for(var i=stateChain.length-1; i>=0; i--) {
+    if(stateChain[i]) {
+      var nextState = stateChain[i];
+      state = angular.merge(nextState, state || {});
+    }
+    if(state && state.inherit === false) break;
+  }
+</mergeStateChain>
+<cacheState>
+  _stateCache[name] = state;
+</cacheState>
+<returnState>
+  return state;
+</returnState>
+}
+</dynamicStateRetriever>
+
+<reportIncorrectPlucking>
+function reportIncorrectPlucking( ast, session ) {
+  session.buildVisitor( {
+    action( node ) {
+
+      this.visit( node.expression, true );
+
+    },
+    labeled( node, action ) {
+      if ( node.pick !== true ) return void 0;
+      if ( action === true )
+        session.error( `"@" cannot be used with an action block.`, node.location );
+      if ( isSemanticPredicate( node ) )
+        session.error( `"@" cannot be used on a semantic predicate.`, node.location );
+
+      this.visit( node.expression );
+    },
+  } )( ast );
+}
+</reportIncorrectPlucking>
+
+<MapZoomPluginConstructor>
+function (container, options) {
+  var self = this;
+<initializePlugin>
+  self.container = container;
+  self.$container = $(container);
+  self.options = self.extendDefaultOptions(options);
+  self.zoomTO = 0;
+  self.zoomCenterX = 0;
+  self.zoomCenterY = 0;
+  self.previousPinchDist = 0;
+  self.zoomData = {
+    zoomLevel: 0,
+    zoomX: 0,
+    zoomY: 0,
+    panX: 0,
+    panY: 0
+  };
+  self.currentViewBox = {
+    x: 0, y: 0, w: 0, h: 0
+  };
+  self.panning = false;
+  self.zoomAnimID = null; 
+  self.zoomAnimStartTime = null; 
+  self.zoomAnimCVBTarget = null;
+</initializePlugin>
+<setDOMElements>
+  self.$map = $("." + self.options.map.cssClass, self.container);
+  self.initialMapHTMLContent = self.$map.html();
+  self.$tooltip = {};
+</setDOMElements>
+<createGraphics>
+  self.paper = {};
+</createGraphics>
+<initializeCollections>
+  self.areas = {};
+  self.plots = {};
+  self.links = {};
+  self.legends = {};
+</initializeCollections>
+<storeMapConf>
+  self.mapConf = {};
+</storeMapConf>
+<initializeEventHandlers>
+  self.customEventHandlers = {};
+</initializeEventHandlers>
+<invokeInit>
+  self.init();
+</invokeInit>
+}
+</MapZoomPluginConstructor>
+
+<mixinFn>
+function mixinFn(target, mixin, config){
+<handleArguments>
+  if (arguments.length == 1){
+    mixin = target
+    target = {}
+  }
+</handleArguments>
+<validateMixin>
+  if (!mixin){
+    return target
+  }
+</validateMixin>
+<configureMixin>
+  config = config || {}
+</configureMixin>
+<getClassForMixin>
+  var MixinClass      = getClass(mixin)
+</getClassForMixin>
+<prepareMixinIdentifier>
+  var mixinIdentifier = config.mixinIdentifier || mixin
+</prepareMixinIdentifier>
+<copyMixinClassPrototype>
+  if (MixinClass){
+    if (typeof mixin == 'string'){
+      mixin = { alias: mixin }
+    }
+    if (mixin == MixinClass){
+      mixin = MixinClass.prototype
+    } else {
+      copyIf(MixinClass.prototype, mixin)
+    }
+    copyMetaFrom(mixin)
+    mixinIdentifier = mixin.alias
+  }
+</copyMixinClassPrototype>
+<mergeStaticsToTarget>
+  if ( target.$ownClass && !config.skipStatics) {
+    var mixinStatics = MixinClass?
+      copyMetaFrom(MixinClass, {}):
+      mixin.statics
+    if ( mixinStatics && mixinMeta.some(function(when){ return !! mixinStatics[when] }) ) {
+      config.skipWarning = true
+      var staticsMixinIdentifier = 'statics.' + mixinIdentifier
+      mixinFn(target.$ownClass, mixinStatics, { skipStatics: true, mixinIdentifier: staticsMixinIdentifier})
+    }
+  }
+</mergeStaticsToTarget>
+<applyMixin>
+  doMixin(target, mixin, mixinIdentifier, config)
+</applyMixin>
+<returnTarget>
+  return target
+</returnTarget>
+}
+</mixinFn>
+
+<mayanYearConverter>
+function(years) {
+  years = years.split('.');
+<validateYearComponents>
+  if (years.length < 3) {
+    throw 'Invalid Mayan year';
+  }
+</validateYearComponents>
+<convertYearComponentsToNumber>
+  var year = 0;
+  for (var i = 0; i < years.length; i++) {
+    var y = parseInt(years[i], 10);
+    if (Math.abs(y) > 19 || (i > 0 && y < 0)) {
+      throw 'Invalid Mayan year';
+    }
+    year = year * 20 + y;
+  }
+</convertYearComponentsToNumber>
+<returnYear>
+  return year;
+</returnYear>
+}
+</mayanYearConverter>
+```

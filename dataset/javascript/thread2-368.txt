@@ -1,0 +1,290 @@
+<function Oscillator>
+function Oscillator(type, frequency, amplitude, bufferSize, sampleRate) {
+  this.frequency  = frequency;
+  this.amplitude  = amplitude;
+  this.bufferSize = bufferSize;
+  this.sampleRate = sampleRate;
+  
+  this.frameCount = 0;
+ 
+  this.waveTableLength = 2048;
+
+  this.cyclesPerSample = frequency / sampleRate;
+
+  this.signal = new Float32Array(bufferSize);
+  this.envelope = null;
+
+  <selectWaveFunction>
+  switch(parseInt(type, 10)) {
+    case DSP.TRIANGLE:
+      this.func = Oscillator.Triangle;
+      break;
+
+    case DSP.SAW:
+      this.func = Oscillator.Saw;
+      break;
+
+    case DSP.SQUARE:
+      this.func = Oscillator.Square;
+      break;
+
+    default:
+    case DSP.SINE:
+      this.func = Oscillator.Sine;
+      break;
+  }
+  </selectWaveFunction>
+
+  <generateWaveTable>
+  this.generateWaveTable = function() {
+    Oscillator.waveTable[this.func] = new Float32Array(2048);
+    var waveTableTime = this.waveTableLength / this.sampleRate;
+    var waveTableHz = 1 / waveTableTime;
+
+    for (var i = 0; i < this.waveTableLength; i++) {
+      Oscillator.waveTable[this.func][i] = this.func(i * waveTableHz/this.sampleRate);
+    }
+  };
+  </generateWaveTable>
+
+  <initializeWaveTable>
+  if ( typeof Oscillator.waveTable === 'undefined' ) {
+    Oscillator.waveTable = {};
+  }
+
+  if ( typeof Oscillator.waveTable[this.func] === 'undefined' ) {
+    this.generateWaveTable();
+  }
+  </initializeWaveTable>
+ 
+  this.waveTable = Oscillator.waveTable[this.func];
+}
+</function Oscillator>
+
+<function adjustTickAmounts>
+function adjustTickAmounts() {
+		if (optionsChart.alignTicks !== false) {
+			each(axes, function (axis) {
+				axis.adjustTickAmount();
+			});
+		}
+		maxTicks = null;
+	}
+</function adjustTickAmounts>
+
+<function getGlobalThis>
+function getGlobalThis() {
+    return t.callExpression(
+      t.sequenceExpression([t.valueToNode(0), t.identifier("eval")]),
+      [t.valueToNode("this")]
+    );
+  }
+</function getGlobalThis>
+
+<function getInfoFromPackageLock>
+function getInfoFromPackageLock (presetName) {
+  debug('get preset info from package-lock.json')
+
+  <definePaths>
+  const baseDir = getBaseDir()
+  const lockPath = path.join(baseDir, 'package-lock.json')
+  </definePaths>
+
+  <checkExistence>
+  if (!fs.existsSync(lockPath)) {
+    debug('package-lock.json not exist')
+    return null
+  }
+  </checkExistence>
+
+  debug(`package-lock.json path: ${lockPath}`)
+
+  <extractDependencyInfo>
+  const lockInfo = _.get(require(lockPath), `dependencies.${presetName}`)
+  </extractDependencyInfo>
+
+  debug('lock info: %o', lockInfo)
+
+  <validateLockInfo>
+  if (!lockInfo) {
+    return null
+  }
+  </validateLockInfo>
+
+  <returnPresetInfo>
+  return {
+    name: presetName,
+    version: lockInfo.version,
+    registryUrl: getRegistryUrl(lockInfo.resolved)
+  }
+  </returnPresetInfo>
+}
+</function getInfoFromPackageLock>
+
+<async function retrieveDescriptor>
+async function retrieveDescriptor(descriptor) {
+
+  <handlePlainObjectDescriptor>
+  if (isPlainObject(descriptor)) {
+    descriptor = cloneDeep(descriptor)
+  }
+  </handlePlainObjectDescriptor>
+
+  <handleRemotePathDescriptor>
+  else if (isRemotePath(descriptor)) {
+    const res = await axios.get(descriptor)
+    descriptor = res.data
+
+    <checkResponseStatus>
+    if (res.status >= 400) {
+      throw new TableSchemaError(`Can't load descriptor at "${descriptor}"`)
+    }
+    </checkResponseStatus>
+  }
+  </handleRemotePathDescriptor>
+
+  <handleLocalPathDescriptor>
+  else {
+    <checkBrowserEnvironment>
+    if (config.IS_BROWSER) {
+      throw new TableSchemaError('Local paths are not supported in browser')
+    }
+    </checkBrowserEnvironment>
+
+    <readFileDescriptor>
+    try {
+      descriptor = await new Promise((resolve, reject) => {
+        fs.readFile(descriptor, 'utf-8', (error, data) => {
+          if (error) reject(error)
+          try {resolve(JSON.parse(data))} catch (error) {reject(error)}
+        })
+      })
+    } catch (error) {
+      throw new TableSchemaError(`Can't load descriptor at "${descriptor}"`)
+    }
+    </readFileDescriptor>
+  }
+  </handleLocalPathDescriptor>
+
+  return descriptor
+}
+</async function retrieveDescriptor>
+
+<function removeMirageIndices>
+function removeMirageIndices(countMax, indexFirstKnown) {
+  var placeholdersAtEnd = 0;
+
+  <defineRemovePlaceholdersAfterSlot>
+  function removePlaceholdersAfterSlot(slotRemoveAfter) {
+      for (var slot2 = slotListEnd.prev; !(slot2.index < countMax) && slot2 !== slotRemoveAfter;) {
+          var slotPrev2 = slot2.prev;
+          if (slot2.index !== undefined) {
+              deleteSlot(slot2, true);
+          }
+          slot2 = slotPrev2;
+      }
+
+      placeholdersAtEnd = 0;
+  }
+  </defineRemovePlaceholdersAfterSlot>
+
+  <iterateSlotsToRemoveMirageIndices>
+  for (var slot = slotListEnd.prev; !(slot.index < countMax) || placeholdersAtEnd > 0;) {
+      var slotPrev = slot.prev;
+
+      if (slot === slotsStart) {
+          removePlaceholdersAfterSlot(slotsStart);
+          break;
+      } else if (slot.key) {
+          if (slot.index >= countMax) {
+              beginRefresh();
+              return false;
+          } else if (slot.index >= indexFirstKnown) {
+              removePlaceholdersAfterSlot(slot);
+          } else {
+              if (itemsFromKey) {
+                  fetchItemsFromKey(slot, 0, placeholdersAtEnd);
+              } else {
+                  fetchItemsFromIndex(slot, 0, placeholdersAtEnd);
+              }
+
+              return false;
+          }
+      } else if (slot.indexRequested || slot.firstInSequence) {
+          removePlaceholdersAfterSlot(slotPrev);
+      } else {
+          placeholdersAtEnd++;
+      }
+
+      slot = slotPrev;
+  }
+  </iterateSlotsToRemoveMirageIndices>
+
+  return true;
+}
+</function removeMirageIndices>
+
+<function processNotFound>
+function processNotFound () {
+  <invokeCallbacks>
+  if (_cb.beforeReturnNotFound) { _cb.beforeReturnNotFound(); }
+  if (_cb.returnNotFound) { _cb.returnNotFound(response); }
+  if (_cb.afterReturnNotFound) { _cb.afterReturnNotFound(); }
+  </invokeCallbacks>
+}
+</function processNotFound>
+
+<function rep>
+function rep (num, str) {
+  return function (arr, done) {
+    arr.forEach(function (i, idx) {
+      var s = ''
+      if (typeof i === 'string') s = i
+      if (idx === 0) return
+      else if (idx/num === Math.floor(idx/num)) arr[idx] = s + str
+    })
+    done()
+  }
+}
+</function rep>
+
+<function buildFromString>
+function buildFromString({ declaration, name, mapActionType }) {
+  <checkStringDeclaration>
+  if (typeof declaration === 'string') {
+    return arg => ({
+      type: mapActionType(name),
+      [declaration]: arg,
+    });
+  }
+  </checkStringDeclaration>
+  return null;
+}
+</function buildFromString>
+
+<function SocketNamespace>
+function SocketNamespace() {
+  var self = this;
+  var namespace = null;
+
+  <defineProperties>
+  Object.defineProperties(this, {
+    handlers: {value: {}},
+    middlewares: {value: []},
+    namespace: {
+      get: function() {
+        return namespace;
+      },
+      set: function(newNamespace) {
+        namespace = newNamespace;
+
+        <mountHandlersAndMiddlewares>
+        mountHandlers.call(self);
+        mountMiddlewares.call(self);
+        </mountHandlersAndMiddlewares>
+      }
+    }
+  });
+  </defineProperties>
+}
+</function SocketNamespace>

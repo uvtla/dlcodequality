@@ -1,0 +1,313 @@
+```javascript
+<function_handleEntryClick>
+function (e) {
+    <handleRenameCondition>
+    if (this.props.entry.get("rename")) {
+        e.stopPropagation();
+        return;
+    }
+    </handleRenameCondition>
+    
+    <checkMouseButton>
+    if (e.button !== LEFT_MOUSE_BUTTON) {
+        return;
+    }
+    </checkMouseButton>
+
+    <handleSelection>
+    if (this.props.entry.get("selected") && !e.ctrlKey) {
+        if (this.state.clickTimer === null && !this.props.entry.get("rename")) {
+            var timer = window.setTimeout(this.startRename, CLICK_RENAME_MINIMUM);
+            this.setState({
+                clickTimer: timer
+            });
+        }
+    } else {
+        this.props.actions.setSelected(this.myPath());
+    }
+    </handleSelection>
+    e.stopPropagation();
+    e.preventDefault();
+}
+</function_handleEntryClick>
+
+<function_getView>
+function getView(inner, type) { 
+    if (!type) {
+        type = inner;
+        inner = undefined;
+    }
+
+    var views, i, l, found,
+        view = this,
+        root = !type || type === "root";
+        
+    <handleInnerViewLookup>
+    if (inner) {
+        found = view.type === type ? view : undefined;
+        if (!found) {
+            views = view.views;
+            if (view._.useKey) {
+                for (i in views) {
+                    if (found = views[i].get(inner, type)) {
+                        break;
+                    }
+                }
+            } else for (i = 0, l = views.length; !found && i < l; i++) {
+                found = views[i].get(inner, type);
+            }
+        }
+    }
+    </handleInnerViewLookup>
+
+    <findRootView>
+    else if (root) {
+        while (view.parent.parent) {
+            found = view = view.parent;
+        }
+    }
+    </findRootView> 
+
+    <findViewByType>
+    else while (view && !found) {
+        found = view.type === type ? view : undefined;
+        view = view.parent;
+    }
+    </findViewByType>
+
+    return found;
+}
+</function_getView>
+
+<function_connect>
+function connect(uri, callback) {
+    console.log('connecting to database (' + uri + ')');
+    mongo.MongoClient.connect(uri, {safe: true}, function (err, client) {
+        if (err) return callback(err);
+
+        db = client;
+        <handleDatabaseError>
+        db.addListener("error", function (error) {
+            console.log("mongo client error: " + error);
+        });
+        </handleDatabaseError>
+
+        callback(null, db);
+    });
+}
+</function_connect>
+
+<function_someComplexInitialization>
+function () {
+    var children = [],
+        addedDescriptors = [],
+        i, child;
+
+    <checkDefaultsConsistency>
+    if (this.$defaultContentName && this.$defaultTemplateName) {
+        throw "both $defaultContentName and $defaultTemplateName are defined";
+    }
+    </checkDefaultsConsistency>
+
+    var desc;
+
+    <function_addChildren>
+    function addChildren(childrenFromDescriptor, fromDescriptor) {
+        for (var j = 0; j < childrenFromDescriptor.length; j++) {
+            child = childrenFromDescriptor[j];
+            child.$fromDescriptor = fromDescriptor;
+
+            if (child.$createdByTemplate || _.indexOf(addedDescriptors, child.$descriptor) === -1) {
+                children.push(child);
+                if (child.$descriptor) {
+                    addedDescriptors.push(child.$descriptor);
+                }
+            }
+        }
+    }
+    </function_addChildren>
+
+    <addInternalDescriptorsChildren>
+    for (var d = 0; d < this.$internalDescriptors.length; d++) {
+        desc = this.$internalDescriptors[d];
+        addChildren(this._getChildrenFromDescriptor(desc, this, null, this), "intern");
+    }
+    </addInternalDescriptorsChildren>
+
+    var externalDescriptorChildren;
+
+    <handleDefaultTemplateName>
+    if (this.$defaultTemplateName) {
+        var templateBlock;
+        for (i = 0; i < this.$descriptor.childNodes.length; i++) {
+            var node = this.$descriptor.childNodes[i];
+            if (node.nodeType === 1 && node.getAttribute("name") === this.$defaultTemplateName && this.$stage.$applicationContext.getFqClassName(node.namespaceURI, this._localNameFromDomNode(node), true) === "js/core/Template") {
+                templateBlock = node;
+                break;
+            }
+        }
+        if (!templateBlock && this.$descriptor) {
+            templateBlock = this.createComponent(Component.Template, {
+                name: this.$defaultTemplateName
+            }, this.$descriptor);
+
+            externalDescriptorChildren = [templateBlock];
+        }
+    }
+    </handleDefaultTemplateName>
+
+    <handleDefaultContentName>
+    externalDescriptorChildren = externalDescriptorChildren || this._getChildrenFromDescriptor(this.$descriptor);
+    if (this.$defaultContentName && this.$descriptor) {
+        var contentBlock,
+            internAndExternalChildren = children.concat(externalDescriptorChildren);
+        for (i = 0; i < internAndExternalChildren.length; i++) {
+            child = internAndExternalChildren[i];
+            if (child instanceof Component.Content && child.$.name === this.$defaultContentName) {
+                contentBlock = child;
+                break;
+            }
+        }
+        if (!contentBlock) {
+            contentBlock = this.createComponent(Component.Content, {
+                name: this.$defaultContentName
+            });
+            for (i = 0; i < externalDescriptorChildren.length; i++) {
+                contentBlock.addChild(externalDescriptorChildren[i]);
+            }
+            externalDescriptorChildren = [contentBlock];
+        }
+    }
+    </handleDefaultContentName>
+
+    addChildren(externalDescriptorChildren, "external");
+
+    <handleExtraChildren>
+    var extraChildren = this.createChildren();
+    if (extraChildren) {
+        addChildren(extraChildren, "extra");
+    }
+    </handleExtraChildren>
+
+    this._initializeChildren(children);
+
+    this._childrenInitialized();
+
+    this._initializeXamlEventAttributes(this.$xamlDefaults, this);
+    this._initializeXamlEventAttributes(this.$xamlAttributes, this.$rootScope);
+}
+</function_someComplexInitialization>
+
+<function_openAndPositionDropdown>
+function () {
+    var self = this;
+    self.$el.addClass("open");
+    var $button = self.parentView.$dropdownButton;
+    var align;
+    <calculateAlignment>
+    if (self.options.align === "auto") {
+        var viewPortWidth = document.body.clientWidth || document.body.clientWidth;
+        align = (($button.offset().left + self.$el.outerWidth()) > viewPortWidth) ? "left" : "right";
+    }
+    else {
+        align = (self.options.align === "left" || self.options.align === "right") ?
+        (self.options.align === "right" ? "right" : "left") : "right";
+    }
+    </calculateAlignment>
+    var offset;
+    <setPositionLeft>
+    if (align === "left") {
+        offset = $button.offset().left + $button.outerWidth() - self.$el.outerWidth();
+        self.$el.css("left", offset + "px");
+    }
+    </setPositionLeft>
+    <setPositionRight>
+    else {
+        offset = $button.offset().left;
+        self.$el.css("left", offset + "px");
+    }
+    </setPositionRight>
+    
+    <setPositionTop>
+    var offsetHeight = $button.offset().top + $button.outerHeight();
+    self.$el.css("top", offsetHeight + "px");
+    </setPositionTop>
+}
+</function_openAndPositionDropdown>
+
+<function_removeGoogleListeners>
+function () {
+    if (!this.googleListeners) return false;
+    for (var i = 0; i < this.googleListeners.length; i++) {
+        google.maps.event.removeListener(this.googleListeners[i]);
+    }
+    this.googleListeners.length = 0;
+    return true;
+}
+</function_removeGoogleListeners>
+
+<function_getTextRangeContainerElement>
+function(textRange) {
+    var parentEl = textRange.parentElement();
+    var range = textRange.duplicate();
+    range.collapse(true);
+    var startEl = range.parentElement();
+    range = textRange.duplicate();
+    range.collapse(false);
+    var endEl = range.parentElement();
+    var startEndContainer = (startEl == endEl) ? startEl : dom.getCommonAncestor(startEl, endEl);
+    return startEndContainer == parentEl ? startEndContainer : dom.getCommonAncestor(parentEl, startEndContainer);
+}
+</function_getTextRangeContainerElement>
+
+<function_resolveType>
+function resolveType(type) {
+    if (typeof type !== 'object') {
+        throw new Error('Type definition must be an object. Illegal value: ' + type);
+    }
+    var parent = types[type.type];
+    <iterateAndResolveType>
+    while (parent && !type.resolved) {
+        resolveType(parent);
+        _.defaults(type, JSON.parse(JSON.stringify(parent)));
+        type.write = type.write || parent.write;
+        type.read = type.read || parent.read;
+        type.type = parent.type; 
+        parent = types[type.type];
+    }
+    </iterateAndResolveType>
+}
+</function_resolveType>
+
+<function_setYearForCalendarPages>
+function(year) {
+    var cfgPageDate = DEF_CFG.PAGEDATE.key;
+    year = parseInt(year, 10);
+    for (var p=0;p<this.pages.length;++p) {
+        var cal = this.pages[p];
+        var pageDate = cal.cfg.getProperty(cfgPageDate);
+        <handleYearIncrement>
+        if ((pageDate.getMonth()+1) == 1 && p>0) {
+            year+=1;
+        }
+        </handleYearIncrement>
+        cal.setYear(year);
+    }
+}
+</function_setYearForCalendarPages>
+
+<function_parsePullDownPlaceHolders>
+function parsePullDownPlaceHolders( str ) {
+	log( "Pong-PullDown",  "parsePullDownPlaceHolders: "+ str );
+	<replacePlaceholdersWithSessionInfo>
+	for (var key in sessionInfo) {
+		if ( str.indexOf( '${'+key+'}' ) >=0 ) {
+			str = str.replace( '${'+key+'}', $.i18n( sessionInfo[key] ) );
+		}
+	}
+	</replacePlaceholdersWithSessionInfo>
+	log( "Pong-PullDown", "Processed value: "+ str );
+	return str;
+}
+</function_parsePullDownPlaceHolders>
+```

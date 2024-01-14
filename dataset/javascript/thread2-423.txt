@@ -1,0 +1,250 @@
+```javascript
+<handleErrorResponse>
+function (unused, req) {
+    var res = req.res, cb = req.callback;
+    if (!cb) {
+        this.$logError(this.MISSING_IO_CALLBACK, [res.url]);
+    } else if (res.error != null) {
+        
+        
+        if (cb.onerror == null) {
+            
+            this.$logError(this.IO_REQUEST_FAILED, [res.url, res.error]);
+        } else {
+            var scope = cb.onerrorScope;
+            if (!scope) {
+                scope = cb.scope;
+            }
+            try {
+                cb.onerror.call(scope, res, cb.args);
+            } catch (ex) {
+                this.$logError(this.IO_CALLBACK_ERROR, [res.url], ex);
+            }
+        }
+    } else {
+
+        
+        if (req.expectedResponseType) {
+
+            this._jsonTextConverter(res, req.expectedResponseType);
+        }
+
+        cb.fn.call(cb.scope, res, cb.args);
+    }
+    req = cb = null;
+}
+</handleErrorResponse>
+
+<findColumnInForm>
+function(v) {
+    var $formBody = $("td.ms-formbody, td.ms-formbodysurvey"),
+    
+    
+    escapeRegExp = function (v){
+        return v.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    },
+    columnName = escapeRegExp(v),
+    rcommentValidation = new RegExp("(?:Field|FieldInternal)Name=\"" + columnName + "\"", "i"),
+    $columnNode = $formBody.contents().filter(function () {
+        return this.nodeType === 8 && rcommentValidation.test(this.nodeValue);
+    })
+
+    ;
+
+    return $columnNode.parent("td");
+}
+</findColumnInForm>
+
+<checkIfIndependentMember>
+function isIndependentMember(symbol) {
+    if (symbol.declarations && symbol.declarations.length === 1) {
+        var declaration = symbol.declarations[0];
+        if (declaration) {
+            switch (declaration.kind) {
+                case 145 :
+                case 144 :
+                    return isIndependentVariableLikeDeclaration(declaration);
+                case 147 :
+                case 146 :
+                case 148 :
+                    return isIndependentFunctionLikeDeclaration(declaration);
+            }
+        }
+    }
+    return false;
+}
+</checkIfIndependentMember>
+
+<loadData>
+function(table, limit, page, query, fields)
+{
+    if (this._doneLoading)
+        return;
+
+    var _this = this;
+
+    
+    var args = [table, limit, page, query, fields];
+    if (this._orderBy) {
+        args.push(this._orderBy);
+        args.push(this._ascending);
+    }
+
+    var p = this.dataService.query.apply(this.dataService.query, args)
+
+    
+    .then(function(results) {
+        results.forEach(function(r) {
+            var obj = new _this._T();
+            _(r).each(function(value, key) {
+                obj[key] = value;
+            });
+            _this._results.push(obj);
+        });
+
+        
+        if (results.length !== limit)
+            _this._doneLoading = true;
+
+        return _this._results;
+    });
+
+    return p;
+}
+</loadData>
+
+<copyCordovaFiles>
+function copyCordovaSrc(sourceLib, platformInfo) {
+    
+    
+    shell.mkdir('-p', platformInfo.locations.platformWww);
+    shell.cp('-f', path.join(platformInfo.locations.www, 'cordova.js'),
+        path.join(platformInfo.locations.platformWww, 'cordova.js'));
+
+    
+    
+    var cordovaJsSrcPath = path.resolve(sourceLib, platformInfo.locations.cordovaJsSrc);
+
+    
+    if(fs.existsSync(cordovaJsSrcPath)) {
+        shell.cp('-rf', cordovaJsSrcPath, platformInfo.locations.platformWww);
+    }
+}
+</copyCordovaFiles>
+
+<formatDateTime>
+function datetime(date = new Date(), format) {
+  if (date && isString(date)) {
+    const dateString = date;
+    date = new Date(Date.parse(date));
+
+    if (isNaN(date.getTime()) && !format) {
+      format = dateString;
+      date = new Date();
+    }
+  }
+  format = format || 'YYYY-MM-DD HH:mm:ss';
+
+  const fn = d => {
+    return ('0' + d).slice(-2);
+  };
+
+  const d = new Date(date);
+  const formats = {
+    YYYY: d.getFullYear(),
+    MM: fn(d.getMonth() + 1),
+    DD: fn(d.getDate()),
+    HH: fn(d.getHours()),
+    mm: fn(d.getMinutes()),
+    ss: fn(d.getSeconds())
+  };
+
+  return format.replace(/([a-z])\1+/ig, a => {
+    return formats[a] || a;
+  });
+}
+</formatDateTime>
+
+<getRecordLocation>
+function (record, index) {
+	var code = this.options.codeField ? L.Util.getFieldValue(record, this.options.codeField) : index;
+	var geoJSON;
+	var centroid;
+	var states = L.states || {};
+	var stateCentroids = L.stateCentroids || {};
+	var originalCode = code.toUpperCase();
+
+	code = originalCode;
+
+	geoJSON = states[code];
+	centroid = stateCentroids[code];
+
+	var geoJSONLayer = new L.GeoJSON(geoJSON);
+
+	return {
+		location: geoJSONLayer,
+		text: L.GeometryUtils.getName(geoJSON) || code,
+		center: centroid
+	};
+}
+</getRecordLocation>
+
+<showSidebarAndDropdown>
+function handleKeyEvent() {
+    if (!$dropdown) {
+        if (!SidebarView.isVisible()) {
+            SidebarView.show();
+        }
+
+        $("#project-dropdown-toggle").trigger("click");
+
+        $dropdown.focus();
+        $links = $dropdown.find("a");
+        
+        
+        $dropdownItem = $links.eq($links.length > 1 ? 1 : 0);
+        $dropdownItem.addClass("selected");
+
+        
+        window.setTimeout(function () {
+            $dropdown.focus();
+        }, 0);
+    }
+}
+</showSidebarAndDropdown>
+
+<createServerWrapper>
+function (onConnection, onError, onStart) {
+  onError = onError || function (err) {
+    console.error('server error, from', err.address)
+    console.error(err.stack)
+  }
+  return asyncify(proto.server(function (stream) {
+    compose(
+      wrap(stream),
+      trans.map(function (tr) { return tr.create() }),
+      function (err, stream) {
+        if(err) onError(err)
+        else onConnection(stream)
+      }
+    )
+  }, onStart))
+}
+</createServerWrapper>
+
+<sendHomekitServiceTypes>
+function () {
+  
+  RED.httpAdmin.get('/homekit/service/types', RED.auth.needsPermission('homekit.read'), function (req, res) {
+    var data = {}
+    Object.keys(HapNodeJS.Service).forEach(function (key) {
+      var val = HapNodeJS.Service[key]
+      if (typeof val === 'function' && val.hasOwnProperty('UUID')) {
+        data[key] = val.UUID
+      }
+    })
+    res.json(data)
+  })
+}
+</sendHomekitServiceTypes>
+```

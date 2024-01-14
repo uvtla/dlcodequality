@@ -1,0 +1,211 @@
+Here are the annotations for the provided JavaScript functions:
+
+1.
+```javascript
+<replacePathPredicates>
+function (mMap, sTransientPredicate, sPredicate) {
+  var sPath;
+  for (sPath in mMap) {
+    if (sPath.includes(sTransientPredicate)) {
+      mMap[sPath.replace(sTransientPredicate, sPredicate)] = mMap[sPath];
+      delete mMap[sPath];
+    }
+  }
+}
+</replacePathPredicates>
+```
+This function is SRP compliant as it focuses solely on replacing path predicates in the provided map.
+
+2.
+```javascript
+<parseInlineAnnotation>
+function tryParseInline (s) {
+  if (/INLINE/.test(s)) {
+    const [ match, inlinedFn ] = /INLINE \((.*?)\) id\{/.exec(s) || [ false ];
+    if (match === false) return -1;
+    if (lastOptimizedFrame === null) return -1;
+    const { fn, file } = lastOptimizedFrame;
+    if (fn !== inlinedFn) return -1;
+    const key = `${fn} ${file}`;
+    inlined[key] = inlined[key] || [];
+    inlined[key].push(lastOptimizedFrame);
+    return match.length;
+  }
+  return 0;
+}
+</parseInlineAnnotation>
+```
+The function has one responsibility, which is parsing inline annotations from a string and updating data accordingly if conditions are met.
+
+3.
+```javascript
+<defineFieldChecks>
+function (fieldDefinition, fieldName) {
+  const fieldType = propertyHelper.getFieldType(fieldDefinition);
+  let checks;
+  if (fieldType === 'number' || fieldType === 'integer' || fieldType === 'float') {
+    checks = createChecks(fieldDefinition, fieldName, fieldType);
+  }
+  return checks;
+}
+</defineFieldChecks>
+```
+This function is SRP compliant as it concerns itself with defining checks for field definitions based on specified conditions.
+
+4.
+```javascript
+<manageHostConnections>
+function(hostName, callback) {
+  var t = this,
+      errStr = '';
+      // Initial setup and callback registration
+  <registerCallback>
+  if (!t.addHostCallbacks[hostName]) {
+    t.addHostCallbacks[hostName] = [];
+  }
+  if (t.addHostCallbacks[hostName].push(callback) > 1) {
+    return;
+  }
+  </registerCallback>
+  
+  // Finalizing the process and calling callbacks
+  <finalizeAddHost>
+  var doneAdding = function(error) {
+    t.addHostCallbacks[hostName].forEach(function(cb) {
+      cb(error);
+    });
+    delete t.addHostCallbacks[hostName];
+  };
+  </finalizeAddHost>
+  
+  // Checking the range of ports already connected
+  <checkConnectedPorts>
+  var portStart = Config.Monitor.serviceBasePort,
+      portEnd = Config.Monitor.serviceBasePort + Config.Monitor.portsToScan - 1,
+      connectedPorts = [];
+  t.connections.each(function(connection){
+    var host = connection.get('hostName').toLowerCase();
+    var port = connection.get('hostPort');
+    if (host === hostName && port >= portStart && port <= portEnd) {
+      connectedPorts.push(port);
+    }
+  });
+  </checkConnectedPorts>
+  
+  // Scanning for ports and setting up connections
+  <scanAndSetupConnections>
+  var portsToScan = Config.Monitor.portsToScan - connectedPorts.length;
+  if (portsToScan === 0) {
+    errStr = 'All monitor ports in use.  Increase the Config.Monitor.portsToScan configuration';
+    log.error('addHostConnections', errStr);
+    return doneAdding(errStr);
+  }
+  var doneScanning = function() {
+    var conn = this; 
+    conn.off('connect disconnect error', doneScanning);
+    if (--portsToScan === 0) {
+      return doneAdding();
+    }
+  };
+  for (var i = portStart; i <= portEnd; i++) {
+    if (connectedPorts.indexOf(i) < 0) {
+      var connection = t.addConnection({hostName:hostName, hostPort:i});
+      connection.on('connect disconnect error', doneScanning, connection);
+    }
+  }
+  </scanAndSetupConnections>
+}
+</manageHostConnections>
+```
+The function violates SRP as it handles registering callbacks, checking connected ports, and scanning and setting up new connections, which have been annotated as separate responsibilities.
+
+5.
+```javascript
+<ensurePrototypeInheritance>
+function ensurePrototypeTraversal(prototype) {
+  if (!Object.__proto__) {
+    var ancestor = Object.getPrototypeOf(prototype);
+    prototype.__proto__ = ancestor;
+    if (isBase(ancestor)) {
+      ancestor.__proto__ = Object.getPrototypeOf(ancestor);
+    }
+  }
+}
+</ensurePrototypeInheritance>
+```
+This function is SRP compliant as it ensures prototype inheritance by setting the `__proto__` property when necessary.
+
+6.
+```javascript
+<checkAncestry>
+function isAncestor(instA, instB) {
+  while (instB) {
+    if (instA === instB || instA === instB.alternate) {
+      return true;
+    }
+    instB = getParent(instB);
+  }
+  return false;
+}
+</checkAncestry>
+```
+This function adheres to SRP by checking if one object is an ancestor of another.
+
+7.
+```javascript
+<deleteClient>
+function deleteClient (id, options) {
+  options = options || {};
+  options.url = '/v1/clients/' + id;
+  options.method = 'DELETE';
+  delete options.json;
+  return request.bind(this)(options);
+}
+</deleteClient>
+```
+The function is SRP compliant as it sets up the options for a DELETE request and then performs the request. It does not involve multiple layers of logic.
+
+8.
+```javascript
+<addInversePathMapping>
+function addPath(path, name) {
+  var fullPath = (pathModule.normalize(pathModule.join(baseFullUrl, path)) + ".js").replace(/\\/g,"/");
+  inversePaths[path] = name;
+  inversePaths[fullPath] = name;
+}
+</addInversePathMapping>
+```
+This function exhibits SRP compliance as it solely adds a mapping between paths and their corresponding names.
+
+9.
+```javascript
+<createUnitsDictionary>
+function createUnits(conversions, withNames=false) {
+  const result = {};
+  <defineUnitConversion>
+  conversions.forEach(c => c.names.forEach(name =>
+      result[unitToLower(normalizeUnitName(name))] = {
+          name: c.names[0],
+          prefix: c.prefix,
+          scale: c.scale,
+          toBase: c.toBase,
+          fromBase: c.fromBase,
+          names: withNames ? c.names : null
+      }
+  ));
+  </defineUnitConversion>
+  return result;
+}
+</createUnitsDictionary>
+```
+This function is SRP compliant as it constructs a dictionary of units with their conversion data from an array of conversions.
+
+10.
+```javascript
+<retrieveModifierValue>
+function getModifierValue(dialect, node) {
+  return node.count.type ? dialect.visit(node.count) : node.count;
+}
+</retrieveModifierValue>
+```
+This function complies with SRP by retrieving a modifier value based on the presence of a type within a node.

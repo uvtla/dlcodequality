@@ -1,0 +1,396 @@
+```javascript
+<numericConverter>
+function ( o ) {
+    this.isNumber = true;
+    this.value = 0;
+    if(o.value !== undefined){
+        if( typeof o.value === 'string' ) this.value = o.value * 1;
+        else this.value = o.value;
+    }
+
+    this.min = o.min === undefined ? -Infinity : o.min;
+    this.max = o.max === undefined ?  Infinity : o.max;
+    this.precision = o.precision === undefined ? 2 : o.precision;
+
+    var s;
+
+    switch(this.precision){
+        case 0: s = 1; break;
+        case 1: s = 0.1; break;
+        case 2: s = 0.01; break;
+        case 3: s = 0.001; break;
+        case 4: s = 0.0001; break;
+    }
+
+    this.step = o.step === undefined ?  s : o.step;
+    this.range = this.max - this.min;
+    this.value = this.numValue( this.value );
+}
+</numericConverter>
+
+<routeHandler>
+function(router, req, res) {
+    var routeFound = false,
+      url = req.url.toString(),
+      method = req.method;
+    for (var i = 0; i < router.routes.length; i++) {
+      var route = router.routes[i];
+      if (url.indexOf(route.route) != -1 && route.method == method) {
+        if (url != '/' && route.route == '/') {
+          continue;
+        }
+        if (url != route.route && !route.hasObject) {
+          continue;
+        }
+        
+        <getRequestHandler>
+        if (method === 'GET') {
+          req.body = {};
+          if (route.hasObject) {
+            req.body[route.objectName] = basename(url);
+          }
+          route.callback(req, res);
+          routeFound = true;
+          break;
+        }
+        </getRequestHandler>
+        
+        <nonGetRequestHandler>
+        else {
+          ReqToObject(req, res, route);
+          routeFound = true;
+          break;
+        }
+        </nonGetRequestHandler>
+      }
+    }
+    return routeFound;
+}
+</routeHandler>
+<fileStubInitialization>
+function FileStub() {
+  this.settings = {
+    name: '',
+    buffer: new Buffer(0),
+    readdir: false,
+    parentName: '',
+    stats: {
+      dev: 2114,
+      ino: 48064969,
+      mode: 33188,
+      nlink: 1,
+      uid: 85,
+      gid: 100,
+      rdev: 0,
+      size: 0,
+      blksize: 4096,
+      blocks: 0,
+      atime: 'Mon, 10 Oct 2011 23:24:11 GMT',
+      mtime: 'Mon, 10 Oct 2011 23:24:11 GMT',
+      ctime: 'Mon, 10 Oct 2011 23:24:11 GMT'
+    }
+  };
+}
+</fileStubInitialization>
+
+<unicodeConversion>
+function(match, esc) {
+    if (/^(\n|\r\n|\r|\f)$/.test(esc)) { return ''; }
+    var m = /^[0-9a-f]{1,6}/i.exec(esc);
+    if (m) {
+        var codePoint = parseInt(m[0], 16);
+        
+        <fromCodePointUsage>
+        if (String.fromCodePoint) {
+            return String.fromCodePoint(codePoint);
+        } else {
+            return String.fromCharCode(codePoint);
+        }
+        </fromCodePointUsage>
+    }
+    return esc;
+}
+</unicodeConversion>
+
+<zestCommunication>
+function (token, path, payload, contentFormat) {
+    return new Promise((resolve,reject)=>{
+        let zh = NewZestHeader();
+        zh.code = 2;
+        zh.token = token;
+        zh.tkl = token.length;
+        zh.payload = payload;
+        zh.oc = 3;
+        zh.options.push(NewZestOptionHeader(11,path,path.length));
+        let hostname = os.hostname();
+        zh.options.push(NewZestOptionHeader(3,hostname,hostname.length));
+        zh.options.push(NewZestOptionHeader(12,contentFormatToInt(contentFormat),2)); 
+
+        let msg = MarshalZestHeader(zh)
+        
+        <sendAndHandle>
+        sendRequestAndAwaitResponse(this.ZMQsoc,msg)
+        .then((resp)=>{
+            handleResponse(resp,(zh)=>{resolve(zh.payload)},reject);
+        })
+        .catch((err)=>{
+            reject(err);
+        });
+        </sendAndHandle>
+    });
+}
+</zestCommunication>
+
+<namespaceInstallation>
+function install(ns) {
+    if (!ns || typeof ns !== 'object') {
+        throw new Error('Argument 0 of install is not valid.');
+    }
+
+    return Object.assign(ns, module.exports);
+}
+</namespaceInstallation>
+
+<dynamicFunctionCreation>
+function pregame(name, path) {
+  var expected = [];
+  var match, possible;
+  
+  <argumentExtraction>
+  pathArgs.lastIndex = 0;
+  while ((match = pathArgs.exec(path)) !== null) {
+    expected.push({
+      name: match[1],
+      allowed: (possible = match[2] !== undefined ? match[2].split(',') : undefined),
+      assume: possible !== undefined ? possible[0] : undefined
+    });
+  }
+  </argumentExtraction>
+
+  return function() {
+    var self = this;
+    var args = slice.call(arguments);
+    var options;
+    var callback;
+    var actual;
+    var adjustedPath = path;
+    var diff;
+    var i;
+
+    <argumentValidation>
+    if (args.length > expected.length + 2 ) {
+      throw new Error('Too many arguments passed to .' + name + '()');
+    }
+    
+    if (typeof args[ args.length - 1 ] !== 'function') {
+      throw new Error('No callback given for .' + name + '()');
+    }
+    </argumentValidation>
+
+    callback = args.pop();
+
+    <optionHandling>
+    if (typeof args[ args.length - 1 ] === 'object') {
+      options = args.pop();
+    }
+    </optionHandling>
+
+    <pathAdjustment>
+    for (i = 0, diff = expected.length - args.length; i < expected.length; i++) {
+      actual = args.length >= expected.length - i ? args[ i - diff ] : expected[i].assume;
+      
+      if (actual === undefined) {
+        throw new Error('No value given for ' + expected[i].name);
+      }
+      
+      if (expected[i].allowed && !~expected[i].allowed.indexOf(actual)) {
+        throw new Error('Value passed is not one of the following: ' + expected[i].allowed.join(', '));
+      }
+      
+      adjustedPath = adjustedPath.replace(pathArg, actual);
+    }
+    </pathAdjustment>
+
+    <apiRequest>
+    (function gameon(options, callback) {
+      // The API request and response handling code would be here.
+    }(options, callback));
+    </apiRequest>
+
+    return this;
+  };
+}
+</dynamicFunctionCreation>
+
+<hotspotInitialization>
+function Hotspot(domElement, parentDomElement, view, coords, opts) {
+
+  opts = opts || {};
+  opts.perspective = opts.perspective || {};
+  opts.perspective.extraTransforms =
+      opts.perspective.extraTransforms != null ? opts.perspective.extraTransforms : "";
+
+  <browserSupportCheck>
+  if ((opts.perspective.radius || opts.perspective.extraTransforms) && !cssSupported()) {
+    throw new Error('CSS transforms on hotspots are not supported on this browser');
+  }
+  </browserSupportCheck>
+
+  <hotspotProperties>
+  this._domElement = domElement;
+  this._parentDomElement = parentDomElement;
+  this._view = view;
+  this._coords = {};
+  this._perspective = {};
+
+  this.setPosition(coords);
+  </hotspotProperties>
+
+  <domAttachment>
+  this._parentDomElement.appendChild(this._domElement);
+  </domAttachment>
+
+  <perspectiveSetup>
+  this.setPerspective(opts.perspective);
+  </perspectiveSetup>
+
+  <visibilityState>
+  this._visible = true;
+  </visibilityState>
+
+  <positionBias>
+  this._position = { x: 0, y: 0 };
+  </positionBias>
+}
+</hotspotInitialization>
+
+<splineSmoothing>
+function (segment, point, i) {
+    var smoothing = 1.5, 
+        denom = smoothing + 1,
+        plotX = point.plotX,
+        plotY = point.plotY,
+        lastPoint = segment[i - 1],
+        nextPoint = segment[i + 1],
+        leftContX,
+        leftContY,
+        rightContX,
+        rightContY,
+        ret;
+
+    <controlPointCalculation>
+    if (i && i < segment.length - 1) {
+        var lastX = lastPoint.plotX,
+            lastY = lastPoint.plotY,
+            nextX = nextPoint.plotX,
+            nextY = nextPoint.plotY,
+            correction;
+
+        leftContX = (smoothing * plotX + lastX) / denom;
+        leftContY = (smoothing * plotY + lastY) / denom;
+        rightContX = (smoothing * plotX + nextX) / denom;
+        rightContY = (smoothing * plotY + nextY) / denom;
+
+        correction = ((rightContY - leftContY) * (rightContX - plotX)) /
+            (rightContX - leftContX) + plotY - rightContY;
+
+        leftContY += correction;
+        rightContY += correction;
+
+        if (leftContY > lastY && leftContY > plotY) {
+            leftContY = mathMax(lastY, plotY);
+            rightContY = 2 * plotY - leftContY; 
+        } else if (leftContY < lastY && leftContY < plotY) {
+            leftContY = mathMin(lastY, plotY);
+            rightContY = 2 * plotY - leftContY;
+        }
+        if (rightContY > nextY && rightContY > plotY) {
+            rightContY = mathMax(nextY, plotY);
+            leftContY = 2 * plotY - rightContY;
+        } else if (rightContY < nextY && rightContY < plotY) {
+            rightContY = mathMin(nextY, plotY);
+            leftContY = 2 * plotY - rightContY;
+        }
+
+        point.rightContX = rightContX;
+        point.rightContY = rightContY;
+    }
+    </controlPointCalculation>
+
+    <pathCommand>
+    if (!i) {
+        ret = [M, plotX, plotY];
+    } else { 
+        ret = [
+            'C',
+            lastPoint.rightContX || lastPoint.plotX,
+            lastPoint.rightContY || lastPoint.plotY,
+            leftContX || plotX,
+            leftContY || plotY,
+            plotX,
+            plotY
+        ];
+        lastPoint.rightContX = lastPoint.rightContY = null; 
+    }
+    </pathCommand>
+    return ret;
+}
+</splineSmoothing>
+
+<bufferExtensions>
+function (module, exports, __webpack_require__) {
+
+  "use strict";
+
+  var $export = __webpack_require__(0);
+  var $typed = __webpack_require__(61);
+  var buffer = __webpack_require__(90);
+  var anObject = __webpack_require__(1);
+  var toAbsoluteIndex = __webpack_require__(35);
+  var toLength = __webpack_require__(8);
+  var isObject = __webpack_require__(4);
+  var ArrayBuffer = __webpack_require__(2).ArrayBuffer;
+  var speciesConstructor = __webpack_require__(59);
+  var $ArrayBuffer = buffer.ArrayBuffer;
+  var $DataView = buffer.DataView;
+  var $isView = $typed.ABV && ArrayBuffer.isView;
+  var $slice = $ArrayBuffer.prototype.slice;
+  var VIEW = $typed.VIEW;
+  var ARRAY_BUFFER = 'ArrayBuffer';
+
+  <arrayBufferExtension>
+  $export($export.G + $export.W + $export.F * (ArrayBuffer !== $ArrayBuffer), { ArrayBuffer: $ArrayBuffer });
+  </arrayBufferExtension>
+
+  <arrayBufferUtil>
+  $export($export.S + $export.F * !$typed.CONSTR, ARRAY_BUFFER, {
+    isView: function isView(it) {
+      return $isView && $isView(it) || isObject(it) && VIEW in it;
+    }
+  });
+
+  $export($export.P + $export.U + $export.F * __webpack_require__(3)(function () {
+    return !new $ArrayBuffer(2).slice(1, undefined).byteLength;
+  }), ARRAY_BUFFER, {
+    slice: function slice(start, end) {
+      if ($slice !== undefined && end === undefined) return $slice.call(anObject(this), start); 
+      var len = anObject(this).byteLength;
+      var first = toAbsoluteIndex(start, len);
+      var final = toAbsoluteIndex(end === undefined ? len : end, len);
+      var result = new (speciesConstructor(this, $ArrayBuffer))(toLength(final - first));
+      var viewS = new $DataView(this);
+      var viewT = new $DataView(result);
+      var index = 0;
+      while (first < final) {
+        viewT.setUint8(index++, viewS.getUint8(first++));
+      } return result;
+    }
+  });
+  </arrayBufferUtil>
+
+  <speciesSymbolSupport>
+  __webpack_require__(38)(ARRAY_BUFFER);
+  </speciesSymbolSupport>
+}
+</bufferExtensions>
+```

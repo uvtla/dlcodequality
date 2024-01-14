@@ -1,0 +1,226 @@
+```javascript
+<heuristic>
+function heuristic() {
+    if (this.type === typeEnum.unit) {
+      
+      return Math.max(0, this.cache.size - this.capacity)
+    } else if (this.type === typeEnum.heap) {
+      if (getHeapSize() >= this.capacity) {
+        console.log('LRU HEURISTIC heap:', getHeapSize())
+        
+        return this.cache.size >> 1
+      } else {
+        return 0
+      }
+    } else {
+      console.error(`Unknown heuristic '${this.type}' for LRU cache.`)
+      return 1
+    }
+}
+</heuristic>
+
+<getSelector>
+function getSelector(node) {
+  var selector = arguments.length <= 1 || arguments[1] === undefined ? [node.name] : arguments[1];
+
+  <constructSelector>
+  var parent = node.parent;
+  if (parent) {
+    var children = parent.children;
+    var matches = children.filter(function (child) {
+      return child.name === node.name;
+    });
+    if (matches.length > 1) {
+      for (var i = 0, l = matches.length; i < l; i++) {
+        if (matches[i] === node) {
+          selector[0] = selector[0] + ':nth-of-type(' + (i + 1) + ')';
+          break;
+        }
+      }
+    }
+    selector.unshift(parent.name);
+  }
+  </constructSelector>
+
+  return parent && parent.parent ? getSelector(parent, selector) : selector.join(' > ');
+}
+</getSelector>
+
+<isIgnoredNode>
+function isIgnoredNode(node, options) {
+  <checkForIgnoredConditions>
+  if (node.nodeType == 8) {
+    return true;
+  } else if (node.nodeType == 3) {
+    <examineParentNode>
+    if (node.parentNode && /^(script|style)$/i.test(node.parentNode.tagName)) {
+      return true;
+    }
+    </examineParentNode>
+
+    <checkForWhitespace>
+    if (options.ignoreWhiteSpace && !/[^\r\n\t ]/.test(node.data)
+            && (isUnwrappable(node.previousSibling, options) || isUnwrappable(node.nextSibling, options))) {
+      return true;
+    }
+    </checkForWhitespace>
+  }
+  </checkForIgnoredConditions>
+  
+  return false;
+}
+</isIgnoredNode>
+
+<positionMatchDeep>
+function (pos) {
+  if (!this.range.inside(pos)) {
+    return null;
+  }
+
+  <matchChildren>
+  for (var i = 0, il = this.children.length, m; i < il; i++) {
+    m = this.children[i].matchDeep(pos);
+    if (m) {
+      return m;
+    }
+  };
+  </matchChildren>
+
+  return this.parent ? this : null;
+}
+</positionMatchDeep>
+
+<decode>
+function decode (data, start, end, encoding) {
+  <validateData>
+  if (data == null || data.length === 0) {
+    return null
+  }
+  </validateData>
+
+  <inferEncoding>
+  if (typeof start !== 'number' && encoding == null) {
+    encoding = start
+    start = undefined
+  }
+
+  if (typeof end !== 'number' && encoding == null) {
+    encoding = end
+    end = undefined
+  }
+  </inferEncoding>
+
+  <prepareDecoding>
+  decode.position = 0
+  decode.encoding = encoding || null
+
+  decode.data = !(Buffer.isBuffer(data))
+    ? Buffer.from(data)
+    : data.slice(start, end)
+
+  decode.bytes = decode.data.length
+  </prepareDecoding>
+
+  return decode.next()
+}
+</decode>
+
+<resetElementOnTransitionEnd>
+function resetElementOnTransitionEnd(event) {
+  event.target.style.transition = '';
+  event.target.style.pointerEvents = '';
+  <removeEventListener>
+  event.target.removeEventListener('transitionend', resetElementOnTransitionEnd);
+  </removeEventListener>
+}
+</resetElementOnTransitionEnd>
+
+<isolateScope>
+function isolateScope(model, scope, attrs) {
+    model = model || {};
+    var me = this;
+
+    if (!scope) { return; }
+
+    <assignScopeValues>
+    _.each(scope, function (type, name) {
+        var attrName = me.pancakes.utils.splitCamelCase(name).join('-');
+        var value = attrs[attrName];
+
+        if (type === '=') {
+            model[name] = me.pancakes.utils.getNestedValue(model, value);
+        }
+        else if (type === '@') {
+            model[name] = value;
+        }
+    });
+    </assignScopeValues>
+}
+</isolateScope>
+
+<search>
+function search (){
+    var replaced = 0
+    var scripts = document.querySelectorAll('script')
+    var script
+    
+    <replaceScriptTags>
+    for (var i = 0; i < scripts.length; i++) {
+      script = scripts[i]
+      if (!script.src) continue
+      if (/\/slackin\.js(\?.*)?$/.test(script.src)) {
+        replace(script)
+        return true
+      }
+    }
+    </replaceScriptTags>
+}
+</search>
+
+<removeSuffixes>
+function removeSuffixes(){
+  <processSuffixRules>
+  for(var i in suffix_rules$1){
+    resultObj = suffix_rules$1[i](current_word);
+    if(resultObj.removal!=undefined){
+      removals.push(resultObj.removal);
+    }
+    current_word = resultObj.current_word;
+
+    if(find(current_word))
+      return current_word;
+  }
+  </processSuffixRules>
+}
+</removeSuffixes>
+
+<getNeedLoad>
+function getNeedLoad (resource) {
+  <checkLoadedResources>
+  if (JSON.stringify(loadedResource) == '{}') {
+    getLoadedScript();
+  }
+  </checkLoadedResources>
+
+  var needLoad = [];
+  
+  <determineResourcesToLoad>
+  if(typeof resource === "string") {
+    needLoad = [resource]
+  } else if(Object.prototype.toString.call(resource) === "[object Array]") {
+    for (var i = 0; i < resource.length; i++) {
+      if(loadedResource[resource[i]] !== LOADED) {
+        needLoad.push(resource[i]);
+      }
+    };
+  }
+  </determineResourcesToLoad>
+
+  if(needLoad.length === 0) {
+    needLoad = null;
+  }
+
+  return needLoad;
+}
+</getNeedLoad>
+```

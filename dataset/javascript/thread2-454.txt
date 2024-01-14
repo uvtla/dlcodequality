@@ -1,0 +1,153 @@
+```javascript
+<setType>
+function setType(object, type) {
+    Object.defineProperty(object, '_ethersType', { configurable: false, value: type, writable: false });
+}
+</setType>
+
+<makeThrottle>
+function makeThrottle(fps){
+    var delay = 1000/fps;
+    var lastTime = Date.now();
+
+    <validateFPS>
+    if( fps<=0 || fps === Infinity ){
+        return returnTrue;
+    }
+    </validateFPS>
+
+    var half = Math.ceil(1000 / 60) / 2;
+
+    return function(){
+
+        var now = Date.now();
+
+        <throttleCheck>
+        if(now - lastTime < delay - half){
+            return false;
+        }
+        </throttleCheck>
+        
+        lastTime = now;
+        return true;
+    };
+}
+</makeThrottle>
+
+<setLevel>
+function setLevel(newLogLevel) {
+    <validateLogLevel>
+    if (isNaN(newLogLevel) || newLogLevel < 0 || newLogLevel > LEVELS.silly) {
+        throw Error(`setLevel(): invalid level: ${newLogLevel}`);
+    }
+    </validateLogLevel>
+
+    logLevel = newLogLevel;
+
+    <updateLoggerMethods>
+    Object.keys(LEVELS).forEach((levelName, levelIndex) => {
+        if (levelIndex <= logLevel) {
+            logger[levelName] = function logit() {
+                const msgArgs = [levelName].concat([].slice.call(arguments));
+                writeLog.apply(writeLog, msgArgs);
+            };
+        } else {
+            logger[levelName] = () => {};
+        }
+    });
+    </updateLoggerMethods>
+}
+</setLevel>
+
+<createPathPartSetter>
+function createPathPartSetter( node ) {
+    
+    const nodeLevel = node.level;
+    const nodeName = node.names[ 0 ];
+    const supportedMethods = node.methods || [];
+    const dynamicChildren = node.children ?
+        Object.keys( node.children )
+            .map( key => node.children[ key ] )
+            .filter( childNode => ( childNode.namedGroup === true ) ) :
+        [];
+    const dynamicChild = dynamicChildren.length === 1 && dynamicChildren[ 0 ];
+    const dynamicChildLevel = dynamicChild && dynamicChild.level;
+
+    if ( node.namedGroup ) {
+        
+        return function( val ) {
+            this.setPathPart( nodeLevel, val );
+            if ( supportedMethods.length ) {
+                this._supportedMethods = supportedMethods;
+            }
+            return this;
+        };
+    } else {
+        
+        return function( val ) {
+            
+            
+            
+            this.setPathPart( nodeLevel, nodeName );
+
+            
+            
+            
+            if ( val !== undefined && dynamicChildLevel ) {
+                this.setPathPart( dynamicChildLevel, val );
+            }
+            return this;
+        };
+    }
+}
+</createPathPartSetter>
+
+<appendToOutputFile>
+function(callback) {
+    <writeUMDWrapper>
+    fs.appendFileSync(outputFile,";(function(root,factory){\r\n")
+    fs.appendFileSync(outputFile,"    if (typeof define === 'function' && define.amd) {\r\n")
+    fs.appendFileSync(outputFile,"        define([], factory);\r\n")
+    fs.appendFileSync(outputFile,"    } else if (typeof exports === 'object') {\r\n")
+    fs.appendFileSync(outputFile,"        module.exports = factory();\r\n")
+    fs.appendFileSync(outputFile,"    } else {\r\n")
+    fs.appendFileSync(outputFile,"        if (typeof root === 'undefined' || root !== Object(root)) {\r\n")
+    fs.appendFileSync(outputFile,"            throw new Error('puglatizer: window does not exist or is not an object');\r\n")
+    fs.appendFileSync(outputFile,"        }\r\n")
+    fs.appendFileSync(outputFile,"        root.puglatizer = factory();\r\n")
+    fs.appendFileSync(outputFile,"    }\r\n")
+    fs.appendFileSync(outputFile,"}(this, function () {\r\n")
+    </writeUMDWrapper>
+    
+    <writePugHelpers>
+    fs.appendFileSync(outputFile,"    function pug_classes_object(val) { ... }")
+    fs.appendFileSync(outputFile,"    function pug_classes_array(val, escaping) { ... }")
+    fs.appendFileSync(outputFile,"    " + minify.js(pug.runtime.merge.toString()) + '\r\n')
+    fs.appendFileSync(outputFile,"    " + minify.js(pug.runtime.classes.toString()) + '\r\n')
+    fs.appendFileSync(outputFile,"    " + minify.js(pug.runtime.style.toString()) + '\r\n')
+    fs.appendFileSync(outputFile,"    " + minify.js(pug.runtime.attr.toString()) + '\r\n')
+    fs.appendFileSync(outputFile,"    " + minify.js(pug.runtime.attrs.toString()) + '\r\n')
+    fs.appendFileSync(outputFile,"    " + minify.js(pug.runtime.escape.toString()).replace('pug_match_html','(/[\"&<>]/)') + '\r\n')
+    fs.appendFileSync(outputFile,"    " + minify.js(pug.runtime.rethrow.toString()) + '\r\n')
+    fs.appendFileSync(outputFile,"    var pug = {\r\n")
+    fs.appendFileSync(outputFile,"    	merge:" + minify.js(pug.runtime.merge.toString()) + ',\r\n')
+    fs.appendFileSync(outputFile,"    	classes:" + minify.js(pug.runtime.classes.toString()) + ',\r\n')
+    fs.appendFileSync(outputFile,"    	style:" + minify.js(pug.runtime.style.toString()) + ',\r\n')
+    fs.appendFileSync(outputFile,"    	attr:" + minify.js(pug.runtime.attr.toString()) + ',\r\n')
+    fs.appendFileSync(outputFile,"    	attrs:" + minify.js(pug.runtime.attrs.toString()) + ',\r\n')
+    fs.appendFileSync(outputFile,"    	escape:" + minify.js(pug.runtime.escape.toString()).replace('pug_match_html','(/[\"&<>]/)') + ',\r\n')
+    fs.appendFileSync(outputFile,"    	rethrow:" + minify.js(pug.runtime.rethrow.toString()) + '\r\n')
+    fs.appendFileSync(outputFile,"    }\r\n")
+    </writePugHelpers>
+    
+    <completeFileOperations>
+    fs.appendFileSync(outputFile,"\r\n")
+    fs.appendFileSync(outputFile,'    var puglatizer = {}')
+    fs.appendFileSync(outputFile,"\r\n")
+    </completeFileOperations>
+    
+    return callback()
+}
+</appendToOutputFile>
+```
+(Note: The rest of the functions will be annotated in the next continuation due to message length limits.)

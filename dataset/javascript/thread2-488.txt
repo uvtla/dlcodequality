@@ -1,0 +1,292 @@
+<setUpReadable>
+function setUpReadable(stream, deserialize) {
+  <setDeserialization>
+  stream.deserialize = common.wrapIgnoreNull(deserialize);
+  </setDeserialization>
+  <streamInitialization>
+  stream.finished = false;
+  stream.reading = false;
+  </streamInitialization>
+
+  <defineTerminateFunction>
+  stream.terminate = function() {
+    stream.finished = true;
+    stream.on('data', function() {});
+  };
+  </defineTerminateFunction>
+
+  <registerCancelEvent>
+  stream.on('cancelled', function() {
+    stream.terminate();
+  });
+  </registerCancelEvent>
+}
+</setUpReadable>
+
+<setFontFamily>
+function(){
+    <determineFontByConfig>
+    var isgothic = this.puzzle.getConfig('font')===1;
+    if(this.puzzle.pzpr.env.OS.Android){
+      this.fontfamily = (isgothic ? 'Helvetica, Verdana, Arial, ' : '"Times New Roman", ');
+    }
+    else{ this.fontfamily = '';}
+    </determineFontByConfig>
+    <appendToFontFamily>
+    this.fontfamily += (isgothic ? 'sans-serif' : 'serif');
+    </appendToFontFamily>
+}
+</setFontFamily>
+
+<buildParam>
+function buildParam(key: string, value: any, traditional?: boolean): Array<string> {
+  <validateInput>
+  let result = [];
+  if (value === null || value === undefined) {
+    return result;
+  }
+  </validateInput>
+  <handleArray>
+  if (Array.isArray(value)) {
+    for (let i = 0, l = value.length; i < l; i++) {
+      if (traditional) {
+        result.push(`${encodeKey(key)}=${encode(value[i])}`);
+      } else {
+        let arrayKey = key + '[' + (typeof value[i] === 'object' && value[i] !== null ? i : '') + ']';
+        result = result.concat(buildParam(arrayKey, value[i]));
+      }
+    }
+  } 
+  </handleArray>
+  <handleObject>
+  else if (typeof (value) === 'object' && !traditional) {
+    for (let propertyName in value) {
+      result = result.concat(buildParam(key + '[' + propertyName + ']', value[propertyName]));
+    }
+  } 
+  </handleObject>
+  <handlePrimitive>
+  else {
+    result.push(`${encodeKey(key) }=${encode(value) }`);
+  }
+  </handlePrimitive>
+  return result;
+}
+</buildParam>
+
+<cylinder>
+function cylinder (params) {
+  <setDefaultParameters>
+  const defaults = {
+    r: 1,
+    r1: 1,
+    r2: 1,
+    h: 1,
+    fn: 32,
+    round: false
+  }
+  let {r1, r2, h, fn, round} = Object.assign({}, defaults, params)
+  let offset = [0, 0, 0]
+  let a = arguments
+  </setDefaultParameters>
+
+  <parameterAdjustments>
+  if (params && params.d) {
+    r1 = r2 = params.d / 2
+  }
+  if (params && params.r) {
+    r1 = params.r
+    r2 = params.r
+  }
+  if (params && params.h) {
+    h = params.h
+  }
+  if (params && (params.r1 || params.r2)) {
+    r1 = params.r1
+    r2 = params.r2
+    if (params.h) h = params.h
+  }
+  if (params && (params.d1 || params.d2)) {
+    r1 = params.d1 / 2
+    r2 = params.d2 / 2
+  }
+
+  if (a && a[0] && a[0].length) {
+    a = a[0]
+    r1 = a[0]
+    r2 = a[1]
+    h = a[2]
+    if (a.length === 4) fn = a[3]
+  }
+  </parameterAdjustments>
+
+  <constructObject>
+  let object
+  if (params && (params.start && params.end)) {
+    object = round
+      ? _roundedCylinder({start: params.start, end: params.end, radiusStart: r1, radiusEnd: r2, resolution: fn})
+      : _cylinder({start: params.start, end: params.end, radiusStart: r1, radiusEnd: r2, resolution: fn})
+  } else {
+    object = round
+      ? _roundedCylinder({start: [0, 0, 0], end: [0, 0, h], radiusStart: r1, radiusEnd: r2, resolution: fn})
+      : _cylinder({start: [0, 0, 0], end: [0, 0, h], radiusStart: r1, radiusEnd: r2, resolution: fn})
+    let r = r1 > r2 ? r1 : r2
+    if (params && params.center && params.center.length) { 
+      offset = [params.center[0] ? 0 : r, params.center[1] ? 0 : r, params.center[2] ? -h / 2 : 0]
+    } else if (params && params.center === true) {
+      offset = [0, 0, -h / 2]
+    } else if (params && params.center === false) {
+      offset = [0, 0, 0]
+    }
+    object = (offset[0] || offset[1] || offset[2]) ? translate(offset, object) : object
+  }
+  </constructObject>
+  
+  return object
+}
+</cylinder>
+
+<Advisor>
+function Advisor(type, advised, advisedFunc = null){
+  <assignValuesAndFreeze>
+    this.type = type;
+    this.advised = advised;
+    this.advisedMethod = advisedFunc;
+    Object.freeze(this);
+  </assignValuesAndFreeze>
+}
+</Advisor>
+
+<storedPixelDataToImageData>
+function storedPixelDataToImageData (image) {
+  <initializeVariables>
+  const minPixelValue = image.minPixelValue;
+  let canvasImageDataIndex = 0;
+  let storedPixelDataIndex = 0;
+  
+  const numStoredPixels = image.width * image.height * 4;
+  const numOutputPixels = image.width * image.height * 3;
+  const storedPixelData = image.getPixelData();
+  const data = new Uint8Array(numOutputPixels);
+  </initializeVariables>
+  
+  <convertData>
+  if (minPixelValue < 0) {
+    while (storedPixelDataIndex < numStoredPixels) {
+      data[canvasImageDataIndex++] = storedPixelData[storedPixelDataIndex++] + (-minPixelValue); 
+      data[canvasImageDataIndex++] = storedPixelData[storedPixelDataIndex++] + (-minPixelValue); 
+      data[canvasImageDataIndex++] = storedPixelData[storedPixelDataIndex++] + (-minPixelValue); 
+      storedPixelDataIndex += 1; 
+    }
+  } else {
+    while (storedPixelDataIndex < numStoredPixels) {
+      data[canvasImageDataIndex++] = storedPixelData[storedPixelDataIndex++]; 
+      data[canvasImageDataIndex++] = storedPixelData[storedPixelDataIndex++]; 
+      data[canvasImageDataIndex++] = storedPixelData[storedPixelDataIndex++]; 
+      storedPixelDataIndex += 1; 
+    }
+  }
+  </convertData>
+
+  return data;
+}
+</storedPixelDataToImageData>
+
+<replaceBuildVariables>
+function replaceBuildVariables(fileContent, srcPath){
+  <fileProcessing>
+        grunt.verbose.writeln("Processing : " + srcPath );
+
+        return fileContent
+            .replace( /@BUILD/g, buildId)
+            .replace( /@VERSION/g, grunt.template.process("<%= pkg.version %>"))
+            .replace( /@DATE/g, buildDate )
+            .replace( /@YEAR/g, buildYear )
+            .replace( /@AUTHOR/g, grunt.template.process("<%= pkg.author %>") );
+  </fileProcessing>
+}
+</replaceBuildVariables>
+
+<ElmRunner>
+function ElmRunner(filename, baseDir, defaults) {
+  <pathCalculations>
+  var relativePath = path.relative(baseDir, filename);
+  var baseName = path.basename(filename, path.extname(filename));
+  </pathCalculations>
+
+  <assignVariables>
+  this.filename = filename;
+  this.defaults = defaults || {};
+
+  this.moduleName = resolveModuleName(relativePath);
+  this.outputPath = path.join(path.dirname(filename), baseName + ".js");
+  </assignVariables>
+
+  <compileAndExecute>
+  var self = this;
+  withCheckedPath(this.outputPath, function() {
+    try {
+      compile.call(self);
+      execute.call(self);
+      wrap.call(self);
+    } catch (e) {
+      return e;
+    }
+
+    return true;
+  });
+  </compileAndExecute>
+}
+</ElmRunner>
+
+<connect>
+function connect() {
+  <logging>
+  log('debug', `Connecting to Postgres at ${POSTGRES_HOST}:${POSTGRES_PORT}`);
+  </logging>
+
+  <initializeKnex>
+  knex = knexLib({
+    client: 'pg',
+    connection: {
+      host: POSTGRES_HOST,
+      user: POSTGRES_USER,
+      password: POSTGRES_PASSWORD,
+      database: POSTGRES_DB,
+      port: POSTGRES_PORT
+    },
+    pool: { min: CONNECTION_POOL_MIN, max: CONNECTION_POOL_MAX }
+  });
+  </initializeKnex>
+
+  <handleDatabaseConnection>
+  
+  return knex.table('information_schema.tables').first()
+    .catch(createDBIfNotExists);
+  </handleDatabaseConnection>
+}
+</connect>
+
+<parseStatements>
+function parseStatements(lex, endTokens, isRoot) {
+  <prepareEndTokens>
+    endTokens = Array.isArray(endTokens) ? endTokens : [endTokens];
+  </prepareEndTokens>
+  <initializeVariables>
+    var statements = [];
+    var temp = lex.peek();
+  </initializeVariables>
+  <parseLoop>
+    while (endTokens.indexOf(temp) === -1 &&
+           (temp.type && endTokens.indexOf(temp.type) === -1)) {
+        var statement = parseStatement(lex, isRoot);
+        if (!statement) {
+            throw new Error('Invalid statement');
+        }
+        temp = lex.peek();
+        statements.push(statement);
+    }
+  </parseLoop>
+  return statements;
+}
+</parseStatements>

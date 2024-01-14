@@ -1,0 +1,260 @@
+```javascript
+<refreshTree>
+function(parent, children) {
+  if (this.myTree) {
+    this.myTree.refresh.bind(this.myTree)(parent, children, true);
+  }
+}
+</refreshTree>
+
+<ValidationExtension>
+function ValidationExtension() {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref$reject = _ref.reject,
+      reject = _ref$reject === undefined ? false : _ref$reject;
+
+  _classCallCheck(this, ValidationExtension);
+
+  <extendBaseClass>
+  var _this = _possibleConstructorReturn(this, (ValidationExtension.__proto__ || Object.getPrototypeOf(ValidationExtension)).call(this, {
+    onEntityInstantiate: true,
+    onChangeDetected: true
+  }));
+  </extendBaseClass>
+
+  _this.rejectInvalidValues = reject;
+  return _this;
+}
+</ValidationExtension>
+
+<callFunction>
+function call (dataStore, fn, args) {
+  let resources, callback;
+
+  <defineResourceAndCallback>
+  let singleResource = _.first(args) instanceof Resource && (args.length === 0 || _.isFunction(args[1]));
+  if (_.isFunction(_.last(args))) {
+    resources = _.flatten(_.initial(args), true);
+    callback = _.last(args);
+  }
+  else {
+    resources = _.flatten(args, true);
+    callback = _.noop;
+  }
+  </defineResourceAndCallback>
+
+  <validateResources>
+  let collections = {};
+  for (let i = 0; i < resources.length; i++) {
+    let resource = resources[i];
+    if (!(resource instanceof Resource)) {
+      throw ono("Expected a Resource object, but parameter %d is a %s.", i + 1, typeof (resource));
+    }
+    let collectionName = resource.valueOf(dataStore.__router, true);
+    let collection = collections[collectionName] || (collections[collectionName] = []);
+    collection.push(resource);
+  }
+  </validateResources>
+
+  <processCollections>
+  let collectionNames = Object.keys(collections);
+  let collectionIndex = 0, processedResources = [];
+  processNextCollection();
+  </processCollections>
+
+  <processNextCollection>
+  function processNextCollection (err, resources) {
+    if (err) {
+      <handleError>
+      finished(err);
+      </handleError>
+      return;
+    }
+
+    if (resources) {
+      <concatenateResources>
+      processedResources = processedResources.concat(resources);
+      </concatenateResources>
+    }
+
+    if (collectionIndex >= collectionNames.length) {
+      <finishProcessing>
+      finished(null, processedResources);
+      </finishProcessing>
+    }
+    else {
+      <processEachCollection>
+      let collectionName = collectionNames[collectionIndex++];
+      fn(dataStore, collectionName, collections[collectionName], processNextCollection);
+      </processEachCollection>
+    }
+  }
+  </processNextCollection>
+
+  <finishedCallback>
+  function finished (err, resources) {
+    if (err) {
+      callback(err);
+    }
+    else {
+      callback(null, singleResource ? resources[0] : resources);
+    }
+  }
+  </finishedCallback>
+}
+</callFunction>
+
+<lookupQualifiedType>
+function lookupQualifiedType(qname) {
+  var t = type_env.get(qname)
+  if (!t)
+    throw new TypeError("Unresolved type: " + qname)
+  return t;
+}
+</lookupQualifiedType>
+
+<getterFunction>
+function(type){
+  return function(prop){
+    <generateAccessor>
+    var accessor = this.getAccessor(prop, type),
+        accessorName = this._accessorName;
+    </generateAccessor>
+
+    <returnAccessorValue>
+    if (accessor && accessorName != prop) {
+      return accessor();
+    }
+    </returnAccessorValue>
+    
+    return this.parent(prop);
+  }.overloadGetter();
+}
+</getterFunction>
+
+<fadeLinesBut>
+function fadeLinesBut(exceptionItemId) {
+  let classToFade = 'g.legend-entry';
+  let entryLine = svg.select(`[data-item="${exceptionItemId}"]`);
+
+  <fadeEntriesAndHighlight>
+  if (entryLine.nodes().length){
+      svg.select('.legend-group')
+          .selectAll(classToFade)
+          .classed(isFadedClassName, true);
+
+      entryLine.classed(isFadedClassName, false);
+  }
+  </fadeEntriesAndHighlight>
+}
+</fadeLinesBut>
+
+<createFBO>
+function createFBO(renderState) {
+  m_handle = renderState.m_context.createFramebuffer();
+  renderState.m_context.bindFramebuffer(vgl.GL.FRAMEBUFFER, m_handle);
+
+  var colorBufferHandle, depthBufferHandle;
+
+  <prepareColorAttachment>
+  var colorTexture = m_fboAttachmentMap[vgl.GL.COLOR_ATTACHMENT0];
+  if (!colorTexture) {
+    colorBufferHandle = renderState.m_context.createRenderbuffer();
+    renderState.m_context.bindRenderbuffer(vgl.GL.RENDERBUFFER, colorBufferHandle);
+    renderState.m_context.renderbufferStorage(vgl.GL.RENDERBUFFER,
+      vgl.GL.RGB565, m_width, m_height);
+    renderState.m_context.framebufferRenderbuffer(vgl.GL.FRAMEBUFFER,
+      vgl.GL.COLOR_ATTACHMENT0, vgl.GL.RENDERBUFFER, colorBufferHandle);
+    m_fboAttachmentMap[vgl.COLOR_ATTACHMENT0] = colorBufferHandle;
+  } else {
+    updateTexture(colorTexture, renderState);
+    colorTexture.bind(renderState);
+    renderState.m_context.framebufferTexture2D(vgl.GL.FRAMEBUFFER,
+      vgl.GL.COLOR_ATTACHMENT0, vgl.GL.TEXTURE_2D,
+      colorTexture.textureHandle(), 0);
+  }
+  </prepareColorAttachment>
+
+  <prepareDepthAttachment>
+  var depthTexture = m_fboAttachmentMap[vgl.GL.DEPTH_ATTACHMENT];
+  if (!depthTexture) {
+    depthBufferHandle = vgl.GL.createRenderbuffer();
+    renderState.m_context.bindRenderbuffer(vgl.GL.RENDERBUFFER, depthBufferHandle);
+    renderState.m_context.renderbufferStorage(vgl.GL.RENDERBUFFER,
+      vgl.GL.DEPTH_COMPONENT16, m_width, m_height);
+    renderState.m_context.framebufferRenderbuffer(vgl.GL.FRAMEBUFFER,
+      vgl.GL.DEPTH_ATTACHMENT, vgl.GL.RENDERBUFFER, depthBufferHandle);
+    m_fboAttachmentMap[vgl.DEPTH_ATTACHMENT] = depthBufferHandle;
+  } else {
+    updateTexture(depthTexture, renderState);
+    depthTexture.bind(renderState);
+    renderState.m_context.framebufferTexture2D(vgl.GL.FRAMEBUFFER,
+      vgl.GL.DEPTH_ATTACHMENT, vgl.GL.TEXTURE_2D,
+      depthTexture.textureHandle(), 0);
+  }
+  </prepareDepthAttachment>
+
+  m_fboCreationTime.modified();
+}
+</createFBO>
+
+<formatDate>
+function (v) {
+  if (!v)
+      return null;
+  var d = AtomDate.parse(v);
+  var now = new Date();
+
+  <calculateDateDifference>
+  if (now.getFullYear() === d.getFullYear()
+      && now.getMonth() === d.getMonth()) {
+    var diff = now.getDate() - d.getDate();
+    switch(diff){
+      case -1:
+          return "Tomorrow (" + AtomDate.toTimeString(d) + ")";
+      case 0:
+          return "Today (" + AtomDate.toTimeString(d) + ")";
+      case 1:
+          return "Yesterday (" + AtomDate.toTimeString(d) + ")";
+    }
+  }
+  </calculateDateDifference>
+
+  return AtomDate.toDateTimeString(d);
+}
+</formatDate>
+
+<ParseMetaData>
+function ParseMetaData(countryCode, md) {
+  <parseAndCacheMetaData>
+  var array = eval(md.replace(BACKSLASH, "\\\\"));
+  md = ParseArray(array,
+                  META_DATA_ENCODING,
+                  { countryCode: countryCode });
+  regionCache[md.region] = md;
+  </parseAndCacheMetaData>
+  return md;
+}
+</ParseMetaData>
+
+<iterateParentChain>
+function (iterator, context) {
+  <validateIteratorAndContext>
+  if (!_.isFunction(iterator)) { return; }
+  !context && (context = this);
+  </validateIteratorAndContext>
+
+  var parent = this.__parent,
+      prev;
+
+  <iterateThroughParents>
+  while (parent) {
+    iterator.call(context, parent, prev);
+
+    prev = parent;
+    parent = parent.__parent;
+  }
+  </iterateThroughParents>
+}
+</iterateParentChain>
+```

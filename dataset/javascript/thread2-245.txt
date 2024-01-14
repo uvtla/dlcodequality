@@ -1,0 +1,237 @@
+Function 1:
+```javascript
+<formatFileSize>
+function( size, pointLength, units ) {
+    var unit;
+
+    units = units || [ 'B', 'K', 'M', 'G', 'TB' ];
+
+    while ( (unit = units.shift()) && size > 1024 ) {
+        size = size / 1024;
+    }
+
+    return (unit === 'B' ? size : size.toFixed( pointLength || 2 )) +
+            unit;
+}
+</formatFileSize>
+```
+
+Function 2:
+```javascript
+<cacheTile>
+function (tile) {
+    if (!this.cache[tile.id]) {
+        this.cache[tile.id] = tile;
+        this.cacheCount++;
+        try {
+            this.addToImage(tile);
+        } catch (e) {
+            
+        } 
+    }
+}
+</cacheTile>
+```
+
+Function 3:
+```javascript
+<generateBucketHref>
+function (req, bucket) {
+    var location = getLocation(req),
+        href = location.origin;
+
+    
+    if (href.substr(-1) !== '/') {
+        href += '/';
+    }
+    
+    
+    href += bucket + location.search;
+
+    return href;
+}
+</generateBucketHref>
+```
+
+Function 4:
+```javascript
+<parseString>
+function (str) {
+    return str.split(';').map(function (e, i) {
+        return plugs[i].parse(e)
+    })
+}
+</parseString>
+```
+
+Function 5:
+```javascript
+<collectSelectedNodes>
+function(stopOnParents) {
+    var nodeList = [];
+    this.rootNode.visit(function(node){
+        if( node.selected ) {
+            nodeList.push(node);
+            if( stopOnParents === true ){
+                return "skip"; 
+            }
+        }
+    });
+    return nodeList;
+}
+</collectSelectedNodes>
+```
+
+Function 6:
+```javascript
+<hasOwnPropertyCheck>
+function _hasOwnProperty(obj) {
+    var key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+</hasOwnPropertyCheck>
+```
+
+Function 7:
+```javascript
+<setupTabEventHandlersAndMenuItems>
+function () {
+    topic.subscribe("/focus", lang.hitch(this, "onPageFocus"));
+    topic.subscribe("/new", lang.hitch(this, "onNew"));
+    topic.subscribe("/deleted", lang.hitch(this, "onDeleted"));
+
+    <addCloseChildAspect>
+    aspect.before(this.tabContainer, "closeChild", function (child) {
+        this.closing = true;
+
+        setTimeout(function () {
+
+        }.bind(this), 0);
+    }.bind(this));
+    </addCloseChildAspect>
+    <addOnCloseAspect>
+    aspect.after(this.tabContainer, "closeChild", function (value, args) {
+        this.closing = false;
+        this.onClose(args[0]);
+    }.bind(this));
+    </addOnCloseAspect>
+    <addSelectChildAspect>
+    aspect.after(this.tabContainer, "selectChild", function (promise, args) {
+        if (!this.closing) {
+            this.tabSelected(args[0]);
+        }
+    }.bind(this));
+    </addSelectChildAspect>
+
+
+    var menu = registry.byId(this.tabContainer.id + "_tablist_Menu");
+
+    <createCloseAllMenuItem>
+    var me = this;
+    menu.addChild(
+        new MenuItem({
+            label: messages["tabopener.closeall"],
+            ownerDocument: this.tabContainer.ownerDocument,
+            dir: this.tabContainer.dir,
+            lang: this.tabContainer.lang,
+            textDir: this.tabContainer.textDir,
+            onClick: function (evt) {
+                me.closeTabs();
+            }
+        })
+    );
+    </createCloseAllMenuItem>
+    
+    <createCloseOthersMenuItem>
+    menu.addChild(
+        new MenuItem({
+            label: messages["tabopener.closeothers"],
+            ownerDocument: this.tabContainer.ownerDocument,
+            dir: this.tabContainer.dir,
+            lang: this.tabContainer.lang,
+            textDir: this.tabContainer.textDir,
+            onClick: function (evt) {
+                var tabElement = this.getParent().currentTarget;
+                var tab = registry.byNode(tabElement);
+                me.closeTabs(tab.page);
+            }
+        })
+    );
+    </createCloseOthersMenuItem>
+}
+</setupTabEventHandlersAndMenuItems>
+```
+
+Function 8:
+```javascript
+<createWebSocketInstance>
+function ws(uri, protocols, opts) {
+    var instance;
+    if (protocols) {
+        instance = new WebSocket(uri, protocols);
+    } else {
+        instance = new WebSocket(uri);
+    }
+    return instance;
+}
+</createWebSocketInstance>
+```
+
+Function 9:
+```javascript
+<setCSSRules>
+function set (sel, props) {
+    if (props) {
+        if (props && typeof props.rulesets === 'function') props = props.rulesets()
+        Object.keys(props).forEach(function (prop) {
+            var val = props[prop]
+            if (typeof val === 'object') {
+                set(expand(sel, prop), val)
+            } else {
+                if (!(sel in rules)) {
+                    rules[sel] = {}
+                }
+                rules[sel][prop] = val
+            }
+        })
+    } else {
+        if (sel && typeof sel.rulesets === 'function') sel = sel.rulesets()
+        Object.keys(sel).forEach(function (selector) {
+            set(selector, sel[selector])
+        })
+    }
+
+    return api
+}
+</setCSSRules>
+```
+
+Function 10:
+```javascript
+<flattenCSSRules>
+function flattenRules(rules) {
+    var out = {};
+
+    rules.forEach(function(rule) {
+        if (rule.type !== 'rule') return;
+        rule.selectors.forEach(function(sel) {
+            if (!out[sel]) out[sel] = {};
+
+            rule.declarations.forEach(function(decl) {
+                out[sel][decl.property] = decl.value;
+            });
+        });
+    });
+
+    return out;
+}
+</flattenCSSRules>
+```
+
+Function 7 contains the most complex setup with different responsibilities, so it's annotated at multiple levels, indicating potential SRP violations. The rest of the functions each manage a single responsibility and are annotated as compliant with SRP.

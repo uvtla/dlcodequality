@@ -1,0 +1,273 @@
+```javascript
+<dependencyLink>
+function dependencyLink (pkg, cb) {
+  <pathCalculations>
+  var dependencies = path.join(npm.dir, pkg.name, pkg.version, "node_modules")
+    , depBin = path.join(npm.dir, pkg.name, pkg.version, "dep-bin")</pathCalculations>
+  asyncMap(pkg._resolvedDeps, function (dep, cb) {
+    log.silly(dep, "dependency")
+    <dependencyLinkCreation>
+    var fromRoot = path.join(npm.dir, dep.name, dep.version)
+      , dependsOn = path.join( npm.dir, pkg.name, pkg.version
+                             , "dependson", dep.name + "@" + dep.version
+                             )</dependencyLinkCreation>
+    link(fromRoot, dependsOn, cb)
+  }, function (dep, cb) {
+    <loadDependentPackage>
+    var depDir = path.join(npm.dir, dep.name, dep.version, "package")
+    readJson(path.join(depDir, "package.json"), function (er, dep) {
+      if (er) return cb(er)
+      loadPackageDefaults(dep, function (er, dep) {
+        if (er) return cb(er)</loadDependentPackage>
+        asyncMap([dep], function (dep) {
+          var toLib = path.join(dependencies, dep.name)
+          linkModules(dep, toLib, cb)
+        }, function (dep, cb) {
+          
+          <linkDependenciesAndBinaries>
+          linkBins(dep, depBin, false, cb)</linkDependenciesAndBinaries>
+        }, cb)
+      })
+    })
+  }, cb)
+}
+</dependencyLink>
+
+<makeEventTarget>
+function makeEventTarget(target) {
+    var listeners = {};
+    <setupListeners>
+    target.on = function(event, func) {
+      if (listeners[event]) {
+        listeners[event].push(func);
+      } else {
+        listeners[event] = [func];
+      }
+    };</setupListeners>
+    <fireListeners>
+    target.fireEvent = function(event, data) {
+      expect(target.on).toHaveBeenCalledWith(event, jasmine.any(Function));
+      listeners[event].forEach(function(listener) {
+        listener(data);
+      });
+    };</fireListeners>
+    <removeListeners>
+    target.removeListeners = function() {
+      listeners = {};
+    };</removeListeners>
+    <spyOnListeners>
+    spyOn(target, "on").and.callThrough();</spyOnListeners>
+  }
+</makeEventTarget>
+
+<createFragment>
+function (result) {
+  var frag = can.buildFragment(result, document.body);
+  
+  if (!frag.childNodes.length) {
+      frag.appendChild(document.createTextNode(''));
+  }
+  return frag;
+}
+</createFragment>
+
+<sliceAndPush>
+function(){
+  var slice = [].splice.call(arguments,0),
+  focus = slice[0],rem  = slice.splice(1,slice.length);
+
+  this.forEach(rem,function pushing(e,i,b){
+    _pusher.call(focus,e);
+  });
+  return;
+}
+</sliceAndPush>
+
+<dbSync>
+function(method, model, options) {
+  options = options || {};
+  var self = this;
+  var db;
+  <selectDatabase>
+  if (!(self instanceof Db)) {
+    db = model.db || options.db;
+    debug('using db from model');
+  } else {
+    debug('using self as database');
+    db = self;
+  }</selectDatabase>
+
+  <logSyncStart>
+  debug('sync %s %s %s %s',
+    method,
+    model.type,
+    JSON.stringify(model.toJSON(options)),
+    JSON.stringify(options)
+  );
+
+  var start = Date.now();</logSyncStart>
+
+  function callback(err, res, resp) {
+    <logSyncEnd>
+    debug('callback ' + err + ' ' + JSON.stringify(res));
+    var elapsed = Date.now() - start;
+    var syncInfo = {
+      method: method,
+      type: model.type,
+      elapsed: elapsed,
+      model: model.toJSON(options),
+      res: JSON.stringify(res)
+    };
+    if (err) {
+      syncInfo.error = err;
+    }
+    if (options && options.where) {
+      syncInfo.where = _.clone(options.where);
+    }
+    if (db.trigger) {
+      db.trigger('sync_info', syncInfo);
+    }</logSyncEnd>
+    <errorReporting>
+    if ((err && options.error) || (!err && !res && options.error)) {
+      var errorMsg = pff('%s (%s) not found', model.type, model.id);
+      err = err || new errors.NotFoundError(errorMsg);
+      return options.error(err, resp);
+    }</errorReporting>
+    <successfulResponse>
+    else if (options.success && res) {
+      debug('success %s', JSON.stringify(res));
+      return options.success(res, resp);
+    }</successfulResponse>
+  }
+
+  <syncSwitch>
+  switch (method) {
+    case 'create':
+      return db.create(model, options, callback);
+    case 'update':
+      return db.update(model, options, callback);
+    case 'delete':
+      return db.destroy(model, options, callback);
+    case 'read':
+      if (typeof model.get(model.idAttribute) !== 'undefined') {
+        return db.find(model, options, callback);
+      }
+      return db.findAll(model, options, callback);
+    default:
+      throw new Error('method ' + method + ' not supported');
+  }</syncSwitch>
+}
+</dbSync>
+
+<initViewPortData>
+function (needsStitching) {
+  var initData = {
+          viewPort: {},
+          document: {},
+          bodyTransform: {}
+      },
+
+      de = document.documentElement,
+      el = document.createElement('div'),
+      body = document.body;
+
+  <calculateViewPort>
+  initData.viewPort.x = window.pageXOffset || body.scrollLeft || de.scrollLeft;
+  initData.viewPort.y = window.pageYOffset || body.scrollTop || de.scrollTop;
+
+  el.style.position = "fixed";
+  el.style.top = 0;
+  el.style.left = 0;
+  el.style.bottom = 0;
+  el.style.right = 0;
+  de.insertBefore(el, de.firstChild);
+  initData.viewPort.width = el.offsetWidth;
+  initData.viewPort.height = el.offsetHeight;
+  de.removeChild(el);</calculateViewPort>
+
+  <calculateDocumentData>
+  initData.document.width = Math.max(body.scrollWidth, body.offsetWidth, de.clientWidth, de.scrollWidth, de.offsetWidth);
+  initData.document.height = Math.max(body.scrollHeight, body.offsetHeight, de.clientHeight, de.scrollHeight, de.offsetHeight);
+  initData.document.cssHeight = body.style.height;
+  initData.document.overflow = body.style.overflow;</calculateDocumentData>
+
+  <determineTransformProperty>
+  if (body.style.webkitTransform !== undefined) {
+      initData.bodyTransform.property = 'webkitTransform';
+  } else if (body.style.mozTransform !== undefined) {
+      initData.bodyTransform.property = 'mozTransform';
+  } else if (body.style.msTransform !== undefined) {
+      initData.bodyTransform.property = 'msTransform';
+  } else if (body.style.oTransform !== undefined) {
+      initData.bodyTransform.property = 'oTransform';
+  } else {
+      initData.bodyTransform.property = 'transform';
+  }</determineTransformProperty>
+  initData.bodyTransform.value = body.style[initData.bodyTransform.property];
+  initData.needsStitching = needsStitching;
+
+  <applyStitching>
+  if (needsStitching) {
+    body.style[initData.bodyTransform.property] = 'translate(' + initData.viewPort.x + 'px, ' + initData.viewPort.y + 'px)';
+  }</applyStitching>
+
+  return JSON.stringify(initData);
+}
+</initViewPortData>
+
+<getFileDetails>
+function (file, parent, type) {
+  var fileDetails = path.parse(file),
+      filePath = (type === 'static') ?
+          path.join(fileDetails.dir, fileDetails.name + fileDetails.ext) :
+          path.join(fileDetails.dir, fileDetails.name);
+
+  return {
+      name: filePath,
+      parentDir: parent,
+      href: parent + filePath
+  };
+}
+</getFileDetails>
+
+<hasTrackedTypes>
+function(type, checks) {
+  var result = false;
+  var list = this._trackedtypes[type];
+  if (list) {
+    result = !checks || this._haschecks(list, checks);
+  }
+  return result;
+}
+</hasTrackedTypes>
+
+<getNetworkInterfaces>
+function getNetworkInterfaces() {
+  const ret = {};
+  for (const macinfo of Object.values(macs)) {
+    if (!macinfo.self) {
+      continue;
+    }
+    <copyInterfaceInformation>
+    ret[macinfo.net] = objCpy(macinfo);</copyInterfaceInformation>
+  }
+  return ret;
+}
+</getNetworkInterfaces>
+
+<updateSpaceData>
+function (spaceIdentifier, data) {
+  var path;
+  if (data) {
+    <constructPathAndUpdateSpace>
+    path = this.constructPath(constants.SPACES, spaceIdentifier);
+    return this.Core.PATCH(path, data);</constructPathAndUpdateSpace>
+  } else {
+    <rejectBadRequest>
+    return this.rejectRequest('Bad Request: Space data is required');</rejectBadRequest>
+  }
+}
+</updateSpaceData>
+```
+
+Each of the functions has been annotated with SRP compliance or violations. Tags have been wrapped around blocks of code that represent distinct responsibilities within the functions.

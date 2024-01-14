@@ -1,0 +1,308 @@
+```javascript
+<hextoipv6>
+function hextoipv6(s) {
+  <validateHex>
+  if (! s.match(/^[0-9A-Fa-f]{32}$/))
+    throw "malformed IPv6 address octet";
+  </validateHex>
+
+  
+  s = s.toLowerCase();
+
+  <splitHex>
+  var a = s.match(/.{1,4}/g);
+  </splitHex>
+
+  <normalizeGroups>
+  for (var i = 0; i < 8; i++) {
+    a[i] = a[i].replace(/^0+/, "");
+    if (a[i] == '') a[i] = '0';
+  }
+  s = ":" + a.join(":") + ":";
+  </normalizeGroups>
+
+  <findLongestZeroSequence>
+  var aZero = s.match(/:(0:){2,}/g);
+  </findLongestZeroSequence>
+
+  <shortenSingleZeroGroup>
+  if (aZero === null) return s.slice(1, -1);
+  </shortenSingleZeroGroup>
+
+  <pickLongestZeroSequence>
+  var item = '';
+  for (var i = 0; i < aZero.length; i++) {
+    if (aZero[i].length > item.length) item = aZero[i];
+  }
+  </pickLongestZeroSequence>
+
+  <replaceWithDoubleColon>
+  s = s.replace(item, '::');
+  return s.slice(1, -1);
+  </replaceWithDoubleColon>
+}
+</hextoipv6>
+
+<showConfirmationModal>
+function showConfirmationModal(settings) {
+  <sendMessage>
+  window.parent.postMessage(
+    {
+      msg: 'luigi.ux.confirmationModal.show',
+      data: {
+        settings
+      }
+    },
+    '*'
+  );
+  </sendMessage>
+  
+  <initPromise>
+  promises.confirmationModal = {};
+  promises.confirmationModal.promise = new Promise((resolve, reject) => {
+    promises.confirmationModal.resolveFn = resolve;
+    promises.confirmationModal.rejectFn = reject;
+  });
+  </initPromise>
+  return promises.confirmationModal.promise;
+}
+</showConfirmationModal>
+
+<debounceFunction>
+function(func, wait) {
+  var self = this,
+      timeout,
+      timestamp
+
+  var later = function() {
+    <checkDisposal>
+    if (self._disposed) {
+      clearTimeout(timeout)
+      timeout = self = null
+      return
+    }
+    </checkDisposal>
+
+    <calculateElapsedTime>
+    var last = getTime() - timestamp
+    </calculateElapsedTime>
+
+    <rescheduleOrExecute>
+    if (last < wait && last >= 0) {
+      timeout = setTimeout(later, wait - last)
+    } else {
+      timeout = null
+      func()
+    }
+    </rescheduleOrExecute>
+  }
+
+  return function() {
+    <setTimestamp>
+    timestamp = getTime()
+    </setTimestamp>
+
+    <scheduleFirstExecution>
+    if (!timeout) {
+      timeout = setTimeout(later, wait)
+    }
+    </scheduleFirstExecution>
+  }
+}
+</debounceFunction>
+
+<makeCorporations>
+function makeCorporations(agent) {
+  let functor = function (id) {
+    return new CorporationImpl(agent, id);
+  };
+
+  <attachSearchFunction>
+  functor.search = search_1.makeDefaultSearch(agent, "corporation" );
+  </attachSearchFunction>
+
+  <attachNPCFunction>
+  functor.npc = function () {
+    return agent.request('get_corporations_npccorps', undefined);
+  };
+  </attachNPCFunction>
+
+  <attachNamesFunction>
+  functor.names = function (ids) {
+    <handleLargeIdArrays>
+    if (ids.length > 100) {
+      return names_1.getNames(agent, "corporation" , ids);
+    }
+    </handleLargeIdArrays>
+    else {
+      <handleSmallIdArrays>
+      return agent.request('get_corporations_names', { query: { 'corporation_ids': ids } })
+          .then(result => {
+          let map = new Map();
+          for (let name of result) {
+              map.set(name.corporation_id, name.corporation_name);
+          }
+          return map;
+      });
+      </handleSmallIdArrays>
+    }
+  };
+  </attachNamesFunction>
+  
+  return functor;
+}
+</makeCorporations>
+
+<ForCommand>
+function ForCommand(value, engine) {
+  <parseForCommand>
+  var rule = new RegExp(
+      stringFormat(
+        '^\\s*({0}[\\s\\S]+{1})\\s+as\\s+{0}([0-9a-z_]+){1}\\s*(,\\s*{0}([0-9a-z_]+){1})?\\s*$',
+        regexpLiteral(engine.options.variableOpen),
+        regexpLiteral(engine.options.variableClose)
+      ),
+      'i'
+  );
+  </parseForCommand>
+
+  <matchForCommand>
+  var match = value.match(rule);
+  if (!match) {
+      throw new Error('Invalid ' + this.type + ' syntax: ' + value);
+  }
+  </matchForCommand>
+
+  <assignForCommandProperties>
+  this.list = match[1];
+  this.item = match[2];
+  this.index = match[4];
+  Command.call(this, value, engine);
+  this.cloneProps = ['list', 'item', 'index'];
+  </assignForCommandProperties>
+}
+</ForCommand>
+
+<drawLoop>
+function drawLoop () {
+  <clearCanvas>
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  </clearCanvas>
+
+  <calculateCenter>
+  var centerX = canvas.width / 2
+  var centerY = canvas.height / 2
+  </calculateCenter>
+
+  <drawPrimaryCircle>
+  ctx.beginPath()
+  ctx.arc(centerX, centerY, 100, 0, 2 * Math.PI, false)
+  ctx.fillStyle = 'yellow'
+  ctx.fill()
+  </drawPrimaryCircle>
+
+  <drawSegments>
+  ctx.strokeStyle = 'lime'
+  scope.draw(ctx, 0, 0, centerX, centerY)
+
+  ctx.strokeStyle = 'cyan'
+  scope.draw(ctx, centerX, 0, centerX, centerY)
+
+  ctx.strokeStyle = 'red'
+  scope.draw(ctx, 0, centerY, null, centerY)
+  </drawSegments>
+
+  <requestNextAnimationFrame>
+  window.requestAnimationFrame(drawLoop)
+  </requestNextAnimationFrame>
+}
+</drawLoop>
+
+<setSegment>
+function setSegment(start, end, identifier) {
+  <assignDefaultIdentifier>
+  if (identifier === undefined || identifier === null || identifier.length === 0) {
+    identifier = "default";
+  }
+  </assignDefaultIdentifier>
+
+  <createNewSegment>
+  this.segments[identifier] = new WaveformDataSegment(this, start, end);
+  </createNewSegment>
+
+  return this.segments[identifier];
+}
+</setSegment>
+
+<setNestedValue>
+function setNestedValue(data, field, value) {
+  var fieldParts = _.isArray(field) ? field : field.split('.');
+
+  <handleSingleFieldParts>
+  if (fieldParts.length === 1) {
+      data[field] = _.isString(value) ? value.trim() : value;
+      return;
+  }
+  </handleSingleFieldParts>
+
+  <initializeNestedStructureIfNecesssary>
+  data[fieldParts[0]] = data[fieldParts[0]] || {};
+  </initializeNestedStructureIfNecesssary>
+
+  <recursiveSetNestedValue>
+  setNestedValue(data[fieldParts[0]], fieldParts.slice(1, fieldParts.length), value);
+  </recursiveSetNestedValue>
+}
+</setNestedValue>
+
+<getCheckedValues>
+function getCheckedValues() {
+  var checkedValues = [];
+  for(var i=0, j=this.checkboxes.length; i<j; i++) {
+    if(this.checkboxes[i].checked) {
+        checkedValues[checkedValues.length] = this.checkboxes[i].value;
+    }
+  }
+  return checkedValues;
+}
+</getCheckedValues>
+
+<parseHTMLComment>
+function parseHTMLComment(mode, code, tokens, flags, scope, parseMode) {
+  <locateStartOfComment>
+  var index = code.index,
+      length = code.length;
+
+  if (
+    code.codePointAt(index) === 0x003c &&
+    code.codePointAt(++index) === 0x0021 &&
+    code.codePointAt(++index) === 0x002d &&
+    code.codePointAt(++index) === 0x002d
+  ) {
+      index++;
+  </locateStartOfComment>
+
+  <searchCommentClosing>
+  for (; index < length; index++) {
+      if (
+          code.codePointAt(index) === 0x002d &&
+          code.codePointAt(index + 1) === 0x002d &&
+          code.codePointAt(index + 2) === 0x003e
+      ) {
+          index += 3;
+          code.index = index;
+
+          return true;
+      }
+  }
+  </searchCommentClosing>
+
+  <handleUnclosedComment>
+  throw code.makeError(
+    code.index, code.index + 4,
+    'Unclosed Comment: Expected "-->" to fallow "<!--".'
+  );
+  </handleUnclosedComment>
+}
+</parseHTMLComment>
+```

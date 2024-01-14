@@ -1,0 +1,187 @@
+```javascript
+<JsonArray>
+function JsonArray(arr) {
+    if (!(this instanceof JsonArray)) {
+        return new JsonArray(arr);
+    }
+    Array.call(this);
+    var i = -1, l = arr.length;
+    while (++i < l) {
+        this.push(arr[i]);
+    }
+}
+</JsonArray>
+
+<router>
+function router(req, res) {
+
+	let parse = req.parse = url.parse(req.url, true);
+	let method = req.method = req.method.toUpperCase();
+
+	let _postData = '';
+	req.setEncoding('utf8');
+
+	setClientInfo(req);
+
+	if (clientDisAccessable(req.client.USERAGENT)) { 
+		res.writeHead(403);
+		res.end();
+		return;
+	} else {
+		req.on('error', onError)
+			.on('data', function (chunk) {
+				_postData += chunk;
+			}).on("end", function () {
+				switch (method) {
+					case HttpRequestMethod.PUT:
+					case HttpRequestMethod.POST:
+						Object.addAll(qs.parse(_postData), parse.query);
+					case HttpRequestMethod.GET:
+						request(req, res);
+						break;
+					case HttpRequestMethod.DELETE:
+					case HttpRequestMethod.HEAD: 
+					case HttpRequestMethod.CONNECT:
+					case HttpRequestMethod.OPTIONS:
+					case HttpRequestMethod.TRACE:
+					case HttpRequestMethod.PATCH:
+						break;
+					default:
+						unsupportedOperation(method);
+				}
+			}).setTimeout(TIMEOUT, function () {
+				if (developMode) return; 
+				Coralian.logger.err('request error code : ' + HttpStatusCode.REQUEST_TIMEOUT);
+				req.url = formatString(ERROR_ROUTE_FORMAT, HttpStatusCode.REQUEST_TIMEOUT);
+				req.parse = url.parse(req.url, true);
+				request(req, res);
+			});
+		res.on('error', onError)
+			.setTimeout(TIMEOUT, function () {
+				if (developMode) return; 
+				Coralian.logger.err('response error code : ' + HttpStatusCode.GATEWAY_TIMEOUT);
+				req.url = formatString(ERROR_ROUTE_FORMAT, HttpStatusCode.GATEWAY_TIMEOUT);
+				parse = url.parse(req.url, true);
+				request(req, res);
+			});
+	}
+
+	<onError>
+	function onError(err) {
+		Coralian.logger.err("HTTP req error : ");
+		Coralian.logger.err(err.code);
+		Coralian.logger.err(err.stack);
+
+		if (String.contains(err.message, 'write after end')) return;
+
+		req.url = formatString(ERROR_ROUTE_FORMAT, (err.code || HttpStatusCode.INTERNAL_SERVER_ERROR));
+		req.parse = url.parse(req.url, true);
+		request(req, res);
+	}
+	</onError>
+}
+</router>
+
+<FetchLongPollingTransport>
+function FetchLongPollingTransport(fetch) {
+  var _super = new LongPollingTransport()
+  var that = Transport.derive(_super)
+
+  <xhrSend>
+  that.xhrSend = function (packet) {
+    fetch(packet.url, {
+      method: 'post',
+      body: packet.body,
+      headers: Object.assign(packet.headers, {
+        'Content-Type': 'application/json;charset=UTF-8'
+      })
+    })
+    .then(function (response) {
+      return response.json()
+    })
+    .then(packet.onSuccess)
+    .catch(packet.onError)
+  }
+  </xhrSend>
+
+  return that
+}
+</FetchLongPollingTransport>
+
+<QueryCompiler>
+function QueryCompiler(client, builder) {
+  this.client = client;
+  this.method = builder._method || 'select';
+  this.options = builder._options || {};
+  this.single = builder._single;
+  var grouped = this.grouped = {};
+  builder._statements.forEach(function (item) {
+    if (!item.grouping) {
+      return;
+    }
+    var val = item.grouping;
+    if (!(val in grouped)) {
+      grouped[val] = [];
+    }
+    grouped[val].push(item);
+  });
+  this.formatter = new Formatter(client);
+}
+</QueryCompiler>
+
+<cachePersistence>
+function () {
+    if (this._storage) {
+        this._removeOldCache();
+        this._storage.setItem(this._storageKey, this._cache);
+        this._storage.$dispose();
+        this._storage = null;
+    }
+    ariaUtilsEvent.removeListener(Aria.$window, "unload", this._saveCacheCB);
+}
+</cachePersistence>
+
+<finishExchange>
+function (cb) {
+    if (done || !localSentWants || !localSentHeads || !remoteSentWants || !remoteSentHeads) return cb()
+    done = true
+    if (!live) return stream.finalize(cb)
+    sendChanges()
+    cb()
+  }
+</finishExchange>
+
+<attach>
+function attach(node) {
+  // The body of this function violates SRP by handling multiple responsibilities:
+  // initializing modals, attaching event listeners, and managing UI interactions
+}
+</attach>
+
+<getPlatformVersion>
+function getPlatformVersion (platformRoot) {
+    var versionFile = path.join(platformRoot, 'cordova/version');
+
+    if (!fs.existsSync(versionFile)) {
+        return null;
+    }
+
+    var version = shell.cat(versionFile).match(/VERSION\s=\s["'](.*)["'];/m);
+    return version && version[1];
+}
+</getPlatformVersion>
+
+<getRelevantElements>
+function _getRelevantElements(oElement, oRelevantContainer, sAggregationName) {
+  // The body of this function is considered as a single unit of functionality,
+  // thus it adheres to the SRP.
+}
+</getRelevantElements>
+
+<getSinks>
+function() {
+  // The body of this function is considered as a single unit of functionality,
+  // thus it adheres to the SRP.
+}
+</getSinks>
+```

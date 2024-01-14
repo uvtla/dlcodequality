@@ -1,0 +1,213 @@
+```javascript
+<createCaretContainer>
+function createCaretContainer(fill) {
+  var caretContainer = dom.create('span', { id: caretContainerId, 'data-mce-bogus': true, style: debug ? 'color:red' : '' });
+
+  if (fill) {
+    caretContainer.appendChild(ed.getDoc().createTextNode(INVISIBLE_CHAR));
+  }
+
+  return caretContainer;
+}
+</createCaretContainer>
+
+<compile>
+function compile(){
+    debug('compiling module ' + mod.name);
+
+    var refs = deps.map(function(d){
+        return d.module.out;
+    });
+    mod.refs = Array.isArray(mod.refs) ? mod.refs.concat(refs) : refs;
+
+    compile_core();
+}
+</compile>
+
+<getDirectoriesInURL>
+function getDirectoriesInURL()
+{
+	var trail = document.location.pathname.split( PATH_SEPARATOR );
+
+	var lastcrumb = trail[trail.length-1];
+	for( var i = 0; i < FILE_EXTENSIONS.length; i++ )
+	{
+		if( lastcrumb.indexOf( FILE_EXTENSIONS[i] ) )
+		{
+			return trail.slice( 1, trail.length-1 );
+		}
+	}
+
+	return trail.slice( 1, trail.length );
+}
+</getDirectoriesInURL>
+
+<BoundingBox>
+function (min, max) {
+    this.min = min || new Vector3(Infinity, Infinity, Infinity);
+    this.max = max || new Vector3(-Infinity, -Infinity, -Infinity);
+    this.vertices = null;
+}
+</BoundingBox>
+
+<makeActionCreator>
+function makeActionCreator(type) {
+  var payloadReducer = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _lodash2.default.identity;
+  var metaReducer = arguments[2];
+
+  var actionType = completeActionType(type);
+  var hasMeta = _lodash2.default.isFunction(metaReducer);
+
+  return function () {
+    var action = {
+      type: actionType,
+      payload: payloadReducer.apply(undefined, arguments)
+    };
+
+    if (arguments.length === 1 && (arguments.length <= 0 ? undefined : arguments[0]) instanceof Error) {
+      action.error = true;
+    }
+
+    if (hasMeta) {
+      action.meta = metaReducer.apply(undefined, arguments);
+    }
+
+    return action;
+  };
+}
+</makeActionCreator>
+
+<CompoundDuplex>
+function CompoundDuplex(writable, readable, options) {
+	var self = this;
+	var convertToZStream = require('../index');	
+
+	if(!readable || typeof readable.read !== 'function') {
+		options = readable;
+		readable = writable;
+		writable = null;
+	}
+
+	if(writable && !writable._isZStream) {
+		writable = convertToZStream(writable);
+	}
+	if(!readable._isZStream) {
+		readable = convertToZStream(readable);
+	}
+
+	if(!writable) {
+		if(typeof readable.getStreamChain !== 'function') {
+			throw new Error('Can only use shorthand CompoundDuplex constructor if pipeline is all zstreams');
+		}
+		writable = readable.getStreamChain().getStreams()[0];
+	}
+
+	if(!options) options = {};
+
+	options.readableObjectMode = readable.isReadableObjectMode();
+	options.writableObjectMode = writable.isWritableObjectMode();
+	Duplex.call(this, options);
+
+	this._compoundReadable = readable;
+	this._compoundWritable = writable;
+
+	this._waitingForReadableData = false;
+
+	writable.on('chainerror', function(error) {
+		this.ignoreError();
+		self.emit('error', error);
+	});
+
+	readable.on('readable', function() {
+		if(self._waitingForReadableData) {
+			self._waitingForReadableData = false;
+			self._readSomeData();
+		}
+	});
+
+	readable.on('end', function() {
+		self.push(null);
+	});
+}
+</CompoundDuplex>
+
+<changeURLContent>
+function (from_value, to_value) {
+    var type;
+
+    if (from_value instanceof RegExp) {
+        type = 'RegExp';
+    } else if (typeof from_value === 'string') {
+        type = 'String';
+    } else {
+        throw { type: 'changeURLContent', message: 'First argument must be RegExp of String' };
+    }
+
+    if (to_value === undefined) {
+        to_value = "";
+    } else if (typeof to_value !== 'string') {
+        throw { type: 'changeURLContent', message: 'Second argument must be String' };
+    }
+
+    urls.filter(function (value) {
+        if (type === "RegExp") {
+            return from_value.test(_getURLValue(value));
+        } else {
+            return _getURLValue(value).indexOf(from_value) !== -1;
+        }
+    }).forEach(function (value) {
+        var new_value = _getURLValue(value).replace(from_value, to_value);
+        _setURLValue(value, new_value);
+    });
+}
+</changeURLContent>
+
+<start>
+function start (startTiming) {
+  if (isStart) {
+    return
+  }
+  isStart = true
+  recordTiming('MIPStart', startTiming)
+  viewer.on('show', showTiming => {
+    recordTiming('MIPPageShow', showTiming)
+  })
+
+  document.addEventListener('DOMContentLoaded', domLoaded, false)
+  document.onreadystatechange = () => {
+    if (document.readyState === 'complete') {
+      domLoaded()
+    }
+  }
+}
+</start>
+
+<TextureAttach>
+function( format, type, internal ){
+    var t = new Texture( this.gl, format, type, internal );
+    return this.attach( 0x8CE0, t );
+}
+</TextureAttach>
+
+<findMatchingOptionIndex>
+function (lastTypedKeys, newMatch) {
+    var LABEL_META = this.LABEL_META;
+    var options = this._dataModel.listContent;
+    var keyNbr = lastTypedKeys.length;
+    var index = this._dataModel.selectedIdx + (newMatch ? 1 : 0);
+    for (var ct = 0, optionsLength = options.length; ct < optionsLength; ct++, index++) {
+        if (index >= optionsLength) {
+            index = 0;
+        }
+        var opt = options[index];
+        var prefix = opt[LABEL_META].substr(0, keyNbr);
+        if (prefix == lastTypedKeys) {
+            return index;
+        }
+    }
+    return -1;
+}
+</findMatchingOptionIndex>
+```
+
+Each function is tagged according to its cohesive responsibility. These annotations are made assuming the surrounding context of these code segments is not available, and each function appears to have a single responsibility based on the provided content. If the context were available and showed that these functions had multiple responsibilities, additional annotations might be required.

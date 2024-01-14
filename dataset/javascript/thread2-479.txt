@@ -1,0 +1,205 @@
+```javascript
+<TemplateFile>
+function TemplateFile(path) {
+    <readFile>
+    this._buffer = FS.readFileSync(path, {"encoding": "utf8"});
+    if (!this._buffer || this._buffer.length === 0) {
+        throw new Error("Could not read " + path);
+    }
+    </readFile>
+}
+</TemplateFile>
+
+<getCurrentUtcTime>
+function(){
+    <getCurrentUtcTime>
+    var now = new Date();
+    var nowUtc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),  now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+    return nowUtc.getTime();
+    </getCurrentUtcTime>
+}
+</getCurrentUtcTime>
+
+<throttleTime$2>
+function throttleTime$2(duration, scheduler) {
+    <setDefaultScheduler>
+    if (scheduler === void 0) { scheduler = async.async; }
+    </setDefaultScheduler>
+    return this.lift(new ThrottleTimeOperator(duration, scheduler));
+}
+</throttleTime$2>
+
+<anonymousFunctionLink>
+function( args ) {
+  <exceptionHandling>
+  try {
+    <createLinkId>
+    var id = ID++;
+    </createLinkId>
+    <checkAndLinkArgs>
+    checkArgs.call( this, args );
+    var onChangedA = link.call( this, args, id, "A", "B" );
+    var onChangedB = link.call( this, args, id, "B", "A" );
+    </checkAndLinkArgs>
+    <addCleanup>
+    addDestroyFunction.call( this, onChangedA, onChangedB );
+    </addCleanup>
+  }
+  catch( ex ) {
+    console.error("new Link( " + args + " )");
+    <handleFailure>
+    fail( ex, "new Link( <args> ) " + (this.name || "") );
+    </handleFailure>
+  }
+  </exceptionHandling>
+}
+</anonymousFunctionLink>
+
+<replaceMacroText>
+function replaceMacroText (ctx, targetElement, path, offset, macros, text) {
+    <resetDocumentSelection>
+    resetSelection(ctx, targetElement, path, offset);
+    </resetDocumentSelection>
+    <extractMacroInfo>
+    var macroMatchInfo = getMacroMatch(ctx, macros);
+    </extractMacroInfo>
+    <modifyTextWithTrailingSpace>
+    if (macroMatchInfo.macroHasTrailingSpace) {
+        macroMatchInfo.macroText = macroMatchInfo.macroText + '\xA0';
+        text = text + '\xA0';
+    }
+    </modifyTextWithTrailingSpace>
+    if (macroMatchInfo !== undefined) {
+        <updateElementContent>
+        var element = getDocument(ctx).activeElement;
+        if (selectedElementIsTextAreaOrInput(ctx)) {
+            var startPos = macroMatchInfo.macroPosition;
+            var endPos = macroMatchInfo.macroPosition + macroMatchInfo.macroText.length;
+            element.value = element.value.substring(0, startPos) + text +
+                element.value.substring(endPos, element.value.length);
+            element.selectionStart = startPos + text.length;
+            element.selectionEnd = startPos + text.length;
+        } else {
+            pasteHtml(ctx, text, macroMatchInfo.macroPosition,
+                    macroMatchInfo.macroPosition + macroMatchInfo.macroText.length);
+        }
+        </updateElementContent>
+    }
+}
+</replaceMacroText>
+
+<updateColorPickerField>
+function(value, sendUpdatedEvt) {
+    <setValueAndStyle>
+    this.el.value = value;
+    </setValueAndStyle>
+    if(this.oButton) {
+        <updateButtonAndLabel>
+        this.oButton.set("value", value);
+        var el = Dom.get(this.labelElId);
+        if(el) {
+            Dom.setStyle(el, "backgroundColor", value);
+            el.innerHTML = "Current color is " + value;
+        }
+        else {
+            Event.onAvailable(this.labelElId, function() {
+                Dom.setStyle(this, "backgroundColor", value);
+                this.innerHTML = "Current color is " + value;
+            });
+        }
+        </updateButtonAndLabel>
+    }
+    <updateColorPicker>
+    if(this.oColorPicker) {
+        this.oColorPicker.set("hex", value.substr(1));
+    }
+    </updateColorPicker>
+    
+    <callSuperSetValue>
+    inputEx.ColorPickerField.superclass.setValue.call(this,value, sendUpdatedEvt);
+    </callSuperSetValue>
+}
+</updateColorPickerField>
+
+<_syncGutterWidths>
+function _syncGutterWidths(hostEditor) {
+    <getInlineEditors>
+    var allHostedEditors = EditorManager.getInlineEditors(hostEditor);
+    </getInlineEditors>
+    <addHostEditorToList>
+    allHostedEditors.push(hostEditor);
+    </addHostEditorToList>
+    <computeMaxWidth>
+    var maxWidth = 0;
+    allHostedEditors.forEach(function (editor) {
+        var $gutter = $(editor._codeMirror.getGutterElement()).find(".CodeMirror-linenumbers");
+        $gutter.css("min-width", "");
+        var curWidth = $gutter.width();
+        if (curWidth > maxWidth) {
+            maxWidth = curWidth;
+        }
+    });
+    </computeMaxWidth>
+    if (allHostedEditors.length === 1) {
+        <noWidthSyncNeeded>
+        allHostedEditors[0]._codeMirror.setOption("gutters", allHostedEditors[0]._codeMirror.getOption("gutters"));
+        return;
+        </noWidthSyncNeeded>
+    }
+    <updateGutters>
+    maxWidth = maxWidth + "px";
+    allHostedEditors.forEach(function (editor) {
+        $(editor._codeMirror.getGutterElement()).find(".CodeMirror-linenumbers").css("min-width", maxWidth);
+        editor._codeMirror.setOption("gutters", editor._codeMirror.getOption("gutters"));
+    });
+    </updateGutters>
+}
+</_syncGutterWidths>
+
+<createBlocklyVariableSetter>
+function() {
+    <configureBlocklyField>
+    this.setHelpUrl(Blockly.Msg.VARIABLES_SET_HELPURL);
+    this.setColour(330);
+    this.appendValueInput('VALUE')
+        .appendField(Plane.getMsg('Plane_setSeats'));
+    this.setTooltip(Blockly.Msg.VARIABLES_SET_TOOLTIP);
+    </configureBlocklyField>
+    <disableDeletion>
+    this.setDeletable(false);
+    </disableDeletion>
+}
+</createBlocklyVariableSetter>
+
+<prepareAppConfig>
+function(appConfig) {
+    <cloneAppConfig>
+    appConfig = jQuery.extend(true, {}, appConfig);
+    </cloneAppConfig>
+    <setDefaultInstanceId>
+    appConfig.instanceId = appConfig.instanceId || F2.guid();
+    </setDefaultInstanceId>
+    <setDefaultViews>
+    appConfig.views = appConfig.views || [];
+    if (!F2.inArray(F2.Constants.Views.HOME, appConfig.views)) {
+        appConfig.views.push(F2.Constants.Views.HOME);
+    }
+    </setDefaultViews>
+    <setLocale>
+    if (F2.ContainerConfig.locale){
+        appConfig.containerLocale = F2.ContainerConfig.locale;
+    }
+    </setLocale>
+    return appConfig;
+}
+</prepareAppConfig>
+
+<isResponse>
+function (obj) {
+    <checkResponse>
+    return Boolean(obj) && ((obj instanceof Response) ||
+        _.inSuperChain(obj.constructor, '_postman_propertyName', Response._postman_propertyName));
+    </checkResponse>
+}
+</isResponse>
+```

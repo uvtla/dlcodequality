@@ -1,0 +1,219 @@
+<toArray>
+function toArray(line, delimiter) {
+  var arr = line
+    .split(delimiter)
+    .filter(Boolean)
+  return arr
+}
+</toArray>
+
+<formatNodeValue>
+function formatNodeValue(node, profile) {
+	if (node.value != null && reNl.test(node.value)) {
+    <splitAndFormat>
+		const lines = splitByLines(node.value);
+		const indent = profile.indent(1);
+		const maxLength = lines.reduce((prev, line) => Math.max(prev, line.length), 0);
+		return lines.map((line, i) => `${i ? indent : ''}${pad(line, maxLength)} |`).join('\n');
+    </splitAndFormat>
+	}
+
+	return node.value;
+}
+</formatNodeValue>
+
+<loadPathsAndCallback>
+function(paths, callback) {
+        var results = [];
+        for(var path in paths) {
+          <checkOwnPath>
+            if(paths.hasOwnProperty(path)) {
+            </checkOwnPath>
+                <cacheAndCollectResult>
+                acquire.cache[path] = paths[path];
+                results.push(acquire.cache[path]);
+                </cacheAndCollectResult>
+            }
+        }
+        <executeCallback>
+        callback.apply(null, results);
+        </executeCallback>
+
+        return results;
+    }
+</loadPathsAndCallback>
+
+<EntryConstructor>
+function Entry(name, hash, status, mode, deed, registrationDate, value, highestBid) {
+  this.name = name;
+  this.hash = hash;
+  this.status = status;
+  this.mode = mode;
+  this.deed = deed;
+  this.registrationDate = registrationDate;
+  this.value = value;
+  this.highestBid = highestBid;
+}
+</EntryConstructor>
+
+<objectIcon>
+function objectIcon(object) {
+  if (!object) {
+    return;
+  }
+  <getLocation>
+  var location = getIcon(object);
+  </getLocation>
+
+  if (location) {
+    <generateUrl>
+    return getUrl({
+      location: location,
+      updatedAt: object.updatedAt
+    }, null, agneta.get_media);
+    </generateUrl>
+  }
+}
+</objectIcon>
+
+<eventTracker>
+function () {
+  if (arguments[0] == "init") {
+    <initializeSettings>
+    settings = Pilotfish('extend', {}, settings, arguments[1]);
+    </initializeSettings>
+
+    <bindEvents>
+    if (settings.events) {
+        for (var i = 0; i < settings.events.length; i++) {
+            Pilotfish('on', settings.events[i], function (evt) {
+                recordEvent(evt.type);
+            });
+        }
+    }
+    </bindEvents>
+
+    <monitorHashChanges>
+    if (settings.hashChangePageView) {
+        Pilotfish('on', 'window:hashchange', function (evt) {
+            recordEvent(PAGEVIEW, evt.path);
+        });
+    }
+    </monitorHashChanges>
+
+    <recordClicks>
+    if (settings.recordClicks) {
+        jQuery(settings.recordClicks).click(function recordClicks() {
+            var $this = jQuery(this);
+            if ($this.data("event")) {
+                recordEvent($this.data("event"));
+            } else if ($this.val() && $this.val().length < 25) {
+                recordEvent($this.val());
+            } else if ($this.text().length < 25) {
+                recordEvent($this.text());
+            }
+        });
+    }
+    </recordClicks>
+
+    <recordSessionOnLoad>
+    if (settings.recordSession) {
+        jQuery(window).load(function () {
+            track("pilotfish-session", PAGEVIEW, {path: location.pathname});
+        });
+    }
+    </recordSessionOnLoad>
+
+  } else {
+    <recordArbitraryEvent>
+    recordEvent.apply(this, arguments);
+    </recordArbitraryEvent>
+  }
+}
+</eventTracker>
+
+<schemaFieldExtractor>
+function(schemaData) {
+    var fields = [];
+    <checkSchemaAndCollectFields>
+    if (schemaData &&
+           'object' === typeof schemaData &&
+           schemaData['fields'] &&
+            Array.isArray(schemaData['fields'])) {
+      schemaData['fields'].forEach((f) => {
+        if (f['field'] && f['type'] && 'nested' !== f['type']) {
+          fields.push(f['field']);
+        }
+      });
+    }
+    </checkSchemaAndCollectFields>
+
+    <filterUniqueFields>
+    if (fields.length) {
+      fields = fields.filter(this.uniqueFilter);
+    }
+    </filterUniqueFields>
+
+    return fields;
+  }
+</schemaFieldExtractor>
+
+<sizerFunction>
+function() {
+    var self = this;
+
+    <clearPreviousTimeout>
+    clearTimeout(self.__sizerTimeout);
+    </clearPreviousTimeout>
+
+    var sizer = function() {
+      <resizeAction>
+      self.resize();
+      </resizeAction>
+    };
+
+    <triggerSizerInitiallyAndSetUpTimeout>
+    sizer();
+    self.__sizerTimeout = setTimeout(sizer, 1000);
+    </triggerSizerInitiallyAndSetUpTimeout>
+  }
+</sizerFunction>
+
+<infiniteScrollTrigger>
+function infiniteScroll() {
+    if (infiniteScroll.bound) return;
+    <initializeScrollVariables>
+    var body = o('body');
+    hideLoading();
+    infiniteScroll.bound = true;
+    </initializeScrollVariables>
+
+    <bindScrollEvent>
+    o(window).scroll(function (e) {
+        var top = body.scrollTop()
+            , height = body.innerHeight()
+            , windowHeight = window.innerHeight
+            , pad = 30;
+        <checkScrollPosition>
+        if (top + windowHeight + pad >= height) {
+            to += more;
+            infiniteScroll.bound = false;
+            showLoading();
+            o(window).unbind('scroll');
+        }
+        </checkScrollPosition>
+    });
+    </bindScrollEvent>
+}
+</infiniteScrollTrigger>
+
+<expandBigInt>
+function expand(x, n) {
+  <createExpandedInt>
+  var ans=int2bigInt(0, (x.length>n ? x.length : n)*bpe, 0);
+  <copyOriginalToInt>
+  copy_(ans, x);
+  </copyOriginalToInt>
+  return ans;
+}
+</expandBigInt>

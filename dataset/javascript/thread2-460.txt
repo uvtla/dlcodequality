@@ -1,0 +1,354 @@
+```javascript
+<getResolvedJsxType>
+function getResolvedJsxType(node, elemType, elemClassType) {
+    <checkElemType>
+    if (!elemType) {
+        elemType = checkExpression(node.tagName);
+    }
+    </checkElemType>
+    <handleUnionType>
+    if (elemType.flags & 524288 ) {
+        var types = elemType.types;
+        return getUnionType(types.map(function (type) {
+            return getResolvedJsxType(node, type, elemClassType);
+        }),  true);
+    }
+    </handleUnionType>
+    
+    <handleDifferentJsxTypes>
+    if (elemType.flags & 2 ) {
+        return anyType;
+    }
+    else if (elemType.flags & 32 ) {
+        
+        <lookupIntrinsicElements>
+        var intrinsicElementsType = getJsxType(JsxNames.IntrinsicElements);
+        if (intrinsicElementsType !== unknownType) {
+            var stringLiteralTypeName = elemType.text;
+            var intrinsicProp = getPropertyOfType(intrinsicElementsType, stringLiteralTypeName);
+            if (intrinsicProp) {
+                return getTypeOfSymbol(intrinsicProp);
+            }
+            var indexSignatureType = getIndexTypeOfType(intrinsicElementsType, 0 );
+            if (indexSignatureType) {
+                return indexSignatureType;
+            }
+            error(node, ts.Diagnostics.Property_0_does_not_exist_on_type_1, stringLiteralTypeName, "JSX." + JsxNames.IntrinsicElements);
+        }
+        </lookupIntrinsicElements>
+        
+        return anyType;
+    }
+    </handleDifferentJsxTypes>
+    
+    <analyzeElemInstanceType>
+    var elemInstanceType = getJsxElementInstanceType(node, elemType);
+    if (!elemClassType || !isTypeAssignableTo(elemInstanceType, elemClassType)) {
+        <handleJsxElementType>
+        if (jsxElementType) {
+            <getCallSignatures>
+            var callSignatures = elemType && getSignaturesOfType(elemType, 0 );
+            var callSignature = callSignatures && callSignatures.length > 0 && callSignatures[0];
+            var callReturnType = callSignature && getReturnTypeOfSignature(callSignature);
+            var paramType = callReturnType && (callSignature.parameters.length === 0 ? emptyObjectType : getTypeOfSymbol(callSignature.parameters[0]));
+            </getCallSignatures>
+            <checkCallReturnType>
+            if (callReturnType && isTypeAssignableTo(callReturnType, jsxElementType)) {
+                <mergeIntrinsicAttributes>
+                var intrinsicAttributes = getJsxType(JsxNames.IntrinsicAttributes);
+                if (intrinsicAttributes !== unknownType) {
+                    paramType = intersectTypes(intrinsicAttributes, paramType);
+                }
+                </mergeIntrinsicAttributes>
+                return paramType;
+            }
+            </checkCallReturnType>
+        }
+        </handleJsxElementType>
+    }
+    </analyzeElemInstanceType>
+    
+    <checkElemClassType>
+    if (elemClassType) {
+        checkTypeRelatedTo(elemInstanceType, elemClassType, assignableRelation, node, ts.Diagnostics.JSX_element_type_0_is_not_a_constructor_function_for_JSX_elements);
+    }
+    </checkElemClassType>
+    <handleIsTypeAny>
+    if (isTypeAny(elemInstanceType)) {
+        return elemInstanceType;
+    }
+    </handleIsTypeAny>
+    <getPropsName>
+    var propsName = getJsxElementPropertiesName();
+    if (propsName === undefined) {
+        return anyType;
+    }
+    else if (propsName === "") {
+        return elemInstanceType;
+    }
+    </getPropsName>
+    <handleAttributesType>
+    else {
+        var attributesType = getTypeOfPropertyOfType(elemInstanceType, propsName);
+        if (!attributesType) {
+            return emptyObjectType;
+        }
+        else if (isTypeAny(attributesType) || (attributesType === unknownType)) {
+            return attributesType;
+        }
+        else if (attributesType.flags & 524288 ) {
+            error(node.tagName, ts.Diagnostics.JSX_element_attributes_type_0_may_not_be_a_union_type, typeToString(attributesType));
+            return anyType;
+        }
+        else {
+            <intersectAttributesTypes>
+            var apparentAttributesType = attributesType;
+            var intrinsicClassAttribs = getJsxType(JsxNames.IntrinsicClassAttributes);
+            if (intrinsicClassAttribs !== unknownType) {
+                var typeParams = getLocalTypeParametersOfClassOrInterfaceOrTypeAlias(intrinsicClassAttribs.symbol);
+                if (typeParams) {
+                    if (typeParams.length === 1) {
+                        apparentAttributesType = intersectTypes(createTypeReference(intrinsicClassAttribs, [elemInstanceType]), apparentAttributesType);
+                    }
+                }
+                else {
+                    apparentAttributesType = intersectTypes(attributesType, intrinsicClassAttribs);
+                }
+            }
+            var intrinsicAttribs = getJsxType(JsxNames.IntrinsicAttributes);
+            if (intrinsicAttribs !== unknownType) {
+                apparentAttributesType = intersectTypes(intrinsicAttribs, apparentAttributesType);
+            }
+            </intersectAttributesTypes>
+            return apparentAttributesType;
+        }
+    }
+    </handleAttributesType>
+}
+</getResolvedJsxType>
+
+<addText>
+function addText(value, nodes) {
+    <appendToExistingOrAddNewTextNode>
+    var tail
+    if (value) {
+        tail = nodes[nodes.length - 1]
+        if (tail && tail.type === 'text') {
+            tail.value += value
+        } else {
+            nodes.push(buildText(value))
+        }
+    }
+    </appendToExistingOrAddNewTextNode>
+    return nodes
+}
+</addText>
+
+<anonymous>
+function (tasks, callback) {
+    <setupAndValidation>
+    var keys; var length; var i; var results; var kind;
+    var updated_tasks = [];
+    var is_object;
+    var counter = 0;
+    if (isArray(tasks)) {
+        length = tasks.length;
+        results = [];
+    } else if (isObject(tasks)) {
+        is_object = true;
+        keys = ObjectKeys(tasks);
+        length = keys.length;
+        results = {};
+    } else {
+        return callback();
+    }
+    </setupAndValidation>
+
+    <preprocessTasks>
+    for (i=0; i<length; i++) {
+        if (is_object) {
+            updated_tasks.push({ k: keys[i], t: tasks[keys[i]] });
+        } else {
+            updated_tasks.push({ k: i, t: tasks[i] });
+        }
+    }
+    </preprocessTasks>
+
+    <executeTasks>
+    updated_tasks.forEach(function(task_object) {
+        task_object.t(function(err, result) {
+            if (err) return callback(err);
+            results[task_object.k] = result;
+            counter++;
+            if (counter == length) callback(null, results);
+        });
+    });
+    </executeTasks>
+}
+</anonymous>
+
+<anonymous2>
+function (subpath) {
+    <getValueToJSConversion>
+    var value = this.sub(subpath).get();
+    return Imm.Iterable.isIterable(value) ? value.toJS() : value;
+    </getValueToJSConversion>
+}
+</anonymous2>
+
+<anonymous3>
+function (driver, response, remote, options, deferred) {
+    <emitDriverResponseEvent>
+    this.events.emit('driver:webdriver:response', {
+        statusCode: response.statusCode,
+        method: response.req.method,
+        path: response.req.path,
+        data: this.data
+    });
+    </emitDriverResponseEvent>
+    <handleRemoteResponse>
+    if (remote.onResponse) {
+        remote.onResponse.call(this, response, remote, options, deferred, this.data);
+    } else {
+        deferred.resolve(this.data);
+    }
+    </handleRemoteResponse>
+    return this;
+}
+</anonymous3>
+
+<mergeExtraSegments>
+function mergeExtraSegments(context, segments) {
+    <mergeUntilContextCount>
+    while (segments.length > context.count) {
+        var merged = [];
+        for (var i = 0, length = segments.length / 2 | 0; i < length; ++i) {
+            merged.push(CodePathSegment.newNext(
+                context.idGenerator.next(), [segments[i], segments[i + length]]
+            ));
+        }
+        segments = merged;
+    }
+    </mergeUntilContextCount>
+    return segments;
+}
+</mergeExtraSegments>
+
+<copySamples>
+function copySamples(result) {
+    <setupFilePaths>
+    var sampleDir = path.resolve(__dirname, "..", "sample");
+    var srcFiles = ["style.css", "index.pug", "index.md", "second.md"];
+    var targFiles = [
+        path.resolve(result.css, "style.css"),
+        path.resolve(result.template, "index.pug"),
+        path.resolve(result.data, "index.md"),
+        path.resolve(result.data, "second.md"),
+    ];
+    var proms = [];
+    </setupFilePaths>
+
+    <copyFilesAndReturnPromises>
+    for (var i = 0; i < srcFiles.length; i++)
+        proms.push(util.copy(path.resolve(sampleDir, srcFiles[i]), targFiles[i]));
+    </copyFilesAndReturnPromises>
+    
+    return q(proms);
+}
+</copySamples>
+
+<placeholder>
+function placeholder (model, name, spec) {
+    <handleSpecialPlaceholders>
+    if (spec.type === 'id' && model.binaryIds) {
+        return `UNHEX(:${name})`
+    }
+    else if (spec.type === 'data' && model.compression) {
+        return `FROM_BASE64(:${name})`
+    }
+    </handleSpecialPlaceholders>
+    else {
+        return `:${name}`
+    }
+}
+</placeholder>
+
+<off>
+function off(evt, handler) {
+    var _this2 = this;
+    var thisArg = arguments[2] === undefined ? null : arguments[2];
+
+    <handleEventHandlerRemoval>
+    if (eachEvt(evt, handler, thisArg, function () {
+        for (var _len3 = arguments.length, _ = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+            _[_key3] = arguments[_key3];
+        }
+        return _this2.off.apply(_this2, _);
+    })) {
+        return this;
+    }
+    </handleEventHandlerRemoval>
+    <removeAllEventHandlers>
+    if (evt === undefined && handler === undefined && thisArg === null) {
+        this[_eventHandlers] = new core.Map();
+        return this;
+    }
+    </removeAllEventHandlers>
+
+    <manageSpecificEventHandlers>
+    var eH = this[_eventHandlers];
+    if (handler === undefined && thisArg === null) {
+        eH.set(evt, new core.Map());
+        return this;
+    }
+    var objMap = eH.get(evt);
+    if (objMap !== undefined) {
+        if (typeof handler === "object") {
+            objMap["delete"](handler);
+            return this;
+        }
+        var handlerSet = objMap.get(thisArg);
+        if (handlerSet !== undefined) {
+            handlerSet["delete"](handler);
+            if (handlerSet.size === 0) {
+                eH["delete"](objMap);
+            }
+        }
+    }
+    </manageSpecificEventHandlers>
+
+    return this;
+}
+</off>
+
+<initializationForWMIC>
+function (options) {
+    this.isWindows = process.platform === 'win32';
+    <setOptions>
+    this.options = options || {};
+    this.host = this.options.host || (this.isWindows ? '127.0.0.1' : null);
+    var user = getUsername(this.options.username);
+    this.username = user.username;
+    this.domain = user.domain;
+    this.password = this.options.password;
+    this.namespace = this.options.namespace || '\\\\root\\cimv2';
+    this.timeout = this.options.timeout || 90000;
+    this.delimiter = '^@^';
+    this.wmic = this.options.wmic || 'wmic';
+    this.isNeedNTLM2 = this.options.ntlm2 || false;
+    </setOptions>
+    <processCwdSetting>
+    this.cwd = this.options.cwd || path.join(__dirname, '..');
+    </processCwdSetting>
+    <parserOptionsSetting>
+    this.parserOptions = {
+        delimiter: this.delimiter,
+        trim: true,
+        auto_parse: true
+    };
+    </parserOptionsSetting>
+    
+    return this;
+}
+</initializationForWMIC>
+```

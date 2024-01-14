@@ -1,0 +1,216 @@
+```javascript
+<getTouchList>
+function getTouchList() {
+    var touchlist = [];
+    Utils.each(this.pointers, function(pointer) {
+      touchlist.push(pointer);
+    });
+    return touchlist;
+}
+</getTouchList>
+
+<getSectionBody>
+function getSectionBody(sectionString) {
+    var sectionBody = {};
+    var sectionBodyData = [];
+    var objectFromBodyRegExp = /-*(\n){2,}(?!-{4,})[\S\s,]+?((?=((\n){3,}?))|\n\n$)/gi;
+    var objectStrings = sectionString.match(objectFromBodyRegExp);
+    for (var obj = 0; obj < objectStrings.length; obj++) {
+        var sectionChild = processSectionChild(objectStrings[obj]);
+        if (!isEmpty(sectionChild)) {
+            if ('source' in sectionChild) {
+                sectionBody.source = sectionChild.source;
+            } else {
+                sectionBodyData.push(sectionChild);
+            }
+        }
+    }
+    sectionBody.data = sectionBodyData;
+    return sectionBody;
+}
+</getSectionBody>
+
+<extractPointerMetrics>
+function (e){
+    var
+      d = document,
+      b = d.body,
+      de = d.documentElement,
+      axes = this.axes,
+      plotOffset = this.plotOffset,
+      lastMousePos = this.lastMousePos,
+      pointer = E.eventPointer(e),
+      dx = pointer.x - lastMousePos.pageX,
+      dy = pointer.y - lastMousePos.pageY,
+      r, rx, ry;
+    if ('ontouchstart' in this.el) {
+      r = D.position(this.overlay);
+      rx = pointer.x - r.left - plotOffset.left;
+      ry = pointer.y - r.top - plotOffset.top;
+    } else {
+      r = this.overlay.getBoundingClientRect();
+      rx = e.clientX - r.left - plotOffset.left - b.scrollLeft - de.scrollLeft;
+      ry = e.clientY - r.top - plotOffset.top - b.scrollTop - de.scrollTop;
+    }
+    return {
+      x:  axes.x.p2d(rx),
+      x2: axes.x2.p2d(rx),
+      y:  axes.y.p2d(ry),
+      y2: axes.y2.p2d(ry),
+      relX: rx,
+      relY: ry,
+      dX: dx,
+      dY: dy,
+      absX: pointer.x,
+      absY: pointer.y,
+      pageX: pointer.x,
+      pageY: pointer.y
+    };
+}
+</extractPointerMetrics>
+
+<getTallest>
+function getTallest(elements) {
+  let tallest = 0;
+  for (let i = elements.length - 1; i >= 0; i--) {
+    if (elements[i].offsetHeight > tallest) {
+      tallest = elements[i].offsetHeight;
+    }
+  }
+  return tallest;
+}
+</getTallest>
+
+<contentAssistSetup>
+function(editor, contentAssist, evnt) {
+    // Assisting content based on file type and other parameters
+    var fileContentType = inputManager.getContentType();
+    var fileName = editor.getTitle();
+    var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.contentAssist").concat(serviceRegistry.getServiceReferences("orion.edit.contentassist")); 
+    var providerInfoArray = evnt && evnt.providers;
+    if (!providerInfoArray) {
+        providerInfoArray = serviceRefs.map(function(serviceRef) {
+            var contentTypeIds = serviceRef.getProperty("contentType"),
+                pattern = serviceRef.getProperty("pattern"); 
+            if ((contentTypeIds && contentTypeRegistry.isSomeExtensionOf(fileContentType, contentTypeIds)) ||
+                    (pattern && new RegExp(pattern).test(fileName))) {
+                var service = serviceRegistry.getService(serviceRef);
+                var id = serviceRef.getProperty("service.id").toString();
+                var charTriggers = serviceRef.getProperty("charTriggers");
+                var excludedStyles = serviceRef.getProperty("excludedStyles");
+                var autoApply = serviceRef.getProperty("autoApply");
+                if (charTriggers) {
+                    charTriggers = new RegExp(charTriggers);
+                }
+                if (excludedStyles) {
+                    excludedStyles = new RegExp(excludedStyles);
+                }
+                return {provider: service, id: id, charTriggers: charTriggers, excludedStyles: excludedStyles, autoApply: autoApply};
+            }
+            return null;
+        }).filter(function(providerInfo) {
+            return !!providerInfo;
+        });
+    }
+
+    var lspServer = languageServerRegistry.getServerByContentType(fileContentType);
+    if (lspServer) {
+        providerInfoArray.push({provider: lspServer, id: lspServer._id, lspServer: true, excludedStyles: new RegExp("(string.*)")});
+    }
+    
+    var boundEditorContext = {};
+    Object.keys(EditorContext).forEach(function(key) {
+        if (typeof EditorContext[key] === "function") {
+            boundEditorContext[key] = EditorContext[key].bind(null, serviceRegistry, that.editContextServiceID);
+        }
+    });
+    contentAssist.setEditorContextProvider(boundEditorContext);
+    contentAssist.setProviders(providerInfoArray);
+    contentAssist.setAutoTriggerEnabled(that.settings.contentAssistAutoTrigger);
+    contentAssist.setProgress(progress);
+    contentAssist.setStyleAccessor(that.getStyleAccessor());
+}
+</contentAssistSetup>
+
+<readNotifyTablesClose>
+function readNotifyTablesClose(message, tokens) {
+    message.sessionId = protocol.decodeString(tokens[1]);
+    readTableInfos(message, tokens.slice(2));
+}
+</readNotifyTablesClose>
+
+<jsonPRequest>
+function (uri, success, failure, args) {
+    // Handling JSONP request with deferred promise
+    var defer = deferred(),
+        callback = "callback", cbid, s;
+    if (external === undefined) {
+        if (global.abaaso === undefined) {
+            utility.define("abaaso.callback", {}, global);
+        }
+        external = "abaaso";
+    }
+    if (args instanceof Object && args.callback !== undefined) {
+        callback = args.callback;
+    }
+    defer.then(function (arg) {
+        if (typeof success === "function") {
+            success(arg);
+        }
+    }, function (e) {
+        if (typeof failure === "function") {
+            failure(e);
+        }
+        throw e;
+    });
+    do {
+        cbid = utility.genId().slice(0, 10);
+    }
+    while (global.abaaso.callback[cbid] !== undefined);
+    uri = uri.replace(callback + "=?", callback + "=" + external + ".callback." + cbid);
+    global.abaaso.callback[cbid] = function (arg) {
+        clearTimeout(utility.timer[cbid]);
+        delete utility.timer[cbid];
+        delete global.abaaso.callback[cbid];
+        defer.resolve(arg);
+        element.destroy(s);
+    };
+    s = element.create("script", {src: uri, type: "text/javascript"}, utility.$("head")[0]);
+    utility.defer(function () {
+        defer.reject(undefined);
+    }, 30000, cbid);
+    return defer;
+}
+</jsonPRequest>
+
+<isSubset>
+function (subset, superset) {
+    if (   !Arrays.isArrayLike(subset)
+        || !Arrays.isArrayLike(superset)
+        || subset.length > superset.length )
+        return false;
+    return this._isSubsetOf(subset, superset);
+}
+</isSubset>
+
+<numericalConversion>
+function je(ct,pt,ut,bt){...}
+</numericalConversion>
+
+<setDataTipFunction>
+function(value)
+    {
+        if(this._dataTipFunction)
+        {
+            YAHOO.widget.Chart.removeProxyFunction(this._dataTipFunction);
+        }
+        if(value)
+        {
+            this._dataTipFunction = value = YAHOO.widget.Chart.getFunctionReference(value);
+        }
+        this._swf.setDataTipFunction(value);
+    }
+</setDataTipFunction>
+```
+
+Note: The `numericalConversion` function is a little bit of an exception as it is a minified or obscured piece of code that is difficult to determine the responsibilities without context or meaningful variable names. It likely does not adhere to SRP based on its complex and compressed nature.

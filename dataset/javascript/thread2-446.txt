@@ -1,0 +1,280 @@
+```jsx
+<updateSync>
+function updateSync(newData, newParent, newIdx, withDOM, withRedraw) {
+    var vm = this;
+
+    if (newData != null) {
+        if (vm.data !== newData) {
+            {
+                <notifyDataReplaced>
+                devNotify("DATA_REPLACED", [vm, vm.data, newData]);
+                </notifyDataReplaced>
+            }
+            <willUpdateHook>
+            fireHook(vm.hooks, "willUpdate", vm, newData);
+            </willUpdateHook>
+            <setData>
+            vm.data = newData;
+            </setData>
+        }
+    }
+
+    <redrawOrReturnVM>
+    return withRedraw ? vm._redraw(newParent, newIdx, withDOM) : vm;
+    </redrawOrReturnVM>
+}
+</updateSync>
+
+<unmountComponentAtNode>
+function (container) {
+    
+    <warnIfNestedUpdates>
+    "development" !== 'production' ? warning(ReactCurrentOwner.current == null, 'unmountComponentAtNode(): Render methods should be a pure function ' + 'of props and state; triggering nested component updates from render ' + 'is not allowed. If necessary, trigger nested updates in ' + 'componentDidUpdate. Check the render method of %s.', ReactCurrentOwner.current && ReactCurrentOwner.current.getName() || 'ReactCompositeComponent') : void 0;
+    </warnIfNestedUpdates>
+
+    <validateContainer>
+    !isValidContainer(container) ? "development" !== 'production' ? invariant(false, 'unmountComponentAtNode(...): Target container is not a DOM element.') : _prodInvariant('40') : void 0;
+    </validateContainer>
+
+    <warnIfMultiReactInstance>
+    if ("development" !== 'production') {
+      "development" !== 'production' ? warning(!nodeIsRenderedByOtherInstance(container), 'unmountComponentAtNode(): The node you\'re attempting to unmount ' + 'was rendered by another copy of React.') : void 0;
+    }
+    </warnIfMultiReactInstance>
+
+    <getTopLevelWrapper>
+    var prevComponent = getTopLevelWrapperInContainer(container);
+    </getTopLevelWrapper>
+    
+    if (!prevComponent) {
+      
+      <checkReactChild>
+      var containerHasNonRootReactChild = hasNonRootReactChild(container);
+      </checkReactChild>
+
+      <checkIsReactRoot>
+      var isContainerReactRoot = container.nodeType === 1 && container.hasAttribute(ROOT_ATTR_NAME);
+      </checkIsReactRoot>
+
+      <warnIfNonTopLevel>
+      if ("development" !== 'production') {
+        "development" !== 'production' ? warning(!containerHasNonRootReactChild, 'unmountComponentAtNode(): The node you\'re attempting to unmount ' + 'was rendered by React and is not a top-level container. %s', isContainerReactRoot ? 'You may have accidentally passed in a React root node instead ' + 'of its container.' : 'Instead, have the parent component update its state and ' + 'rerender in order to remove this component.') : void 0;
+      }
+      </warnIfNonTopLevel>
+
+      return false;
+    }
+    
+    <unmountComponent>
+    delete instancesByReactRootID[prevComponent._instance.rootID];
+    ReactUpdates.batchedUpdates(unmountComponentFromNode, prevComponent, container, false);
+    </unmountComponent>
+    
+    return true;
+}
+</unmountComponentAtNode>
+
+<adminUIAppConfig>
+function (config) {
+    if (config) {
+        if (config.element) {
+            <expectElementPresent>
+            this.expect.element(config.element).to.be.present;
+            </expectElementPresent>
+        } else {
+            <throwMissingElementError>
+            throw new Error('adminUIApp:must specify an element!');
+            </throwMissingElementError>
+        }
+    } else {
+        <throwInvalidConfigError>
+        throw new Error('adminUIApp:invalid config specification!');
+        </throwInvalidConfigError>
+    }
+    return this;
+}
+</adminUIAppConfig>
+
+<returnMessage>
+function returnMessage (msg, method) {
+  <logUsageInstructions>
+  console.log('==============================')
+  console.log('TO AVOID THIS MESSAGE, DO:')
+  console.log('  exemethod(function logger (msg, method) {')
+  console.log('  ; return method; })')
+  console.log('RETURNS:')
+  console.log('[npm|shellscript|globalcli|localcli|required|browserify]')
+  console.log('==============================')
+  </logUsageInstructions>
+  <logMessage>
+  console.log(msg)
+  </logMessage>
+  <logEnd>
+  console.log('==============================')
+  </logEnd>
+  return method
+}
+</returnMessage>
+
+<preDraw>
+function preDraw(renderer) {
+    <calculateAnchor>
+    var bounds = this.getBounds();
+    var ax = bounds.width * this.anchorPoint.x,
+    ay = bounds.height * this.anchorPoint.y; 
+    </calculateAnchor>
+
+    <saveContext>
+    renderer.save(); 
+    </saveContext>
+
+    <modulateAlpha>
+    renderer.setGlobalAlpha(renderer.globalAlpha() * this.getOpacity()); 
+    </modulateAlpha>
+
+    <applyFlipTransform>
+    if (this._flip.x || this._flip.y) {
+      var dx = this._flip.x ? this.centerX - ax : 0,
+      dy = this._flip.y ? this.centerY - ay : 0;
+      renderer.translate(dx, dy);
+      renderer.scale(this._flip.x ? -1 : 1, this._flip.y ? -1 : 1);
+      renderer.translate(-dx, -dy);
+    }
+    </applyFlipTransform>
+
+    <applyAutoTransform>
+    if (this.autoTransform === true && !this.currentTransform.isIdentity()) {
+      this.currentTransform.translate(-ax, -ay); 
+      renderer.transform(this.currentTransform);
+      this.currentTransform.translate(ax, ay);
+    } else {
+      renderer.translate(-ax, -ay);
+    }
+    </applyAutoTransform>
+
+    <setMaskIfNeeded>
+    if (typeof this.mask !== "undefined") {
+      renderer.setMask(this.mask);
+    }
+    </setMaskIfNeeded>
+
+    <setTintIfNeeded>
+    if (typeof this.tint !== "undefined") {
+      renderer.setTint(this.tint);
+    }
+    </setTintIfNeeded>
+}
+</preDraw>
+
+<getType>
+function getType(value) {
+    if (value === null) {
+        return 'null';
+    }
+
+    if (value && (value.nodeType === 1 || value.nodeType === 9)) {
+        return 'element';
+    }
+
+    var s = Object.prototype.toString.call(value);
+    var type = s.match(/\[object (.*?)\]/)[1].toLowerCase();
+
+    if (type === 'number') {
+        if (isNaN(value)) {
+            return 'nan';
+        }
+        if (!isFinite(value)) {
+            return 'infinity';
+        }
+    }
+
+    return type;
+}
+</getType>
+
+<msPointerTouchHandler>
+function(element, type, handler) {
+    var touches = this._msTouches;
+
+    <handlePointerDown>
+    var cb = function(e) {
+        var alreadyInArray = false;
+        for (var i=0, ii=touches.length; i<ii; ++i) {
+            if (touches[i].pointerId == e.pointerId) {
+                alreadyInArray = true;
+                break;
+            }
+        }
+        if (!alreadyInArray) {
+            touches.push(e);
+        }
+        e.touches = touches.slice();
+        handler(e);
+    };
+    OpenLayers.Event.observe(element, 'MSPointerDown', cb);
+    </handlePointerDown>
+
+    <removePointerOnUp>
+    var internalCb = function(e) {
+        for (var i=0, ii=touches.length; i<ii; ++i) {
+            if (touches[i].pointerId == e.pointerId) {
+                touches.splice(i, 1);
+                break;
+            }
+        }
+    };
+    OpenLayers.Event.observe(element, 'MSPointerUp', internalCb);
+    </removePointerOnUp>
+}
+</msPointerTouchHandler>
+
+<extractJsdoc>
+function extractJsdoc(comment) {
+    <parseComment>
+    var docAst = doctrine.parse(comment, { unwrap: true, sloppy: true });
+    </parseComment>
+    if (!docAst.tags || docAst.tags.length === 0) {
+        return null;
+    }
+
+    <filterAndMapParamTags>
+    var paramTags = docAst.tags.filter(function(tag) {
+        return tag.title === "param";
+    }).map(jsdocTagToFlowTag);
+    </filterAndMapParamTags>
+
+    <filterAndMapReturnTags>
+    var returnTags = docAst.tags.filter(function(tag) {
+        return tag.title === "return" || tag.title === "returns";
+    }).map(jsdocTagToFlowTag);
+    </filterAndMapReturnTags>
+
+    <filterAndMapPropTags>
+    var propTags = docAst.tags.filter(function(tag) {
+        return tag.title === "property" || tag.title === "prop";
+    }).map(jsdocTagToFlowTag);
+    </filterAndMapPropTags>
+
+    return {
+        params: paramTags,
+        returns: returnTags,
+        props: propTags
+    };
+}
+</extractJsdoc>
+
+<modelUpdate>
+function(model) {
+    <applyChanges>
+    _.each(model.changedAttributes(), function(value, fieldName) {
+    this.set(fieldName, this.__cloneVal(value));
+    }, this);
+    </applyChanges>
+    <updateCache>
+    this.__updateCache(model);
+    </updateCache>
+}
+</modelUpdate>
+```
+
+The other functions provided in the user's message are already self-contained and don't need additional SRP annotations. They are marked up with SRP tags identifying each function as a whole.

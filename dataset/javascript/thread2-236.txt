@@ -1,0 +1,222 @@
+<watchValidity>
+function watchValidity() {
+		if( !unwatch ) {
+			unwatch = $scope.$watch(
+				function() {
+					<evaluateAndValidate>
+					var results = evaluateConstraints(ngModel.$modelValue, true);
+					return isValid(results);
+					</evaluateAndValidate>
+				},
+				function(newval, oldval) {
+					if( newval !== oldval ) {
+						<ngModelValidation>
+						ngModel.$validate();
+						</ngModelValidation>
+					}
+				}
+			);
+		}
+	}
+</watchValidity>
+
+<jql>
+function jql(queryChunks, ...injects) {
+    try {
+        let res = '';
+        for (let i = 0; i < injects.length; i++) {
+            let value = injects[i];
+            let q = queryChunks[i];
+            
+            <prepareValues>
+            if (typeof value === 'string') {
+                value = cleanString(value);
+            }
+            else if (Array.isArray(value)) {
+                value = value.map((it) => {
+                    if (Array.isArray(it))
+                        throw new Error('JQL: Nested arrays not supported . Consider using a nativeFunction for that query instead.')
+                    if (typeof it === 'string') {
+                        it = cleanString(it);
+                    }
+                    return it;
+                })
+                value = "(" + value.join(', ') + ")";
+            }
+            </prepareValues>
+            
+            res += q + value;
+        }
+        res += queryChunks[queryChunks.length - 1];
+        return res;
+    } catch (err) {
+        <handleJqlErrors>
+        throw new Boom.badRequest('Bad JQL:', err)
+        </handleJqlErrors>
+    }
+}
+</jql>
+
+<setHttpMetadata>
+function setHttpMetadata (file, res) {
+  <parseContentTypeHeader>
+  var header = res.headers['content-type'];
+  if (header && typeof header === 'string') {
+    var parsed = contentType.parse(header);
+    file.mimeType = lowercase(parsed.type);
+    file.encoding = lowercase(parsed.parameters.charset || null);
+  }
+  </parseContentTypeHeader>
+}
+</setHttpMetadata>
+
+<extendSelect>
+function (cols) {
+            <parseAndConcatArguments>
+            cols = argsToArray(arguments);
+            var currentSelect = this.__opts.select;
+            if (!currentSelect || !currentSelect.length) {
+                currentSelect = [this._static.WILDCARD];
+            }
+            </parseAndConcatArguments>
+            return this.select.apply(this, currentSelect.concat(cols));
+        }
+</extendSelect>
+
+<updateAllPackages>
+function updateAllPackages(rootPkgPath, packagesPath) {
+  <findAndReducePkgPaths>
+  const paths = findPackages(packagesPath);
+  return paths.reduce((promise, pkgPath) => promise.then(() => updateSinglePackage(rootPkgPath, pkgPath)), Promise.resolve());
+  </findAndReducePkgPaths>
+}
+</updateAllPackages>
+
+<Serialize>
+function Serialize (elem) {
+  <serializeInitialization>
+  if (!(this instanceof Serialize))
+    return new Serialize(elem)
+  if (!elem || elem.nodeType !== Node.ELEMENT_NODE)
+    throw TypeError('Serialize can only serialize element nodes.')
+  </serializeInitialization>
+  var text = ''
+  this.length = 0
+  this.markups = []
+  this.type = elem.nodeName.toLowerCase()
+  
+  <textProperty>
+  Object.defineProperty(this, 'text', {
+    configurable: true,
+    enumerable: true,
+    get: function () {
+      return text
+    },
+    set: function (newText) {
+      this.length = newText.length
+      text = newText
+    }
+  })
+  </textProperty>
+  
+  <convertElement>
+  convert(elem, this)
+  </convertElement>
+}
+</Serialize>
+
+<generateFieldDefinitions>
+function(){
+        var f = [],
+            i, n = this._fieldCount,
+            fieldOrder = this.fieldOrder
+        ;
+        for (i = 0; i < n; i++) f[i] = this.fieldDef(fieldOrder[i]);
+        return f;
+    }
+</generateFieldDefinitions>
+
+<hasFileWithHigherPriorityExtension>
+function hasFileWithHigherPriorityExtension(file, literalFiles, wildcardFiles, extensions, keyMapper) {
+        <checkForHigherPriorityFiles>
+        var extensionPriority = ts.getExtensionPriority(file, extensions);
+        var adjustedExtensionPriority = ts.adjustExtensionPriority(extensionPriority);
+        for (var i = 0 ; i < adjustedExtensionPriority; i++) {
+            var higherPriorityExtension = extensions[i];
+            var higherPriorityPath = keyMapper(ts.changeExtension(file, higherPriorityExtension));
+            if (higherPriorityPath in literalFiles || higherPriorityPath in wildcardFiles) {
+                return true;
+            }
+        }
+        </checkForHigherPriorityFiles>
+        return false;
+    }
+</hasFileWithHigherPriorityExtension>
+
+<shutdownHandler>
+function shutdownHandler(job) {
+   <attemptInProgressStatus>
+   job.inProgress({ operation: job.operation, step: 'attempting' }, function(err) { 
+      showJobsError(err);
+   </attemptInProgressStatus>
+      <extractAndPersistDelay>
+      var delay = (isUndefined(job.document.delay) ? '0' : job.document.delay.toString());
+      </extractAndPersistDelay>
+      
+      <initiateShutdown>
+      exec('sudo /sbin/shutdown -k +' + delay, function (err) { 
+         if (!isUndefined(err)) {
+            <handleShutdownFailure>
+            job.failed({ operation: job.operation, errorCode: 'ERR_SYSTEM_CALL_FAILED', errorMessage: 'unable to execute shutdown, check passwordless sudo permissions on agent', 
+                         error: errorToString(err) }, showJobsError);
+            </handleShutdownFailure>
+         } else {
+            <confirmShutdownInitiation>
+            job.succeeded({ operation: job.operation, step: 'initiated' }, function (err) {
+               showJobsError(err);
+               exec('sudo /sbin/shutdown +' + delay);
+            });
+            </confirmShutdownInitiation>
+         }
+      });
+   });
+}
+</shutdownHandler>
+
+<parseChannelEvent>
+function parseChannelEvent(delay, type, channel, cursor) {
+    <parseChannelEventSpecs>
+    var specs = {};
+    switch (type) {
+    case ChannelEvent.TYPE.NOTE_OFF:
+        specs.note = cursor.readUInt8();
+        specs.velocity = cursor.readUInt8();
+        break;
+    case ChannelEvent.TYPE.NOTE_ON:
+        specs.note = cursor.readUInt8();
+        specs.velocity = cursor.readUInt8();
+        break;
+    case ChannelEvent.TYPE.NOTE_AFTERTOUCH:
+        specs.note = cursor.readUInt8();
+        specs.pressure = cursor.readUInt8();
+        break;
+    case ChannelEvent.TYPE.CONTROLLER:
+        specs.controller = cursor.readUInt8();
+        specs.value = cursor.readUInt8();
+        break;
+    case ChannelEvent.TYPE.PROGRAM_CHANGE:
+        specs.program = cursor.readUInt8();
+        break;
+    case ChannelEvent.TYPE.CHANNEL_AFTERTOUCH:
+        specs.pressure = cursor.readUInt8();
+        break;
+    case ChannelEvent.TYPE.PITCH_BEND:
+        specs.value = cursor.readUInt8() +
+            (cursor.readUInt8() << 7) - 8192;
+        break;
+    }
+    </parseChannelEventSpecs>
+    
+    return new ChannelEvent(type, specs, channel, delay);
+}
+</parseChannelEvent>

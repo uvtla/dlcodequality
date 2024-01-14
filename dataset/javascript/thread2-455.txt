@@ -1,0 +1,303 @@
+<groupData>
+function groupData(data, dim) {
+    var groups = {};
+
+    each(data, function (record) {
+      var value = record[dim];
+      if (value === undefined) {
+        <setDefaultY>
+        value = record[dim] = DEFAULT_Y;
+        </setDefaultY>
+      }
+      if (!groups[value]) {
+        <initializeGroup>
+        groups[value] = [];
+        </initializeGroup>
+      }
+      <addToGroup>
+      groups[value].push(record);
+      </addToGroup>
+    });
+
+    return groups;
+}
+</groupData>
+
+<_cmdClose>
+function _cmdClose(clientId) {
+    <getClient>
+    var client = _clients[clientId];
+    if (client) {
+        </getClient>
+        <closeSocket>
+        client.socket.close();
+        </closeSocket>
+        <removeClient>
+        delete _clients[clientId];
+        </removeClient>
+    }
+}
+</_cmdClose>
+
+<interpolate>
+function interpolate (template, data, opts) {
+  <setupInterpolation>
+  var regex,
+      lDel,
+      rDel,
+      delLen,
+      lDelLen,
+      delimiter,
+      
+      regexEscape = /([$\^\\\/()|?+*\[\]{}.\-])/g
+
+  opts = opts || {}
+
+  delimiter = opts.delimiter || '{}'
+  delLen = delimiter.length
+  lDelLen = Math.ceil(delLen / 2)
+  
+  lDel = delimiter.substr(0, lDelLen).replace(regexEscape, "\\$1")
+  rDel = delimiter.substr(lDelLen, delLen).replace(regexEscape, "\\$1") || lDel
+
+  regex = new RegExp(lDel + "[^" + lDel + rDel + "]+" + rDel, "g")
+  </setupInterpolation>
+
+  <replacePlaceholders>
+  return template.replace(regex, function (placeholder) {
+    var key = placeholder.slice(lDelLen, -lDelLen),
+        keyParts = key.split("."),
+        val,
+        i = 0,
+        len = keyParts.length
+
+    if (key in data) {
+      val = data[key]
+    }
+    else {
+      val = data
+      for (; i < len; i++) {
+        if (keyParts[i] in val) {
+          val = val[ keyParts[i] ]
+        } else {
+          return placeholder
+        }
+      }
+    }
+    return val
+  })
+  </replacePlaceholders>
+}
+</interpolate>
+
+<getViews>
+function getViews(property, options) {
+    <logActivity>
+    logger.debug('getting views for', property);
+    </logActivity>
+    <listAnalyticsProfiles>
+    return analytics.management.profiles.listAsync({
+        auth: auth,
+        accountId: accountId,
+        webPropertyId: property.id
+    })
+    </listAnalyticsProfiles>
+    <processProfiles>
+    .then((profiles) => {
+        if (options.metagroup !== 'view') {
+            profiles.items = _.where(profiles.items, {name: 'All Web Site Data'});
+        }
+        return _.map(profiles.items, (profile) => {
+            return {
+                webPropertyId: property.id,
+                webProperty: property.name,
+                viewId: profile.id,
+                view: profile.name
+            };
+        });
+    });
+    </processProfiles>
+}
+</getViews>
+
+<timeFormatParsing>
+function (timeFormat) {
+    <parseFormat>
+    var finds = timeFormat.toLowerCase().match(/(h{1,2}|m{1,2}|s{1,2}|l{1}|c{1}|t{1,2}|z|'.*?')/g),
+        orders = {
+            h: -1,
+            m: -1,
+            s: -1,
+            l: -1,
+            c: -1,
+            t: -1,
+            z: -1
+        };
+    </parseFormat>
+    
+    <determineOrder>
+    if (finds) {
+        for (var i = 0; i < finds.length; i++) {
+            if (orders[finds[i].toString().charAt(0)] === -1) {
+                orders[finds[i].toString().charAt(0)] = i + 1;
+            }
+        }
+    }
+    </determineOrder>
+    return orders;
+}
+</timeFormatParsing>
+
+<parseArguments$3>
+function parseArguments$3(args) {
+    <parseArgs>
+    var first = args[0];
+    var second = args[1];
+
+    return typeof first === 'string' ? { namespace: first, mappings: second } : { namespace: null, mappings: first };
+    </parseArgs>
+}
+</parseArguments$3>
+
+<removeFromList>
+function() {
+    <checkList>
+    if ( list ) {
+        </checkList>
+        <removeElements>
+        _each( arguments, function( arg ) {
+            var index;
+            while( ( index = _inArray( arg, list, index ) ) > -1 ) {
+                list.splice( index, 1 );
+                <updateIndexesWhenFiring>
+                if ( firing ) {
+                    if ( index <= firingLength ) {
+                        firingLength--;
+                    }
+                    if ( index <= firingIndex ) {
+                        firingIndex--;
+                    }
+                }
+                </updateIndexesWhenFiring>
+            }
+        });
+        </removeElements>
+    }
+    return this;
+}
+</removeFromList>
+
+<Frame>
+function Frame(callback, tasks) {
+    <checkReadiness>
+    this.isReady = function() {
+        for (var i=0; i < tasks.length; i++) {
+            if (tasks[i].blocked)
+                return false;
+        }
+        return true;
+    };
+    </checkReadiness>
+    
+    <flushTasks>
+    this.flush = function() {
+        for (var i=0; i < tasks.length; i++)
+            tasks[i].execute();
+        if (callback) callback();
+    };
+    </flushTasks>
+}
+</Frame>
+
+<RequestSigner>
+function RequestSigner(options) {
+  assert.object(options, 'options');
+
+  <setUpAlgorithm>
+  var alg = [];
+  if (options.algorithm !== undefined) {
+    assert.string(options.algorithm, 'options.algorithm');
+    alg = validateAlgorithm(options.algorithm);
+  }
+  this.rs_alg = alg;
+  </setUpAlgorithm>
+
+  <setUpSigning>
+  if (options.sign !== undefined) {
+    assert.func(options.sign, 'options.sign');
+    this.rs_signFunc = options.sign;
+  </setUpSigning>
+  <setUpHmac>
+  } else if (alg[0] === 'hmac' && options.key !== undefined) {
+    assert.string(options.keyId, 'options.keyId');
+    this.rs_keyId = options.keyId;
+
+    if (typeof (options.key) !== 'string' && !Buffer.isBuffer(options.key))
+      throw (new TypeError('options.key for HMAC must be a string or Buffer'));
+
+    this.rs_signer = crypto.createHmac(alg[1].toUpperCase(), options.key);
+    this.rs_signer.sign = function () {
+      var digest = this.digest('base64');
+      return ({
+        hashAlgorithm: alg[1],
+        toString: function () { return (digest); }
+      });
+    };
+  </setUpHmac>
+  <setUpKey>
+  } else if (options.key !== undefined) {
+    var key = options.key;
+    if (typeof (key) === 'string' || Buffer.isBuffer(key))
+      key = sshpk.parsePrivateKey(key);
+
+    assert.ok(sshpk.PrivateKey.isPrivateKey(key, [1, 2]),
+      'options.key must be a sshpk.PrivateKey');
+    this.rs_key = key;
+
+    assert.string(options.keyId, 'options.keyId');
+    this.rs_keyId = options.keyId;
+    
+    if (!PK_ALGOS[key.type]) {
+      throw (new InvalidAlgorithmError(key.type.toUpperCase() + ' type ' +
+        'keys are not supported'));
+    }
+
+    if (alg[0] !== undefined && key.type !== alg[0]) {
+      throw (new InvalidAlgorithmError('options.key must be a ' +
+        alg[0].toUpperCase() + ' key, was given a ' +
+        key.type.toUpperCase() + ' key instead'));
+    }
+
+    this.rs_signer = key.createSign(alg[1]);
+  </setUpKey>
+  <checkSignOrKeyRequirement>
+  } else {
+    throw (new TypeError('options.sign (func) or options.key is required'));
+  }
+  </checkSignOrKeyRequirement>
+
+  <initializeHeadersAndLines>
+  this.rs_headers = [];
+  this.rs_lines = [];
+  </initializeHeadersAndLines>
+}
+</RequestSigner>
+
+<addEvent>
+function addEvent(elem, event, fn) {
+  <addEventListenerSupport>
+  if (elem.addEventListener) {
+    elem.addEventListener(event, fn, false);
+    return fn;
+  } else {
+  </addEventListenerSupport>
+  <attachEventSupport>
+    let fn2 = function() {
+      return(fn.call(elem, window.event));
+    };
+    elem.attachEvent("on" + event, fn2);
+    return fn2;
+  }
+  </attachEventSupport>
+}
+</addEvent>

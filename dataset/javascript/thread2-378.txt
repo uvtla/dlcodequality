@@ -1,0 +1,263 @@
+```javascript
+<normalizeConnectArgs>
+function normalizeConnectArgs(args)
+{
+	if( typeof args[0]==='object' && args[0]!==null )
+		return args[0]
+	else if( typeof args[0]==='string' && !(Number(args[0]) >= 0) )
+		return {path: args[0]}
+	var options= {port: args[0]}
+	if( typeof args[1]==='string' )
+		options.host= args[1]
+	return options
+}
+</normalizeConnectArgs>
+
+<checkFirstNodeLineIndent>
+function checkFirstNodeLineIndent(node, firstLineIndent) {
+            const startIndent = getNodeIndent(node, false);
+
+            if ((startIndent.goodChar !== firstLineIndent || startIndent.badChar !== 0) && isNodeFirstInLine(node)) {
+                report(
+                    node,
+                    firstLineIndent,
+                    startIndent.space,
+                    startIndent.tab,
+                    { line: node.loc.start.line, column: node.loc.start.column }
+                );
+            }
+        }
+</checkFirstNodeLineIndent>
+
+<proxyMethods>
+function proxyMethods(exec, query) {
+    const methods = [].concat(END_POINT_METHODS).concat(CHAINABLE_METHODS);
+    for (let name of methods) {
+        const oldMethod = query[name];
+        query[name] = function (...args) {
+            const clonedQuery = query.clone();
+            proxyMethods(exec, clonedQuery);
+            oldMethod.apply(clonedQuery, args);
+            if (CHAINABLE_METHODS.indexOf(name) > -1) {
+                return clonedQuery;
+            } else {
+                return exec(clonedQuery.toString());
+            }
+        }
+    }
+}
+</proxyMethods>
+
+<isomorphic>
+function isomorphic(options = {}) {
+    <handleOverload>
+    if (!(typeof options === 'object' && options.template))
+        return isomorphic({
+            routes: arguments[0],
+            configStore: arguments[1],
+            template: arguments[2],
+            distPathName: arguments[3],
+            injection: {
+                js: arguments[4]
+            }
+        })
+    </handleOverload>
+
+    let { routes, configStore } = options
+
+    return async (ctx, next) => {
+
+        try {
+            <setUpHistoryAndStore>
+            const memoryHistory = createMemoryHistory(ctx.url)
+            const store = configStore() 
+            const history = syncHistoryWithStore(memoryHistory, store)
+            </setUpHistoryAndStore>
+            <matchRoutes>
+            const { redirectLocation, renderProps } = await asyncMatch({ history, routes, location: ctx.url })
+            </matchRoutes>
+
+            if (redirectLocation) {
+                ctx.redirect(redirectLocation.pathname + redirectLocation.search)
+            } else if (renderProps) {
+                const cookies = cookie.parse(ctx.request.header.cookie || '')
+
+                <determineLanguage>
+                let lang = ctx.query.hl
+
+                if (!lang && cookies.spLocaleId)
+                    lang = cookies.spLocaleId
+                
+                if (!lang)
+                    lang = ctx.header['accept-language']
+                
+                if (!lang)
+                    lang = 'en'
+                </determineLanguage>
+
+                <dispatchActions>
+                store.dispatch({ type: CHANGE_LANGUAGE, data: lang })
+                store.dispatch({ type: TELL_ME_URL, data: ctx.origin })
+                store.dispatch(i18nActionInit(store.getState()))
+                store.dispatch(i18nActionLocales())
+                </dispatchActions>
+
+                <asyncStoreFetch>
+                await asyncStore(store, renderProps)
+                </asyncStoreFetch>
+
+                <renderHtml>
+                extendHtml(store, renderProps)
+
+                ctx.body = renderHtml(
+                    renderToString(
+                        <Provider store={store}>
+                            <RouterContext {...renderProps } />
+                        </Provider>
+                    ),
+                    store.getState(),
+                    options
+                )
+                </renderHtml>
+            } else {
+                await next()
+            }
+
+        } catch (e) {
+            console.error('Server-Render Error Occures: %s', e.stack)
+            ctx.status = 500
+            ctx.body = e.message
+        }
+    }
+}
+</isomorphic>
+
+<extractMinFromHeap>
+function () {
+            var heap = this.__heap,
+                l = heap.length,
+                ret;
+            if (l) {
+                ret = heap[0];
+                if (l === 1) {
+                    heap.length = 0;
+                } else {
+                    heap[0] = heap.pop();
+                    this.__downHeap(0);
+                }
+            }
+            return ret ? ret.value : ret;
+        }
+</extractMinFromHeap>
+
+<replace>
+function replace(haystack, needle) {
+			const replacement = options.resolve ? notate(data, needle.trim()) : data[needle.trim()];
+
+			return VALID_RESULT_TYPES.includes(typeof replacement) ? replacement : options.clean ? '' : haystack;
+		}
+</replace>
+
+<toPromise>
+function toPromise( obj ) {
+    if( !obj ) {
+        return obj;
+    }
+    if( isPromise( obj ) ) {
+        return obj;
+    }
+    if( isGeneratorFunction( obj ) || isGenerator( obj ) ) {
+        return co.call( this, obj );
+    }
+    if( 'function' == typeof obj ) {
+        return thunkToPromise.call( this, obj );
+    }
+    if( Array.isArray( obj ) ) {
+        return arrayToPromise.call( this, obj );
+    }
+    if( isObject( obj ) ) {
+        return objectToPromise.call( this, obj );
+    }
+    return obj;
+}
+</toPromise>
+
+<indentLine>
+function(direction) {
+      if (!this.container.firstChild) return;
+      
+      <highlight>
+      if (!this.highlightAtCursor()) return;
+      var cursor = select.selectionTopNode(this.container, false);
+      </highlight>
+      
+      <checkAndMoveCursor>
+      if (cursor === false)
+        return;
+      var lineStart = startOfLine(cursor);
+      var whiteSpace = this.indentLineAfter(lineStart, direction);
+      if (cursor == lineStart && whiteSpace)
+          cursor = whiteSpace;
+      </checkAndMoveCursor>
+      
+      <refocus>
+      if (cursor == whiteSpace)
+        select.focusAfterNode(cursor, this.container);
+      </refocus>
+    }
+</indentLine>
+
+<serializeDoctype>
+function serializeDoctype (node) {
+  var r = '<!DOCTYPE ' + node.name;
+
+  if (node.publicId) {
+    r += ' PUBLIC "' + node.publicId + '"';
+  }
+
+  if (!node.publicId && node.systemId) {
+    r += ' SYSTEM';
+  }
+
+  if (node.systemId) {
+    r += ' "' + node.systemId + '"';
+  }
+
+  r += '>';
+  return r;
+}
+</serializeDoctype>
+
+<renderStatistics>
+function(){
+		var color = munit.color.get[ munit.failed > 0 ? 'red' : 'green' ],
+			callback = render.callback;
+
+		<ensureRenderState>
+		render.requireState( munit.RENDER_STATE_FINISHED );
+		render.state = munit.RENDER_STATE_COMPLETE;
+		</ensureRenderState>
+
+		<logStatistics>
+		munit.log([
+			"\n",
+			color( "Tests Passed: " + munit.passed ),
+			color( "Tests Failed: " + munit.failed ),
+			color( "Tests Skipped: " + munit.skipped ),
+			color( "Time: " + munit._relativeTime( munit.end - munit.start ) ),
+			"\n"
+		].join( "\n" ));
+		</logStatistics>
+
+		<handleFailureOrCallback>
+		if ( munit.failed > 0 ) {
+			munit.exit( 1, "Test failed with " + munit.failed + " errors" );
+		}
+		else if ( callback ) {
+			render.callback = undefined;
+			callback( null, munit );
+		}
+		</handleFailureOrCallback>
+	}
+</renderStatistics>
+```

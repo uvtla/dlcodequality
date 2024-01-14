@@ -1,0 +1,218 @@
+```javascript
+<render>
+function render(source, config) {
+  <configureEnvironment>
+  const env = nunjucks.configure(config.templatesPath, { autoescape: false });
+  </configureEnvironment>
+
+  <defaultConfiguration>
+  config = config || {};
+  config.raml2MdVersion = pjson.version;
+  </defaultConfiguration>
+
+  <processRenderAndResolve>
+  return raml2obj.parse(source).then((ramlObj) => {
+    ramlObj.config = config;
+
+    return new Promise((resolve) => {
+      const result = env.render(config.template, ramlObj);
+      if (config.processOutput) {
+        resolve(config.processOutput(result));
+      }
+
+      return resolve(result);
+    });
+  });
+  </processRenderAndResolve>
+}
+</render>
+
+<mirror>
+function mirror(vector, ...shapes) {
+  <normalizeShapes>
+  let _shapes = flatten(toArray(shapes))
+  _shapes = (shapes.length >= 1 && shapes[0].length) ? shapes[0] : shapes
+  </normalizeShapes>
+
+  <calculateMirroringPlane>
+  const plane = vec4.fromValues(...vec3.normalize(vec3.fromValues(...vector)), 0)
+  </calculateMirroringPlane>
+
+  <applyMirroring>
+  const results = _shapes.map(function (shape) {
+    const specificMirror = findFunctionInTypes(shape, 'scale')
+    return specificMirror(plane, shape)
+  })
+  </applyMirroring>
+
+  <returnResults>
+  return results.length === 1 ? results[0] : results
+  </returnResults>
+}
+</mirror>
+
+<updateTableDom>
+function updateTableDom() {
+  <selectTableBody>
+  const tableBody = this.ui.tableBody;
+  </selectTableBody>
+
+  <clearTableBody>
+  while (tableBody.lastChild) {
+    tableBody.removeChild(tableBody.lastChild);
+  }
+  </clearTableBody>
+
+  <generateDocumentFragment>
+  const documentFragment = document.createDocumentFragment();
+  for (let i = 0; i < this.tableData.length; i++) {
+    documentFragment.appendChild(this.tableData[i][1]);
+  }
+  </generateDocumentFragment>
+
+  <appendFragmentAndUpdate>
+  tableBody.appendChild(documentFragment);
+  this.trigger('table:updated');
+  </appendFragmentAndUpdate>
+
+  <returnTableBody>
+  return tableBody;
+  </returnTableBody>
+}
+</updateTableDom>
+
+<take>
+function take(collection, n) {
+  <prepareArguments>
+  const [col, num] = isNumber(collection) ? [null, collection] : [collection, n];
+  </prepareArguments>
+
+  <returnTake>
+  return col ? sequence(col, take(num)) : xform => takeTransducer(num, xform);
+  </returnTake>
+}
+</take>
+
+<MethodOptions>
+function MethodOptions(properties) {
+  <initializeDefault>
+  this.uninterpretedOption = [];
+  </initializeDefault>
+
+  <assignProperties>
+  if (properties)
+    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+      if (properties[keys[i]] != null)
+        this[keys[i]] = properties[keys[i]];
+  </assignProperties>
+}
+</MethodOptions>
+
+<linkState>
+function linkState(component, key, eventPath) {
+  <splitKeyAndSetupCache>
+  var path = key.split('.'),
+    cache = component.__lsc || (component.__lsc = {});
+  </splitKeyAndSetupCache>
+
+  <cacheOrLinkFunction>
+  return (
+    cache[key + eventPath] ||
+    (cache[key + eventPath] = function(e) {
+      <getTargetValue>
+      var t = (e && e.target) || this,
+        state = {},
+        obj = state,
+        v = typeof eventPath === 'string' ? dlv(e, eventPath) : t.nodeName ? (t.type.match(/^che|rad/) ? t.checked : t.value) : e;
+      </getTargetValue>
+
+      <buildStatePath>
+      var i = 0;
+      for (; i < path.length - 1; i++) {
+        obj = obj[path[i]] || (obj[path[i]] = (!i && component.state[path[i]]) || {});
+      }
+      obj[path[i]] = v;
+      </buildStatePath>
+
+      <updateState>
+      component.setState(state);
+      </updateState>
+    })
+  );
+  </cacheOrLinkFunction>
+}
+</linkState>
+
+<transform>
+function transform(flapjack, pluginOptions, runtimeOptions) {
+  <getTransformer>
+  var name = runtimeOptions.transformer;
+  var transformer = transformerFactory.getTransformer(name, clientPlugin, pluginOptions);
+  </getTransformer>
+
+  <combineOptions>
+  var options = _.extend({}, pluginOptions, runtimeOptions);
+  </combineOptions>
+
+  <performTransformation>
+  return transformer.transform(flapjack, options);
+  </performTransformation>
+}
+</transform>
+
+This last function provided does not have an identifier name which is essential for creating the surrounding tags. Please provide a name for the function so I can correctly annotate it for SRP compliance.
+
+<getTableScrollAreas>
+function(oTable) {
+  <getTableDomRef>
+  var oDomRef = oTable.getDomRef();
+  var aScrollableColumnAreas;
+  </getTableDomRef>
+
+  <findScrollableAreas>
+  if (oDomRef) {
+    aScrollableColumnAreas = Array.prototype.slice.call(oTable.getDomRef().querySelectorAll(".sapUiTableCtrlScr"));
+  }
+  </findScrollableAreas>
+
+  <combineScrollAreas>
+  var aScrollAreas = [
+    oTable._getScrollExtension().getHorizontalScrollbar()
+  ].concat(aScrollableColumnAreas);
+  </combineScrollAreas>
+
+  <filterNonNull>
+  return aScrollAreas.filter(function(oScrollArea) {
+    return oScrollArea != null;
+  });
+  </filterNonNull>
+}
+</getTableScrollAreas>
+
+<_ping_count>
+function _ping_count(){
+  <validateUrl>
+  if( count_url && typeof(count_url) === 'string' && count_url !== '' ){
+  </validateUrl>
+
+  <performRequest>
+  request({
+    url: count_url
+  }, <logResult>
+  function(error, response, body){
+    if( error || response.statusCode !== 200 ){
+      console.log('Unable to ping: ' + count_url);
+    }else{
+      console.log('Pinged: ' + count_url);
+    }
+  });
+  </logResult>
+  </performRequest>
+  <skipPing>
+  }else{
+    console.log('Will not ping home.');
+  }
+  </skipPing>
+}
+</_ping_count>
+```

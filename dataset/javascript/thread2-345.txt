@@ -1,0 +1,213 @@
+<checkFolder>
+function checkFolder(ffs, fld) {
+    let fldBits = fld.split('/'), mkfld = '';
+    fldBits.forEach(toBit => {
+        mkfld = mkfld ? mkfld + '/' + toBit : toBit;
+        if (mkfld && !ffs.existsSync(mkfld)) {
+            ffs.mkdirSync(mkfld);
+        }
+    });
+}
+</checkFolder>
+
+<registerInteractionHandler>
+function registerInteractionHandler(fnHandler) {
+    var aSuppressHandler = [],
+        oParentDOM = this.$parent.get(0),
+        oBlockLayerDOM = this.$blockLayer.get(0);
+
+    for (var i = 0; i < aPreventedEvents.length; i++) {
+
+        oParentDOM.addEventListener(aPreventedEvents[i], fnHandler, {
+            capture: true,
+            passive: false
+        });
+        aSuppressHandler.push(EventTriggerHook.suppress(aPreventedEvents[i], oParentDOM, oBlockLayerDOM));
+    }
+
+    this.$blockLayer.bind('keydown', fnHandler);
+
+    return aSuppressHandler;
+}
+</registerInteractionHandler>
+
+<haveDifferentKeys>
+function haveDifferentKeys(object1, object2) {
+    var keys1 = Object.keys(object1);
+    var keys2 = Object.keys(object2);
+
+    if (keys1.length !== keys2.length) {
+        return true;
+    }
+
+    return !keys1.every(function existsInKeys2(key) {
+        return keys2.indexOf(key) !== -1;
+    });
+}
+</haveDifferentKeys>
+
+<isValidJSON>
+function isValidJSON(arg) {
+    var parsed;
+    if (!lodash.isString(arg)) {
+        return false;
+    }
+    try {
+        parsed = JSON.parse(arg);
+    } catch (e) {
+        return false;
+    }
+    if (typeof(parsed) === 'object') {
+        return true;
+    }
+    return false;
+}
+</isValidJSON>
+
+<TiledElevationCoverage>
+function () {
+    TiledElevationCoverage.call(this, {
+        coverageSector: Sector.FULL_SPHERE,
+        resolution: 0.008333333333333,
+        retrievalImageFormat: "image/tiff",
+        minElevation: -11000,
+        maxElevation: 8850,
+        urlBuilder: new WcsTileUrlBuilder("https://ows.jpl.nasa.gov/wcs", "NASA_SRTM30_900m_Tiled", "1.0.0")
+    });
+
+    this.displayName = "WCS Earth Elevation Coverage";
+}
+</TiledElevationCoverage>
+
+<linearDependencies>
+function linearDependencies(matrix, options = {}) {
+    const { thresholdValue = 10e-10, thresholdError = 10e-10 } = options;
+
+    var n = matrix.rows;
+    var results = new Matrix$1(n, n);
+
+    for (var i = 0; i < n; i++) {
+        var b = Matrix$1.columnVector(matrix.getRow(i));
+        var Abis = matrix.subMatrixRow(xrange(n, i)).transposeView();
+        var svd = new SingularValueDecomposition$$1(Abis);
+        var x = svd.solve(b);
+        var error = max(
+            Matrix$1.sub(b, Abis.mmul(x))
+                .abs()
+                .to1DArray()
+        );
+        results.setRow(
+            i,
+            dependenciesOneRow(error, x, i, thresholdValue, thresholdError)
+        );
+    }
+    return results;
+}
+</linearDependencies>
+
+<handleCustomClick>
+function handleCustomClick(e, d) {
+    let [mouseX, mouseY] = getMousePosition(e);
+    let dataPoint = isHorizontal ? getNearestDataPoint2(mouseY) : getNearestDataPoint(mouseX);
+
+    dispatcher.call('customClick', e, dataPoint, d3Selection.mouse(e));
+}
+</handleCustomClick>
+
+<addBoundsToArray>
+function addBoundsToArray(bounds, array) {
+    if (!bounds) return;
+    var bound;
+
+    for (var j = 0; j < bounds.length; j++) {
+        bound = bounds[j];
+        if (bound.type === 'UBM' || bound.type === 'LBM') {
+            array.push(bound);
+        }
+    }
+}
+</addBoundsToArray>
+
+<addCard>
+function addCard(contentType, currentActivity, rest) {
+    let card = { buttons: [] };
+    let lines = rest.split('\n');
+    for (let line of lines) {
+        let start = line.indexOf('=');
+        let property = line.substr(0, start).trim().toLowerCase();
+        let value = line.substr(start + 1).trim();
+        switch (property) {
+            // handle each card property
+            <handleCardProperty>
+            case 'title':
+            case 'subtitle':
+            case 'text':
+            case 'aspect':
+            case 'value':
+            case 'connectioname':
+                card[property] = value;
+                break;
+            case 'image':
+                card.image = { url: value };
+                break;
+            case 'images':
+                if (!card.images) {
+                    card.images = [];
+                }
+                card.images.push({ url: value });
+                break;
+            case 'media':
+                if (!card.media)
+                    card.media = [];
+                card.media.push({ url: value });
+                break;
+            case 'buttons':
+                for (let button of value.split('|')) {
+                    card.buttons.push({ title: button.trim(), type: "imBack", value: button.trim() });
+                }
+                break;
+            case 'autostart':
+            case 'sharable':
+            case 'autoloop':
+                card[property] = value.toLowerCase() == 'true';
+                break;
+            case '':
+                break;
+            default:
+                console.warn(chalk.red.bold(`Skipping unknown card property ${property}\n${line}`));
+                break;
+            </handleCardProperty>
+        }
+    }
+    // attach the card to the activity
+    <attachCardToActivity>
+    let attachment = { contentType: contentType, content: card };
+    (currentActivity.attachments || (currentActivity.attachments = [])).push(attachment);
+    </attachCardToActivity>
+}
+</addCard>
+
+<calculateScrollBarSize>
+function calculateScrollBarSize() {
+    if ($scrollContainer.length) {
+        if (opts.support && opts.support.perfectScrollbar && $scrollContainer.data().perfectScrollbar) {
+            scrollbarOffset = { horizontal: 0, vertical: 0 };
+        } else {
+            if ($scrollContainer.css('overflow-x') == 'scroll') {
+                scrollbarOffset.horizontal = scrollbarWidth;
+            } else {
+                var sw = $scrollContainer.width(), tw = tableWidth($table, $fthCells);
+                var offsetv = sh < th ? scrollbarWidth : 0;
+                scrollbarOffset.horizontal = sw - offsetv < tw ? scrollbarWidth : 0;
+            }
+            if ($scrollContainer.css('overflow-y') == 'scroll') {
+                scrollbarOffset.vertical = scrollbarWidth;
+            } else {
+                var sh = $scrollContainer.height(), th = $table.height();
+                var offseth = sw < tw ? scrollbarWidth : 0;
+                scrollbarOffset.vertical = sh - offseth < th ? scrollbarWidth : 0;
+            }
+        }
+    }
+}
+</calculateScrollBarSize>

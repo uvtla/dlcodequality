@@ -1,0 +1,385 @@
+<emitLine>
+function emitLine(line) {
+  var c = line[0];
+  ++linenum;
+  if (c === '=') {
+    
+  } else if (c === '@') {
+    <matchLine>
+    var match = line.match(line_regex);
+    if (!match) {
+      return console.log('regex fail on line ' + linenum + ': "' + line + '"');
+    }
+    </matchLine>
+    var module = match[1];
+    var symbol = match[2]; 
+    var symbol_offs = h2i(match[3]); 
+    var site_addr = h2i(match[4]); 
+    var op = match[5]; 
+    var ptr_addr = h2i(match[6]); 
+    var size = h2i(match[7]); 
+
+    if (op === '-' || op === '<') {
+      <processDeallocation>
+      var alloc_data = mem[ptr_addr];
+      if (alloc_data) {
+        var site_data = addr[alloc_data.site_addr]
+        --site_data.count;
+        ++site_data.traffic_count;
+        site_data.total_size -= alloc_data.size;
+        site_data.traffic_size += alloc_data.size;
+        delete mem[ptr_addr];
+      } else {
+        
+      }
+      </processDeallocation>
+    } else if (op === '+' || op === '>') {
+      <processAllocation>
+      mem[ptr_addr] = { size: size, site_addr: site_addr };
+      var site_data = addr[site_addr];
+      if (!site_data) {
+        addr[site_addr] = site_data = { module: module, symbol: symbol, symbol_offs: symbol_offs, count: 0, total_size: 0, traffic_count: 0, traffic_size: 0 };
+      }
+      ++site_data.count;
+      ++site_data.traffic_count;
+      site_data.total_size += size;
+      site_data.traffic_size += size;
+      </processAllocation>
+    }
+  } else {
+    console.log('unrecognized type on line ' + linenum + ': "' + line + '"');
+  }
+}
+</emitLine>
+
+<start>
+function start() {
+    <displayVersions>
+    console.log(
+      'Using ts-node version',
+      tsNodeVersion + ', typescript version',
+      tsVersion
+    )
+    </displayVersions>
+    var cmd = nodeArgs.concat(wrapper, script, scriptArgs)
+    var childHookPath = compiler.getChildHookPath()
+    cmd = ['-r', childHookPath].concat(cmd)
+    <logStart>
+    log.debug('Starting child process %s', cmd.join(' '))
+    </logStart>
+    <spawnChildProcess>
+    child = fork(cmd[0], cmd.slice(1), {
+      cwd: process.cwd(),
+      env: process.env
+    })
+    </spawnChildProcess>
+    starting = false
+    var compileReqWatcher = filewatcher({ forcePolling: opts.poll })
+    var currentCompilePath
+    <setupCompileReqWatcher>
+    fs.writeFileSync(compiler.getCompileReqFilePath(), '')
+    compileReqWatcher.add(compiler.getCompileReqFilePath())
+    compileReqWatcher.on('change', function(file) {
+      fs.readFile(file, 'utf-8', function(err, data) {
+        if (err) {
+          log.error('Error reading compile request file', err)
+          return
+        }
+        var split = data.split('\n')
+        var compile = split[0]
+        var compiledPath = split[1]
+        if (currentCompilePath == compiledPath) return
+        currentCompilePath = compiledPath
+        
+        if (compiledPath) {
+          compiler.compile({
+            compile: compile,
+            compiledPath: compiledPath
+          })
+        }
+      })
+    })
+    </setupCompileReqWatcher>
+    <setupChildProcessListeners>
+    child.on('message', function(message) {
+      if (!message.compiledPath || currentCompilePath === message.compiledPath)
+        return
+      currentCompilePath = message.compiledPath
+      compiler.compile(message)
+    })
+
+    child.on('exit', function(code) {
+      log.debug('Child exited with code %s', code)
+      if (!child) return
+      if (!child.respawn) process.exit(code)
+      child = undefined
+    })
+    </setupChildProcessListeners>
+
+    if (cfg.respawn) {
+      child.respawn = true
+    }
+
+    if (compiler.tsConfigPath) {
+      watcher.add(compiler.tsConfigPath)
+    }
+
+    
+    <setupIpc>
+    ipc.on(child, 'required', function(m) {
+      var isIgnored =
+        cfg.ignore.some(isPrefixOf(m.required)) ||
+        cfg.ignore.some(isRegExpMatch(m.required))
+
+      if (!isIgnored && (cfg.deps === -1 || getLevel(m.required) <= cfg.deps)) {
+        watcher.add(m.required)
+      }
+    })
+
+    
+    ipc.on(child, 'error', function(m) {
+      notify(m.error, m.message, 'error')
+      stop(m.willTerminate)
+    })
+    </setupIpc>
+    <writeReadyFile>
+    compiler.writeReadyFile()
+    </writeReadyFile>
+  }
+</start>
+
+<createInstance>
+function (name, params) {
+    <instantiateObject>
+    var newInstance = Object.create(BABYLON.Tools.Instantiate("BABYLON." + name).prototype);
+    newInstance.constructor.apply(newInstance, params);
+    </instantiateObject>
+    return newInstance;
+}
+</createInstance>
+
+<parseRelationships>
+function ( relationships, deformerNodes ) {
+    <processRelationships>
+    var rawBones = [];
+
+    relationships.children.forEach( function ( child ) {
+
+      var boneNode = deformerNodes[ child.ID ];
+
+      if ( boneNode.attrType !== 'Cluster' ) return;
+
+      var rawBone = {
+
+        ID: child.ID,
+        indices: [],
+        weights: [],
+        transform: new THREE.Matrix4().fromArray( boneNode.Transform.a ),
+        transformLink: new THREE.Matrix4().fromArray( boneNode.TransformLink.a ),
+        linkMode: boneNode.Mode,
+
+      };
+
+      if ( 'Indexes' in boneNode ) {
+
+        rawBone.indices = boneNode.Indexes.a;
+        rawBone.weights = boneNode.Weights.a;
+
+      }
+
+      rawBones.push( rawBone );
+
+    } );
+    </processRelationships>
+    return {
+      rawBones: rawBones,
+      bones: []
+    };
+}
+</parseRelationships>
+
+<generatePerson>
+function() {
+    <randomPersonAttributes>
+    var firstName = Math.round((firstNames.length - 1) * randomFunc());
+    var lastName = Math.round((lastNames.length - 1) * randomFunc());
+    var pets = Math.round(10 * randomFunc());
+    var birthyear = 1900 + Math.round(randomFunc() * 114);
+    var birthmonth = Math.round(randomFunc() * 11);
+    var birthday = Math.round(randomFunc() * 29);
+    var birthstate = Math.round(randomFunc() * 49);
+    var residencestate = Math.round(randomFunc() * 49);
+    var travel = randomFunc() * 1000;
+    var income = randomFunc() * 100000;
+    var employed = Math.round(randomFunc());
+    </randomPersonAttributes>
+    <createPersonObject>
+    var person = {
+        last_name: lastNames[lastName],
+        
+        first_name: firstNames[firstName],
+        
+        pets: pets,
+        birthDate: birthyear + '-' + months[birthmonth] + '-' + days[birthday],
+        birthState: states[birthstate],
+        residenceState: states[residencestate],
+        employed: employed === 1,
+        income: income,
+        travel: travel
+    };
+    </createPersonObject>
+    return person;
+}
+</generatePerson>
+
+<expandSmartyPathAttr>
+function expandSmartyPathAttr(content, tagName, attrName, file) {
+    var attrReg = new RegExp('((?:^|\\s)' +
+    her.util.pregQuote(attrName) +
+    '\\s*=\\s*)(([\"\']).*?\\3)', 'ig');
+
+    <filterAndUpdateAttributes>
+    content = tagFilter.filterTag(content,
+      tagName, smarty_left_delimiter, smarty_right_delimiter,
+      function (outter, attr) {
+
+        attr = attr.replace(attrReg,
+          function (all, preCodeHolder, valueCodeHolder) {
+            var info = her.util.stringQuote(valueCodeHolder);
+            var path = info.rest;
+            var ret = info.quote + her.uri.getId(path, file.dirname).id + info.quote;
+            return preCodeHolder + ret;
+          });
+
+        outter = smarty_left_delimiter +
+        tagName + attr +
+        smarty_right_delimiter;
+
+        return outter;
+      });
+    </filterAndUpdateAttributes>
+
+    return content;
+  }
+</expandSmartyPathAttr>
+
+<initializeTestEnvironment>
+function (done) {
+      
+      app = connect();
+      app = routify(app);
+      
+      <setupMiddleware>
+      app.use(function (req, res, next) {
+
+        req.is = function() {
+          console.warn('Note: req.is() doesn\'t actually work in our routification shim.  (It always returns false.)');
+          return false;
+        };
+        res.send = function (body) {
+          if (body !== undefined) {
+            res.write(body);
+          }
+          res.end();
+        };
+        res.json = function (body){
+          body = JSON.stringify(body);
+          return res.send(body);
+        };
+        next();
+      });
+      </setupMiddleware>
+      
+      app.use(skipper());
+
+      <startServer>
+      server = app.listen(PORT, done);
+      </startServer>
+
+      <setupGlobalEnvironment>
+      global['_'] = _;
+      global['assert'] = assert;
+      global['request'] = request;
+      global['fsx'] = fsx;
+
+      global['server'] = server;
+      global['app'] = app;
+
+      global['baseurl'] = 'http://<your-domain>:<your-port>';
+      global['domain'] = 'localhost';
+      global['port'] = PORT;
+      </setupGlobalEnvironment>
+
+      <prepareFileFixtures>
+      fileFixtures = [];
+
+      
+      outputDir = new Temporary.Dir();
+
+      
+      for (var bytes=10; bytes <= 100000; bytes*=10) {
+        GENERATE_NONSENSE_FILE(bytes);
+      }
+      
+      for (bytes=10; bytes <= 100000; bytes*=10) {
+        GENERATE_NONSENSE_FILE(bytes);
+      }
+      </prepareFileFixtures>
+
+      global['fixtures'] = {
+        files: fileFixtures,
+        dir: outputDir
+      };
+}
+</initializeTestEnvironment>
+
+<DevicesResponse>
+function DevicesResponse(jsonAnswer) {
+    <parseJson>
+    var data = JSON.parse(jsonAnswer);
+    data = data.result.devices;
+    </parseJson>
+
+    <createDevicesArray>
+    var devices = [];
+    if (Array.isArray(data)) {
+        data.forEach(function (value) {
+            devices.push(createDevice(value.key, value.name, value.children));
+        });
+    }
+    </createDevicesArray>
+
+    this.devices = devices;
+}
+</DevicesResponse>
+
+<arrayFromObjectValues>
+function(obj){
+    <extractValues>
+    var arr = [];
+    shapeReflections.each(obj, function(value){
+        arr.push(value);
+    });
+    </extractValues>
+    return arr;
+}
+</arrayFromObjectValues>
+
+<getFileFromReq>
+function getFileFromReq(req, res) {
+    <validateAndRetrieveFile>
+    var file;
+    file = req.params[0];
+    if ('' === file || 'undefined' === typeof file) {
+        res.status(404).send('No file specified.');
+        return false;
+    }
+    else if (file.lastIndexOf('\/') === (file.length - 1)) {
+        
+        
+        file = file.substring(0, file.length - 1);
+    }
+    </validateAndRetrieveFile>
+    return file;
+}
+</getFileFromReq>

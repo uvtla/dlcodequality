@@ -1,0 +1,245 @@
+<checkBidDuration>
+function checkBidDuration(bidderRequest, bidResponse) {
+  const buffer = 2;
+  <extractBidInformation>
+  let bidDuration = utils.deepAccess(bidResponse, 'video.durationSeconds');
+  let videoConfig = utils.deepAccess(bidderRequest, 'mediaTypes.video');
+  let adUnitRanges = videoConfig.durationRangeSec;
+  adUnitRanges.sort((a, b) => a - b); 
+  </extractBidInformation>
+
+  <validateBidDuration>
+  if (!videoConfig.requireExactDuration) {
+    <calculateMaximumDuration>
+    let max = Math.max(...adUnitRanges);
+    if (bidDuration <= (max + buffer)) {
+    </calculateMaximumDuration>
+      <findNextHighestRangeAndAssign>
+      let nextHighestRange = find(adUnitRanges, range => (range + buffer) >= bidDuration);
+      bidResponse.video.durationBucket = nextHighestRange;
+      </findNextHighestRangeAndAssign>
+    } else {
+      <logDurationWarningAndRejectBid>
+      utils.logWarn(`Detected a bid with a duration value outside the accepted ranges specified in adUnit.mediaTypes.video.durationRangeSec.  Rejecting bid: `, bidResponse);
+      return false;
+      </logDurationWarningAndRejectBid>
+    }
+  } else {
+    if (find(adUnitRanges, range => range === bidDuration)) {
+      <assignDurationBucketExactMatch>
+      bidResponse.video.durationBucket = bidDuration;
+      </assignDurationBucketExactMatch>
+    } else {
+      <logExactMatchWarningAndRejectBid>
+      utils.logWarn(`Detected a bid with a duration value not part of the list of accepted ranges specified in adUnit.mediaTypes.video.durationRangeSec.  Exact match durations must be used for this adUnit. Rejecting bid: `, bidResponse);
+      return false;
+      </logExactMatchWarningAndRejectBid>
+    }
+  }
+  </validateBidDuration>
+  return true;
+}
+</checkBidDuration>
+
+<createMatch>
+function createMatch(data) {
+  <matchDataCallback>
+  return function(node) {
+    <checkNodeValidity>
+    if (node == root || node == null || node == doc) return null; 
+    </checkNodeValidity>
+    <performMatchData>
+    return matchData(node, data);
+    </performMatchData>
+  };
+  </matchDataCallback>
+}
+</createMatch>
+
+<ORMObjectBuilder>
+function() {
+	var me = {};
+	var db = common.config.database;
+
+	me.act = new NobleMachine();
+
+	return _.extend(me, {
+		<createTable>
+		create_table: function(name, definer) {
+			var t = new TableDefinition(name, 'create', definer);
+			me.act.next(t.act);
+		},
+		</createTable>
+
+		<changeTable>
+		change_table: function(name, definer) {
+			var t = new TableDefinition(name, 'alter', definer);
+			me.act.next(t.act);
+		},
+		</changeTable>
+
+		<dropTable>
+		drop_table: function(name) {
+			me.act.next(db.query(" DROP TABLE `" + name + "`;"));
+		},
+		</dropTable>
+
+		<renameTable>
+		rename_table: function(name, newname) {
+			me.act.next(db.query(" ALTER TABLE `" + name + "` RENAME `" + newname + "`"));
+		},
+		</renameTable>
+	});
+}
+</ORMObjectBuilder>
+
+<UnrollSampleLoop>
+function UnrollSampleLoop(samp) {
+  <calculateLoopIterations>
+  var nloops = ((2048 + samp.looplen - 1) / samp.looplen) | 0;
+  var pingpong = samp.type & 2;
+  if (pingpong) {
+    nloops = (nloops + 1) & (~1);
+  }
+  </calculateLoopIterations>
+  <prepareSampleDataBuffer>
+  var samplesiz = samp.loop + nloops * samp.looplen;
+  var data = new Float32Array(samplesiz);
+  </prepareSampleDataBuffer>
+  <copyInitialSampleData>
+  for (var i = 0; i < samp.loop; i++) {
+    data[i] = samp.sampledata[i];
+  }
+  </copyInitialSampleData>
+  <unrollLoop>
+  for (var j = 0; j < nloops; j++) {
+    var k;
+    if ((j&1) && pingpong) {
+      for (k = samp.looplen - 1; k >= 0; k--) {
+        data[i++] = samp.sampledata[samp.loop + k];
+      }
+    } else {
+      for (k = 0; k < samp.looplen; k++) {
+        data[i++] = samp.sampledata[samp.loop + k];
+      }
+    }
+  }
+  </unrollLoop>
+  <logAndFinalizeSampleData>
+  console.log("unrolled sample loop; looplen", samp.looplen, "x", nloops, " = ", samplesiz);
+  samp.sampledata = data;
+  samp.looplen = nloops * samp.looplen;
+  samp.type = 1;
+  </logAndFinalizeSampleData>
+}
+</UnrollSampleLoop>
+
+<fadeSeries>
+function(series) {
+  <checkSeriesValidity>
+  if(!series || !series.area) {
+      return;
+  }
+  </checkSeriesValidity>
+  <applyFadedColorToSeries>
+  series.area.attr({'fill': this.fadedElementColor});
+  </applyFadedColorToSeries>
+  <conditionallyApplyFadedColorToGraph>
+  if(this.showLines) {
+      series.graph.attr({'stroke': this.fadedElementColor});
+  }
+  </conditionallyApplyFadedColorToGraph>
+}
+</fadeSeries>
+
+<baseURIFunction>
+function (base) {
+  <handleBaseURIAssignment>
+  if (this.union === undefined) {
+    if (base === undefined) {
+      return this.baseURI;
+    } else {
+      this.baseURI = base;
+      return this;
+    }
+  } 
+  </handleBaseURIAssignment>
+  <handleBaseURIFromUnion>
+  else if (base === undefined) {
+    return this.union[0].base();
+  } else {
+    <setBaseURIForUnionMembers>
+    $.each(this.union, function (i, databank) {
+      databank.base(base);
+    });
+    </setBaseURIForUnionMembers>
+    return this;
+  }
+  </handleBaseURIFromUnion>
+}
+</baseURIFunction>
+
+<storeWidgetSchema>
+function(widget_title, widget_config) {
+  <preventRedefinition>
+	if (!Lava.schema.widget.ALLOW_REDEFINITION && (widget_title in this.widgets))
+		Lava.t("storeWidgetSchema: widget is already defined: " + widget_title);
+  </preventRedefinition>
+
+  <registerWidgetConfig>
+	this.widgets[widget_title] = widget_config;
+  </registerWidgetConfig>
+
+  <createSugarMapping>
+	if (('sugar' in widget_config) && widget_config.sugar.tag_name) {
+		this.sugar_map[widget_config.sugar.tag_name] = {widget_title: widget_title};
+	}
+  </createSugarMapping>
+}
+</storeWidgetSchema>
+
+<arrayEachRight>
+function arrayEachRight(array, callback) {
+  <iterateArrayFromRight>
+  var length = array ? array.length : 0;
+  while (length--) {
+    if (callback(array[length], length, array) === false) {
+      break;
+    }
+  }
+  </iterateArrayFromRight>
+  return array;
+}
+</arrayEachRight>
+
+<removeDuplicateObjectsFromArray>
+function removeDuplicateObjectsFromArray(originalArray, prop) {
+  <initializeHelpers>
+  var newArray = [];
+  var lookupObject = {};
+  </initializeHelpers>
+
+  <buildLookupObject>
+  for (var i in originalArray) {
+    lookupObject[originalArray[i][prop]] = originalArray[i];
+  }
+  </buildLookupObject>
+
+  <createNewArrayFromLookup>
+  for (i in lookupObject) {
+    newArray.push(lookupObject[i]);
+  }
+  </createNewArrayFromLookup>
+  return newArray;
+}
+</removeDuplicateObjectsFromArray>
+
+<getMaxLines>
+function getMaxLines(height) {
+  <calculateMaximumLines>
+  var availHeight = height || element.clientHeight,
+    lineHeight = getLineHeight(element);
+  return Math.max(Math.floor(availHeight / lineHeight), 0);
+  </calculateMaximumLines>
+}
+</getMaxLines>

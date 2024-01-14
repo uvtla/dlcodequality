@@ -1,0 +1,270 @@
+<subscribeWhenReady>
+function subscribeWhenReady(doctype, socket) {
+  <checkSocketState>
+  if (socket.readyState === WEBSOCKET_STATE.OPEN) </checkSocketState> {
+    try {
+      <socketSend>
+      socket.send(
+        JSON.stringify({
+          method: 'SUBSCRIBE',
+          payload: {
+            type: doctype
+          }
+        })
+      )
+      </socketSend>
+    } catch (error) {
+      <errorHandling>
+      console.warn(`Cannot subscribe to doctype ${doctype}: ${error.message}`)
+      throw error
+      </errorHandling>
+    }
+  } else {
+    <retrySubscription>
+    setTimeout(() => {
+      subscribeWhenReady(doctype, socket)
+    }, 10)
+    </retrySubscription>
+  }
+}
+</subscribeWhenReady>
+
+<onUpdating>
+function onUpdating(model, attr, options) {
+    <omitChangedRelationships>
+    if (this.relationships) {
+        model.changed = _.omit(model.changed, this.relationships);
+    }
+    </omitChangedRelationships>
+
+    <setUpdatedBy>
+    if (schema.tables[this.tableName].hasOwnProperty('updated_by')) {
+        if (!options.importing && !options.migrating) {
+            this.set('updated_by', String(this.contextUser(options)));
+        }
+    }
+    </setUpdatedBy>
+
+    <handleCreatedAtAndCreatedBy>
+    if (options && options.context && !options.context.internal && !options.importing) {
+        if (schema.tables[this.tableName].hasOwnProperty('created_at')) {
+            if (model.hasDateChanged('created_at', {beforeWrite: true})) {
+                model.set('created_at', this.previous('created_at'));
+            }
+        }
+
+        if (schema.tables[this.tableName].hasOwnProperty('created_by')) {
+            if (model.hasChanged('created_by')) {
+                model.set('created_by', String(this.previous('created_by')));
+            }
+        }
+    }
+    </handleCreatedAtAndCreatedBy>
+
+    <handleUpdatedAt>
+    if (schema.tables[this.tableName].hasOwnProperty('updated_at') && !options.importing) {
+        if (options.migrating) {
+            model.set('updated_at', model.previous('updated_at'));
+        } else if (Object.keys(model.changed).length === 1 && model.changed.updated_at) {
+            model.set('updated_at', model.previous('updated_at'));
+            delete model.changed.updated_at;
+        }
+    }
+    </handleUpdatedAt>
+
+    <cloneChangedState>
+    model._changed = _.cloneDeep(model.changed);
+    </cloneChangedState>
+
+    return Promise.resolve(this.onValidate(model, attr, options));
+}
+</onUpdating>
+
+<join>
+function join() {
+  <mergeSegments>
+  var segs = Array.prototype.slice.call(arguments);
+  var path = [];
+  for (var i=0; i < segs.length; i++) {
+    var segment = segs[i];
+    
+    var last = segment.length-1;
+    if (i > 0 && segment[0] === '/') segment = segment.substring(1);
+    if (segment[last] === '/') segment = segment.substring(0, last);
+    path.push(segment);
+  }
+  </mergeSegments>
+  return path.join('/');
+}
+</join>
+
+<serializeParams>
+function serializeParams(params) {
+  <convertMediaObjects>
+  for (var key in params) {
+    var param = params[key];
+    if (param instanceof MediaObject || (param && (params.object !==
+        undefined ||
+        params.hub !== undefined || params.sink !== undefined))) {
+      if (param && param.id != null) {
+        params[key] = param.id;
+      }
+    }
+  };
+  </convertMediaObjects>
+
+  return params;
+}
+</serializeParams>
+
+<toBuddhist>
+function toBuddhist(oGregorian) {
+  <convertToBuddhistYear>
+  var iEraStartYear = UniversalDate.getEraStartDate(CalendarType.Buddhist, 0).year,
+    iYear = oGregorian.year - iEraStartYear + 1;
+  
+  if (oGregorian.year < 1941 && oGregorian.month < 3) {
+    iYear -= 1;
+  }
+  if (oGregorian.year === null) {
+    iYear = undefined;
+  }
+  </convertToBuddhistYear>
+  return {
+    year: iYear,
+    month: oGregorian.month,
+    day: oGregorian.day
+  };
+}
+</toBuddhist>
+
+<HyperConfig>
+function HyperConfig(options) {
+  <handleInstanceCheck>
+  this.name = 'HyperConfig';
+  if (!(this instanceof HyperConfig)) {
+    return new HyperConfig(options);
+  }
+  </handleInstanceCheck>
+  <initializeOptions>
+  options = options || {};
+  this._refLabel = options.refLabel || '~';
+  this._annotationLabel = options.annotationLabel || '@';
+  this._macroBegin = options.macroBegin || '{';
+  this._macroEnd = options.macroEnd || '}';
+  </initializeOptions>
+
+  <setupInternalState>
+  this._config = traverse({});
+  this._isBuilded = false;
+  </setupInternalState>
+  <registerNormalizers>
+  this._normalizers = {};
+  this.addNormalizer('tags', extractTags);
+  </registerNormalizers>
+}
+</HyperConfig>
+
+<generateTableHeaders>
+function generateTableHeaders(table){
+  
+  table = table || this;
+  <convertColumnsNumber>
+  var columns = table.columns*1;
+  </convertColumnsNumber>
+
+  <prepareHeadersObject>
+  var headers = {};
+  headers['rank'] = table.headerRank;
+  headers['team'] = table.headerTeam;
+  headers['scores'] = getScoreHeadersNames(table);
+  headers['final'] = table.headerFinal;
+  </prepareHeadersObject>
+  
+  <assignHeadersToTable>
+  table.headers = headers;
+  </assignHeadersToTable>
+  return headers;
+}
+</generateTableHeaders>
+
+<getValidOptions>
+function getValidOptions (options, setDefaults) {
+    <ensureValidOptionsObject>
+    options = requireValidOptionalObject(options)
+    </ensureValidOptionsObject>
+    
+    <validateAutomock>
+    if (defined(options.automock)) {
+        if (typeof options.automock !== 'function') {
+            throw new Error('options error: automock must be function')
+        }
+    }
+    </validateAutomock>
+    
+    <validateCacheClient>
+    if (defined(options.cacheClient)) {
+        requireValidCacheClient(options.cacheClient)
+    }
+    </validateCacheClient>
+    
+    <validateLogClient>
+    if (defined(options.logClient)) {
+        requireValidLogClient(options.logClient)
+    }
+    </validateLogClient>
+
+    <applyDefaultOptions>
+    if (!setDefaults) {
+        return options
+    }
+    _.each(defaultOptions, (defaultOptionName, optionName) => {
+        if (!defined(options[optionName])) {
+            options[optionName] = immutable[defaultOptionName]
+        }
+    })
+    </applyDefaultOptions>
+
+    return options
+}
+</getValidOptions>
+
+<exec>
+function exec() {  
+  <assembleCommand>
+  var command = 'xdotool ' + Array.prototype.join.call(arguments, ' ');
+  </assembleCommand>
+
+  <executeCommand>
+  Exec(command, function(error, stdout, stderr) {
+    if (error) console.log('ERROR' + error);
+    if (stdout) console.log('STDOUT' + stdout);
+    if (stderr) console.log('STDERR' + stderr);
+  });
+  </executeCommand>
+}
+</exec>
+
+<deepCopy>
+function deepCopy(o) {
+  <initializeCopy>
+  var copy = Object.create(null);
+  </initializeCopy>
+  <copyProperties>
+  for (var i in o) {
+    if (typeof o[i] === "object" && o[i] !== null) {
+      copy[i] = deepCopy(o[i]);
+    }
+    else if (typeof o[i] === "function" && o[i] !== null) {
+      
+      eval(" copy[i] = " +  o[i].toString());
+      
+    }
+
+    else
+      copy[i] = o[i];
+  }
+  </copyProperties>
+  return copy;
+}
+</deepCopy>

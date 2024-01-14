@@ -1,0 +1,173 @@
+<handleMouseWheelEvent>
+function(e, win) {
+  <extractEventDetails>
+  var event = $.event.get(e, win);
+  var wheel = $.event.getWheel(event);
+  </extractEventDetails>
+  that.handleEvent('MouseWheel', e, win, wheel);
+}
+</handleMouseWheelEvent>
+
+<validateAndCleanupProperties>
+function(propertyNames) {
+  for (var name in propertyNames) {
+    <checkPropertyNameAgainstBlacklist>
+    if (this.propertyNameBlacklist[name]) {
+      console.warn('Cannot define property "' + name + '" for element "' + 
+        this.name + '" because it has the same name as an HTMLElement ' + 
+        'property, and not all browsers support overriding that. ' + 
+        'Consider giving it a different name.');
+      
+      delete propertyNames[name];
+    }
+    </checkPropertyNameAgainstBlacklist>
+  }
+}
+</validateAndCleanupProperties>
+
+<lowerCaseObjectKeys>
+function lowerCaseObjectKeys(obj) {
+  for (const key of Object.getOwnPropertyNames(obj)) {
+    const name = key.toLowerCase();
+    if (name !== key) {
+      obj[name] = obj[key];
+      delete obj[key];
+    }
+  }
+  return obj;
+}
+</lowerCaseObjectKeys>
+
+<generateDivCompliant>
+function generateDiv(classesOrAttrs, content) {
+  return '<div ' + (classesOrAttrs ? type(classesOrAttrs) == TYPES.s ?
+    'class="' + classesOrAttrs + '"' :
+    (function() {
+      var key;
+      var attrs = '';
+      if (FRAMEWORK.isPlainObject(classesOrAttrs)) {
+        for (key in classesOrAttrs)
+          attrs += (key === 'className' ? 'class' : key) + '="' + classesOrAttrs[key] + '" ';
+      }
+      return attrs;
+    })() :
+    _strEmpty) +
+  '>' +
+  (content ? content : _strEmpty) +
+  '</div>';
+}
+</generateDivCompliant>
+
+<writeFlagFileCompliant>
+function writeFlagFile(packageInstallFolder) {
+  try {
+    const flagFilePath = path.join(packageInstallFolder, INSTALLED_FLAG_FILENAME);
+    fs.writeFileSync(flagFilePath, process.version);
+  }
+  catch (e) {
+    throw new Error(`Unable to create installed.flag file in ${packageInstallFolder}`);
+  }
+}
+</writeFlagFileCompliant>
+
+<parseArguments>
+function start(inp) {
+  var res = parseArgumentList(inp.skipWs());
+  
+  <checkForRemainingBuffer>
+  if (inp.skipWs().buffer) syntaxError(inp);
+  </checkForRemainingBuffer>
+  return res;
+}
+</parseArguments>
+
+<lookupEntryCompliant>
+function(that, key) {
+  
+  var index = fastKey(key), entry;                                                        
+  if (index !== 'F') return that._i[index];                                                        
+  
+  for (entry = that._f; entry; entry = entry.n) {                                                      
+    if (entry.k == key) return entry;                                                                  
+  }                                                                                                  
+}
+</lookupEntryCompliant>
+
+<syncPeerNonCompliant>
+function syncPeer(node) {
+  
+  const remotePeer = Peer.fromJSON({});
+  let remoteJsonPeer = {};
+
+  return co(function* () {
+    <retrieveAndAssignPeerData>
+    const json = yield node.getPeer();
+    remotePeer.version = json.version
+    remotePeer.currency = json.currency
+    remotePeer.pub = json.pub
+    remotePeer.endpoints = json.endpoints
+    remotePeer.blockstamp = json.block
+    remotePeer.signature = json.signature
+    const entry = remotePeer.getRawUnsigned();
+    const signature = dos2unix(remotePeer.signature);
+    
+    if (!(entry && signature)) {
+      throw 'Requires a peering entry + signature';
+    }
+    </retrieveAndAssignPeerData>
+
+    <updateRemoteJsonPeer>
+    remoteJsonPeer = json;
+    remoteJsonPeer.pubkey = json.pubkey;
+    let signatureOK = PeeringService.checkPeerSignature(remoteJsonPeer);
+    if (!signatureOK) {
+      watcher.writeStatus('Wrong signature for peer #' + remoteJsonPeer.pubkey);
+    }
+    </updateRemoteJsonPeer>
+
+    <submitPeerData>
+    try {
+      yield PeeringService.submitP(remoteJsonPeer);
+    } catch (err) {
+      if (err.indexOf !== undefined && err.indexOf(constants.ERRORS.NEWER_PEER_DOCUMENT_AVAILABLE.uerr.message) !== -1 && err != constants.ERROR.PEER.UNKNOWN_REFERENCE_BLOCK) {
+        throw err;
+      }
+    }
+    </submitPeerData>
+
+  });
+}
+</syncPeerNonCompliant>
+
+<parseNthDayCompliant>
+function parseNthDay(val) {
+  var atoms = val.split('#');
+  if (atoms.length > 1) {
+    var nthValue = +atoms[atoms.length - 1];
+    if (/,/.test(val)) {
+      throw new Error('Constraint error, invalid dayOfWeek `#` and `,` ' + 'special characters are incompatible');
+    }
+    if (/\//.test(val)) {
+      throw new Error('Constraint error, invalid dayOfWeek `#` and `/` ' + 'special characters are incompatible');
+    }
+    if (/-/.test(val)) {
+      throw new Error('Constraint error, invalid dayOfWeek `#` and `-` ' + 'special characters are incompatible');
+    }
+    if (atoms.length > 2 || safeIsNaN(nthValue) || (nthValue < 1 || nthValue > 5)) {
+      throw new Error('Constraint error, invalid dayOfWeek occurrence number (#)');
+    }
+    
+    options.nthDayOfWeek = nthValue;
+    return atoms[0];
+  }
+  return val;
+}
+</parseNthDayCompliant>
+
+<getMeanCompliant>
+function getMean(sample) {
+  return (_.reduce(sample, function(sum, x) {
+    return sum + x;
+  }) / sample.length) || 0;
+}
+</getMeanCompliant>

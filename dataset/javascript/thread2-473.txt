@@ -1,0 +1,174 @@
+Here are the annotated functions for SRP compliance:
+
+Non-Compliant Functions Example:
+
+<decompress>
+function decompress(data) {
+    <initializeVariables>
+    var input = new Uint8Array(data);
+    var output = [];
+    var ip = 0;
+    var op = 0;
+    </initializeVariables>
+
+    <decompressionLoop>
+    do {
+        var ctrl = input[ip++];
+
+        if (ctrl < (1 << 5)) {
+            ctrl++;
+            <inputLengthCheck>
+            if (ip + ctrl > input.length) {
+                throw new Error('Invalid input');
+            }
+            </inputLengthCheck>
+            
+            <copyUncompressedData>
+            while (ctrl--) {
+                output[op++] = input[ip++];
+            }
+            </copyUncompressedData>
+        } else {
+            var len = ctrl >> 5;
+            var ref = op - ((ctrl & 0x1f) << 8) - 1;
+
+            <invalidInputCheck>
+            if (ip >= input.length) {
+                throw new Error('Invalid input');
+            }
+            </invalidInputCheck>
+
+            <lengthAdjustment>
+            if (len == 7) {
+                len += input[ip++];
+
+                if (ip >= input.length) {
+                    throw new Error('Invalid input');
+                }
+            }
+            </lengthAdjustment>
+
+            <referenceAdjustment>
+            ref -= input[ip++];
+            if (ref < 0) {
+                throw new Error('Invalid input');
+            }
+            </referenceAdjustment>
+
+            <copyCompressedData>
+            len += 2;
+            do {
+                output[op++] = output[ref++];
+            } while (--len);
+            </copyCompressedData>
+        }
+    } while (ip < input.length);
+    </decompressionLoop>
+
+    <outputFormatConversion>
+    if (typeof Buffer !== 'undefined') {
+        return new Buffer(output);
+    } else {
+        var res = new Uint8Array(output.length);
+        res.set(output);
+        return res;
+    }
+    </outputFormatConversion>
+}
+</decompress>
+
+<createToggle>
+function createToggle(options, fn) {
+    <initializeToggle>
+    var name = options.name || '';
+    var labelOn = options.labelOn || 'on';
+    var labelOff = options.labelOff || 'off';
+    var value = !!options.value;
+    var el = document.createElement('div');
+    el.innerHTML = `...`;
+    options.el.appendChild(el);
+    </initializeToggle>
+
+    <domElementReferences>
+    var iconEl = el.querySelector('[data-icon]');
+    var outputEl = el.querySelector('[data-output]');
+    </domElementReferences>
+
+    <updateStateFunction>
+    function updateState(val) {
+        <domStateUpdate>
+        if (val) {
+            iconEl.classList.remove('Control-mark--cross');
+            iconEl.classList.add('Control-mark--tick');
+        } else {
+            iconEl.classList.remove('Control-mark--tick');
+            iconEl.classList.add('Control-mark--cross');
+        }
+        </domStateUpdate>
+
+        <setLabel>
+        setLabel(val ? labelOn : labelOff);
+        </setLabel>
+    }
+    </updateStateFunction>
+
+    <eventHandler>
+    function onDown(event) {
+        <preventDuplicateEventListeners>
+        if (event.type === 'touchstart') {
+            el.removeEventListener('mousedown', onDown);
+        }
+        </preventDuplicateEventListeners>
+
+        <toggleValue>
+        value = !value;
+        </toggleValue>
+
+        <applyStateUpdate>
+        updateState(value);
+        </applyStateUpdate>
+
+        <executeCallback>
+        if (fn) {
+            fn(value);
+        }
+        </executeCallback>
+    }
+    </eventHandler>
+
+    <setLabelFunction>
+    function setLabel(v) {
+        outputEl.value = v;
+    }
+    </setLabelFunction>
+
+    <publicToggleFunction>
+    function toggle(val) {
+        value = val;
+        updateState(val);
+    }
+    </publicToggleFunction>
+
+    <cleanupFunction>
+    function destroy() {
+        el.removeEventListener('mousedown', onDown);
+        el.removeEventListener('touchstart', onDown);
+    }
+    </cleanupFunction>
+
+    <initializeHandlers>
+    el.addEventListener('mousedown', onDown);
+    el.addEventListener('touchstart', onDown);
+    </initializeHandlers>
+
+    <initialStateUpdate>
+    updateState(value);
+    </initialStateUpdate>
+
+    <publicApi>
+    return { setLabel: setLabel, toggle: toggle, destroy: destroy };
+    </publicApi>
+}
+</createToggle>
+
+For the other functions provided, we will only need to annotate if they are not complying with SRP, as the instruction says. Since these functions do not contain nested tags, it implies that they adhere to the Single Responsibility Principle and do not require further annotation.

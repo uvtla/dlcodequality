@@ -1,0 +1,314 @@
+```javascript
+<updateScrollPosition>
+function(render) {
+    var self = this;
+
+    
+    
+
+    
+    var scrollLeft = self.__scrollLeft + self.__decelerationVelocityX;
+    var scrollTop = self.__scrollTop + self.__decelerationVelocityY;
+
+
+    
+    
+
+    if (!self.options.bouncing) {
+      
+      <constrainScrollPosition>
+      var scrollLeftFixed = Math.max(Math.min(self.__maxDecelerationScrollLeft, scrollLeft), self.__minDecelerationScrollLeft);
+      if (scrollLeftFixed !== scrollLeft) {
+        scrollLeft = scrollLeftFixed;
+        self.__decelerationVelocityX = 0;
+      }
+
+      var scrollTopFixed = Math.max(Math.min(self.__maxDecelerationScrollTop, scrollTop), self.__minDecelerationScrollTop);
+      if (scrollTopFixed !== scrollTop) {
+        scrollTop = scrollTopFixed;
+        self.__decelerationVelocityY = 0;
+      }
+      </constrainScrollPosition>
+      
+    }
+
+
+    
+    
+
+    if (render) {
+
+      <publishUpdates>
+      self.__publish(scrollLeft, scrollTop, self.__zoomLevel);
+      </publishUpdates>
+
+    } else {
+
+      <setScrollPosition>
+      self.__scrollLeft = scrollLeft;
+      self.__scrollTop = scrollTop;
+      </setScrollPosition>
+
+    }
+
+
+    
+    
+    
+
+    
+    if (!self.options.paging) {
+
+      <applyFriction>
+      
+      var frictionFactor = self.options.deceleration;
+
+      self.__decelerationVelocityX *= frictionFactor;
+      self.__decelerationVelocityY *= frictionFactor;
+      </applyFriction>
+      
+    }
+
+
+    
+    
+    
+
+    if (self.options.bouncing) {
+
+      <handleBounceEffect>
+      var scrollOutsideX = 0;
+      var scrollOutsideY = 0;
+
+      
+      var penetrationDeceleration = self.options.penetrationDeceleration;
+      var penetrationAcceleration = self.options.penetrationAcceleration;
+
+      
+      if (scrollLeft < self.__minDecelerationScrollLeft) {
+        scrollOutsideX = self.__minDecelerationScrollLeft - scrollLeft;
+      } else if (scrollLeft > self.__maxDecelerationScrollLeft) {
+        scrollOutsideX = self.__maxDecelerationScrollLeft - scrollLeft;
+      }
+
+      if (scrollTop < self.__minDecelerationScrollTop) {
+        scrollOutsideY = self.__minDecelerationScrollTop - scrollTop;
+      } else if (scrollTop > self.__maxDecelerationScrollTop) {
+        scrollOutsideY = self.__maxDecelerationScrollTop - scrollTop;
+      }
+
+      
+      if (scrollOutsideX !== 0) {
+        var isHeadingOutwardsX = scrollOutsideX * self.__decelerationVelocityX <= self.__minDecelerationScrollLeft;
+        if (isHeadingOutwardsX) {
+          self.__decelerationVelocityX += scrollOutsideX * penetrationDeceleration;
+        }
+        var isStoppedX = Math.abs(self.__decelerationVelocityX) <= self.__minVelocityToKeepDecelerating;
+        
+        if (!isHeadingOutwardsX || isStoppedX) {
+          self.__decelerationVelocityX = scrollOutsideX * penetrationAcceleration;
+        }
+      }
+
+      if (scrollOutsideY !== 0) {
+        var isHeadingOutwardsY = scrollOutsideY * self.__decelerationVelocityY <= self.__minDecelerationScrollTop;
+        if (isHeadingOutwardsY) {
+          self.__decelerationVelocityY += scrollOutsideY * penetrationDeceleration;
+        }
+        var isStoppedY = Math.abs(self.__decelerationVelocityY) <= self.__minVelocityToKeepDecelerating;
+        
+        if (!isHeadingOutwardsY || isStoppedY) {
+          self.__decelerationVelocityY = scrollOutsideY * penetrationAcceleration;
+        }
+      }
+      </handleBounceEffect>
+    }
+  }
+</updateScrollPosition>
+  
+<validatePredictionInput>
+function (failed) {
+  if (failed) {
+    return false;
+  }
+  var count = that._count;
+  <checkIfNumber>
+  if (+count !== count) {
+    return true;
+  }
+  </checkIfNumber>
+  <checkIfGreaterThanZero>
+  if (count > 0) {
+    return true;
+  }
+  </checkIfGreaterThanZero>
+}
+</validatePredictionInput>
+
+<isObjectOrClassMethod>
+function isObjectOrClassMethod(node) {
+  const parent = node.parent;
+
+  return (
+    parent.type === "MethodDefinition" || (
+      parent.type === "Property" && (
+        parent.method ||
+        parent.kind === "get" ||
+        parent.kind === "set"
+      )
+    )
+  );
+}
+</isObjectOrClassMethod>
+
+<requireMaybe>
+function requireMaybe(moduleName) {
+  <loadModule>
+  try {
+    var modulePath = require.resolve(moduleName);
+  } catch (e) {
+    return null;
+  }
+  </loadModule>
+  
+  <requireModule>
+  return require(moduleName);
+  </requireModule>
+}
+</requireMaybe>
+
+<ObjectTypeProperty>
+function ObjectTypeProperty(node, print) {
+  <handleStaticModifier>
+  if (node["static"]) this.push("static ");
+  </handleStaticModifier>
+  <printKey>
+  print.plain(node.key);
+  </printKey>
+  <handleOptionalProperty>
+  if (node.optional) this.push("?");
+  </handleOptionalProperty>
+  <handleTypeAnnotation>
+  if (!t.isFunctionTypeAnnotation(node.value)) {
+    this.push(":");
+    this.space();
+  }
+  </handleTypeAnnotation>
+  <printValue>
+  print.plain(node.value);
+  </printValue>
+}
+</ObjectTypeProperty>
+
+<alterTableColumn>
+function(name, newname) {
+  <createTransaction>
+  var act = new NobleMachine(function() {
+    act.toNext(db.query("SHOW COLUMNS FROM `" + tablename + "`;"));
+  });
+  </createTransaction>
+
+  <generateAndExecuteSQL>
+  act.next(function(result) {
+    var sql = "ALTER TABLE `" + tablename + "` CHANGE `" + name + "` `" + newname + "`";
+
+    result.forEach(function(coldatum) {
+      if (coldatum['Field'] == name) {
+        sql += " " + coldatum['Type'];
+        
+        if (coldatum['Null'] == 'NO') {
+          sql += " NOT NULL";
+        }
+
+        if (coldatum['Key'] == 'PRI') {
+          sql += " PRIMARY KEY";
+        }
+
+        sql += coldatum['Extra'];
+
+        if (coldatum['Default'] != 'NULL') {
+          sql += " DEFAULT " + coldatum['Default'];
+        }
+      }
+    });
+    sql += ";";
+
+    act.toNext(db.query(sql));
+  });
+  </generateAndExecuteSQL>
+
+  <nextAction>
+  me.act.next(act);
+  </nextAction>
+}
+</alterTableColumn>
+
+<enableDebugger>
+function enableDebugger() {
+  <attemptEnableDebugger>
+  try {
+    _nodeConnection.domains.base.enableDebugger();
+  } catch (e) {
+    <handleDebuggerEnablementFailure>
+    window.alert("Failed trying to enable Node debugger: " + e.message);
+    </handleDebuggerEnablementFailure>
+  }
+  </attemptEnableDebugger>
+}
+</enableDebugger>
+
+<compileTemplate>
+function compileTemplate (templatePath, outputFilename, mainCompilation) {
+  <getChildCompiler>
+  const childCompiler = getChildCompiler(mainCompilation.compiler);
+  </getChildCompiler>
+  <compileAndMapTemplates>
+  return childCompiler.compileTemplates(mainCompilation).then((compiledTemplates) => {
+    if (!compiledTemplates[templatePath]) console.log(Object.keys(compiledTemplates), templatePath);
+    const compiledTemplate = compiledTemplates[templatePath];
+    
+    <generateOutputName>
+    const outputName = mainCompilation.mainTemplate.hooks.assetPath.call(outputFilename, {
+      hash: compiledTemplate.hash,
+      chunk: compiledTemplate.entry
+    });
+    </generateOutputName>
+    return {
+      
+      hash: compiledTemplate.hash,
+      
+      outputName: outputName,
+      
+      content: compiledTemplate.content
+    };
+  });
+  </compileAndMapTemplates>
+}
+</compileTemplate>
+
+<encryptKey>
+function encryptKey(kms, keyId, plaintext, logger) {
+  <prepareEncryptionParams>
+  const params = {KeyId: keyId, Plaintext: plaintext};
+  </prepareEncryptionParams>
+  <performEncryption>
+  return encrypt(kms, params, logger).then(result => 
+    <processEncryptionResult>
+    result.CiphertextBlob && result.CiphertextBlob.toString('base64')
+    </processEncryptionResult>
+  );
+  </performEncryption>
+}
+</encryptKey>
+
+<prepareRequest>
+async function prepareRequest(ctx, next) {
+  <setRequestParams>
+  ctx.request.params = ctx.params;
+  </setRequestParams>
+  <callNextMiddleware>
+  await next();
+  </callNextMiddleware>
+}
+</prepareRequest>
+```

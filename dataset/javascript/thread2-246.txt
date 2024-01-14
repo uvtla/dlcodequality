@@ -1,0 +1,191 @@
+Here are the annotated JavaScript functions for SRP compliance or violations:
+
+```javascript
+<readable>
+function readable(file) {
+  <checkExistence>
+  if (!exists(file)) {
+    return false;
+  } </checkExistence>
+  else {
+    <checkReadAccess>
+    try {
+      fs.accessSync(file, fs.R_OK);
+    } catch (e) {
+      return false;
+    }
+    </checkReadAccess>
+    return true;
+  }
+}
+</readable>
+
+<openCollection>
+function openCollection (dataStore, collection, callback) {
+  <validateCollectionType>
+  if (_.isString(collection)) {
+    collection = new Resource(collection, "", "");
+  }
+  else if (!(collection instanceof Resource)) {
+    throw ono("Expected a string or Resource object. Got a %s instead.", typeof (collection));
+  }
+  </validateCollectionType>
+
+  <resolveCollectionName>
+  let collectionName = collection.valueOf(dataStore.__router, true);
+  </resolveCollectionName>
+
+  <openDataStore>
+  dataStore.__openDataStore(collectionName, (err, resources) => {
+    callback(err, collection, resources);
+  });
+  </openDataStore>
+}
+</openCollection>
+
+<appRequest>
+function appRequest(params, cb) {
+  <prepareParams>
+  params = params || {};
+  var mbaasConf = params[constants.MBAAS_CONF_KEY];
+  params[constants.MBAAS_CONF_KEY] = undefined;
+
+  var fullParams = _.extend(_.clone(params), mbaasConf);
+  </prepareParams>
+
+  <validateParams>
+  var invalidParamError = validateAppParams(fullParams);
+  if (invalidParamError) {
+    return cb(invalidParamError);
+  }
+  </validateParams>
+
+  <buildAndSendRequest>
+  fullParams = _buildAppRequestParams(fullParams);
+  return doFHMbaaSRequest(fullParams, cb);
+  </buildAndSendRequest>
+}
+</appRequest>
+
+<freeParser>
+function freeParser(parser, req) {
+  <releaseParserResources>
+  if (parser) {
+    parser._headers = [];
+    parser.onIncoming = null;
+    if (parser.socket) {
+      parser.socket.onend = null;
+      parser.socket.ondata = null;
+      parser.socket.parser = null;
+    }
+    parser.socket = null;
+    parser.incoming = null;
+    parsers.free(parser);
+    parser = null;
+  }
+  </releaseParserResources>
+
+  <disassociateRequestParser>
+  if (req) {
+    req.parser = null;
+  }
+  </disassociateRequestParser>
+}
+</freeParser>
+
+<decorate>
+function decorate(metaProperty, target, key, descriptor) {
+  <verifyTargetAndMethod>
+  var Class = typeof target === 'function' ? target : target.constructor;
+  var proto = typeof target === 'function' ? target.prototype : target;
+  var isClass = Class === target;
+  var fn = descriptor.value;
+  if (!Class instanceof _GQLBase.GQLBase) {
+    console.warn((0, _neTagFns.dedent)(_templateObject(), fn && fn.name || key, Class.name));
+    return descriptor;
+  }
+  if (!descriptor.value || descriptor.get || descriptor.set || descriptor.initializer) {
+    console.warn((0, _neTagFns.dedent)(_templateObject2(), fn && fn.name || key));
+    return descriptor;
+  }
+  </verifyTargetAndMethod>
+
+  <cleanDescriptorAndTarget>
+  delete target[key];
+  delete descriptor.value;
+  if (isClass) {
+    delete proto[key];
+  } else {
+    delete Class[key];
+  }
+  </cleanDescriptorAndTarget>
+
+  <recordMetaData>
+  Class[_GQLBase.META_KEY][metaProperty] = Class[_GQLBase.META_KEY][metaProperty] || [];
+  if (fn.name !== key) {
+    Object.defineProperty(fn, 'name', {
+      get: function get() {
+        return key;
+      }
+    });
+  }
+  Class[_GQLBase.META_KEY][metaProperty].push(fn);
+  descriptor[Symbol.for(metaProperty)] = fn;
+  </recordMetaData>
+
+  return descriptor;
+}
+</decorate>
+
+<browse>
+function browse () {
+  <initializeVariables>
+  var $body, $dom, isChrome, isEdge;
+  var isMobile = false;
+  var strUndefined = 'undefined';
+  var result = {
+    isNode: false,
+    isMobile: isMobile,
+    isPC: false,
+    isDoc: typeof document !== strUndefined
+  };
+  </initializeVariables>
+
+  <determineEnvironment>
+  if (typeof window === strUndefined && typeof process !== strUndefined) {
+    result.isNode = true;
+  }
+  </determineEnvironment>
+  else {
+    <identifyBrowserType>
+    isEdge = isBrowseType('Edge');
+    isChrome = isBrowseType('Chrome');
+    isMobile = /(Android|webOS|iPhone|iPad|iPod|SymbianOS|BlackBerry|Windows Phone)/.test(navigator.userAgent);
+    </identifyBrowserType>
+    <applyDocumentProperties>
+    if (result.isDoc) {
+      $dom = document;
+      $body = $dom.body || $dom.documentElement;
+      baseExports.each(['webkit', 'khtml', 'moz', 'ms', 'o'], function (core) {
+        result['-' + core] = !!$body[core + 'MatchesSelector'];
+      });
+    }
+    </applyDocumentProperties>
+
+    <assignBrowserDiagnostics>
+    baseExports.assign(result, {
+      edge: isEdge,
+      msie: !isEdge && result['-ms'],
+      safari: !isChrome && !isEdge && isBrowseType('Safari'),
+      isMobile: isMobile,
+      isPC: !isMobile,
+      isLocalStorage: isBrowseStorage(window.localStorage),
+      isSessionStorage: isBrowseStorage(window.sessionStorage)
+    });
+    </assignBrowserDiagnostics>
+  }
+  return result;
+}
+</browse>
+
+The remaining functions provided do not have a clear separation of distinct responsibilities within the function or are already compliant with the Single Responsibility Principle as written.

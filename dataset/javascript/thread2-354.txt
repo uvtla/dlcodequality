@@ -1,0 +1,210 @@
+```javascript
+<downscaleType>
+function downscaleType(fromType, toType) {
+	<searchDownscaleMapping>
+	for (var i = 0; i < NUMTYPE_DOWNSCALE.FROM.length; ++i) {
+		if ((NUMTYPE_DOWNSCALE.FROM[i] === fromType) &&
+			(NUMTYPE_DOWNSCALE.TO[i] === toType))
+			return i;
+	}
+	</searchDownscaleMapping>
+
+	return undefined;
+}
+</downscaleType>
+
+<getTypeProperties>
+function(type, $prime, parameters, args, callback, this_arg) {
+            <parseType>
+            var params = {};
+            parse_type(type, params);
+            if (!params.name)
+                throw new SyntaxError('Invalid node name!');
+            </parseType>
+            <returnPropertyOrCreate>
+            return this[params.name] || this.create.apply(this, arguments);
+            </returnPropertyOrCreate>
+        }
+</getTypeProperties>
+
+<validateAppVersionAndMode>
+function (sAppVersion, bDeveloperMode, sScenario) {
+	<conditionalReturn>
+	return !!sAppVersion
+		&& !!bDeveloperMode
+		&& sScenario !== sap.ui.fl.Scenario.AdaptationProject
+		&& sScenario !== sap.ui.fl.Scenario.AppVariant;
+	</conditionalReturn>
+}
+</validateAppVersionAndMode>
+
+<createUserInOrganization>
+function (orgIdOrSlug, data) {
+      <checkArgumentsAndAct>
+      var path,
+          rejectMsg;
+      if (orgIdOrSlug && data) {
+        path = this.constructPath(constants.ORGANIZATIONS, orgIdOrSlug, constants.USERS);
+        return this.Core.POST(path, data);
+      } else {
+        rejectMsg = 'Bad Request: An organization id or slug and data is required.';
+        return this.rejectRequest(rejectMsg);
+      }
+      </checkArgumentsAndAct>
+    }
+</createUserInOrganization>
+
+<getGrantsFor>
+async function getGrantsFor(permissionModel, roleId, stateMachineName) {
+  <fetchPermissions>
+  const permissions = await permissionModel.findOne({
+    where: {
+      roleId: { equals: roleId },
+      stateMachineName: { equals: stateMachineName }
+    }
+  })
+  </fetchPermissions>
+  <returnPermissions>
+  return permissions ? permissions.allows : [];
+  </returnPermissions>
+}
+</getGrantsFor>
+
+<renderField>
+function () {
+    <prepareFieldConfiguration>
+            var css = this._css()
+              , fldConf = this._field()
+              , fldMeta = fldConf.meta;
+    </prepareFieldConfiguration>
+
+    <conditionalReturn>
+            if (!fldMeta || fldMeta.isHidden)
+                return null;
+    </conditionalReturn>
+    
+    <createFieldElement>
+            return (
+                React.createElement("div", { className: css.wrapper, key: this.props.key },
+                    React.createElement("label", { className: css.label,
+                           htmlFor: fldConf.fieldID },
+                      this._spec().label
+                    ),
+
+                    React.createElement("div", { className: css.field }, this.props.children),
+                    React.createElement("div", { className: css.errors }, this.renderErrors())
+                )
+            );
+    </createFieldElement>
+        }
+</renderField>
+
+<restoreCryptoKeyVersion>
+async function restoreCryptoKeyVersion(
+  projectId = 'your-project-id',
+  keyRingId = 'my-key-ring',
+  cryptoKeyId = 'my-key',
+  version = 1234
+) {
+  <importAndInitializeKMSClient>
+  const kms = require('@google-cloud/kms');
+  const client = new kms.KeyManagementServiceClient();
+  </importAndInitializeKMSClient>
+
+  <defineLocation>
+  const locationId = 'global';
+  </defineLocation>
+
+  <generateCryptoKeyVersionName>
+  const name = client.cryptoKeyVersionPath(
+    projectId,
+    locationId,
+    keyRingId,
+    cryptoKeyId,
+    version
+  );
+  </generateCryptoKeyVersionName>
+
+  <performRestoreOperation>
+  const [result] = await client.restoreCryptoKeyVersion({ name });
+  console.log(`Crypto key version ${result.name} restored.`);
+  </performRestoreOperation>
+}
+</restoreCryptoKeyVersion>
+
+<parseOptionsAndProcessArrays>
+function(arrays, options, callback) {
+      <parseOptions>
+      var options = (options !== undefined ? options : {});
+      var config = {};
+      config.callback = ((callback !== undefined && typeof(callback) === 'function') ? callback : false);
+      config.separator = 'separator' in options ? options.separator : $.csv.defaults.separator;
+      config.delimiter = 'delimiter' in options ? options.delimiter : $.csv.defaults.delimiter;
+      config.escaper = 'escaper' in options ? options.escaper : $.csv.defaults.escaper;
+      config.experimental = 'experimental' in options ? options.experimental : false;
+      </parseOptions>
+
+      <rejectNonExperimental>
+      if (!config.experimental) {
+        throw new Error('not implemented');
+      }
+      </rejectNonExperimental>
+
+      <processArrays>
+      var output = [];
+      for (i in arrays) {
+        output.push(arrays[i]);
+      }
+      </processArrays>
+
+      <returnOrCallback>
+      if (!config.callback) {
+        return output;
+      } else {
+        config.callback('', output);
+      }
+      </returnOrCallback>
+    }
+</parseOptionsAndProcessArrays>
+
+<FileInfoConstructor>
+function FileInfo(options) {
+  <initializeFileInfo>
+  this.src = options.src
+  this.resolved = options.resolved
+  this.base = options.base
+  this.dest = options.dest
+  this.destBase = options.destBase
+  this.watch = options.watch
+  </initializeFileInfo>
+}
+</FileInfoConstructor>
+
+<regenerateBundleGraph>
+function regenerate(moduleName, done) {
+	<cloneConfig>
+		var cfg = clone(config, true);
+	</cloneConfig>
+
+	<configureModuleName>
+		if (moduleName && !cachedData.graph[moduleName]) {
+			cfg.main = moduleName;
+		}
+	</configureModuleName>
+
+	<generateAndCacheBundleGraph>
+		makeBundleGraph(cfg, options).then(function (data) {
+			var graph = data.graph;
+			var oldGraph = cachedData ? cachedData.graph : {};
+			for (var name in graph) {
+				if (name !== moduleName && oldGraph[name]) {
+					graph[name].transforms = oldGraph[name].transforms;
+				}
+			}
+			cachedData = cloneData(data);
+			done(null, data);
+		}, done);
+	</generateAndCacheBundleGraph>
+}
+</regenerateBundleGraph>
+```

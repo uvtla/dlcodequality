@@ -1,0 +1,334 @@
+```javascript
+<ElementConnectionData>
+function ElementConnectionData(elementConnectionDataDict){
+  if(!(this instanceof ElementConnectionData))
+    return new ElementConnectionData(elementConnectionDataDict)
+
+  
+  <checkInputs>
+  checkType('MediaElement', 'elementConnectionDataDict.source', elementConnectionDataDict.source, {required: true});
+  checkType('MediaElement', 'elementConnectionDataDict.sink', elementConnectionDataDict.sink, {required: true});
+  checkType('MediaType', 'elementConnectionDataDict.type', elementConnectionDataDict.type, {required: true});
+  checkType('String', 'elementConnectionDataDict.sourceDescription', elementConnectionDataDict.sourceDescription, {required: true});
+  checkType('String', 'elementConnectionDataDict.sinkDescription', elementConnectionDataDict.sinkDescription, {required: true});
+  </checkInputs>
+
+  
+  ElementConnectionData.super_.call(this, elementConnectionDataDict)
+
+  
+  Object.defineProperties(this, {
+    source: {
+      writable: true,
+      enumerable: true,
+      value: elementConnectionDataDict.source
+    },
+    sink: {
+      writable: true,
+      enumerable: true,
+      value: elementConnectionDataDict.sink
+    },
+    type: {
+      writable: true,
+      enumerable: true,
+      value: elementConnectionDataDict.type
+    },
+    sourceDescription: {
+      writable: true,
+      enumerable: true,
+      value: elementConnectionDataDict.sourceDescription
+    },
+    sinkDescription: {
+      writable: true,
+      enumerable: true,
+      value: elementConnectionDataDict.sinkDescription
+    }
+  })
+}
+</ElementConnectionData>
+
+<Suite>
+function Suite(type, opts) {
+  Benchmark.Suite.call(this);
+
+  opts = opts || {};
+  this._type = type;
+  <parseType>
+  this._compatibleType = avro.parse(type.getSchema(), {
+    typeHook: typeHook,
+    wrapUnions: opts.wrapUnions
+  });
+  </parseType>
+  this._value = opts.value ? type.fromString(opts.value) : type.random();
+
+  <handleOptions>
+  Object.keys(opts).forEach(function (name) {
+    if (!name.indexOf('_')) {
+      return;
+    }
+    var fn = this['__' + name];
+    if (typeof fn == 'function') {
+      this.add(name, fn.call(this, opts[name])); 
+    }
+  }, this);
+  </handleOptions>
+}
+</Suite>
+
+<Concept>
+function Concept(concept) {
+  if (!(concept.prefLabel && concept.id && concept.type === 'Concept')) {
+    throw new Error('Invalid concept: "' + concept.id + '"');
+  }
+  this.id = concept.id;
+  this.prefLabel = concept.prefLabel;
+  this.altLabel = concept.altLabel;
+  this.hiddenLabel = concept.hiddenLabel;
+  this.definition = concept.definition;
+  this._topConceptOf = concept.topConceptOf;
+  this._partOfScheme = false;
+  this._originalConcept = concept;
+  this._broaderConcepts = [];
+  this._narrowerConcepts = [];
+  this._relatedConcepts = [];
+}
+</Concept>
+
+<processType>
+function processType (item, entities, types) {
+  var type = _.find(types, { name: item })
+
+  var additionalTypes = []
+  
+  <defineAdditionalTypes>
+  var addPossibleTypes = typeName => {
+    var union = _.find(types, { name: typeName })
+    var possibleTypes = _.map(union.possibleTypes, 'name')
+
+    
+    additionalTypes = _.union(additionalTypes, possibleTypes, [typeName])
+  }
+  </defineAdditionalTypes>
+
+  <processFields>
+  var fields = _.map(type.fields, field => {
+    var obj = analyzeField.call(this, field)
+
+    if (
+      (obj.isUnionType && !this.theme.unions.hide) ||
+      (obj.isInterfaceType && !this.theme.interfaces.hide)
+    ) {
+      addPossibleTypes(obj.type)
+    }
+
+    
+    if (!this.theme.field.noargs) {
+      if (field.args && field.args.length) {
+        obj.args = _.map(field.args, analyzeField.bind(this))
+      }
+    }
+
+    return obj
+  })
+  </processFields>
+
+  <defineEntity>
+  entities[type.name] = {
+    name: type.name,
+    fields: fields,
+    isObjectType: true,
+    isInterfaceType: type.kind === 'INTERFACE',
+    isUnionType: type.kind === 'UNION',
+    possibleTypes: _.map(type.possibleTypes, 'name')
+  }
+  </defineEntity>
+
+  <computeLinkedItems>
+  var linkeditems = _.chain(fields)
+    .filter('isObjectType')
+    .map('type')
+    .union(additionalTypes)
+    .uniq()
+    .value()
+  </computeLinkedItems>
+
+  return linkeditems
+}
+</processType>
+
+<process>
+function process(advertiserData) {
+  var data = advertiserData.manufacturerSpecificData.data;
+  var cursor = 0;
+
+  
+  while(cursor < data.length) {
+    var appleType = data.substr(cursor,2);
+
+    <processAppleType>
+    switch(appleType) {
+      case '01':
+        return; 
+      case '02':
+        cursor = ibeacon.process(advertiserData, cursor);
+        break;
+      case '05':
+        cursor = airdrop.process(advertiserData, cursor);
+        break;
+      case '07':
+        cursor = airpods.process(advertiserData, cursor);
+        break;
+      case '08':
+        cursor = service.process(advertiserData, cursor); 
+        break;
+      case '09':
+        cursor = airplay.process(advertiserData, cursor); 
+        break;
+      case '0a':
+        cursor = airplay.process(advertiserData, cursor);
+        break;
+      case '0b':
+        cursor = service.process(advertiserData, cursor); 
+        break;
+      case '0c':
+        cursor = handoff.process(advertiserData, cursor);
+        break;
+      case '10':
+        cursor = nearby.process(advertiserData, cursor);
+        break;
+      default:
+        return; 
+    }
+    </processAppleType>
+  }
+}
+</process>
+
+<handleClose>
+function handleClose(mode) {
+        var targetIndex  = MainViewManager.findInWorkingSet(MainViewManager.ACTIVE_PANE, MainViewManager.getCurrentlyViewedPath(MainViewManager.ACTIVE_PANE)),
+            workingSetList = MainViewManager.getWorkingSet(MainViewManager.ACTIVE_PANE),
+            start        = (mode === closeBelow) ? (targetIndex + 1) : 0,
+            end          = (mode === closeAbove) ? (targetIndex) : (workingSetList.length),
+            files        = [],
+            i;
+
+        <buildFileList>
+        for (i = start; i < end; i++) {
+            if ((mode === closeOthers && i !== targetIndex) || (mode !== closeOthers)) {
+                files.push(workingSetList[i]);
+            }
+        }
+        </buildFileList>
+
+        <closeFiles>
+        CommandManager.execute(Commands.FILE_CLOSE_LIST, {fileList: files});
+        </closeFiles>
+    }
+</handleClose>
+
+<anonymous>
+function (workout) {
+        var q = $q.defer();
+        <saveWorkout>
+        $window.plugins.healthkit.saveWorkout(workout,
+          function (success) {
+            q.resolve(success);
+          },
+          function (err) {
+            q.resolve(err);
+          }
+        );
+        </saveWorkout>
+        return q.promise;
+      }
+</anonymous>
+
+<anonymous>
+function (plus, minus) {
+    var out = {}, i;
+
+    <computeDifference>
+    for (i in plus) {
+      if (plus.hasOwnProperty(i) && plus[i] !== minus[i]) {
+        out[i] = plus[i];
+      }
+    }
+    </computeDifference>
+
+    return out;
+  }
+</anonymous>
+
+<GameShell>
+function GameShell() {
+  EventEmitter.call(this)
+  this._curKeyState  = new Array(keyNames.length)
+  this._pressCount   = new Array(keyNames.length)
+  this._releaseCount = new Array(keyNames.length)
+  
+  this._tickInterval = null
+  this._rafHandle = null
+  this._tickRate = 0
+  this._lastTick = hrtime()
+  this._frameTime = 0.0
+  this._paused = true
+  this._width = 0
+  this._height = 0
+  
+  this._wantFullscreen = false
+  this._wantPointerLock = false
+  this._fullscreenActive = false
+  this._pointerLockActive = false
+  
+  this._rafFunction = tickOrRender.bind(undefined, this, true)
+
+  this.preventDefaults = true
+  this.stopPropagation = false
+  
+  <initializeKeyStates>
+  for(var i=0; i<keyNames.length; ++i) {
+    this._curKeyState[i] = false
+    this._pressCount[i] = this._releaseCount[i] = 0
+  }
+  </initializeKeyStates>
+  
+  
+  this.element = null
+  this.bindings = {}
+  this.frameSkip = 100.0
+  this.tickCount = 0
+  this.frameCount = 0
+  this.startTime = hrtime()
+  this.tickTime = this._tickRate
+  this.frameTime = 10.0
+  this.stickyFullscreen = false
+  this.stickyPointerLock = false
+  
+  
+  this.scroll = [0,0,0]
+    
+  
+  this.mouseX = 0
+  this.mouseY = 0
+  this.prevMouseX = 0
+  this.prevMouseY = 0
+}
+</GameShell>
+
+<toObject>
+function toObject(input, obj) {
+    if (isString(input)) {
+        <convertStringToObject>
+        input = obj(input);
+        </convertStringToObject>
+    }
+    <validateInput>
+    if (typeof input !== 'object') {
+        throw new TypeError('Input must be an object or string.');
+    }
+    </validateInput>
+    return input;
+}
+</toObject>
+```

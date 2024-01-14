@@ -1,0 +1,228 @@
+<function1>
+function( x, y ) {
+  this.element.css( { left: x, top: y } );
+  this._area = this._layoutManager._$getArea( x, y );
+  if( this._area !== null ) {
+    this._lastValidArea = this._area;
+    this._area.contentItem._$highlightDropZone( x, y, this._area );
+  }
+}
+</function1>
+
+<write_BrtFileVersion>
+function write_BrtFileVersion(data, o) {
+  if(!o) o = new_buf(127);
+  for(var i = 0; i != 4; ++i) o.write_shift(4, 0);
+  write_XLWideString("SheetJS", o);
+  write_XLWideString(XLSX.version, o);
+  write_XLWideString(XLSX.version, o);
+  write_XLWideString("7262", o);
+  o.length = o.l;
+  return o.length > o.l ? o.slice(0, o.l) : o;
+}
+</write_BrtFileVersion>
+
+<readCols>
+function readCols(ws, cols, opts) {
+  let contents = {};
+  if (typeof cols === 'string') {
+    cols = cols.split(',');
+  }
+  opts = (opts === undefined) ? {} : opts;
+  let dRange = xlsx.utils.decode_range(ws['!ref']);
+  for (let i = 0; i < cols.length; ++i) {
+    let dCol = xlsx.utils.decode_col(cols[i]);
+    for (let R = dRange.s.r; R <= dRange.e.r; ++R) {
+      let encCell = xlsx.utils.encode_cell({c: dCol, r: R});
+      contents[encCell] = ws[encCell] || {};
+    }
+  }
+  contents['!ref'] = ws['!ref'];
+  if (opts.asis) {
+    return contents;
+  }
+  Object.assign(opts, {
+    header: 1,
+    raw: true,
+    blankrows: true,
+  });
+  opts.header = opts.useLabel ? 'A' : opts.header;
+  let contentsJson = xlsx.utils.sheet_to_json(contents, opts);
+  if (opts.removeEmpty) {
+    contentsJson = contentsJson.filter((col) => {
+      return check.object(col) ? check.nonEmptyObject(col) : check.nonEmptyArray(col);
+    });
+  }
+  return contentsJson;
+}
+</readCols>
+
+<function4>
+function(event, touch) {
+  if($.gestures.stoped) {
+    return;
+  }
+  $.doAction('gestures', function(index, gesture) {
+    if(!$.gestures.stoped) {
+      if($.options.gestureConfig[gesture.name] !== false) {
+        gesture.handle(event, touch);
+      }
+    }
+  });
+}
+</function4>
+
+<function5>
+function(p_sType, p_aArgs) {
+  if (!this.firstElement) {
+    if (UA.webkit || UA.opera) {
+      if (!this._modalFocus) {
+        this._createHiddenFocusElement();
+      }
+    } else {
+      this.innerElement.tabIndex = 0;
+    }
+  }
+  this.setTabLoop(this.firstElement, this.lastElement);
+  Event.onFocus(document.documentElement, this._onElementFocus, this, true);
+  _currentModal = this;
+}
+</function5>
+
+<function6>
+function(client){
+  var define_connection_options = lodash.clone(this._connection);
+  define_connection_options.policies = {
+    loadBalancing: new SingleNodePolicy()
+  };
+  this._client = client;
+  this._define_connection = new cql.Client(define_connection_options);
+  for(var i in this._models){
+    this._models[i]._properties.cql = this._client;
+    this._models[i]._properties.define_connection = this._define_connection;
+  }
+}
+</function6>
+
+<getPreimage>
+function getPreimage (web3, key) {
+  return new Promise((resolve, reject) => {
+    web3.debug.preimage(key.indexOf('0x') === 0 ? key : '0x' + key, function (error, preimage) {
+      if (error) {
+        resolve(null)
+      } else {
+        resolve(preimage)
+      }
+    })
+  })
+}
+</getPreimage>
+
+<defineSequenceType>
+function defineSequenceType(base, name, overrides) {
+  var ctor = function ctor() {};
+  ctor.prototype = new base();
+  for (var override in overrides) {
+    ctor.prototype[override] = overrides[override];
+  }
+  var factory = function factory() {
+    var sequence = new ctor();
+    sequence.parent = this;
+    if (sequence.init) {
+      sequence.init.apply(sequence, arguments);
+    }
+    return sequence;
+  };
+  var methodNames = typeof name === 'string' ? [name] : name;
+  for (var i = 0; i < methodNames.length; ++i) {
+    base.prototype[methodNames[i]] = factory;
+  }
+  return ctor;
+}
+</defineSequenceType>
+
+<function8>
+function(event, rec, prevChild) {
+  var key = this.$$getKey(rec);
+  var changed = false;
+  var curPos;
+  switch(event) {
+    case 'child_added':
+      curPos = this.$indexFor(key);
+      break;
+    case 'child_moved':
+      curPos = this.$indexFor(key);
+      this._spliceOut(key);
+      break;
+    case 'child_removed':
+      changed = this._spliceOut(key) !== null;
+      break;
+    case 'child_changed':
+      changed = true;
+      break;
+    default:
+      throw new Error('Invalid event type: ' + event);
+  }
+  if( angular.isDefined(curPos) ) {
+    changed = this._addAfter(rec, prevChild) !== curPos;
+  }
+  if( changed ) {
+    this.$$notify(event, key, prevChild);
+  }
+  return changed;
+}
+</function8>
+
+<runDriver>
+function runDriver(location, driver, options) {
+  options.testComplete = options.testComplete || 'return window.TESTS_COMPLETE';
+  options.testPassed = options.testPassed || 'return window.TESTS_PASSED && !window.TESTS_FAILED';
+  var startTime = Date.now();
+  var jobInfo = {
+    name: options.name,
+    build: process.env.TRAVIS_JOB_ID
+  };
+  Object.keys(options.jobInfo || {}).forEach(function (key) {
+    jobInfo[key] = options.jobInfo[key];
+  });
+  return Promise.resolve(null).then(function () {
+    return retry(function () {
+      return driver.sauceJobUpdate(jobInfo);
+    }, 3, '500ms', {debug: options.debug})
+  }).then(function () {
+    return retry(function () {
+      return driver.browser().activeWindow().navigator().navigateTo(location.url)
+    }, 3, '500ms', {debug: options.debug}).catch(err => {
+      err.message += ' (while navigating to url)';
+      throw err;
+    });
+  }).then(function () {
+    return waitForJobToFinish(driver, {
+      allowExceptions: options.allowExceptions,
+      testComplete: options.testComplete,
+      timeout: options.timeout,
+      debug: options.debug
+    });
+  }).then(function () {
+    return retry(function () {
+      if (typeof options.testPassed === 'string') {
+        return driver.browser().activeWindow().execute(options.testPassed);
+      } else {
+        return Promise.resolve(options.testPassed(driver));
+      }
+    }, 5, '500ms', {debug: options.debug});
+  }).then(function (result) {
+    result = {passed: result, duration: Date.now() - startTime};
+    return retry(function () { return driver.dispose({passed: result.passed}); }, 5, {debug: options.debug}).then(function () {
+      return result;
+    });
+  }, function (err) {
+    err.duration = Date.now() - startTime;
+    return retry(function () { return driver.dispose({passed: false}); }, 2, {debug: options.debug}).then(function () {
+      throw err;
+    }, function () {
+      throw err;
+    });
+  });
+}
+</runDriver>

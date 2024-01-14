@@ -1,0 +1,218 @@
+```javascript
+<unnamedFunction1>
+function(x,y) {
+
+   if(typeof this.mouseInState === undefined) {
+      this.mouseInState = false;
+   }
+
+   <handleWireInteraction>
+   if( this.wireDrawnAt(x,y) ) {
+      if(!this.mouseInState) {
+         this.mouseInState=true;
+         this.onWireIn(x,y);
+      }
+      
+      this.onWireMove(x,y);
+   }
+   else {
+      if(this.mouseInState) {
+         this.mouseInState=false;
+         this.onWireOut(x,y);
+      }
+   }
+   </handleWireInteraction>
+   
+}
+</unnamedFunction1>
+
+<unnamedFunction2>
+function (evt, callback) {
+   <validateEvent>
+   if (!evt || !_.isObject(evt)) {
+      var err = new Error('Please pass a valid event!');
+      debug(err);
+      throw err;
+   }
+   </validateEvent>
+
+   var self = this;
+
+   <initializeRevisionGuard>
+   var workWithRevisionGuard = false;
+   if (
+      this.revisionGuard &&
+      !!this.definitions.event.revision && dotty.exists(evt, this.definitions.event.revision) &&
+      !!this.definitions.event.aggregateId && dotty.exists(evt, this.definitions.event.aggregateId)
+   ) {
+      workWithRevisionGuard = true;
+   }
+
+   if (dotty.get(evt, this.definitions.event.name) === this.options.commandRejectedEventName) {
+      workWithRevisionGuard = false;
+   }
+   </initializeRevisionGuard>
+
+   if (!workWithRevisionGuard) {
+      return this.dispatch(evt, callback);
+   }
+
+   <revisionGuardProcess>
+   this.revisionGuard.guard(evt, function (err, done) {
+      if (err) {
+         debug(err);
+         if (callback) {
+            callback([err]);
+         }
+         return;
+      }
+
+      self.dispatch(evt, function (errs, cmds, sagaModels) {
+         if (errs) {
+            debug(errs);
+            if (callback) {
+               callback(errs, cmds, sagaModels);
+            }
+            return;
+         }
+
+         done(function (err) {
+            if (err) {
+               if (!errs) {
+                  errs = [err];
+               } else if (_.isArray(errs)) {
+                  errs.unshift(err);
+               }
+               debug(err);
+            }
+
+            if (callback) {
+               callback(errs, cmds, sagaModels);
+            }
+         });
+      });
+
+   });
+   </revisionGuardProcess>
+}
+</unnamedFunction2>
+
+<isCounterAfter>
+function isCounterAfter(counter, currentStateCounter) {
+   <calculateDifference>
+   const diff = counter - currentStateCounter
+   </calculateDifference>
+
+   <determineWhetherCounterIsAfter>
+   return diff > 0 || (diff < 0 && Math.abs(diff) > MAX_SAFE_INTEGER / 2)
+   </determineWhetherCounterIsAfter>
+}
+</isCounterAfter>
+
+<classify>
+function classify(str) {
+    <transformString>
+    return str
+        .split('.')
+        .map(part => capitalize(camelize(part)))
+        .join('.');
+    </transformString>
+}
+</classify>
+
+<flipIfOrConditional>
+function flipIfOrConditional(path) {
+   const { node } = path;
+   <flipNegationIfNotLogicalExpression>
+   if (!path.get("test").isLogicalExpression()) {
+     flipNegation(node);
+     return;
+   }
+   </flipNegationIfNotLogicalExpression>
+
+   <flipLogicalTestAndSwapBranches>
+   if (flipExpressions.shouldFlip(node.test)) {
+     node.test = flipExpressions.flip(node.test);
+     [node.alternate, node.consequent] = [
+       node.consequent,
+       node.alternate
+     ];
+   }
+   </flipLogicalTestAndSwapBranches>
+}
+</flipIfOrConditional>
+
+<changeSkin>
+function changeSkin(cls) {
+   <removeExistingSkins>
+   $.each(mySkins, function (i) {
+       $('body').removeClass(mySkins[i])
+   })
+   </removeExistingSkins>
+
+   <addNewSkinAndStorePreference>
+   $('body').addClass(cls)
+   store('skin', cls)
+   return false
+   </addNewSkinAndStorePreference>
+}
+</changeSkin>
+
+<resolveObject>
+function resolveObject(arg) {
+  var resolvedObject = {};
+  <resolveObjectKeyValues>
+  return Object.keys(arg)
+      .reduce(function(soFar, key) {
+        return soFar
+            .then(resolveItem.bind(null, arg[key]))
+            .then(function(value) {
+              resolvedObject[key] = value;
+            });
+      }, Promise.resolve())
+      .then(function() {
+        return resolvedObject;
+      });
+  </resolveObjectKeyValues>
+}
+</resolveObject>
+
+<dotProduct>
+function dotProduct(v) {
+   <calculateDotProduct>
+   return this._x * v.x + this._y * v.y + this._z * (v.z || 1);
+   </calculateDotProduct>
+}
+</dotProduct>
+
+<getDisplayName>
+function getDisplayName(node) {
+   <findDisplayNameProperty>
+   const property = find(
+     node.arguments[0].properties,
+     _node => _node.key.name === 'displayName',
+   );
+   return property && property.value.value;
+   </findDisplayNameProperty>
+}
+</getDisplayName>
+
+<unnamedFunction3>
+function (msgctxt, msgid) {
+   <retrieveMessageOrFallback>
+   var message;
+   if (this.$i18n.getLocaleMessage(this.$i18n.activeLocale)[msgctxt]) {
+      message = this.$i18n.getLocaleMessage(this.$i18n.activeLocale)[msgctxt][msgid];
+   }
+
+   if (!message) {
+      return msgid
+   } else {
+      return message.msgstr[0] || message.msgid
+   }
+   </retrieveMessageOrFallback>
+}
+</unnamedFunction3>
+```
+
+Each of the above functions has been annotated with tags representing their separate responsibilities. When the functions had more than one responsibility or had complex logic, those sections were tagged accordingly. Some simple mathematical operations or direct assignments were not considered separate responsibilities and thus not annotated with their own tags.

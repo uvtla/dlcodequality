@@ -1,0 +1,304 @@
+<add>
+function add(x, y) {
+    if (!retTable[x + "," + y]) {
+      retTable[x + "," + y] = true;
+      retArray.push([x, y]);
+    }
+}
+</add>
+
+<partial>
+function partial(view, opts) {
+	var collection, object, locals, name;
+
+	if (opts) {
+		if (opts.collection) {
+			collection = opts.collection;
+			delete opts.collection;
+		} else if ('length' in opts) {
+			collection = opts;
+			opts = {};
+		}
+
+		if (opts.locals) {
+			locals = opts.locals;
+			delete opts.locals;
+		}
+
+		if ('Object' != opts.constructor.name) {
+			object = opts;
+			opts = {};
+		} else if (opts.object !== undefined) {
+			object = opts.object;
+			delete opts.object;
+		}
+	} else {
+		opts = {};
+	}
+
+	let options = {
+		ENTRY: opts
+	};
+
+	if (locals)
+		options.__proto__ = locals;
+
+	for (var k in this)
+		options[k] = options[k] || this[k];
+
+	name = options.as || resolveObjectName(view);
+
+	var root = _dirname(options.filename),
+		file = lookup(root, view, options),
+		key = file + ':string';
+	if (!file)
+		throw new Error('Could not find partial ' + view);
+
+	var source = options.cache ?
+		cache[key] || (cache[key] = fs.readFileSync(file, 'utf8')) :
+		cache[key] = fs.readFileSync(file, 'utf8');
+
+	options.filename = file;
+
+	options.partial = partial.bind(options);
+
+	
+	function render() {
+		if (object) {
+			if ('string' == typeof name) {
+				options[name] = object;
+			} else if (name === global) {
+				
+			}
+		}
+		var html = ejs.render(source, options);
+		return html;
+	}
+
+	if (collection) {
+		var len = collection.length,
+			buf = '',
+			keys, prop, val, i;
+
+		if ('number' == typeof len || Array.isArray(collection)) {
+			options.collectionLength = len;
+			for (i = 0; i < len; ++i) {
+				val = collection[i];
+				options.firstInCollection = i === 0;
+				options.indexInCollection = i;
+				options.lastInCollection = i === len - 1;
+				object = val;
+				buf += render();
+			}
+		} else {
+			keys = Object.keys(collection);
+			len = keys.length;
+			options.collectionLength = len;
+			options.collectionKeys = keys;
+			for (i = 0; i < len; ++i) {
+				prop = keys[i];
+				val = collection[prop];
+				options.keyInCollection = prop;
+				options.firstInCollection = i === 0;
+				options.indexInCollection = i;
+				options.lastInCollection = i === len - 1;
+				object = val;
+				buf += render();
+			}
+		}
+
+		return buf;
+	} else {
+		return render();
+	}
+}
+</partial>
+
+<unnamed>
+function(json) {
+        var stats, shaved, kb;
+
+        this._showOutputDebug(json.warnings, 'warning', this.console.warn);
+        this._showOutputDebug(json.errors, 'error', this.console.error);
+
+        if (json.statistics) {
+
+            stats = json.statistics;
+            shaved = (100 - (stats.compressedSize / stats.originalSize * 100)).toPrecision(3);
+            kb = function(bytes) {
+                return Math.round(bytes / 10.24) / 100 + ' KB';
+            };
+
+            this.console.info();
+            this.console.info('      Original', kb(stats.originalSize));
+            this.console.info('    Compressed', kb(stats.compressedSize));
+            this.console.info('     + GZipped', kb(stats.compressedGzipSize));
+            this.console.info('       Reduced', shaved + '%');
+            this.console.info();
+        }
+    }
+</unnamed>
+
+<Lock>
+function Lock(consul, opts) {
+  events.EventEmitter.call(this);
+
+  opts = utils.normalizeKeys(opts);
+
+  this.consul = consul;
+  this._opts = opts;
+  this._defaults = utils.defaultCommonOptions(opts);
+
+  if (opts.session) {
+    switch (typeof opts.session) {
+      case 'string':
+        opts.session = { id: opts.session };
+        break;
+      case 'object':
+        opts.session = utils.normalizeKeys(opts.session);
+        break;
+      default:
+        throw errors.Validation('session must be an object or string');
+    }
+  } else {
+    opts.session = {};
+  }
+
+  if (!opts.key) {
+    throw errors.Validation('key required');
+  } else if (typeof opts.key !== 'string') {
+    throw errors.Validation('key must be a string');
+  }
+}
+</Lock>
+
+<_initNavigationMenuItems>
+function _initNavigationMenuItems() {
+    var menu = Menus.getMenu(Menus.AppMenuBar.NAVIGATE_MENU);
+    menu.addMenuItem(NAVIGATION_JUMP_BACK, "", Menus.AFTER, Commands.NAVIGATE_PREV_DOC);
+    menu.addMenuItem(NAVIGATION_JUMP_FWD, "", Menus.AFTER, NAVIGATION_JUMP_BACK);
+}
+</_initNavigationMenuItems>
+
+<unnamed_destroy>
+function() {
+    if (this.imgDiv)  {
+        this.clear();
+        this.imgDiv = null;
+        this.frame = null;
+    }
+    
+    this.asyncRequestId = null;
+    OpenLayers.Tile.prototype.destroy.apply(this, arguments);
+}
+</unnamed_destroy>
+
+<updateAllDeps>
+function updateAllDeps (pPackageObject, pOutdatedPackages = {}, pOptions = {}) {
+  return Object.assign(
+    {},
+    pPackageObject,
+    Object.keys(pPackageObject)
+      .filter(pPkgKey => pPkgKey.includes('ependencies'))
+      .reduce(
+        (pAll, pDepKey) => {
+          pAll[pDepKey] = updateDeps(pPackageObject[pDepKey], pOutdatedPackages, pOptions)
+          return pAll
+        },
+        {}
+      )
+  )
+}
+</updateAllDeps>
+
+<unnamed_loadCSS>
+function(file) {
+    var link = document.createElement("link")
+    link.href = file
+    link.type = "text/css"
+    link.rel = "stylesheet"
+    link.media = "screen,print"
+    document.getElementsByTagName("head")[0].appendChild(link)
+  }
+</unnamed_loadCSS>
+
+<translate>
+function translate(key, options, hasOwnOptions) {
+			var lng = options.lng || 'auto';
+			if (!translations[lng]) {
+				translations[lng] = {};
+			}
+			if (!t) {
+				translations[lng][key] = 'defaultLoadingValue' in options ? options.defaultLoadingValue :
+					'defaultValue' in options ? options.defaultValue :
+					'defaultLoadingValue' in globalOptions ? globalOptions.defaultLoadingValue : key;
+			} else if (!translations[lng][key] or hasOwnOptions) {
+				translations[lng][key] = t(key, options);
+			}
+		}
+</translate>
+
+<processComponent>
+function processComponent (tagged_rule, returnObj) {
+    tagged_rule.metadata = {
+        global: false,
+        complete: false,
+        status: "dev"
+    };
+
+    var metadata_info = getTaggedCommentInfo(tagged_rule);
+    $.extend(tagged_rule.metadata, metadata_info);
+
+    if (tagged_rule.metadata.tags) {
+        var tag;
+        var is_base = false;
+        for (var t = 0; t < tagged_rule.metadata.tags.length; t++) {
+            tag = tagged_rule.metadata.tags[t];
+            if (!returnObj.tags_hash[tag]) {
+                returnObj.tags_hash[tag] = [];
+                returnObj.tags.push(tag);
+            }
+            returnObj.tags_hash[tag].push(tagged_rule);
+
+            if (tag == "base") {
+                is_base = true;
+            }
+        }
+
+        for (var t = 0; t < tagged_rule.metadata.tags.length; t++) {
+            tag = tagged_rule.metadata.tags[t];
+
+            if (is_base) {
+                if (!returnObj.base_tags_hash[tag]) {
+                    returnObj.base_tags_hash[tag] = [];
+                    returnObj.base_tags.push(tag);
+                }
+                returnObj.base_tags_hash[tag].push(tagged_rule.uuid);
+            } else {
+                if (!returnObj.design_tags_hash[tag]) {
+                    returnObj.design_tags_hash[tag] = [];
+                    returnObj.design_tags.push(tag);
+                }
+                returnObj.design_tags_hash[tag].push(tagged_rule.uuid);
+            }
+        }
+    }
+    __processExample(tagged_rule);
+
+    if (
+        tagged_rule.metadata.example &&
+        tagged_rule.metadata.status
+    ) {
+        returnObj.totals.tagged_completed++;
+        tagged_rule.metadata.complete = true;
+    } else {
+        returnObj.incomplete_tagged_rules.push(tagged_rule.uuid);
+    }
+
+    returnObj.totals.tagged_rules++;
+    returnObj.tagged_rules.push(tagged_rule);
+    if (!returnObj.totals.depths_tagged[tagged_rule.depth])
+        returnObj.totals.depths_tagged[tagged_rule.depth] = 0;
+    returnObj.totals.depths_tagged[tagged_rule.depth]++;
+}
+</processComponent>

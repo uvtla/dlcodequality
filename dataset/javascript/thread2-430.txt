@@ -1,0 +1,167 @@
+```javascript
+<validateCurlyBeforeKeyword>
+function validateCurlyBeforeKeyword(curlyToken) {
+  <getToken>
+  const keywordToken = sourceCode.getTokenAfter(curlyToken);
+  </getToken>
+
+  <reportMismatchStyle>
+  if (style === '1tbs' && !astUtils.isTokenOnSameLine(curlyToken, keywordToken)) {
+    context.report({
+      node: curlyToken,
+      messageId: 'nextLineClose',
+      fix: removeNewlineBetween(curlyToken, keywordToken),
+    });
+  }
+  </reportMismatchStyle>
+
+  <reportMismatchStyle>
+  if (style !== '1tbs' && astUtils.isTokenOnSameLine(curlyToken, keywordToken)) {
+    context.report({
+      node: curlyToken,
+      messageId: 'sameLineClose',
+      fix: (fixer) => fixer.insertTextAfter(curlyToken, '\n'),
+    });
+  }
+  </reportMismatchStyle>
+}
+</validateCurlyBeforeKeyword>
+
+<checkEventInArray>
+function (event) {
+  <searchEvent>
+  for (var i = 0; i < this.events.length; i++) {
+    if (event === this.events[i]) {
+      return true;
+    }
+  }
+  </searchEvent>
+  return false;
+}
+</checkEventInArray>
+
+<applyStyleOnLoad>
+function applyStyleOnLoad(reference, popper, options, modifierOptions, state) {
+  <computeReferenceOffsets>
+  const referenceOffsets = getReferenceOffsets(state, popper, reference, options.positionFixed);
+  </computeReferenceOffsets>
+  
+  <computePlacement>
+  const placement = computeAutoPlacement(options.placement, referenceOffsets, popper, reference, options.modifiers.flip.boundariesElement, options.modifiers.flip.padding);
+  </computePlacement>
+
+  <setPlacementAttribute>
+  popper.setAttribute('x-placement', placement);
+  </setPlacementAttribute>
+
+  <setStyles>
+  setStyles(popper, { position: options.positionFixed ? 'fixed' : 'absolute' });
+  </setStyles>
+
+  return options;
+}
+</applyStyleOnLoad>
+
+<containedInOrder>
+function containedInOrder(needle, haystack) {
+  <searchSubsequence>
+  var i, j = 0;
+  for (i = 0; i < needle.length; i++) {
+    while (j < haystack.length && needle[i] !== haystack[j]) j++;
+  }
+  </searchSubsequence>
+  return i === needle.length && j < haystack.length;
+}
+</containedInOrder>
+
+<randomFileOrFolderName>
+function randomFileOrFolderName(len = 32) {
+  <validateAndGenerateName>
+  if (Number.isFinite(len)) {
+    return crypto.randomBytes(Math.ceil(len / 2)).toString('hex').slice(0, len);
+  }
+  </validateAndGenerateName>
+  throw new Error(`illegal argument: ${len}`);
+}
+</randomFileOrFolderName>
+
+<randCol>
+function randCol (r, g, b, a) {
+  <generateRandomColor>
+  return "rgba(" + Math.floor(Math.random() * r).toString() + "," +
+                   Math.floor(Math.random() * g).toString() + "," +
+                   Math.floor(Math.random() * b).toString() + "," + a + ")";
+  </generateRandomColor>
+}
+</randCol>
+
+<isValidCodepoint>
+function(codepoint) {
+  <determineCodepointValidity>
+  return codepoint === 0x09
+    || codepoint === 0x0a
+    || (codepoint >= 0x20 && codepoint <= 0x7e)
+    || (codepoint >= 0xa0 && codepoint <= 0xd7ff)
+    || (codepoint >= 0xe000 && codepoint <= 0xfffd)
+    || (codepoint >= 0x10000 && codepoint <= 0x10ffff);
+  </determineCodepointValidity>
+}
+</isValidCodepoint>
+
+<disableControlsTemporarily>
+function disableControlsTemporarily() {
+  <disableMethods>
+  viewer.controls().disableMethod('touchView');
+  viewer.controls().disableMethod('pinch');
+  </disableMethods>
+  <timeoutEnableMethods>
+  setTimeout(function() {
+    viewer.controls().enableMethod('touchView');
+    viewer.controls().enableMethod('pinch');
+  }, 200);
+  </timeoutEnableMethods>
+}
+</disableControlsTemporarily>
+
+<getRequestWithDeviceIdentifier>
+function (deviceIdentifier, channelIdentifier, params) {
+  <pathConstruction>
+  var path;
+  if (deviceIdentifier) {
+    path = this.constructPath(constants.DEVICES, deviceIdentifier, constants.CHANNELS, channelIdentifier);
+  </pathConstruction>
+    <getRequest>
+    return this.Core.GET(path, params);
+    </getRequest>
+  } else {
+    <rejectRequest>
+    return this.rejectRequest('Bad Request: A device identifier is required.');
+    </rejectRequest>
+  }
+}
+</getRequestWithDeviceIdentifier>
+
+<cleanUpChildren>
+function() {
+  <removeAllChildren>
+  var children = Kinetic.Collection.toCollection(this.children);
+  var child;
+  for (var i = 0; i < children.length; i++) {
+    child = children[i];
+    
+    delete child.parent;
+    child.index = 0;
+    if (child.hasChildren()) {
+      child.removeChildren();
+    }
+    child.remove();
+  }
+  children = null;
+  </removeAllChildren>
+  <resetChildrenCollection>
+  this.children = new Kinetic.Collection();
+  </resetChildrenCollection>
+  return this;
+}
+</cleanUpChildren>
+```

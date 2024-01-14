@@ -1,0 +1,291 @@
+```javascript
+<dropLowerRankedEqualResult>
+function dropLowerRankedEqualResult(res) {
+    <sortingResults>
+    res.sort(cmpByResultThenRank);
+    </sortingResults>
+    <filteringResults>
+    return res.filter(function (resx, index) {
+        var prior = res[index - 1];
+        if (prior &&
+            !(resx.rule && resx.rule.range)
+            && !(res[index - 1].rule && res[index - 1].rule.range)
+            && (resx.matchedString === prior.matchedString)
+            && (resx.rule.bitindex === prior.rule.bitindex)
+            && (resx.rule.wordType === prior.rule.wordType)
+            && (resx.category === res[index - 1].category)) {
+            return false;
+        }
+        return true;
+    });
+    </filteringResults>
+}
+</dropLowerRankedEqualResult>
+
+<handleData>
+function(data){
+
+    var scout;
+    
+    <extractScoutIfMeshExists>
+    if(out.mesh) {
+      scout = out.mesh.scoutid;
+    }
+    </extractScoutIfMeshExists>
+
+    
+    <processTokenData>
+    if(data && data.type == "token"){
+
+      out.token = data.token;
+      data['pinoccio-bridge'] = version+'';
+
+      out.sentToken = true;
+
+    } else if(out.token && !out.sentToken){
+      out.sentToken = true;
+      out.queue({type:"token",token:out.token,_v:version,bridge:version,scout:scout});
+    }
+    </processTokenData>
+
+    
+    <handleReplyOrQueueData>
+    if(data) {
+      if(data.type == 'reply') return out._handleReply(data);
+      out.queue(data);
+    }
+    </handleReplyOrQueueData>
+
+}
+</handleData>
+
+<DocletInitialization>
+function (options) {
+    <initializeProperties>
+    this.tags = [];
+    this.params = [];
+    this.properties = [];
+    this.examples = [];
+    this.borrows = [];
+    this.augments = [];
+    this.includedDocs = [];
+    this.see = [];
+    this.throws = [];
+    this.returns = [];
+    options = options || {};
+    </initializeProperties>
+    <assignOptions>
+    for (var i in options) {
+        if (i in this) {
+            this[i] = options[i];
+        }
+    }
+    </assignOptions>
+}
+</DocletInitialization>
+
+<generateTree>
+function tree(app, options) {
+  <initializeOptionsAndNode>
+  var opts = extend({}, options);
+  var node = {
+    label: getLabel(app, opts),
+    metadata: getMetadata(app, opts)
+  };
+  </initializeOptionsAndNode>
+
+  
+  <constructTree>
+  var names = arrayify(opts.names || ['nodes']);
+  return names.reduce(function(acc, name) {
+    var children = app[name];
+    if (typeof children !== 'object') {
+      return node;
+    }
+
+    
+    var nodes = [];
+    for (var key in children) {
+      var child = children[key];
+      if (typeof child[opts.method] === 'function') {
+        nodes.push(child[opts.method](opts));
+      } else {
+        var res = tree(child, opts);
+        nodes.push(res);
+      }
+    }
+
+    if (nodes.length) {
+      node.nodes = (node.nodes || []).concat(nodes);
+    }
+    return node;
+  }, node);
+  </constructTree>
+
+}
+</generateTree>
+
+<isAncestor>
+function(el, ancestorEl) {
+    <checkAncestry>
+    if (el && el.nodeType === 1 && el.ownerDocument && ancestorEl && (ancestorEl.nodeType === 1 && ancestorEl.ownerDocument && ancestorEl.ownerDocument === el.ownerDocument || ancestorEl.nodeType === 9 && !ancestorEl.ownerDocument && ancestorEl === el.ownerDocument)) {
+      do {
+        if (el === ancestorEl) {
+          return true;
+        }
+        el = el.parentNode;
+      } while (el);
+    }
+    </checkAncestry>
+    return false;
+}
+</isAncestor>
+
+<deleteZookeeperNode>
+function deleteNode(lock, lockPath, callback) {
+  <deletePathWithCallback>
+  lock.client
+    .delete()
+    .guaranteed()
+    .forPath(lockPath, callback);
+  </deletePathWithCallback>
+}
+</deleteZookeeperNode>
+
+<addChainableMethod>
+function addChainableMethod(ctx, type, name, options) {
+  <validateAndAssertParameters>
+  options = options || {};
+
+  assert(isObject(ctx), `${obj2Str(ctx)} is not a valid Object`);
+  assert(isString(name), `${obj2Str(name)} is not a valid String`);
+
+  const hasChainingBehaviour = isFunction(options.chainingBehaviour);
+  const hasMethod = isFunction(options.method);
+  const hasParseArgs = isFunction(options.parseArgs);
+
+  assert(
+    hasMethod || hasChainingBehaviour,
+    `Invalid chainable method \`${name}\`, options method or chainingBehaviour should be provided!`
+  );
+  </validateAndAssertParameters>
+
+  <setUpChainableMethod>
+  options.type = options.type || 'validator';
+  options.allowMethodOverwrite = options.allowMethodOverwrite === false;
+  const defaultFn = options.method || noop;
+
+  
+  ctx[name] = function(fn) {
+    let self = this.clone();
+    let args = cloneArray(arguments);
+
+    
+    if (hasParseArgs) {
+      args = options.parseArgs.apply(null, args);
+    }
+
+    
+    if (hasChainingBehaviour) {
+      self = options.chainingBehaviour.apply(self, args) || self;
+    }
+
+    
+    if (hasMethod) {
+      let _fn = defaultFn;
+
+      
+      
+      if (options.allowMethodOverwrite && options.type === 'validator' && isFunction(fn)) {
+        _fn = fn;
+        args.shift();
+      }
+
+      
+      let locale;
+      if (isLocale(args[args.length - 1])) locale = args.pop();
+
+      
+      let refs = Object.create(null);
+      for (let i = 0; i < args.length; i++) {
+        if (isRef(args[i])) {
+          refs[i] = args[i];
+        }
+      }
+
+      
+      if (!self._methods) self._methods = {};
+
+      self._methods[name] = new Method({
+        name: name,
+        fn: _fn,
+        args: args,
+        refs: refs,
+        type: options.type,
+        path: `${type}.${name}`,
+        locale: locale
+      });
+    }
+  </setUpChainableMethod>
+}
+</addChainableMethod>
+
+<MessageConstructor>
+function Message () {
+
+  if (!(this instanceof Message)) {
+    <handleMessageInstantiation>
+    if (typeof arguments[0] === 'object' && arguments[0] instanceof Message) {
+      debug('message is a message so return it');
+      return arguments[0];
+    }
+    else {
+      debug('creating new message and initializing with arguments');
+      var m = new Message();
+      Message.prototype.initialize.apply(m, slice.call(arguments));
+      return m;
+    }
+    </handleMessageInstantiation>
+  }
+  else {
+    <initializeMessageInstance>
+    this.isMessage = true;
+    if (arguments.length) {
+      debug('initializing with arguments');
+      Message.prototype.initialize.apply(this, slice.call(arguments));
+    }
+    </initializeMessageInstance>
+  }
+
+}
+</MessageConstructor>
+
+<generateRandomColor>
+function generateColor(color) {
+    <colorGeneration>
+    const colorLength = isArray(color) ? color.length : false;
+    const recolor = () => color[floor(random() * colorLength)];
+    return isString(color) ? () => color : colorLength ? recolor : randomColor;
+    </colorGeneration>
+}
+</generateRandomColor>
+
+<reloadSourceList>
+function reload () {
+        <clearSourceRows>
+        sourceRows.innerHTML = ""; 
+        </clearSourceRows>
+        <populateSourceRows>
+        sources.forEach(function (source, index) {
+            if (flavor && !flavor[index]) {
+                return;
+            }
+            sourceRows.appendChild(rowFactory(source, index));
+            updateSourceRow(source);
+        });
+        </populateSourceRows>
+    }
+</reloadSourceList>
+```
+
+In this set of functions, I have annotated different code segments within the functions in tags to indicate whether the function complies with the Single Responsibility Principle or if there are violations. The tags describe each coherent block of instructions and their specific responsibilities, while also identifying whether the function has single or multiple responsibilities.

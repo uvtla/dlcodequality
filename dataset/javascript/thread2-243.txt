@@ -1,0 +1,300 @@
+<withTranspositions>
+function withTranspositions(maxOffset, maxDistance, a, b) {
+  if (a === b)
+    return 0;
+
+  const la = a.length,
+        lb = b.length;
+
+  if (!la || !lb)
+    return Math.max(la, lb);
+
+  let cursorA = 0,
+      cursorB = 0,
+      longestCommonSubsequence = 0,
+      localCommonSubstring = 0,
+      transpositions = 0;
+
+  const offsetArray = [];
+
+  while (cursorA < la && cursorB < lb) {
+    if (a[cursorA] === b[cursorB]) {
+      localCommonSubstring++;
+
+      let isTransposition = false,
+          i = 0;
+
+      while (i < offsetArray.length) {
+        const offset = offsetArray[i];
+
+        if (cursorA <= offset.cursorA || cursorB <= offset.cursorB) {
+          isTransposition = Math.abs(cursorB - cursorA) >= Math.abs(offset.cursorB - offset.cursorA);
+
+          if (isTransposition) {
+            transpositions++;
+          } else {
+            if (!offset.isTransposition) {
+              offset.isTransposition = true;
+              transpositions++;
+            }
+          }
+
+          break;
+        } else {
+          if (cursorA > offset.cursorB && cursorB > offset.cursorA)
+            offsetArray.splice(i, 1);
+          else
+            i++;
+        }
+      }
+
+      offsetArray.push({
+        cursorA,
+        cursorB,
+        isTransposition
+      });
+    } else {
+      longestCommonSubsequence += localCommonSubstring;
+      localCommonSubstring = 0;
+
+      if (cursorA !== cursorB)
+        cursorA = cursorB = Math.min(cursorA, cursorB);
+
+      for (let i = 0; i < maxOffset && (cursorA + i < la || cursorB + i < lb); i++) {
+        if ((cursorA + i < la) && a[cursorA + i] === b[cursorB]) {
+          cursorA += i - 1;
+          cursorB--;
+          break;
+        }
+
+        if ((cursorB + i < lb) && a[cursorA] === b[cursorB + i]) {
+          cursorA--;
+          cursorB += i - 1;
+          break;
+        }
+      }
+    }
+
+    cursorA++;
+    cursorB++;
+
+    if (cursorA >= la || cursorB >= lb) {
+      longestCommonSubsequence += localCommonSubstring;
+      localCommonSubstring = 0;
+      cursorA = cursorB = Math.min(cursorA, cursorB);
+    }
+
+    if (maxDistance) {
+      const tempDistance = (
+        Math.max(cursorA, cursorB) -
+        longestCommonSubsequence +
+        transpositions
+      );
+
+      if (tempDistance === maxDistance)
+        return maxDistance;
+
+      if (tempDistance > maxDistance)
+        return Infinity;
+    }
+  }
+
+  longestCommonSubsequence += localCommonSubstring;
+
+  return Math.max(la, lb) - longestCommonSubsequence + transpositions;
+}
+</withTranspositions>
+
+<toggleDebug>
+function(enable) {
+  if (arguments.length == 1) {
+    isDebugging = enable;
+    if (isDebugging) {
+      this.log = log;
+      this.error = logError;
+      this.log('Debug:Enabled');
+    } else {
+      this.log('Debug:Disabled');
+      this.log = noop;
+      this.error = noop;
+    }
+  }
+
+  return isDebugging;
+}
+</toggleDebug>
+
+<getTemplateFile>
+async function getTemplateFile(templateDir, stackName) {
+  const f = await Promise.any(
+    _.map(['.yml', '.yaml', '.json', ''], async(ext) =>
+      await utils.fileExists(`${path.join(templateDir, stackName)}${ext}`)));
+  if (f) {
+    return f;
+  }
+  throw new Error(`Stack template "${stackName}" not found!`);
+}
+</getTemplateFile>
+
+<makeMove>
+function makeMove(child, afterNode, toIndex) {
+  return {
+    type: ReactMultiChildUpdateTypes.MOVE_EXISTING,
+    content: null,
+    fromIndex: child._mountIndex,
+    fromNode: ReactReconciler.getHostNode(child),
+    toIndex: toIndex,
+    afterNode: afterNode
+  };
+}
+</makeMove>
+
+<!-- This whole function handles the complexities of a model in a StackMob application, violating SRP due to multiple responsibilities like model initialization, binary field handling, querying, and syncing with a remote service. For the sake of demonstration, only certain blocks are annotated that represent some of these distinct responsibilities. -->
+
+<StackMobModel>
+function() {
+  StackMob.Model = Backbone.Model.extend({
+    urlRoot : StackMob.getBaseURL(),
+    getBinaryFields: function() {
+      return this.binaryFields || [];
+    },
+    url : function() {
+      var base = StackMob.getBaseURL();
+      base += this.schemaName;
+      return base;
+    },
+    
+    <initializeModel>
+    getPrimaryKeyField : function() {
+      return this.schemaName + '_id';
+    },
+    constructor : function() {
+      this.setIDAttribute();
+      Backbone.Model.prototype.constructor.apply(this, arguments);
+    },
+    initialize : function(attributes, options) {
+      StackMob.getProperty(this, 'schemaName') || StackMob.throwError('A schemaName must be defined');
+      this.setIDAttribute();
+    },
+    </initializeModel>
+    
+    setIDAttribute : function() {
+      this.idAttribute = this.getPrimaryKeyField();
+    },
+    
+    <parseData>
+    parse : function(data, xhr) {
+      if(!data || (data && (!data['text'] || data['text'] === '')))
+        return data;
+
+      var attrs = JSON.parse(data['text']);
+
+      return attrs;
+    },
+    </parseData>
+
+    <remoteSync>
+    sync : function(method, model, options) {
+      StackMob.sync.call(this, method, this, options);
+    },
+    </remoteSync>
+
+    
+    <otherModelResponsibilities>
+    /* Omitted sections here due to length, but they handle responsibilities like querying, binary file manipulation, incrementing/decrementing logic on save, etc. */
+    </otherModelResponsibilities>
+    
+  });
+}
+</StackMobModel>
+<!-- End of StackMobModel function annotations -->
+
+<renderTemplate>
+function(template, controller, locals) {
+  var deferred = $q.defer();
+  $element.html(template);
+
+  <compileTemplate>
+  var link = $compile($element.contents());
+  </compileTemplate>
+
+  <applyController>
+  if(controller) {
+    var _locals = angular.extend({}, locals || {}, {
+      $scope: scope.$parent
+    });
+    $controller(controller, _locals);
+  }
+  </applyController>
+
+  link(scope.$parent);
+
+  deferred.resolve();
+  return deferred.promise;
+}
+</renderTemplate>
+
+<augmentConfigBasic>
+function augmentConfigBasic(
+  stylelint,
+  config,
+  configDir,
+  allowOverrides
+) {
+  return Promise.resolve()
+    .then(() => {
+      if (!allowOverrides) return config;
+
+      <overrideConfiguration>
+      return _.merge(config, stylelint._options.configOverrides);
+      </overrideConfiguration>
+    })
+    .then(augmentedConfig => {
+      <extendConfigFunction>
+      return extendConfig(stylelint, augmentedConfig, configDir);
+      </extendConfigFunction>
+    })
+    .then(augmentedConfig => {
+      <absolutizePathsFunction>
+      return absolutizePaths(augmentedConfig, configDir);
+      </absolutizePathsFunction>
+    });
+}
+</augmentConfigBasic>
+
+<hexNumber>
+function hexNumber(char) {
+  var code = char.toLowerCase().charCodeAt(0);
+  if (code >= 48 && code <= 57) {
+    return code - 48;
+  }
+  if (code >= 97 && code <= 102) {
+    return code - 87;
+  }
+  return code;
+}
+</hexNumber>
+
+<discoverMDSCHEMA_HIERARCHIES>
+function(options){
+  var request = _applyProps(options, {
+    requestType: Xmla.MDSCHEMA_HIERARCHIES
+  }, true);
+  return this.discover(request);
+}
+</discoverMDSCHEMA_HIERARCHIES>
+
+<checkIfMethodHasThisArg>
+function isMethodWhichHasThisArg(node) {
+  for (
+    let currentNode = node;
+    currentNode.type === "MemberExpression" && !currentNode.computed;
+    currentNode = currentNode.property
+  ) {
+    if (currentNode.property.type === "Identifier") {
+      return arrayMethodPattern.test(currentNode.property.name);
+    }
+  }
+  return false;
+}
+</checkIfMethodHasThisArg>

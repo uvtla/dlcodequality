@@ -1,0 +1,280 @@
+```javascript
+<calculatePosition>
+function (horiz, pos, tickmarkOffset, old) {
+    var axis = this.axis,
+        chart = axis.chart,
+        cHeight = (old && chart.oldChartHeight) || chart.chartHeight;
+
+    return {
+        x: horiz ?
+            axis.translate(pos + tickmarkOffset, null, null, old) + axis.transB :
+            axis.left + axis.offset + (axis.opposite ? ((old && chart.oldChartWidth) || chart.chartWidth) - axis.right - axis.left : 0),
+
+        y: horiz ?
+            cHeight - axis.bottom + axis.offset - (axis.opposite ? axis.height : 0) :
+            cHeight - axis.translate(pos + tickmarkOffset, null, null, old) - axis.transB
+    };
+}
+</calculatePosition>
+
+<createEntityActions>
+function createCreateEntityActions(action, getState) {
+    <getActionData>
+    const dataPath = get(action, 'meta.dataPath');
+    const schema = get(action, 'meta.schema');
+    const skipNormalization = get(action, 'meta.skipNormalization');
+    const data = skipNormalization ? get(action, dataPath) : normalizeData(schema, get(action, dataPath));
+    </getActionData>
+  
+    <mapEntitiesToActions>
+    return Object.keys(data.entities)
+        .map((key) => ({ entities: data.entities[key], key }))
+        .reduce((memo, entitiesAndKey) => [...memo, ...extractEntities(entitiesAndKey)], [])
+        .map((entity) => ({ ...entity, oldEntity: getFromState(getState(), entity.key, entity.entity.id) }))
+        .sort(sortMainFirst(schema))
+        .map((payload) => {
+            if (payload.oldEntity) {
+                return {
+                    type: `@@entman/UPDATE_ENTITY_${payload.key.toUpperCase()}`,
+                    payload,
+                };
+            }
+            return {
+                type: `@@entman/CREATE_ENTITY_${payload.key.toUpperCase()}`,
+                payload,
+            };
+        });
+    </mapEntitiesToActions>
+}
+</createEntityActions>
+
+<convertToDataString>
+function(oData) {
+    if (!lang.isValue(oData)) {
+        return null;
+    }
+
+    var string = oData + "";
+
+    if (lang.isString(string)) {
+        return string;
+    } else {
+        YAHOO.log("Could not convert data " + lang.dump(oData) + " to type String", "warn", this.toString());
+        return null;
+    }
+}
+</convertToDataString>
+
+<isDataAllowed>
+function(elem) {
+    var noData = elem.nodeName && jQuery.noData[elem.nodeName.toLowerCase()];
+
+    return !noData || noData !== true && elem.getAttribute("classid") === noData;
+}
+</isDataAllowed>
+
+<hideLoading>
+function () {
+    var options = this.options,
+        loadingDiv = this.loadingDiv;
+
+    if (loadingDiv) {
+        animate(loadingDiv, {
+            opacity: 0
+        }, {
+            duration: options.loading.hideDuration || 100,
+            complete: function () {
+                css(loadingDiv, {
+                    display: NONE
+                });
+            }
+        });
+    }
+    this.loadingShown = false;
+}
+</hideLoading>
+
+<createDocumentElement>
+function create(type, nameOrValue) {
+    if (type == 9) {
+        return document.implementation.createDocument(null, null);
+    } else if (type == 10) {
+        return document.implementation.createDocumentType(...nameOrValue);
+    } else if (type == 11) {
+        return document.createDocumentFragment();
+    } else if ((0, _type.isBranch)(type)) {
+        <createElement>
+        const name = type == 1 ? nameOrValue : "l3-" + constructors[type];
+        var elem = document.createElement(name);
+        if (type == 14) elem.name = nameOrValue;
+        return elem;
+        </createElement>
+    } else if (type == 2) {
+        return document.createAttribute(nameOrValue);
+    } else if (type == 3) {
+        return document.createTextNode(nameOrValue);
+    } else if (type == 4) {
+        <createLinkElement>
+        const node = document.createElement("link");
+        node.setAttribute("rel", "import");
+        node.setAttribute("href", nameOrValue);
+        return node;
+        </createLinkElement>
+    } else if (type == 7) {
+        return document.createProcessingInstruction(...nameOrValue);
+    } else if (type == 8) {
+        return document.createComment(nameOrValue);
+    }
+}
+</createDocumentElement>
+
+<formatBeautifyWarnings>
+function beautifyWarnings(configFilePath, warnings) {
+    if (warnings.length === 0) {
+        return;
+    }
+    const intro = `⚠️ ts-config-webpack-plugin found ${warnings.length} warning${
+    warnings.length ? 's' : ''
+    } in "${configFilePath}".`;
+    return intro + '\n' + warnings.map((warning) => 'Warning: \n   ' + warning.split('\n').join('\n   ')).join('\n\n');
+}
+</formatBeautifyWarnings>
+
+<updateDocumentOptions>
+function(options) {
+    var baseTag,
+        href;
+
+    <updateBaseUrl>
+    try {
+        if (!options.baseUrl && this.document && this.document.location) {
+            this.options.baseUrl = this.document.location.href;
+        }
+    } catch (e) {}
+    </updateBaseUrl>
+
+    <setBaseTag>
+    baseTag = modules.domUtils.querySelector(this.document, 'base');
+    if (baseTag) {
+        href = modules.domUtils.getAttribute(baseTag, 'href');
+        if (href) {
+            this.options.baseUrl = href;
+        }
+    }
+    </setBaseTag>
+
+    var path,
+        newDocument,
+        newRootNode;
+
+    <updateDocumentRoot>
+    path = modules.domUtils.getNodePath(this.rootNode);
+    newDocument = modules.domUtils.cloneDocument(this.document);
+    newRootNode = modules.domUtils.getNodeByPath(newDocument, path);
+    </updateDocumentRoot>
+
+    <setNewDocumentAndRoot>
+    if (newDocument && newRootNode) {
+        this.document = newDocument;
+        this.rootNode = newRootNode;
+    }
+    </setNewDocumentAndRoot>
+
+    <includeAdditions>
+    if (this.addIncludes) {
+        this.addIncludes(this.document);
+    }
+    </includeAdditions>
+
+    return (this.rootNode && this.document);
+}
+</updateDocumentOptions>
+
+<validatorHelper>
+function(attrName) {
+    return function(err, validationErrMsg) {
+        ranCount++
+        if (returned) return
+
+        <handleError>
+        if (err) {
+            returned = true
+            return done(err)
+        }
+        </handleError>
+
+        <handleValidationError>
+        if (validationErrMsg) {
+            self._merge(validationErrors, validationErrMsg, (prefix || '') + '.' + attrName)
+            isValid = false
+        }
+        </handleValidationError>
+
+        if (ranCount === attrNames.length) _runAfter()
+    }
+}
+</validatorHelper>
+
+<lexerNextToken>
+function() {
+    if (this.done) {
+        return this.EOF;
+    }
+    if (!this._input) {
+        this.done = true;
+    }
+
+    var token,
+        match,
+        tempMatch,
+        index;
+    if (!this._more) {
+        this.yytext = '';
+        this.match = '';
+    }
+    var rules = this._currentRules();
+    for (var i = 0; i < rules.length; i++) {
+        tempMatch = this._input.match(this.rules[rules[i]]);
+        if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
+            match = tempMatch;
+            index = i;
+            if (this.options.backtrack_lexer) {
+                <backtrackMatching>
+                token = this.test_match(tempMatch, rules[i]);
+                if (token !== false) {
+                    return token;
+                } else if (this._backtrack) {
+                    match = false;
+                    continue;
+                } else {
+                    return false;
+                }
+                </backtrackMatching>
+            } else if (!this.options.flex) {
+                break;
+            }
+        }
+    }
+    if (match) {
+        <testTokenMatch>
+        token = this.test_match(match, rules[index]);
+        if (token !== false) {
+            return token;
+        }
+        return false;
+        </testTokenMatch>
+    }
+    if (this._input === "") {
+        return this.EOF;
+    } else {
+        <reportLexicalError>
+        return this.parseError('Lexical error on line ' + (this.yylineno + 1) + '. Unrecognized text.\n' + this.showPosition(), {
+            text: "",
+            token: null,
+            line: this.yylineno
+        });
+        </reportLexicalError>
+    }
+}
+</lexerNextToken>
+```

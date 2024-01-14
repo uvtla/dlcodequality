@@ -1,0 +1,395 @@
+```javascript
+<_mapOne>
+function _mapOne(name) {
+      const parts = name.split(".");
+      let current = _this.parent.model;
+      let current_name = "";
+      while (parts.length) {
+        current_name = parts.shift();
+        current = current[current_name];
+      }
+      return {
+        name,
+        model: current,
+        type: current ? current.getType() : null
+      };
+    }
+</_mapOne>
+
+<anonymous_function>
+function(req, res, next) {
+  <set_default_origin>
+  if (req.headers.origin === undefined) {
+      res.setHeader('Access-Control-Allow-Origin', "*");
+  } else {
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  }
+  </set_default_origin>
+  
+  <set_headers>
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  </set_headers>
+  
+  <log_request>
+  console.log(req.method + " on " + req.originalUrl);
+  </log_request>
+  
+  <handle_options>
+  if (req.method === "OPTIONS") {
+      res.setHeader('Access-Control-Allow-Headers', 'content-type');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.setHeader('Content-Length', '0');
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      grunt.file.read(req.originalUrl.split("?")[0]);
+      
+      res.end("200");
+      
+  } else {
+      next();
+  }
+  </handle_options>
+}
+</anonymous_function>
+
+<skladConnection_get>
+function skladConnection_get() {
+    const isMulti = (arguments.length === 1 && typeof arguments[0] === 'object');
+    const objStoreNames = isMulti ? Object.keys(arguments[0]) : [arguments[0]];
+
+    <validate_stores>
+    const allObjStoresExist = checkContainingStores.call(this, objStoreNames);
+    if (!allObjStoresExist) {
+        const err = createError('NotFoundError', `Database ${this.database.name} (version ${this.database.version}) doesn't contain all needed stores`);
+        return Promise.reject(err);
+    }
+    </validate_stores>
+
+    let result = {};
+    let data, abortErr;
+
+    <prepare_data>
+    if (isMulti) {
+        data = arguments[0];
+    } else {
+        data = {};
+        data[arguments[0]] = arguments[1];
+    }
+
+    objStoreNames.forEach(function (objStoreName) {
+        result[objStoreName] = [];
+    });
+    </prepare_data>
+
+    return new Promise((resolve, reject) => {
+        let transaction;
+
+        
+        <initiate_transaction>
+        try {
+            transaction = this.database.transaction(objStoreNames, TRANSACTION_READONLY);
+        } handle_transaction_error {
+          } 
+
+        transaction.oncomplete = transaction.onerror = transaction.onabort = function skladConnection_get_onFinish(evt) {
+            const err = abortErr || evt.target.error;
+            const isSuccess = !err && evt.type === 'complete';
+
+            if (isSuccess) {
+                resolve(isMulti ? result : result[objStoreNames[0]]);
+            } else {
+                reject(ensureError(err));
+            }
+
+            if (evt.type === 'error') {
+                evt.preventDefault();
+            }
+        };
+        </initiate_transaction>
+
+        for (let objStoreName in data) {
+            const objStore = transaction.objectStore(objStoreName);
+            const options = data[objStoreName] || {};
+            const direction = options.direction || skladAPI.ASC;
+            const range = options.range instanceof IDBKeyRangeRef ? options.range : null;
+
+            <initialize_object_store_request>
+            let useGetAll = false;
+            let iterateRequest;
+
+            if (supportsObjStoreGetAll) {
+                useGetAll = Object.keys(options).every(key => (key !== 'index' && key !== 'direction'));
+            }
+            if (options.index) {
+                if (!objStore.indexNames.contains(options.index)) {
+                    abortErr = createError('NotFoundError', `Object store ${objStore.name} doesn't contain "${options.index}" index`);
+                    return;
+                }
+
+                try {
+                    iterateRequest = objStore.index(options.index).openCursor(range, direction);
+                } catch (ex) {
+                    abortErr = ex;
+                    return;
+                }
+            } else {
+                <use_get_all>
+                if (useGetAll) {
+                  // The get all logic is a distinct responsibility
+                }
+                </use_get_all>
+                <use_cursor>
+                else {
+                    try {
+                        iterateRequest = objStore.openCursor(range, direction);
+                    } catch (ex) {
+                        abortErr = ex;
+                        return;
+                    }
+                }
+                </use_cursor>
+            }
+            </initialize_object_store_request>
+            
+            <handle_iteration>
+            let cursorPositionMoved = false;
+
+            iterateRequest.onsuccess = function (evt) {
+                const cursor = evt.target.result;
+
+                
+                if (!cursor) {
+                    return;
+                }
+
+                if (options.offset && !cursorPositionMoved) {
+                    cursorPositionMoved = true;
+                    cursor.advance(options.offset);
+
+                    return;
+                }
+
+                result[objStoreName].push({
+                    key: cursor.key,
+                    value: cursor.value
+                });
+
+                if (options.limit && options.limit === result[objStoreName].length) {
+                    return;
+                }
+
+                cursor.continue();
+            };
+            </handle_iteration>
+        }
+    });
+}
+</skladConnection_get>
+
+<getExpandedQuery>
+function getExpandedQuery(basicQuery) {
+  <check_existing_query>
+  let expandedQuery = [];
+  const needsExpandedQuery = isExpandableQuery(basicQuery);
+  </check_existing_query>
+
+  <process_query_expansion>
+  if (!needsExpandedQuery) {
+    expandedQuery = basicQuery;
+  } else {
+    _.each(basicQuery, (query, i) => {
+      let thisNonExpandableQueryWasAlreadyCloned = false;
+      const isExpandableQueryLine = isAlongExpandableQueryLine(query);
+      _.each(query.nested.query.bool.must, (innerQuery, mustI) => {
+        const matchObj = innerQuery.nested.query.match;
+        const values = _.values(matchObj);
+        if (values.length > 1) {
+          console.warn('...warning message...');
+          throw Error('The query expansion algorithm does not expect this query form.');
+        }
+        if (_.isArray(values[0])) {
+          _.each(values[0], (value) => {
+            const key = _.keys(matchObj)[0];
+            const newQuery = _.cloneDeep(basicQuery);
+            const relatedMatchObj = newQuery[i].nested.query.bool.must[mustI].nested.query.match;
+            relatedMatchObj[key] = value;
+            expandedQuery.push(newQuery[i]);
+          });
+        } else {
+          <handle_non_expandable_query>
+          if (!isExpandableQueryLine && !thisNonExpandableQueryWasAlreadyCloned) {
+            
+            expandedQuery.push(basicQuery[i]);
+            thisNonExpandableQueryWasAlreadyCloned = true;
+          }
+          </handle_non_expandable_query>
+        }
+      });
+    });
+  }
+  </process_query_expansion>
+
+  return expandedQuery;
+}
+</getExpandedQuery>
+
+<resolveAppBuild>
+function resolveAppBuild(appTsConfigPath) {
+  const outDir = getAppBuildFolder(appTsConfigPath);
+  const buildPath = path.join(path.dirname(appTsConfigPath), outDir);
+  return buildPath;
+}
+</resolveAppBuild>
+
+<anonymous_function_animation>
+function (domElt, refreshArgs) {
+  
+  <initialize_animation>
+  var animation = this._getAnimation();
+  this._animating = true;
+  var newSection = this._domElt.cloneNode(false);
+  </initialize_animation>
+  
+  <setup_dom>
+  domElt.id = null;
+  newSection.className += " not-visible";
+  newSection = ariaUtilsDom.replaceHTML(newSection, this.html);
+  var from = domElt;
+  var to = newSection;
+  ariaUtilsDom.insertAdjacentElement(from, "afterEnd", newSection);
+  this.setDom(newSection);
+  </setup_dom>
+
+  <configure_animation>
+  var animSemaphore = false;
+  var cfg = {
+      
+      to : to,
+      type : 3,
+      reverse : animation.animIn.reverse,
+      hiddenClass : 'not-visible'
+  };
+
+  var cfg2 = {
+      from : from,
+      
+      type : 3,
+      reverse : animation.animOut.reverse,
+      hiddenClass : 'not-visible'
+  };
+  </configure_animation>
+
+  <animate_elements>
+  var anim = new ariaUtilsCssAnimations();
+  var anim2 = new ariaUtilsCssAnimations();
+
+  var animEnd = {
+      "animationend" : function () {
+          if (animSemaphore) {
+              ariaUtilsDom.removeElement(from);
+              this._animating = false;
+              this.tplCtxt.onRefreshAnimationEnd(refreshArgs);
+          } else {
+              animSemaphore = true;
+          }
+      },
+      scope : this
+  };
+
+  anim.$on(animEnd);
+  anim2.$on(animEnd);
+
+  anim.start(animation.animIn.type, cfg);
+  anim2.start(animation.animOut.type, cfg2);
+  </animate_elements>
+}
+</anonymous_function_animation>
+
+<anonymous_function>
+function(_href){
+  
+  
+  <lock_management>
+  if (!!_locked){
+      _locked = !1;
+      return;
+  }
+  </lock_management>
+  
+  var _event = {
+      oldValue:_location,
+      newValue:_getLocation()
+  };
+  
+  <modify_state>
+  if (!!location.ignored){
+      location.ignored = !1;
+  }else{
+      _v._$dispatchEvent(
+          location,'beforeurlchange',_event
+      );
+      if (_event.stopped){
+          if (!!_location){
+              _locked = !0;
+              _setLocation(_location.href,!0);
+          }
+          return;
+      };
+  }
+  
+  _url = _ctxt.location.href;
+  _location = _event.newValue;
+  _v._$dispatchEvent(
+      location,'urlchange',_location
+  );
+  _h.__pushHistory(_location.href);
+  </modify_state>
+}
+</anonymous_function>
+
+<convertToJson>
+function convertToJson(callback) {
+    var output = new File(file);
+    output.contents = new Buffer(JSON.stringify(spritesheet, null, '\t'));
+    output.path = file;
+    this.push(output);
+    callback();
+  }
+</convertToJson>
+
+<queryImport>
+function queryImport(styles) {
+    if (styles.indexOf('@import') < 0) return []
+    const arr = []
+    const ast = csstree.parse(styles);
+    <extract_imports>
+    csstree.walk(ast, {
+        enter: function (node) {
+            if (node.type === 'Atrule' && node.name === 'import') {
+                const pat = node.prelude.children.head.data.value
+                arr.push(pat.substring(1, pat.length - 1))
+            }
+        }
+    })
+    </extract_imports>
+    return arr
+}
+</queryImport>
+
+<function>
+function(value, attr, required, model, computed) {
+        var isRequired = _.isFunction(required) ? required.call(model, value, attr, computed) : required;
+        
+        <handle_optional_field>
+        if(!isRequired && !hasValue(value)) {
+          return false; 
+        }
+        </handle_optional_field>
+        
+        <handle_required_field>
+        if (isRequired && !hasValue(value)) {
+          return this.format(getMessageKey(this.msgKey, defaultMessages.required), this.formatLabel(attr, model));
+        }
+        </handle_required_field>
+      }
+</function>
+```

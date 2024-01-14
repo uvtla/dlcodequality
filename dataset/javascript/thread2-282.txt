@@ -1,0 +1,274 @@
+```javascript
+<getCacheCtor>
+function getCacheCtor(cache){
+  <checkCacheAndReturn>
+  if (!cache){
+    return;
+  }
+  </checkCacheAndReturn>
+
+  <checkCacheFunctionality>
+  if (typeof cache === 'function'){
+    return cache;
+  }
+  </checkCacheFunctionality>
+
+  <defineRuntimeLoad>
+  function runtimeLoad(moduleRef){
+    return require(moduleRef);
+  }
+  </defineRuntimeLoad>
+
+  <defineCacheCtors>
+  var cacheCtors = {
+    disabled: runtimeLoad('./DisabledCache'),
+    memory: runtimeLoad('./MemoryStore'),
+    memcached: runtimeLoad('./MemcachedStore'),
+    redis: runtimeLoad('./RedisStore')
+  };
+  </defineCacheCtors>
+
+  <validateAndReturnCache>
+  if (!(cache in cacheCtors)){
+    throw new Error('Unsupported cache provider: ' + cache);
+  }
+  </validateAndReturnCache>
+
+  return cacheCtors[cache];
+}
+</getCacheCtor>
+
+<removeClass>
+function(el, c) {
+  <modifyClassList>
+  if (el.classList) {
+    el.classList.remove(c);
+  } else {
+    <updateClassName>
+    el.className = el.className.replace(c, '').replace(/^\s+|\s+$/g, '');
+    </updateClassName>
+  }
+  </modifyClassList>
+}
+</removeClass>
+
+<evalBoard>
+function(evalfunc, code){
+  var result = true, bd = this.board;
+  <evaluateBoardRows>
+  allloop: do{
+    for(var by=1; by<=bd.maxby; by+=2){
+      var clist = bd.cellinside(bd.minbx+1, by, bd.maxbx-1, by);
+      if( evalfunc.call(this, clist) ){ continue;}
+      result = false;
+      if(this.checkOnly){ break allloop;}
+    }
+    </evaluateBoardRows>
+
+    <evaluateBoardColumns>
+    for(var bx=1; bx<=bd.maxbx; bx+=2){
+      var clist = bd.cellinside(bx, bd.minby+1, bx, bd.maxby-1);
+      if( evalfunc.call(this, clist) ){ continue;}
+      result = false;
+      if(this.checkOnly){ break allloop;}
+    }
+    </evaluateBoardColumns>
+  } while(0);
+  </evaluateBoardRows>
+
+  <updateResult>
+  if(!result){
+    this.failcode.add(code);
+  }
+  </updateResult>
+}
+</evalBoard>
+
+<runDatabaseSetup>
+async function run () {
+  const {host, port, database, username: user, password, idleTimeoutMillis} = config()
+  <initializeClient>
+  const client = new Client({host, port, database: 'postgres', user, password, idleTimeoutMillis})
+  </initializeClient>
+
+  <manageDatabase>
+  await client.connect()
+  await client.query(`DROP DATABASE IF EXISTS ${database}`)
+  await client.query(`CREATE DATABASE ${database}`)
+  await client.end()
+  </manageDatabase>
+
+  <logSuccess>
+  console.log(`\x1b[32m\u2714 Database \x1b[1m${database}\x1b[22m created successfully!\x1b[0m`)
+  </logSuccess>
+}
+</runDatabaseSetup>
+
+<setupCompilerHooks>
+function(compiler){
+  bindCallbackMethod(compiler, "compilation",
+                     this, this.addDependencyFactories);
+  bindCallbackMethod(compiler.parser, "expression window.angular",
+                     this, this.addAngularVariable);
+  bindCallbackMethod(compiler.parser, "expression angular",
+                     this, this.addAngularVariable);
+  bindCallbackMethod(compiler.parser, "call angular.module",
+                     this, this.parseModuleCall);
+  bindCallbackMethod(compiler.resolvers.normal, "module-module",
+                     this, this.resolveModule);
+}
+</setupCompilerHooks>
+
+<handleGolrResponse>
+function(request_data, response_hook) {
+  <setSuccessCallback>
+  anchor.jq_vars['success'] = function(json_data){
+    var retlist = [];
+    var resp = new bbop.golr.response(json_data);
+    </setSuccessCallback>
+
+    <initializeVariables>
+    result_count = null;
+    return_count = null;
+    </initializeVariables>
+
+    <processResponseData>
+    if( resp.success() ){
+      result_count = resp.total_documents();
+      return_count = resp.documents().length;
+
+      loop(resp.documents(), function(doc){
+        <generateLabel>
+        var lbl = label_tt.fill(doc);
+        </generateLabel>
+
+        <generateValue>
+        var val = value_tt.fill(doc);
+        </generateValue>
+
+        <createAndPushItem>
+        var item = {
+          'label': lbl,
+          'value': val,
+          'document': doc
+        };
+        retlist.push(item);
+        </createAndPushItem>
+      });
+    }
+    </processResponseData>
+
+    <callResponseHook>
+    response_hook(retlist);
+    </callResponseHook>
+  };
+
+  <externalQuery>
+  anchor.set_comfy_query(request_data.term);
+  anchor.JQ.ajax(anchor.get_query_url(), anchor.jq_vars);
+  </externalQuery>
+}
+</handleGolrResponse>
+
+<SensorConstructor>
+function Sensor(sensorInfo, options) {
+  <initializeProperties>
+  var props = this.properties = this.constructor.properties;
+  var id = sensorInfo.id;
+  </initializeProperties>
+
+  <setId>
+  if (id) {
+    this.id = id;
+  } else {
+    if (props && props.id) {
+      this.id = template(props.id, options);
+    }
+  }
+  </setId>
+
+  <setOtherDetails>
+  this.info = sensorInfo;
+  this.options = _.defaults(options || {}, sensorInfo.options);
+  this.model = sensorInfo.model;
+  this.device = sensorInfo.device;
+  </setOtherDetails>
+
+  <initializeEventEmitter>
+  EventEmitter.call(this);
+  </initializeEventEmitter>
+}
+</SensorConstructor>
+
+<numberOfBits>
+function nbits(x) {
+  var n = 1, t;
+  <calculateBits>
+  if ((t = x >>> 16) != 0) {
+    x = t;
+    n += 16;
+  }
+  if ((t = x >> 8) != 0) {
+    x = t;
+    n += 8;
+  }
+  if ((t = x >> 4) != 0) {
+    x = t;
+    n += 4;
+  }
+  if ((t = x >> 2) != 0) {
+    x = t;
+    n += 2;
+  }
+  if ((t = x >> 1) != 0) {
+    x = t;
+    n += 1;
+  }
+  </calculateBits>
+  return n;
+}
+</numberOfBits>
+
+<linkUserWithFacebook>
+function(facebookAccessToken, options) {
+  <setupOptions>
+  options = options || {};
+  options['data'] = options['data'] || {};
+  _.extend(options['data'], {
+    "fb_at" : facebookAccessToken,
+    "token_type" : "mac"
+  });
+  </setupOptions>
+
+  <syncUser>
+  (this.sync || Backbone.sync).call(this, "linkUserWithFacebook", this, options);
+  </syncUser>
+}
+</linkUserWithFacebook>
+
+<createRequestTimeoutError>
+function createRequestTimeoutErr(opts, req) {
+  assert.object(opts, 'opts');
+  assert.object(req, 'req');
+
+  <getErrorInfoAndMessage>
+  var errInfo = createErrInfo(opts, req);
+  var errMsg = [
+    opts.method,
+    'request to',
+    errInfo.fullUrl,
+    'failed to complete within',
+    opts.requestTimeout + 'ms'
+  ].join(' ');
+  </getErrorInfoAndMessage>
+
+  <constructError>
+  return new ERR_CTOR.RequestTimeoutError({
+    info: _.assign(errInfo, {
+      requestTimeout: opts.requestTimeout
+    })
+  }, '%s', errMsg);
+  </constructError>
+}
+</createRequestTimeoutError>
+```

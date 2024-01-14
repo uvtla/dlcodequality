@@ -1,0 +1,246 @@
+```javascript
+<getPropertyDescriptor>
+function getPropertyDescriptor(target, key, dsc) {
+    const defaultDescriptor = { enumerable: true, configurable: true, writable: true };
+    return (target instanceof Function) 
+        ? new KeyPropertyDescriptor().key(key).descriptor(dsc || Object.getOwnPropertyDescriptor(target, key) || defaultDescriptor) 
+        : new KeyPropertyDescriptor().key(key).descriptor(dsc || Reflect.getMetadata('design:descriptor', target, key) || defaultDescriptor); 
+}
+</getPropertyDescriptor>
+```
+
+```javascript
+<meshSetString>
+function meshSetString (tiles) {
+    return JSON.stringify(
+        Object.entries(tiles).map(([,t]) => {
+            return Object.entries(t.meshes).map(([,s]) => {
+                return s.map(m => m.created_at);
+            });
+        })
+    );
+}
+</meshSetString>
+```
+
+```javascript
+<update>
+function update (client) {
+  return function update (pushApp) {
+    <requestSetup>
+    const req = {
+      url: `${client.baseUrl}/rest/applications/${pushApp.pushApplicationID}`,
+      body: pushApp,
+      method: 'PUT'
+    };
+    </requestSetup>
+
+    <handleResponse>
+    return request(client, req)
+      .then((response) => {
+        if (response.resp.statusCode !== 204) {
+          return Promise.reject(response.body);
+        }
+
+        return Promise.resolve(response.body);
+      });
+    </handleResponse>
+  };
+}
+</update>
+```
+
+```javascript
+<liftChildNodes>
+function liftChildNodes(oParent, oWithControl, oTarget) {
+    <visitAndLift>
+    return visitChildNodes(oParent, oWithControl).then(function () {
+        var oChild;
+
+        oTarget = oTarget || oParent;
+        while ((oChild = oParent.firstChild)) {
+            oTarget.parentNode.insertBefore(oChild, oTarget);
+        }
+    });
+    </visitAndLift>
+}
+</liftChildNodes>
+```
+
+```javascript
+<function>
+function(hljs) {
+  <defineCPPKeywords>
+  var CPP_KEYWORDS = {
+    // Keywords and built-ins are defined here...
+  };
+  </defineCPPKeywords>
+  
+  <returnHighlightConfiguration>
+  return {
+    aliases: ['c', 'h', 'c++', 'h++'],
+    keywords: CPP_KEYWORDS,
+    illegal: '</',
+    contains: [
+      // Highlight rules are defined here...
+    ]
+  };
+  </returnHighlightConfiguration>
+}
+</function>
+```
+
+```javascript
+<logMessage>
+function logMessage(message)
+    {
+        <trackRepeatMessages>
+        var repeatCount = 1;
+        if (message == WebInspector.log.lastMessage)
+            repeatCount = WebInspector.log.repeatCount + 1;
+
+        WebInspector.log.lastMessage = message;
+        WebInspector.log.repeatCount = repeatCount;
+        </trackRepeatMessages>
+
+        <createRemoteObject>
+        message = new WebInspector.RemoteObject.fromPrimitiveValue(message);
+        </createRemoteObject>
+
+        <constructConsoleMessage>
+        var msg = new WebInspector.ConsoleMessage(
+            // WebInspector.ConsoleMessage configurations...
+        );
+        </constructConsoleMessage>
+
+        <addMessageToConsole>
+        self.console.addMessage(msg);
+        </addMessageToConsole>
+    }
+</logMessage>
+```
+
+```javascript
+<initQuery>
+function initQuery (args) {
+    
+    <prepareQueryMethod>
+    var methodName = `${this.name}Query`
+    var methodSignature = `${this.moduleName}.${methodName}`
+    var model = this
+    </prepareQueryMethod>
+    
+    <createQueryFunction>
+    this.query = immutable.method(methodSignature, function (args) {
+        
+        <prepareQueryArguments>
+        var session = args.session
+        delete args.session
+        var query = new ImmutableCoreModelQuery({
+            args: args,
+            model: model,
+            session: session,
+        })
+        </prepareQueryArguments>
+        
+        <executeQuery>
+        try {
+            return query.execute()
+        }
+        catch (err) {
+            return Promise.reject(err)
+        }
+        </executeQuery>
+        
+    }, {
+        freeze: false,
+    });
+    </createQueryFunction>
+}
+</initQuery>
+```
+
+```javascript
+<JavascriptXPathEngine>
+function JavascriptXPathEngine() {
+    var engineDoc = document;
+
+    <isAvailableMethod>
+    this.isAvailable = function() { return true; };
+    </isAvailableMethod>
+    
+    <selectNodesMethod>
+    this.selectNodes = function(xpath, contextNode, namespaceResolver) {
+        if (contextNode != this.doc) {
+            xpath = '.' + xpath;
+        }
+
+        var nodes = [];
+
+        try {
+            var xpathResult = engineDoc.evaluate(xpath, contextNode,
+                namespaceResolver, 0, null);
+        }
+        catch (e) {
+            var msg = extractExceptionMessage(e);
+            throw new SeleniumError("Invalid xpath [1]: " + msg);
+        }
+        finally {
+            if (xpathResult == null) {
+                throw new SeleniumError("Invalid xpath [2]: " + xpath);
+            }
+        }
+
+        var node = xpathResult.iterateNext();
+
+        while (node) {
+            nodes.push(node);
+            node = xpathResult.iterateNext();
+        }
+
+        return nodes;
+    };
+    </selectNodesMethod>
+}
+</JavascriptXPathEngine>
+```
+
+```javascript
+<decodeGlobal>
+function decodeGlobal(config, result) {
+    var values = result.values;
+
+    <cleanResultValues>
+    delete values.generator;
+    delete values.output;
+    </cleanResultValues>
+
+    <updateConfigValues>
+    return config.updateValues(values);
+    </updateConfigValues>
+}
+</decodeGlobal>
+```
+
+```javascript
+<removeLocalBranch>
+function removeLocalBranch(options) {
+    <checkMandatoryBranch>
+    assert.ok(options.branch, 'branch is mandatory');
+    </checkMandatoryBranch>
+
+    <prepareGitArguments>
+    var args = [
+      'branch',
+      options.force ? '-D' : '-d',
+      options.branch
+    ];
+    </prepareGitArguments>
+
+    <executeGitCommand>
+    return git(args)
+        .then(silent);
+    </executeGitCommand>
+}
+</removeLocalBranch>
+```

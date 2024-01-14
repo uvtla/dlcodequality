@@ -1,0 +1,339 @@
+```javascript
+<home>
+function home(req, res) {
+  <mtime>
+  function mtime(key, cb) {
+    var repo = repos[key];
+    repo.mtime(function(err, date) {
+      repo.last_updated = date;
+      cb(err, repo);
+    });
+  }
+  </mtime>
+
+  <asyncMap>
+  async.map(Object.keys(repos), mtime, function(err, repos) {
+    res.render('home.jade',  { repos: repos });
+  });
+  </asyncMap>
+}
+</home>
+
+<anonymousFunction>
+function() {
+  if (OpenLayers.Control.prototype.activate.apply(this, arguments)) {
+    <addLayerAndRegister>
+    this.map.addLayer(this.gratLayer);
+    this.map.events.register('moveend', this, this.update);
+    </addLayerAndRegister>
+    <update>
+    this.update();
+    </update>
+    return true;
+  } else {
+    return false;
+  }
+}
+</anonymousFunction>
+
+<handleEvent>
+function handleEvent(cmd, context, filename, callback) {
+  <parseAndRouteEvent>
+  var event = JSON.parse(cmd)
+  eventline.route(event)
+  </parseAndRouteEvent>
+}
+</handleEvent>
+
+<deployAsync>
+async function (showPrompts) {
+  <loggingStep>
+  logger.step('** Deploying utilityRegistrar Contract');
+  </loggingStep>
+
+  if (showPrompts) {
+    <displayAndVerifyDetails>
+    logger.info("Utility Chain Deployer Address: " + utilityDeployerAddress);
+    logger.info("Foundation Address: " + foundationAddress);
+    logger.info("Utility Chain Registrar User Address: " + utilityRegistrarAddress);
+    await new Promise(
+      function (onResolve, onReject) {
+        prompts.question("Please verify all above details. Do you want to proceed? [Y/N]", function (intent) {
+          if ((intent === 'Y') || (intent === 'y')) {
+            logger.info('Great! Proceeding deployment.');
+            prompts.close();
+            onResolve();
+          } else {
+            logger.error('Exiting deployment scripts. Change the env vars and re-run.');
+            process.exit(1);
+          }
+        });
+      }
+    );
+    </displayAndVerifyDetails>
+  } else {
+    <promptClosure>
+    prompts.close();
+    </promptClosure>
+  }
+
+  <deployUtilityRegistrarContract>
+  const utilityRegistrarContractDeployResult = await deployHelper.perform(utilityRegistrarContractName, web3Provider,
+    utilityRegistrarContractAbi, utilityRegistrarContractBin, utilityDeployerName,
+    {gasPrice: UC_GAS_PRICE, gas: UC_GAS_LIMIT});
+  </deployUtilityRegistrarContract>
+
+  <loggerAndOperations>
+  logger.step('** Setting opsAddress of utilityRegistrar Contract to utilityRegistrar');
+  const utilityRegistrarContractAddress = utilityRegistrarContractDeployResult.contractAddress
+    , utilityRegistrar = new UtilityRegistrarKlass(utilityRegistrarContractAddress);
+  await utilityRegistrar.setOpsAddress(utilityDeployerName, utilityRegistrarAddress,
+    {gasPrice: UC_GAS_PRICE, gas: UC_GAS_LIMIT});
+  </loggerAndOperations>
+
+  <checkOpsAddress>
+  const getOpsAddressResponse = await utilityRegistrar.getOpsAddress();
+  if (!utilityRegistrarAddress.equalsIgnoreCase(getOpsAddressResponse.data.address)) {
+    logger.error('Exiting the deployment as opsAddress of utilityRegistrar Contract does not match');
+    process.exit(1);
+  }
+  </checkOpsAddress>
+
+  <initiateOwnershipTransfer>
+  logger.step('** Initiating OwnerShipTransfer of utilityRegistrar Contract to foundation');
+  await utilityRegistrar.initiateOwnerShipTransfer(utilityDeployerName, foundationAddress,
+    {gasPrice: UC_GAS_PRICE, gas: UC_GAS_LIMIT});
+  </initiateOwnershipTransfer>
+
+  <verifyOwnershipTransfer>
+  const getOwnerResponse = await utilityRegistrar.getOwner();
+  if (!foundationAddress.equalsIgnoreCase(getOwnerResponse.data.address)) {
+    logger.error('Exiting the deployment as owner of utilityRegistrar Contract does not match');
+    process.exit(1);
+  }
+  </verifyOwnershipTransfer>
+
+  <returnSuccess>
+  return Promise.resolve(responseHelper.successWithData(
+    {contract: 'utilityRegistrar', address: utilityRegistrarContractAddress}));
+  </returnSuccess>
+}
+</deployAsync>
+
+<determineAttributes>
+function(options, view) {
+  <evaluatingAttributes>
+  var attrs = options.attributes;
+  if (_.isFunction(attrs)) {
+    attrs = attrs(view);
+  } else if (_.isString(attrs) && (_.isFunction(defaultAttributeLoaders[attrs]))) {
+    attrs = defaultAttributeLoaders[attrs](view);
+  }
+  if (_.isArray(attrs)) {
+    return attrs;
+  }
+  </evaluatingAttributes>
+}
+</determineAttributes>
+
+<updateIndices>
+function updateIndicies(modifiedElements, cachedRecords) {
+  <processModifiedElements>
+  var updatedCachedRecords = {};
+  for (var i = 0, len = modifiedElements.length; i < len; i++) {
+    var modifiedElementLookup = modifiedElements[i];
+    var cachedRecord = cachedRecords[modifiedElementLookup.oldIndex];
+    if (cachedRecord) {
+      updatedCachedRecords[modifiedElementLookup.newIndex] = cachedRecord;
+      cachedRecord.element = modifiedElementLookup.element;
+      delete cachedRecords[modifiedElementLookup.oldIndex];
+    }
+  }
+  </processModifiedElements>
+  <cleanupCachedRecords>
+  var cachedRecordKeys = Object.keys(cachedRecords);
+  for (var i = 0, len = cachedRecordKeys.length; i < len; i++) {
+    var key = cachedRecordKeys[i],
+        record = cachedRecords[key];
+    if (!record.element || existingContainers[uniqueID(record.element)]) {
+      updatedCachedRecords[key] = record;
+    }
+  }
+  </cleanupCachedRecords>
+  return updatedCachedRecords;
+}
+</updateIndices>
+
+<login>
+function login(options) {
+  <promiseForFBLogin>
+  return new Promise(function (resolve, reject) {
+    FB.login(function (response) {
+      <getUserInfo>
+      _getUser(response).then(function (userResponse) {
+        if(userResponse.user) {
+          resolve(userResponse);
+        } else {
+          reject(userResponse);
+        }
+      });
+      </getUserInfo>
+    }, options);
+  });
+  </promiseForFBLogin>
+}
+</login>
+
+<normaliseDeps>
+function normaliseDeps (deps) {
+  <normaliseDependencies>
+  if (Array.isArray(deps)) {
+    deps = deps.reduce(function (d, depName) {
+      d[depName] = '*'
+      return d
+    }, {})
+  }
+  </normaliseDependencies>
+  return deps
+}
+</normaliseDeps>
+
+<TLconstructor>
+function(elem, options) {
+  <elementInitialization>
+  this._el = {
+    container: {},
+    content_container: {},
+    major: {},
+    minor: {},
+  };
+  </elementInitialization>
+  
+  <textInitialization>
+  this._text = {};
+  </textInitialization>
+
+  <stateInitialization>
+  this._state = {
+    loaded: false
+  };
+  </stateInitialization>
+
+  <dataInitialization>
+  this.data = {};
+  </dataInitialization>
+
+  <optionsInitialization>
+  this.options = {
+    duration: 1000,
+    ease: TL.Ease.easeInSpline,
+    width: 600,
+    height: 600
+  };
+  </optionsInitialization>
+
+  <stateFlags>
+  this.active = false;
+  </stateFlags>
+
+  <animatorInitialization>
+  this.animator = {};
+  </animatorInitialization>
+
+  <helperEntitiesInitialization>
+  this.axis_helper = {};
+  this.minor_ticks = [];
+  this.major_ticks = [];
+  </helperEntitiesInitialization>
+
+  <dateFormatLookupSetup>
+  this.dateformat_lookup = {
+    millisecond: 'time_milliseconds',
+    second: 'time_short',
+    minute: 'time_no_seconds_short',
+    hour: 'time_no_minutes_short',
+    day: 'full_short',
+    month: 'month_short',
+    year: 'year',
+    decade: 'year',
+    century: 'year',
+    millennium: 'year',
+    age: 'compact',
+    epoch: 'compact',
+    era: 'compact',
+    eon: 'compact',
+    eon2: 'compact'
+  }
+  </dateFormatLookupSetup>
+
+  <containerElementInitialization>
+  if (typeof elem === 'object') {
+    this._el.container = elem;
+  } else {
+    this._el.container = TL.Dom.get(elem);
+  }
+  </containerElementInitialization>
+
+  <optionSetupAndInitialization>
+  TL.Util.mergeData(this.options, options);
+  </optionSetupAndInitialization>
+
+  <initFunctionCalls>
+  this._initLayout();
+  this._initEvents();
+  </initFunctionCalls>
+}
+</TLconstructor>
+
+<projectEnvironmentMapGPU>
+function projectEnvironmentMapGPU(renderer, envMap) {
+  <generateSHTexture>
+  var shTexture = new Texture2D({
+    width: 9,
+    height: 1,
+    type: Texture.FLOAT
+  });
+  </generateSHTexture>
+
+  <setupPass>
+  var pass = new Pass({
+    fragment: projectEnvMapShaderCode
+  });
+  pass.material.define('fragment', 'TEXTURE_SIZE', envMap.width);
+  pass.setUniform('environmentMap', envMap);
+  </setupPass>
+
+  <framebufferSetup>
+  var framebuffer = new FrameBuffer();
+  framebuffer.attach(shTexture);
+  </framebufferSetup>
+
+  <renderPass>
+  pass.render(renderer, framebuffer);
+  </renderPass>
+
+  <readCoefficients>
+  framebuffer.bind(renderer);
+  var pixels = new vendor.Float32Array(9 * 4);
+  renderer.gl.readPixels(0, 0, 9, 1, Texture.RGBA, Texture.FLOAT, pixels);
+  </readCoefficients>
+  
+  <mapPixelsToCoeff>
+  var coeff = new vendor.Float32Array(9 * 3);
+  for (var i = 0; i < 9; i++) {
+    coeff[i * 3] = pixels[i * 4];
+    coeff[i * 3 + 1] = pixels[i * 4 + 1];
+    coeff[i * 3 + 2] = pixels[i * 4 + 2];
+  }
+  </mapPixelsToCoeff>
+  
+  <cleanupFrameBufferAndPass>
+  framebuffer.unbind(renderer);
+  framebuffer.dispose(renderer);
+  pass.dispose(renderer);
+  </cleanupFrameBufferAndPass>
+
+  return coeff;
+}
+</projectEnvironmentMapGPU>
+```

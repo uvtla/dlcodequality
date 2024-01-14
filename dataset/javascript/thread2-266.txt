@@ -1,0 +1,232 @@
+```javascript
+<Bitimports>
+function Bitimports(options) {
+  <mergeSettings>
+  var settings = utils.merge({}, defaults, options);
+  </mergeSettings>
+  
+  <configureResolve>
+  if (!settings.resolve) {
+    var resolver = factory.create("resolver", settings);
+    settings.resolve = resolver.resolve.bind(resolver);
+  }
+  </configureResolve>
+  
+  <configureFetch>
+  if (!settings.fetch) {
+    var fetcher = factory.create("fetcher", settings);
+    settings.fetch = fetcher.fetch.bind(fetcher);
+  }
+  </configureFetch>
+
+  <initBitloader>
+  Bitloader.call(this, settings);
+  </initBitloader>
+  
+  <pluginConfiguration>
+  this.plugin("js", {
+    "dependency": dependency
+  });
+  </pluginConfiguration>
+
+  <optionalNodeModuleIgnored>
+  if (settings.doNotIgnoreNodeModules !== true) {
+    this.services.transform.ignore("path", /node_modules/);
+    this.services.dependency.ignore("path", /node_modules/);
+  }
+  </optionalNodeModuleIgnored>
+}
+</Bitimports>
+
+<getOrDefault>
+function getOrDefault (source, path, defaultVal) {
+  var isAlreadySplitted = isArray(path);
+
+  if (!isDefined(source)) return defaultVal;
+  if (!isString(path) && !isAlreadySplitted) return defaultVal;
+
+  var tokens = isAlreadySplitted ? path : path.split('.');
+  var idx, key;
+
+  for (idx in tokens) {
+    key = tokens[idx];
+
+    if (isDefined(source[key])) 
+      source = source[key];
+    else 
+      return defaultVal;
+  }
+
+  return source;
+}
+</getOrDefault>
+
+<moveOrCollapseCursor>
+function (node, offset) {
+  var self = this, rng = self.dom.createRng();
+
+  <moveCursorToBody>
+  if (!node) {
+    self._moveEndPoint(rng, self.editor.getBody(), true);
+    self.setRng(rng);
+  } 
+  </moveCursorToBody>
+  <setCursor>
+  else {
+    rng.setStart(node, offset);
+    rng.setEnd(node, offset);
+    self.setRng(rng);
+    self.collapse(false);
+  }
+  </setCursor>
+}
+</moveOrCollapseCursor>
+
+<handleEvent>
+function (evt, callback) {
+  <checkAggregateIdAndRevision>
+  if (!this.definition.aggregateId || !dotty.exists(evt, this.definition.aggregateId) ||
+      !this.definition.revision || !dotty.exists(evt, this.definition.revision)) {
+    var err = new Error('Please define an aggregateId!');
+    debug(err);
+    return callback(err);
+  }
+  </checkAggregateIdAndRevision>
+
+  var self = this;
+
+  <eventHandlingImplementation>
+  // ... The rest of the function which includes detailed event handling logic ...
+  // This example is trimmed down for brevity as the function is too long.
+  </eventHandlingImplementation>
+}
+</handleEvent>
+
+<getNextMatch>
+function _getNextMatch(editor, searchBackwards, pos, wrap) {
+  var cm = editor._codeMirror;
+  var state = getSearchState(cm);
+  var cursor = getSearchCursor(cm, state, pos || editor.getCursorPos(false, searchBackwards ? "start" : "end"));
+
+  <findNextMatch>
+  state.lastMatch = cursor.find(searchBackwards);
+  </findNextMatch>
+  <wrapSearch>
+  if (!state.lastMatch && wrap !== false) {
+    cursor = getSearchCursor(cm, state, searchBackwards ? {line: cm.lineCount() - 1} : {line: 0, ch: 0});
+    state.lastMatch = cursor.find(searchBackwards);
+  }
+  </wrapSearch>
+  <searchFailure>
+  if (!state.lastMatch) {
+    cm.setCursor(editor.getCursorPos());
+    return null;
+  }
+  </searchFailure>
+
+  <matchSuccess>
+  return {start: cursor.from(), end: cursor.to()};
+  </matchSuccess>
+}
+</getNextMatch>
+
+<parse>
+function parse(signature) {
+  var pattern = /^(?:void|([a-zA-Z]+!?|\.{3})(?:[:\s]+([a-zA-Z]+)(?:(=)(@)?(.*))?)?)?$/;
+
+  <splitAndMapSignature>
+  return signature.split(/\s*,\s*/).map(function(argument, index, all) {
+    var result = prepareArgument(argument.match(pattern), 'var' + (index + 1));
+
+    <signatureErrorHandling>
+    if (result.type === false) {
+      throw new Error('polymorphic: invalid argument "' + argument + '" in signature "' + signature + '"');
+    }
+    else if (result.type === '...' && index < all.length - 1) {
+      throw new Error('polymorphic: variadic argument must be at end of signature "' + signature + '"');
+    }
+    </signatureErrorHandling>
+
+    return result;
+  })
+  </splitAndMapSignature>
+  <filterUndefinedArguments>
+  .filter(function(argument) {
+    return argument.type !== undefined;
+  });
+  </filterUndefinedArguments>
+}
+</parse>
+
+<loadFunction>
+function loadFunction (js, resolver) {
+  <immediateJsCall>
+  immediate(function () {
+    <tryExecutingFunction>
+    try {
+      js.call(null, resolver);
+    }
+    catch (e) {
+      resolver.reject(e);
+    }
+    </tryExecutingFunction>
+  });
+  </immediateJsCall>
+}
+</loadFunction>
+
+<getConfigForStyleGuide>
+function getConfigForStyleGuide(guide) {
+  <guideDefinitions>
+  const guides = {
+    google: { extends: "google" },
+    airbnb: { extends: "airbnb" },
+    "airbnb-base": { extends: "airbnb-base" },
+    standard: { extends: "standard" }
+  };
+  </guideDefinitions>
+
+  <validateGuide>
+  if (!guides[guide]) {
+    throw new Error("You referenced an unsupported guide.");
+  }
+  </validateGuide>
+
+  <returnGuideConfig>
+  return guides[guide];
+  </returnGuideConfig>
+}
+</getConfigForStyleGuide>
+
+<Service>
+function Service(args) {
+  <createRpcService>
+  const obj = createRpcService(args);
+  </createRpcService>
+  <attachProperties>
+  Object.getOwnPropertyNames(obj).forEach(k => {
+    if (typeof obj[k] !== 'function') {
+      this[k] = obj[k];
+    }
+  });
+  </attachProperties>
+}
+</Service>
+
+<normalizeLinks>
+function normalizeLinks(base, input) {
+  <inputValidation>
+  if (!input) return;
+  </inputValidation>
+  <convertToArray>
+  if (!Array.isArray(input)) input = [input];
+  </convertToArray>
+
+  <normalizeMap>
+  return flatten(input).filter(Boolean).map(function (link) {
+    return normalizeLink(base, link);
+  });
+  </normalizeMap>
+}
+</normalizeLinks>
+```

@@ -1,0 +1,289 @@
+```javascript
+<retrieveAndUpdateAuthStruct>
+function(owner_id, next) {
+    var self = this,
+    podName = this.getName(),
+    filter = {
+      owner_id : owner_id,
+      type : this.getAuthType(),
+      oauth_provider : this.getName()
+    };
+    <findAccountAuth>
+    this._dao.find('account_auth', filter, function(err, result) {
+      var model, authStruct;
+
+      if (result) {
+        
+        authStruct = {
+          oauth_provider : result.oauth_provider,
+          repr : self._profileRepr(result)
+        }
+      }
+
+      next(err, podName, filter.type, authStruct);
+    });
+    </findAccountAuth>
+  }
+</retrieveAndUpdateAuthStruct>
+
+<processAndTransformText>
+function(text, node, type) {
+			var maxNum = 0;
+			var that = this;
+			
+			var tsOptions = {
+				tabstop: function(data) {
+					var group = parseInt(data.group, 10);
+					if (group === 0)
+						return '${0}';
+					
+					if (group > maxNum) maxNum = group;
+					if (data.placeholder) {
+						
+						var ix = group + tabstopIndex;
+						var placeholder = that.processText(data.placeholder, tsOptions);
+						return '${' + ix + ':' + placeholder + '}';
+					} else {
+						return '${' + (group + tabstopIndex) + '}';
+					}
+				}
+			};
+			
+			
+			text = this.processText(text, tsOptions);
+			
+			
+			text = this.replaceVariables(text, this.variablesResolver(node));
+			
+			tabstopIndex += maxNum + 1;
+			return text;
+		}
+</processAndTransformText>
+
+<directiveDefinition>
+function() {
+  return {
+    restrict: 'A',
+    require: '?ngModel',
+    link: function(scope, elm, attr, ctrl) {
+      if (!ctrl) return;
+
+      var regexp, patternExp = attr.ngPattern || attr.pattern;
+      <observePattern>
+      attr.$observe('pattern', function(regex) {
+        if (isString(regex) && regex.length > 0) {
+          regex = new RegExp('^' + regex + '$');
+        }
+
+        if (regex && !regex.test) {
+          throw minErr('ngPattern')('noregexp',
+            'Expected {0} to be a RegExp but was {1}. Element: {2}', patternExp,
+            regex, startingTag(elm));
+        }
+
+        regexp = regex || undefined;
+        ctrl.$validate();
+      });
+      </observePattern>
+
+      ctrl.$validators.pattern = function(modelValue, viewValue) {
+        
+        return ctrl.$isEmpty(viewValue) || isUndefined(regexp) || regexp.test(viewValue);
+      };
+    }
+  };
+}
+</directiveDefinition>
+
+<generateMessageBoxWithButtons>
+function (settings) {
+          var buttons, callback = settings.callback || function () { };
+
+          <createButtonFunction>
+          function createButton(text, status, primary) {
+            return {
+              type: "button",
+              text: text,
+              subtype: primary ? 'primary' : '',
+              onClick: function (e) {
+                e.control.parents()[1].close();
+                callback(status);
+              }
+            };
+          }
+          </createButtonFunction>
+
+          <determineButtonsBasedOnSettings>
+          switch (settings.buttons) {
+            case MessageBox.OK_CANCEL:
+              buttons = [
+                createButton('Ok', true, true),
+                createButton('Cancel', false)
+              ];
+              break;
+
+            case MessageBox.YES_NO:
+            case MessageBox.YES_NO_CANCEL:
+              buttons = [
+                createButton('Yes', 1, true),
+                createButton('No', 0)
+              ];
+
+              if (settings.buttons == MessageBox.YES_NO_CANCEL) {
+                buttons.push(createButton('Cancel', -1));
+              }
+              break;
+
+            default:
+              buttons = [
+                createButton('Ok', true, true)
+              ];
+              break;
+          }
+          </determineButtonsBasedOnSettings>
+
+          return new Window({
+            padding: 20,
+            x: settings.x,
+            y: settings.y,
+            minWidth: 300,
+            minHeight: 100,
+            layout: "flex",
+            pack: "center",
+            align: "center",
+            buttons: buttons,
+            title: settings.title,
+            role: 'alertdialog',
+            items: {
+              type: "label",
+              multiline: true,
+              maxWidth: 500,
+              maxHeight: 200,
+              text: settings.text
+            },
+            onPostRender: function () {
+              this.aria('describedby', this.items()[0]._id);
+            },
+            onClose: settings.onClose,
+            onCancel: function () {
+              callback(false);
+            }
+          }).renderTo(document.body).reflow();
+        }
+</generateMessageBoxWithButtons>
+
+<createStaticFunctionMapping>
+function inject (taskKey) {
+    var taskName = task[taskKey]
+
+    var num = parseFloat(taskName)
+
+    <createStaticReturnFunction>
+    if (!isNaN(num)) {
+      funcs[taskName] = function () { return num }
+    }
+    </createStaticReturnFunction>
+  }
+</createStaticFunctionMapping>
+
+<setValuesInStorage>
+function set(key, val, cb) {
+  return type(key) != 'object'
+    ? localForage.setItem(key, val).then(wrap(cb), cb)
+    <mapAndStoreMultipleValues>
+    : Promise.all(Object.keys(key).map(function(subkey) {
+      return key[subkey] === null
+      ? del(subkey)
+      : set(subkey, key[subkey]);
+    })).then(wrap(val), val);
+    </mapAndStoreMultipleValues>
+}
+</setValuesInStorage>
+
+<convertToArrayList>
+function (o) {
+            if (o == null) {
+                return [];
+            }
+            if (S.isArray(o)) {
+                return o;
+            }
+            <handleNonArrayConversion>
+            var lengthType = typeof o.length,
+                oType = typeof o;
+            
+            if (lengthType != 'number' ||
+                o.alert ||
+                oType == 'string' ||
+                (oType == 'function' && !( 'item' in o && lengthType == 'number'))) {
+                return [o];
+            }
+            </handleNonArrayConversion>
+            var ret = [];
+            for (var i = 0, l = o.length; i < l; i++) {
+                ret[i] = o[i];
+            }
+            return ret;
+        }
+</convertToArrayList>
+
+<defineLazyProperty>
+function(spirit, prefix, Plugin) {
+		<Object.defineProperty>
+    Object.defineProperty(spirit, prefix, {
+			enumerable: true,
+			configurable: true,
+			get: function() {
+				var plugin = new Plugin(this);
+				this.life.plugins[prefix] = true;
+				gui.Plugin.$assign(spirit, prefix, plugin);
+				return plugin;
+			}
+		});
+		</Object.defineProperty>
+	}
+</defineLazyProperty>
+
+<createSSEClientWithAuth>
+function newSSEClientFactory(endpoint) {
+    return function(initDict) {
+        initDict = initDict || { };
+        
+        <setupURI>
+        var uriOptions = utils.getURIOptions(initDict);
+        utils.removeURIOptions(initDict);
+        
+        var uri = utils.url(endpoint, uriOptions);
+        </setupURI>
+        <setupAuthOptions>
+        var authOptions = utils.getAuthOptions([utils.setup(), this, initDict]);
+        
+        auth.sign(authOptions.key, authOptions.secret, uri);
+        </setupAuthOptions>
+        
+        return new EventSource(uri.toString(), initDict);
+    };
+}
+</createSSEClientWithAuth>
+
+<calendarNavigatorRender>
+function(html) {
+        var NAV = YAHOO.widget.CalendarNavigator,
+            C = NAV.CLASSES,
+            h = html; 
+
+        h[h.length] = '<div class="' + C.MONTH + '">';
+        this.renderMonth(h);
+        h[h.length] = '</div>';
+        h[h.length] = '<div class="' + C.YEAR + '">';
+        this.renderYear(h);
+        h[h.length] = '</div>';
+        h[h.length] = '<div class="' + C.BUTTONS + '">';
+        this.renderButtons(h);
+        h[h.length] = '</div>';
+        h[h.length] = '<div class="' + C.ERROR + '" id="' + this.id + NAV.ERROR_SUFFIX + '"></div>';
+
+        return h;
+    }
+</calendarNavigatorRender>
+```

@@ -1,0 +1,303 @@
+```javascript
+<csvParsingAndFiltering>
+function (cb) {
+    let vehicles = [];
+
+    const options = { newline: '\r\n', columns: true };
+    const parser = csv(options);
+
+    parser.on('data', (line) => {
+        
+        line.year = parseInt(line.year);
+        line['comb08'] = parseInt(line['comb08']);
+
+        
+        let satisfies = true;
+
+        
+        
+        constraints.forEach((constr) => {
+            if (!constr(line)) satisfies = false;
+        });
+
+        
+        
+        if (satisfies) {
+            vehicles.push(line);
+        };
+    });
+
+    parser.on('end', () => {
+        cb(vehicles);
+    });
+
+    fs.createReadStream('./vehicles.csv').pipe(parser)
+}
+</csvParsingAndFiltering>
+
+<updateSeriesType>
+function (newOptions, redraw) {
+    var series = this,
+        chart = this.chart,
+        
+        
+        oldOptions = this.userOptions,
+        oldType = this.type,
+        proto = seriesTypes[oldType].prototype,
+        preserve = ['group', 'markerGroup', 'dataLabelsGroup'],
+        n;
+
+    
+    each(preserve, function (prop) {
+        preserve[prop] = series[prop];
+        delete series[prop];
+    });
+
+    
+    newOptions = merge(oldOptions, {
+        animation: false,
+        index: this.index,
+        pointStart: this.xData[0]
+    }, { data: this.options.data }, newOptions);
+
+    
+    this.remove(false);
+    for (n in proto) {
+        if (proto.hasOwnProperty(n)) {
+            this[n] = UNDEFINED;
+        }
+    }
+    extend(this, seriesTypes[newOptions.type || oldType].prototype);
+
+    
+    each(preserve, function (prop) {
+        series[prop] = preserve[prop];
+    });
+
+    this.init(chart, newOptions);
+    chart.linkSeries();
+    if (pick(redraw, true)) {
+        chart.redraw(false);
+    }
+}
+</updateSeriesType>
+
+<getGitTags>
+async function getTags(execaOpts) {
+    return (await execa.stdout('git', ['tag'], execaOpts))
+        .split('\n')
+        .map(tag => tag.trim())
+        .filter(Boolean);
+}
+</getGitTags>
+
+<webdriverDownload>
+function webdriverDownload(done) {
+    const platform = os.platform();
+    const destDir = path.join(__dirname, '.selenium');
+    const chromeDriverUrl = (() => {
+        const filePath = platform === 'win32' ?
+            '/2.38/chromedriver_win32.zip' :
+            `/2.38/chromedriver_${platform === 'darwin' ? 'mac' : 'linux'}64.zip`;
+        return `http:
+    })();
+
+    
+    if (fs.existsSync(destDir + '/chromedriver') || fs.existsSync(destDir + '/chromedriver.exe')) {
+        done();
+    } else {
+        const selenium = $.download('https:
+            .pipe(gulp.dest(destDir));
+
+        const chromedriver = $.download(chromeDriverUrl)
+            .pipe($.unzip())
+            .pipe($.chmod(755))
+            .pipe(gulp.dest(destDir));
+
+        return mergeStream(selenium, chromedriver);
+    }
+}
+</webdriverDownload>
+
+<ImportConstructor>
+function Import(opts) {
+    if (!opts.base) {
+        throw new Error("Must specify a file path");
+    }
+
+    opts = opts || {};
+    this.opts = opts;
+    this.base = opts.base || process.cwd();
+    this.path = opts.path;
+    this.visit = this.visit.bind(this);
+    this.importFile = this.importFile.bind(this);
+    this.map = opts.map || [];
+    this.target = opts.target;
+
+    
+    if (path.resolve(this.path) !== this.path) {
+        this.path = path.resolve(this.base, this.path);
+    }
+}
+</ImportConstructor>
+
+<getWmsProvider>
+function getWmsProvider(name, options) {
+    var wmsProvider = void 0;
+    if (name in CONFIG.WMS_PROVIDERS) {
+        wmsProvider = CONFIG.WMS_PROVIDERS[name];
+
+        
+        if (wmsProvider.deprecated && console && console.warn) {
+            
+            console.warn(name + " is a deprecated wms; it will be redirected to its replacement. For performance improvements, please change your reference.");
+        }
+    } else {
+        wmsProvider = _extends({}, CONFIG.WMS_DEFAULTS, options);
+        
+        console.log('NL Maps: You asked for a wms which does not exist! Available wmses: ' + Object.keys(CONFIG.WMS_PROVIDERS).join(', ') + '. Provide an options object to make your own WMS.');
+    }
+    return wmsProvider;
+}
+</getWmsProvider>
+
+<substring>
+function (indexA, indexB) {
+    
+    
+    if (typeof indexB != 'number')
+        return this.$.nodeValue.substr(indexA);
+    else
+        return this.$.nodeValue.substring(indexA, indexB);
+}
+</substring>
+
+<createToolbarIcon>
+function (button) {
+    var $element = $('<a/>').addClass('wysiwyg-toolbar-icon')
+        .prop('href', '#')
+        .prop('unselectable', 'on')
+        .append(button.image);
+    
+    $.each(button, function (name, value) {
+        switch (name) {
+            
+            case 'class':
+                $element.addClass(value);
+                break;
+            
+            case 'image':
+            case 'html':
+            case 'popup':
+            case 'click':
+            case 'showstatic':
+            case 'showselection':
+                break;
+            default:
+                $element.attr(name, value);
+                break;
+        }
+    });
+    return $element;
+}
+</createToolbarIcon>
+
+<parseDateString>
+function makeDateFromStringAndFormat(config) {
+
+    config._a = [];
+    config._pf.empty = true;
+
+    
+    var lang = getLangDefinition(config._l),
+        string = '' + config._i,
+        i, parsedInput, tokens, token, skipped,
+        stringLength = string.length,
+        totalParsedInputLength = 0;
+
+    tokens = expandFormat(config._f, lang).match(formattingTokens) || [];
+
+    for (i = 0; i < tokens.length; i++) {
+        token = tokens[i];
+        parsedInput = (getParseRegexForToken(token, config).exec(string) || [])[0];
+        if (parsedInput) {
+            skipped = string.substr(0, string.indexOf(parsedInput));
+            if (skipped.length > 0) {
+                config._pf.unusedInput.push(skipped);
+            }
+            string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
+            totalParsedInputLength += parsedInput.length;
+        }
+        
+        if (formatTokenFunctions[token]) {
+            if (parsedInput) {
+                config._pf.empty = false;
+            }
+            else {
+                config._pf.unusedTokens.push(token);
+            }
+            addTimeToArrayFromToken(token, parsedInput, config);
+        }
+        else if (config._strict && !parsedInput) {
+            config._pf.unusedTokens.push(token);
+        }
+    }
+
+    
+    config._pf.charsLeftOver = stringLength - totalParsedInputLength;
+    if (string.length > 0) {
+        config._pf.unusedInput.push(string);
+    }
+
+    
+    if (config._isPm && config._a[HOUR] < 12) {
+        config._a[HOUR] += 12;
+    }
+    
+    if (config._isPm === false && config._a[HOUR] === 12) {
+        config._a[HOUR] = 0;
+    }
+
+    dateFromConfig(config);
+    checkOverflow(config);
+}
+</parseDateString>
+
+<removeRequire>
+function removeRequire(filepath, source, moduleBase) {
+
+    try {
+        return source.replace(/\brequire\s*\(\s*("|')([\s\S]*?)\1\s*\)/g, function (match, sign, moduleName) {
+
+            var originalName = moduleName;
+
+            if (/^[.]{1,2}\\/) {
+                
+                moduleName = PathModule.resolve(PathModule.dirname(filepath) + PathModule.sep + moduleName);
+            } else if (idMapping.hasOwnProperty(moduleName)) {
+                return depsPoolName + '.r(' + idMapping[moduleName] + ')';
+            } else {
+                moduleName = PathModule.resolve(moduleBase + moduleName);
+            }
+
+            if (PathModule.extname(moduleName) === "") {
+                moduleName += ".js";
+            }
+
+            if (moduleMapping.hasOwnProperty(moduleName)) {
+                return depsPoolName + ".r(" + moduleMapping[moduleName] + ")";
+            }
+
+            throw new ModuleNotfoundError(originalName);
+
+        });
+    } catch (e) {
+        if (e.name === "ModuleNotfoundError") {
+            grunt.fatal('Module [' + e.message + '] not found, in file: ' + filepath);
+        }
+        throw e;
+    }
+
+}
+</removeRequire>
+```

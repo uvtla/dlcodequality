@@ -1,0 +1,164 @@
+```javascript
+<uniqueArray>
+function uniqueArray(item) {
+  const u = {};
+  <arrayDeduplication>
+  const newArray = [];
+  for (let i = 0, l = item.length; i < l; ++i) {
+    if (!{}.hasOwnProperty.call(u, item[i])) {
+      newArray.push(item[i]);
+      u[item[i]] = 1;
+    }
+  }
+  </arrayDeduplication>
+  return newArray;
+}
+</uniqueArray>
+
+<parseXMLNode>
+function parseXMLNode(node) {
+  <initializeParsedNode>
+  const parsedNode = {
+    attributes: {},
+    children: {},
+    value: {},
+  };
+
+  parsedNode.value = parseNodeValue(node);
+  </initializeParsedNode>
+
+  <parseAttributes>
+  if (node.attributes) {
+    [...node.attributes].forEach((nodeAttr) => {
+      if (nodeAttr.nodeName && nodeAttr.nodeValue !== undefined && nodeAttr.nodeValue !== null) {
+        parsedNode.attributes[nodeAttr.nodeName] = nodeAttr.nodeValue;
+      }
+    });
+  }
+  </parseAttributes>
+
+  <parseChildren>
+  if (node.childNodes) {
+    [...node.childNodes]
+      .filter((childNode) => childNode.nodeName.substring(0, 1) !== '#')
+      .forEach((childNode) => {
+        parsedNode.children[childNode.nodeName] = parseXMLNode(childNode);
+      });
+  }
+  </parseChildren>
+
+  return parsedNode;
+}
+</parseXMLNode>
+
+<playerStats>
+function playerStats(playerID) {
+  <initializePlayerInfo>
+	const apiBase = 'https://example.api.com';
+	const playerInfoJson = {/*JSON data structure*/};
+  </initializePlayerInfo>
+  <performApiRequests>
+	return new Promise(function (resolve, reject) {
+		request(apiBase, function (err, res) {/* main api request logic */});
+	});
+  </performApiRequests>
+}
+</playerStats>
+
+<RenderComponent>
+function() {
+  <invokeSuperclassRender>
+  inputEx.MultiSelectField.superclass.renderComponent.call(this);
+  </invokeSuperclassRender>
+  
+  <createListCustomWidget>
+  this.ddlist = new inputEx.widget.ListCustom({/*widget options*/});
+  </createListCustomWidget>
+}
+</RenderComponent>
+
+<nominalLoad>
+function nominalLoad(){
+  <constructAndLoadSnapshot>
+	var ARObject = constructAggregate();
+	return when.try(snapshotter.loadSnapshot.bind(snapshotter), /*args*/).then(function _applySnapshot(snapshot){/*apply logic*/});
+  </constructAndLoadSnapshot>
+</nominalLoad>
+
+<loadFile>
+function loadFile(fileName, options) {
+  <initializeDeferredAndFileObject>
+  var deferred         = new $.Deferred(),
+      file             = FileSystem.getFileForPath(fileName),
+      currentThemeName = prefs.get("theme");
+  </initializeDeferredAndFileObject>
+  <checkFileAndLoadTheme>
+  file.exists(function (err, exists) {
+    /* logic for checking file existence and loading theme */
+  });
+  </checkFileAndLoadTheme>
+  return deferred.promise();
+}
+</loadFile>
+
+<nthRootExponent>
+function nthRootExponent(node) {
+  <initializeAndProcessExponents>
+  let newNode = clone(node);
+  /* logic for processing nth root exponent */
+  </initializeAndProcessExponents>
+  return Node.Status.noChange(node);
+}
+</nthRootExponent>
+
+<uninitializeComponents>
+function (id) {
+  <prepareComponentsList>
+  var uninit = [], c = 0, ul, 
+  i = 0, l, comps, comp;
+  /* logic for creating a list of components to uninitialize */
+  </prepareComponentsList>
+  <uninitializeAndTrigger>
+  ul = uninit.length;
+  /* logic for uninitializing components */
+  </uninitializeAndTrigger>
+  return this;
+}
+</uninitializeComponents>
+
+<decodeData>
+function(data, encoding) {
+  <setDefaultEncoding>
+  if (encoding == null) {
+    encoding = 'hex';
+  }
+  </setDefaultEncoding>
+  <validateAndDecodeInput>
+  if (Array.isArray(data)) {
+    return data;
+  }
+  switch (encoding) {
+    /* cases to decode data based on encoding */
+    default:
+      throw new Error("Encoding not supported");
+  }
+  </validateAndDecodeInput>
+}
+</decodeData>
+
+<processDir>
+function processDir (err) {
+  <handleErrorOrLogSuccess>
+  if (err) {
+    /* handle error scenario */
+  } else {
+    /* log success message */
+  }
+  </handleErrorOrLogSuccess>
+  <proceedToNextDirectoryOrCallback>
+  ++index;
+  /* logic to continue processing or invoke callback */
+  </proceedToNextDirectoryOrCallback>
+}
+</processDir>
+```

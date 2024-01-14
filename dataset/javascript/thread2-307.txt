@@ -1,0 +1,282 @@
+```javascript
+<correctQuestionMarkAndAnd>
+function correctQuestionMarkAndAnd(url) {
+  var baseURL = url;
+  
+  <replaceDoubleAnd>
+  baseURL = baseURL.replace(new RegExp('&&', 'g'), '&');
+  </replaceDoubleAnd>
+  
+  <ensureProperQueryString>
+  if (new RegExp('[\?]$').test(baseURL)) {
+    // No code inside this conditional
+  } else {
+    <ensureQueryStringPresent>
+    if (baseURL.includes('?')) {
+      <ensureTrailingAmpersand>
+      if (new RegExp('[\&]$').test(baseURL)) {
+        // No code here either
+      } else {
+        baseURL += '&';
+      }
+      </ensureTrailingAmpersand>
+    } else {
+      <replaceLastAmpersandWithQuestionMark>
+      var countOfAnd = baseURL.split('&').length - 1;
+      if (new RegExp('[\&]$').test(baseURL)) {
+        if (countOfAnd === 1) {
+          baseURL = baseURL.slice(0, -1);
+          baseURL += '?';
+        } else {
+          baseURL = baseURL.replace('&', '?');
+        }
+      } else {
+        if (countOfAnd > 1) {
+          baseURL = baseURL.replace('&', '?');
+          baseURL += '&';
+        } else {
+          baseURL += '?';
+        }
+      }
+      </replaceLastAmpersandWithQuestionMark>
+    }
+    </ensureQueryStringPresent>
+  }
+  </ensureProperQueryString>
+  
+  return baseURL;
+}
+</correctQuestionMarkAndAnd>
+```
+
+```javascript
+<getAppFormsForApp>
+function get(req, res, next) {
+  <prepareParameters>
+  var params = {
+    appId: req.params.projectid || req.params.id
+  };
+  </prepareParameters>
+  
+  <handleAppForms>
+  forms.getAppFormsForApp(_.extend(req.connectionOptions, params), formsResultHandlers(constants.resultTypes.formProjects, req, next));
+  </handleAppForms>
+}
+</getAppFormsForApp>
+```
+
+```javascript
+<parseTemplate>
+function parseTemplate(code, parserOptions) {
+    <initializeStores>
+    const sourceCodeStore = new SourceCodeStore(code);
+    </initializeStores>
+    
+    <parseScript>
+    let script = ""
+    let pre = 0
+    let template = ""
+    const microTemplateTokens = [] 
+    for (const token of genMicroTemplateTokens(code, parserOptions, sourceCodeStore)) {
+        microTemplateTokens.push(token);
+        // ... Truncated for brevity
+    }
+    const scriptResult = parseScript(script, parserOptions);
+    </parseScript>
+    
+    <finalizeTemplateAndScript>
+    sourceCodeStore.template = template;
+    sourceCodeStore.script = script;
+    </finalizeTemplateAndScript>
+    
+    <setupMicroTemplateService>
+    const service = new MicroTemplateService({ ... });
+    container.addService(parserOptions.filePath, service);
+    scriptResult.services = Object.assign(scriptResult.services || {}, { ... });
+    </setupMicroTemplateService>
+    
+    return scriptResult;
+}
+</parseTemplate>
+```
+
+```javascript
+<addRoute>
+function(route, name, callback) {
+  <prepareRegExpAndCallback>
+  var regExp = conbo.isRegExp(route) ? route : this.__routeToRegExp(route);
+  if (!callback) {
+    callback = this[name];
+  }
+  if (conbo.isFunction(name)) {
+    callback = name;
+    name = '';
+  }
+  if (!callback) {
+    callback = this[name];
+  }
+  </prepareRegExpAndCallback>
+
+  <defineRoute>
+  this.__history.addRoute(regExp, (function(path) {
+    <extractAndMapParameters>
+    var args = this.__extractParameters(regExp, path);
+    var params = conbo.isString(route)
+      ? conbo.object((route.match(/:\w+/g) || []).map(function(r) { return r.substr(1); }), args)
+      : {};
+    </extractAndMapParameters>
+
+    <invokeCallback>
+    callback && callback.apply(this, args);
+    </invokeCallback>
+
+    <dispatchEvents>
+    var options = {
+      // ... Object properties
+    };
+    this.dispatchEvent(new conbo.ConboEvent('route:'+name, options));
+    this.dispatchEvent(new conbo.ConboEvent(conbo.ConboEvent.ROUTE, options));
+    </dispatchEvents>
+  }).bind(this));
+  </defineRoute>
+
+  return this;
+}
+</addRoute>
+```
+
+```javascript
+<aggregate>
+function aggregate(sAlias) {
+  <processAggregateWithDetails>
+  var oDetails = oAggregation.aggregate[sAlias],
+      sAggregate = oDetails.name || sAlias,
+      sGrandTotal = sAlias,
+      sWith = oDetails.with;
+  
+  if (sWith) {
+    // ... Code for handling with aggregation
+  } else if (oDetails.name) {
+    sAggregate += " as " + sAlias;
+  }
+  </processAggregateWithDetails>
+
+  <handleMinOrMax>
+  if (!bFollowUp) {
+    if (oDetails.min) {
+      processMinOrMax(sAlias, "min");
+    }
+    if (oDetails.max) {
+      processMinOrMax(sAlias, "max");
+    }
+  }
+  </handleMinOrMax>
+
+  <processGrandTotal>
+  if (oDetails.grandTotal) {
+    bHasGrandTotal = true;
+    if (!mQueryOptions.$skip) {
+      // ... Code that adds grand total to the aggregate
+    }
+  }
+  </processGrandTotal>
+
+  return sAggregate;
+}
+</aggregate>
+```
+
+```javascript
+<defaultAutoAuthorizeHtmlResponse>
+function defaultAutoAuthorizeHtmlResponse(req, res) {
+  <processRedirect>
+  var config = req.app.get('stormpathConfig');
+  res.redirect(302, url.parse(req.query.next || '').path || config.web.register.nextUri);
+  </processRedirect>
+}
+</defaultAutoAuthorizeHtmlResponse>
+```
+
+```javascript
+<vueFieldStates>
+function (Vue) {
+  <initializeHelpers>
+  var ref = Vue.util;
+  var isPlainObject = ref.isPlainObject;
+  </initializeHelpers>
+
+  <defineFieldStateMethods>
+  function getValue (options) { /* ... */ }
+  function checkModified () { /* ... */ }
+  function willUpdateTouched (options) { /* ... */ }
+  function willUpdateDirty () { /* ... */ }
+  function willUpdateModified () { /* ... */ }
+  function handleInputable (e) { /* ... */ }
+  function watchInputable (val) { /* ... */ }
+  function _initStates (keys, target, init) { /* ... */ }
+  function reset () { /* ... */ }
+  function _walkValid (keys, target) { /* ... */ }
+  function _watchValidationRawResults () { /* ... */ }
+  function _unwatchValidationRawResults () { /* ... */ }
+  function touch () { /* ... */ }
+  </defineFieldStateMethods>
+
+  return {
+    getValue,
+    checkModified,
+    // ... Other methods
+  }
+}
+</vueFieldStates>
+```
+
+```javascript
+<collapseTopLevelNodes>
+function() {
+  <collapseAll>
+  var topLevelNodes = this._navHandler.getTopLevelNodes();
+  for (var i = 0; i < topLevelNodes.length ; i++){
+    this.myTree.collapse(topLevelNodes[i]);
+  }
+  </collapseAll>
+}
+</collapseTopLevelNodes>
+```
+
+```javascript
+<addListenerToDashboard>
+function addListener(uid) {
+  <updateListenerRecord>
+  var addedListener = false;
+  if(typeof(dashboardListeners[uid]) === 'undefined') {
+    dashboardListeners[uid] = {
+      'startTime': new Date(),
+      'numIterations': 0,
+      'uid': uid,
+      'numStarts': 1,
+    };
+    addedListener = true;
+  } else {
+    dashboardListeners[uid].numStarts += 1;
+  }
+  </updateListenerRecord>
+  return addedListener;
+}
+</addListenerToDashboard>
+```
+
+```javascript
+<isConsecutiveComment>
+function isConsecutiveComment(comment) {
+  <checkConsecutiveTokenOrComment>
+  const previousTokenOrComment = sourceCode.getTokenBefore(comment, { includeComments: true });
+  return Boolean(
+    previousTokenOrComment &&
+    ["Block", "Line"].indexOf(previousTokenOrComment.type) !== -1
+  );
+  </checkConsecutiveTokenOrComment>
+}
+</isConsecutiveComment>
+```
+
+In the provided functions, each annotated section represents distinct responsibilities within the context of their function. Some annotations encompass multiple lines where the combined operations act towards a single responsibility.
