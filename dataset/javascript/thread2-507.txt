@@ -1,0 +1,179 @@
+```javascript
+<isPlainObject>
+function isPlainObject(value) {
+	if (!isObjectLike(value) || getTag(value) != '[object Object]') {
+		return false
+	}
+	if (Object.getPrototypeOf(value) === null) {
+		return true
+	}
+	let proto = value;
+	while (Object.getPrototypeOf(proto) !== null) {
+		proto = Object.getPrototypeOf(proto);
+	}
+	return Object.getPrototypeOf(value) === proto
+}
+</isPlainObject>
+
+<isMimeType>
+function isMimeType(str) {
+  (0, _assertString.default)(str);
+  return mimeTypeSimple.test(str) || mimeTypeText.test(str) || mimeTypeMultipart.test(str);
+}
+</isMimeType>
+
+<getSortedCollection>
+function (query) {
+    if (query instanceof Query && query.query.sort) {
+        if (this.$.query) {
+            <mergeQueries>
+            query.query.where = this.$.query.query.where;
+            </mergeQueries>
+        }
+
+        <prepareOptions>
+        var options = _.defaults({}, {
+            query: query,
+            root: this.getRoot()
+        }, this.$);
+        </prepareOptions>
+
+        <sortCacheHandling>
+        var sortCacheId = query.sortCacheId();
+        if (!this.$sortCache[sortCacheId]) {
+            this.$sortCache[sortCacheId] = this._createSortedCollection(query, options);
+        }
+        </sortCacheHandling>
+
+        return this.$sortCache[sortCacheId];
+    }
+
+    return this;
+}
+</getSortedCollection>
+
+<keysFromPath>
+function keysFromPath(path) {
+    var re = /\[("|')(.+)\1\]|([^.\[\]]+)/g;
+    var elements = [];
+    var result;
+    while ((result = re.exec(path)) !== null) {
+      elements.push(result[2] || result[3]);
+    }
+    return elements;
+  }
+</keysFromPath>
+
+<signMessage>
+function(message, privateKey, cb = null)
+{
+	<executeSigning>
+    var result
+    try {
+        result = secp256k1.sign(ethUtils.sha3(message), privateKey)
+    }
+    catch (err){
+        result = err
+    }
+    </executeSigning>
+
+    <handleCallback>
+    if(isFunction(cb)){
+        if(result instanceof Error){
+            return cb(result)
+        } else {
+            return cb(null, result)
+        }
+    }
+    else {
+        return result
+    }
+	</handleCallback>
+}
+</signMessage>
+
+<runPre>
+function runPre (arr, argv, cb) {
+  const nw = arr.map(function (el) {
+    return el.bind(null, argv)
+  })
+  series(nw, cb)
+}
+</runPre>
+
+<fulfillName>
+function fulfillName (name, ext, mask, lang) {
+    <parameterNormalization>
+    var shortname;
+    var params;
+    if (isPlainObject(name)) {
+        params = name;
+        name = params.name;
+        ext = params.ext;
+        mask = params.mask;
+        lang = params.lang;
+    }
+    </parameterNormalization>
+
+    <generateFullName>
+    shortname = basename(name);
+    if (mask) {
+        name = join(name, unmaskName(shortname, mask, lang));
+    }
+    var curext = extname(name);
+    if (curext) {
+        return name;
+    }
+    if (ext[0] !== '.') {
+        ext = '.' + ext;
+    }
+    return join(name, shortname + ext);
+    </generateFullName>
+}
+</fulfillName>
+
+<parseModelData>
+function (model, data, action, options) {
+    var processor = this.$dataSource.getProcessorForModel(model);
+    return processor.parse(model, data, action, options);
+}
+</parseModelData>
+
+<getChannelsSchedule>
+function getChannelsSchedule(channel,date){
+  <generatePath>
+  var p = '/ibl/v1/channels/{channel}/schedule/{date}';
+  p = p.replace('{channel}',channel);
+  p = p.replace('{date}',date);
+  return p;
+  </generatePath>
+}
+</getChannelsSchedule>
+
+<timeout>
+function timeout(message) {
+    <logTimeoutWarning>
+    $log.warn('Plugin client request timeout: ' + serialize(message));
+    </logTimeoutWarning>
+
+    <findAndResolvePromise>
+    var promiseIndex = lodash.findIndex(promises, function(promise) {
+      return promise.id == message.header.id;
+    });
+    if (promiseIndex >= 0) {
+      var promise = lodash.pullAt(promises, promiseIndex);
+      message.response = {
+        statusCode: 408,
+        statusText: 'REQUEST_TIMED_OUT',
+        data: {
+          message: 'Request timed out.'
+        }
+      }
+      promise[0].onComplete(message);
+    } else {
+      $log.warn('Message request timed out but there is no promise to fulfill: ' + serialize(message));
+    }
+    </findAndResolvePromise>
+  }
+</timeout>
+```

@@ -1,0 +1,152 @@
+<function>
+function(uri) {
+    var prefix = null;
+    if(uri == null) {
+        prefix = this.namespaces[this.defaultPrefix];
+    } else {
+        for(prefix in this.namespaces) {
+            if(this.namespaces[prefix] == uri) {
+                break;
+            }
+        }
+    }
+    return prefix;
+}
+</function>
+
+<toMetaString>
+function toMetaString(obj) {
+  var attrs = _.map(obj, function(_v, _k) {
+    return _k + '="' + _.escape(_v) + '"';
+  });
+
+  var res = _.compact(attrs).join(" ");
+  return res ? "<meta " + res + ">" : "";
+}
+</toMetaString>
+
+<httpRequestStableId>
+function httpRequestStableId (data) {
+    
+    data = requireValidOptionalObject(data)
+    
+    var stableData = _.pick(data, ['options', 'moduleCallSignature', 'requestId', 'stack'])
+    
+    var stableIdWithData = stableId(stableData, true)
+    
+    return stableIdWithData.id
+}
+</httpRequestStableId>
+
+<getImportPaths>
+function getImportPaths(filePath){
+  var importPaths = [];
+  try{
+    var contents = fs.readFileSync(filePath).toString('utf8');
+    importPaths = parseImpt(contents);
+  }
+  catch(exception){}
+  return importPaths;
+}
+</getImportPaths>
+
+<createIHDRChunk>
+function createIHDRChunk(width, height) {
+    const data = buffer.Buffer.alloc(13);
+
+    
+    data.writeUInt32BE(width);
+    
+    data.writeUInt32BE(height, 4);
+    
+    data.writeUInt8(8, 8);
+    
+    data.writeUInt8(6, 9);
+    
+    data.writeUInt8(0, 10);
+    
+    data.writeUInt8(0, 11);
+    
+    data.writeUInt8(0, 12);
+
+    return createChunk('IHDR', data);
+}
+</createIHDRChunk>
+
+<function>
+function(error, params) {
+      if (error) {
+        if (!options.silenceErrors) {
+          logger.error('_sync.onComplete', t.className, error);
+        }
+        options.error(null, error);
+      } else {
+        logger.info('_sync.onComplete', t.className, model.get('id'));
+        options.success(params);
+      }
+    }
+</function>
+
+<updateUserDataField>
+function updateUserDataField(userId, data, overwrite, callback) {
+    return _updateUserObjectField(userId, ['data'], data, overwrite)
+        .then(function (userData) {
+            return userData.data;
+        })
+        .nodeify(callback);
+}
+</updateUserDataField>
+
+<getSections>
+function getSections() {
+    var sections = [];
+    
+    for (var name in builtinSections)
+      sections.push(builtinSections[name]);
+    
+    for (var i in Espruino.Core.Config.data) {
+      var c = Espruino.Core.Config.data[i];
+      
+      var found = false;
+      for (var s in sections)
+        if (sections[s].name == c.section)
+          found = true;
+      
+      if (!found) {
+        console.warn("Section named "+c.section+" was not added with Config.addSection");
+        sections[c.section] = {
+            name : c.section,
+            sortOrder : 0
+        };        
+      }
+    }
+    
+    sections.sort(function (a,b) { return a.sortOrder - b.sortOrder; });
+    
+    return sections;
+  }
+</getSections>
+
+<addPhaseTrigger>
+function addPhaseTrigger(priv, target, propertyName) {
+  check(target, 'target').is.anEventTarget();
+  var property = propertyName || 'transform';
+  check(property, 'property').is.aString();
+
+  if (property === 'transform') {
+    property = feature.transformPropertyName;
+  }
+  priv.phaseTriggers.put(property, target);
+  maybeStart(priv);
+}
+</addPhaseTrigger>
+
+<doPostCss>
+function doPostCss(css, callback) {
+	postcss([autoprefixer]).process(css, {from: undefined}).then(function gotCssResult(result) {
+		callback(null, result.css);
+	}).catch(function gotError(err) {
+		callback(err);
+	});
+}
+</doPostCss>

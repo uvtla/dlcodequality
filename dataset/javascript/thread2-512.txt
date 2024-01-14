@@ -1,0 +1,257 @@
+```javascript
+<initializeMap>
+function initializeMap() {
+  <checkMapPresence>
+  if($('.map').length) {
+  </checkMapPresence>
+    <mapSetup>
+    var mapCanvas = $('#map-canvas');
+    var myLatlng = new google.maps.LatLng(mapCanvas.data("latitude"),mapCanvas.data("longitude"));
+    var mapOptions = {
+      zoom: mapCanvas.data("zoom"),
+      center: myLatlng
+    }
+    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+    </mapSetup>
+    
+    <markerCreation>
+    var marker = new google.maps.Marker({
+      position: myLatlng,
+      map: map
+    });
+    </markerCreation>
+  }
+}
+</initializeMap>
+
+<execute>
+function execute(req, res) {
+  <delegateOrRespond>
+  if(req.info.command.sub) {
+    this.delegate(req, res);
+  }else{
+    var list = getList.call(this);
+    return res.send(null, list);
+  }
+  </delegateOrRespond>
+}
+</execute>
+
+<processComputed>
+function processComputed (instance) {
+  const computed = []
+  <getComputedDefinitions>
+  const defs = instance.$options.computed || {}
+  </getComputedDefinitions>
+  
+  <evaluateComputedProperties>
+  for (const key in defs) {
+    const def = defs[key]
+    <determinePropertyType>
+    const type = typeof def === 'function' && def.vuex
+      ? 'vuex bindings'
+      : 'computed'
+    </determinePropertyType>
+    
+    let computedProp = null
+    try {
+      computedProp = {
+        type,
+        key,
+        value: instance[key]
+      }
+    } catch (e) {
+      computedProp = {
+        type,
+        key,
+        value: '(error during evaluation)'
+      }
+    }
+
+    computed.push(computedProp)
+  }
+  </evaluateComputedProperties>
+
+  return computed
+}
+</processComputed>
+
+<updateTimeout>
+function(map, delay, nice) {
+  
+  <clearPreviousTimeout>
+  window.clearTimeout(this.tileQueueId[map.id]);
+  </clearPreviousTimeout>
+
+  <queueManagement>
+  var tileQueue = this.tileQueue[map.id];
+  </queueManagement>
+
+  <setNewTimeout>
+  if (!nice || tileQueue.length) {
+    this.tileQueueId[map.id] = window.setTimeout(
+      OpenLayers.Function.bind(function() {
+        this.drawTilesFromQueue(map);
+        if (tileQueue.length) {
+          this.updateTimeout(map, this.frameDelay);
+        }
+      }, this), delay
+    );
+  }
+  </setNewTimeout>
+}
+</updateTimeout>
+
+<hasNextPage>
+function () {
+  <getPageInformation>
+  var currentPage = this.getCurrentPage(),
+      totalPages  = this.getTotalPages();
+  </getPageInformation>
+
+  <checkPagination>
+  return currentPage && (totalPages === Paginator.VALUE_UNLIMITED || currentPage < totalPages);
+  </checkPagination>
+}
+</hasNextPage>
+
+<SequentialParser>
+function SequentialParser(accumulators, callback) {
+  var step = 0;
+  <initializeFields>
+  var fields = {};
+  </initializeFields>
+  
+  return {
+    fields: fields,
+    <addField>
+    addField: function(key, value) {
+      this.fields[key] = value;
+    },
+    </addField>
+    <parseItem>
+    parseItem: function(item) {
+      <parseControlFlow>
+      if (step >= accumulators.length) {
+        return console.warn(
+          "warning: skipping item, because SequentialParser is done."
+        );
+      }
+      var current = accumulators[step];
+      if (current.field) {
+        this.addField(current.field, item);
+        ++step;
+      } else if (current.accumulator) {
+        var doneAccumulating = current.accumulator(item, this);
+        if (doneAccumulating) ++step;
+      } 
+      else ++step;
+      if (!item || step >= accumulators.length) {
+        callback && callback(null, this);
+      }
+      </parseControlFlow>
+    }
+    </parseItem>
+  };
+}
+</SequentialParser>
+
+<drawImage>
+function drawImage(canvas, rect, image) {
+  <executeImageContent>
+  if (image && image.content) {
+    try {
+      eval(image.content);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  </executeImageContent>
+}
+</drawImage>
+
+<consumes>
+function consumes(ctx) {
+  <checkMethod>
+  if (['HEAD', 'GET'].indexOf(ctx.operation.spec.method) >= 0) return;
+  </checkMethod>
+
+  <gatherConsumptionInfo>
+  var mimes = ctx.operation.spec.consumes ||
+    ctx.operation.resource.api.spec.consumes || [];
+  var prefix = describe(ctx);
+  </gatherConsumptionInfo>
+
+  <disableMiddlewareIfNeeded>
+  if (!mimes.length) {
+    debug(prefix + 'consumes middleware disabled (no consumes)');
+    return;
+  }
+  <disableMiddlewareIfNeeded>
+
+  <consumesMiddleware>
+  return function(req, res, next) {
+    if (req.sf.text && !is(req, mimes)) {
+      debug(prefix + 'consumes mime not supported: "%s" not in "%s"',
+            req.headers['content-type'], mimes);
+
+      var err = new Error('Unsupported Content-Type (' +
+                          req.headers['content-type'] + '), supports: ' +
+                          mimes.join(', '));
+      err.statusCode = 415;
+      err.expose = true;
+
+      return res.sf.reply(err);
+    }
+
+    next();
+  };
+  </consumesMiddleware>
+}
+</consumes>
+
+<addRoleToSet>
+function(set, role) {
+  <validForNodeTypeComparison>
+  var validForNodeType = function(implicitNodeTypeSelector) {
+    return axe.utils.matchesSelector(node, implicitNodeTypeSelector);
+  };
+  </validForNodeTypeComparison>
+
+  <addToSetIfValid>
+  if (role.implicit && role.implicit.some(validForNodeType)) {
+    set.push(role.name);
+  }
+  </addToSetIfValid>
+
+  return set;
+}
+</addRoleToSet>
+
+<flattenObject>
+function flattenObject(ob) {
+  <objectFlattening>
+  return Object.entries(ob).reduce((accum, el) => {
+    const [key, entry] = el;
+
+    <nestedFlattening>
+    if (typeof entry === 'object' && entry !== null) {
+      const flatObject = Object.entries(flattenObject(entry));
+
+      flatObject.forEach((flattenedEntry) => {
+        const [fkey, fentry] = flattenedEntry;
+        
+        accum[`${key}.${fkey}`] = fentry;
+      });
+    } else {
+      
+      accum[key] = entry;
+    }
+    </nestedFlattening>
+
+    return accum;
+  }, {});
+  </objectFlattening>
+}
+</flattenObject>
+```

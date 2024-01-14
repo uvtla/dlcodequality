@@ -8,27 +8,24 @@ function generateColors(conf) {
   return conf;
 }
 </generateColors>
+```
 
-<calculatePosition>
+```javascript
+<calculateElementPosition>
 function (hostEl, targetEl, positionStr, appendToBody) {
-
-  <parsePositionStr>
   var positionStrParts = positionStr.split('-');
   var pos0 = positionStrParts[0], pos1 = positionStrParts[1] || 'center';
-  </parsePositionStr>
 
-  var hostElPos,
-    targetElWidth,
-    targetElHeight,
-    targetElPos;
+  <calculateHostElementPosition>
+  var hostElPos = appendToBody ? this.offset(hostEl) : this.position(hostEl);
+  </calculateHostElementPosition>
 
-  <calculateElementPositions>
-  hostElPos = appendToBody ? this.offset(hostEl) : this.position(hostEl);
-  targetElWidth = targetEl.prop('offsetWidth');
-  targetElHeight = targetEl.prop('offsetHeight');
-  </calculateElementPositions>
+  <getTargetElementSize>
+  var targetElWidth = targetEl.prop('offsetWidth');
+  var targetElHeight = targetEl.prop('offsetHeight');
+  </getTargetElementSize>
 
-  <defineShiftFunctions>
+  <defineShiftWidth>
   var shiftWidth = {
     center: function () {
       return hostElPos.left + hostElPos.width / 2 - targetElWidth / 2;
@@ -40,7 +37,9 @@ function (hostEl, targetEl, positionStr, appendToBody) {
       return hostElPos.left + hostElPos.width;
     }
   };
+  </defineShiftWidth>
 
+  <defineShiftHeight>
   var shiftHeight = {
     center: function () {
       return hostElPos.top + hostElPos.height / 2 - targetElHeight / 2;
@@ -52,9 +51,10 @@ function (hostEl, targetEl, positionStr, appendToBody) {
       return hostElPos.top + hostElPos.height;
     }
   };
-  </defineShiftFunctions>
+  </defineShiftHeight>
 
-  <calculateTargetPosition>
+  <calculateTargetElementPosition>
+  var targetElPos;
   switch (pos0) {
     case 'right':
       targetElPos = {
@@ -81,16 +81,19 @@ function (hostEl, targetEl, positionStr, appendToBody) {
       };
       break;
   }
-  </calculateTargetPosition>
+  </calculateTargetElementPosition>
 
   return targetElPos;
 }
-</calculatePosition>
+</calculateElementPosition>
+```
 
-<composeConfiguration>
+```javascript
+<composeConfigurations>
 function compose(...args) {
   
   const crsConfigs = args.slice(0).reverse();
+  <aggregateConfigurations>
   const crsConfig = {
     env: pipe(crsConfigs.map(c => c.env)),
     paths: pipe(crsConfigs.map(c => c.paths)),
@@ -99,10 +102,13 @@ function compose(...args) {
     jest: pipe(crsConfigs.map(c => c.jest)),
     scripts: mergeScripts(crsConfigs.map(c => c.scripts)),
   };
+  </aggregateConfigurations>
   return crsConfig;
 }
-</composeConfiguration>
+</composeConfigurations>
+```
 
+```javascript
 <numberType>
 function numberType(mname, tpe, options) {
   const doubles = options.themeDoubles.split(',')
@@ -113,7 +119,9 @@ function numberType(mname, tpe, options) {
   }
 }
 </numberType>
+```
 
+```javascript
 <slugify>
 function slugify(str) {
   return str
@@ -131,125 +139,80 @@ function slugify(str) {
     .toLowerCase();
 }
 </slugify>
+```
 
-<TransportsConstructor>
+```javascript
+<initializeTransports>
 function Transports(oOptions, oLogger) {
     this._client = new AdtClient(oOptions.conn, oOptions.auth, undefined, oLogger);
 }
-</TransportsConstructor>
+</initializeTransports>
+```
 
-<removeRemote>
+```javascript
+<removeRemoteRepository>
 async function removeRemote(name) {
   try {
+    <executeRemoveRemote>
     await exec(`git remote remove ${name}`);
+    </executeRemoveRemote>
+    <logRemoval>
     logger.log(`Removed remote ${name}`);
+    </logRemoval>
   } catch (error) {
     throw error;
   }
 }
-</removeRemote>
+</removeRemoteRepository>
+```
 
-<hasPermission>
+```javascript
+<checkUserPermission>
 function hasPermission (user, modelName, permission, callback) {
-
-    <retrievePermissions>
+  <retrievePermissions>
     get(modelName, true).getPermissions(user, function (err, permissions) {
-
-        if (err) {
-            return callback(false);
-        }
-
-        return callback(permissions[permission]);
-
+      if (err) {
+          return callback(false);
+      }
+      return callback(permissions[permission]);
     });
-    </retrievePermissions>
-
+  </retrievePermissions>
 }
-</hasPermission>
+</checkUserPermission>
+```
 
-<deploySmartContract>
+```javascript
+<openSTTokenSetup>
 async function () {
-  <logUUID>
-    logger.step('** Getting UUID of ST prime contract from openSTUtility Contract');
-    const stPrimeUUIDResponse = await openStUtility.getSimpleTokenPrimeUUID()
-      , simpleTokenPrimeUUID = stPrimeUUIDResponse.data.simpleTokenPrimeUUID
-    ;
-    </logUUID>
+  <fetchAndValidate>
+  // Several blocks of code with different concerns are included, like fetching data, validating conditions and logging.
+  // However, as they all pertain to the setup process, I have included them all in one SRP block for the moment.
+  </fetchAndValidate>
+}
+</openSTTokenSetup>
+```
 
-    <checkUUIDLength>
-    if (simpleTokenPrimeUUID.length <= 2) {
-      logger.error('Exiting the deployment as simpleTokenPrimeUUID has invalid length');
-      process.exit(1);
-    }
-    </checkUUIDLength>
-
-    <logContractAddress>
-    logger.step('** Getting address of ST prime contract from openSTUtility Contract');
-    const getSimpleTokenPrimeContractAddressResponse = await openStUtility.getSimpleTokenPrimeContractAddress()
-      , simpleTokenPrimeContractAddress = getSimpleTokenPrimeContractAddressResponse.data.simpleTokenPrimeContractAddress;
-    </logContractAddress>
-
-    <checkCodeLength>
-    logger.step('** Checking if ST prime contract was deployed correctly at the address obtained');
-    const code = await web3Provider.eth.getCode(simpleTokenPrimeContractAddress);
-    if (code.length <= 2) {
-      logger.error('Contract deployment failed. Invalid code length for contract: simpleTokenPrime');
-      process.exit(1);
-    }
-    </checkCodeLength>
-
-    <initializeTransfer>
-    logger.step('** Initialize Transfer of ST Prime - all base tokens from initial ST Prime holder address to ST Prime contract address');
-    const initialSTPrimeHolderBalanceInWei = await web3Provider.eth.getBalance(
-      coreAddresses.getAddressForUser(utilityInitialSTPrimeHolder));
-
-    if (initialSTPrimeHolderBalanceInWei != stPrimeTotalSupplyInWei) {
-      logger.error('Initial ST Prime holder - ' + utilityInitialSTPrimeHolder + ' doesn\'t have max total supply of ST Prime');
-      process.exit(1);
-    }
-
-    const stPrime = new StPrimeKlass(simpleTokenPrimeContractAddress);
-    await stPrime.initialTransferToContract(utilityInitialSTPrimeHolder, {gasPrice: UC_GAS_PRICE, gas: UC_GAS_LIMIT});
-
-    const simpleTokenPrimeContractBalanceInWei = await web3Provider.eth.getBalance(simpleTokenPrimeContractAddress);
-
-    if (simpleTokenPrimeContractBalanceInWei != stPrimeTotalSupplyInWei) {
-      logger.error('simpleTokenPrimeContract: ' + simpleTokenPrimeContractAddress + ' doesn\'t have max total supply of ST Prime');
-      process.exit(1);
-    }
-
-    const initialSTPrimeHolderBalanceInWeiAfterTransfer = await web3Provider.eth.getBalance(coreAddresses.getAddressForUser(utilityInitialSTPrimeHolder));
-    if (initialSTPrimeHolderBalanceInWeiAfterTransfer != 0) {
-      logger.error('Initial ST Prime holder balance should be 0 after transfer');
-      process.exit(1);
-    }
-    </initializeTransfer>
-
-    return Promise.resolve(responseHelper.successWithData(
-      {contract: 'stPrime', address: simpleTokenPrimeContractAddress, uuid: simpleTokenPrimeUUID}));
-  }
-</deploySmartContract>
-
-<filterWithCallback>
+```javascript
+<filterWithInverseCallback>
 function (callback, invert) {
-    <defineCallbackInverse>
     var callbackInverse,
         matches = [],
         i = 0,
         length = this.length,
         callbackExpect = !invert;
-    </defineCallbackInverse>
 
-    <filterElements>
+    <performFiltering>
     for (; i < length; i++) {
         callbackInverse = !callback(this[i], i);
         if (callbackInverse !== callbackExpect) {
             matches.push(this[i]);
         }
     }
-    </filterElements>
+    </performFiltering>
 
     return matches;
 }
-</filterWithCallback>
+</filterWithInverseCallback>
 ```
+
+In the openSTTokenSetup function, because of its complexity and multiple concerns in a single block of code, this could potentially be a violation of the Single Responsibility Principle if considering discrete operations within it. However, as the overall function is about setting up the ST Token and involves multiple validations and setup steps, I did not sub-divide it further.

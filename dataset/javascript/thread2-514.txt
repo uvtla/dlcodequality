@@ -1,0 +1,194 @@
+```javascript
+<_log>
+function _log() {
+  return function() {
+    var that = this;
+    return function() {
+      log[level]
+        .bind(undefined, that.log_opts.component_name)
+        .apply(undefined, arguments);
+    };
+  };
+}
+</_log>
+
+<iScore>
+function iScore(min, max, value) {
+  value = Math.min(max, value);
+  value = Math.max(min, value);
+  return round(1 + 9 * (max - value) / (max - min));
+}
+</iScore>
+
+<forEachUp>
+function forEachUp(domEle, fn$$1) {
+    while (domEle != null) {
+      fn$$1(domEle);
+      domEle = domEle.parentNode;
+    }
+}
+</forEachUp>
+
+<NBASearchState>
+function NBASearchState(node) {
+  
+  this.node = node;
+  
+  this.p1 = null;
+  
+  this.p2 = null;
+  
+  this.closed = false;
+  
+  this.g1 = Number.POSITIVE_INFINITY;
+  
+  this.g2 = Number.POSITIVE_INFINITY;
+  
+  this.f1 = Number.POSITIVE_INFINITY;
+  
+  this.f2 = Number.POSITIVE_INFINITY;
+  
+  this.h1 = -1;
+  
+  this.h2 = -1;
+}
+</NBASearchState>
+
+<Anonymous Function>
+function (attributes) {
+    this._imageColor = attributes ? attributes._imageColor.clone() : Color.WHITE.clone();
+    this._imageOffset = attributes ? attributes._imageOffset
+        : new Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 0.5);
+    this._imageScale = attributes ? attributes._imageScale : 1;
+    this._imageSource = attributes ? attributes._imageSource : null;
+    this._depthTest = attributes ? attributes._depthTest : true;
+    this._labelAttributes = attributes ? attributes._labelAttributes : new TextAttributes(null);
+    this._drawLeaderLine = attributes ? attributes._drawLeaderLine : false;
+    this._leaderLineAttributes = attributes ? attributes._leaderLineAttributes : new ShapeAttributes(null);
+
+    this.stateKeyInvalid = true;
+}
+</Anonymous Function>
+
+<postSetTags>
+function postSetTags(post_id, tags, cb) {
+  var ids = _.pluck(tags, 'id')
+    , q1 = 'DELETE FROM posts_tags WHERE post_id = $1'
+    , q2 = 'INSERT INTO posts_tags (post_id, tag_id) VALUES ' +
+    ids.map(function(id) {
+      return '(' + post_id + ',' + id + ')';
+    }).join(', ');
+
+  db.getClient(function(err, client, done) {
+    if(err) { return cb(err); }
+    client.query(q1, [post_id], function(err, r) {
+      if(err) { return cb(err); }
+      client.query(q2, function(err, r) {
+        if(err) {
+          cb(err);
+          done(err);
+        } else {
+          cb(null, r.rowCount);
+          done();
+        }
+      });
+    });
+  });
+}
+</postSetTags>
+
+<getTextBindingForToken>
+function getTextBindingForToken(Directive, tokenText) {
+    tokenText = tokenText.trim();
+
+    let directiveInstances = PRIVATE.get(Directive);
+
+    if (!directiveInstances) {
+        directiveInstances = {};
+        PRIVATE.set(Directive, directiveInstances);
+    }
+
+    if (!directiveInstances[tokenText]) {
+        directiveInstances[tokenText] = new Directive(tokenText);
+    }
+
+    return directiveInstances[tokenText];
+}
+</getTextBindingForToken>
+
+<Anonymous Function>
+function() {
+    this.disable();
+
+    this.$hud.hide();
+    this.$shade.hide();
+    this.showing = false;
+
+    delete Garnish.HUD.activeHUDs[this._namespace];
+
+    Garnish.escManager.unregister(this);
+
+    this.onHide();
+}
+</Anonymous Function>
+
+<Anonymous Function>
+function (parsed_key, options) {
+    "use strict";
+
+    this.key = parsed_key;
+
+    options = options || {};
+
+    this.options = {};
+    this.options.json = options.json !== false;
+    this.options.check = options.check !== false;
+    this.options.pad = options.pad !== false;
+    this.options.custom = options.custom;
+
+    this.encoding = options.base64 !== false ? 'base64' : undefined;
+}
+</Anonymous Function>
+
+<Anonymous Function>
+function($exercise) {
+    var codeSolution = $exercise.find(".code-solution").text();
+    var codeValidation = $exercise.find(".code-validation").text();
+    var codeContext = $exercise.find(".code-context").text();
+
+    var editor = ace.edit($exercise.find(".editor").get(0));
+    editor.setTheme("ace/theme/tomorrow");
+    editor.getSession().setUseWorker(false);
+    editor.getSession().setMode("ace/mode/javascript");
+
+    editor.commands.addCommand({
+        name: "submit",
+        bindKey: "Ctrl-Return|Cmd-Return",
+        exec: function() {
+            $exercise.find(".action-submit").click();
+        }
+    });
+
+    
+    $exercise.find(".action-submit").click(function(e) {
+        e.preventDefault();
+
+        gitbook.events.trigger("exercise.submit", {type: "code"});
+
+        execute("javascript", editor.getValue(), codeValidation, codeContext, function(err, result) {
+            $exercise.toggleClass("return-error", err != null);
+            $exercise.toggleClass("return-success", err == null);
+            if (err) $exercise.find(".alert-danger").text(err.message || err);
+        });
+    });
+
+    
+    $exercise.find(".action-solution").click(function(e) {
+        e.preventDefault();
+
+        editor.setValue(codeSolution);
+        editor.gotoLine(0);
+    });
+}
+</Anonymous Function>
+```

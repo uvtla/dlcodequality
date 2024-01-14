@@ -1,0 +1,590 @@
+Function 1: getNumType
+```javascript
+<getNumType>
+function getNumType(vmin, vmax, is_float) {
+	if (typeof vmin !== "number") return NUMTYPE.NAN;
+	if (typeof vmax !== "number") return NUMTYPE.NAN;
+	if (isNaN(vmin) || isNaN(vmax)) return NUMTYPE.NAN;
+
+	if (is_float) {
+		var smallest;
+		if (vmin === 0) {
+			smallest = vmax;
+		} else if (vmax === 0) {
+			smallest = -vmax;
+		} else {
+			if (vmin > 0) {
+				smallest = vmin;
+			} else if (vmax < 0) {
+				smallest = -vmax;
+			} else if ((vmin < 0) && (vmax > 0)) {
+				smallest = -vmin;
+				if (vmax < smallest) smallest = vmax;
+			}
+		}
+
+		if ((vmin > FLOAT32_NEG) && (vmax < FLOAT32_POS) && (smallest > FLOAT32_SMALL)) {
+			return NUMTYPE.FLOAT32;
+		} else {
+			return NUMTYPE.FLOAT64;
+		}
+	}
+
+	if ((vmax < 0) || (vmin < 0)) {
+		var amax = -vmin;
+		if (vmax < 0) {
+			if (-vmax > amax) amax = -vmax;
+		} else {
+			if (vmax > amax) amax = vmax;
+		}
+
+		if (amax < INT8_MAX) {
+			return NUMTYPE.INT8;
+		} else if (amax < INT16_MAX) {
+			return NUMTYPE.INT16;
+		} else if (amax < INT32_MAX) {
+			return NUMTYPE.INT32;
+		} else {
+			return NUMTYPE.FLOAT64;
+		}
+	} else {
+		if (vmax < UINT8_MAX) {
+			return NUMTYPE.UINT8;
+		} else if (vmax < UINT16_MAX) {
+			return NUMTYPE.UINT16;
+		} else if (vmax < UINT32_MAX) {
+			return NUMTYPE.UINT32;
+		} else {
+			return NUMTYPE.FLOAT64;
+		}
+	}
+}
+</getNumType>
+```
+This function is **compliant** with the SRP. Although it has multiple conditional paths, they all serve the single cohesive responsibility of determining the numeric type based on the input parameters.
+
+---
+
+Function 2: includeProjectFileOrNodeModuleException
+```javascript
+<includeProjectFileOrNodeModuleException>
+function includeProjectFileOrNodeModuleException(resource) {
+    return resource.startsWith(CWD) &&
+        (
+            !resource.startsWith(CWD_NODE_MODULES) ||
+            INCLUDE_EXCEPTIONS.some(exceptionPath => resource.startsWith(exceptionPath))
+        );
+}
+</includeProjectFileOrNodeModuleException>
+```
+This function is **compliant** with the SRP. It has a single cohesive responsibility of checking whether the resource should be included based on predefined rules.
+
+---
+
+Function 3: _flatten
+```javascript
+<_flatten>
+function _flatten(groups, groupName, alreadySeen)
+{
+  alreadySeen = alreadySeen || [];
+
+  var ret = {};
+
+  <initializeHandlers>
+  HANDLER_KEYS.forEach(function(key) {
+    ret[key] = [];
+  });
+  </initializeHandlers>
+
+  var thisGroup = groups[groupName];
+  if (!thisGroup)
+    throw new Error('Unknown group: ' + groupName);
+
+  <includeSubgroups>
+  if (thisGroup.include) {
+    thisGroup.include.forEach(function(subGroupName) {
+      if (alreadySeen.indexOf(subGroupName) >= 0) {
+        return;
+      }
+      else {
+        alreadySeen.push(subGroupName);
+      }
+
+      var subGroup = _flatten(groups, subGroupName, alreadySeen);
+      if (!subGroup)
+        throw new Error('Unknown subgroup:' + subGroupName);
+
+      HANDLER_KEYS.forEach(function(key) {
+        if (subGroup[key]) {
+          _mergeArrayInPlace(ret[key], subGroup[key]);
+        }
+      });
+    });
+  }
+  </includeSubgroups>
+
+  <mergeHandlers>
+  HANDLER_KEYS.forEach(function(key) {
+    if (thisGroup[key]) {
+      _mergeArrayInPlace(ret[key], thisGroup[key]);
+    }
+  });
+  </mergeHandlers>
+
+  return ret;
+}
+</_flatten>
+```
+This function is **non-compliant** with the SRP. It performs multiple distinct tasks such as initializing handler data structures, including subgroups, and merging handlers, which have been annotated with separate tags indicating their distinct responsibilities within the function.
+
+---
+
+Function 4: Listener Removal (anonymous function)
+```javascript
+<listenerRemoval>
+function (lstCfg, itfWrap) {
+    if (this._listeners == null) {
+        return;
+    }
+    var defaultScope = (lstCfg.scope) ? lstCfg.scope : null;
+    var lsn;
+
+    <removeListenersLoop>
+    for (var evt in lstCfg) {
+        if (!lstCfg.hasOwnProperty(evt)) {
+            continue;
+        }
+        if (evt == 'scope') {
+            continue;
+        }
+        if (this._listeners[evt]) {
+            var lsnRm = lstCfg[evt];
+            if (typeof(lsnRm) == 'function') {
+                if (defaultScope == null) {
+                    this.$logError(this.MISSING_SCOPE, evt);
+                    continue;
+                }
+                __removeCallback(this._listeners, evt, defaultScope, lsnRm, itfWrap);
+            } else {
+                if (lsnRm.scope == null) {
+                    lsnRm.scope = defaultScope;
+                }
+                if (lsnRm.scope == null) {
+                    this.$logError(this.MISSING_SCOPE, evt);
+                    continue;
+                }
+                __removeCallback(this._listeners, evt, lsnRm.scope, lsnRm.fn, itfWrap, lsnRm.firstOnly);
+            }
+        }
+    }
+    </removeListenersLoop>
+    defaultScope = lsn = lsnRm = null;
+}
+</listenerRemoval>
+```
+This function is **compliant** with the SRP. Despite the multiple branches and checks, they all serve the single purpose of removing listeners from an object.
+
+---
+
+Function 5: hint
+```javascript
+<hint>
+function hint(ts, cm, c) {
+    ts.request(cm, {type: "completions", types: true, docs: true, urls: true}, function(error, data) {
+      
+      <handleRequestError>
+      if (error) return showError(ts, cm, error);
+      </handleRequestError>
+
+      var completions = [], after = "";
+      var from = data.start, to = data.end;
+
+      
+
+      <gatherCompletions>
+      for (var i = 0; i < data.completions.length; ++i) {
+        var completion = data.completions[i], className = typeToIcon(completion.type);
+        if (data.guess) className += " " + cls + "guess";
+        completions.push({
+          text: completion.name + after,
+          displayText: completion.name,
+          className: className,
+          data: completion
+        });
+      }
+      </gatherCompletions>
+
+      <setupCompletionObject>
+      var obj = {from: from, to: to, list: completions};
+      var tooltip = null;
+      CodeMirror.on(obj, "close", function() { remove(tooltip); });
+      CodeMirror.on(obj, "update", function() { remove(tooltip); });
+      CodeMirror.on(obj, "select", function(cur, node) {
+        remove(tooltip);
+        var content = ts.options.completionTip ? ts.options.completionTip(cur.data) : cur.data.doc;
+        if (content) {
+          tooltip = makeTooltip(node.parentNode.getBoundingClientRect().right + window.pageXOffset,
+            node.getBoundingClientRect().top + window.pageYOffset, content);
+          tooltip.className += " " + cls + "hint-doc";
+        }
+      });
+      </setupCompletionObject>
+
+      c(obj);
+    });
+  }
+</hint>
+```
+This function is **non-compliant** with the SRP. It performs multiple distinct tasks such as handling request errors, gathering completions, and setting up the completion object, noted by the annotated separate tags.
+
+---
+
+Function 6: cacheFor
+```javascript
+<cacheFor>
+function cacheFor(obj, key) {
+    var meta = _emberMetalMeta.peekMeta(obj);
+    var cache = meta && meta.source === obj && meta.readableCache();
+    var ret = cache && cache[key];
+
+    if (ret === UNDEFINED) {
+      return undefined;
+    }
+    return ret;
+}
+</cacheFor>
+```
+This function is **compliant** with the SRP. It focuses on a single responsibility: retrieving a cached value for a given object and key.
+
+---
+
+Function 7: transformMedia
+```javascript
+<transformMedia>
+function transformMedia(media, customMedias) {
+	const transpiledMedias = [];
+
+	for (const index in media.nodes) {
+		const { value, nodes } = media.nodes[index];
+		const key = value.replace(customPseudoRegExp, '$1');
+
+		
+		<handleCustomMedias>
+		if (key in customMedias) {
+			for (const replacementMedia of customMedias[key].nodes) {
+				
+				<configureMediaClone>
+				const modifier = media.modifier !== replacementMedia.modifier
+					? media.modifier || replacementMedia.modifier
+				: '';
+				const mediaClone = media.clone({
+					modifier,
+					
+					raws: !modifier || media.modifier
+						? { ...media.raws }
+					: { ...replacementMedia.raws },
+					type: media.type || replacementMedia.type,
+				});
+				</configureMediaClone>
+
+				
+				<assignCloneProperties>
+				if (mediaClone.type === replacementMedia.type) {
+					Object.assign(mediaClone.raws, {
+						and: replacementMedia.raws.and,
+						beforeAnd: replacementMedia.raws.beforeAnd,
+						beforeExpression: replacementMedia.raws.beforeExpression
+					});
+				}
+				</assignCloneProperties>
+
+				<spliceNodes>
+				mediaClone.nodes.splice(index, 1, ...replacementMedia.clone().nodes.map(node => {
+					
+					if (media.nodes[index].raws.and) {
+						node.raws = { ...media.nodes[index].raws };
+					}
+
+					node.spaces = { ...media.nodes[index].spaces };
+
+					return node;
+				}));
+				</spliceNodes>
+
+				
+				<handleRetranspilation>
+				const nextCustomMedia = getCustomMediasWithoutKey(customMedias, key);
+				const retranspiledMedias = transformMedia(mediaClone, nextCustomMedia);
+
+				if (retranspiledMedias.length) {
+					transpiledMedias.push(...retranspiledMedias);
+				} else {
+					transpiledMedias.push(mediaClone);
+				}
+				</handleRetranspilation>
+			}
+
+			return transpiledMedias;
+		}
+		</handleCustomMedias>
+
+		
+		<transformNestedNodes>
+		else if (nodes && nodes.length) {
+			transformMediaList(media.nodes[index], customMedias);
+		}
+		</transformNestedNodes>
+	}
+
+	return transpiledMedias;
+}
+</transformMedia>
+```
+This function is **non-compliant** with the SRP. It holds multiple responsibilities including handling custom medias, configuring media clones, assigning clone properties, splicing nodes, handling retranspilation, and transforming nested nodes, which have been annotated with separate tags indicating their discrete functions within the overall process.
+
+---
+
+Function 8: HighlightLayer
+```javascript
+<HighlightLayer>
+function HighlightLayer(name, scene, options) {
+    this.name = name;
+    
+    <initialSetup>
+    this._vertexBuffers = {};
+    this._mainTextureDesiredSize = { width: 0, height: 0 };
+    this._meshes = {};
+    this._maxSize = 0;
+    this._shouldRender = false;
+    this._instanceGlowingMeshStencilReference = HighlightLayer.glowingMeshStencilReference++;
+    this._excludedMeshes = {};
+    
+    this.innerGlow = true;
+    
+    this.outerGlow = true;
+    
+    this.isEnabled = true;
+    
+    this.onDisposeObservable = new BABYLON.Observable();
+    
+    this.onBeforeRenderMainTextureObservable = new BABYLON.Observable();
+    
+    this.onBeforeBlurObservable = new BABYLON.Observable();
+    
+    this.onAfterBlurObservable = new BABYLON.Observable();
+    
+    this.onBeforeComposeObservable = new BABYLON.Observable();
+    
+    this.onAfterComposeObservable = new BABYLON.Observable();
+    
+    this.onSizeChangedObservable = new BABYLON.Observable();
+    </initialSetup>
+    
+    this._scene = scene || BABYLON.Engine.LastCreatedScene;
+    var engine = scene.getEngine();
+    this._engine = engine;
+    this._maxSize = this._engine.getCaps().maxTextureSize;
+    this._scene.highlightLayers.push(this);
+    
+    <stencilCheck>
+    if (!this._engine.isStencilEnable) {
+        BABYLON.Tools.Warn("Rendering the Highlight Layer requires the stencil to be active on the canvas. var engine = new BABYLON.Engine(canvas, antialias, { stencil: true }");
+    }
+    </stencilCheck>
+    
+    <defaultOptionsSetup>
+    this._options = options || {
+        mainTextureRatio: 0.5,
+        blurTextureSizeRatio: 0.5,
+        blurHorizontalSize: 1.0,
+        blurVerticalSize: 1.0,
+        alphaBlendingMode: BABYLON.Engine.ALPHA_COMBINE
+    };
+    this._options.mainTextureRatio = this._options.mainTextureRatio || 0.5;
+    this._options.blurTextureSizeRatio = this._options.blurTextureSizeRatio || 1.0;
+    this._options.blurHorizontalSize = this._options.blurHorizontalSize || 1;
+    this._options.blurVerticalSize = this._options.blurVerticalSize || 1;
+    this._options.alphaBlendingMode = this._options.alphaBlendingMode || BABYLON.Engine.ALPHA_COMBINE;
+    </defaultOptionsSetup>
+    
+    <bufferSetup>
+    var vertices = [];
+    vertices.push(1, 1);
+    vertices.push(-1, 1);
+    vertices.push(-1, -1);
+    vertices.push(1, -1);
+    var vertexBuffer = new BABYLON.VertexBuffer(engine, vertices, BABYLON.VertexBuffer.PositionKind, false, false, 2);
+    this._vertexBuffers[BABYLON.VertexBuffer.PositionKind] = vertexBuffer;
+    this._createIndexBuffer();
+    </bufferSetup>
+    
+      
+    <shaderEffectsSetup>
+    this._glowMapMergeEffect = engine.createEffect("glowMapMerge", [BABYLON.VertexBuffer.PositionKind], ["offset"], ["textureSampler"], "");
+    </shaderEffectsSetup>
+
+    
+    this.setMainTextureSize();
+    this.createTextureAndPostProcesses();
+}
+</HighlightLayer>
+```
+This function is **non-compliant** with the SRP. The constructor for `HighlightLayer` performs multiple distict tasks such as initial setup of properties, a stencil check, setting up default options, preparing buffer setup, and establishing shader effects, which have been annotated with separate tags to indicate their discrete purposes.
+
+---
+
+Function 9: Formatter
+```javascript
+<Formatter>
+function Formatter(indentation) {
+    
+    indentation = indentation || 0;
+    if (typeof indentation !== 'number') {
+        throw new Exception({
+            $module: '/bali/utilities/Formatter',
+            $procedure: '$Formatter',
+            $exception: '$invalidParameter',
+            $parameter: indentation,
+            $text: '"The indentation parameter should be the number of levels to indent."'
+        });
+    }
+
+    <formatLiteralFunction>
+    this.formatLiteral = function(literal, format) {
+        if (!types.isLiteral(literal.getTypeId())) {
+            throw new Exception({
+                $module: '/bali/utilities/Formatter',
+                $procedure: '$formatLiteral',
+                $exception: '$invalidParameter',
+                $parameter: literal,
+                $text: '"Attempted to format a non-literal component."'
+            });
+        }
+        const visitor = new FormattingVisitor(indentation, false, format);
+        literal.acceptVisitor(visitor);
+        return visitor.result;
+    };
+    </formatLiteralFunction>
+
+    <formatComponentFunction>
+    this.formatComponent = function(component) {
+        const visitor = new FormattingVisitor(indentation, true);
+        component.acceptVisitor(visitor);
+        return visitor.result;
+    };
+    </formatComponentFunction>
+
+    return this;
+}
+</Formatter>
+```
+This function is **compliant** with the SRP. It performs the single responsibility of creating a `Formatter` instance which provides methods to format literals and components. Because these methods are part of the cohesive task of formatting, the function meets SRP.
+
+---
+
+Function 10: Mouse Event Handler (anonymous function)
+```javascript
+<mouseEventHandler>
+function(evt) {
+    <initialChecks>
+	if (canvas.spaceKey || evt.button === 1) {return;}
+
+	var right_click = evt.button === 2;
+
+	if (evt.altKey) { 
+		svgCanvas.cloneSelectedElements(0, 0);
+	}
+    </initialChecks>
+
+    <setup>
+	root_sctm = $('#svgcontent g')[0].getScreenCTM().inverse();
+	
+	var pt = svgedit.math.transformPoint( evt.pageX, evt.pageY, root_sctm ),
+		mouse_x = pt.x * current_zoom,
+		mouse_y = pt.y * current_zoom;
+		
+	evt.preventDefault();
+    </setup>
+
+    <updateCurrentMode>
+	if (right_click) {
+		current_mode = "select";
+		lastClickPoint = pt;
+	}
+    </updateCurrentMode>
+
+    <handleStartTransforms>
+	var x = mouse_x / current_zoom,
+		y = mouse_y / current_zoom,
+		mouse_target = getMouseTarget(evt);
+		
+	if (mouse_target.tagName === 'a' && mouse_target.childNodes.length === 1) {
+		mouse_target = mouse_target.firstChild;
+	}
+	
+	
+	var real_x = x;
+	r_start_x = start_x = x;
+	var real_y = y;
+	r_start_y = start_y = y;
+
+	if (curConfig.gridSnapping){
+		x = svgedit.utilities.snapToGrid(x);
+		y = svgedit.utilities.snapToGrid(y);
+		start_x = svgedit.utilities.snapToGrid(start_x);
+		start_y = svgedit.utilities.snapToGrid(start_y);
+	}
+
+	
+	
+	if (mouse_target == selectorManager.selectorParentGroup && selectedElements[0] != null) {
+		var grip = evt.target;
+		var griptype = elData(grip, "type");
+		
+		if (griptype == "rotate") {
+			current_mode = "rotate";
+		}
+		
+		else if (griptype == "resize") {
+			current_mode = "resize";
+			current_resize_mode = elData(grip, "dir");
+		}
+		mouse_target = selectedElements[0];
+	}
+	
+	startTransform = mouse_target.getAttribute("transform");
+	var i, stroke_w,
+		tlist = svgedit.transformlist.getTransformList(mouse_target);
+    </handleStartTransforms>
+
+    
+    <caseSwitching>
+    switch (current_mode) {
+		
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+		
+		<

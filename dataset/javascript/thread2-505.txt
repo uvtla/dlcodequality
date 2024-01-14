@@ -1,0 +1,311 @@
+```javascript
+<getStat>
+function getStat(type, name, granCode, fromDate, toDate, callback) {
+  <checkGranCode>
+  if(!granCode) throw new Error('granCode is required');
+  </checkGranCode>
+
+  <assignToDateIfCallbackIsFunction>
+  if(!callback && typeof toDate == 'function') {
+    callback = toDate;
+    toDate = Date.now();
+  }
+  </assignToDateIfCallbackIsFunction>
+
+  <getGranularity>
+  var gran = granMap[granCode] || util.getUnitDesc(granCode);
+  if(!gran) throw new Error('Granularity is not defined ' + granCode);
+  </getGranularity>
+
+  <convertDatesToTimestamps>
+  if(fromDate instanceof Date) fromDate = fromDate.getTime();
+  if(toDate instanceof Date) toDate = toDate.getTime();
+  </convertDatesToTimestamps>
+
+  <setDefaultDates>
+  toDate = toDate || Date.now()
+  fromDate = fromDate || (toDate - util.getTimePeriod(gran, points));
+  </setDefaultDates>
+
+  <prepareRedisQuery>
+  var unitPeriod = gran[0];
+  var multi = redis.multi();
+  var _points = [];
+  for(var d = fromDate; d <= toDate; d += unitPeriod) {
+    var key = getGranKey(name, gran, d);
+    _points.push(util.getKeyTime(gran, d));
+    multi.hget(key, type);
+  }
+  </prepareRedisQuery>
+
+  <executeRedisQuery>
+  multi.exec(function(err, results) {
+    if(err) return callback(err);
+    var merged = [];
+    for (var i = 0, l = _points.length, p; i < l; i ++) {
+      p = _points[i];
+      merged[i] = [p, Number(results[i])];
+    }
+    callback(null, {
+        step: unitPeriod
+        , unitType: gran[3]
+        , data: merged
+    });
+  });
+  </executeRedisQuery>
+}
+</getStat>
+
+<copyToClipBoard>
+function copyToClipBoard(content) {
+  <copyContentToClipboardBasedOnOS>
+  switch (process.platform) {
+  case 'darwin':
+    var child = spawn('pbcopy', []);
+    child.stdin.end(new Buffer(content, 'utf8'));
+    return true;
+  default:
+    return false;
+  }
+  </copyContentToClipboardBasedOnOS>
+}
+</copyToClipBoard>
+
+<unnamedFunction1>
+function (route) {
+  <compileHostAndPathPatterns>
+  var staticPrefix = null;
+  var hostVariables = [];
+  var pathVariables = [];
+  var variables = [];
+  var tokens = [];
+  var regex = null;
+  var hostRegex = null;
+  var hostTokens = [];
+  var host;
+
+  <compileHostPattern>
+  if ('' !== (host = route.domain())) {
+      var result = compilePattern(route, host, true);
+      hostVariables = result['variables'];
+      variables = variables.concat(hostVariables);
+      hostTokens = result['tokens'];
+      hostRegex = result['regex'];
+  }
+  </compileHostPattern>
+
+  <compilePathPattern>
+  var path = route.getPath();
+  result = compilePattern(route, path, false);
+  staticPrefix = result['staticPrefix'];
+  pathVariables = result['variables'];
+  variables = variables.concat(pathVariables);
+  tokens = result['tokens'];
+  regex = result['regex'];
+  </compilePathPattern>
+
+  <returnCompiledRoute>
+  return new CompiledRoute(
+      staticPrefix,
+      regex,
+      tokens,
+      pathVariables,
+      hostRegex,
+      hostTokens,
+      hostVariables,
+      _.uniq(variables)
+  );
+  </returnCompiledRoute>
+  </compileHostAndPathPatterns>
+}
+</unnamedFunction1>
+
+<unnamedFunction2>
+function (chart, userOptions) {
+  <setupAxisConfiguration>
+  var isXAxis = userOptions.isX,
+    axis = this;
+  axis.horiz = chart.inverted ? !isXAxis : isXAxis;
+  axis.isXAxis = isXAxis;
+  axis.coll = isXAxis ? 'xAxis' : 'yAxis';
+  axis.opposite = userOptions.opposite;
+  axis.side = userOptions.side || (axis.horiz ? (axis.opposite ? 0 : 2) : (axis.opposite ? 1 : 3));
+  
+  axis.setOptions(userOptions);
+  </setupAxisConfiguration>
+
+  <assignVariousOptions>
+  var options = this.options,
+    type = options.type,
+    isDatetimeAxis = type === 'datetime';
+  axis.userOptions = userOptions;
+  axis.minPixelPadding = 0;
+  axis.chart = chart;
+  axis.reversed = options.reversed;
+  axis.zoomEnabled = options.zoomEnabled !== false;
+  axis.categories = options.categories || type === 'category';
+  axis.names = [];
+  axis.isLog = type === 'logarithmic';
+  axis.isDatetimeAxis = isDatetimeAxis;
+  axis.isLinked = defined(options.linkedTo);
+  axis.tickmarkOffset = (axis.categories && options.tickmarkPlacement === 'between' && pick(options.tickInterval, 1) === 1) ? 0.5 : 0;
+  axis.ticks = {};
+  axis.labelEdge = [];
+  axis.minorTicks = {};
+  axis.plotLinesAndBands = [];
+  axis.alternateBands = {};
+  axis.len = 0;
+  axis.minRange = axis.userMinRange = options.minRange || options.maxZoom;
+  axis.range = options.range;
+  axis.offset = options.offset || 0;
+  axis.stacks = {};
+  axis.oldStacks = {};
+  axis.max = null;
+  axis.min = null;
+  axis.crosshair = pick(options.crosshair, splat(chart.options.tooltip.crosshairs)[isXAxis ? 0 : 1], false);
+  </assignVariousOptions>
+
+  <processEventsAndFinalSetup>
+  var eventType,
+    events = axis.options.events;
+  if (inArray(axis, chart.axes) === -1) {
+    if (isXAxis && !this.isColorAxis) {
+      chart.axes.splice(chart.xAxis.length, 0, axis);
+    } else {
+      chart.axes.push(axis);
+    }
+    chart[axis.coll].push(axis);
+  }
+  axis.series = axis.series || [];
+  if (chart.inverted && isXAxis && axis.reversed === UNDEFINED) {
+    axis.reversed = true;
+  }
+  axis.removePlotBand = axis.removePlotBandOrLine;
+  axis.removePlotLine = axis.removePlotBandOrLine;
+  for (eventType in events) {
+    addEvent(axis, eventType, events[eventType]);
+  }
+  if (axis.isLog) {
+    axis.val2lin = log2lin;
+    axis.lin2val = lin2log;
+  }
+  </processEventsAndFinalSetup>
+}
+</unnamedFunction2>
+
+<startNode>
+function startNode(node) {
+  <initializeNavigationNode>
+  var navNode = emptyNavigationBarNode(node);
+  pushChild(parent, navNode);
+  </initializeNavigationNode>
+
+  <updateParentsStack>
+  parentsStack.push(parent);
+  parent = navNode;
+  </updateParentsStack>
+}
+</startNode>
+
+<resolveUse>
+function resolveUse (appendList, increment, options, resolver) {
+  <resolveUseClosure>
+  return function resolveUseClosure (value) {
+    <earlyReturnIfSettled>
+    if (resolver.settled && !options.updateAfterSettlement) {
+      return;
+    }
+    </earlyReturnIfSettled>
+
+    <updateResolverAndPromise>
+    var promise = resolver.promise;
+    resolver[appendList].push(value);
+    promise[increment] += 1;
+    promise.pending -= 1;
+    </updateResolverAndPromise>
+
+    <resumeSubscriptionIfApplicable>
+    if (resolver.i >= 0) {
+      var resume = resolver.resume;
+      resumeSubscriptionDispatcher(
+        resume.topic, resume.data, options, resume.subscriptions,
+        resolver, resume.fulfill, resume.reject
+      );
+      return;
+    }
+    </resumeSubscriptionIfApplicable>
+
+    <evaluateLatchForResolver>
+    evaluateLatch(resolver, options);
+    </evaluateLatchForResolver>
+  };
+  </resolveUseClosure>
+}
+</resolveUse>
+
+<finalizeRequest>
+function(request, callback, response_middlewares) {
+  <executeRequestAndCallMiddlewares>
+  var that = this;
+  request.finalize(function(err, res) {
+    if (err) callback(err, null);
+    else that._callResponseMiddlewares(response_middlewares, res, callback);
+  });
+  </executeRequestAndCallMiddlewares>
+}
+</finalizeRequest>
+
+<makeInstance>
+function makeInstance(constructor, constructorOpt, args) {
+  <defineInstantiationProcedure>
+  function F() {
+    return constructor.apply(this, args);
+  }
+  F.prototype = constructor.prototype;
+  </defineInstantiationProcedure>
+
+  <instantiateAndCaptureStackTrace>
+  var errInstance = new F();
+  Error.captureStackTrace(errInstance, constructorOpt);
+  </instantiateAndCaptureStackTrace>
+
+  <returnInstance>
+  return errInstance;
+  </returnInstance>
+}
+</makeInstance>
+
+<_sha1>
+function _sha1() {
+  <createAndDigestSha1>
+  var sha = forge.md.sha1.create();
+  var num = arguments.length;
+  for (var i = 0; i < num; ++i) {
+    sha.update(arguments[i]);
+  }
+  return sha.digest();
+  </createAndDigestSha1>
+}
+</_sha1>
+
+<unnamedFunction3>
+function (opts) {
+  <initializeProperties>
+  this.options = opts || {};
+  this.pattern = null;
+  this.middleware = {};
+  this.includes = {};
+  this.excludes = {};
+  this.files = [];
+  this.fns = [];
+  </initializeProperties>
+
+  <attachHelpers>
+  options(this);
+  iterators(this);
+  symlinks(this);
+  readers(this);
+  </attachHelpers>
+}
+</unnamedFunction3>
+```

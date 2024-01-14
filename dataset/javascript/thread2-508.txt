@@ -1,0 +1,241 @@
+Here are the annotated functions for SRP compliance:
+
+Function 1:
+```javascript
+<findElement>
+function(selector, all) {
+    if (!this.querySelector) {bb.warn('Find should be used with DOM elements'); return;}
+    return all && this.querySelectorAll(selector) || this.querySelector(selector);
+}
+</findElement>
+```
+- Compliant with SRP: The function's singular purpose is to find one or many elements in the DOM.
+
+Function 2:
+```javascript
+<createReadOnlyObjectTypeProperty>
+function readOnlyObjectTypeProperty(key: string, value: BabelAST) {
+  const prop = t.objectTypeProperty(t.identifier(key), value);
+  prop.variance = t.variance('plus');
+  return prop;
+}
+</createReadOnlyObjectTypeProperty>
+```
+- Compliant with SRP: The function's sole responsibility is to create a read-only object type property.
+
+Function 3:
+```javascript
+<trackerSetup>
+function () {
+	<defineVariables>
+	var series = this,
+		options = series.options,
+		trackByArea = options.trackByArea,
+		trackerPath = [].concat(trackByArea ? series.areaPath : series.graphPath),
+		trackerPathLength = trackerPath.length,
+		chart = series.chart,
+		pointer = chart.pointer,
+		renderer = chart.renderer,
+		snap = chart.options.tooltip.snap,
+		tracker = series.tracker,
+		cursor = options.cursor,
+		css = cursor && { cursor: cursor },
+		singlePoints = series.singlePoints,
+		singlePoint,
+		i,
+		onMouseOver = function () {
+			if (chart.hoverSeries !== series) {
+				series.onMouseOver();
+			}
+		};
+	</defineVariables>
+
+	<modifyTrackerPath>
+	if (trackerPathLength && !trackByArea) {
+		// ... code that modifies trackerPath ...
+	}
+	</modifyTrackerPath>
+
+	<appendSinglePointsToPath>
+	for (i = 0; i < singlePoints.length; i++) {
+		// ... code that appends single point paths ...
+	}
+	</appendSinglePointsToPath>
+	
+	<createOrUpdateTracker>
+	if (tracker) {
+		tracker.attr({ d: trackerPath });
+	} else { 
+		// ... code to create new tracker ...
+	}
+	</createOrUpdateTracker>
+
+	<setEventHandlers>
+	each([series.tracker, series.markerGroup], function (tracker) {
+		// ... code that sets event handlers ...
+	});
+	</setEventHandlers>
+}
+</trackerSetup>
+```
+- Violates SRP: This function contains distinct responsibilities, such as defining variables, modifying tracker paths, appending points to paths, creating/updating the tracker, and setting event handlers. These have been individually annotated.
+
+Function 4:
+```javascript
+<setupShorthandPropertyProcess>
+function processShorthandPropertyConfiguration () {
+  <filterExtensions>
+  let extensions = _.filter(this.extensions, (extension) => {
+    return extension.implemented.processShorthandPropertyConfiguration;
+  });
+  </filterExtensions>
+
+  <processConfiguration>
+  this.processShorthandPropertyConfiguration = (propertyConfiguration) => {
+    _.forEach(extensions, (extension) => {
+      propertyConfiguration = extension.processShorthandPropertyConfiguration(propertyConfiguration);
+    });
+    
+    return propertyConfiguration;
+  };
+  </processConfiguration>
+}
+</setupShorthandPropertyProcess>
+```
+- Violates SRP: This function has the responsibility of filtering applicable extensions and another responsibility of processing configuration. Both have been annotated.
+
+Function 5:
+```javascript
+<initializeTrackerInfo>
+function TrackerInfo(obj) {
+    this.attempts = obj.attempts
+    this.id = obj.id
+    this.states = obj.states
+    this.origin = obj.origin,
+    this.destiny = obj.destiny
+    this.trackerWebsite = exportModule.getLink(this.id)
+}
+</initializeTrackerInfo>
+```
+- Compliant with SRP: This constructor function is responsible for initializing the TrackerInfo object.
+
+Function 6:
+```javascript
+<dynamicFunctionCreation>
+function createFunction (code, errors) {
+  try {
+    return new Function(code)
+  } catch (err) {
+    errors.push({ err, code });
+    return noop
+  }
+}
+</dynamicFunctionCreation>
+```
+- Compliant with SRP: This function creates a new function from the provided code and handles any errors that may occur.
+
+Function 7:
+```javascript
+<recursiveOptionsMerge>
+function (child, parent, visited) {
+  <initializeVisitedSet>
+  if (visited == null) visited = new Set()
+  if (visited.has(parent)) return
+  </initializeVisitedSet>
+
+  <addParentToVisited>
+  visited.add(parent)
+  </addParentToVisited>
+
+  <mergeObjectProperties>
+  for (const key in parent) {
+    // ... code that merges properties ...
+  }
+  </mergeObjectProperties>
+
+  <cleanupVisitedSet>
+  visited.delete(parent)
+  </cleanupVisitedSet>
+
+  return child
+}
+</recursiveOptionsMerge>
+```
+- Violates SRP: The function has different blocks for initializing and cleaning up the visited set, and merging object properties.
+
+Function 8:
+```javascript
+<retrieveAndUpdateDocument>
+function(req, res) {
+  <parseRequestParameters>
+  var name = req.params.name;
+  var id = this.toId(req.params.id);
+  if (typeof id === 'undefined' || id === '') {
+      return res.send(400, "invalid id.");
+  }
+  </parseRequestParameters>
+  
+  <findDocument>
+  var collection = new mongodb.Collection(this.db, name);
+  collection.find({ "_id" : id }, { limit:1 }).nextObject(function(err, doc){
+      if(err){
+          res.send(400, err);
+      } else if (doc) {
+          res.send(doc);
+      } else {
+          res.send(404, 'Document not found!');
+      }
+  });
+  </findDocument>
+}
+</retrieveAndUpdateDocument>
+```
+- Violates SRP: The function is performing parameter parsing and document retrieval, each annotated as a separate responsibility.
+
+Function 9:
+```javascript
+<getFilteredWorkingSet>
+function getWorkingSet() {
+    <invokeDeprecationWarning>
+    DeprecationWarning.deprecationWarning("Use MainViewManager.getWorkingSet() instead of DocumentManager.getWorkingSet()", true);
+    </invokeDeprecationWarning>
+
+    <filterWorkingSet>
+    return MainViewManager.getWorkingSet(MainViewManager.ALL_PANES)
+        .filter(function (file) {
+            return !MainViewFactory.findSuitableFactoryForPath(file.fullPath);
+        });
+    </filterWorkingSet>
+}
+</getFilteredWorkingSet>
+```
+- Compliant with SRP: The function is responsible for fetching and filtering the working set of documents, even though it includes a deprecation warning, which serves the overarching purpose of the function.
+
+Function 10:
+```javascript
+<applyReconfigurationOverrides>
+function(obj, env, keypath) {
+  <preventInvalidObjects>
+  if (!_.isObject(obj) || _.isArray(obj)) { return; }
+  </preventInvalidObjects>
+
+  <applyEnvironmentOverrides>
+  if (hasKeyPath(obj, ['options', 'reconfigureOverrides', env])) {
+    var options = obj.options,
+        overrides = obj.options.reconfigureOverrides[env];
+
+    for (var key in overrides) {
+      // ... code to apply overrides ...
+    }
+  }
+  </applyEnvironmentOverrides>
+
+  <recurseChildObjects>
+  for (var objKey in obj) {
+    updateOptions(obj[objKey], env, keypath+'.'+objKey);
+  }
+  </recurseChildObjects>
+}
+</applyReconfigurationOverrides>
+```
+- Violates SRP: This function checks object validity, applies environment-specific overrides, and recursively updates child objects. Each part has been annotated with its responsibility.

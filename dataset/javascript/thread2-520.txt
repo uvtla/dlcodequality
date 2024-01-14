@@ -1,0 +1,222 @@
+<CacheDriver>
+function CacheDriver(callContext, authority, resource, clientId, cache, refreshFunction) {
+  this._callContext = callContext;
+  this._log = new Logger('CacheDriver', callContext._logContext);
+  this._authority = authority;
+  this._resource = resource;
+  this._clientId = clientId;
+  this._cache = cache || nopCache;
+  this._refreshFunction = refreshFunction;
+}
+</CacheDriver>
+
+<onResponse>
+function onResponse( repo, idx ) {
+  return function onResponse( error, response, body ) {
+    <errorHandling>
+    if ( eFLG ) {
+      return;
+    }
+    debug( 'Response received for repository `%s` (%d).', repo, idx );
+    if ( arguments.length === 1 ) {
+      eFLG = true;
+      debug( 'Encountered an application-level error for repository `%s` (%d): %s', repo, idx, error.message );
+      return clbk( error );
+    }
+    if ( error ) {
+      debug( 'Failed to resolve file for repository `%s` (%d): %s', repo, idx, error.message );
+      out.failures[ repo ] = error.message;
+      fcount += 1;
+    } else {
+      debug( 'Successfully resolved file for repository `%s` (%d).', repo, idx );
+      out.data[ repo ] = body;
+      scount += 1;
+    }
+    count += 1;
+    </errorHandling>
+    debug( 'Request %d of %d complete.', count, len );
+    next();
+  }; 
+}
+</onResponse>
+
+<getCustomPropertiesFromObject>
+function getCustomPropertiesFromObject(object) {
+  <mergeCustomProperties>
+  const customProperties = Object.assign(
+    {},
+    Object(object).customProperties,
+    Object(object)['custom-properties']
+  );
+  </mergeCustomProperties>
+
+  <parseCustomProperties>
+  for (const key in customProperties) {
+    customProperties[key] = parse(String(customProperties[key])).nodes;
+  }
+  </parseCustomProperties>
+
+  return customProperties;
+}
+</getCustomPropertiesFromObject>
+
+<anonymousFunction>
+function (forms, serializeArray) {
+  return querystring.stringify(FormSerializer.getFormData(forms), undefined, undefined, serializeArray || false);
+}
+</anonymousFunction>
+
+<baseDifference>
+function baseDifference(array, values) {
+  var index = -1,
+    indexOf = getIndexOf(),
+    length = array ? array.length : 0,
+    result = [];
+  
+  <optimizeDifferenceCalculation>
+  if (createCache && values && indexOf === baseIndexOf && values.length >= LARGE_ARRAY_SIZE) {
+    indexOf = cacheIndexOf;
+    values = createCache(values);
+  }
+  </optimizeDifferenceCalculation>
+
+  <calculateDifference>
+  while (++index < length) {
+    var value = array[index];
+    if (indexOf(values, value) < 0) {
+      result.push(value);
+    }
+  }
+  </calculateDifference>
+
+  return result;
+}
+</baseDifference>
+
+<Request_redirect>
+function Request_redirect(url, isTemp) {
+  <logRedirection>
+  logger.info('Request.redirect:', {
+    url: url,
+    isTemp: isTemp
+  });
+  </logRedirection>
+
+  <setupRedirection>
+  this.addHeader('Location', url);
+  this.stopPromiseChain();
+  this.isRendered = true;
+  if (Type.isBoolean(isTemp) && !!isTemp) {
+    this.response.writeHead(302, this.headers);
+  } else {
+    this.response.writeHead(301, this.headers);
+  }
+  </setupRedirection>
+
+  this.response.end('Redirect to:' + url);
+}
+</Request_redirect>
+
+<checkUriRaw>
+function checkUriRaw(i) {
+  const start = i;
+  
+  <parseUriTokens>
+  let l;
+
+  while (i < tokensLength) {
+    if (checkInterpolation(i) || checkVariable(i)) break;
+    else if (l = checkUriRawCharacters(i)) i += l;
+    else break;
+  }
+  </parseUriTokens>
+
+  tokens[start].uri_raw_end = i;
+
+  return i - start;
+}
+</checkUriRaw>
+
+<loadFontChar>
+function loadFontChar(png, x, fontColor, delimiter) {
+  <getWidth>
+  var width = getCharWidth(png, x, delimiter);
+  </getWidth>
+
+  var startX = x;
+  var startY = 0;
+  var endX = startX + width;
+  var endY = png.height - 1;
+
+  <readPixels>
+  var pixels = [];
+  for (var y = startY; y < endY; y++) {
+    for (var x = startX; x < endX; x++) {
+      var pixelColor = readPixel(png, x, y);
+      if (pixelColor != null && equalsColors(pixelColor, fontColor)) {
+        pixels.push([x - startX, y]);
+      }
+    }
+  }
+  </readPixels>
+
+  return {
+    width: width,
+    pixels: pixels
+  };
+}
+</loadFontChar>
+
+<combineNumeratorsAboveCommonDenominator>
+function combineNumeratorsAboveCommonDenominator(node) {
+  <prepareNode>
+  let newNode = clone(node);
+  </prepareNode>
+
+  const commonDenominator = newNode.args[0].args[1];
+  const numeratorArgs = [];
+
+  <accumulateNumerators>
+  newNode.args.forEach(fraction => {
+    numeratorArgs.push(fraction.args[0]);
+  });
+  </accumulateNumerators>
+
+  <createNewNumerator>
+  const newNumerator = Node.Creator.parenthesis(
+    Node.Creator.operator('+', numeratorArgs)
+  );
+  </createNewNumerator>
+
+  <reconstructFraction>
+  newNode = Node.Creator.operator('/', [newNumerator, commonDenominator]);
+  </reconstructFraction>
+
+  return Node.Status.nodeChanged(
+    ChangeTypes.COMBINE_NUMERATORS, node, newNode
+  );
+}
+</combineNumeratorsAboveCommonDenominator>
+
+<decorateWithReadConcern>
+function decorateWithReadConcern(command, coll, options) {
+  <earlyReturnForTransactionSessions>
+  if (options && options.session && options.session.inTransaction()) {
+    return;
+  }
+  </earlyReturnForTransactionSessions>
+  
+  <setupReadConcern>
+  let readConcern = Object.assign({}, command.readConcern || {});
+  if (coll.s.readConcern) {
+    Object.assign(readConcern, coll.s.readConcern);
+  }
+  </setupReadConcern>
+
+  <applyReadConcern>
+  if (Object.keys(readConcern).length > 0) {
+    Object.assign(command, { readConcern: readConcern });
+  }
+  </applyReadConcern>
+}
+</decorateWithReadConcern>

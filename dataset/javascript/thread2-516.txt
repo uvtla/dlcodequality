@@ -1,0 +1,207 @@
+```javascript
+<getConnection>
+function getConnection(pool, scope){
+    return new Promise(function(resolve, reject){
+
+        <retrieveConnection>
+        pool.getConnection(function(err, connection){
+            
+            if (err){
+                reject(err);
+                return;
+            }
+        </retrieveConnection>
+
+        <exposeAPI>
+        const api = exposeAPI(connection);
+        </exposeAPI>
+
+        <executeScopeFunction>
+        if (typeof scope === 'function'){
+
+            scope.apply(api, [api, connection]).then(function(result){
+
+                <releaseConnection>
+                connection.release();
+                </releaseConnection>
+
+                resolve(result);
+            }).catch(function(e){
+                
+                <releaseConnection>
+                connection.release();
+                </releaseConnection>
+
+                reject(e);
+            });
+
+        }else{
+        </executeScopeFunction>
+        
+        <resolveAPI>
+        resolve(api);
+        </resolveAPI>
+        }
+    });
+});
+</getConnection>
+
+<parseExpression>
+function() {
+    var m, a, op, operation;
+    
+    m = $(this.operand);
+    
+    if (m) {
+        while ((op = ($('/') || $('*') || $('%'))) && (a = $(this.operand))) {
+            operation = new tree.Operation(op, [operation || m, a], memo, env.filename);
+        }
+        
+        return operation || m;
+    }
+}
+</parseExpression>
+
+<initializeObject>
+function () {
+    const self = this;
+
+    self.initd = {};
+    self.native = null;
+    <setupConnectd>
+    self.connectd = {
+        data_in: function (paramd) {
+            _.extend(paramd.cookd, paramd.rawd);
+        },
+
+        data_out: function (paramd) {
+            _.extend(paramd.rawd, paramd.cookd);
+        },
+    };
+    </setupConnectd>
+}
+</initializeObject>
+
+<ThrowType>
+function ThrowType(name, type, value, actual) {
+    console.log('THIS:', this)
+    let THS = this, pfx = (!!THS ? THS.Name||THS.Scheme : '');
+    
+    <throwTypeError>
+    throw new TypeError(
+        `${pfx} property, [${name}], must be one of the following, <${
+            type.join('> or <').toTitleCase()
+        }>. Got <${actual.toTitleCase()}> (${value}) instead.`
+    );
+    </throwTypeError>
+}
+</ThrowType>
+
+<onErr>
+function onErr(err) {
+  
+  <handlePortInUseError>
+  if (err.code === 'EADDRINUSE') {
+    panic('Local port is in use \nFailing...');
+  }
+  </handlePortInUseError>
+  
+  <handleUsbmuxdErrors>
+  if (err.code === 'ECONNREFUSED' || err.code === 'EADDRNOTAVAIL') {
+    panic('Usbmuxd not found at', usbmux.address, '\nFailing...');
+  }
+  </handleUsbmuxdErrors>
+  
+  <handleGenericError>
+  panic('%s \nFailing...', err);
+  </handleGenericError>
+}
+</onErr>
+
+<animateCharacter>
+function() {
+    var hand = game.player.hand;
+    var steps = game.player.steps;
+    var scaleFactor = this.scale * 6;
+
+    <calculateScales>
+    var xScale = Math.cos(steps * 2);
+    var yScale = Math.sin(steps * 4);
+    var bobX = xScale * scaleFactor;
+    var bobY = yScale * scaleFactor;
+    </calculateScales>
+
+    <calculatePositions>
+    var x = (canvas.width - (hand.width * this.scale) + scaleFactor) + bobX;
+    var y = (canvas.height - (hand.height * this.scale) + scaleFactor) + bobY;
+    </calculatePositions>
+
+    <calculateDimensions>
+    var w = hand.width * this.scale;
+    var h = hand.height * this.scale;
+    </calculateDimensions>
+
+    <drawImage>
+    ctx.drawImage(hand.image, x, y, w, h);
+    </drawImage>
+  }
+</animateCharacter>
+
+<OutlineRenderer>
+function OutlineRenderer (options, explorer, title, inputManager) {
+    this.explorer = explorer;
+    <initializeOptions>
+    this._init(options);
+    </initializeOptions>
+    this.title = title;
+    this.inputManager = inputManager;
+}
+</OutlineRenderer>
+
+<updateImageMetadata>
+function(imageIdentifier, data, callback, method) {
+    var url = this.getMetadataUrl(imageIdentifier);
+
+    <metadataRequest>
+    request({
+        method: method || 'POST',
+        uri: this.getSignedResourceUrl(method || 'POST', url),
+        json: data,
+        onComplete: function(err, res, body) {
+            callback(err, body, res);
+        }
+    });
+    </metadataRequest>
+
+    return this;
+}
+</updateImageMetadata>
+
+<clean>
+function clean(args) {
+    return Array.prototype.filter.call(args, v => v !== INVALIDATE);
+}
+</clean>
+
+<S>
+function S(fn, value) {
+    <guardAgainstRootlessComputation>
+    if (Owner === null)
+        console.warn("computations created without a root or parent will never be disposed");
+    </guardAgainstRootlessComputation>
+    
+    var _a = makeComputationNode(fn, value, false, false), node = _a.node, _value = _a.value;
+    
+    <returnComputationFunction>
+    if (node === null) {
+        return function computation() { return _value; };
+    }
+    else {
+        return function computation() {
+            return node.current();
+        };
+    }
+    </returnComputationFunction>
+}
+</S>
+```

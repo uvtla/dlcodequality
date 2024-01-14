@@ -1,0 +1,318 @@
+<fuseAnnotation>
+function fuseAnnotation(tx, annos) {
+  <inputValidation>
+  if (!isArray(annos) || annos.length < 2) {
+    throw new Error('fuseAnnotation(): at least two annotations are necessary.')
+  }
+  </inputValidation>
+  let sel, annoType
+  <processAnnotations>
+  annos.forEach(function(anno, idx) {
+    if (idx === 0) {
+      sel = anno.getSelection()
+      annoType = anno.type
+    } else {
+      if (anno.type !== annoType) {
+        throw new Error('fuseAnnotation(): all annotations must be of the same type.')
+      }
+      sel = sel.expand(anno.getSelection())
+    }
+  })
+  </processAnnotations>
+
+  <deleteAndExpandAnnotations>
+  for (var i = 1; i < annos.length; i++) {
+    tx.delete(annos[i].id)
+  }
+  expandAnnotation(tx, annos[0], sel)
+  tx.setSelection(sel)
+  </deleteAndExpandAnnotations>
+}
+</fuseAnnotation>
+
+<anonymousFunction>
+function(query, mongooseQuery, attributesFilter, associations, model, logger) {
+  <initializeLogger>
+  const Log = logger.bind()
+  </initializeLogger>
+  <handleEmbedding>
+  if (query.$embed) {
+    if (!Array.isArray(query.$embed)) {
+      query.$embed = query.$embed.split(',')
+    }
+    query.$embed.forEach(function(embed) {
+      let embeds = embed.split('.')
+      let populate = {}
+
+      populate = nestPopulate(
+        query,
+        populate,
+        0,
+        embeds,
+        associations,
+        model,
+        Log
+      )
+
+      mongooseQuery.populate(populate)
+
+      attributesFilter = attributesFilter + ' ' + embeds[0]
+    })
+    delete query.$embed
+    delete query.populateSelect
+  }
+  </handleEmbedding>
+  return { mongooseQuery: mongooseQuery, attributesFilter: attributesFilter }
+}
+</anonymousFunction>
+
+<webpackRequireWrapper>
+function(module, exports, __webpack_require__) {
+  <exportDataView>
+  var $export = __webpack_require__(269);
+  $export($export.G + $export.W + $export.F * !__webpack_require__(480).ABV, {
+    DataView: __webpack_require__(481).DataView
+  });
+  </exportDataView>
+}
+</webpackRequireWrapper>
+
+<getObjectValue>
+function get(obj, key) {
+  var i, accessor = key.split('.'), empty = true;
+  <navigateObject>
+  for (i = 0; i < accessor.length; i++) {
+
+    if (!obj) return '';
+    obj = obj[accessor[i]];
+  }
+  </navigateObject>
+
+  <handleEmptyValues>
+  if (obj === undefined || obj === null || obj === false) return '';
+
+  if (obj instanceof Array && obj.length == 0) return '';
+  if (obj.constructor === Object) {
+    for (i in obj)
+      if (obj.hasOwnProperty(i)) empty = !i;
+    if (empty) return '';
+  }
+  </handleEmptyValues>
+  return obj;
+}
+</getObjectValue>
+
+<validateInputParameters>
+function validate({ separator, transformer }) {
+  <validateSeparator>
+  if (null != separator) {
+    if ('string' !== typeof separator) {
+      throw new Error(`The separator must be a string: "${separator}".`)
+    } else if (INVALID_SEPARATOR.test(separator)) {
+      throw new Error(`The separator has invalid characters: "${separator}".`)
+    }
+  }
+  </validateSeparator>
+
+  <validateTransformer>
+  if (null != transformer) {
+    if (false !== transformer
+      && 'function' !== typeof transformer
+      && !defaultTransformers[transformer]
+    ) {
+      throw new Error(`The transformer must be a function: "${transformer}".`)
+    }
+  }
+  </validateTransformer>
+}
+</validateInputParameters>
+
+<onloadConfiguration>
+function onload(app, options) {
+  <initializeContext>
+  ctx.app = app;
+  ctx.options = options || {};
+  </initializeContext>
+
+  <setupOptions>
+  const config = app.c();
+  options.logDir = options.logDir || path.join(process.cwd(), 'logs');
+  ensureLogDir(options.logDir);
+  </setupOptions>
+
+  <configureTransportsAndHandlers>
+  const transports = options.transports || [
+    new winston.transports.Console({
+      humanReadableUnhandledException: true,
+      colorize: true,
+      json: false
+    }),
+    new winston.transports.File({
+      filename: path.join(options.logDir, 'error.log'),
+      level: 'error',
+      colorize: true,
+      maxsize: 20971520,
+      maxFiles: 5
+    }),
+    new winston.transports.File({
+      filename: path.join(options.logDir, 'combined.log'),
+      colorize: true,
+      maxsize: 52428800,
+      maxFiles: 5
+    })
+  ];
+  const exceptionHandlers = options.exceptionHandlers || [
+    new winston.transports.File({
+      filename: path.join(options.logDir, 'exceptions.log'),
+      colorize: true,
+      maxsize: 20971520,
+      maxFiles: 5
+    }),
+  ];
+  </configureTransportsAndHandlers>
+
+  <setupFormatterAndLogger>
+  const formatter = (typeof options.formatter === 'function') ? options.formatter :
+    info => `${new Date(info.timestamp).toLocaleString()} [${info.label}] ${info.level}: ${info.message}`;
+  const opts = options.logOpts || {
+    level: 'info',
+    format: combine(
+      label({ label: config.name || 'ibird' }),
+      timestamp(),
+      printf(formatter)
+    ),
+    transports,
+    exceptionHandlers
+  };
+  const logger = winston.createLogger(opts);
+  app.config({ logger });
+  </setupFormatterAndLogger>
+
+  <bindLoggingMethods>
+  Object.assign(api, {
+    error: logger.error.bind(logger),
+    warn: logger.warn.bind(logger),
+    info: logger.info.bind(logger),
+    verbose: logger.verbose.bind(logger),
+    debug: logger.debug.bind(logger),
+    silly: logger.silly.bind(logger)
+  });
+  </bindLoggingMethods>
+}
+</onloadConfiguration>
+
+<sanitizeFunctionCall>
+function sanitizeFunctionCall(tokens, start) {
+  <initializeParsing>
+  var parenDepth = 1, end = start + 1, n = tokens.length;
+  while (end < n && parenDepth) {
+    var token = tokens[end++];
+
+    parenDepth += (token === ')' ? -1 : /^[^"']*\($/.test(token));
+  }
+  </initializeParsing>
+
+  <sanitizeAndReturn>
+  if (!parenDepth) {
+    var fnToken = tokens[start].toLowerCase();
+    var bareFnToken = withoutVendorPrefix(fnToken);
+
+    var fnTokens = tokens.splice(start, end - start, '');
+    var fns = propertySchema['cssFns'];
+
+    for (var i = 0, nFns = fns.length; i < nFns; ++i) {
+      if (fns[i].substring(0, bareFnToken.length) == bareFnToken) {
+        fnTokens[0] = fnTokens[fnTokens.length - 1] = '';
+
+        sanitize(
+          fns[i],
+
+          fnTokens,
+          opt_naiveUriRewriter, opt_baseUri);
+
+        return fnToken + fnTokens.join(' ') + ')';
+      }
+    }
+  }
+  </sanitizeAndReturn>
+  return '';
+}
+</sanitizeFunctionCall>
+
+<changesDbFunction>
+function changesDb(dbName, qs0, callback0) {
+  <extractOptions>
+  const { opts, callback } = getCallback(qs0, callback0)
+  </extractOptions>
+  <makeDbCall>
+  return relax({ db: dbName, path: '_changes', qs: opts }, callback)
+  </makeDbCall>
+}
+</changesDbFunction>
+
+<ckeditorTextProcessing>
+function(text) {
+  <htmlEncode>
+  var standard = function(text) {
+    var span = new CKEDITOR.dom.element('span');
+    span.setText(text);
+    return span.getHtml();
+  };
+  </htmlEncode>
+
+  <replaceBreaksAndGt>
+  var fix1 = (standard('\n').toLowerCase() == '<br>') ?
+    function(text) {
+
+      return standard(text).replace(/<br>/gi, '\n');
+    } :
+    standard;
+  var fix2 = (standard('>') == '>') ?
+    function(text) {
+
+      return fix1(text).replace(/>/g, '&gt;');
+    } :
+    fix1;
+  </replaceBreaksAndGt>
+
+  <handleNbsp>
+  var fix3 = (standard('  ') == '&nbsp; ') ?
+    function(text) {
+
+      return fix2(text).replace(/&nbsp;/g, ' ');
+    } :
+    fix2;
+  </handleNbsp>
+
+  <setHtmlEncodeFunction>
+  this.htmlEncode = fix3;
+  </setHtmlEncodeFunction>
+
+  <returnHtmlEncode>
+  return this.htmlEncode(text);
+  </returnHtmlEncode>
+}
+</ckeditorTextProcessing>
+
+<jCalValueHydration>
+function() {
+  var len = this.jCal.length - VALUE_INDEX;
+  <checkIfEmpty>
+  if (len < 1) {
+
+    return [];
+  }
+  </checkIfEmpty>
+
+  var i = 0;
+  var result = [];
+
+  <hydrateValues>
+  for (; i < len; i++) {
+    result[i] = this._hydrateValue(i);
+  }
+  </hydrateValues>
+
+  return result;
+}
+</jCalValueHydration>

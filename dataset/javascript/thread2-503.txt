@@ -1,0 +1,288 @@
+```javascript
+<findConfig>
+function findConfig(sType, vObject, fnCheck) {
+    <determineComponentId>
+    var sComponentId = vObject && typeof vObject === "string" ? vObject : (vObject && Component.getOwnerIdFor(vObject));</determineComponentId>
+    if (sComponentId) {
+        
+        <retrieveComponentInfo>
+        var oComponent = Component.get(sComponentId);
+        var sComponentName = oComponent && oComponent.getMetadata().getComponentName();</retrieveComponentInfo>
+        
+        <checkComponentConfig>
+        var oConfig = mComponentConfigs[sComponentName + "::" + sComponentId];
+        if (oConfig && oConfig[sType] && fnCheck(oConfig[sType])) {
+            return false;
+        } else {
+            oConfig = mComponentConfigs[sComponentName];
+            if (oConfig && oConfig[sType] && fnCheck(oConfig[sType])) {
+                return false;
+            }
+        }</checkComponentConfig>
+    } else {
+        
+        <checkAllComponentConfigs>
+        jQuery.each(mComponentConfigs, function(sComponentName, oConfig) {
+            if (oConfig && oConfig[sType] && fnCheck(oConfig[sType])) {
+                return false;
+            }
+        });</checkAllComponentConfigs>
+    }
+}
+</findConfig>
+
+<appendImagesToNodes>
+function(src, el) {
+    <getNodes>
+    var nodes = DOM.getNodeArray(el);</getNodes>
+    <createImagesAndAppend>
+    nodes.forEach(function (node) {
+        var img = DOM.newEl('img');
+        var domProps = {};
+        domProps[App.setup.dataAttr] = src;
+        <setAttributeToImage>
+        DOM.setAttr(img, domProps);</setAttributeToImage>
+        node.appendChild(img);
+    });</createImagesAndAppend>
+    return this;
+}
+</appendImagesToNodes>
+
+<deferPromise>
+function deferPromise() {
+    var resolve = null, reject = null;
+    <initializePromise>
+    var promise = new Bluebird(function () {
+        resolve = arguments[0];
+        reject = arguments[1];
+    });</initializePromise>
+    return {
+        resolve: resolve,
+        reject: reject,
+        <returnNewPromise>
+        promise: promise</returnNewPromise>
+    };
+}
+</deferPromise>
+
+<gatherOverrides>
+function(containerUIMap, groupUIMap)
+{
+    containerOverrides = [];
+    groupOverrides = [];
+    
+    <processContainerUIMap>
+    for (var cI in containerUIMap)
+    {
+        var c = containerUIMap[cI]
+        var overrides = {"fields" : {}, "terminals" : {}};
+        
+        <processFieldsForContainer>
+        for (var fName in c.fields)
+        {
+            var f = c.fields[fName];
+            var o = {}
+            o.visible = f.visible.checked;
+            var rename = f.externalName.value;
+            
+            if (rename.length > 0)
+                o.rename = rename;
+
+            overrides.fields[fName] = o;
+        }</processFieldsForContainer>
+        
+        <processTerminalsForContainer>
+        for (var tName in c.terminals)
+        {
+            var t = c.terminals[tName];
+            var o = {}
+            o.visible = t.visible.checked;
+            var rename = t.externalName.value;
+            
+            if (rename.length > 0)
+                o.rename = rename;
+
+            o.side = t.side.value;
+            
+            overrides.terminals[tName] = o;
+        }</processTerminalsForContainer>
+        
+        containerOverrides.push(overrides);
+    }</processContainerUIMap>
+    
+    <processGroupUIMap>
+    for (var gI in groupUIMap)
+    {
+        var g = groupUIMap[gI]
+        var overrides = {"fields" : {}, "terminals" : {}};
+        
+        <processFieldsForGroup>
+        for (var fName in g.fields)
+        {
+            var f = g.fields[fName];
+            var o = {}
+            o.visible = f.visible.checked;
+            var rename = f.externalName.value;
+            
+            if (rename.length > 0)
+                o.rename = rename;
+
+            overrides.fields[fName] = o;
+        }</processFieldsForGroup>
+        
+        <processTerminalsForGroup>
+        for (var tName in g.terminals)
+        {
+            var t = g.terminals[tName];
+            var o = {}
+            o.visible = t.visible.checked;
+            var rename = t.externalName.value;
+            
+            if (rename.length > 0)
+                o.rename = rename;
+
+            o.side = t.side.value;
+
+            overrides.terminals[tName] = o;
+        }</processTerminalsForGroup>
+    }</processGroupUIMap>
+    
+    return {"containerOverrides" : containerOverrides, "groupOverrides" : groupOverrides};
+}
+</gatherOverrides>
+
+<addToReturnedOrThrown>
+function addToReturnedOrThrown(dest, others, all, segments) {
+    <processSegments>
+    for (var i = 0; i < segments.length; ++i) {
+        var segment = segments[i];
+
+        dest.push(segment);
+        if (others.indexOf(segment) === -1) {
+            all.push(segment);
+        }
+    }
+    </processSegments>
+}
+</addToReturnedOrThrown>
+
+<undefineModule>
+function (moduleName) {
+    <createAndUndefineModule> 
+    var requiresModule = createModule(moduleName);
+    var mods = requiresModule.getNormalizedModules();
+    Utils.each(mods, function (m) {
+        m.undef();
+    });
+    </createAndUndefineModule>
+}
+</undefineModule>
+
+<replaceSelected>
+function replaceSelected(string, editor = null) {
+  <getDefaultEditor>
+  let workEditor = editor;
+  if (isEmptyString(workEditor)) {
+    workEditor = atom.workspace.getActiveTextEditor();
+    if (isEmptyString(workEditor)) {
+      return;
+    }
+  }
+  </getDefaultEditor>
+
+  <insertTextWithConfig>
+  workEditor.insertText(string, {
+    "select": true,
+    "autoIndent": false,
+    "autoIndentNewline": false,
+    "autoDecreaseIndent": false,
+    "normalizeLineEndings": true, 
+    "undo": null,
+  });
+  </insertTextWithConfig>
+}
+</replaceSelected>
+
+<setupTestEnvironment>
+function(credentials, mocha) {
+  var that = this;
+  <initializeConnection>
+  this._connection        = new taskcluster.PulseConnection(credentials);</initializeConnection>
+  this._listeners         = null;
+  this._promisedMessages  = null;
+
+  <requireMocha>
+  if (!mocha) {
+    mocha = require('mocha');
+  }</requireMocha>
+
+  <mochaHooks>
+  mocha.before(function() {
+    return that._connection.connect();
+  });
+
+  mocha.beforeEach(function() {
+    that._listeners         = [];
+    that._promisedMessages  = {};
+  });
+
+  mocha.afterEach(function() {
+    return Promise.all(that._listeners.map(function(listener) {
+      listener.close();
+    })).then(function() {
+      that._listeners         = null;
+      that._promisedMessages  = null;
+    });
+  });
+
+  mocha.after(function() {
+    return that._connection.close().then(function() {
+      that._connection = null;
+    });
+  });
+  </mochaHooks>
+}
+</setupTestEnvironment>
+
+<buildSassFiles>
+async function buildSassFiles(files, outputDir, config) {
+  <renderAllFiles>
+  const renderedFiles = await Promise.all(files.map(async file => {
+    const css = await renderFile(file, config);
+    return {file, css};
+  }));</renderAllFiles>
+
+  <ensureOutputDir>
+  await fs.ensureDir(outputDir);</ensureOutputDir>
+
+  <writeRenderedFiles>
+  return Promise.all(renderedFiles.map(({file, css}) => {
+    const outputFile = getOutputFile(file, outputDir);
+    return writeFile(outputFile, css);
+  }));
+  </writeRenderedFiles>
+}
+</buildSassFiles>
+
+<parseExpression>
+function parseExpression(str) {
+  <matchExpression>
+  var expMatches = str.match(expressionRegex)</matchExpression>
+
+  <parseArgumentsAndOptions>
+  var options = {}
+  var args = compact((expMatches[2] || '').split(argsRegex))
+    .filter(function (arg) {
+      var keyValue = arg.split('=')
+      return keyValue.length === 1 || (options[keyValue[0]] = keyValue[1], false)
+    })</parseArgumentsAndOptions>
+
+  <returnParsedResult>
+  return {
+    expression: expMatches[1] || null,
+    args: args,
+    options: options
+  }</returnParsedResult>
+}
+</parseExpression>
+```

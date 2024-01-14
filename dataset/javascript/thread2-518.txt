@@ -1,0 +1,275 @@
+```javascript
+<addDetected>
+function addDetected(app, pattern, type, value, key) {
+  app.detected = true;
+
+  
+  app.confidence[`${type} ${key ? `${key} ` : ''}${pattern.regex}`] = pattern.confidence === undefined ? 100 : parseInt(pattern.confidence, 10);
+
+  
+  if (pattern.version) {
+    const versions = [];
+    const matches = pattern.regex.exec(value);
+
+    let { version } = pattern;
+
+    if (matches) {
+      matches.forEach((match, i) => {
+        
+        const ternary = new RegExp(`\\\\${i}\\?([^:]+):(.*)$`).exec(version);
+
+        if (ternary && ternary.length === 3) {
+          version = version.replace(ternary[0], match ? ternary[1] : ternary[2]);
+        }
+
+        
+        version = version.trim().replace(new RegExp(`\\\\${i}`, 'g'), match || '');
+      });
+
+      if (version && versions.indexOf(version) === -1) {
+        versions.push(version);
+      }
+
+      if (versions.length) {
+        
+        app.version = versions.reduce((a, b) => (a.length > b.length ? a : b));
+      }
+    }
+  }
+}
+</addDetected>
+
+<validateSchemas>
+function() {
+    let schemas = utils.parseArg(arguments);
+    schemas.forEach(function(schema) {
+      utils.assert(schema.isOvt, `${utils.obj2Str(schema)} is not a valid ovt schema`);
+    });
+  }
+</validateSchemas>
+
+<asyncSome>
+function asyncSome(promise, iterator, scope, limit) {
+    return asyncArray(asyncLoop(promise, iterator, scope, limit).chain(function (results) {
+        return results.loopResults.some(function (res) {
+            return !!res;
+        });
+    }));
+}
+</asyncSome>
+
+<done>
+function done(error, ret) {
+    busy = false;
+
+    
+    if (!error) {
+      var everReleased = !!watchList.length;
+      var affectedToCheck = [];
+
+      
+      Object.keys(ret.modified).forEach(function(filepath) {
+        var file = ret.modified[filepath];
+        var filepath = file.realpath;
+
+        ~watchList.indexOf(filepath) || watchList.push(filepath);
+
+        
+        if (file.cache) {
+          _.forEach(file.cache.deps, function(mtime, filepath) {
+            ~watchList.indexOf(filepath) || watchList.push(filepath);
+          });
+        }
+
+        
+        if (everReleased) {
+          file.links.forEach(function(filepath) {
+            filepath = fis.util(root, filepath);
+            if (!~watchList.indexOf(filepath)) {
+              watchList.push(filepath);
+              affectedToCheck.push(filepath);
+              affectedList.push(filepath);
+
+              fis.log.debug('New files detected: %s', filepath);
+            }
+          });
+        }
+      });
+
+      latestTotal = ret.totalBeforePack;
+      process.stdout.write(util.format(' [%s]\n'.grey, fis.log.now()));
+
+      
+      if (affectedList.length) {
+        affectedToCheck.length && getAffectedFiles(latestTotal, affectedToCheck, false).forEach(function(filepath) {
+          ~affectedList.indexOf(filepath) || affectedList.unshift(filepath);
+        });
+
+        setTimeout(release, 200);
+      }
+    }
+  }
+</done>
+
+<createDocumentTypeNode>
+function(qualifiedName, publicId, systemId){
+		var node = new DocumentType();
+		node.name = qualifiedName;
+		node.nodeName = qualifiedName;
+		node.publicId = publicId;
+		node.systemId = systemId;
+		
+		
+		
+		
+		
+		
+		return node;
+	}
+</createDocumentTypeNode>
+
+<LoopStopInjector>
+function LoopStopInjector() {
+
+    var t = {};
+
+    t.inject = inject;
+
+    return t;
+
+    
+    function inject(code) {
+
+        var LOOP_CHECK = 'if (LoopStopManager.shouldStopExecution(%d)) break; ';
+        var LOOP_EXIT = '\nLoopStopManager.exitedLoop(%d);\n';
+
+        var loopId = 1;
+        var patches = [];
+
+        var loopStatements = ["ForOfStatement",
+                              "ForStatement",
+                              "ForInStatement",
+                              "WhileStatement",
+                              "DoWhileStatement"];
+
+        esprima.parse(code, { range: true }, function(node) {
+
+            var isItLoopStatement = loopStatements.indexOf(node.type) != -1;
+
+            if (isItLoopStatement) {
+
+                var start = 1 + node.body.range[0];
+                var end = node.body.range[1];
+                var prolog = LOOP_CHECK.replace('%d', loopId);
+                var epilog = '';
+
+                if (node.body.type !== 'BlockStatement') {
+
+                    
+                    prolog = '{' + prolog;
+                    epilog = '}';
+                    --start;
+
+                }
+
+                patches.push({ pos: start, str: prolog });
+                patches.push({ pos: end, str: epilog });
+                patches.push({ pos: node.range[1] + 1, str: LOOP_EXIT.replace('%d', loopId) });
+
+                loopId++;
+
+            }
+
+        });
+
+        patches.sort(function (a, b) { return b.pos - a.pos }).forEach(function (patch) {
+
+            code = code.slice(0, patch.pos) + patch.str + code.slice(patch.pos);
+
+        });
+
+        return code;
+
+    }
+
+}
+</LoopStopInjector>
+
+<parseFile>
+function parseFile(filePath, encoding, callback) {
+	return fs.readFile(filePath, encoding, function(err, fileString) {
+		if (err) {
+			return callback(err);
+		}
+
+		fileString = expandIncludes(fileString, path.dirname(filePath));
+
+		return parse(fileString, callback);
+	});
+}
+</parseFile>
+
+<_fullyReady>
+function _fullyReady(callback) {
+    var self = this;
+
+    var promise = self._initReady().then(function () {
+        var dbContext = dbContexts[self._dbInfo.name];
+
+        if (dbContext && dbContext.dbReady) {
+            return dbContext.dbReady;
+        }
+    });
+
+    executeTwoCallbacks(promise, callback, callback);
+    return promise;
+}
+</_fullyReady>
+
+<_areBatchRequirementsMet>
+function _areBatchRequirementsMet(batch_ops, completed_ops) {
+  var dependencies = common.flatMap(batch_ops, function(op) {
+    return OP_DEPENDENCIES[op] || [];
+  });
+  for (var i = 0; i < dependencies.length; i++) {
+    var required_dep = dependencies[i];
+    if (batch_ops.indexOf(required_dep) === -1 &&
+        completed_ops.indexOf(required_dep) === -1) {
+      return false;
+    }
+  }
+  return true;
+}
+</_areBatchRequirementsMet>
+
+<consoleHandler>
+function consoleHandler(record) {
+  if (typeof console === 'undefined' || !console) {
+    return;
+  }
+  record = (record);
+  var timestamp = new Date(record.getMillis());
+  <formatMessage>
+  var msg =
+      '[' + timestamp.getUTCFullYear() + '-' +
+      padNumber(timestamp.getUTCMonth() + 1, 2) + '-' +
+      padNumber(timestamp.getUTCDate(), 2) + 'T' +
+      padNumber(timestamp.getUTCHours(), 2) + ':' +
+      padNumber(timestamp.getUTCMinutes(), 2) + ':' +
+      padNumber(timestamp.getUTCSeconds(), 2) + 'Z]' +
+      '[' + record.getLevel().name + ']' +
+      '[' + record.getLoggerName() + '] ' +
+      record.getMessage();
+  </formatMessage>
+
+  var level = record.getLevel().value;
+  if (level >= Logger.Level.SEVERE.value) {
+    console.error(msg);
+  } else if (level >= Logger.Level.WARNING.value) {
+    console.warn(msg);
+  } else {
+    console.log(msg);
+  }
+}
+</consoleHandler>
+```

@@ -1,0 +1,234 @@
+```javascript
+<unknownFunction1>
+function(data, cb) {
+        async.series([
+            <manageChildProcesses>
+            cntUtils.many('shutdownChild', unknown(), data),
+            cntUtils.many('checkAndRestartChild', childrenSpecObj, data, true)
+            </manageChildProcesses>
+        ], cb);
+    }
+</unknownFunction1>
+
+<validateParameters>
+function validateParameters (api, path, pathId, operation, operationId) {
+  <initializeParameters>
+  var pathParams = path.parameters || [];
+  var operationParams = operation.parameters || [];
+  </initializeParameters>
+  
+  <checkPathParamsDuplicates>
+  try {
+    checkForDuplicates(pathParams);
+  }
+  catch (e) {
+    throw ono.syntax(e, "Validation failed. %s has duplicate parameters", pathId);
+  }
+  </checkPathParamsDuplicates>
+
+  <checkOperationParamsDuplicates>
+  try {
+    checkForDuplicates(operationParams);
+  }
+  catch (e) {
+    throw ono.syntax(e, "Validation failed. %s has duplicate parameters", operationId);
+  }
+  </checkOperationParamsDuplicates>
+
+  <combineValidateParams>
+  
+  var params = pathParams.reduce(function (combinedParams, value) {
+    var duplicate = combinedParams.some(function (param) {
+      return param.in === value.in && param.name === value.name;
+    });
+    if (!duplicate) {
+      combinedParams.push(value);
+    }
+    return combinedParams;
+  }, operationParams.slice());
+
+  validateBodyParameters(params, operationId);
+  validatePathParameters(params, pathId, operationId);
+  validateParameterTypes(params, api, operation, operationId);
+  </combineValidateParams>
+}
+</validateParameters>
+
+<copyFile>
+function copyFile(from, to) {
+  
+  return new Promise((resolve, reject) => {
+    <fileCopying>
+    fs.copyFile(from, to, (err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(to);
+    });
+    </fileCopying>
+  });
+}
+</copyFile>
+
+<cacheDom>
+function(el, document) {
+            var self    = this;
+
+            <beforeCacheDom>
+            self.callActions('beforeCacheDom', arguments);
+            </beforeCacheDom>
+
+            <cacheElements>
+            self.dom.document  = document;
+            self.dom.body      = self.dom.document.querySelector('body');
+            self.dom.container = el;
+            self.dom.parent    = el;
+            </cacheElements>
+
+            <afterCacheDom>
+            self.callActions('afterCacheDom', arguments);
+            </afterCacheDom>
+        }
+</cacheDom>
+
+<getVersionTags>
+function getVersionTags() {
+	<gitCommand>
+	var tags = exec('git tag', { silent: true }).output.trim().split(/\n/g);
+	</gitCommand>
+
+	<filterAndSortTags>
+	return tags.reduce(function(list, tag) {
+		if (semver.valid(tag)) {
+			list.push(tag);
+		}
+		return list;
+	}, []).sort(semver.compare);
+	</filterAndSortTags>
+}
+</getVersionTags>
+
+<handleElseStatement>
+function (out, statement) {
+                    <checkElseContext>
+                    var ifstruct = statement.parent;
+                    if (ifstruct.name != "if") {
+                        return out.logError(statement, statementsSingleton.ELSE_WITHOUT_IF);
+                    } else if (ifstruct[Aria.FRAMEWORK_PREFIX + "elsepresent"]) {
+                        return out.logError(statement, statementsSingleton.ELSE_ALREADY_USED);
+                    }
+                    ifstruct[Aria.FRAMEWORK_PREFIX + "elsepresent"] = true;
+                    </checkElseContext>
+
+                    <outputElseBlock>
+                    out.decreaseIndent();
+                    out.writeln("} else {");
+                    out.increaseIndent();
+                    </outputElseBlock>
+                }
+</handleElseStatement>
+
+<takePhoto>
+function takePhoto () {
+  <setupConfiguration>
+  let sizeFactor = 1;
+  let imageType = IMAGE_TYPES.JPG;
+  let imageCompression = 1;
+
+  let config = {
+    sizeFactor,
+    imageType,
+    imageCompression
+  };
+  </setupConfiguration>
+
+  <capturePhoto>
+  let dataUri = cameraPhoto.getDataUri(config);
+  imgElement.src = dataUri;
+  </capturePhoto>
+}
+</takePhoto>
+
+<scheduleSearch>
+function scheduleSearch( country, date, callback ) {
+    <buildUrl>
+    var url = apiBaseUrl+endpoints['schedule'].replace('$1', country).replace('$2', date);
+    </buildUrl>
+
+    <performFetch>
+    fetch(url, function(result) {
+        callback(result);
+    });
+    </performFetch>
+}
+</scheduleSearch>
+
+<EventHandlerAccept>
+function EventHandlerAccept (device, data){
+        <logAction>
+        console.log ("#%d- Action Devid:[%s] Name:[%s] Cmd:[%s] Lat:%d Lon:%d Speed=%d", count, device.devid, device.name, data.cmd, data.lat, data.lon, data.sog);
+        </logAction>
+    }
+</EventHandlerAccept>
+
+<accessFocusSpace>
+function accessFocusSpace( that, insertFunction, doSave ) {
+		<createRange>
+		var range = new CKEDITOR.dom.range( that.doc ),
+		</createRange>
+		<defineEditor>
+			editor = that.editor,
+		</defineEditor>
+		<createAccessNode>
+			accessNode;
+		</createAccessNode>
+
+		<setAccessNodeForIE>
+		
+		if ( env.ie && that.enterMode == CKEDITOR.ENTER_BR )
+			accessNode = that.doc.createText( WHITE_SPACE );
+		</setAccessNodeForIE>
+
+		<setAccessNodeForOtherBrowsers>
+		
+		else {
+			
+			
+			var limit = getClosestEditableLimit( that.element, true ),
+
+				
+				
+				
+				
+				enterMode = limit && limit.data( 'cke-enter-mode' ) || that.enterMode;
+
+			accessNode = new newElement( enterElements[ enterMode ], that.doc );
+
+			if (!accessNode.is( 'br' )) {
+				var dummy = that.doc.createText( WHITE_SPACE );
+				dummy.appendTo( accessNode );
+			}
+		}
+		</setAccessNodeForOtherBrowsers>
+
+		<saveSnapshotOnStart>
+		doSave && editor.fire( 'saveSnapshot' );
+		</saveSnapshotOnStart>
+
+		<insertAccessNode>
+		insertFunction( accessNode );
+		</insertAccessNode>
+		<setPositionAndSelect>
+		
+		range.moveToPosition( accessNode, CKEDITOR.POSITION_AFTER_START );
+		editor.getSelection().selectRanges( [ range ] );
+		that.hotNode = accessNode;
+		</setPositionAndSelect>
+
+		<saveSnapshotOnEnd>
+		doSave && editor.fire( 'saveSnapshot' );
+		</saveSnapshotOnEnd>
+	}
+</accessFocusSpace>
+```

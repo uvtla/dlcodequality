@@ -1,0 +1,308 @@
+```javascript
+<launchPlayground>
+function launchPlayground(){
+    
+    <initializePlayground>
+    $('.playground-item').playground();
+    </initializePlayground>
+
+    
+    <setupEyedropperClickHandler>
+    $('.cp_eyedropper').on('click', function() {
+      if ($(this).next('.cp_grid').hasClass('visuallyhidden')) {
+        $(".cp_grid").addClass('visuallyhidden');
+        $(this).next(".cp_grid").removeClass('visuallyhidden');
+      } else {
+        $(this).next(".cp_grid").addClass('visuallyhidden');
+      }
+    })
+    </setupEyedropperClickHandler>
+    
+    <setupDocumentClickHandler>
+    $(document).on('click', function(event) {
+      if (!$(event.target).closest('.cp_eyedropper').length && !$(event.target).hasClass('playground-list_item')) {
+        $(".cp_grid").addClass('visuallyhidden');
+      }
+    });
+    </setupDocumentClickHandler>
+
+    
+    <setupPlaygroundUpdateHandler>
+    $('body').on('playgroundUpdated', '.playground-item', function(){
+      <updatePlaygroundContent>
+      var $input = $(this),
+          base = $input.data('playground'),
+          $playground = $input.closest('.playground'),
+          $codeEl, targetHtmlStr;
+
+      if ( !$playground.length ) $playground = $input.closest('article');
+      $codeEl = $playground.find('.exampleWithCode code');
+
+      if ( $playground.find('.copyable').length ) {
+        targetHtmlStr = $playground.find('.copyable')[0].outerHTML;
+      } else if ( $playground.find('.copyable-inner').length ) {
+        targetHtmlStr = $playground.find('.copyable-inner').html();
+      } else {
+        targetHtmlStr = base.$targetEl[0].outerHTML;
+      }
+
+      $codeEl.html(escapeHtml(targetHtmlStr));
+      </updatePlaygroundContent>
+      <highlightPlaygroundCode>
+      Prism.highlightElement($codeEl[0]);
+      </highlightPlaygroundCode>
+
+    });
+    </setupPlaygroundUpdateHandler>
+    
+    <triggerPlaygroundInputEvent>
+    $('.playground-item').trigger('input');
+    </triggerPlaygroundInputEvent>
+}
+</launchPlayground>
+
+<getArgs>
+function getArgs (uriMappers, location) {
+    var args = null;
+
+    uriMappers.some(mapper => {
+      if (mapper.expression.test(location.path)) {
+        args = mapper.argsMap(location) || Object.create(null);
+        return true;
+      }
+      return false;
+    });
+
+    return args;
+}
+</getArgs>
+
+<displayActiveDom>
+function displayActiveDom(ifControlPanel, ifverifySignupLong, ifresetPwdLong) {
+  controlPanelEl.style.display = ifControlPanel ? 'block' : 'none';
+  verifySignupLongEl.style.display = ifverifySignupLong ? 'block' : 'none';
+  resetPwdLongEl.style.display = ifresetPwdLong ? 'block' : 'none';
+}
+</displayActiveDom>
+
+<getTimings>
+function getTimings (eventTimes) {
+  return {
+
+      <calculateTimings>
+      dnsLookup: getHrTimeDurationInMs(
+          eventTimes.startAt,
+          eventTimes.dnsLookupAt
+      ),
+      tcpConnection: getHrTimeDurationInMs(
+          eventTimes.dnsLookupAt || eventTimes.startAt,
+          eventTimes.tcpConnectionAt
+      ),
+      
+      tlsHandshake: getHrTimeDurationInMs(
+          eventTimes.tcpConnectionAt,
+          eventTimes.tlsHandshakeAt
+      ),
+      firstByte: getHrTimeDurationInMs((
+          
+          eventTimes.tlsHandshakeAt || eventTimes.tcpConnectionAt ||
+              eventTimes.startAt),
+          eventTimes.firstByteAt
+      ),
+      contentTransfer: getHrTimeDurationInMs(
+          eventTimes.firstByteAt,
+          eventTimes.endAt
+      ),
+      total: getHrTimeDurationInMs(eventTimes.startAt, eventTimes.endAt)
+      </calculateTimings>
+  };
+}
+</getTimings>
+
+<createRuleSetMethod>
+function createRuleSetMethod(methodName){
+    return function(){
+      for (var i = 0, rule; rule = this.rules[i]; i++)
+        rule[methodName].apply(rule, arguments);
+    };
+}
+</createRuleSetMethod>
+
+<pongIOrenderButton>
+function pongIOrenderButton( divId, ctx, def, dta ) {
+    
+    <logButtonRenderStart>
+	log( "pong-io", "pongIOrenderButton '"+def.id+"': "+JSON.stringify(dta) );
+    </logButtonRenderStart>
+	
+    <validateButtonPosition>
+	if ( ! def.pos || ! def.pos.x || ! def.pos.y ) { log( "pong-ioX", "pos.x or pos.y  not set"); return; }
+    </validateButtonPosition>
+
+    <drawButton>
+	var x = parseInt( def.pos.x );
+	var y = parseInt( def.pos.y );
+	var w = 50;
+	var h = 25;
+	if ( def.width  ) {  w = parseInt( def.width ); }
+	if ( def.height ) {  h = parseInt( def.height ); }
+	ctx.beginPath();
+	ctx.lineWidth   = "2";
+	ctx.strokeStyle = "#00F";
+	ctx.fillStyle   = "#DDD";
+	if ( def.lineCol ) { ctx.strokeStyle = def.lineCol; }
+	if ( def.fillCol ) { ctx.fillStyle   = def.fillCol; }
+	ctx.rect( x, y, w, h );
+	ctx.stroke();
+	ctx.fill();
+    </drawButton>  
+
+    <setupButtonSensing>
+	ioSense[ divId ][ def.id ] = new Object();
+	ioSense[ divId ][ def.id ].x1 = x;
+	ioSense[ divId ][ def.id ].x2 = x + w;
+	ioSense[ divId ][ def.id ].y1 = y;
+	ioSense[ divId ][ def.id ].y2 = y + h;
+    </setupButtonSensing>
+
+    <configureButtonLED>
+	if ( def.values  &&  def.values.length  ) {
+		
+		var ledDef = new Object;
+		if ( def.led ) {
+			ledDef = def.led;
+		} else {
+			ledDef.id = def.id+"LED";
+			ledDef.pos = new Object();
+			ledDef.pos.x = x + 2;
+			ledDef.pos.y = y + 2;
+			ledDef.ledHeight = 3;
+		}
+		var ledDta = new Object();
+		ledDta.value = 0;
+		if ( dta && dta.value ) {
+			for ( var i = 0; i < def.values.length; i++ ) {
+				var btVal = def.values[ i ];
+				
+				if ( btVal.buttonState == dta.value ) { 
+					ledDta.value = btVal.led; 
+					
+				}				    
+			}
+		}
+		pongIOrenderLED( divId, ctx, ledDef, ledDta );	
+		
+	}
+    </configureButtonLED>
+
+    <setLabel>
+	if ( def.label ) {
+		var xx = x + w/2, yy = y + h/2; 
+		ctx.textAlign = "center"; 
+		ctx.textBaseline = "middle"; 
+		textOut( divId, def, ctx, def.label, xx, yy, { strokeStyle:"#DDD" } );
+	}
+    </setLabel>
+
+    <logButtonRenderEnd>
+	log( "pong-io", "pongIOrenderButton end.");
+    </logButtonRenderEnd>
+}
+</pongIOrenderButton>
+
+<placeholderHandling>
+function () {
+    <retrievePlaceholder>
+    var placeholder = this.getPlaceholder();
+    </retrievePlaceholder>
+
+    <adjustSearchBoxPlaceholder>
+    if (placeholder !== undefined  && this.getVal().length === 0 && this.search.hasClass("select2-focused") === false) {
+        this.search.val(placeholder).addClass("select2-default");
+        
+        this.resizeSearch();
+    } else {
+        
+        this.search.val(" ").width(10);
+    }
+    </adjustSearchBoxPlaceholder>
+}
+</placeholderHandling>
+
+<_applyFilters>
+function _applyFilters(rawdata, filterOptions) {
+    
+    <cloneData>
+    var dataToWorkOn = (JSON.parse(JSON.stringify(rawdata)));
+    </cloneData>
+
+    <calculateWidth>
+    var containerWidth = document.querySelector('#sapUiSupportPerfHeaderTimeline').offsetWidth - document.querySelector('#sapUiSupportPerfHeaderTimelineBarInfoWrapper').offsetWidth;
+    var scrollWidth = 20;
+    </calculateWidth>
+    <initializeFilteredTime>
+    var filteredTime = 1;
+    </initializeFilteredTime>
+
+    <applyTimeFilter>
+    dataToWorkOn = _filterByTime(filterOptions.filterByTime, dataToWorkOn);
+    </applyTimeFilter>
+    <applySorting>
+    dataToWorkOn = _sortBy(filterOptions.orderByValue, dataToWorkOn);
+    </applySorting>
+    <applyMinValueFilter>
+    dataToWorkOn = _filterMinValue(filterOptions.minValue, dataToWorkOn);
+    </applyMinValueFilter>
+
+    <computeWidthSingleUnit>
+    if (dataToWorkOn.length) {
+        filteredTime = filterOptions.filterByTime.end - filterOptions.filterByTime.start;
+    }
+
+    _widthSingleUnit = ((containerWidth - scrollWidth) / filteredTime); 
+    </computeWidthSingleUnit>
+
+    return dataToWorkOn;
+}
+</_applyFilters>
+
+<getParent>
+function getParent(model, path) {
+    
+    <invokeGetParent>
+    var getParentMethod = inner(model).getParent;
+    return getParentMethod ? getParentMethod.call(model, path) : model.parentModel;
+    </invokeGetParent>
+}
+</getParent>
+
+<checkExec>
+function checkExec (mode, callback) {
+    
+    <verifyExercisePassed>
+    if (!exercise.passed)
+        return callback(null, true) 
+    </verifyExercisePassed>
+
+    <firstExec>
+    execWith(copyTempDir, 'testing', function (err, pass) {
+        if (err)
+            return callback(err)
+        if (!pass) {
+            exercise.emit('fail', 'JavaScript code loads addon, invokes `length(str)` method and prints the return value')
+            return callback(null, false)
+        }
+    </firstExec>
+
+    <secondExec>
+        execWith(copyTempDir, 'this is a longer test string, with spaces in it', function (err, pass) {
+            if (err)
+                return callback(err)
+
+            exercise.emit(pass ? 'pass' : 'fail', 'Add-on receives string, calculates length and returns value')
+            callback(null, pass)
+        })
+    </secondExec>
+}
+</checkExec>
+```

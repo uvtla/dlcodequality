@@ -1,0 +1,353 @@
+```javascript
+<Agent>
+function Agent(file, args, env, cwd, cols, rows, debug) {
+  var self = this;
+
+  <incrementPipeCounter>
+  pipeIncr++;
+  </incrementPipeCounter>
+
+  <generateTimestamp>
+  var timestamp = Date.now();
+  </generateTimestamp>
+
+  <setupDataPipe>
+  this.dataPipe = '\\\\.\\pipe\\winpty-data-' + pipeIncr + '' + timestamp;
+  </setupDataPipe>
+
+  <initializePtySocket>
+  this.ptySocket = new net.Socket();
+  </initializePtySocket>
+
+  <createPtyDataPipeServer>
+  this.ptyDataPipe = net.createServer(function (socket) {
+    socket.setEncoding('utf8');
+    socket.pause();
+
+    file = file;
+    args = args.join(' ');
+    cwd = path.resolve(cwd);
+
+    pty.startProcess(self.pid, file, args, env, cwd);
+
+    self.ptySocket.emit('ready_datapipe', socket);
+  }).listen(this.dataPipe);
+  </createPtyDataPipeServer>
+
+  <openPtyTerminal>
+  var term = pty.open(self.dataPipe, cols, rows, debug);
+  </openPtyTerminal>
+
+  <assignPtyProperties>
+  this.pid = term.pid;
+  this.fd = term.fd;
+  this.pty = term.pty;
+  </assignPtyProperties>
+}
+</Agent>
+
+<rotatePixels>
+function rotatePixels(buffer, width, height, degrees) {
+  let loops = degrees / 90
+  while (loops > 0) {
+    <createNewBuffer>
+    const newBuffer = Buffer.alloc(buffer.length)
+    </createNewBuffer>
+    <rotateBuffer>
+    let newOffset = 0
+    for (let x = 0; x < width; x += 1) {
+      for (let y = height - 1; y >= 0; y -= 1) {
+        const offset = (width * y + x) << 2
+        const pixel = buffer.readUInt32BE(offset, true)
+        newBuffer.writeUInt32BE(pixel, newOffset, true)
+        newOffset += 4
+      }
+    }
+    buffer = newBuffer
+    const newHeight = width
+    width = height
+    height = newHeight
+    loops -= 1
+    </rotateBuffer>
+  }
+  return buffer
+}
+</rotatePixels>
+
+<fileFunction>
+function(file, enc, cb) {
+  <checkConditionsAndTapFile>
+  if (
+    !file.isNull() &&
+    !file.isDirectory() &&
+    options.extensions.some(function(ext) {
+      return path.extname(file.path).substr(1).toLowerCase() === ext;
+    })
+  ) {
+    file = retina.tapFile(file, cb);
+  } else {
+    cb();
+  }
+  </checkConditionsAndTapFile>
+  
+  <pushToFile>
+  if (file) this.push(file);
+  </pushToFile>
+}
+</fileFunction>
+
+<addRectHandles>
+function addRectHandles($canvas, parent) {
+  <calculateAspectRatio>
+  var handlePlacement = parent.handlePlacement;
+  
+  if (parent.aspectRatio === null && parent.height !== 0) {
+    parent.aspectRatio = parent.width / parent.height;
+  }
+  </calculateAspectRatio>
+
+  <addCornersAndSidesHandles>
+  if (handlePlacement === 'corners' || handlePlacement === 'both') {
+    addRectHandle($canvas, parent, -1, -1);
+    addRectHandle($canvas, parent, 1, -1);
+    addRectHandle($canvas, parent, 1, 1);
+    addRectHandle($canvas, parent, -1, 1);
+  }
+  
+  if (handlePlacement === 'sides' || handlePlacement === 'both') {
+    addRectHandle($canvas, parent, 0, -1);
+    addRectHandle($canvas, parent, 1, 0);
+    addRectHandle($canvas, parent, 0, 1);
+    addRectHandle($canvas, parent, -1, 0);
+  }
+  </addCornersAndSidesHandles>
+
+  <addGuides>
+  if (parent.guide) {
+    addRectGuides($canvas, parent);
+  }
+  </addGuides>
+}
+</addRectHandles>
+
+<hasKeyPrev>
+function (key) {                                                         
+    <checkKeyExistence>
+    var self = this;                                                             
+    if (self.has(key)) {                                                         
+      var elt = self._dict[self._k(key)];                                        
+      if (elt.prev)                                                              
+        return elt.prev.key;                                                     
+    }                                                                            
+    </checkKeyExistence>
+    return null;                                                                 
+}
+</hasKeyPrev>
+
+<isScriptTag>
+function isScriptTag (tagName, scriptTags) {
+    for (var i = 0; i < scriptTags.length; i++) {
+      if (tagName.toLowerCase() == scriptTags[i]) return true
+    }
+    return false
+}
+</isScriptTag>
+
+<registerExtension>
+function registerExtension(ext) {
+  <determineOldHandler>
+  var old = oldHandlers[ext] || oldHandlers[".js"] || require.extensions[".js"];
+  </determineOldHandler>
+
+  <selectLoader>
+  var loader = normalLoader;
+  if (process.env.running_under_istanbul) loader = istanbulLoader;
+  </selectLoader>
+
+  <setupRequireExtension>
+  require.extensions[ext] = function (m, filename) {
+    if (shouldIgnore(filename)) {
+      old(m, filename);
+    } else {
+      loader(m, filename, old);
+    }
+  };
+  </setupRequireExtension>
+}
+</registerExtension>
+
+<storeMembershipEvents>
+async function(roomId, membershipEvents) {
+  <logBeforeStoringEvents>
+  console.log(`LL: backend about to store ${membershipEvents.length}` +
+      ` members for ${roomId}`);
+  </logBeforeStoringEvents>
+  <createTransaction>
+  const tx = this.db.transaction(["oob_membership_events"], "readwrite");
+  const store = tx.objectStore("oob_membership_events");
+  </createTransaction>
+  <putMembershipEvents>
+  membershipEvents.forEach((e) => {
+      store.put(e);
+  });
+  </putMembershipEvents>
+  <storeMarkerObject>
+  const markerObject = {
+      room_id: roomId,
+      oob_written: true,
+      state_key: 0,
+  };
+  store.put(markerObject);
+  </storeMarkerObject>
+  <completeTransaction>
+  await txnAsPromise(tx);
+  </completeTransaction>
+  <logAfterStoringEvents>
+  console.log(`LL: backend done storing for ${roomId}!`);
+  </logAfterStoringEvents>
+}
+</storeMembershipEvents>
+
+<parens>
+function parens(node) {
+  <initialSetup>
+  const isAsync = node.async;
+  const firstTokenOfParam = sourceCode.getFirstToken(node, isAsync ? 1 : 0);
+  </initialSetup>
+
+  <fixParamsWithParenthesis>
+  function fixParamsWithParenthesis(fixer) {
+      const paramToken = sourceCode.getTokenAfter(firstTokenOfParam);
+      const closingParenToken = sourceCode.getTokenAfter(paramToken, astUtils.isClosingParenToken);
+      const asyncToken = isAsync ? sourceCode.getTokenBefore(firstTokenOfParam) : null;
+      const shouldAddSpaceForAsync = asyncToken && (asyncToken.range[1] === firstTokenOfParam.range[0]);
+
+      return fixer.replaceTextRange([
+          firstTokenOfParam.range[0],
+          closingParenToken.range[1]
+      ], `${shouldAddSpaceForAsync ? " " : ""}${paramToken.value}`);
+  }
+  </fixParamsWithParenthesis>
+
+  <reportingAndFixingIssues>
+  // The following are multiple conditions and reports which could be grouped
+  // into a single responsibility of analyzing and reporting code issues
+
+  if (
+      requireForBlockBody &&
+      node.params.length === 1 &&
+      node.params[0].type === "Identifier" &&
+      !node.params[0].typeAnnotation &&
+      node.body.type !== "BlockStatement" &&
+      !node.returnType
+  ) {
+      if (astUtils.isOpeningParenToken(firstTokenOfParam)) {
+          context.report({
+              node,
+              messageId: "unexpectedParensInline",
+              fix: fixParamsWithParenthesis
+          });
+      }
+      return;
+  }
+
+  if (
+      requireForBlockBody &&
+      node.body.type === "BlockStatement"
+  ) {
+      if (!astUtils.isOpeningParenToken(firstTokenOfParam)) {
+          context.report({
+              node,
+              messageId: "expectedParensBlock",
+              fix(fixer) {
+                  return fixer.replaceText(firstTokenOfParam, `(${firstTokenOfParam.value})`);
+              }
+          });
+      }
+      return;
+  }
+
+  if (asNeeded &&
+      node.params.length === 1 &&
+      node.params[0].type === "Identifier" &&
+      !node.params[0].typeAnnotation &&
+      !node.returnType
+  ) {
+      if (astUtils.isOpeningParenToken(firstTokenOfParam)) {
+          context.report({
+              node,
+              messageId: "unexpectedParens",
+              fix: fixParamsWithParenthesis
+          });
+      }
+      return;
+  }
+
+  if (firstTokenOfParam.type === "Identifier") {
+      const after = sourceCode.getTokenAfter(firstTokenOfParam);
+
+      if (after.value !== ")") {
+          context.report({
+              node,
+              messageId: "expectedParens",
+              fix(fixer) {
+                  return fixer.replaceText(firstTokenOfParam, `(${firstTokenOfParam.value})`);
+              }
+          });
+      }
+  }
+  </reportingAndFixingIssues>
+}
+</parens>
+
+<moduleRegistration>
+function (module, initialState, onStateChange, obj, overrideContext) {
+  <validateArguments>
+  if (typeof module !== "string" || YAHOO.lang.trim(module) === "" ||
+      typeof initialState !== "string" ||
+      typeof onStateChange !== "function") {
+      throw new Error("Missing or invalid argument");
+  }
+  </validateArguments>
+
+  <checkModuleExistence>
+  if (_modules[module]) {               
+      return;
+  }
+  </checkModuleExistence>
+
+  <checkInitialization>
+  if (_initialized) {
+      throw new Error("All modules must be registered before calling YAHOO.util.History.initialize");
+  }
+  </checkInitialization>
+
+  <setupModuleDetails>
+  module = escape(module);
+  initialState = escape(initialState);
+  </setupModuleDetails>
+
+  <wrapStateChangeFunction>
+  scope = null;
+  if (overrideContext === true) {
+      scope = obj;
+  } else {
+      scope = overrideContext;
+  }
+
+  wrappedFn = function (state) {
+      return onStateChange.call(scope, state, obj);
+  };
+  </wrapStateChangeFunction>
+
+  <registerModule>
+  _modules[module] = {
+      name: module,
+      initialState: initialState,
+      currentState: initialState,
+      onStateChange: wrappedFn
+  };
+  </registerModule>
+}
+</moduleRegistration>
+```

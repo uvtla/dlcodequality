@@ -1,0 +1,272 @@
+```javascript
+<bundleJsFiles>
+function bundleJsFiles () {
+  return concat(jsFiles)
+    .then((output) => {
+      <bundleJsFiles.minification>
+      const uglified = UglifyJS.minify(output)
+      if (uglified.error) {
+        throw new Error(uglified.error)
+      }
+      return uglified.code
+      </bundleJsFiles.minification>
+    })
+}
+</bundleJsFiles>
+
+<getBidsForAdpod>
+function getBidsForAdpod(bidsReceived, adPodAdUnits) {
+  let adUnitCodes = adPodAdUnits.map((adUnit) => adUnit.code);
+  return bidsReceived
+    .filter((bid) => adUnitCodes.indexOf(bid.adUnitCode) != -1 && (bid.video && bid.video.context === ADPOD))
+}
+</getBidsForAdpod>
+
+<routeMatchHandling>
+function (oRouteMatch) {
+  var that = this;
+  var mRouteArguments = oRouteMatch.getParameter("arguments");
+  <routeMatchHandling.setup>
+  this.sLayer = mRouteArguments.layer;
+  this.sNamespace = mRouteArguments.namespace || "";  
+  var oPage = this.getView().getContent()[0];
+  oPage.setBusy(true);
+  that.sNamespace = decodeURIComponent(that.sNamespace);
+  oPage.setTitle(this._shortenNamespace());
+  </routeMatchHandling.setup>
+
+  <routeMatchHandling.dataRetrieval>
+  LRepConnector.getContent(that.sLayer, that.sNamespace).then(
+    that._onContentReceived.bind(that, oPage),
+    function(){
+      oPage.setBusy(false);
+    }).then(function () {
+      LRepConnector.requestPending = false;
+    });
+  </routeMatchHandling.dataRetrieval>
+}
+</routeMatchHandling>
+
+<createOutputDirsAsync>
+function createOutputDirsAsync(buildOptions) {
+  var outputDirs = new OutputDirs(buildOptions);
+
+  var tasks = [];
+  <createOutputDirsAsync.taskCreation>
+  tasks.push(makeDirAndParents(outputDirs.tmp));
+  tasks.push(makeDirAndParents(outputDirs.gen));
+  tasks.push(makeDirAndParents(outputDirs.build));
+  </createOutputDirsAsync.taskCreation>
+
+  return kew.all(tasks)
+      .then(function() { return outputDirs; });
+}
+</createOutputDirsAsync>
+
+<buildDirectoryPath>
+function (dir, appname, version) {
+  if (appname) {
+    dir = path.join(dir, appname);
+    if (version) {
+      <buildDirectoryPath.version>
+      dir = path.join(dir, version);
+      </buildDirectoryPath.version>
+    }
+  }
+  return dir;
+}
+</buildDirectoryPath>
+
+<composeTaskList>
+function composeTaskList({dev, selfContained, jsdoc, includedTasks, excludedTasks}) {
+	let selectedTasks = Object.keys(definedTasks).reduce((list, key) => {
+		list[key] = true;
+		return list;
+	}, {});
+
+	
+	selectedTasks.generateManifestBundle = false;
+	selectedTasks.generateStandaloneAppBundle = false;
+	selectedTasks.transformBootstrapHtml = false;
+	selectedTasks.generateJsdoc = false;
+	selectedTasks.executeJsdocSdkTransformation = false;
+	selectedTasks.generateCachebusterInfo = false;
+	selectedTasks.generateApiIndex = false;
+
+	if (selfContained) {
+		<composeTaskList.selfContained>
+		selectedTasks.generateComponentPreload = false;
+		selectedTasks.generateStandaloneAppBundle = true;
+		selectedTasks.transformBootstrapHtml = true;
+		selectedTasks.generateLibraryPreload = false;
+		</composeTaskList.selfContained>
+	}
+
+	if (jsdoc) {
+		<composeTaskList.jsdoc>
+		selectedTasks.generateJsdoc = true;
+		selectedTasks.executeJsdocSdkTransformation = true;
+		selectedTasks.generateApiIndex = true;
+		selectedTasks.buildThemes = true;
+		selectedTasks.replaceCopyright = false;
+		selectedTasks.replaceVersion = false;
+		selectedTasks.generateComponentPreload = false;
+		selectedTasks.generateLibraryPreload = false;
+		selectedTasks.generateLibraryManifest = false;
+		selectedTasks.createDebugFiles = false;
+		selectedTasks.uglify = false;
+		selectedTasks.generateFlexChangesBundle = false;
+		selectedTasks.generateManifestBundle = false;
+		</composeTaskList.jsdoc>
+	}
+
+	if (dev) {
+		<composeTaskList.dev>
+		Object.keys(selectedTasks).forEach((key) => {
+			if (devTasks.indexOf(key) === -1) {
+				selectedTasks[key] = false;
+			}
+		});
+		</composeTaskList.dev>
+	}
+
+	for (let i = 0; i < excludedTasks.length; i++) {
+		<composeTaskList.exclusion>
+		const taskName = excludedTasks[i];
+		if (taskName === "*") {
+			Object.keys(selectedTasks).forEach((sKey) => {
+				selectedTasks[sKey] = false;
+			});
+			break;
+		}
+		if (selectedTasks[taskName] !== false) {
+			selectedTasks[taskName] = false;
+		}
+		</composeTaskList.exclusion>
+	}
+
+	for (let i = 0; i < includedTasks.length; i++) {
+		<composeTaskList.inclusion>
+		const taskName = includedTasks[i];
+		if (taskName === "*") {
+			Object.keys(selectedTasks).forEach((sKey) => {
+				selectedTasks[sKey] = true;
+			});
+			break;
+		}
+		if (selectedTasks[taskName] === false) {
+			selectedTasks[taskName] = true;
+		}
+		</composeTaskList.inclusion>
+	}
+
+	selectedTasks = Object.keys(selectedTasks).filter((task) => selectedTasks[task]);
+
+	return selectedTasks;
+}
+</composeTaskList>
+
+<findReactContainer>
+function(id) {
+    <findReactContainer.init>
+    var reactRootID = ReactInstanceHandles.getReactRootIDFromNodeID(id);
+    var container = containersByReactRootID[reactRootID];
+    </findReactContainer.init>
+
+    if ("production" !== process.env.NODE_ENV) {
+      <findReactContainer.checksInDev>
+      var rootElement = rootElementsByReactRootID[reactRootID];
+      if (rootElement && rootElement.parentNode !== container) {
+        ("production" !== process.env.NODE_ENV ? invariant(
+          
+          
+          internalGetID(rootElement) === reactRootID,
+          'ReactMount: Root element ID differed from reactRootID.'
+        ) : invariant(
+        
+        internalGetID(rootElement) === reactRootID));
+
+        var containerChild = container.firstChild;
+        if (containerChild &&
+            reactRootID === internalGetID(containerChild)) {
+          
+          
+          
+          
+          rootElementsByReactRootID[reactRootID] = containerChild;
+        } else {
+          ("production" !== process.env.NODE_ENV ? warning(
+            false,
+            'ReactMount: Root element has been removed from its original ' +
+            'container. New container:', rootElement.parentNode
+          ) : null);
+        }
+      }
+      </findReactContainer.checksInDev>
+    }
+
+    return container;
+  }
+</findReactContainer>
+
+<tiledRendererInit>
+function init(cols, rows, tilewidth, tileheight) {
+  this._super(me.TMXRenderer, "init", [cols, rows, tilewidth, tileheight]);
+  <tiledRendererInit.setup>
+  this.hTilewidth = tilewidth / 2;
+  this.hTileheight = tileheight / 2;
+  this.originX = this.rows * this.hTilewidth;
+  </tiledRendererInit.setup>
+}
+</tiledRendererInit>
+
+<getOptions>
+function getOptions(opts, cb) {
+  if (typeof opts !== 'object') {
+    throw new Error('Invalid: options is not an object.');
+  }
+  <getOptions.setup>
+  var options = clonedeep(opts || {});
+
+  options.sourceComments = options.sourceComments || false;
+  if (options.hasOwnProperty('file')) {
+    options.file = getInputFile(options);
+  }
+  options.outFile = getOutputFile(options);
+  options.includePaths = buildIncludePaths(options);
+  options.precision = parseInt(options.precision) || 5;
+  options.sourceMap = getSourceMap(options);
+  options.style = getStyle(options);
+  options.indentWidth = getIndentWidth(options);
+  options.indentType = getIndentType(options);
+  options.linefeed = getLinefeed(options);
+  </getOptions.setup>
+
+  
+  <getOptions.contextAndResult>
+  options.context = { options: options, callback: cb };
+
+  options.result = {
+    stats: getStats(options)
+  };
+  </getOptions.contextAndResult>
+
+  return options;
+}
+</getOptions>
+
+<generateNextId>
+function nextId() {
+    var maxId = 0;
+    <generateNextId.calculate>
+    for (var i = 0; i < comments.length; i++) {
+      var comment = comments[i];
+      if (maxId < comment.id) {
+        maxId = comment.id;
+      }
+    }
+    </generateNextId.calculate>
+    return maxId + 1;
+  }
+</generateNextId>
+```

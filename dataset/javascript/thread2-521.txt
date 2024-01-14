@@ -1,0 +1,312 @@
+```javascript
+<globMatch>
+function globMatch(match, file) {
+    var directiveType = match[1];
+    var globPattern = match[2]; 
+
+    <processDirective>
+    if (directiveType.indexOf('_tree') !== -1) {
+      globPattern = globPattern.concat('*');
+      directiveType = directiveType.replace('_tree', '');
+    }
+
+    if (directiveType.indexOf('_directory') !== -1) {
+      globPattern = globPattern.concat('/*');
+      directiveType = directiveType.replace('_directory', '');
+    }
+    </processDirective>
+
+    <validateDirectiveType>
+    if (directiveType !== 'require' && directiveType !== 'include') {
+      return [];
+    }
+    </validateDirectiveType>
+
+    <appendJsExtension>
+    var jsExt = '.js';
+    if (globPattern.substr(globPattern.length-jsExt.length).indexOf(jsExt) !== 0) {
+      globPattern += jsExt;
+    }
+    </appendJsExtension>
+
+    <constructGlobPattern>
+    var relativeDir = getRelativeDir(file);
+    globPattern = relativeDir+globPattern;
+    </constructGlobPattern>
+
+    var possibleIncludes = [];
+    <matchFiles>
+    _.each(_.keys(allFiles), function(fileName) {
+      
+      if (fileName.indexOf(relativeDir) !== 0) {
+        return;
+      }
+
+      possibleIncludes.push(fileName);
+    });
+    </matchFiles>
+    
+    <matchGlobPattern>
+    return minimatch.match(possibleIncludes, globPattern);
+    </matchGlobPattern>
+  }
+</globMatch>
+
+<getModelMonitor>
+function getModelMonitor(id) {
+      var t = this,
+          components = t.model.get('components');
+      <getComponentMonitor>  
+      return components.get(id).get('monitor');
+      </getComponentMonitor>
+}
+</getModelMonitor>
+
+<siblise>
+function siblise(a, b) {
+	var list = [a, b];
+	<calculateHeight>
+	list.height = a.height + 1;
+	</calculateHeight>
+	<calculateSizes>
+	list.sizes = [length(a), length(a) + length(b)];
+	</calculateSizes>
+	return list;
+}
+</siblise>
+
+<polyfillMap>
+function polyfillMap(callback, thisArg) {
+    if (Array.prototype.map) {
+      return arr.map(callback, thisArg);
+    } else {
+      <mapPolyfill>
+      var len = arr.length >>> 0,
+          A = new Array(len),
+          i = 0;
+      for (; i < len; i++) {
+        A[i] = callback.call(thisArg, arr[i], i, arr);
+      }
+      return A;
+      </mapPolyfill>
+    }
+}
+</polyfillMap>
+
+<rollup>
+function rollup(imbuff)
+{
+  var roll = new Buffer(0);
+  <concatenateHash>
+  Object.keys(imbuff).sort().forEach(function(id){
+    roll = crypto.createHash('sha256').update(Buffer.concat([roll,new Buffer(id, 'hex')])).digest();
+    roll = crypto.createHash('sha256').update(Buffer.concat([roll,imbuff[id]])).digest();
+  });
+  </concatenateHash>
+  return roll;
+}
+</rollup>
+
+<processThreadState>
+function processThreadState(state) {
+            if (wakeup !== undefined) {
+              <calculateMidDuration>
+              midDuration = wakeup.ts - prevSlice.end;
+              </calculateMidDuration>
+            }
+
+            if (blocked_reason !== undefined) {
+              <handleBlockedState>
+              var args = {
+                'kernel callsite when blocked:' : blocked_reason.caller
+              };
+              if (blocked_reason.iowait) {
+                <updateSleepState>
+                switch (state) {
+                  case SCHEDULING_STATE.UNINTR_SLEEP:
+                    state = SCHEDULING_STATE.UNINTR_SLEEP_IO;
+                    break;
+                  case SCHEDULING_STATE.UNINTR_SLEEP_WAKE_KILL:
+                    state = SCHEDULING_STATE.UNINTR_SLEEP_WAKE_KILL_IO;
+                    break;
+                  case SCHEDULING_STATE.UNINTR_SLEEP_WAKING:
+                    state = SCHEDULING_STATE.UNINTR_SLEEP_WAKE_KILL_IO;
+                    break;
+                  default:
+                }
+                </updateSleepState>
+              }
+              <createBlockedSlice>
+              slices.push(new tr.model.ThreadTimeSlice(
+                  thread,
+                  state, '', prevSlice.end, args, midDuration));
+              </createBlockedSlice>
+            } else {
+              <createNormalSlice>
+              slices.push(new tr.model.ThreadTimeSlice(
+                  thread,
+                  state, '', prevSlice.end, {}, midDuration));
+              </createNormalSlice>
+            }
+            if (wakeup !== undefined) {
+              <handleWakeup>
+              var wakeupDuration = nextSlice.start - wakeup.ts;
+              var args = {'wakeup from tid': wakeup.fromTid};
+              slices.push(new tr.model.ThreadTimeSlice(
+                  thread, SCHEDULING_STATE.RUNNABLE, '',
+                  wakeup.ts, args, wakeupDuration));
+              </handleWakeup>
+              wakeup = undefined;
+            }
+          }
+</processThreadState>
+
+<isProcessMaster>
+function isProcessMaster(opts, cb) {
+	if (!opts) opts = {}
+	var gotClose
+	<defaultLogFunction>
+	if (typeof opts.log == 'function') log = opts.log
+	</defaultLogFunction>
+	<processNameAssignment>
+	var processName = opts.processName || process.pid + ':' +
+		path.basename(__filename, path.extname(__filename))
+	</processNameAssignment>
+
+	var server = new masterserver.MasterServer(opts.port, opts.interface)
+		.on('connect', isMaster)
+		.on('fail', isNotMaster)
+		.on('error', errorLogger)
+		.on('end', serverDiedLogger)
+		.on('data', resetUi)
+
+	function isMaster() {
+		cb(true, closeServer)
+	}
+	function isNotMaster() {
+		<findMasterPid>
+		pidgetter.getPidFromPort({port: opts.port, host: opts.interface}, hazMasterPid)
+		</findMasterPid>
+	}
+	function hazMasterPid(err, result) {
+		cb(err ? err : result)
+	}
+	<handleResetUi>
+	function resetUi(data) { 
+		var text
+		var pid = +data
+		if (!isNaN(pid) && pid > 0) text = 'from process: ' + pid
+		else text = 'from another process'
+		log(processName, (new Date).toISOString(), 'ui reset requested', text)
+
+		if (typeof resetUiFn == 'function') resetUiFn()
+	}
+	</handleResetUi>
+
+	<logError>
+	function errorLogger(err) { 
+		log(processName, (new Date).toISOString(), 'error', err.message)
+	}
+	</logError>
+	<logServerShutdown>
+	function serverDiedLogger() {
+		log(processName, (new Date).toISOString(), 'master server', gotClose ? 'shut down' : 'died')
+	}
+	</logServerShutdown>
+
+	<shutdownServer>
+	function closeServer() {
+		gotClose = true
+		server.shutdown()
+	}
+	</shutdownServer>
+}
+</isProcessMaster>
+
+<updateExchangeCount>
+function updateExchangeCount(fileName) {
+    <logUpdateAttempt>
+    log.bright.cyan('Updating exchange count →', fileName.yellow)
+    </logUpdateAttempt>
+
+    <readAndUpdateFileContent>
+    let oldContent = fs.readFileSync(fileName, 'utf8')
+    let newContent =
+        oldContent.replace(/shields\.io\/badge\/exchanges\-[0-9a-z]+\-blue/g, 'shields.io/badge/exchanges-' + ccxt.exchanges.length + '-blue')
+    </readAndUpdateFileContent>
+
+    <overwriteFile>
+    fs.truncateSync(fileName)
+    fs.writeFileSync(fileName, newContent)
+    </overwriteFile>
+}
+</updateExchangeCount>
+
+<doRollup>
+function doRollup(component) {
+    <setupGulp>
+    return gulp.src(component.src)
+    .pipe(
+        rollup({
+            input: component.entry,
+            output: {
+                name: 'ImageCropper',
+                format: 'iife',
+            },
+            plugins: [
+                resolve({
+                    jsnext: true,
+                    main: true,
+                    browser: true,
+                }),
+                commonjs(),
+                eslint('.eslintrc'),
+                babel({
+                    presets: ['es2015-rollup'],
+                    plugins : [
+                        'check-es2015-constants',
+                        'transform-minify-booleans',
+                        'transform-property-literals',
+                        'transform-member-expression-literals',
+                    ]
+                }),
+                uglify()
+            ],
+        })
+    )
+    </setupGulp>
+    <renameAndSave>
+    .pipe(rename({
+        suffix : '.min'
+    }))
+    .pipe(gulp.dest(component.dest));
+    </renameAndSave>
+}
+</doRollup>
+
+<loadFile>
+function loadFile(req, res) {
+    if (req.user) {
+        <checkUserPermission>
+        writeError(403, res, 'Forbidden');
+        </checkUserPermission>
+        return;
+    }
+    var relativeFilePath = req.params['0'];
+    var hubid = req.params['hubId'];
+
+    <retrieveFilePath>
+    return sharedProjects.getProjectPathFromHubID(hubid)
+    .then(function(filepath) {
+        if (!filepath) {
+            <fileNotFoundError>
+            writeError(404, res, 'Session not found: ' + hubid);
+            </fileNotFoundError>
+            return;
+        }
+        getTree(req, res);
+    });
+    </retrieveFilePath>
+}
+</loadFile>
+```

@@ -1,0 +1,185 @@
+```javascript
+<validateLiteral>
+function validateLiteral(node) {
+  var token = context.getTokens(node)[0];
+  if (
+    token.type === 'RegularExpression' &&
+    !safe(token.value)
+  ) {
+    context.report(node, 'Unsafe regular expression');
+  }
+}
+</validateLiteral>
+
+<changeState>
+function changeState(state, url, replace, lastURLValue) {
+  if (!isSupportHistoryAPI) {
+    if (isUsedHistoryLocationFlag === 0) isUsedHistoryLocationFlag = 2;
+    
+    <parseURLAndChange>
+    var urlObject = parseURL(url, isUsedHistoryLocationFlag === 2 && ('' + url).indexOf("#") !== -1);
+    if (urlObject._relative !== parseURL()._relative) {
+      lastURL = lastURLValue;
+      if (replace) {
+        windowLocation.replace("#" + urlObject._special);
+      } else {
+        windowLocation.hash = urlObject._special;
+      }
+    }
+    </parseURLAndChange>
+    
+  } else {
+    lastURL = windowLocation.href;
+  }
+  <manageStateStorage>
+  if (!isSupportStateObjectInHistory && state) {
+    stateStorage[windowLocation.href] = state;
+  }
+  </manageStateStorage>
+  
+  isFireInitialState = false;
+}
+</changeState>
+
+<getType>
+function getType(key, req) {
+  var val = this.getKey(key, req);
+  if (val === undefined) return undefined;
+  return val.rtype || TYPE_NAMES.STRING;
+}
+</getType>
+
+<doUniqueMemberIdsCheckAndReport>
+function () {
+  var doUniqueMemberIdsCheck = function (compound) {
+    var duplicateMemberIds = [];
+    compound.members.forEach(function (member) {
+      var memberId = member.memberId;
+
+      <filterMembersById>
+      function filterByMemberId(member) {
+        return member.memberId === memberId;
+      }
+      var arrayByMemberId = compound.members.filter(filterByMemberId);
+      </filterMembersById>
+      
+      <checkDuplicatesAndRecord>
+      if (arrayByMemberId.length > 1 && duplicateMemberIds.indexOf(memberId) < 0) {
+        duplicateMemberIds.push(memberId);
+      }
+      </checkDuplicatesAndRecord>
+    });
+    <reportDuplicateMemberIds>
+    duplicateMemberIds.forEach(function (memberId) {
+      errors.push('RuleViolation identified: Artifact \'' + compound.artifactId +
+        '\' contains multiple members with \'memberId\'=\'' + memberId + '\'');
+    });
+    </reportDuplicateMemberIds>
+  };
+  
+  <applyUniqueCheckToComponents>
+  if (doc.artifacts && doc.artifacts.compoundComponents) {
+    doc.artifacts.compoundComponents.forEach(doUniqueMemberIdsCheck);
+  }
+  </applyUniqueCheckToComponents>
+}
+</doUniqueMemberIdsCheckAndReport>
+
+<refreshComponent>
+function (domElt, refreshArgs) {
+  if (this._cfg && this._cfg.animation && refreshArgs && refreshArgs.animate && !this._animating) {
+    this._animateRefresh(domElt, refreshArgs);
+  } else {
+    <replaceHTMLAndSetDom>
+    domElt = ariaUtilsDom.replaceHTML(domElt, this.html);
+    this.setDom(domElt);
+    </replaceHTMLAndSetDom>
+  }
+}
+</refreshComponent>
+
+<generateApiSkeleton>
+function (scope, cb) {
+  <validateScope>
+  if (!scope.args[0]) {
+    return cb(new Error('Please provide a name for this humpback-api.'));
+  }
+  if (!scope.rootPath) {
+    return cb(INVALID_SCOPE_VARIABLE('rootPath'));
+  }
+  </validateScope>
+
+  <defineDefaults>
+  _.defaults(scope, {
+    createdAt: new Date()
+  });
+  </defineDefaults>
+
+  <setControllerNameDetails>
+  scope.controllerName = scope.args[0].toLowerCase();
+  scope.ControllerName = scope.args[0].charAt(0).toUpperCase() + scope.args[0].slice(1) + 'Ctrl';
+  scope.ControllerNameLong = scope.args[0].charAt(0).toUpperCase() + scope.args[0].slice(1) + 'Controller';
+  scope.ControllerFilename = scope.args[0].charAt(0).toUpperCase() + scope.args[0].slice(1) + 'Controller.js';
+  scope.whatIsThisController = 'humpback-controller created at ' + scope.createdAt;
+  </setControllerNameDetails>
+
+  <setModelNameDetails>
+  scope.modelname = scope.args[0].toLowerCase();
+  scope.Modelname = scope.args[0].charAt(0).toUpperCase() + scope.args[0].slice(1);
+  scope.ModelFilename = scope.args[0].charAt(0).toUpperCase() + scope.args[0].slice(1) + '.js';
+  scope.whatIsThisModel = 'humpback-model created at ' + scope.createdAt;
+  </setModelNameDetails>
+
+  cb();
+}
+</generateApiSkeleton>
+
+<parseURI>
+function parse(uriStr) {
+  <matchURIAgainstPattern>
+  var m = ('' + uriStr).match(URI_RE_);
+  if (!m) { return null; }
+  </matchURIAgainstPattern>
+  
+  <createURIInstance>
+  return new URI(
+    nullIfAbsent(m[1]),
+    nullIfAbsent(m[2]),
+    nullIfAbsent(m[3]),
+    nullIfAbsent(m[4]),
+    nullIfAbsent(m[5]),
+    nullIfAbsent(m[6]),
+    nullIfAbsent(m[7])
+  );
+  </createURIInstance>
+}
+</parseURI>
+
+<setDefaults>
+function setDefaults(model, defaults) {
+  if (!defaults) { return; }
+  _.each(defaults, function (value, key) {
+    if (model[key] === undefined) {
+      model[key] = value;
+    }
+  });
+}
+</setDefaults>
+
+<updateAndDeleteProperties>
+function (lastProps, nextProps, transaction) {
+  <logicToHandlePropertyUpdatesAndDeletes>
+  // Multiple responsibilities are combined in this function, such as handling style updates, event listener updates, and attribute manipulation. Specific annotations within the function would be needed to further delineate these separate responsibilities.
+  </logicToHandlePropertyUpdatesAndDeletes>
+}
+</updateAndDeleteProperties>
+
+<not>
+function not(arr) {
+  var ans = new Array(arr.length);
+  for (var i = 0; i < ans.length; i++)
+      ans[i] = ~arr[i];
+  return ans;
+}
+</not>
+```

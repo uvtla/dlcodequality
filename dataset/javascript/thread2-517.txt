@@ -1,0 +1,291 @@
+```javascript
+<validateHeader>
+function validateHeader (key, value) {
+  if (typeof key !== 'string' || typeof value !== 'string')
+    return option.some(`Parts of header ${key}:${value} must be strings`)
+  return option.none
+}
+</validateHeader>
+
+<initOrUpdateTranslation>
+function initOrUpdateTranslation(locale, translation, defaultLocale) {
+  <initializeVariables>
+  var defaultLocaleBundle, localeBundle, merged;
+  var aux = {};
+  
+  init();
+  </initializeVariables>
+
+  <loadCldrData>
+  loadCldr(defaultLocale);
+  loadCldr(locale);
+  </loadCldrData>
+
+  <prepareLocaleBundles>
+  defaultLocaleBundle = new Globalize(defaultLocale).cldr.attributes.bundle;
+  localeBundle = new Globalize(locale).cldr.attributes.bundle;
+  </prepareLocaleBundles>
+
+  <assertions>
+  assertLocale(locale);
+  assert(typeof translation === "object", "missing or invalid `translation` argument, JSON expected (e.g., {\"en\": ...})");
+  assert(typeof defaultLocale === "string", "missing or invalid `defaultLocale` argument, String expected (e.g., \"en\")");
+  </assertions>
+
+  <mergeTranslations>
+  aux[localeBundle] = generateDefaultTranslation(defaultLocale)[defaultLocaleBundle];
+  merged = merge({}, aux, translation);
+  if (orderedStringify(translation) !== orderedStringify(merged)) {
+    return merged;
+  }
+  </mergeTranslations>
+}
+</initOrUpdateTranslation>
+
+<getFieldTypeName>
+function( str, dropIdUbar ){
+  <convertToUnderscore>
+  str = this.demodulize( str );
+  str = this.underscore( str ) + (( dropIdUbar ) ? ( '' ) : ( '_' )) + 'id';
+  </convertToUnderscore>
+
+  return str;
+}
+</getFieldTypeName>
+
+<getFieldType>
+function getFieldType(fld){
+  <determineFieldType>
+  var type = (fld.attr("type") || "").toLowerCase();
+  if (
+    !type
+    && fld[0].tagName == "SELECT"
+  ) type = "select";
+  if (!type) type = "json";
+  fld.data("type", type);
+  </determineFieldType>
+  
+  return type;
+}
+</getFieldType>
+
+<parseOperation>
+function parse(op, target) {
+  <checkOperator>
+  if (OPERATORS.indexOf(op.op) !== -1) {
+    op = clone(op);
+    </checkOperator>
+    
+    <parsePointers>
+    if (op.from != null) {
+      op.from = parsePointer(op.from);
+    }
+    if (op.path != null) {
+      op.path = parsePointer(op.path);
+    } else {
+      throw new error.InvalidOperationError(op.op, 'Operation object must have a "path" member');
+    }
+    </parsePointers>
+    
+    <validatePathOperation>
+    validatePath(op.from || op.path, target);
+    return op;
+    </validatePathOperation>
+  }
+  throw new error.InvalidOperationError('Operation object "op" member must be one of ' + OPERATORS.join(', ') + ' ' + ('but got "' + op.op + '"'));
+}
+</parseOperation>
+
+<applyUpdateFunction>
+function(obToApplyTo,pathitem,cloningFunction) {
+  <checkOperationExists>
+  if (!updateResult.hasOwnProperty('_op_'+pathitem.o)) {
+    throw new Error(
+      'SyncLib.updateResult No Operation: updateResult has no ' +
+      'operation '+
+      pathitem.o
+    );
+  }
+  </checkOperationExists>
+  
+  <invokeUpdateFunction>
+  var f = updateResult['_op_'+pathitem.o];
+  return f.call(this,obToApplyTo,pathitem,cloningFunction);
+  </invokeUpdateFunction>
+}
+</applyUpdateFunction>
+
+<checkContainerDiff>
+function (containerGuid, relativePath) {
+  <initializeVariables>
+  var usedDiff, path, containerDiff, baseGuids, i, baseDiff, dataKnownInExtension;
+
+  containerDiff = getNodeByGuid(diffExtension, containerGuid);
+  </initializeVariables>
+
+  <determineContainerDiffLocation>
+  if (containerDiff === null) {
+    containerDiff = getNodeByGuid(diffBase, containerGuid);
+    usedDiff = diffBase;
+    path = getPathOfGuid(usedDiff, containerGuid);
+  } else {
+    dataKnownInExtension = true;
+    usedDiff = diffExtension;
+    path = getPathOfGuid(usedDiff, containerGuid);
+  }
+  </determineContainerDiffLocation>
+
+  <checkBaseGuids>
+  baseGuids = Object.keys(containerDiff.oBaseGuids || {})
+    .concat(Object.keys(containerDiff.ooBaseGuids || {}));
+
+  for (i = 0; i < baseGuids.length; i += 1) {
+    baseDiff = getPathOfDiff(getNodeByGuid(diffExtension, baseGuids[i]) || {}, relativePath);
+    if (baseDiff.removed === false || typeof baseDiff.movedFrom === 'string') {
+      
+      return true;
+    }
+  }
+  </checkBaseGuids>
+
+  <checkDataKnownInExtension>
+  if (dataKnownInExtension &&
+    containerDiff.pointer &&
+    typeof containerDiff.pointer.base === 'string') {
+    
+    return true;
+  }
+  </checkDataKnownInExtension>
+
+  <checkParentPath>
+  relativePath = CONSTANTS.PATH_SEP + getRelidFromPath(path) + relativePath;
+  if (getParentPath(path)) {
+    
+    return checkContainer(getParentGuid(diffExtension, path), relativePath);
+  }
+  </checkParentPath>
+
+  return false;
+}
+</checkContainerDiff>
+
+<handleKeyEvents>
+function onKey( event ) {
+  if (editor.mode != 'wysiwyg' )
+    return;
+
+  switch ( event.data.keyCode ) {
+    
+    case CKEDITOR.CTRL + 86: 
+    case CKEDITOR.SHIFT + 45: 
+      <prepareEditorForPaste>
+      var editable = editor.editable();
+      
+      
+      preventPasteEventNow();
+      
+      !CKEDITOR.env.ie && editable.fire( 'beforepaste' );
+      </prepareEditorForPaste>
+
+      return;
+
+    
+    case CKEDITOR.CTRL + 88: 
+    case CKEDITOR.SHIFT + 46: 
+      <triggerSnapshotForCutDelete>
+      
+      editor.fire( 'saveSnapshot' ); 
+      setTimeout( function() {
+        editor.fire( 'saveSnapshot' ); 
+      }, 50 ); 
+      </triggerSnapshotForCutDelete>
+  }
+}
+</handleKeyEvents>
+
+<watchProjectFiles>
+function watch(conf, undertaker) {
+
+  const root = conf.themeConfig.root;
+
+  
+  undertaker.watch(
+    path.join(root, conf.themeConfig.sass.src, '**', '*.scss'),
+    undertaker.series(
+      require('../styles/lintStyles').bind(null, conf, undertaker),
+      require('../styles/buildStyles').bind(null, conf, undertaker),
+      require('../styles/holograph').bind(null, conf, undertaker)
+    )
+  );
+
+  
+  undertaker.watch(
+    path.join(root, conf.themeConfig.js.src, '**', '*.js'),
+    undertaker.series(
+      require('../scripts/lintScripts').bind(null, conf, undertaker),
+      require('../scripts/buildScripts').bind(null, conf, undertaker)
+    )
+  );
+
+  
+  undertaker.watch(
+    path.join(root, conf.themeConfig.images.src, '**', '*'),
+    undertaker.series(
+      require('../assets/buildImages').bind(null, conf, undertaker)
+    )
+  );
+
+  
+  undertaker.watch(
+    path.join(root, conf.themeConfig.fonts.src, '**', '*'),
+    undertaker.series(
+      require('../assets/buildFonts').bind(null, conf, undertaker)
+    )
+  );
+
+}
+</watchProjectFiles>
+
+<freezeRemote>
+function freezeRemote(filePaths, remote, callback) {
+    <initializeUrlObject>
+    var urlObj = url.parse(remote, false, true);
+    var basePath = urlObj.pathname + (urlObj.search || "");
+    </initializeUrlObject>
+    
+    <sendHeadRequests>
+    var await = 0;
+    for (var itemPath in filePaths) {
+        var item = filePaths[itemPath];
+        if (item.freezed) {
+            continue;
+        }
+        await++;
+        var req = http.request({
+                method: "HEAD",
+                host: urlObj.hostname,
+                port: urlObj.port || 80,
+                path: basePath + item.hashedName
+            }, function(res) {
+                if (res.statusCode === 200) {
+                    this.freezed = remote + this.hashedName;
+                }
+                await--;
+                if (!await) {
+                    await--; 
+                    callback();
+                }
+            }.bind(item)
+        );
+        req.end();
+    }
+    </sendHeadRequests>
+    
+    <checkAllRequests>
+    if (await === 0) {
+        callback();
+    }
+    </checkAllRequests>
+}
+</freezeRemote>
+```
