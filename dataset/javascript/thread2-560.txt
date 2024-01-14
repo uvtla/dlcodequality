@@ -1,0 +1,310 @@
+```javascript
+<stats>
+function() {
+    var l = Date.now(), m = l, g = 0, n = Infinity, o = 0, h = 0, p = Infinity, q = 0, r = 0, s = 0, f = document.createElement("div");
+    f.id = "stats";
+    f.addEventListener("mousedown", function(b) {
+        b.preventDefault();
+        t(++s % 2)
+    }, !1);
+    f.style.cssText = "width:80px;opacity:0.9;cursor:pointer";
+    var a = document.createElement("div");
+    a.id = "fps";
+    a.style.cssText = "padding:0 0 3px 3px;text-align:left;background-color:#002";
+    f.appendChild(a);
+    var i = document.createElement("div");
+    i.id = "fpsText";
+    i.style.cssText = "color:#0ff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px";
+    i.innerHTML = "FPS";
+    a.appendChild(i);
+    var c = document.createElement("div");
+    c.id = "fpsGraph";
+    c.style.cssText = "position:relative;width:74px;height:30px;background-color:#0ff";
+    for (a.appendChild(c); 74 > c.children.length;) {
+        var j = document.createElement("span");
+        j.style.cssText = "width:1px;height:30px;float:left;background-color:#113";
+        c.appendChild(j)
+    }
+    var d = document.createElement("div");
+    d.id = "ms";
+    d.style.cssText = "padding:0 0 3px 3px;text-align:left;background-color:#020;display:none";
+    f.appendChild(d);
+    var k = document.createElement("div");
+    k.id = "msText";
+    k.style.cssText = "color:#0f0;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px";
+    k.innerHTML = "MS";
+    d.appendChild(k);
+    var e = document.createElement("div");
+    e.id = "msGraph";
+    e.style.cssText = "position:relative;width:74px;height:30px;background-color:#0f0";
+    for (d.appendChild(e); 74 > e.children.length;) j = document.createElement("span"), j.style.cssText = "width:1px;height:30px;float:left;background-color:#131", e.appendChild(j);
+    var t = function(b) {
+        s = b;
+        switch (s) {
+            case 0:
+                a.style.display =
+                    "block";
+                d.style.display = "none";
+                break;
+            case 1:
+                a.style.display = "none", d.style.display = "block"
+        }
+    };
+    return {
+        REVISION: 11,
+        domElement: f,
+        setMode: t,
+        begin: function() {
+            l = Date.now()
+        },
+        end: function() {
+            var b = Date.now();
+            g = b - l;
+            n = Math.min(n, g);
+            o = Math.max(o, g);
+            k.textContent = g + " MS (" + n + "-" + o + ")";
+            var a = Math.min(30, 30 - 30 * (g / 200));
+            e.appendChild(e.firstChild).style.height =
+                a + "px";
+            r++;
+            b > m + 1E3 && (h = Math.round(1E3 * r / (b - m)), p = Math.min(p, h), q = Math.max(q, h), i.textContent = h + " FPS (" + p + "-" + q + ")", a = Math.min(30, 30 - 30 * (h / 100)), c.appendChild(c.firstChild).style.height =
+                a + "px", m = b, r = 0);
+            return b
+        },
+        update: function() {
+            l = this.end()
+        }
+    }
+}
+</stats>
+
+<analyseCallGraph>
+function analyseCallGraph(callGraph, funcName, context, nodeCheck) {
+    return analyseCallGraphInternal(callGraph, funcName, context, (a, b) => a || b, nodeCheck, {})
+}
+</analyseCallGraph>
+
+<gatherMimeInformation>
+function(mime) {
+    var info = {
+        type: UNKNOWN,
+        format: RAW,
+        guessed: true
+    },
+    match,
+    base;
+    base = (base = mime.split(SEP)) && base[0] || E;
+    match = base.match(AUDIO_VIDEO_IMAGE_TEXT);
+    if (match && match[1]) {
+        info.type = info.format = match[1];
+        if (info.type === TEXT) {
+            match = mime.match(JSON_XML_SCRIPT_SIBLINGS);
+            info.format = match && match[1] || PLAIN;
+        }
+        return info;
+    }
+    match = mime.match(JSON_XML_SCRIPT_SIBLINGS);
+    if (match && match[1]) {
+        info.type = TEXT;
+        info.format = match[1];
+        return info;
+    }
+    match = mime.match(AUDIO_VIDEO_IMAGE_TEXT_SUBTYPE);
+    if (match && match[1]) {
+        info.type = info.format = match[1];
+        return info;
+    }
+    match = base.match(APPLICATION_MESSAGE_MULTIPART);
+    if (match && match[1]) {
+        info.type = match[1];
+        info.format = RAW;
+        return info;
+    }
+    info.orphan = true;
+    return info;
+}
+</gatherMimeInformation>
+
+<isQuoteAssignKeywordExpr>
+function isQuoteAssignKeywordExpr(node) {
+  return isQuoteAssignExpr(node) && (node.varname === 'accept' || node.varname === 'reject' || node.varname === 'status' || node.varname === 'footer')
+}
+</isQuoteAssignKeywordExpr>
+
+<createSourceMap>
+function create(content, url) {
+    url = url || '<source>';
+    const map = new SourceMapGenerator({ file: url });
+    const lines = content.split('\n');
+    for (let l = 1, n = lines.length; l <= n; l++) {
+        if (lines[l - 1]) {
+            map.addMapping({
+                source: url,
+                original: { line: l, column: 0 },
+                generated: { line: l, column: 0 }
+            });
+        }
+    }
+    map.setSourceContent(url, content);
+    return map;
+}
+</createSourceMap>
+
+<webkitSupportsFullscreen>
+function(element) {
+    if (bigscreen.enabled) {
+        return true;
+    }
+    element = element || document.body;
+    var video = _getVideo(element);
+    if (!video || video.webkitSupportsFullscreen === undefined) {
+        return false;
+    }
+    return video.readyState < video.HAVE_METADATA ? 'maybe' : video.webkitSupportsFullscreen;
+}
+</webkitSupportsFullscreen>
+
+<determineTypePropertyAndSchema>
+function(model, ctx) {
+    var typeProperty;
+    var schemaStore;
+    if (model.schema.element) {
+        typeProperty = model.getModelByPath(".typeProperty").getPlainValue();
+        schemaStore = ctx.getStore(model.schema.element.url);
+    } else {
+        typeProperty = model.getModelByPath("..typeProperty").getPlainValue();
+        schemaStore = ctx.getStore(model.schema.url);
+    }
+    var schema = {
+        "group": {
+            "editor": "listpane",
+            "attributes": [{
+                    "code": this.idProperty,
+                    "type": this.idType,
+                    "editor": this.idType,
+                    "disabled": !this._isAssignableId(model)
+                },
+                {
+                    "code": typeProperty,
+                    "editor": "string",
+                    "type": "string",
+                    "visible": false
+                }
+            ]
+        }
+    };
+    return schema;
+}
+</determineTypePropertyAndSchema>
+
+<showToastMessage>
+function Toast(optionsOrMsg, pageCtx) {
+    var options = optionsOrMsg || {};
+    if (typeof optionsOrMsg === 'string') {
+        options = {
+            message: optionsOrMsg
+        };
+    }
+    var ctx = getPageCtx(pageCtx);
+    var pageToastUserSetting = getPageToastConfig(ctx);
+    var parsedOptions = Object.assign({}, globalToastUserConfig, pageToastUserSetting, options);
+    var toastCtx = ctx.selectComponent(parsedOptions.selector);
+    if (!toastCtx) {
+        console.error('无法找到对应的toast组件，请于页面中注册并在 wxml 中声明 toast 自定义组件');
+        return;
+    }
+    if (timeoutData.timeoutId) {
+        Toast.clear();
+    }
+    toastCtx.show(Object.assign({}, parsedOptions, {
+        show: true
+    }));
+    var timeoutId = 0;
+    var timeoutOption = parsedOptions.timeout || DEFAULT_SHOW_TOAST_TIME;
+    if (timeoutOption >= 0) {
+        timeoutId = setTimeout(function() {
+            toastCtx.clear();
+        }, timeoutOption);
+    }
+    timeoutData = {
+        timeoutId: timeoutId,
+        toastCtx: toastCtx
+    };
+}
+</showToastMessage>
+
+<decompressValue>
+function decompressValue(value) {
+    if (value === 0)
+        return 0;
+    value--;
+    let exp = value % 10;
+    value = (value - exp) / 10;
+    let n;
+    if (exp < 9) {
+        const last = value % 9;
+        value = (value - last) / 9;
+        n = value * 10 + last + 1;
+    } else {
+        n = value + 1;
+    }
+    while (exp > 0) {
+        n *= 10;
+        exp--;
+    }
+    return n;
+}
+</decompressValue>
+
+<handleValueChanges>
+function() {
+    var value = this.get();
+    if (this.skip || !this.callback) {
+        this.skip = false;
+        if (this.getChangeRecords) {
+            this.oldValue = diff.clone(value);
+        } else {
+            this.oldValue = value;
+        }
+    } else {
+        var change;
+        var useCompareBy = this.getChangeRecords &&
+            this.compareBy &&
+            Array.isArray(value) &&
+            Array.isArray(this.oldValue);
+        if (useCompareBy) {
+            var compareExpression = this.compareBy;
+            var name = this.compareByName;
+            var index = this.compareByIndex || '__index__';
+            var ctx = this.context;
+            var globals = this.observations.globals;
+            var formatters = this.observations.formatters;
+            var oldValue = this.oldValue;
+            if (!name) {
+                name = '__item__';
+                compareExpression = name + '.' + compareExpression;
+            }
+            var getCompareValue = expressions.parse(compareExpression, globals, formatters, name, index);
+            changed = diff.values(value.map(getCompareValue, ctx), oldValue.map(getCompareValue, ctx));
+        } else if (this.getChangeRecords) {
+            changed = diff.values(value, this.oldValue);
+        } else {
+            changed = diff.basic(value, this.oldValue);
+        }
+        var oldValue = this.oldValue;
+        if (this.getChangeRecords) {
+            this.oldValue = diff.clone(value);
+        } else {
+            this.oldValue = value;
+        }
+        if (!changed && !this.forceUpdateNextSync) return;
+        this.forceUpdateNextSync = false;
+        if (Array.isArray(changed)) {
+            this.callback.call(this.callbackContext, value, oldValue, changed);
+        } else {
+            this.callback.call(this.callbackContext, value, oldValue);
+        }
+    }
+}
+</handleValueChanges>
+```

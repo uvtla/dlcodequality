@@ -1,0 +1,306 @@
+<baseClone>
+function baseClone(value, bitmask, customizer, key, object, stack) {
+  
+  var result,
+      isDeep = bitmask & CLONE_DEEP_FLAG$1,
+      isFlat = bitmask & CLONE_FLAT_FLAG,
+      isFull = bitmask & CLONE_SYMBOLS_FLAG$1;
+
+  <customizerCheck>
+  if (customizer) {
+    result = object ? customizer(value, key, object, stack) : customizer(value);
+  }
+  if (result !== undefined) {
+    return result;
+  }
+  </customizerCheck>
+
+  <isObjectCheck>
+  if (!isObject_1(value)) {
+    return value;
+  }
+  </isObjectCheck>
+
+  <initClone>
+  var isArr = isArray_1(value);
+  if (isArr) {
+    result = _initCloneArray(value);
+    if (!isDeep) {
+      return _copyArray(value, result);
+    }
+  } else {
+    var tag = _getTag(value),
+        isFunc = tag == funcTag || tag == genTag;
+
+    if (isBuffer_1(value)) {
+      return _cloneBuffer(value, isDeep);
+    }
+    if (tag == objectTag || tag == argsTag || (isFunc && !object)) {
+      result = (isFlat || isFunc) ? {} : _initCloneObject(value);
+      if (!isDeep) {
+        return isFlat
+          ? _copySymbolsIn(value, _baseAssignIn(result, value))
+          : _copySymbols(value, _baseAssign(result, value));
+      }
+    } else {
+      if (!cloneableTags[tag]) {
+        return object ? value : {};
+      }
+      result = _initCloneByTag(value, tag, baseClone, isDeep);
+    }
+  }
+  </initClone>
+
+  <stackInitialization>
+  stack || (stack = new _Stack);
+  var stacked = stack.get(value);
+  if (stacked) {
+    return stacked;
+  }
+  stack.set(value, result);
+  </stackInitialization>
+
+  <keysFunctionSetup>
+  var keysFunc = isFull
+    ? (isFlat ? _getAllKeysIn : _getAllKeys)
+    : (isFlat ? keysIn : keys_1);
+  </keysFunctionSetup>
+
+  <propsSetup>
+  var props = isArr ? undefined : keysFunc(value);
+  </propsSetup>
+
+  <cloneProperties>
+  _arrayEach(props || value, function(subValue, key) {
+    if (props) {
+      key = subValue;
+      subValue = value[key];
+    }
+    
+    _assignValue(result, key, baseClone(subValue, bitmask, customizer, key, value, stack));
+  });
+  </cloneProperties>
+
+  return result;
+}
+</baseClone>
+
+<destroyDropdown>
+function() {
+  <dropdownExistenceCheck>
+  if (this._dropdownTriggerButton) {
+    <destroyDropdownIfExists>
+    if (this._dropdownTriggerButton.dropdown) {
+      this._dropdownTriggerButton.dropdown.destroy();
+      this._dropdownTriggerButton.dropdown = null;
+    }
+    </destroyDropdownIfExists>
+    this._dropdownTriggerButton = null;
+  }
+  </dropdownExistenceCheck>
+}
+</destroyDropdown>
+
+<concatMiddlewareNames>
+function concatMiddlewareNames(routes) {
+  <initializeOutput>
+  var output = [];
+  </initializeOutput>
+
+  <iterateAndConcatMiddleware>
+  for (var i = 0; i < routes.length; i++) {
+    output = output.concat(getMiddlewareNames(routes[i]));
+  }
+  </iterateAndConcatMiddleware>
+
+  return output;
+}
+</concatMiddlewareNames>
+
+<addContext>
+function addContext(el, tagData, insertionElementTagData) {
+  <preventDataBindings>
+  domData.set(el, "preventDataBindings", true);
+  </preventDataBindings>
+
+  <createViewModel>
+  var teardown = stacheBindings.behaviors.viewModel(el, insertionElementTagData,
+    function createViewModel(initialData, hasDataBinding, bindingState) {
+      if(bindingState && bindingState.isSettingOnViewModel === true) {
+        newScope = tagData.scope.addLetContext(initialData);
+        return newScope._context;
+      } else {
+        return vm = new SimpleObservable(initialData);
+      }
+    }, undefined, true);
+  </createViewModel>
+
+  <handleTeardown>
+  if(!teardown) {
+    return tagData;
+  } else {
+    return assign(assign({}, tagData), {
+      teardown: teardown,
+      scope: newScope || tagData.scope.add(vm)
+    });
+  }
+  </handleTeardown>
+}
+</addContext>
+
+<isDebug>
+function isDebug(debugging) {
+  <checkDebuggingValue>
+  if (isValue(debugging))
+      return debugging;
+  </checkDebuggingValue>
+
+  <processCheck>
+  var eargv = process && process.execArgv;
+  </processCheck>
+
+  <chkDebug>
+  function chkDebug() {
+    return (eargv.filter(function (v) { return /^(--debug|--inspect)/.test(v); }).length ||
+        isValue(v8debug));
+  }
+  </chkDebug>
+
+  <wrapAndReturnDebugCheck>
+  return function_1.tryWrap(chkDebug)(false);
+  </wrapAndReturnDebugCheck>
+}
+</isDebug>
+
+<getPrototypeOfExpression>
+function getPrototypeOfExpression(objectRef, isStatic, file, isPrivateMethod) {
+  <cloneObjectRef>
+  objectRef = t.cloneNode(objectRef);
+  </cloneObjectRef>
+
+  <defineTargetRef>
+  const targetRef =
+    isStatic || isPrivateMethod
+      ? objectRef
+      : t.memberExpression(objectRef, t.identifier("prototype"));
+  </defineTargetRef>
+
+  <generateCallExpression>
+  return t.callExpression(file.addHelper("getPrototypeOf"), [targetRef]);
+  </generateCallExpression>
+}
+</getPrototypeOfExpression>
+
+<Tri>
+function Tri() {
+  <applyTriangleSuperConstructor>
+  Triangle.apply(this, arguments);
+  </applyTriangleSuperConstructor>
+
+  <initializeProperties>
+  this.target = {vec: null, t: 0};
+  this.vertices = ["p0","p1","p2"];
+  this.colorId = 1 + (colorToggle % 3);
+  </initializeProperties>
+}
+</Tri>
+
+<reportRunningTask>
+function reportRunningTask(taskname) {
+  <requireIconModule>
+  const icon = require('./ci-icon');
+  </requireIconModule>
+
+  <defineDoneFunction>
+  function done(success) {
+      success
+          ? console.log(`${icon.success()} ${taskname}`)
+          : console.log(`${icon.error()} ${taskname}`);
+  }
+  </defineDoneFunction>
+
+  return done;
+}
+</reportRunningTask>
+
+<innerFill>
+function innerFill(order, proc, body) {
+  <initializeVariables>
+  var dimension = order.length,
+      nargs = proc.arrayArgs.length,
+      has_index = proc.indexArgs.length>0,
+      code = [],
+      vars = [],
+      idx=0, pidx=0, i, j;
+  </initializeVariables>
+
+  <setupLoopVariables>
+  for(i=0; i<dimension; ++i) { 
+    vars.push(["i",i,"=0"].join(""));
+  }
+  </setupLoopVariables>
+
+  <setupStrideVariables>
+  for(j=0; j<nargs; ++j) {
+    for(i=0; i<dimension; ++i) {
+      pidx = idx;
+      idx = order[i];
+      if(i === 0) { 
+        vars.push(["d",j,"s",i,"=t",j,"p",idx].join(""));
+      } else { 
+        vars.push(["d",j,"s",i,"=(t",j,"p",idx,"-s",pidx,"*t",j,"p",pidx,")"].join(""));
+      }
+    }
+  }
+  </setupStrideVariables>
+
+  <declareVariables>
+  if (vars.length > 0) {
+    code.push("var " + vars.join(","));
+  }
+  </declareVariables>
+
+  <generateLoops>
+  for(i=dimension-1; i>=0; --i) { 
+    idx = order[i];
+    code.push(["for(i",i,"=0;i",i,"<s",idx,";++i",i,"){"].join(""));
+  }
+  </generateLoops>
+
+  <insertBodyCode>
+  code.push(body);
+  </insertBodyCode>
+
+  <closeLoopsAndHandleIndex>
+  for(i=0; i<dimension; ++i) {
+    pidx = idx;
+    idx = order[i];
+    for(j=0; j<nargs; ++j) {
+      code.push(["p",j,"+=d",j,"s",i].join(""));
+    }
+    if(has_index) {
+      if(i > 0) {
+        code.push(["index[",pidx,"]-=s",pidx].join(""));
+      }
+      code.push(["++index[",idx,"]"].join(""));
+    }
+    code.push("}");
+  }
+  </closeLoopsAndHandleIndex>
+
+  return code.join("\n");
+}
+</innerFill>
+
+<scaleNodeBreadths>
+function scaleNodeBreadths(nodes, kx, orient) {
+  <iterateNodesAndSetLayout>
+  zrUtil.each(nodes, function (node) {
+    var nodeDepth = node.getLayout().depth * kx;
+    orient === 'vertical'
+        ? node.setLayout({y: nodeDepth}, true)
+        : node.setLayout({x: nodeDepth}, true);
+  });
+  </iterateNodesAndSetLayout>
+}
+</scaleNodeBreadths>

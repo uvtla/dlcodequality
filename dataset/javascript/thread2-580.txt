@@ -1,0 +1,267 @@
+```javascript
+<functionEventOn>
+function(name, callback, context) {
+  <eventApiCheck>
+  if (!eventsApi(this, 'on', name, [callback, context]) || !callback) return this;
+  </eventApiCheck>
+  <initializeEventsObject>
+  this._events || (this._events = {});
+  </initializeEventsObject>
+  <registerCallback>
+  var events = this._events[name] || (this._events[name] = []);
+  events.push({callback: callback, context: context, ctx: context || this});
+  </registerCallback>
+  return this;
+}
+</functionEventOn>
+
+<functionInitModelRead>
+function initModelRead (args) {
+  <basicConfiguration>
+  var controller = this;
+  var model = this.model;
+  if (!model.columnName('id')) {
+      return;
+  }
+  args = requireValidOptionalObject(args);
+  args.read = requireValidOptionalObject(args.read);
+  var queryArgs = requireValidOptionalObject(args.read.query);
+  </basicConfiguration>
+
+  <defaultQuerySetup>
+  if (!defined(queryArgs.with)) {
+      queryArgs.with = {};
+      _.each(model.relations, (relation, relationName) => {
+          queryArgs.with[relationName] = {
+              limit: 20,
+          }
+      });
+  }
+  if (queryArgs.with === false) {
+      delete queryArgs.with;
+  }
+  var role = args.defaultRole || 'all';
+  var forms = args.read && args.read.forms;
+  </defaultQuerySetup>
+
+  <inputSetup>
+  var input = {
+      current: 'query.current',
+      deleted: 'query.deleted',
+      id: 'params.id',
+  };
+  </inputSetup>
+
+  <linksSetup>
+  var links;
+  if (Array.isArray(args.read.links)) {
+      links = _.cloneDeep(args.read.links);
+  }
+  else if (Array.isArray(args.links)) {
+      links = _.cloneDeep(args.links);
+  }
+  else {
+      links = [];
+  }
+  </linksSetup>
+
+  <registerPath>
+  if (!this.paths['/:id']) {
+      this.paths['/:id'] = {};
+  }
+  this.paths['/:id'].get = [
+      {
+          before: function (args) {
+              return beforeRead(controller, args, forms, queryArgs);
+          },
+          input: input,
+          method: function (args) {
+              return read(controller, args, links);
+          },
+          methodName: 'read',
+          role: role,
+          template: 'instance',
+      },
+  ];
+  </registerPath>
+}
+</functionInitModelRead>
+
+<functionLayoutRecalc>
+function () {
+  <layoutComparisonSetup>
+  var self = this, rect = self._layoutRect, lastRect = self._lastRect;
+  if (!lastRect || lastRect.w != rect.w || lastRect.h != rect.h) {
+  </layoutComparisonSetup>
+    <performLayoutRecalc>
+    self._layout.recalc(self);
+    rect = self.layoutRect();
+    self._lastRect = { x: rect.x, y: rect.y, w: rect.w, h: rect.h };
+    </performLayoutRecalc>
+    return true;
+  }
+}
+</functionLayoutRecalc>
+
+<functionFromShape>
+function fromShape(obj, propType, options=null) {
+  <validateShape>
+  const declaration = propType[SHAPE];
+  if (!(declaration instanceof Declaration)) {
+    throw new Error('fromShape called with a non-shape property type');
+  }
+  const shape = declaration.shape;
+  </validateShape>
+
+  <createShapeInstance>
+  const instance = {};
+  const checker = {};
+  Object.keys(shape).forEach(key => {
+    <handleReshape>
+    const type = shape[key];
+    if (type[SHAPE] instanceof Reshape) {
+      addReshape(instance, key);
+      return;
+    }
+    </handleReshape>
+    <copyValues>
+    let value = obj[key];
+    if (value === undefined) {
+      return;
+    }
+    if (type[SHAPE] instanceof Declaration) {
+      instance[key] = fromShape(value, type);
+      return;
+    }
+    if (checker.toString.call(value) === '[object Function]') {
+      value = value.bind(obj);
+    }
+    instance[key] = value;
+    </copyValues>
+  });
+  </createShapeInstance>
+
+  <handleOptions>
+  options = options || {};
+  if (options.mutable) {
+    return instance;
+  }
+  return deepFreeze(instance);
+  </handleOptions>
+}
+</functionFromShape>
+
+<functionDebounceParenHighlight>
+function() {
+  <clearPreviousTimeout>
+  if (this.parenEvent) this.parent.clearTimeout(this.parenEvent);
+  </clearPreviousTimeout>
+  <setDebounce>
+  var self = this;
+  this.parenEvent = this.parent.setTimeout(function(){self.highlightParens();}, 300);
+  </setDebounce>
+}
+</functionDebounceParenHighlight>
+
+<functionSortTextLoaded>
+function () {
+  <prepareSortParameters>
+  var array = ariaUtilsObject.keys(this.__textLoaded);
+  var prefixes = this.__prefixes;
+  var prefixLength = this.__PREFIX.length;
+  </prepareSortParameters>
+
+  <comparatorDefinition>
+  var comparator = function (first, second) {
+      var firstIndex = prefixes[first]
+              ? parseInt(prefixes[first].substring(prefixLength), 10)
+              : Number.MAX_VALUE;
+      var secondIndex = prefixes[second]
+              ? parseInt(prefixes[second].substring(prefixLength), 10)
+              : Number.MAX_VALUE;
+      if (firstIndex === secondIndex) {
+          return 0;
+      }
+      return firstIndex > secondIndex ? 1 : -1;
+  };
+  </comparatorDefinition>
+
+  <performSort>
+  var sorted = array.sort(comparator);
+  </performSort>
+  
+  <cleanup>
+  prefixes = null;
+  prefixLength = null;
+  </cleanup>
+  
+  return sorted;
+}
+</functionSortTextLoaded>
+
+<functionLoadSync>
+function (path, encoding) {
+  <synchronousFetchRequest>
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', path, false);
+  xhr.send();
+  </synchronousFetchRequest>
+  return xhr.responseText;
+}
+</functionLoadSync>
+
+<functionAddressToKey>
+function addressToKey(address) {
+  <keyFormation>
+  const protocol = "http";
+  const host = iputil.addrToHostname(iputil.normalize(address.address));
+  return `${protocol}://${host}`;
+  </keyFormation>
+}
+</functionAddressToKey>
+
+<functionTestCharConversion>
+function (successCallback, errorCallback, args) {
+  <logEntry>
+  winble.logger.logApiEntry("testCharConversion");
+  </logEntry>
+  <arraySetup>
+  var array = new Uint8Array(1);
+  array[0] = args[0] ? args[0] : 0;
+  </arraySetup>
+  <invokeSuccessCallback>
+  successCallback(array);
+  </invokeSuccessCallback>
+  <logExit>
+  winble.logger.logApiExit("testCharConversion");
+  </logExit>
+}
+</functionTestCharConversion>
+
+<functionGenerateClasses>
+function GENERATE_CLASSES(classes, parent) {
+  return <aggregateClasses>
+  _.reduce(classes, function(memo, classSpec, className) {
+    return memo
+      + <generateClassSnippet>
+      GENERATE_CLASS(className, classSpec.description, parent, classSpec.parent)
+      </generateClassSnippet>
+      + <generateMethodsSnippet>
+      _.reduce(classSpec.methods, function(memo, methodSpec, methodName) {
+        return memo += GENERATE_METHOD(methodName, methodSpec, className);
+      }, '')
+      </generateMethodsSnippet>
+      + <generateVariablesSnippet>
+      _.reduce(classSpec.variables, function(memo, variableSpec, variableName) {
+        return memo += GENERATE_VAR(variableName, variableSpec, className);
+      }, '')
+      </generateVariablesSnippet>
+      + <generateEnumsSnippet>
+      _.reduce(classSpec.enums, function(memo, enumSpec, enumName) {
+        return memo += GENERATE_ENUM(enumName, enumSpec, className);
+      }, '');
+  }, '');
+  </aggregateClasses>;
+}
+</functionGenerateClasses>
+```

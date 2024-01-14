@@ -1,0 +1,240 @@
+```javascript
+<onDrag>
+function onDrag(target, innerTarget, dir, listener) { 
+  <initializePointerEvents>
+  const hasPointerEvent = undefined !== target.onpointerup;
+  const hasTouchEvent   = undefined !== target.ontouchstart;
+  const pointerDown = hasPointerEvent ? 'pointerdown' : hasTouchEvent ? 'touchstart' : 'mousedown';
+  const pointerMove = hasPointerEvent ? 'pointermove' : hasTouchEvent ? 'touchmove' : 'mousemove';
+  const pointerUp   = hasPointerEvent ? 'pointerup'   : hasTouchEvent ? 'touchend' : 'mouseup';
+  </initializePointerEvents>
+
+  <determineDirection>
+  const dirIsInline = /^(ltr|rtl)$/i.test(dir);
+  const dirIsStart  = /^(ltr|ttb)$/i.test(dir);
+  </determineDirection>
+
+  <determineAxis>
+  const axisProp = dirIsInline ? 'clientX' : 'clientY';
+  </determineAxis>
+
+  let window, start, end;
+
+  <attachDragEvents>
+  target.addEventListener(pointerDown, onpointerdown);
+  </attachDragEvents>
+
+  function onpointerdown(event) {
+    <setupDragEvent>
+    window = target.ownerDocument.defaultView;
+    const rect = innerTarget.getBoundingClientRect();
+    start = dirIsInline ? rect.left : rect.top;
+    end   = dirIsInline ? rect.right : rect.bottom;
+    </setupDragEvent>
+
+    <initiateDrag>
+    onpointermove(event);
+    window.addEventListener(pointerMove, onpointermove);
+    window.addEventListener(pointerUp, onpointerup);
+    </initiateDrag>
+  }
+
+  function onpointermove(event) {
+    <calculateDragDistance>
+    event.preventDefault();
+    const position = axisProp in event ? event[axisProp] : event.touches && event.touches[0] && event.touches[0][axisProp] || 0;
+    const percentage = (dirIsStart ? position - start : end - position) / (end - start);
+    </calculateDragDistance>
+
+    <triggerListenerDuringDrag>
+    listener(percentage);
+    </triggerListenerDuringDrag>
+  }
+
+  function onpointerup() {
+    <detachDragEvents>
+    window.removeEventListener(pointerMove, onpointermove);
+    window.removeEventListener(pointerUp, onpointerup);
+    </detachDragEvents>
+  }
+}
+</onDrag>
+
+<hashToArray>
+function hashToArray(hashObj, __key__ = "id") {
+  <validateHashObject>
+  if (hashObj && typeof hashObj !== "object") {
+    throw new Error("Cant convert hash-to-array because hash was not passed in: " + hashObj);
+  }
+  </validateHashObject>
+  const hash = Object.assign({}, hashObj);
+  const results = [];
+  <determineHashType>
+  const isHashArray = Object.keys(hash).every(i => hash[i] === true);
+  const isHashValue = Object.keys(hash).every(i => typeof hash[i] !== "object");
+  </determineHashType>
+  <convertHash>
+  Object.keys(hash).map(id => {
+    const obj = typeof hash[id] === "object"
+      ? Object.assign({}, hash[id], { [__key__]: id }) : isHashArray
+      ? id
+      : { [__key__]: id, value: hash[id] };
+    results.push(obj);
+  });
+  </convertHash>
+  return results;
+}
+</hashToArray>
+
+<addControllerRoutes>
+function addControllerRoutes(router) {
+  <registerRoutes>
+  _.each(reservedRoutes, routeName => {
+    let pathRouter,
+    filename = routeName + '.js',
+    controller = files.tryRequire([__dirname, routesPath, filename].join(path.sep));
+  
+    <setupRouter>
+    pathRouter = express.Router();
+    pathRouter.use(require('body-parser').json({ strict: true, type: 'application/json', limit: '50mb' }));
+    pathRouter.use(require('body-parser').text({ type: 'text/*' }));
+    </setupRouter>
+
+    <configureController>
+    controller(pathRouter);
+    </configureController>
+
+    <mountRouter>
+    router.use(`/${routeName}`, pathRouter);
+    </mountRouter>
+  });
+  </registerRoutes>
+}
+</addControllerRoutes>
+
+<buildSceneGraph>
+function buildSceneGraph(scene) {
+  <configureFontSettings>
+  var fontSize = App.defaults.size;
+  ... // Code that sets the font size and style
+  </configureFontSettings>
+
+  <setupSceneGraph>
+  ... // Code that constructs the scene graph and adds shapes and text to it
+  </setupSceneGraph>
+
+  <finalizeSceneLayout>
+  ... // Code that finalizes the layout of text and lines in the scene graph
+  </finalizeSceneLayout>
+
+  <returnSceneGraph>
+  return sceneGraph;
+  </returnSceneGraph>
+}
+</buildSceneGraph>
+
+<repositionTerminals>
+function() {
+  var width = WireIt.getIntStyle(this.el, "width");
+  var inputsIntervall = Math.floor(width/(this.nParams+1));
+
+  <repositionInputTerminals>
+  for(var i = 1 ; i < this.terminals.length ; i++) {
+    ... // Code that repositions each terminal based on the width
+  }
+  </repositionInputTerminals>
+
+  <repositionOutputTerminal>
+  WireIt.sn(this.outputTerminal.el, null, {position: "absolute", bottom: "-15px", left: (Math.floor(width/2)-15)+"px"});
+  for(var j = 0 ; j < this.outputTerminal.wires.length ; j++) {
+    this.outputTerminal.wires[j].redraw();
+  }
+  </repositionOutputTerminal>
+}
+</repositionTerminals>
+
+<removeChildNow>
+function removeChildNow(child, keepalive) {
+  if (this.hasChild(child) && this.getChildIndex(child) >= 0) {
+    <notifyChildDeactivation>
+    if (typeof child.onDeactivateEvent === "function") {
+      child.onDeactivateEvent();
+    }
+    </notifyChildDeactivation>
+
+    if (!keepalive) {
+      <destroyChild>
+      if (typeof child.destroy === "function") {
+        child.destroy();
+      }
+      me.pool.push(child);
+      </destroyChild>
+    } 
+
+    <updateChildList>
+    var childIndex = this.getChildIndex(child);
+    if (childIndex >= 0) {
+      this.children.splice(childIndex, 1);
+      child.ancestor = undefined;
+    }
+    this.onChildChange.call(this, childIndex);
+    </updateChildList>
+  }
+}
+</removeChildNow>
+
+<ProcessWatcher>
+function ProcessWatcher(pid, parent) {
+  var self = this;
+
+  this.dead = false;
+
+  <checkIfProcessAlive>
+  if (exports.alive(pid) === false) {
+    process.nextTick(function () {
+      self.dead = true;
+      self.emit('dead');
+    });
+    return self;
+  }
+  </checkIfProcessAlive>
+  
+  <monitorParentProcess>
+  if (parent && exports.support.disconnect) {
+    ... // Code sets up the event listeners for the parent process
+    return self;
+  }
+  </monitorParentProcess>
+
+  <monitorProcess>
+  var timer = setInterval(function () {
+    ... // Code to monitor and emit events throughout the process lifecycle
+  });
+  this.stop = clearInterval.bind(null, timer);
+  </monitorProcess>
+}
+</ProcessWatcher>
+
+<md5HashFunction>
+function(x,y){
+  ... // Code that implements the MD5 hashing function
+}
+</md5HashFunction>
+
+<tickleMiddleware>
+function tickle(req, res, next) {
+  <tickleRequest>
+  req.tickle = global.tickle.add(req.url);
+  return next !== undefined ? next() : req.tickle;
+  </tickleRequest>
+}
+</tickleMiddleware>
+
+<HttpRequest>
+function HttpRequest(uri, config) {
+  ... // Code that initializes and sends an HTTP request using node.js libraries
+}
+</HttpRequest>
+```
+
+Notably, several of the provided functions are complex and truncated to prevent over-segmentation. However, for functions like `buildSceneGraph`, because the actual code content is omitted, I've used generic tags to indicate there are separate coherent tasks that likely happen within each segment, even though I did not have the specific details to create precise tags. In such cases, further detail would be necessary to perform a fully accurate SRP analysis.

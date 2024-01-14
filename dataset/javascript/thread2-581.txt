@@ -1,0 +1,229 @@
+```javascript
+<eventAssociationAndErrorLogging>
+function(sortedInputEvents, protoIRs) {
+      var handledEvents = [];
+      protoIRs.forEach(function(protoIR) {
+        protoIR.associatedEvents.forEach(function(event) {
+          if (handledEvents.indexOf(event) >= 0) {
+            console.error('double-handled event', event.typeName, parseInt(event.start), parseInt(event.end), protoIR);
+            return;
+          }
+          handledEvents.push(event);
+        });
+      });
+
+      sortedInputEvents.forEach(function(event) {
+        if (handledEvents.indexOf(event) < 0) {
+          console.error('UNHANDLED INPUT EVENT!', event.typeName, parseInt(event.start), parseInt(event.end));
+        }
+      });
+    }
+</eventAssociationAndErrorLogging>
+
+<viewInitialization>
+function view(template, options = {}) {
+
+	if(!template) {
+		throw new Exception('Please pass a template!');
+	}
+
+	return Class => {
+
+		let renderedFlag = !(options.renderedFlag === false);
+
+		<coreAndViewMapsInit>
+		initCoreMap(storage, Class);
+		initViewMap(storage, Class);
+		</coreAndViewMapsInit>
+
+		let map = storage.get(Class);
+
+		
+		if(map.get('@view').get('callbacksDefined')){
+			return;
+		}
+
+		map.get('@callbacks').get('created').push((domNode, createVars = {}) => {
+
+			<domAttributesExtraction>
+			let domViewAttributes = extractDomProperties(domNode, /^@view\.bind\.(\S+)$/i, true);
+			let regularDomAttributes = extractDomProperties(domNode);
+			</domAttributesExtraction>
+
+			<viewBindsPreparation>
+			let viewBinds = {};
+			let entries = map.get('@view').get('bind');
+			entries.forEach(([key, value]) => viewBinds[key] = value);
+
+			let viewVars = Object.assign({},
+				viewBinds,
+				domViewAttributes,
+				createVars,
+				regularDomAttributes
+			);
+			</viewBindsPreparation>
+
+			<viewInstantiation>
+			let $view = new View({
+				prerenderer: HandlebarsRuntime.template,
+				rootNode: domNode,
+				vars: viewVars,
+				template: template,
+			});
+			</viewInstantiation>
+
+			<viewHelpersRegistration>
+			view.helper.registerSetGet(
+				domNode,
+				Object.assign({}, viewBinds, domViewAttributes)
+			);
+			</viewHelpersRegistration>
+
+			<viewRendering>
+			$view.render(null, {
+				renderedFlag: renderedFlag,
+			});
+			</viewRendering>
+
+			domNode.$view = $view;
+		});
+
+		map.get('@callbacks').get('attached').push(domNode => {
+
+			if(domNode.$view.initialized()){
+				return;
+			}
+
+			<viewReinitialization>
+			domNode.$view.reinit({
+				rootNode: domNode,
+				prerenderer: HandlebarsRuntime.template,
+			});
+			</viewReinitialization>
+		});
+
+		map.get('@callbacks').get('detached').push(domNode => {
+			<viewDestruction>
+			domNode.$view.destroy();
+			</viewDestruction>
+		});
+
+		map.get('@view').set('callbacksDefined', true);
+	}
+}
+</viewInitialization>
+
+<tagExtractionAndModifierCreation>
+function(name, context){
+  var cls = context.cls;
+  var domline = context.domline;
+  var headingType = /(?:^| )heading:([A-Za-z0-9]*)/.exec(cls);
+  var tagIndex;
+  
+  if (headingType) tagIndex = _.indexOf(tags, headingType[1]);
+  
+  if (tagIndex !== undefined && tagIndex >= 0){
+    
+    var tag = tags[tagIndex];
+    <modifierConfiguration>
+    var modifier = {
+      preHtml: '<' + tag + '>',
+      postHtml: '</' + tag + '>',
+      processedMarker: true
+    };
+    </modifierConfiguration>
+    return [modifier];
+  }
+  return [];
+}
+</tagExtractionAndModifierCreation>
+
+<assemblyAndInitialization>
+function Assemble(options) {
+  if (!(this instanceof Assemble)) {
+    return new Assemble(options);
+  }
+  Core.call(this, options);
+  this.is('assemble');
+  this.initAssemble();
+}
+</assemblyAndInitialization>
+
+<objectParsing>
+function parseObject(obj){
+  var ret = { base: {} };
+
+  forEach(objectKeys(obj), function(name){
+    merge(ret, name, obj[name]);
+  });
+
+  return compact(ret.base);
+}
+</objectParsing>
+
+<renderLayoutOrReturnNull>
+function () {
+            var meta   = getOrDefault( this, 'props.meta', {} )
+              , fields = meta.fields;
+
+            if ( !t.isDefined( fields ) ) 
+                return null;
+            else 
+                return this.renderLayout( meta.layout.grid );
+        }
+</renderLayoutOrReturnNull>
+
+<eventEmitting>
+function(name) {
+        var length = arguments.length;
+        var args = new Array(length - 1);
+
+        for (var i = 1; i < length; i++) {
+          args[i - 1] = arguments[i];
+        }
+
+        sendEvent(this, name, args);
+      }
+</eventEmitting>
+
+<plotLinePathCalculation>
+function (from, to) {
+
+		var toPath = this.getPlotLinePath(to),
+			path = this.getPlotLinePath(from);
+			
+		if (path && toPath) {
+			path.push(
+				toPath[4],
+				toPath[5],
+				toPath[1],
+				toPath[2]
+			);
+		} else { 
+			path = null;
+		}
+		
+		return path;
+	}
+</plotLinePathCalculation>
+
+<indexRetrieval>
+function getIndexOf(string, find) {
+    
+    if(XRegExp.isRegExp(find)) {
+      return string.search(find);
+    } else {
+      
+      return string.indexOf(find);
+    }
+  }
+</indexRetrieval>
+
+<listAddition>
+function checkAdd(list, key, func) {
+    list.push({key: key, func: func});
+  }
+</listAddition>
+```
+
+Annotations are applied to each function, designating blocks of code that represent specific responsibilities within the function, in compliance or violation of the Single Responsibility Principle. Simple variable assignments and returns are not considered separate responsibilities, while coherent sections of the function that achieve specific tasks are annotated accordingly.

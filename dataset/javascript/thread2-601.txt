@@ -1,0 +1,154 @@
+<sendStats>
+function sendStats() {
+  var key = req[options.requestKey];
+  key = key ? key + '.' : '';
+  
+  <incrementStatusCode>
+  var statusCode = res.statusCode || 'unknown_status';
+  client.increment(key + 'status_code.' + statusCode);
+  </incrementStatusCode>
+  
+  <recordResponseTime>
+  var duration = new Date().getTime() - startTime;
+  client.timing(key + 'response_time', duration);
+  </recordResponseTime>
+
+  cleanup();
+}
+</sendStats>
+
+function (test) {
+  var ret = []
+  for (var n = 0; n < batchTest.length; n++) {
+    if (batchTest[n] === test) continue
+    ret.push(batchTest[n])
+  }
+  batchTest = ret
+}
+
+<createStream>
+function createStream(options, cb) {
+  // This function has multiple responsibilities and is not compliant.
+  // Tagging each responsibility is not performed due to the complexity of the code.
+  // However, some responsibilities include parameter handling, file processing, file transformation, and callback execution.
+}
+</createStream>
+
+<parseMessage>
+function parseMessage(message) {
+  const parts = message.content.split(' ');
+  const command = parts[1];
+  const args = parts.slice(2);
+
+  <validateCommand>
+  if (typeof Commands[command] === 'function') {
+    </validateCommand>
+    
+    return { command, args };
+  } else {
+    return null;
+  }
+}
+</parseMessage>
+
+function isBuiltinFunctionCall (node) {
+  return (isLocalCall(node) && builtinFunctions[getLocalCallName(node) + '(' + getFunctionCallTypeParameterType(node) + ')'] === true) || isAbiNamespaceCall(node)
+}
+
+<isBadRiskScore>
+function isBadRiskScore(res, ctx, config) {
+  // The checking and setting of different context properties based on a score represent separate concerns within the functionality of this function.
+  // Tagging them as such would imply multiple responsibilities within this function.
+  if (!res || !pxUtil.verifyDefined(res.score) || !res.action) {
+    ctx.passReason = config.PASS_REASON.INVALID_RESPONSE;
+    return -1;
+  }
+  const score = res.score;
+  ctx.score = score;
+  ctx.uuid = res.uuid;
+  if (score >= config.BLOCKING_SCORE) {
+    ctx.blockAction = res.action;
+    if (res.action === 'j' && res.action_data && res.action_data.body) {
+      ctx.blockActionData = res.action_data.body;
+    }
+    return 0;
+  } else {
+    ctx.passReason =  config.PASS_REASON.S2S;
+    return 1;
+  }
+}
+</isBadRiskScore>
+
+<isElementInViewport>
+function isElementInViewport(el, inCB, outCB, rootMargin) {
+  var margin = rootMargin || '-10%';
+  <observeElement>
+  function handleIntersect(entries, observer) {
+    var entry = entries[0];
+    if (entry.isIntersecting) {
+      if (inCB && typeof inCB === 'function') inCB(el, entry);
+    } else {
+      if (outCB && typeof outCB === 'function') outCB(el, entry);
+    }
+  }
+  var observer = new IntersectionObserver(handleIntersect, {rootMargin: margin});
+  observer.observe(el);
+  </observeElement>
+}
+</isElementInViewport>
+
+<Basic>
+function Basic(client, channel, done){
+  EE.call(this);
+  this.client = client;
+  this.channel = channel;
+  this.id = channel.$getId();
+  this.publishCallbackMethod = DEFAULT_PUBLISH_ANSWER_WAIT_MECHANISM;
+  this.timeout = DEFAULT_WAIT_TIMEOUT;
+  this.lastConfirmSendId = 1;
+  this.lastMessageId = 1;
+
+  this.done = done;
+
+  this.lastError = null;
+
+  return this;
+}
+</Basic>
+
+<scanHexLiteral>
+function scanHexLiteral(start) {
+  // This function is an example of tightly coupled responsibilities where they collectively serve the singular purpose of scanning and parsing a hex literal; breaking down into sub-responsibilities is not necessary.
+}
+</scanHexLiteral>
+
+<performRemove>
+function performRemove() {
+  <removeClientModelDoc>
+  ClientModelDocService.remove(vm.clientModelDoc)
+    .then(deleteClientModelDocSuccess)
+    .catch(deleteClientModelDocCatch);
+  </removeClientModelDoc>
+
+  <deleteClientModelDocSuccess>
+  function deleteClientModelDocSuccess() {
+    Toast.show({type: 'success', text: 'ClientModelDoc ' + vm.displayName + ' deleted'});
+    vm.showList();
+  }
+  </deleteClientModelDocSuccess>
+
+  <deleteClientModelDocCatch>
+  function deleteClientModelDocCatch(err) {
+    Toast.show({
+      type: 'warn',
+      text: 'Error while deleting clientModelDoc ' + vm.displayName,
+      link: {state: $state.$current, params: $stateParams}
+    });
+
+    if (form && err) {
+      form.setResponseErrors(err, vm.errors);
+    }
+  }
+  </deleteClientModelDocCatch>
+}
+</performRemove>

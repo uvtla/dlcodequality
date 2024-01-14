@@ -1,0 +1,139 @@
+Function 1 (render) - SRP Compliant
+<render>
+function render(template, vars) {
+    var rendered = template;
+
+    for (var key in vars) {
+        if (vars.hasOwnProperty(key)) {
+            var val = vars[key];
+            var regExpString = '\\{' + key + '\\}';
+            var regExp = new RegExp(regExpString, 'g');
+
+            rendered = rendered.replace(regExp, val);
+        }
+    }
+
+    return rendered;
+}
+</render>
+
+Function 2 (cacheService) - SRP Non-Compliant
+<cacheService>
+function cacheService(cacheServiceConfig, cacheModules) {
+  var self = this;
+
+  <cacheService_get>
+  self.get = function(key, cb){ ... };
+  </cacheService_get>
+
+  <cacheService_mget>
+  self.mget = function(keys, cb){ ... };
+  </cacheService_mget>
+
+  <cacheService_set>
+  self.set = function(){ ... };
+  </cacheService_set>
+
+  <cacheService_mset>
+  self.mset = function(){ ... };
+  </cacheService_mset>
+
+  <cacheService_del>
+  self.del = function(keys, cb){ ... };
+  </cacheService_del>
+
+  <cacheService_flush>
+  self.flush = function(cb){ ... };
+  </cacheService_flush>
+
+  <cacheService_init>
+  function init(){ ... }
+  </cacheService_init>
+
+  <cacheService_checkCacheResponse>
+  function checkCacheResponse(key, err, result, type, cacheIndex){ ... }
+  </cacheService_checkCacheResponse>
+
+  <cacheService_writeToVolatileCaches>
+  function writeToVolatileCaches(currentCacheIndex, key, value){ ... }
+  </cacheService_writeToVolatileCaches>
+
+  <cacheService_Exception>
+  function Exception(name, message) { ... }
+  </cacheService_Exception>
+
+  <cacheService_log>
+  function log(isError, message, data){ ... }
+  </cacheService_log>
+
+  function noop(){}
+
+  init();
+}
+</cacheService>
+
+Function 3 (parseStatement) - SRP Compliant
+<parseStatement>
+function parseStatement() { ... }
+</parseStatement>
+
+Function 4 (qname) - SRP Compliant
+<qname>
+function qname() { ... }
+</qname>
+
+Function 5 (anonymous) - SRP Non-Compliant
+<anonymous_multiple_file_operations>
+function(a,dest){ ... }
+</anonymous_multiple_file_operations>
+
+Function 6 (anonymous) - SRP Compliant
+<anonymous_return_statement>
+function() { ... }
+</anonymous_return_statement>
+
+Function 7 (extractTravelPlan) - SRP Non-Compliant
+<extractTravelPlan>
+function extractTravelPlan(data) { ... }
+<extractTravelPlan_processing>
+  let plans = []
+  let getPlan = (from, to, departure, arrival) => { ... }
+</extractTravelPlan_processing>
+
+<extractTravelPlan_ticketMapping>
+  let mkticket = (ticket, travelClass) => { ... }
+</extractTravelPlan_ticketMapping>
+
+  secondClass.map(ticket => mkticket(ticket, 2))
+  firstClass.map(ticket => mkticket(ticket, 1))
+</extractTravelPlan>
+
+Function 8 (add) - SRP Compliant
+<add>
+function add(this_, part, value){ ... }
+</add>
+
+Function 9 (anonymous) - SRP Non-Compliant
+<anonymous_imageProcessing>
+function() { ... }
+</anonymous_imageProcessing>
+
+Function 10 (__webpack_require__) - SRP Non-Compliant
+<__webpack_require__>
+function(module, exports, __webpack_require__) { ... }
+<__webpack_require__createColdObservable>
+  TestScheduler.prototype.createColdObservable = function (marbles, values, error) { ... };
+</__webpack_require__createColdObservable>
+
+<__webpack_require__expectObservable>
+  TestScheduler.prototype.expectObservable = function (observable, unsubscriptionMarbles) { ... };
+</__webpack_require__expectObservable>
+
+<__webpack_require__parseMarblesAsSubscriptions>
+  TestScheduler.parseMarblesAsSubscriptions = function (marbles) { ... };
+</__webpack_require__parseMarblesAsSubscriptions>
+
+<__webpack_require__parseMarbles>
+  TestScheduler.parseMarbles = function (marbles, values, errorValue, materializeInnerObservables) { ... };
+</__webpack_require__parseMarbles>
+</__webpack_require__>

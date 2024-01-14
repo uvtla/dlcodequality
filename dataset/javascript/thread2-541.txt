@@ -1,0 +1,184 @@
+```javascript
+<mapChildren>
+function mapChildren(children, func, context) {
+  if (children == null) {
+    return children;
+  }
+
+  var mapResult = {};
+  var traverseContext = MapBookKeeping.getPooled(mapResult, func, context); // Responsibility: Acquiring a pooled traverse context
+  traverseAllChildren(children, mapSingleChildIntoContext, traverseContext); // Responsibility: Traversing all children with provided context
+  MapBookKeeping.release(traverseContext); // Responsibility: Releasing the pooled traverse context
+  return ReactFragment.create(mapResult); // Responsibility: Creating a React Fragment from the result
+}
+</mapChildren>
+
+<SimpleThumbnailGenerator>
+function SimpleThumbnailGenerator(options, generatorOptions) {
+	options = options || {};
+	generatorOptions = generatorOptions || {};
+
+	if (!options.manifestFileName) {
+		throw new Error("manifestFileName required."); // Responsibility: Validating input
+	}
+
+	if (typeof(options.logger) === "undefined") {
+		this._logger = Logger.get('SimpleThumbnailGenerator'); // Responsibility: Setting default logger
+	}
+	else {
+		if (options.logger === null) {
+			this._logger = nullLogger; // Responsibility: Setting null logger
+		}
+		else {
+			this._logger = options.logger; // Responsibility: Setting custom logger
+		}
+	}
+	this._generatorOptions = generatorOptions; // Responsibility: Assigning generator options
+	this._manifestFileName = options.manifestFileName; // Responsibility: Assigning manifest file name
+	this._expireTime = options.expireTime || 0; // Responsibility: Assigning expire time
+	this._segmentRemovalTimes = {
+		offset: null, // Responsibility: Init segment removal times
+		times: []
+	};
+	
+	
+	this._segments = []; // Responsibility: Initializing segments
+	this._playlistRemoved = false; // Responsibility: Initializing playlist removed flag
+	this._playlistEnded = false; // Responsibility: Initializing playlist ended flag
+	this._generator = new ThumbnailGenerator(Object.assign({}, generatorOptions, {
+		tempDir: generatorOptions.tempDir || utils.getTempDir() // Responsibility: Creating new ThumbnailGenerator with tempDir
+	}));
+	this._gcTimerId = setInterval(this._gc.bind(this), 30000); // Responsibility: Starting garbage collection timer
+	this._emitter = ee({}); // Responsibility: Creating an event emitter instance
+	this._registerGeneratorListeners(); // Responsibility: Registering generator event listeners
+	this._updateManifest(); // Responsibility: Updating manifest
+}
+</SimpleThumbnailGenerator>
+
+<RSAGetPublicString>
+function RSAGetPublicString() {
+  var exportObj = {n: this.n.toString(16), e: this.e.toString(16)}; // Responsibility: Preparing RSA public key components
+  if (exportObj.n.length % 2 == 1) {
+    exportObj.n = '0' + exportObj.n; // Responsibility: Normalizing the key component length
+  }
+  return JSON.stringify(exportObj); // Responsibility: Returning the public key in JSON format
+}
+</RSAGetPublicString>
+
+<disable>
+function disable(namespaces) {
+  var split = (namespaces || '').split(/[\s,]+/); // Responsibility: Splitting namespaces
+  var len = split.length;
+
+  function removeNamespaceFromNames(namespaces){
+    _.remove(exports.names, function(name){
+      return name.toString() === '/^' + namespaces + '$/';
+    }); // Responsibility: Removing a specific namespace
+  }
+
+  for (var i = 0; i < len; i++) {
+    if (!split[i]) continue; // Responsibility (internal iteration control): Continue if item is falsy
+    namespaces = split[i].replace(/\*/g, '.*?'); // Responsibility: Replacing wildcard in the namespace
+    if (namespaces[0] === '-') {
+      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$')); // Responsibility: Adding namespace to skips
+    } else {
+      removeNamespaceFromNames(namespaces); // Responsibility: Invoking removeNamespaceFromNames
+      exports.skips.push(new RegExp('^' + namespaces + '$')); // Responsibility: Adding namespace to skips
+      loggerEventBus.emit('disable', split[i]); // Responsibility: Emitting 'disable' event for the namespace
+    }
+  }
+
+  exports.save(namespaces); // Responsibility: Saving the state of namespaces
+}
+</disable>
+
+<jsonSections>
+function jsonSections(sections, block) {
+
+  return sections.map(function(section) { // Responsibility: Mapping through sections to transform them into a JSON structure
+    
+    var partial = section; 
+    if (partial.markup() && partial.markup().toString().match(/^[^\n]+\.(html|hbs|pug)$/)) {
+      partial.file = partial.markup().toString(); // Responsibility: Assigning file name from markup
+      partial.name = path.basename(partial.file, path.extname(partial.file)); // Responsibility: Extracting the name from file name
+      partial.file = path.dirname(block.filePath) + '/' + partial.file; // Responsibility: Assigning full file path
+      partial.markupText = fs.readFileSync(partial.file, 'utf8'); // Responsibility: Reading file content
+      section.markup = function() {
+        return partial.markupText; // Responsibility: Overriding markdown function to return file content
+      };
+    }
+
+    return {
+      header: generateDescription(section.header(), {noWrapper: true}), // Responsibility: Generating section header description
+      description: generateDescription(section.description()), // Responsibility: Generating section description
+      modifiers: jsonModifiers(section.modifiers()), // Responsibility: Generating JSON modifiers
+      deprecated: section.deprecated(), // Responsibility: Identifying deprecated section
+      experimental: section.experimental(), // Responsibility: Identifying experimental section
+      reference: section.reference(), // Responsibility: Providing section reference
+      markup: section.markup() ? section.markup().toString() : null // Responsibility: Determining final section markup value
+    };
+  });
+}
+</jsonSections>
+
+<Entity>
+function(options) {
+  Entity.call(this, options); // Responsibility: Structure setup inherited from Entity
+  addCustomFeatureProperties(this); // Responsibility: Adding custom properties to instance
+  this.currentProperties = undefined; // Responsibility: Initializing current properties
+  this.currentDescription = undefined; // Responsibility: Initializing current description
+  this.updateCounters = undefined; // Responsibility: Initializing update counters
+  knockout.track(this, [ // Responsibility: Setting up knockout tracking
+    "currentProperties",
+    "currentDescription",
+    "updateCounters"
+  ]);
+}
+</Entity>
+
+<_tahta_anahtar_tumu_to_mapX>
+function (_kalem_id, _tahta_id) {
+    return db.tahta.f_db_tahta_anahtar_tumu(_tahta_id) // Responsibility: Fetching all keys for a board
+        .then(
+            
+            function (_arrKelimeler) {
+                var arr_idler = _arrKelimeler.pluckX("Id"); // Responsibility: Extracting all IDs from keys
+                return arr_idler.mapX(null, db.anahtar.f_db_anahtar_index_sil_kalem, _kalem_id).allX(); // Responsibility: Bulk deleting key index for an item
+            });
+}
+</_tahta_anahtar_tumu_to_mapX>
+
+<github>
+function github(repo, clone) {
+	let url;
+	if (clone)
+		url = 'git@' + repo.host + ':' + repo.owner + '/' + repo.name + '.git'; // Responsibility: Generating SSH clone URL
+	else
+		url = addProtocol(repo.host) + '/' + repo.owner + '/' + repo.name + '/archive/' + repo.checkout + '.zip'; // Responsibility: Generating download ZIP URL
+	return url; // Responsibility: Returning the constructed URL
+}
+</github>
+
+<Module>
+function Module(id, deps, maker, root) {
+        this.id = id; // Responsibility: Assigning module id
+        this.deps = deps; // Responsibility: Assigning module dependencies
+        this.maker = maker; // Responsibility: Assigning module maker function
+        this.root = root || $; // Responsibility: Assigning module root
+        if(checkDeps(id)) { // Responsibility: Checking module dependencies
+            this.namespace(); // Responsibility: Setting module namespace if dependencies check out
+        } else {
+            this.init(); // Responsibility: Initializing module if dependencies don't check out
+        }
+}
+</Module>
+
+<lower>
+function lower (value) {
+  if (value === null || value === undefined) {
+    return value // Responsibility (single line control): Returning the value if it's null or undefined
+  }
+  return String.prototype.toLowerCase.call(value) // Responsibility: Converting value to lower case
+}
+</lower>
+```

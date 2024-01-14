@@ -1,0 +1,486 @@
+```javascript
+<parseMetadataAndMedia>
+function (body, options) {
+  <initializeObjects>
+  var ogObject = {};
+  var $ = cheerio.load(body);
+  var meta = $('meta');
+  var keys = Object.keys(meta); </initializeObjects>
+
+  <processMetaTags>
+  keys.forEach(function (key) {
+    <metaTagExists>
+    if (!(meta[key].attribs && (meta[key].attribs.property || meta[key].attribs.name))) {
+      return;
+    } </metaTagExists>
+    <getPropertyContent>
+    var property = meta[key].attribs.property || meta[key].attribs.name;
+    var content = meta[key].attribs.content || meta[key].attribs.value; </getPropertyContent>
+    <iterateFields>
+    fields.forEach(function (item) {
+      if (property === item.property) {
+        if (!item.multiple) {
+          ogObject[item.fieldName] = content;
+        } else if (!ogObject[item.fieldName]) {
+          ogObject[item.fieldName] = [content];
+        } else if (Array.isArray(ogObject[item.fieldName])) {
+          ogObject[item.fieldName].push(content);
+        }
+      }
+    }); </iterateFields>
+  }); </processMetaTags>
+
+  <setDefaultImages>
+  ogObject.ogImage = ogObject.ogImage ? ogObject.ogImage : (ogObject.ogImageURL ? ogObject.ogImageURL : (ogObject.ogImageSecureURL ? ogObject.ogImageSecureURL : []));
+  if (!ogObject.ogImage || !ogObject.ogImage.length) {
+    delete ogObject.ogImage;
+  } </setDefaultImages>
+
+  <mediaSetup>
+  ogObject = media.mediaSetup(ogObject, options); </mediaSetup>
+
+  <additionalMediaInfo>
+  if (!options.onlyGetOpenGraphInfo) {
+    <setOgTitle>
+    if (!ogObject.ogTitle && $('head > title').text() && $('head > title').text().length > 0) {
+      ogObject.ogTitle = $('head > title').text();
+    } </setOgTitle>
+    <setOgDescription>
+    if (!ogObject.ogDescription && $('head > meta[name="description"]').attr('content') && $('head > meta[name="description"]').attr('content').length > 0) {
+      ogObject.ogDescription = $('head > meta[name="description"]').attr('content');
+    } </setOgDescription>
+    <addFallbackImages>
+    var ogImageFallback = options.ogImageFallback === undefined ? true : options.ogImageFallback;
+    if (!ogObject.ogImage && ogImageFallback) {
+      ogObject.ogImage = [];
+      var supportedImageExts = ['jpg', 'jpeg', 'png'];
+      
+      <appendFallbackImages>
+      $('img').map(function (i, elem) {
+        if ($(elem).attr('src') && $(elem).attr('src').length > 0 && supportedImageExts.indexOf($(elem).attr('src').split('.').pop()) !== -1) {
+          ogObject.ogImage.push({
+            url: $(elem).attr('src')
+          });
+          return false;
+        }
+      }); </appendFallbackImages>
+    } </addFallbackImages>
+  } </additionalMediaInfo>
+
+  <cleanupEmptyImages>
+  if (ogObject.ogImage === []) {
+    delete ogObject.ogImage;
+  } </cleanupEmptyImages>
+
+  return ogObject;
+} </parseMetadataAndMedia>
+```
+
+```javascript
+<createMaskRect>
+function _createMaskRect() {
+  <createElement>
+  const element = document.createElementNS(svgNS, 'rect'); </createElement>
+
+  <setAttributes>
+  _setAttributes(element, {
+    fill: '#FFFFFF',
+    height: '100%',
+    id: elementIds.modalOverlayMaskRect,
+    width: '100%',
+    x: '0',
+    y: '0'
+  }); </setAttributes>
+
+  return element;
+} </createMaskRect>
+```
+
+```javascript
+<convertLiteralType>
+function convertLiteral(oLiteral, oOtherOperand) {
+  <declareVariables>
+  var vModelValue,
+    oTypeInfo = getType(oOtherOperand); </declareVariables>
+
+  <convertNonStrings>
+  if (oTypeInfo.$Type !== "Edm.String") {
+    vModelValue = _Helper.parseLiteral(oLiteral.value, oTypeInfo.$Type, oTypeInfo.path);
+    oLiteral.value = that.formatPropertyAsLiteral(vModelValue, oTypeInfo);
+  } </convertNonStrings>
+} </convertLiteralType>
+```
+
+```javascript
+<setClippingRectangle>
+function clipRect(x, y, width, height) {
+  <canvasSetup>
+  var canvas = this.backBufferCanvas;
+  var gl = this.gl; </canvasSetup>
+
+  <checkAndUpdateScissorTest>
+  if (x !== 0 || y !== 0 || width !== canvas.width || height !== canvas.height) {
+    var currentScissor = this.currentScissor;
+
+    <sameScissorTest>
+    if (gl.isEnabled(gl.SCISSOR_TEST)) {
+      if (currentScissor[0] === x && currentScissor[1] === y && currentScissor[2] === width && currentScissor[3] === height) {
+        return;
+      }
+    } </sameScissorTest>
+
+    <flushAndSetupScissor>
+    this.flush(); 
+    gl.enable(this.gl.SCISSOR_TEST); 
+    gl.scissor( 
+    x + this.currentTransform.tx, canvas.height - height - y - this.currentTransform.ty, width, height); 
+    currentScissor[0] = x;
+    currentScissor[1] = y;
+    currentScissor[2] = width;
+    currentScissor[3] = height;
+    </flushAndSetupScissor>
+  } else {
+    <disableScissorIfDefaults>
+    gl.disable(gl.SCISSOR_TEST);
+    </disableScissorIfDefaults>
+  }
+} </setClippingRectangle>
+```
+
+```javascript
+<createTestLoaderConfig>
+function createConf(sourceFile, loaders) {
+
+  var allLoaders = [];
+  var testFilesPattern = 'src*.test.js';
+
+  <concatLoaders>
+  if (loaders) {
+      allLoaders.concat(loaders);
+  } </concatLoaders>
+
+  <defineConfiguration>
+  var conf = {
+    <defineBrowsers>
+    browsers: ['PhantomJS'],
+    </defineBrowsers>
+
+    <defineFiles>
+    files: [
+      'node_modules/phantomjs-polyfill/bind-polyfill.js',
+      testFilesPattern
+    ], </defineFiles>
+
+    <defineFrameworks>
+    frameworks: ['jasmine'], </defineFrameworks>
+
+    <definePlugins>
+    plugins: [
+        karmaWebpackPlugin,
+        'karma-jasmine',
+        'karma-phantomjs-launcher'
+    ], </definePlugins>
+
+    <definePreprocessors>
+    preprocessors: {}, </definePreprocessors>
+
+    <defineReporters>
+    reporters: [
+        'dots'
+    ], </defineReporters>
+
+    <setupWebpack>
+    webpack: {
+      module: {
+          loaders: allLoaders
+      },
+      resolve: {
+          alias: {}
+      }
+    }, </setupWebpack>
+
+    <webpackMiddlewareOptions>
+    webpackMiddleware: {
+      noInfo: true
+    }
+    </webpackMiddlewareOptions>
+  }; </defineConfiguration>
+
+  <setWebpackAlias>
+  conf.webpack.resolve.alias[webpackConfig.library.projectName] =
+      path.join(__dirname, sourceFile); </setWebpackAlias>
+
+  <setPreprocessors>
+  conf.preprocessors[testFilesPattern] = ['webpack'];
+  </setPreprocessors>
+
+  return conf;
+} </createTestLoaderConfig>
+```
+
+```javascript
+<createConfigurationInstance>
+function create(options) {
+  <defaultOptions>
+  options = options || {};
+  var filename = path.resolve('', options.filename || '');
+  var tags = options.tags || {};
+  var clean = options.clean;
+  var removeList = options.removeList || [];
+  var fromString = options.fromString;
+  var contentString = options.content;
+  var instance = {};
+  var argv = options.argv || {};
+  var env = options.env || global.process.env;
+  var rootScope = options.rootScope || instance;
+  var scopes = options.scopes || {};
+  var processors = options.processors || {};
+  var variants = options.variants || {};
+  var cacheKeys = options.cacheKeys || {};
+  var tokens = options.tokens;
+  var excludeList = options.excludeList || []; </defaultOptions>
+
+  <defineHelperFunctions>
+  function cleanContent(content) {
+    // ... omitted for brevity
+  }
+  function cleanDefine(content) {
+    // ... omitted for brevity
+  }
+  function init() {
+    // ... omitted for brevity
+  }
+  function compile(content) {
+    // ... omitted for brevity
+  }
+  instance.compile = compile;
+  function getArgument(name) {
+    // ... omitted for brevity
+  }
+  instance.getArgument = getArgument;
+  function getEnvironment(name) {
+    // ... omitted for brevity
+  }
+  instance.getEnvironment = getEnvironment;
+  function getVariant(name) {
+    // ... omitted for brevity
+  }
+  instance.getVariant = getVariant;
+  function setVariant(name, value) {
+    // ... omitted for brevity
+  }
+  instance.setVariant = setVariant;
+  instance.getRootScope = function () {
+    return rootScope;
+  };
+  function getDirname() {
+    // ... omitted for brevity
+  }
+  instance.getDirname = getDirname;
+  function getFilename() {
+    // ... omitted for brevity
+  }
+  instance.getFilename = getFilename;
+  function fileScope(filename) {
+    // ... omitted for brevity
+  }
+  instance.fileScope = fileScope;
+  instance.getScope = fileScope; 
+  function contentScope(content, file) {
+    // ... omitted for brevity
+  }
+  instance.contentScope = contentScope;
+  function process(content, encoding, attrs, node) {
+    // ... omitted for brevity
+  }
+  instance.process = process;
+  function getProcessor(encoding) {
+    // ... omitted for brevity
+  }
+  function querySelector(selector) {
+    // ... omitted for brevity
+  }
+  instance.querySelector = querySelector;
+  function execTrigger(trigger) {
+    // ... omitted for brevity
+  }
+  instance.execTrigger = execTrigger;
+  function execExclude(file) {
+    // ... omitted for brevity
+  }
+  function execImport(importation, froms) {
+    // ... omitted for brevity
+  }
+  instance.execImport = execImport;
+  function execExport(exportation, content) {
+    // ... omitted for brevity
+  }
+  instance.execExport = execExport;
+  function isYes(text) {
+    // ... omitted for brevity
+  }
+  instance.isYes = isYes;
+  function isNo(text) {
+    // ... omitted for brevity
+  }
+  instance.isNo = isNo;
+  function buildBlock(node, isImport) {
+    // ... omitted for brevity
+  }
+  instance.buildBlock = buildBlock;
+  function build() {
+    // ... omitted for brevity
+  }
+  instance.build = build;
+  </defineHelperFunctions>
+
+  return instance;
+} </createConfigurationInstance>
+```
+
+```javascript
+<getValueForValidation>
+function() {
+  <initializeValue>
+  var value = this.inputValue; </initializeValue>
+
+  <handleArray>
+  if (value instanceof Array) {
+    return value.length;
+  } </handleArray>
+
+  <handleNumber>
+  if (typeof value === 'number') {
+    return value;
+  } </handleNumber>
+
+  <handleNumericRule>
+  if (this.validator._hasNumericRule(this.attribute)) {
+    return parseFloat(value, 10);
+  } </handleNumericRule>
+
+  <defaultTextCase>
+  return value.length; </defaultTextCase>
+} </getValueForValidation>
+```
+
+```javascript
+<MultilineConstructor>
+function MultiLine(type, fold, applicable, options) {
+  <setProperties>
+  this.type = type;
+  this.fold = !!fold;
+  this.applicable = !!applicable;
+  this.options = options;
+  this.lines = []; </setProperties>
+} </MultilineConstructor>
+```
+
+```javascript
+<defineProperty>
+function(object, key, def) {
+  <validateAccessor>
+  if (this._isaccessor(def)) {
+    <definePropertyWithAccessor>
+    return Object.defineProperty(object, key, {
+      enumerable: true,
+      configurable: true,
+      get: def.getter || this._NOGETTER,
+      set: def.setter || this._NOSETTER
+    }); </definePropertyWithAccessor>
+  } else {
+    <throwTypeError>
+    throw new TypeError("Expected getter and/or setter method");
+    </throwTypeError>
+  } </validateAccessor>
+} </defineProperty>
+```
+
+```javascript
+<setupAddBoxBehavior>
+function setupAddBox() {
+  <selectAddBox>
+  var addBox = document.querySelector('.addRow input'); </selectAddBox>
+  <addBoxOnInput>
+  addBox.oninput = function() {
+    <handleEmptyInput>
+    if (addBox.value == '') {
+      clearError();
+      return;
+    } </handleEmptyInput>
+    <makeFetchRequest>
+    fetchAddonManifest(addBox.value); </makeFetchRequest>
+  }; </addBoxOnInput>
+  <fetchAddonManifest>
+  function fetchAddonManifest(url) {
+    <setupXHR>
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true); </setupXHR>
+    <handleXHRError>
+    xhr.onerror = function() {
+      setError();
+    }; </handleXHRError>
+    <handleXHRSuccess>
+    xhr.onload = function() {
+      <validateManifest>
+      var contentType = xhr.getResponseHeader('content-type') || '';
+      if (xhr.status != 200 || contentType.indexOf('/json') == -1) {
+        setError();
+        return;
+      } </validateManifest>
+
+      var manifest;
+      <parseManifest>
+      try {
+        manifest = JSON.parse(xhr.responseText);
+      } catch (e) {
+      } </parseManifest>
+      <validateParsedManifest>
+      if (!manifest) {
+        setError();
+        return;
+      } </validateParsedManifest>
+
+      <clearErrorAfterFetching>
+      clearError();
+      addAddon(url, manifest); </clearErrorAfterFetching>
+    }; </handleXHRSuccess>
+    <sendXHR>
+    try {
+      xhr.send(null);
+    } catch (e) {
+      setError();
+    } </sendXHR>
+  }; </fetchAddonManifest>
+  <setErrorFunction>
+  function setError() {
+    addBox.classList.add('kTextFieldError');
+  }; </setErrorFunction>
+  <clearErrorFunction>
+  function clearError() {
+    addBox.classList.remove('kTextFieldError');
+  }; </clearErrorFunction>
+  <addAddonFunction>
+  function addAddon(url, manifest) {
+    <trackAddonAdded>
+    _gaq.push(['_trackEvent', 'popup', 'addon_added']);
+    </trackAddonAdded>
+    
+    <clearAddBoxValue>
+    addBox.value = '';
+    </clearAddBoxValue>
+    <sendMessageToAddAddon>
+    port.postMessage({
+      command: 'add_addon',
+      url: url,
+      manifest: manifest
+    }); </sendMessageToAddAddon>
+    <sendMessageToToggleAddon>
+    port.postMessage({
+      command: 'toggle_addon',
+      enabled: true,
+      url: url
+    }); </sendMessageToToggleAddon>
+  }; </addAddonFunction>
+} </setupAddBoxBehavior>
+```

@@ -1,0 +1,276 @@
+```javascript
+<propertyChangeListenerMaintenance>
+function() {
+
+		if (this._property_changed_listener && (this._value_container.getValue() != this._property_container)) {
+
+			<removeListeners>
+			this._property_changed_listener && this._property_container.removePropertyListener(this._property_changed_listener);
+			this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);
+			this._property_changed_listener = null;
+			this._enumerable_changed_listener = null;
+			this._property_container = null;
+			</removeListeners>
+
+		}
+
+		<queueForRefresh>
+		this._queueForRefresh();
+		</queueForRefresh>
+
+	}
+</propertyChangeListenerMaintenance>
+
+<handleMouseEvent>
+function(e){
+		if(!this.enableMouse){ return true;}
+		
+		<setMouseButton>
+		this.setMouseButton(e);
+		</setMouseButton>
+		if(!this.btn){ this.mousereset(); return;}
+		<getBoardAddress>
+		var addrtarget = this.getBoardAddress(e);
+		</getBoardAddress>
+		<moveTo>
+		this.moveTo(addrtarget.bx, addrtarget.by);
+		</moveTo>
+		
+		<preventDefaultActions>
+		e.stopPropagation();
+		e.preventDefault();
+		</preventDefaultActions>
+	}
+</handleMouseEvent>
+
+<updateRenderableBoundsPos>
+function updateBoundsPos(x, y) {
+         if (typeof this.body !== "undefined") {
+           <updatePositionWithBody>
+           var _pos = this.body.pos;
+
+           this._super(me.Renderable, "updateBoundsPos", [x + _pos.x, y + _pos.y]);
+           </updatePositionWithBody>
+         } else {
+           <updatePositionWithoutBody>
+           this._super(me.Renderable, "updateBoundsPos", [x, y]);
+           </updatePositionWithoutBody>
+         }
+
+         <getBounds>
+         return this.getBounds();
+         </getBounds>
+       }
+</updateRenderableBoundsPos>
+
+<getCellsInRectangle>
+function (start, end) {
+      <calculateCornerCoordinates>
+      var corners = grid.getCornerCoords([start, end]);
+      </calculateCornerCoordinates>
+      <collectCells>
+      var r, c, output = [];
+      for (r = corners.TL.row; r <= corners.BR.row; r++) {
+        for (c = corners.TL.col; c <= corners.BR.col; c++) {
+          output.push(self.view.getCellAtCoords({
+            row: r,
+            col: c
+          }));
+        }
+      }
+      </collectCells>
+      return output;
+    }
+</getCellsInRectangle>
+
+<createDatabaseSetup>
+function createDB(mongoose, mongoConnectionString, modelPath) {
+    <validateModelPath>
+    if (modelPath[modelPath.length - 1] === "\\" || modelPath[modelPath.length - 1] === "/") {
+        throw new Error(`modelpath should be w.o. trailing "/" or "\\", was ${modelPath} `);
+    }
+    </validateModelPath>
+    
+    <initializeJSONSchema>
+    require('mongoose-schema-jsonschema')(mongoose);
+    </initializeJSONSchema>
+    <openMongooseConnection>
+    return MongoUtils.openMongoose(mongoose, mongoConnectionString)
+    </openMongooseConnection>
+    .then(() => 
+    <createDBWithModels>
+    SchemaLoad.createDBWithModels(mongoose, modelPath))
+    </createDBWithModels>
+    .then(() => {
+        <loadModelData>
+        var models = SchemaLoad.loadModelNames(modelPath);
+        return Promise.all(models.map(modelName => loadModelData(mongoose, modelPath, modelName)));
+        </loadModelData>
+    }).then(() => {
+        <disconnectReset>
+        MongoUtils.disconnectReset(mongoose);
+        </disconnectReset>
+    });
+}
+</createDatabaseSetup>
+
+<setTextAnnotationVisibility>
+function(types) {
+			if (textUtil.compare(this._textAnnotationTypesVisible, types)) return;
+			<setVisibility>
+			this._textAnnotationTypesVisible = types;
+			</setVisibility>
+			if (!this._annotationStyler || !this._textView) { return; }
+			<setAnnotationTypeVisible>
+			this._annotationStyler.setAnnotationTypeVisible(types);
+			</setAnnotationTypeVisible>
+			<redrawTextView>
+			this._textView.redrawLines(0, undefined);
+			</redrawTextView>
+		}
+</setTextAnnotationVisibility>
+
+<checkStartupShutdownLogics>
+function() {
+        if (!this._startupSchedule || !this._shutdownSchedule) {
+            return true;
+        }
+
+        <calculateLastStartup>
+        var lastStartup = later.schedule(this._startupSchedule).prev().getTime();
+        </calculateLastStartup>
+        <calculateLastShutdown>
+        var lastShutdown = later.schedule(this._shutdownSchedule).prev().getTime();
+        </calculateLastShutdown>
+        <evaluateTimings>
+        return lastStartup > lastShutdown;
+        </evaluateTimings>
+    }
+</checkStartupShutdownLogics>
+
+<shutdownSystem>
+function(cb) {
+		<logShutdownAttempt>
+		modules.logger.log("shutdown","ISNode System > Attempting to close all open modules.");
+		</logShutdownAttempt>
+		<initializeCounters>
+		var modCount = 0;
+		var stdModCount = 0;
+		var interfaceModCount = 0;
+		var counter = 0;
+		</initializeCounters>
+		<initializeTimeout>
+		if(config.loader.timeouts.closeModules)
+			var timeout = config.loader.timeouts.closeModules
+		else
+			var timeout = 2000;
+		var timeoutTimer = 0;
+		</initializeTimeout>
+
+		<countModules>
+		Object.keys(modules).forEach(function(key) { stdModCount ++; });
+		stdModCount = stdModCount - 1;
+		Object.keys(modules.interfaces).forEach(function(key) { interfaceModCount ++; });
+		modCount = stdModCount + interfaceModCount;
+		</countModules>
+
+		<shutdownInterval>
+		var interval = setInterval(function(){
+	    	if(counter >= (modCount - 1)) {
+	    		<logSuccess>
+	    		if(modules.logger.log) {
+	    			modules.logger.log("shutdown","ISNode System > Modules all shutdown successfully ("+counter+"/"+(modCount - 1)+").");
+	    		} else {
+					var currentDate = new Date();
+					currentDate = currentDate.toISOString();
+					console.log(currentDate + "(shutdown) ISNode System > Modules all shutdown successfully ("+counter+"/"+(modCount - 1)+").");
+	    		}
+	    		</logSuccess>
+			    clearInterval(interval);
+			    <successfulCallback>
+			    cb(null, {success:true, message: "Modules all shutdown successfully"});
+			    </successfulCallback>
+			    return;	
+	    	}
+	    	if(timeoutTimer > timeout) {
+	    		<logTimeout>
+	    		if(modules.logger.log) {
+	    			modules.logger.log("shutdown","ISNode System > Module shutdown timed out ("+counter+"/"+(modCount - 1)+" Closed Successfully).");
+	    		} else {
+					var currentDate = new Date();
+					currentDate = currentDate.toISOString();
+					console.log(currentDate + "(shutdown) ISNode System > Module shutdown timed out ("+counter+"/"+(modCount - 1)+" Closed Successfully).");
+	    		}
+	    		</logTimeout>
+	    		clearInterval(interval);
+	    		<timedOutCallback>
+	    		var error = { message: "Module shutdown timed out" };
+	    		cb(error, null);
+	    		</timedOutCallback>
+	    		return;
+	    	}
+	    	timeoutTimer += 500;
+	    }, 500);
+		</shutdownInterval>
+
+		<emitShutdownEvent>
+		process.nextTick(function(){
+			isnode.on("module-shut-down", function(){
+				counter ++;
+			});
+			isnode.emit("shutdown", "Shutdown All Modules");
+	    	return;
+    	});
+    	</emitShutdownEvent>
+	}
+</shutdownSystem>
+
+<branchExploration>
+function _exploreBranch(baseWord, currentBranch) {
+    var predictedList = [];
+
+    <exploreAndPredict>
+    for (var b in currentBranch.branches) { 
+      var prefix = currentBranch.branches[b].prefix; 
+
+      if (currentBranch.branches[b].$ === true) { 
+        predictedList.push(baseWord + prefix);
+      }
+
+      
+      var predictedWords = this._exploreBranch(baseWord + prefix, currentBranch.branches[b]);
+
+      predictedList = predictedList.concat(predictedWords);
+
+    }
+    </exploreAndPredict>
+    return predictedList;
+  }
+</branchExploration>
+
+<createAnimitter>
+function createAnimitter(options, fn){
+
+    <processArguments>
+    if( arguments.length === 1 && typeof options === 'function'){
+        fn = options;
+        options = {};
+    }
+    </processArguments>
+
+    <initializeAnimitterInstance>
+    var _instance = new Animitter( options );
+    </initializeAnimitterInstance>
+
+    <bindUpdateFunction>
+    if( fn ){
+        _instance.on('update', fn);
+    }
+    </bindUpdateFunction>
+
+    return _instance;
+}
+</createAnimitter>
+```
+
+These annotations should provide a clear guide to which parts of the functions are serving specific responsibilities and where SRP violations may occur. If any function contains clearly distinct responsibilities, they are annotated as such, whereas functions that operate cohesively towards a single purpose are annotated as compliant.

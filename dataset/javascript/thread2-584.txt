@@ -1,0 +1,179 @@
+<getProxyMiddleware>
+function getProxyMiddleware(context, uri) {
+  const pathRewrite = {};
+  pathRewrite[`^${context}`] = url.parse(uri).pathname;
+
+  return proxy({
+    target: getHost(uri),
+    changeOrigin: true,
+    logLevel: 'warn',
+    pathRewrite: pathRewrite,
+  });
+}
+</getProxyMiddleware>
+
+<ResourcePool>
+function ResourcePool (options) {
+  this.max = options.max || 1;
+  this.maxUses = options.maxUses || 1;
+  this.create = options.create || function () {};
+  this.destroy = options.destroy || function () {};
+  this.active = 0;
+  this.resources = new Array(this.max);
+  this.resourceActive = new Array(this.max);
+  this.resourceUses = new Array(this.max);
+}
+</ResourcePool>
+
+<resolvePageContext>
+async function resolvePageContext(request) {
+    
+    const routeSettings = request && request.route && request.route.settings;
+    const app = routeSettings && routeSettings.app;
+
+    
+    const pageContext = clonedeep(app.context);
+
+    
+    const preHandlerResults = Object.values(request.pre);
+    preHandlerResults.reduce(merge, pageContext);
+
+    
+    const pageAdapters = app.adapters;
+    const promises = pageAdapters.map(a => a(pageContext, request));
+    const adapterResults = await Promise.all(promises);
+
+    
+    return adapterResults.reduce(merge, pageContext);
+}
+</resolvePageContext>
+
+<iterDeps>
+function iterDeps(method, obj, depKey, seen, meta) {
+
+  var guid = guidFor(obj);
+  if (!seen[guid]) seen[guid] = {};
+  if (seen[guid][depKey]) return;
+  seen[guid][depKey] = true;
+
+  var deps = meta.deps;
+  deps = deps && deps[depKey];
+  if (deps) {
+    for(var key in deps) {
+      if (DEP_SKIP[key]) continue;
+      method(obj, key);
+    }
+  }
+}
+</iterDeps>
+
+<disableCharacteristicNotification>
+function (successCallback, errorCallback, deviceHandle, charHandle) {
+  
+  winble.logger.logDebug("disableCharacteristicNotification", "deviceHandle='" + deviceHandle + ", charHandle='" + charHandle + "'");
+
+  
+  var device = winble.deviceManager.getDeviceFromHandle(deviceHandle, "disableCharacteristicNotification", errorCallback);
+  if (device == null)
+    return;
+
+  
+  var characteristic = winble.deviceManager.getCharacteristicFromHandle(device, charHandle, "disableCharacteristicNotification", errorCallback);
+  if (characteristic == null)
+    return;
+
+  
+  try {
+    characteristic.gattChar.removeEventListener("valuechanged", characteristic.onValueChanged, false);
+  } catch (e) {
+    var msg = "Could not remove event listener:" + e;
+    winble.logger.logError("disableCharacteristicNotification", msg);
+    errorCallback(msg);
+    return;
+  }
+}
+</disableCharacteristicNotification>
+
+<isSelfParent>
+function isSelfParent (win) {
+  let page = win.MIP.viewer.page
+  return page.isRootPage ||  page.isCrossOrigin
+}
+</isSelfParent>
+
+<docCtrl-renderer>
+function(docCtrl, renderer) {
+  
+  View.call(this);
+
+  this.docCtrl = docCtrl;
+  this.renderer = renderer;
+  this.document = docCtrl.session.document;
+  this.nodeTypes = this.document.nodeTypes;
+  this.nodeViews = this.renderer.nodeViews;
+  this.$el.addClass('surface');
+  this.listenTo(this.document, "property:updated", this.onUpdateView);
+  this.listenTo(this.document, "graph:reset", this.reset);
+  
+  this.$el.blur(this.onBlur.bind(this));
+  this.__lastFocussed = null;
+}
+</docCtrl-renderer>
+
+<toPrecision>
+function toPrecision( number, places, truncation ) {
+  
+  
+  const MAX_SIGNIFICANT_PLACES = 14;
+  const actualPlaces = truncation === 'NONE' ? MAX_SIGNIFICANT_PLACES : places;
+  if( actualPlaces === 0 ) {
+    return `${Math.round( number )}`;
+  }
+  const multiplier = Math.pow( 10, actualPlaces );
+  let str = `${Math.round( number * multiplier ) / multiplier}`;
+  const absNumber = Math.abs( number );
+  if( absNumber < 0.0001 ) {
+    const exponent = parseInt( str.split( 'e-' )[ 1 ], 10 );
+    if( exponent ) {
+      const base = `${Math.pow( 10, exponent - 1 ) * Math.round( absNumber * multiplier ) / multiplier}`;
+      str = `${number < 0 ? '-' : ''}0.${zeros( exponent - 1 ) + base.substring( 2 )}`;
+    }
+  }
+  if( truncation === 'BOUNDED' || truncation === 'NONE' ) {
+    return str;
+  }
+  const tmp = str.split( '.' );
+  if( tmp.length === 1 ) {
+    return `${str}.${zeros( actualPlaces )}`;
+  }
+  return str + zeros( actualPlaces - tmp[ 1 ].length );
+}
+</toPrecision>
+
+<classesImmediate>
+function classesImmediate() {
+  let result = ""
+  for (let i=0, n=arguments.length; i<n; ++i) {
+    const a = arguments[i]
+    if (a) {
+      if (result)
+        result += " "
+      result += a
+    }
+  }
+  return result
+}
+</classesImmediate>
+
+<UnnamedFunction>
+function() {
+  this.divEl = inputEx.cn('div', {className: this.options.className});
+  if(this.options.id) {
+    this.divEl.id = this.options.id;
+  }
+  this.renderFields(this.divEl);
+  if(this.options.disabled) {
+    this.disable();
+  }
+}
+</UnnamedFunction>

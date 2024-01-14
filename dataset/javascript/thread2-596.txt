@@ -1,0 +1,204 @@
+```javascript
+<entitiesToDatastore>
+function entitiesToDatastore(entities, options) {
+    const multiple = is.array(entities);
+    entities = arrify(entities);
+
+    if (entities[0].className !== 'Entity') {
+        return entities;
+    }
+
+    const result = entities.map(e => toDatastore(e, options));
+
+    return multiple ? result : result[0];
+}
+</entitiesToDatastore>
+
+<connectAndInitializeModels>
+function(callback) {
+    self.mongoose.connect(self.config.uri, defaultOpts, function(err) {
+        if (err) {
+            return callback && callback(err);
+        }
+        
+        var modules = (new (require('../../helper/project'))()).listModelsForAllModules(
+            process.cwd(), false
+        );
+
+        var connectionName = 'mongodb.' + self.name;
+        Schema = self.mongoose.Schema;
+
+        <loadModels>
+        Object.keys(modules).forEach(function(module) {
+            if (!modules[module].hasOwnProperty(connectionName)) {
+                return;
+            }
+
+            modules[module][connectionName].forEach(function(model) {
+                var path = process.cwd() + '/modules/' +
+                           module + '/models/' + connectionName + '/' + model;
+                try {
+                    self.mongoose.connection.model(model, require(path));
+                } catch (e) {
+                    logger.error(
+                        'Failed to load model ' + model.bold.green +
+                        ' of ' + connectionName.yellow
+                    );
+                    return callback && callback(e);
+                }
+            });
+        });
+        </loadModels>
+
+        delete Schema;
+
+        <assignOrmInstance>
+        self.orm.instance = self.mongoose.connection;
+        self.orm.models   = self.mongoose.connection.models;
+        </assignOrmInstance>
+
+        callback && callback(null, self.orm);
+    });
+
+    self.mongoose.connection.on('error', function(err) {
+        logger.error('Error occured on ' + self.name.yellow + ' backend. Details: ' + (err.stack || err));
+    });
+}
+</connectAndInitializeModels>
+
+<unpack>
+function unpack (bits, offset, length) {
+    var mask = 0xffffffff, shift;
+    mask = mask >>> (32 - bits);
+    mask = mask >>> (bits - length);
+    shift = bits - offset - length;
+    shift = shift ? 'value >>> ' + shift : 'value';
+    return shift + ' & 0x' + mask.toString(16);
+}
+</unpack>
+
+<setDeadzone>
+function setDeadzone(w, h) {
+    if (typeof this.deadzone === "undefined") {
+        this.deadzone = new me.Rect(0, 0, 0, 0);
+    }
+
+    this.deadzone.pos.set(~~((this.width - w) / 2), ~~((this.height - h) / 2 - h * 0.25));
+    this.deadzone.resize(w, h);
+
+    <toggleSmoothFollow>
+    this.smoothFollow = false;
+    this.updateTarget();
+    this.smoothFollow = true;
+    </toggleSmoothFollow>
+}
+</setDeadzone>
+
+<logFieldsAndRelationships>
+function logFieldsAndRelationships() {
+    const context = this.context;
+    if (context.fields.length > 0 || context.relationships.length > 0) {
+        this.log(chalk.red(chalk.white('\n================= ') + context.entityNameCapitalized + chalk.white(' =================')));
+    }
+    <logFields>
+    if (context.fields.length > 0) {
+        this.log(chalk.white('Fields'));
+        context.fields.forEach(field => {
+            const validationDetails = [];
+            const fieldValidate = _.isArray(field.fieldValidateRules) && field.fieldValidateRules.length >= 1;
+            if (fieldValidate === true) {
+                if (field.fieldValidateRules.includes('required')) {
+                    validationDetails.push('required');
+                }
+                // ... Other validation rules ...
+            }
+            this.log(
+                chalk.red(field.fieldName) +
+                    chalk.white(` (${field.fieldType}${field.fieldTypeBlobContent ? ` ${field.fieldTypeBlobContent}` : ''}) `) +
+                    chalk.cyan(validationDetails.join(' '))
+            );
+        });
+        this.log();
+    }
+    </logFields>
+    <logRelationships>
+    if (context.relationships.length > 0) {
+        this.log(chalk.white('Relationships'));
+        context.relationships.forEach(relationship => {
+            // Relationship logging logic ...
+            });
+        this.log();
+    }
+    </logRelationships>
+}
+</logFieldsAndRelationships>
+
+<getAttributes>
+function getAttributes(attributes) {
+    var t = typeof attributes;
+    if (t === 'string') {
+        return attributes;
+    }
+    if (t === 'object') {
+        return Object.keys(attributes).reduce(function (memo, key) {
+            memo.push(key + '="' + attributes[key] + '"');
+            return memo;
+        }, []).join(' ');
+    }
+    return '';
+}
+</getAttributes>
+
+<HyperlinkView>
+function HyperlinkView() {
+    NodeView.apply(this, arguments);
+
+    <initializeNameLabel>
+    this.nameLabel = new LabelView();
+    this.nameLabel.parentStyle = true;
+    this.addSubView(this.nameLabel);
+    </initializeNameLabel>
+
+    <initializeTypeLabel>
+    this.typeLabel = new LabelView();
+    this.typeLabel.parentStyle = true;
+    this.addSubView(this.typeLabel);
+    </initializeTypeLabel>
+}
+</HyperlinkView>
+
+<IndexToStringConstructor>
+function (jvmObject) {
+    this.logger = Logger.getLogger("ml.feature.IndexToString_js");
+    if (!jvmObject) {
+        jvmObject = new org.apache.spark.ml.feature.IndexToString();
+    }
+    PipelineStage.call(this, jvmObject);
+}
+</IndexToStringConstructor>
+
+<extractObjectKeys>
+function (object) {
+    var result = [],
+        key;
+    for (key in object) {
+        if (object.hasOwnProperty(key)) {
+            result.push(key);
+        }
+    }
+    return result;
+}
+</extractObjectKeys>
+
+<renderBlocks>
+function(blocks, in_tight_list) {
+  var result = [];
+  for (var i=0; i < blocks.length; i++) {
+    if (blocks[i].t !== 'ReferenceDef') {
+      result.push(this.renderBlock(blocks[i], in_tight_list));
+    }
+  }
+  return result.join(this.blocksep);
+}
+</renderBlocks>
+```

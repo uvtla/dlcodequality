@@ -1,0 +1,340 @@
+<insertNode>
+function insertNode (i, last) {
+  var node = new Node(i)
+
+  if (!last) {
+    <initializeNode>
+    node.prev = node
+    node.next = node
+    </initializeNode>
+  } else {
+    <linkNode>
+    node.next = last.next
+    node.prev = last
+    last.next.prev = node
+    last.next = node
+    </linkNode>
+  }
+  return node
+}
+</insertNode>
+
+<update>
+function update(image) {
+  <imageLazyLoadCheck>
+  if (image.lazyLoad) {
+    return;
+  }
+  </imageLazyLoadCheck>
+
+  var rect = DOM.getRect(image.element);
+  var foundBreakpoint;
+
+  <calculateBreakpoint>
+  for (var i = 0; i < image.knownSizes.length; i++) {
+    var s = image.knownSizes[i];
+
+    if (rect.width <= s) {
+      foundBreakpoint = s;
+    } else {
+      break;
+    }
+  }
+  </calculateBreakpoint>
+
+  <setDefaultBreakpoint>
+  if (!foundBreakpoint) {
+    foundBreakpoint = image.knownSizes[0];
+  }
+  </setDefaultBreakpoint>
+
+  <updateImageBreakpoint>
+  if (foundBreakpoint !== image.currentBreakpoint || !image.hasRunOnce) {
+    image.currentBreakpoint = foundBreakpoint;
+    loadImageForBreakpoint(image, image.currentBreakpoint);
+  }
+  </updateImageBreakpoint>
+}
+</update>
+
+<anonymousFunction>
+function(ctx) {
+		var subCtx,
+			tree = ctx.tree,
+			node = ctx.node,
+			children = node.children,
+			opts = ctx.options;
+
+		<guardClause>
+		if(!children){
+			return;
+		}
+		</guardClause>
+
+		<deactivateNodes>
+		if( this.activeNode && this.activeNode.isDescendantOf(node)){
+			this.activeNode.setActive(false); 
+		}
+		if( this.focusNode && this.focusNode.isDescendantOf(node)){
+			this.focusNode = null;
+		}
+		</deactivateNodes>
+
+		<removeChildMarkup>
+		this.nodeRemoveChildMarkup(ctx);
+		</removeChildMarkup>
+
+		<removeChildNodes>
+		subCtx = $.extend({}, ctx);
+		node.visit(function(n){
+			n.parent = null;
+			tree._callHook("treeRegisterNode", tree, false, n);
+			if ( opts.removeNode ){
+				subCtx.node = n;
+				opts.removeNode.call(ctx.tree, {type: "removeNode"}, subCtx);
+			}
+		});
+		</removeChildNodes>
+
+		<resetLazyChildren>
+		if( node.lazy ){
+			node.children = [];
+		} else{
+			node.children = null;
+		}
+		</resetLazyChildren>
+
+		<renderNodeStatus>
+		this.nodeRenderStatus(ctx);
+		</renderNodeStatus>
+	}
+</anonymousFunction>
+
+<_fnBindAction>
+function _fnBindAction( n, oData, fn )
+		{
+			$(n)
+				<bindClickEvent>
+				.bind( 'click.DT', oData, function (e) {
+						n.blur(); 
+						fn(e);
+					} )
+				</bindClickEvent>
+
+				<bindKeypressEvent>
+				.bind( 'keypress.DT', oData, function (e){
+					if ( e.which === 13 ) {
+						fn(e);
+					} } )
+				</bindKeypressEvent>
+
+				<bindSelectstartEvent>
+				.bind( 'selectstart.DT', function () {
+					
+					return false;
+					} );
+				</bindSelectstartEvent>
+		}
+</_fnBindAction>
+
+<approximateFunction>
+function(x) {
+    <approximationCalculation>
+    var z = Math.abs(x);
+    var t = 1 / (1 + z / 2);
+    var r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 +
+            t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 +
+            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 +
+            t * (-0.82215223 + t * 0.17087277)))))))))
+    </approximationCalculation>
+    return x >= 0 ? r : 2 - r;
+  }
+</approximateFunction>
+
+<createFuncClickCbByInputEl>
+function createFuncClickCbByInputEl(jsWaitBoundList, jsGetListItem, isDblClick, enableLog) {
+  <generateClickCallback>
+  return function clickCb(inputEl, noPrint) {
+    <sendKeys>
+    return inputEl.sendKeys(gT.sOrig.key.ARROW_DOWN)
+    </sendKeys>
+
+    .then(() => {
+      <logMessage>
+      gIn.tracer.msg3('Before wait after cb inputEl click');
+      </logMessage>
+      <waitForBoundList>
+      return gT.sOrig.driver.wait(
+        () => gT.s.browser.executeScriptWrapper(jsWaitBoundList), gT.engineConsts.cbBoundListTimeout
+      )
+      </waitForBoundList>
+
+      .catch((err) => { 
+        <handleWaitForBoundListError>
+        const errMsg = 'Error at wait for bound list';
+        gIn.tracer.err(errMsg);
+        gIn.tracer.exc(err);
+        throw new Error(errMsg);
+        </handleWaitForBoundListError>
+      });
+    })
+
+    .then(() => {
+      <logMessage>
+      gIn.tracer.msg3('Before get list item');
+      </logMessage>
+      <getListItem>
+      return gT.s.browser.executeScript(jsGetListItem, false);
+      </getListItem>
+    })
+
+    <delayClickEvent>
+    .then(el => gT.e.lClick.createFuncPrintTextDelayClick(isDblClick, noPrint, enableLog)(el));
+    </delayClickEvent>
+  };
+  </generateClickCallback>
+</createFuncClickCbByInputEl>
+
+<Transaction>
+function Transaction (attributes) {
+  this.attributes = {}
+
+  <initializeAttributes>
+  for (var key in attributes) {
+    if (attributes.hasOwnProperty(key)) this.set(key, attributes[key])
+  }
+  </initializeAttributes>
+
+  <setDefaultDate>
+  if (!this.get('date')) this.setDate()
+  </setDefaultDate>
+  
+  <setDefaultAmount>
+  if (!this.get('amount')) this.setAmount()
+  </setDefaultAmount>
+}
+</Transaction>
+
+<createElementModule>
+function createElementModule() {
+  <setupGulpPipeline>
+  return gulp
+    .src(`./${config.src.path}/${config.src.entrypoint}`)
+    .pipe(
+      <modifyFileContent>
+      modifyFile(content => {
+        return content.replace(
+          new RegExp(`../node_modules/${config.element.scope}/`, 'g'),
+          '../'
+        );
+      })
+      </modifyFileContent>
+    )
+    .pipe(
+      <renameFile>
+      rename({
+        basename: config.element.tag
+      })
+      </renameFile>
+    )
+    .pipe(gulp.dest(`./${config.temp.path}`));
+  </setupGulpPipeline>
+}
+</createElementModule>
+
+<sortMatches>
+function sortMatches(self, matches, basename) {
+  var weights = {};
+
+  var ext_name = path.extname(basename);
+  <initializeAliases>
+  var aliases = has(self.__aliases__, ext_name) ? self.__aliases__[ext_name] : [];
+  </initializeAliases>
+
+  <calculateWeights>
+  matches.forEach(function(match) {
+    var extnames = match.replace(basename, '').split('.');
+
+    weights[match] = extnames.reduce(function(sum, ext) {
+      if (!ext) {
+        return sum;
+      }
+
+      ext = '.' + ext;
+
+      if (self.__extensions__.indexOf(ext) >= 0) {
+        return sum + self.__extensions__.indexOf(ext) + 1;
+      }
+
+      if (aliases.indexOf(ext) >= 0) {
+        return sum + aliases.indexOf(ext) + 11;
+      }
+
+      return sum;
+    }, 0);
+  });
+  </calculateWeights>
+
+  <sortBasedOnWeights>
+  return matches.sort(function(a, b) {
+    return weights[a] > weights[b] ? 1 : -1;
+  });
+  </sortBasedOnWeights>
+}
+</sortMatches>
+
+<anonymousFunction2>
+function (arr, format) {
+			var out = new modules.ISODate(),
+				i = 0,
+				value = '';
+
+			<parsingDate>
+			
+			if(arr[0].toUpperCase().match('T')) {
+				return new modules.ISODate(arr[0], format);
+			}else{
+				for(i = 0; i < arr.length; i++) {
+					value = arr[i];
+
+					
+					if( value.charAt(4) === '-' && out.hasFullDate() === false ){
+						out.parseDate(value);
+					}
+			</parsingDate>
+
+			<parsingTime>
+					
+					if( (value.indexOf(':') > -1 || modules.utils.isNumber( this.parseAmPmTime(value) )) && out.hasTime() === false ) {
+						
+						var items = this.splitTimeAndZone(value);
+						value = items[0];
+
+						value = this.parseAmPmTime(value);
+						out.parseTime(value);
+
+						if(items.length > 1){
+							out.parseTimeZone(items[1], format);
+						}
+					}
+			</parsingTime>
+
+			<parsingTimeZone>
+					
+					if(value.charAt(0) === '-' || value.charAt(0) === '+' || value.toUpperCase() === 'Z') {
+						if( out.hasTimeZone() === false ){
+							out.parseTimeZone(value);
+						}
+					}
+			</parsingTimeZone>
+
+				}
+				<parseDefaultMinute>
+				if(out.tM === -1){
+					out.tM = '00';
+				}
+				</parseDefaultMinute>
+				return out;
+			}
+		}
+</anonymousFunction2>

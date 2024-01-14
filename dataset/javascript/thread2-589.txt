@@ -1,0 +1,349 @@
+```html
+<makeTagPolicy>
+function makeTagPolicy(
+    opt_naiveUriRewriter, opt_nmTokenPolicy, opt_logger) {
+    <sanitizeAndLogTags>
+    return function(tagName, attribs) {
+      if (!(html4.ELEMENTS[tagName] & html4.eflags['UNSAFE'])) {
+        return {
+          'attribs': sanitizeAttribs(tagName, attribs,
+            opt_naiveUriRewriter, opt_nmTokenPolicy, opt_logger)
+        };
+      } else {
+        if (opt_logger) {
+          log(opt_logger, tagName, undefined, undefined, undefined);
+        }
+      }
+    };
+    </sanitizeAndLogTags>
+  }
+</makeTagPolicy>
+
+<addSignatureHeaders>
+function addSignatureHeaders(body, headers, keyId, private_key) {
+  <signFunctionDefinition>
+  var sign = function(str, private_key) {
+    var sign = Crypto.createSign('RSA-SHA256');
+    sign.update(str);
+    return sign.sign(private_key, 'base64');
+  };
+  </signFunctionDefinition>
+
+  <sha256FunctionDefinition>
+  var sha256 = function(str, encoding) {
+    var bodyStr = JSON.stringify(str);
+    var hash = Crypto.createHash('sha256');
+    hash.update(bodyStr);
+    return hash.digest(encoding);
+  };
+  </sha256FunctionDefinition>
+
+  <prepareHeaders>
+  if (!headers) {
+    headers = {};
+  }
+
+  if (!headers.date) {
+    headers.date = (new Date()).toUTCString();
+  }
+
+  if (!headers.digest) {
+    headers.digest = 'SHA256=' + sha256(body, 'base64');
+  }
+  </prepareHeaders>
+
+  <combineFunctionDefinition>
+  var combine = function(names, headers) {
+    var parts = [];
+    names.forEach(function(e) {
+      parts.push(e + ': ' + headers[e]);
+    });
+    return parts.join('\n');
+  };
+  </combineFunctionDefinition>
+
+  <constructAuthorizationHeader>
+  headers.authorization = 'Signature ' +
+    'keyId="' + keyId + '", ' +
+    'headers="date digest", ' +
+    'algorithm="rsa-sha256", ' +
+    'signature="' + sign(combine([ 'date', 'digest' ], headers), private_key) + '"';
+  </constructAuthorizationHeader>
+
+  return headers;
+}
+</addSignatureHeaders>
+
+<decodeByteVector>
+function decodeByteVector(x, N) {
+  var point = 0;
+  for (var i = 0; i < N; ++i) {
+    point |= x.charCodeAt(i) << (i * 8);
+  }
+  return point;
+}
+</decodeByteVector>
+
+<parsePath>
+function parsePath(req) {
+  
+  const path = req.path || (req.url && req.url.split('?')[0]) || '';
+  
+  return path.replace(/^\/|\/$/g, '').split('/');
+}
+</parsePath>
+
+<determineDateRange>
+function (d, range) {
+  "use strict";
+
+  var start = new Date(d.getFullYear(), d.getMonth());
+  var stop = null;
+  if (range instanceof Date) {
+    stop = new Date(range.getFullYear(), range.getMonth());
+  } else {
+    stop = new Date(start);
+    stop = stop.setMonth(stop.getMonth()+range);
+  }
+
+  return d3.time.months(Math.min(start, stop), Math.max(start, stop));
+}
+</determineDateRange>
+
+<handleDatabaseConnection>
+function(db, opt_err) {
+    <checkFired>
+    if (df.hasFired()) {
+      goog.log.warning(me.logger, 'database already set.');
+    </checkFired>
+    <handleError>
+    else if (goog.isDef(opt_err)) {
+      goog.log.warning(me.logger, opt_err ? opt_err.message : 'Error received.');
+      me.idx_db_ = null;
+      df.errback(opt_err);
+    } 
+    </handleError>
+    <setupDB>
+    else {
+      goog.asserts.assertObject(db, 'db');
+      me.idx_db_ = db;
+      me.idx_db_.onabort = function(e) {
+        goog.log.finest(me.logger, me + ': abort');
+        var request =  (e.target);
+        me.onError(request.error);
+      };
+      </setupDB>
+      <handleDBError>
+      me.idx_db_.onerror = function(e) {
+        if (ydn.db.con.IndexedDb.DEBUG) {
+          goog.global.console.log(e);
+        }
+        goog.log.finest(me.logger, me + ': error');
+        var request =  (e.target);
+        me.onError(request.error);
+      };
+      </handleDBError>
+
+      <handleVersionChange>
+      me.idx_db_.onversionchange = function(event) {
+        if (ydn.db.con.IndexedDb.DEBUG) {
+          goog.global.console.log([this, event]);
+        }
+        goog.log.finest(me.logger, me + ' closing connection for onversionchange to: ' +
+            event.version);
+        if (me.idx_db_) {
+          me.idx_db_.onabort = null;
+          me.idx_db_.onblocked = null;
+          me.idx_db_.onerror = null;
+          me.idx_db_.onversionchange = null;
+          me.onVersionChange(event);
+          if (!event.defaultPrevented) {
+            me.idx_db_.close();
+            me.idx_db_ = null;
+            var e = new Error();
+            e.name = event.type;
+            me.onFail(e);
+          }
+        }
+      };
+      </handleVersionChange>
+      <reportOldVersion>
+      df.callback(parseFloat(old_version));
+      </reportOldVersion>
+    }
+  }
+</handleDatabaseConnection>
+
+<is_same>
+function _is_same(a, b) {
+  var ret = false;
+  <basicEqualityCheck>
+  if (a == b) { 
+    ret = true;
+  }
+  </basicEqualityCheck>
+  <complexEqualityCheck>
+  else { 
+    if (typeof(a) === 'object' && typeof(b) === 'object') {
+      if (a == null || b == null) {
+        ret = false;
+      } else if (Array.isArray(a) && Array.isArray(b)) { 
+        if (a.length == b.length) {
+          if (a.length == 0) {
+            ret = true;
+          } else {
+            ret = true; 
+            for (var i = 0; i < a.length; i++) {
+              if (!_is_same(a[i], b[i])) {
+                ret = false;
+                break;
+              }
+            }
+          }
+        }
+      } else { 
+        <objectKeyComparison>
+        var a_keys = Object.keys(a);
+        var b_keys = Object.keys(b);
+        var keys = a_keys.concat(b_keys.filter(function(it) {
+          return a_keys.indexOf(it) < 0;
+        }));
+        ret = true;
+        for (var j = 0; j < keys.length; j++) { 
+          var k = keys[j];
+          if (!_is_same(a[k], b[k])) {
+            ret = false;
+            break;
+          }
+        }
+        </objectKeyComparison>
+      }
+    }
+  }
+  </complexEqualityCheck>
+  return ret;
+}
+</is_same>
+
+<processArgv>
+function processArgv(argv) {
+  <extractCommand>
+  let command = getCommand(argv);
+  let isInternalCommand = true;
+  </extractCommand>
+
+  <logCommand>
+  logger.info(`SKY UX processing command ${command}`);
+  </logCommand>
+
+  <executeCommand>
+  switch (command) {
+    case 'version':
+      require('./lib/version').logVersion(argv);
+      break;
+    case 'new':
+      require('./lib/new')(argv);
+      break;
+    case 'help':
+      require('./lib/help')(argv);
+      break;
+    case 'install':
+      require('./lib/install')(argv);
+      break;
+    default:
+      isInternalCommand = false;
+  }
+  </executeCommand>
+  
+  <invokeExternalCommand>
+  invokeCommand(command, argv, isInternalCommand);
+  </invokeExternalCommand>
+}
+</processArgv>
+
+<executeGit>
+function executeGit(args, options) {
+  <setupOptions>
+  options = options || {};
+  </setupOptions>
+  <promise>
+  return new Promise(function(resolve, reject) {
+    <initialize>
+    var stdo = '';
+    var proc = doSpawn('git', args, { cwd: options.cwd ? options.cwd : process.cwd(), stdio: ['ignore', 'pipe', 'ignore'] });
+    </initialize>
+
+    <unpipeDefinition>
+    function unpipe() {
+    }
+    </unpipeDefinition>
+
+    <captureStdout>
+    if (options.captureStdout) {
+      proc.stdout.on('data', function onStdout(data) {
+              stdo += data.toString();
+            });
+    }
+    </captureStdout>
+    <handleGitError>
+    proc.on('error', function(err) {
+      unpipe();
+      if (options.ignoreError) {
+        resolve({ out: stdo, code: 0 });
+      } else {
+        printError(err, args);
+        reject(err);
+      }
+    });
+    </handleGitError>
+    <handleGitExit>
+    proc.on('exit', function(code) {
+      unpipe();
+    });
+    </handleGitExit>
+    <handleGitClose>
+    proc.on('close', function(code) {
+      unpipe();
+      if (code !== 0 && !options.ignoreError) {
+        if (!options.quiet) {
+          printError('', args);
+        }
+        reject(new Error("Error running git"));
+      } else {
+        resolve({ out: stdo, code: code });
+      }
+    });
+    </handleGitClose>
+  });
+  </promise>
+}
+</executeGit>
+
+<getTasksFromYakefile>
+function getTasksFromYakefile(cwd, fileOption) {
+  <initializeTaskCollections>
+  const tc1 = TC.TaskCollection();
+  const tc2 = TASKS.loadPreloadedTasks(tc1);
+  </initializeTaskCollections>
+
+  <determineYakefilePath>
+  const yakefileCandidates = Yakefile.defaultFilenames();
+  if (fileOption !== undefined)
+    yakefileCandidates = [fileOption];
+  const yakeFilePath = Yakefile.recursiveFindFile(cwd, yakefileCandidates);
+  </determineYakefilePath>
+
+  <handleFileNotFound>
+  if (yakeFilePath === undefined) {
+    const msg = yakefileCandidates.join();
+    ERROR.raiseError(`cannot find yakefile among : ${msg}`);
+  }
+  </handleFileNotFound>
+
+  <requireTasksFromYakefile>
+  const collection = TASKS.requireTasks(yakeFilePath, tc2);
+  </requireTasksFromYakefile>
+  return collection;
+}
+</getTasksFromYakefile>
+```

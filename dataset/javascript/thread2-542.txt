@@ -1,0 +1,308 @@
+```javascript
+<idbReadableStream>
+function idbReadableStream(db, storeName, opts) {
+  <inputValidation>
+  if (typeof db !== 'object') throw new TypeError('db must be an object')
+  if (typeof storeName !== 'string') throw new TypeError('storeName must be a string')
+  if (opts == null) opts = {}
+  if (typeof opts !== 'object') throw new TypeError('opts must be an object')
+  </inputValidation>
+
+  <setupTransformer>
+  var transformer = new stream.Transform(xtend(opts, {
+    objectMode: true,
+    transform: function(obj, enc, cb) {
+      cb(null, obj)
+    }
+  }))
+  opts = xtend({
+    snapshot: false
+  }, opts)
+  var lastIteratedKey = null
+  transformer._cursorsOpened = 0
+  </setupTransformer>
+
+  <startCursor>
+  function startCursor() {
+    <cursorConfiguration>
+    var lower, upper, lowerOpen, upperOpen
+    var direction = opts.direction || 'next'
+    var range = opts.range || {}
+    lower = range.lower
+    upper = range.upper
+    lowerOpen = !!range.lowerOpen
+    upperOpen = !!range.upperOpen
+    if (lastIteratedKey) {
+      if (direction === 'next') {
+        lowerOpen = true 
+        lower = lastIteratedKey
+      } else {
+        upperOpen = true 
+        upper = lastIteratedKey
+      }
+    }
+    var keyRange
+    if (lower && upper)
+      keyRange = IDBKeyRange.bound(lower, upper, lowerOpen, upperOpen)
+    else if (lower)
+      keyRange = IDBKeyRange.lowerBound(lower, lowerOpen)
+    else if (upper)
+      keyRange = IDBKeyRange.upperBound(upper, upperOpen)
+    </cursorConfiguration>
+
+    <transactionAndStoreSetup>
+    var tx = db.transaction(storeName, 'readonly')
+    var store = tx.objectStore(storeName)
+    transformer._cursorsOpened++
+    var req = store.openCursor(keyRange, opts.direction)
+    </transactionAndStoreSetup>
+
+    <cursorOperation>
+    function proceed(cursor) {
+      try {
+        cursor.continue() 
+      } catch(err) {
+        if (err.name === 'TransactionInactiveError' && !opts.snapshot)
+          startCursor()
+        else
+          transformer.emit('error', err)
+      }
+    }
+    req.onsuccess = function() {
+      var cursor = req.result
+      if (cursor) {
+        lastIteratedKey = cursor.key
+        var go = transformer.write({ key: cursor.key, value: cursor.value })
+        if (opts.snapshot || go)
+          proceed(cursor)
+        else
+          transformer.once('drain', function() {
+            proceed(cursor)
+          })
+      } else
+        transformer.end()
+    }
+    tx.onabort = function() {
+      transformer.emit('error', tx.error)
+    }
+    tx.onerror = function() {
+      transformer.emit('error', tx.error)
+    }
+    </cursorOperation>
+  }
+  </startCursor>
+
+  <initiateCursor>
+  startCursor()
+  </initiateCursor>
+
+  return transformer
+}
+</idbReadableStream>
+
+
+<eventHandlerSetup>
+function on (state, eventName, handler) {
+  state.emitter.on(eventName, handler)
+  return state.api
+}
+</eventHandlerSetup>
+
+
+<stickify>
+function stickify(node) {
+  <childrenHandling>
+  var children = node.children;
+  if (children && children.length) {
+    <rectangleSetup>
+    var rect = pad(node),
+        remaining = children.slice(),
+        child,
+        row = [];
+    scale(remaining, rect.dx * rect.dy / node.value);
+    row.area = 0;
+    </rectangleSetup>
+    <childPositioning>
+    while (child = remaining.pop()) {
+      row.push(child);
+      row.area += child.area;
+      if (child.z != null) {
+        position(row, child.z ? rect.dx : rect.dy, rect, !remaining.length);
+        row.length = row.area = 0;
+      }
+    }
+    children.forEach(stickify);
+    </childPositioning>
+  }
+  </childrenHandling>
+}
+</stickify>
+
+
+<formatIcuString>
+function (icuString, options) {
+  <cleanWhiteSpace>
+  icuString = this.cleanWhiteSpace(icuString);
+  </cleanWhiteSpace>
+
+  <optionParsing>
+  if (typeof options !== 'undefined') {
+    <stringOptionReplacement>
+    if (typeof options.string !== 'undefined') {
+      var stringRe = new RegExp(('\{' + options.string + '\}'), 'g');
+      icuString = icuString.replace(stringRe, '%s');
+    }
+    </stringOptionReplacement>
+    <numberOptionReplacement>
+    if (typeof options.number !== 'undefined') {
+      var numberRe = new RegExp(('\{' + options.number + ', number\}'), 'g');
+      icuString = icuString.replace(numberRe, '%d');
+    }
+    </numberOptionReplacement>
+  }
+  </optionParsing>
+  
+  <generalPlaceholderReplacements>
+  icuString = icuString.replace(/\{[a-zA-Z0-9_.|]+\}/g, function (variable_name) {
+    var name = variable_name.substring(1, (variable_name.length - 1));
+    return '%(' + name + ')s';
+  });
+  icuString = icuString.replace(/\{[a-zA-Z0-9_.|]+, number\}/g, function (variable_name) {
+    var name = variable_name.substring(1, (variable_name.length - 9));
+    return '%(' + name + ')d';
+  });
+  </generalPlaceholderReplacements>
+
+  return icuString;
+}
+</formatIcuString>
+
+
+<assertImmutableEqual>
+function assertImmutableEqual(_super) {
+  return function(collection) {
+    <assertionLogic>
+    const obj = this._obj;
+    if (isImmutable(obj)) {
+      this.assert(
+        Immutable.is(obj, collection),
+        'expected #{act} to equal #{exp}',
+        'expected #{act} to not equal #{exp}',
+        collection.toJS(),
+        obj.toJS(),
+        true
+      );
+    } else {
+      _super.apply(this, arguments);
+    }
+    </assertionLogic>
+  };
+}
+</assertImmutableEqual>
+
+
+<k8sutilInitialization>
+function K8sutil() {
+  <podInformationRetrieval>
+  podName = os.hostname();
+  podGenerateName = podName.substr(0, podName.lastIndexOf('-'));
+  logger.debug('k8sutil', 'K8sutil()', 'The pod name: ', podName);
+  fetchContainerID();
+  </podInformationRetrieval>
+  <k8sConfigManagement>
+  try {
+    var kubeconfig = Api.config.getInCluster();
+    kubeconfig.promises = true;
+    logger.debug('k8sutil', 'K8sutil()', 'Kubeconfig', kubeconfig);
+    core = new Api.Core(kubeconfig);
+    ext = new Api.Extensions(kubeconfig);
+    namespace = core.namespaces.namespace;
+    logger.info('k8sutil', 'K8sutil()', 'Current namespace', namespace);
+    if (!podJson) {
+      core.ns(namespace).pods(this.getPodName()).get().then(parsePodInfo).catch(
+        function(err) {
+          logger.error('k8sutil', 'K8sutil()', err.message);
+        }
+      );
+    }
+  } catch (e) {
+    logger.debug('k8sutil', 'K8sutil()',
+                 'Failed to load K8S configuration, is not a ICp environment.');
+  }
+  </k8sConfigManagement>
+  <additionalK8sutilFunctionCalls>
+  findIngressSvc();
+  setNodeIPs();
+  </additionalK8sutilFunctionCalls>
+}
+</k8sutilInitialization>
+
+
+<leafletLayerSetup>
+function(layerModel, leafletLayer, leafletMap) {
+  <initialConfigurations>
+  this.leafletLayer = leafletLayer;
+  this.leafletMap = leafletMap;
+  this.model = layerModel;
+  this.setModel(layerModel);
+  this.type = layerModel.get('type') || layerModel.get('kind');
+  this.type = this.type.toLowerCase();
+  </initialConfigurations>
+}
+</leafletLayerSetup>
+
+
+<curryFunction>
+function curry(fn, obj) {
+  <bindFunction>
+  var newFunction = _.bind(fn, (obj || null));
+  </bindFunction>
+
+  <curryLogic>
+  return function () {
+    <partialApplication>
+    var me = _.partial(newFunction, arguments);
+    </partialApplication>
+
+    <curryDecision>
+    if (!me.length) return me();
+    return curry(me);
+    </curryDecision>
+  };
+  </curryLogic>
+}
+</curryFunction>
+
+
+<findFirstMatch>
+function (array, pred) {
+  <searchLoop>
+  for (var idx = 0, len = array.length; idx < len; idx ++) {
+    var item = array[idx];
+    if (pred(item)) {
+      return item;
+    }
+  }
+  </searchLoop>
+}
+</findFirstMatch>
+
+
+<constructCommitMetadata>
+function (repo, destExists, sha) {
+  <metadataCreation>
+  return {
+    repo: repo,
+    branch: {
+      src: branchSrc,
+      dest: branchDest,
+      destExists: destExists
+    },
+    commit: {
+      sha: sha
+    }
+  };
+  </metadataCreation>
+}
+</constructCommitMetadata>
+```

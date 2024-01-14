@@ -1,0 +1,104 @@
+Here are the annotations for the given functions:
+
+```javascript
+// Compliant with SRP
+function get(path) {
+  return defineRouteProperty([
+    { name: "path", args: [path || ""] },
+    { name: "method", args: [appolo_agent_1.Methods.GET] }
+  ]);
+}
+
+// Non-Compliant with SRP, has two distinct responsibilities
+function (search) {
+  var result = false;
+  files.forEach(function (elem) {
+    <checkFilePath>
+    if (elem.path === search) {
+      result = true;
+    }
+    </checkFilePath>
+  });
+  return result;
+}
+
+// Compliant with SRP
+function findTriggers (pgTriggers, schemaName, tableName) {
+  return pgTriggers
+    .filter(t => t.trigger_schema === schemaName && t.event_object_table === tableName)
+    .reduce((triggers, trigger) => {
+      triggers[trigger.trigger_name] = {
+        eventManipulation: trigger.event_manipulation,
+        actionCondition: trigger.action_condition,
+        actionStatement: trigger.action_statement,
+        actionOrientation: trigger.action_orientation,
+        actionTiming: trigger.action_timing
+      }
+      return triggers
+    },
+    {}
+    )
+}
+
+// Non-Compliant with SRP, has multiple distinct responsibilities for text parsing
+function() {
+  let obj = {},
+    key = null,    
+    extended = false,   
+    index = 0;
+
+  let putText = function(text) {
+    // ... putText block ...
+  },
+  parseContent = function() {
+    // ... parseContent block ...
+  };
+
+  next(); white();
+  while (ch) {
+    // ... parse loop block ...
+  }
+}
+
+// Non-Compliant with SRP; initializes plugin and registers methods with async handling
+function register(server, options, next) {
+  // ... register function block ...
+}
+
+// Non-Compliant with SRP; this function is mixing debugging, task definition, and conditional task collection operations
+function defineTask(taskCollection, name, description, prereqs, action) {
+  // ... defineTask block ...
+}
+
+// Compliant with SRP
+function listenCollection(collection, listener) {
+    collection.forEach(function listenModel(model) {
+        listen(model, listener);
+    });
+
+    collection.on('add', function onAdd(model) {
+        listen(model, listener);
+        listener();
+    });
+}
+
+// Compliant with SRP
+function SingleUniform(id, activeInfo, addr) {
+  this.id = id;
+  this.addr = addr;
+  this.cache = [];
+  this.setValue = getSingularSetter(activeInfo.type);
+}
+
+// Compliant with SRP but notice the possible issue of logging within the function that could be abstracted if needed.
+function(criteria, attributes, cb) {
+  // ... auth handling and attachment function block ...
+}
+
+// Non-Compliant with SRP; this function is parsing a string and managing a stream
+function findParts(str) {
+  // ... findParts block ...
+}
+```
+
+Please note that for some of the larger blocks of code, general comments were made instead of annotating specific lines due to the complexity and length of the functions. These functions have multiple responsibilities that concern parsing, error handling, task management, or registration of methods with conditional logic.

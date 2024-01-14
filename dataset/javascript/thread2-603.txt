@@ -1,0 +1,301 @@
+```javascript
+<getUserRevealSize>
+function getRevealSize() {
+    var carousel = this, isVertical, sz;
+
+    <isVerticalCalculation>
+    isVertical = carousel.get("isVertical");</isVerticalCalculation>
+    <getSizeCalculation>
+    sz  = getCarouselItemSize.call(carousel,
+            isVertical ? "height" : "width");</getSizeCalculation>
+    return (sz * carousel.get("revealAmount") / 100);
+}
+</getUserRevealSize>
+```
+
+This function appears to be SRP compliant, as it has the single responsibility of calculating and returning the reveal size for a carousel based on its configuration and the item size.
+
+```javascript
+<setServiceProperties>
+function(properties) {
+    this._handle = null;
+    this._services = null;
+    this._characteristics = null;
+
+    this.device = null;
+    this.uuid = null;
+    this.isPrimary = false;
+
+    <mergeProperties>
+    mergeDictionary(this, properties);
+    </mergeProperties>
+    <dispatchEvent>
+    this.dispatchEvent({ type: "serviceadded", bubbles: true });
+    </dispatchEvent>
+}
+</setServiceProperties>
+```
+
+This function violates the SRP because it combines the responsibility of setting default properties with the responsibility of merging passed-in properties and dispatching an event, which are two separate concerns within this function.
+
+```javascript
+<checkAssertion>
+function check (expected, control) {
+    <assertIs>
+    return function assertIs (value, message) {
+        var actual = utils.kindOf(value)
+        var result = utils.is[expected](value)
+        var operator = control === false ? '===' : '!=='
+
+        if (utils.kindOf(message) === 'function') {
+            message = message(actual, expected, value)
+        }
+
+        message = utils.kindOf(message) === 'string'
+        ? utils.format(message, { expected: expected, actual: actual })
+        : actual + ' ' + operator + ' ' + expected
+
+        test(result === control, {
+            value: value,
+            actual: actual,
+            expected: expected,
+            operator: operator,
+            message: message,
+            stackStartFunction: assertIs
+        })
+    }
+    </assertIs>
+}
+</checkAssertion>
+```
+
+The `check` function appears to be SRP compliant, as its sole purpose is to provide an assertion function that checks if a given value meets a certain expectation, including custom messages.
+
+```javascript
+<validateManifest>
+function validate (rootPath) {
+  var manifest;
+  var webextensionManifest;
+
+  var errors = {};
+
+  <parseManifest>
+  try {
+    manifest = JSON.parse(fs.readFileSync(join(rootPath, "package.json")));
+  } catch (e) {
+    errors.parsing = utils.getErrorMessage("COULD_NOT_PARSE") + "\n" + e.message;
+    return errors;
+  }
+  </parseManifest>
+
+  <validateSections>
+  if (!validateID(manifest)) {
+    errors.id = utils.getErrorMessage("INVALID_ID");
+  }
+
+  if (!validateMain(rootPath)) {
+    errors.main = utils.getErrorMessage("MAIN_DNE");
+  }
+
+  if (!validateTitle(manifest)) {
+    errors.title = utils.getErrorMessage("INVALID_TITLE");
+  }
+
+  if (!validateName(manifest)) {
+    errors.name = utils.getErrorMessage("INVALID_NAME");
+  }
+
+  if (!validateVersion(manifest)) {
+    errors.version = utils.getErrorMessage("INVALID_VERSION");
+  }
+  </validateSections>
+
+  <checkWebextensionManifest>
+  if (fs.existsSync(join(rootPath, "manifest.json"))) {
+    errors.webextensionManifestFound = utils.getErrorMessage("WEBEXT_ERROR");
+  }
+  </checkWebextensionManifest>
+
+  return errors;
+}
+</validateManifest>
+```
+
+This function violates the SRP, as it includes multiple responsibilities: parsing the manifest, validating individual sections of the manifest, and checking for the existence of a webextension manifest. These should likely be handled by separate functions or a more cohesive singular validation process.
+
+```javascript
+<quoteLiteralValue>
+function quoteLiteral(value) {
+
+    var literal = null;
+    var explicitCast = null;
+
+    <handleSpecialCases>
+    if (value === undefined || value === null) {
+        return 'NULL';
+    } else if (value === false) {
+        return "'f'";
+    } else if (value === true) {
+        return "'t'";
+    } else if (value instanceof Date) {
+        return "'" + formatDate(value.toISOString()) + "'";
+    } else if (value instanceof Buffer) {
+        return "E'\\\\x" + value.toString('hex') + "'";
+    } else if (Array.isArray(value) === true) {
+        var temp = [];
+        for (var i = 0; i < value.length; i++) {
+            if (Array.isArray(value[i]) === true) {
+                temp.push(arrayToList(i !== 0, value[i], quoteLiteral))
+            } else {
+                temp.push(quoteLiteral(value[i]));
+            }
+        }
+        return temp.toString();
+    } else if (value === Object(value)) {
+        explicitCast = 'jsonb';
+        literal = JSON.stringify(value);
+    } else {
+        literal = value.toString().slice(0); 
+    }
+    </handleSpecialCases>
+
+    <quoteAndEscape>
+    var hasBackslash = false;
+    var quoted = '\'';
+
+    for (var i = 0; i < literal.length; i++) {
+        var c = literal[i];
+        if (c === '\'') {
+            quoted += c + c;
+        } else if (c === '\\') {
+            quoted += c + c;
+            hasBackslash = true;
+        } else {
+            quoted += c;
+        }
+    }
+
+    quoted += '\'';
+
+    if (hasBackslash === true) {
+        quoted = 'E' + quoted;
+    }
+    </quoteAndEscape>
+
+    <applyExplicitCast>
+    if (explicitCast) {
+        quoted += '::' + explicitCast;
+    }
+    </applyExplicitCast>
+
+    return quoted;
+}
+</quoteLiteralValue>
+```
+
+The `quoteLiteral` function violates the SRP by combining various value formatting responsibilities with the responsibility of escaping quotations, determining backslashes, and appending explicit casts. This function could be split into multiple functions for clarity and separation of concerns.
+
+```javascript
+<handleErrorLogging>
+function handleError(during, e) {
+    
+    <logErrorHeader>
+    console.error("-------------------------------------------------");
+    console.error("Exception found " + during);
+    </logErrorHeader>
+    
+    <logErrorMessage>
+    console.error("Message: " + e.message);
+    console.error("at     : " + e.line);
+    var filename = e.sourceURL || "unknown";
+    </logErrorMessage>
+    
+    <processFilename>
+    filename = filename.replace(/.*generated-javascript/, '');
+    </processFilename>
+    
+    <logErrorDetails>
+    console.error("file   : " + filename);
+    console.error("url    : " + e.sourceURL);
+    </logErrorDetails>
+    
+    <logStackTrace>
+    var stack = e.stack || e.stacktrace;
+
+    if (stack) {
+        console.error(stack);
+    } else {
+        console.log("No stack trace");
+    }
+    </logStackTrace>
+}
+</handleErrorLogging>
+```
+
+The `handleError` function is mostly SRP compliant as its primary responsibility is to log an error. However, it combines the tasks of formatting the error message and processing the file name. Yet, these can be considered part of providing a comprehensive log, and thus do not necessarily violate the principle.
+
+```javascript
+<buildStringFormat>
+function buildFormat(format) {
+    return <constructFormatString>
+    format.v.map(x=> typeof x === 'string' ? x :
+               '{' + x.p + ('o' in x ? '>' + x.o : '') + '}').join('') +
+    (format.o ? '>>' + Object.keys(format.o).map(x => OPTIONS[x]).join('') : '');
+    </constructFormatString>
+}
+</buildStringFormat>
+```
+
+This function seems compliant with SRP, having a single responsibility of constructing a string format based on a given format object.
+
+```javascript
+<hideTahtaIhale>
+function f_tahta_ihale_gizlenen_sil(_tahta_id, _ihale_id) {
+    <removeIhaleFromGizlenen>
+    return result.dbQ.srem(result.kp.tahta.ssetGizlenenIhaleleri(_tahta_id), _ihale_id)
+    </removeIhaleFromGizlenen>
+        <notifyIhaleHidden>
+        .then(function () {
+            emitter.emit(schema.SABIT.OLAY.IHALE_GIZLENDI, _ihale_id, _tahta_id);
+            return _ihale_id;
+        });
+        </notifyIhaleHidden>
+}
+</hideTahtaIhale>
+```
+
+The function violates the SRP by combining two distinct responsibilities: removing an ihale (auction) from the set of hidden auctions in a tahta (board) and emitting an event to notify that the ihale was hidden. It should be broken up into separate functions to handle these concerns independently.
+
+```javascript
+<getDisplayName>
+function getComponentName(target: ComponentType<*>): string {
+    <checkDisplayName>
+    if (target.displayName && typeof target.displayName === 'string') {
+        return target.displayName;
+    }
+    </checkDisplayName>
+
+    <returnNameOrDefault>
+    return target.name || 'Component';
+    </returnNameOrDefault>
+}
+</getDisplayName>
+```
+
+This function appears to be SRP compliant, as its single responsibility is to determine and return the display name of a component.
+
+```javascript
+<validateDependenciesInPackageJson>
+function validateDependencies(configDir) {
+    const packageJsonPath = path.join(findup.sync(configDir, 'package.json'), 'package.json');
+    <loadPackageJson>
+    const packageJson = require(packageJsonPath);
+    </loadPackageJson>
+    <validateEachDependency>
+    DEPENDENCIES.forEach(validateDependency.bind(null, packageJson));
+    </validateEachDependency>
+}
+</validateDependenciesInPackageJson>
+```
+
+This function is arguably SRP compliant because its sole purpose is to validate dependencies within a package.json file, despite the fact that it combines the task of finding and loading the package.json and validating the dependencies therein. These operations collectively serve the single overarching task of dependency validation.

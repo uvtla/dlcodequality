@@ -1,0 +1,168 @@
+<updateVariable>
+function updateVariable(key, value) {
+  <addOrUpdateVariable>
+  variableService.addOrUpdate({key: key, value: value}, function () {
+  </addOrUpdateVariable>
+      vm.variables[key] = value;
+      vm.variable = {
+          key: undefined,
+          value: undefined
+      };
+  });
+}
+</updateVariable>
+
+<humanizeSize>
+function humanizeSize(bytes) {
+  const index = Math.floor(Math.log(bytes) / Math.log(1024));
+  if (index < 0) return '';
+  return `${+((bytes / 1024) ** index).toFixed(2)} ${units[index]}`;
+}
+</humanizeSize>
+
+<reorderObjects>
+function (object) {
+  var objects = this.getObjects(),
+      idx = objects.indexOf(object),
+      nextIntersectingIdx = idx;
+  
+  <findNextIntersectingObject>
+  if (idx !== objects.length-1) {
+      for (var i = idx + 1, l = this._objects.length; i < l; ++i) {
+        if (object.intersectsWithObject(objects[i]) || object.isContainedWithinObject(this._objects[i])) {
+          nextIntersectingIdx = i;
+          break;
+        }
+      }
+  </findNextIntersectingObject>
+  <updateObjectsArray>
+  removeFromArray(objects, object);
+  objects.splice(nextIntersectingIdx, 0, object);
+  </updateObjectsArray>
+  this.renderAll();
+}
+</reorderObjects>
+
+<iterateData>
+function(callback)
+{
+    <checkLimit>
+    if (this._limit != null && this.offset >= this._limit)
+    {
+        return callback(null, null);
+    }
+    </checkLimit>
+
+    var self = this;
+    <fetchNextItem>
+    var _next = function(err)
+    {       
+        if (err)
+        {
+            return callback(err);
+        }
+    
+        if (self.pos < self.data.length)
+        {
+            var itemData = self.data[self.pos];
+            self.pos++;
+            self.offset++;
+            var cls = self.itemCls;
+            callback(null, new cls(self.api, itemData, true));
+        }
+        else
+        {
+            callback(null, null);
+        }
+    };
+    </fetchNextItem>
+    
+    <loadDataIfNeeded>
+    if (this.data == null || this.pos >= this.data.length && this.truncated)
+    {
+        this.loadNextPage(_next);
+    }
+    else
+    {
+        process.nextTick(_next);
+    }
+    </loadDataIfNeeded>
+}
+</iterateData>
+
+<rotate>
+function rotate(out, a, angle) {
+  var c = Math.cos(angle),
+      s = Math.sin(angle)
+  var x = a[0],
+      y = a[1]
+
+  out[0] = x * c - y * s
+  out[1] = x * s + y * c
+
+  return out
+}
+</rotate>
+
+<initiateJoin>
+function (joinType, table, tableAlias) {
+  this.__joinType = joinType;
+  this.__table = table;
+  this.__tableAlias = tableAlias || null;
+}
+</initiateJoin>
+
+<pauseSpotifyPlayback>
+function(options, callback) {
+  return (
+    <buildPauseRequest>
+    WebApiRequest.builder(this.getAccessToken())
+      .withPath('/v1/me/player/pause')
+      .withQueryParameters(
+        options && options.device_id ? { device_id: options.device_id } : null
+      )
+      .withHeaders({ 'Content-Type': 'application/json' })
+      .build()
+    </buildPauseRequest>
+    <executePauseRequest>
+    .execute(HttpManager.put, callback)
+    </executePauseRequest>
+  );
+}
+</pauseSpotifyPlayback>
+
+<subscribeToTopic>
+function sub (topic, spy, options, context) {
+  <setupSpy>
+  spy = spy || jasmine.createSpy();
+  </setupSpy>
+  <subscribeToArbiter>
+  spy.token = arbiter.subscribe(topic, spy, options, context);
+  </subscribeToArbiter>
+  return spy;
+}
+</subscribeToTopic>
+
+<decodeHexString>
+function decodeHexString( hex ) {
+  const bytes = [];
+  for(let i=0; i< hex.length-1; i+=2) {
+      bytes.push(parseInt(hex.substr(i, 2), 16));
+  }
+  return Buffer.from(bytes)
+}
+</decodeHexString>
+
+<parseCurrencyText>
+function parseCurrencyText(text) {
+  <extractAmount>
+  let amount = Number(text.replace(/[^0-9.]+/g, ''));
+  </extractAmount>
+  <handleDebitRepresentation>
+  if (text.indexOf('DR') > -1) {
+    amount = -amount;
+  }
+  </handleDebitRepresentation>
+  return amount;
+}
+</parseCurrencyText>

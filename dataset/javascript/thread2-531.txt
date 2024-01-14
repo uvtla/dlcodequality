@@ -1,0 +1,199 @@
+```javascript
+<functionNameless1>
+function( condition ) {
+    <determineCheckFn>
+    var checkFn =
+        typeof condition == 'function' ?
+            condition :
+        typeof condition == 'string' ?
+            function( el ) {
+                return el.name == condition;
+            } :
+            function( el ) {
+                return el.name in condition;
+            };
+    </determineCheckFn>
+
+    var parent = this.parent;
+
+    <traverseParent>
+    while ( parent && parent.type == CKEDITOR.NODE_ELEMENT ) {
+        if ( checkFn( parent ) )
+            return parent;
+        parent = parent.parent;
+    }
+    </traverseParent>
+
+    return null;
+}
+</functionNameless1>
+
+<setFirewall>
+function(firewall) {
+    var t = Monitor.getRouter(); 
+    t.firewall = firewall;
+    log.info('setFirewall', firewall);
+}
+</setFirewall>
+
+<timeParamToSeconds>
+function timeParamToSeconds(param) {
+    var componentValue = function (si) {
+        var regex = new RegExp('(\\d+)' + si);
+        return param.match(regex) ? parseInt(RegExp.$1, 10) : 0;
+    };
+
+    return componentValue('h') * 3600
+        + componentValue('m') * 60
+        + componentValue('s');
+}
+</timeParamToSeconds>
+
+<Max7219>
+function Max7219(board, din, cs, clk) {
+    <constructorSetup>
+    Module.call(this);
+    this._board = board;
+    this._din = din;
+    this._cs = cs;
+    this._clk = clk;
+    this._intensity = 0;
+    this._data = 'ffffffffffffffff';
+    </constructorSetup>
+
+    <boardEventListeners>
+    this._board.on(BoardEvent.BEFOREDISCONNECT, this.animateStop.bind(this));
+    this._board.on(BoardEvent.ERROR, this.animateStop.bind(this));
+    </boardEventListeners>
+
+    <sendInitialData>
+    this._board.send([0xf0, 4, 8, 0, din.number, cs.number, clk.number, 0xf7]);
+    </sendInitialData>
+}
+</Max7219>
+
+<decrypt>
+function decrypt(buffer, params, keyLookupCallback) {
+    <parseHeader>
+    var header = parseParams(params);
+    if (header.version === 'aes128gcm') {
+        var headerLength = readHeader(buffer, header);
+        buffer = buffer.slice(headerLength);
+    }
+    </parseHeader>
+    
+    var key = deriveKeyAndNonce(header, MODE_DECRYPT, keyLookupCallback);
+    var start = 0;
+    var result = new Buffer(0);
+
+    <calculateChunkSize>
+    var chunkSize = header.rs;
+    if (header.version !== 'aes128gcm') {
+        chunkSize += TAG_LENGTH;
+    }
+    </calculateChunkSize>
+
+    <decryptChunks>
+    for (var i = 0; start < buffer.length; ++i) {
+        var end = start + chunkSize;
+        if (header.version !== 'aes128gcm' && end === buffer.length) {
+            throw new Error('Truncated payload');
+        }
+        end = Math.min(end, buffer.length);
+        if (end - start <= TAG_LENGTH) {
+            throw new Error('Invalid block: too small at ' + i);
+        }
+        var block = decryptRecord(key, i, buffer.slice(start, end),
+                                  header, end >= buffer.length);
+        result = Buffer.concat([result, block]);
+        start = end;
+    }
+    </decryptChunks>
+
+    return result;
+}
+</decrypt>
+
+<setCookie>
+function setCookie(optOutState) {
+    <handleOptOutState>
+    switch (optOutState) {
+        case true:
+            document.cookie = `${disableStr}=true; expires=Thu, 18 Jan 2038 03:13:59 UTC; path=/`;
+            window[disableStr] = true;
+            break;
+
+        case false:
+            document.cookie = `${disableStr}=false; expires=Thu, 01 Jan 1970 00:00:01 UTC; path=/`;
+            window[disableStr] = false;
+            break;
+
+        default:
+            console.warn('setCookie for outOut invalid param optOutState. Param must be boolean');
+            return false;
+    }
+    </handleOptOutState>
+
+    return true;
+}
+</setCookie>
+
+<createOptions>
+function createOptions(options) {
+    <cacheOptions>
+    var object = optionsCache[options] = {}; (options.match(rnotwhite) || []).forEach(function (flag) {
+        object[flag] = true;
+    });
+    </cacheOptions>
+    return object;
+}
+</createOptions>
+
+<run>
+function run(g) {
+    <initializeDummyChains>
+    g.graph().dummyChains = [];
+    </initializeDummyChains>
+    <normalizeGraphEdges>
+    _.forEach(g.edges(), function(edge) { normalizeEdge(g, edge); });
+    </normalizeGraphEdges>
+}
+</run>
+
+<functionNameless2>
+function (type, data) {
+    if (type === 'size') {
+        return `File size should be less than ${bytes(data.size)}`
+    }
+
+    if (type === 'type') {
+        const verb = data.types.length === 1 ? 'is' : 'are'
+        return `Invalid file type ${data.subtype} or ${data.type}. Only ${data.types.join(', ')} ${verb} allowed`
+    }
+
+    if (type === 'extname') {
+        const verb = data.extnames.length === 1 ? 'is' : 'are'
+        return `Invalid file extension ${data.extname}. Only ${data.extnames.join(', ')} ${verb} allowed`
+    }
+}
+</functionNameless2>
+
+<f_cop_urun_sil>
+function f_cop_urun_sil(_tahta_id, _urun_id, _kullanici_id) {
+    <verifyProductDeletion>
+    var urun = require('./db_urun');
+    return urun.f_db_urun_teklif_kontrol(_tahta_id, _urun_id)
+        .then(function (_teklifler) {
+            if (_teklifler && _teklifler != null && _teklifler.length > 0) {
+
+                throw new exception.Istisna("Ürün silinemedi!",
+                    "Silinmek istenen ürüne ait sistemde kayıtlı teklifler olduğu için işlem gerçekleştirilemez!");
+
+            } else {
+                return urun.f_db_urun_sil(_tahta_id, _urun_id, _kullanici_id);
+            }
+        });
+    </verifyProductDeletion>
+}
+</f_cop_urun_sil>
+```

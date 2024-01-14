@@ -1,0 +1,256 @@
+```javascript
+<_get_result>
+function _get_result(Type) {
+  return function(rows) {
+    if(!rows) { throw new TypeError("failed to parse result"); }
+    var doc = rows.shift();
+    if(!doc) { return; }
+
+    if(doc instanceof Type) {
+      return doc;
+    }
+
+    var obj = {};
+    ARRAY(Object.keys(doc)).forEach(function(key) {
+
+      if(key === 'documents') {
+        obj['$'+key] = {};
+        ARRAY(Object.keys(doc[key])).forEach(function(k) {
+          if(is.uuid(k)) {
+            obj['$'+key][k] = _get_result(NoPg.Document)([doc[key][k]]);
+          } else {
+            obj['$'+key][k] = doc[key][k];
+          }
+        });
+        return;
+      }
+
+      obj['$'+key] = doc[key];
+    });
+
+    _parse_object_expressions(obj);
+
+    return new Type(obj);
+  };
+}
+</_get_result>
+
+<trainTuples>
+function trainTuples(words) {
+  var probs = {};
+  var count = 0;
+
+  words.forEach(function(w) {
+    w = clean(w);
+
+    for (var i = 0; i < w.length - 1; i++) {
+      if (!probs[w[i]]) probs[w[i]] = {};
+      if (!probs[w[i]][w[i + 1]]) probs[w[i]][w[i + 1]] = 1;
+      else probs[w[i]][w[i + 1]]++;
+      count++;
+    }
+  });
+
+  Object.keys(probs).forEach(function(first) {
+    Object.keys(probs[first]).forEach(function(second) {
+      probs[first][second] = percent(probs[first][second], count);
+    });
+  });
+
+  return probs;
+}
+</trainTuples>
+
+<anonymous_function> // Function needs a name for proper tagging. Assuming this is an anonymous function within a context.
+function(pos) {
+  var props = {};
+  <calculate_position_properties>
+  if(pos.indexOf('top') !== -1) {
+    props.top = this.options.pos_margin;
+  } else if(pos.indexOf('bottom') !== -1) {
+    props.bottom = this.options.pos_margin;
+  }
+
+  if(pos.indexOf('left') !== -1) {
+    props.left = this.options.pos_margin;
+  } else if(pos.indexOf('right') !== -1) {
+    props.right = this.options.pos_margin;
+  }
+  </calculate_position_properties>
+  this.$el.css(props);
+}
+</anonymous_function>
+
+<controlComponent>
+function controlComponent() {
+  return {
+    restrict: 'A',
+    
+    link: (scope, element, attrs) => {
+
+      const control = 
+              (scope.$eval(attrs['ngeoControl']));
+      console.assert(control instanceof olControlControl);
+
+      const map = 
+              (scope.$eval(attrs['ngeoControlMap']));
+      console.assert(map instanceof olMap);
+
+      control.setTarget(element[0]);
+      map.addControl(control);
+    }
+  };
+}
+</controlComponent>
+
+<anonymous_function> // Function needs a name for proper tagging. Assuming this is an anonymous function within a context.
+function (globe, positions, followTerrain, pathType, maxLength) {
+  var subdividedPositions = [];
+  var loc = new Location(0, 0);
+  var destLatLon = new Location(0, 0);
+  var pos1 = positions[0];
+  var elevation;
+
+  this.addPosition(globe, subdividedPositions, pos1, followTerrain);
+
+  for (var i = 1; i < positions.length; i++) {
+    var pos2 = positions[i];
+    var arcLengthRadians = Location.greatCircleDistance(pos1, pos2);
+    loc = Location.interpolateAlongPath(pathType, 0.5, pos1, pos2, loc);
+    var arcLength = arcLengthRadians * globe.radiusAt(loc.latitude, loc.longitude);
+    if (arcLength > maxLength) {
+      
+      var segmentAzimuth = null;
+      var segmentDistance = null;
+      var steps = Math.ceil(arcLength / maxLength); 
+      for (var j = 1; j < steps; j++) {
+        var s = j / steps;
+        // Path type calculations and interpolation
+        if (pathType === WorldWind.LINEAR) {
+          destLatLon = Location.interpolateLinear(s, pos1, pos2, destLatLon);
+        }
+        else if (pathType === WorldWind.RHUMB_LINE) {
+          if (segmentAzimuth == null) {
+            segmentAzimuth = Location.rhumbAzimuth(pos1, pos2);
+            segmentDistance = Location.rhumbDistance(pos1, pos2);
+          }
+          destLatLon = Location.rhumbLocation(pos1, segmentAzimuth, s * segmentDistance, destLatLon);
+        }
+        else {
+          if (segmentAzimuth == null) {
+            segmentAzimuth = Location.greatCircleAzimuth(pos1, pos2); 
+            segmentDistance = Location.greatCircleDistance(pos1, pos2); 
+          }
+          destLatLon = Location.greatCircleLocation(pos1, segmentAzimuth, s * segmentDistance, destLatLon);
+        }
+
+        // Elevation setting based on terrain following or straight interpolation
+        if (followTerrain) {
+          elevation = globe.elevationAtLocation(destLatLon.latitude, destLatLon.longitude);
+        }
+        else {
+          elevation = pos1.altitude * (1 - s) + pos2.altitude * s;
+        }
+
+        subdividedPositions.push(new Position(destLatLon.latitude, destLatLon.longitude, elevation));
+      }
+    }
+
+    // Add position to path, move to next segment
+    this.addPosition(globe, subdividedPositions, pos2, followTerrain);
+    pos1 = pos2;
+  }
+
+  return subdividedPositions;
+}
+</anonymous_function>
+
+<presenceVerifier>
+function presenceVerifier(key, input, setting) {
+  return null == input ? 
+      ["req","required"].indexOf(setting) >= 0 ? "Value '"+key+"' required" : "skip" : true;
+}
+</presenceVerifier>
+
+<UMLComponentView>
+function UMLComponentView() {
+  UMLClassifierView.apply(this, arguments);
+
+  _.extend(UMLComponentView.prototype, UMLComponentViewMixin);
+
+  this.fillColor = PreferenceManager.get("uml.component.fillColor", "#ffffff") || PreferenceManager.get("view.fillColor", "#ffffff");
+  this.stereotypeDisplay  = PreferenceManager.get("uml.component.stereotypeDisplay", UML.SD_LABEL);
+  this.suppressAttributes = PreferenceManager.get("uml.component.suppressAttributes", true);
+  this.suppressOperations = PreferenceManager.get("uml.component.suppressOperations", true);
+}
+</UMLComponentView>
+
+<anonymous_function>
+function(services) {
+  return _.map(services, function(service) {
+    var hostnames = [];
+
+    if (service.default) {
+      hostnames.push(app.name);
+    }
+
+    if (service.hostname) {
+      hostnames.push([service.hostname, app.name].join('.'));
+    }
+
+    if (service.subdomains) {
+      _.forEach(service.subdomains, function(subdomain) {
+        hostnames.push([subdomain, app.name].join('.'));
+      });
+    }
+
+    if (service.custom) {
+      _.forEach(service.custom, function(url) {
+        hostnames.push(url);
+      });
+    }
+
+    var protocol = (service.secure) ? 'https://' : 'http://';
+
+    return _.map(hostnames, function(hostname) {
+      return protocol + [hostname, app.domain].join('.');
+    });
+  });
+}
+</anonymous_function>
+
+<resolveSVG>
+function resolveSVG(svg) {
+  svg = svg.replace(/\s+xmlns(?:\:[\w-]+)?=("|')[^"']*\1/g, ' ')
+    .replace(/<defs[>\s][\s\S]+?\/defs>/g, function (text) {
+      if (text.indexOf('</font>') >= 0) {
+        return text;
+      }
+      return '';
+    })
+    .replace(/<use[>\s][\s\S]+?\/use>/g, '');
+  return svg;
+}
+</resolveSVG>
+
+<ownCustomObject>
+function ownCustomObject(name, Meta) {
+  var key = memberProperty(name);
+  var capitalized = capitalize(name);
+  <define_writable_property>
+  Meta.prototype['writable' + capitalized] = function (create) {
+    var ret = this[key];
+    if (!ret) {
+      ret = this[key] = create(this.source);
+    }
+    return ret;
+  };
+  </define_writable_property>
+  <define_readable_property>
+  Meta.prototype['readable' + capitalized] = function () {
+    return this[key];
+  };
+  </define_readable_property>
+}
+</ownCustomObject>
+```

@@ -1,0 +1,237 @@
+<build>
+async function build(inputOpts, outputOpts) {
+  
+  <bundleCreation>
+  const bundle = await rollup.rollup(inputOpts);
+  </bundleCreation>
+  
+  <bundleGeneration>
+  const { code, map } = await bundle.generate(outputOpts);
+  </bundleGeneration>
+
+  <logging>
+  console.log('Writing file: ' + outputOpts.file);
+  </logging>
+  
+  <writeFileToSystem>
+  writeFile(outputOpts.file, code);
+  </writeFileToSystem>
+
+  <logBundleTimings>
+  console.log('Generated bundle: ', bundle.getTimings()[ '# GENERATE' ]);
+  </logBundleTimings>
+
+}
+</build>
+
+<CommandEventListener>
+function CommandEventListener(event, handler, capture) {
+    this.event = event;
+    this.handler = handler;
+    this.capture = capture || false;
+}
+</CommandEventListener>
+
+<extendInstance>
+function extendInstance(ctx) {
+  
+  <addPropertiesGetter>
+  if (!this.properties) {
+    Object.defineProperty(this, 'properties', {
+      get() {
+        return this.props
+      }
+    });
+    </addPropertiesGetter>
+
+    <addCreateSelectorQuery>
+    defineProperty(this, 'createSelectorQuery', () => createSelectorQuery({
+      context: this
+    }));
+    </addCreateSelectorQuery>
+
+    <addTriggerEvent>
+    defineProperty(this, 'triggerEvent', triggerEvent);
+    </addTriggerEvent>
+
+    <addIdGetter>
+    Object.defineProperty(this, 'id', {
+      get() {
+        return this.props.id || this.$id
+      }
+    });
+    </addIdGetter>
+
+    <addSelectAllComponents>
+    defineProperty(this, 'selectAllComponents', selectAllComponents);
+    </addSelectAllComponents>
+
+    <addSelectComponent>
+    defineProperty(this, 'selectComponent', selectComponent);
+    </addSelectComponent>
+
+    <handleComponentInstanceFunctions>
+    cannotAchieveComponentInstanceFunctions(this);
+    </handleComponentInstanceFunctions>
+
+  }
+}
+</extendInstance>
+
+<getIssuerModule>
+function getIssuerModule(parent) {
+  let issuer = parent;
+
+  <findIssuer>
+  while (issuer && (issuer.id === '[eval]' || issuer.id === '<repl>' || !issuer.filename)) {
+    issuer = issuer.parent;
+  }
+  </findIssuer>
+
+  return issuer;
+}
+</getIssuerModule>
+
+<resizeEditor>
+function resizeEditor(psize) {
+    <calculateSizeAndDetermineForce>
+    var force = false;
+    if (psize === -1) {
+      force = true;
+      psize = max(10, editorSize || Number(localStorage.editorSize) || 50);
+    } else {
+      psize = psize % 100;
+    }
+    </calculateSizeAndDetermineForce>
+
+    <resizeIfNecessary>
+    if (force || editorSize !== psize) {
+      if (psize) { localStorage.editorSize = editorSize = psize; }
+      if (isLeftRight) {
+        <styleLeftRightLayout>
+        $('.left.col').css({ width: psize + '%', height: '100%' });
+        $('.right.col').css({ width: (100 - psize) + '%', height: '100%' });
+        $('.handle').css({ left: psize + '%', top: '0' });
+        </styleLeftRightLayout>
+      } else {
+        <styleTopBottomLayout>
+        $('.top.row').css({ height: psize + '%', width: '100%' });
+        $('.bottom.row').css({ height: 100 - psize + '%', width: '100%' });
+        $('.handle').css({ left: '0', top: ((psize / 100 * ($outer.clientHeight - 25)) + 25) + 'px' });
+        </styleTopBottomLayout>
+      }
+    }
+    </resizeIfNecessary>
+    
+}
+</resizeEditor>
+
+<insertLine>
+function insertLine(interactive = true) {
+  <checkStoryContinuation>
+  if (!story.canContinue) {
+    return Promise.resolve(false);
+  }
+  </checkStoryContinuation>
+
+  <generateLineElement>
+  const line = story.Continue();
+  const {elementType, classes} = decodeTags(story.currentTags);
+  const elem = createLineElement(line, elementType, classes);
+  </generateLineElement>
+
+  if (interactive) {
+    <handleInteractiveLineInsertion>
+    return new Promise(resolve => {
+      const cb = oneTimeCB(resolve);
+      elem.addEventListener('animationend', cb);
+      setTimeout(cb, 2000);
+      stageDiv.appendChild(elem);
+    });
+    </handleInteractiveLineInsertion>
+  } else {
+    <appendLineElement>
+    stageDiv.appendChild(elem);
+    return Promise.resolve(true);
+    </appendLineElement>
+  }
+}
+</insertLine>
+
+<needsDeps>
+function needsDeps(name) {
+  return name.charAt(0) === "$" &&
+    !(/\$[0-9]+/.test(name)) &&
+    name !== "$global" &&
+    name !== "$match" &&
+    name !== "$tmp" &&
+    name !== "$error";
+}
+</needsDeps>
+
+<getUniqueIdentifierName>
+function getUniqueIdentifierName(scopes, prefix, num) {
+  if (!scopes) {
+    return prefix;
+  }
+
+  <collatePropertiesFromScopes>
+  var props = scopes.reduce(function(props, scope) {
+    return _.union(props, _.keys(scope.props));
+  }, []);
+  </collatePropertiesFromScopes>
+
+  if (!props) {
+    return prefix;
+  }
+
+  num = num || "1";
+  var name;
+
+  <calculateUniqueName>
+  while (num < 100) {
+    name = prefix + num;
+    if (props.indexOf(name) === -1) {
+      break;
+    }
+    ++num;
+  }
+  </calculateUniqueName>
+
+  return name;
+}
+</getUniqueIdentifierName>
+
+<findLCA>
+function findLCA(node1, node2, layoutInfo) {
+  
+  <findLCA_auxCall>
+  var res = findLCA_aux(node1, node2, 0, layoutInfo);
+  </findLCA_auxCall>
+
+  if (2 > res.count) {
+    
+    
+    return 0;
+  } else {
+    return res.graph;
+  }
+}
+</findLCA>
+
+<getSockets>
+function getSockets() {
+  <initializeSockets>
+  let _sub = zmq.socket('sub');
+  let _pub = zmq.socket('pub');
+  _pub.linger = 0;
+  </initializeSockets>
+
+  <configureSubscriberSocket>
+  _sub.subscribe('');
+  _sub.on('message', (...args) => _pub.send(args));
+  </configureSubscriberSocket>
+
+  return {sub: _sub, pub: _pub};
+}
+</getSockets>

@@ -1,0 +1,248 @@
+1.
+```javascript
+<initializeHashPartitioner>
+function (partitions) {
+        var jvmObject = new org.apache.spark.HashPartitioner(partitions);
+        JavaWrapper.call(this, jvmObject);
+}
+</initializeHashPartitioner>
+```
+
+2.
+```javascript
+<initializeCustomElement>
+function () {
+    this.setClass();
+    baseType.init.call(this);
+    var self = this;
+    <bindSelectEvent>
+    var e = this._element;
+    if (/select/i.test(e.tagName)) {
+        this.set_allowSelectFirst(true);
+        this.bindEvent(e, 'change', function () {
+            AtomBinder.setValue(self, 'selectedIndex', e.selectedIndex);
+        });
+    }
+    </bindSelectEvent>
+
+    
+    <defineCommands>
+    this.selectCommand = function () {
+        self.onSelectItem.apply(self, arguments);
+    };
+    this.selectAllCommand = function () {
+        self.set_selectAll(true);
+    };
+    this.clearSelectionCommand = function () {
+        self.set_selectedIndex(-1);
+    };
+    </defineCommands>
+}
+</initializeCustomElement>
+```
+
+3.
+```javascript
+<getNormalizedItem>
+function(argname){
+    var names = this.getNormalizedName(argname), name = names.name;
+    var item = this.list[name];
+    if(!item){ return null;}
+    if(!!item.variety){
+        var pid = (names.pid!==void 0 ? names.pid : this.puzzle.pid);
+        if(item.variety[pid]!==void 0){ return item.variety[pid];}
+    }
+    return item.val;
+}
+</getNormalizedItem>
+```
+
+4.
+```javascript
+<recursiveCopy>
+async function copy(src, dist) {
+    <checkSource>
+    let stats = await stat(src);
+    </checkSource>
+    
+    <handleFileCopy>
+    if (!stats.isDirectory()) {
+        return await copyFile(src, dist);
+    }
+    </handleFileCopy>
+
+    <createDestinationDirectory>
+    if (!await stat(dist)) {
+        await local.mkdir(dist);
+    }
+    </createDestinationDirectory>
+
+    <listSourceDirectory>
+    files = await local.readdir(src);
+    </listSourceDirectory>
+
+    <copyRemainingFiles>
+    await Promise.all(files.map(file => (
+        file === 'node_modules' ? Promise.resolve() : copy(path.resolve(src, file), path.resolve(dist, file))
+    )));
+    </copyRemainingFiles>
+}
+</recursiveCopy>
+```
+
+5.
+```javascript
+<propagateSyntaxToDescendants>
+function propagateSyntax(parent) {
+    if (parent['messages']) {
+        parent['messages'].forEach(function(child) {
+            child["syntax"] = parent["syntax"];
+            propagateSyntax(child);
+        });
+    }
+    if (parent['enums']) {
+        parent['enums'].forEach(function(child) {
+            child["syntax"] = parent["syntax"];
+        });
+    }
+}
+</propagateSyntaxToDescendants>
+```
+
+6.
+```javascript
+<retrieveUserConfig>
+function getUserConfig(propNames) {
+  
+  <loadAndParseConfig>
+  const config = JSON.parse(utils.loadPackageJson())['eslint-teamcity'] || {};
+  </loadAndParseConfig>
+
+  <determineReporter>
+  const reporter =
+    propNames.reporter || config.reporter || process.env.ESLINT_TEAMCITY_REPORTER || 'errors';
+  </determineReporter>
+
+  <determineReportName>
+  const reportName =
+    propNames.reportName ||
+    config['report-name'] ||
+    process.env.ESLINT_TEAMCITY_REPORT_NAME ||
+    'ESLint Violations';
+  </determineReportName>
+
+  <determineErrorStatisticsName>
+  const errorStatisticsName =
+    propNames.errorStatisticsName ||
+    config['error-statistics-name'] ||
+    process.env.ESLINT_TEAMCITY_ERROR_STATISTICS_NAME ||
+    'ESLint Error Count';
+  </determineErrorStatisticsName>
+
+  <determineWarningStatisticsName>
+  const warningStatisticsName =
+    propNames.warningStatisticsName ||
+    config['warning-statistics-name'] ||
+    process.env.ESLINT_TEAMCITY_WARNING_STATISTICS_NAME ||
+    'ESLint Warning Count';
+  </determineWarningStatisticsName>
+
+  <returnConfigObject>
+  return {
+    reporter,
+    reportName: utils.escapeTeamCityString(reportName),
+    errorStatisticsName: utils.escapeTeamCityString(errorStatisticsName),
+    warningStatisticsName: utils.escapeTeamCityString(warningStatisticsName)
+  };
+  </returnConfigObject>
+}
+</retrieveUserConfig>
+```
+
+7.
+```javascript
+<attachView>
+function attachEmbeddedView(parentView, elementData, viewIndex, view) {
+    <manageEmbeddedViewArray>
+    var embeddedViews = ((elementData.viewContainer))._embeddedViews;
+    if (viewIndex === null || viewIndex === undefined) {
+        viewIndex = embeddedViews.length;
+    }
+    view.viewContainerParent = parentView;
+    addToArray(embeddedViews, ((viewIndex)), view);
+    </manageEmbeddedViewArray>
+
+    <manageProjectedViews>
+    var dvcElementData = declaredViewContainer(view);
+    if (dvcElementData && dvcElementData !== elementData) {
+        var projectedViews = dvcElementData.template._projectedViews;
+        if (!projectedViews) {
+            projectedViews = dvcElementData.template._projectedViews = [];
+        }
+        projectedViews.push(view);
+    }
+    </manageProjectedViews>
+
+    <updateQueriesAndRender>
+    Services.dirtyParentQueries(view);
+    var prevView = ((viewIndex)) > 0 ? embeddedViews[((viewIndex)) - 1] : null;
+    renderAttachEmbeddedView(elementData, prevView, view);
+    </updateQueriesAndRender>
+}
+</attachView>
+```
+
+8.
+```javascript
+<startServer>
+function listen(port = 4000) {
+    <listenToPort>
+    server.listen(process.env.PORT || config.port || port, () => {
+        <logServerStart>
+        app.drivers.logger.success('Express', `App listening on port ${config.port}`)
+        </logServerStart>
+    })
+    </listenToPort>
+}
+</startServer>
+```
+
+9.
+```javascript
+<addControlToMap>
+function (Map, options) {
+    <handleModuleEnvironment>
+    if (typeof module !== 'undefined' && module.exports) {
+        Map.addControl(require('./L.Marker.Pin.Control')(options));
+    }
+    </handleModuleEnvironment>
+    <handleGlobalEnvironment>
+    else {
+        Map.addControl(L.marker.pin.control(options));
+    }
+    </handleGlobalEnvironment>
+}
+</addControlToMap>
+```
+
+10.
+```javascript
+<initializeWebGlRenderer>
+function WebGlEquirectRenderer(gl) {
+    this.gl = gl;
+
+    <initializeMatrices>
+    this.invProjMatrix = mat4.create();
+    this.viewportMatrix = mat4.create();
+    </initializeMatrices>
+
+    <createConstantBuffers>
+    this.constantBuffers = createConstantBuffers(gl, vertexIndices, vertexPositions, textureCoords);
+    </createConstantBuffers>
+
+    <createShaderProgram>
+    this.shaderProgram = createShaderProgram(gl, vertexSrc, fragmentSrc, attribList, uniformList);
+    </createShaderProgram>
+}
+</initializeWebGlRenderer>
+```

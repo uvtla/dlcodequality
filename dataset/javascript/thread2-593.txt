@@ -1,0 +1,410 @@
+<processSync>
+function processSync(filename, content, updater, format) {
+  var text = String(content);
+
+  <parseContent>
+  var ast = esprima.parse(text, {
+    loc    : true,
+    comment: true,
+    source : filename
+  });
+  </parseContent>
+
+  <orderAstNodes>
+  var sorted = orderNodes(ast);
+  </orderAstNodes>
+
+  <associateCommentsWithNodes>
+  associateComments(ast, sorted);
+  </associateCommentsWithNodes>
+
+  <prepareSourcemap>
+  var converter     = convert.fromSource(text);
+  var originalMap   = converter && converter.toObject();
+  var sourceContent = text;
+  if (originalMap) {
+    sourcemapToAst(ast, originalMap);
+    sourceContent = originalMap.sourcesContent[0];
+  }
+  </prepareSourcemap>
+
+  <updateAst>
+  var updated = ((typeof updater === 'function') && updater(filename, ast)) || ast;
+  </updateAst>
+
+  <generateCode>
+  var pair = codegen.generate(updated, {
+    sourceMap        : true,
+    sourceMapWithCode: true,
+    format           : format || {}
+  });
+  </generateCode>
+
+  <setSourceContent>
+  var posixPath = filename.replace(/\\/g, '/');
+  pair.map.setSourceContent(posixPath, sourceContent);
+  </setSourceContent>
+
+  <generateMapComment>
+  var mapComment = convert.fromJSON(pair.map.toString()).toComment();
+  </generateMapComment>
+
+  <returnCodeWithComment>
+  return pair.code + mapComment;
+  </returnCodeWithComment>
+}
+</processSync>
+
+<isControlMethod>
+function (methodName) {
+  var val = this.prototype[methodName],
+      type = typeof val;
+
+  return (methodName !== 'constructor') &&
+  (type === "function" || (type === "string" && (typeof this.prototype[val] === "function") )) &&
+  !! (Control.isSpecial(methodName) || processors[methodName] || /[^\w]/.test(methodName));
+}
+</isControlMethod>
+
+<compileMustache>
+function(mustache, program, inverse) {
+  var params = mustache.params;
+  this.pushParams(params);
+
+  this.opcode('pushProgram', program);
+  this.opcode('pushProgram', inverse);
+
+  if(mustache.hash) {
+    this.hash(mustache.hash);
+  } else {
+    this.opcode('pushLiteral', '{}');
+  }
+
+  return params;
+}
+</compileMustache>
+
+<addMapsToModule>
+function( maps ){
+  maps.forEach(function(map){
+    if(map && map.root && map.name && map.properties){
+    modules.maps[map.name] = JSON.parse(JSON.stringify(map));
+    }
+  });
+}
+</addMapsToModule>
+
+<isRenderMethod>
+function isRenderMethod (props) {
+  return props.some((prop) => {
+    return prop.key.name === 'key' && prop.value.value === 'render'
+  }) && props.some((prop) => {
+    return prop.key.name === 'value' && t.isFunctionExpression(prop.value)
+  })
+}
+</isRenderMethod>
+
+<showDiff>
+function showDiff(acediff, editor, startLine, endLine, className) {
+  var editor = acediff.editors[editor];
+
+  if (endLine < startLine) { 
+    endLine = startLine;
+  }
+
+  const classNames = `${className} ${(endLine > startLine) ? 'lines' : 'targetOnly'}`;
+  endLine--; 
+
+  <addMarkerToEditor>
+  editor.markers.push(editor.ace.session.addMarker(new Range(startLine, 0, endLine, 1), classNames, 'fullLine'));
+  </addMarkerToEditor>
+}
+</showDiff>
+
+<generateAuthSignature>
+function(publicKey, privateKey) {
+  var ts = new Date() / 1000 | 0;
+  return {
+    <timestampAndSignature>
+    ts: ts,
+    api_sig: crypto.createHmac('sha1', privateKey).update(ts.toString()).digest('hex'),
+    </timestampAndSignature>
+    <apiKey>
+    api_key: publicKey
+    </apiKey>
+  };
+}
+</generateAuthSignature>
+
+<updateSweetAlertModal>
+function setParameters(params) {
+  var modal = getModal();
+  var $title = modal.querySelector('h2'),
+      $text = modal.querySelector('p'),
+      $cancelBtn = modal.querySelector('button.cancel'),
+      $confirmBtn = modal.querySelector('button.confirm');
+
+  <setTitle>
+  $title.innerHTML = escapeHtml(params.title).split("\n").join("<br>");
+  </setTitle>
+
+  <setText>
+  $text.innerHTML = escapeHtml(params.text || '').split("\n").join("<br>");
+  if (params.text) {
+    show($text);
+  }
+  </setText>
+
+  <applyCustomClass>
+  if (params.customClass) {
+    addClass(modal, params.customClass);
+  }
+  </applyCustomClass>
+
+  <setupAlertTypeAndVisibility>
+  hide(modal.querySelectorAll('.icon'));
+  if (params.type) {
+    var validType = false;
+    for (var i = 0; i < alertTypes.length; i++) {
+      if (params.type === alertTypes[i]) {
+        validType = true;
+        break;
+      }
+    }
+    if (!validType) {
+      window.console.error('Unknown alert type: ' + params.type);
+      return false;
+    }
+    var $icon = modal.querySelector('.icon.' + params.type);
+    show($icon);
+
+    <animateIcon>
+    switch (params.type) {
+      case "success":
+        addClass($icon, 'animate');
+        addClass($icon.querySelector('.tip'), 'animateSuccessTip');
+        addClass($icon.querySelector('.long'), 'animateSuccessLong');
+        break;
+      case "error":
+        addClass($icon, 'animateErrorIcon');
+        addClass($icon.querySelector('.x-mark'), 'animateXMark');
+        break;
+      case "warning":
+        addClass($icon, 'pulseWarning');
+        addClass($icon.querySelector('.body'), 'pulseWarningIns');
+        addClass($icon.querySelector('.dot'), 'pulseWarningIns');
+        break;
+    }
+    </animateIcon>
+
+  </setupAlertTypeAndVisibility>
+
+  <setupCustomImageIcon>
+  if (params.imageUrl) {
+    var $customIcon = modal.querySelector('.icon.custom');
+
+    $customIcon.style.backgroundImage = 'url(' + params.imageUrl + ')';
+    show($customIcon);
+
+    var _imgWidth  = 80,
+        _imgHeight = 80;
+
+    if (params.imageSize) {
+      var imgWidth  = params.imageSize.split('x')[0];
+      var imgHeight = params.imageSize.split('x')[1];
+
+      if (!imgWidth || !imgHeight) {
+        window.console.error("Parameter imageSize expects value with format WIDTHxHEIGHT, got " + params.imageSize);
+      } else {
+        _imgWidth  = imgWidth;
+        _imgHeight = imgHeight;
+
+        $customIcon.css({
+          'width': imgWidth + 'px',
+          'height': imgHeight + 'px'
+        });
+      }
+    }
+    $customIcon.setAttribute('style', $customIcon.getAttribute('style') + 'width:' + _imgWidth + 'px; height:' + _imgHeight + 'px');
+  }
+  </setupCustomImageIcon>
+
+  <setupButtonsAndAllowOutsideClick>
+  modal.setAttribute('data-has-cancel-button', params.showCancelButton);
+  if (params.showCancelButton) {
+    $cancelBtn.style.display = 'inline-block';
+  } else {
+    hide($cancelBtn);
+  }
+
+  if (params.cancelButtonText) {
+    $cancelBtn.innerHTML = escapeHtml(params.cancelButtonText);
+  }
+  if (params.confirmButtonText) {
+    $confirmBtn.innerHTML = escapeHtml(params.confirmButtonText);
+  }
+
+  $confirmBtn.style.backgroundColor = params.confirmButtonColor;
+
+  setFocusStyle($confirmBtn, params.confirmButtonColor);
+
+  modal.setAttribute('data-allow-ouside-click', params.allowOutsideClick);
+  </setupButtonsAndAllowOutsideClick>
+
+  <miscellaneousModalAttributes>
+  var hasDoneFunction = (params.doneFunction) ? true : false;
+  modal.setAttribute('data-has-done-function', hasDoneFunction);
+
+  modal.setAttribute('data-timer', params.timer);
+  </miscellaneousModalAttributes>
+}
+</updateSweetAlertModal>
+
+<modifySeriesAndLegend>
+function (chart) {
+  var series = this,
+      valueDecimals = chart.options.legend.valueDecimals,
+      legendItems = [],
+      name,
+      from,
+      to,
+      fromLabel,
+      toLabel,
+      colorRange,
+      valueRanges,
+      gradientColor,
+      grad,
+      tmpLabel,
+      horizontal = chart.options.legend.layout === 'horizontal';
+
+  <initSeries>
+  Highcharts.Series.prototype.init.apply(this, arguments);
+  </initSeries>
+  <handleColorRangeAndValueRanges>
+  colorRange = series.options.colorRange;
+  valueRanges = series.options.valueRanges;
+
+  if (valueRanges) {
+    <addValueRangesToLegendItems>
+    each(valueRanges, function (range) {
+      from = range.from;
+      to = range.to;
+      
+      
+      name = '';
+      if (from === UNDEFINED) {
+        name = '< ';
+      } else if (to === UNDEFINED) {
+        name = '> ';
+      }
+      if (from !== UNDEFINED) {
+        name += numberFormat(from, valueDecimals);
+      }
+      if (from !== UNDEFINED && to !== UNDEFINED) {
+        name += ' - ';
+      }
+      if (to !== UNDEFINED) {
+        name += numberFormat(to, valueDecimals);
+      }
+      
+      
+      legendItems.push(Highcharts.extend({
+        chart: series.chart,
+        name: name,
+        options: {},
+        drawLegendSymbol: seriesTypes.area.prototype.drawLegendSymbol,
+        visible: true,
+        setState: function () {},
+        setVisible: function () {}
+      }, range));
+    });
+    </addValueRangesToLegendItems>
+    <setSeriesLegendItems>
+    series.legendItems = legendItems;
+    </setSeriesLegendItems>
+
+  } else if (colorRange) {
+    <handleColorRangeGradient>
+    from = colorRange.from;
+    to = colorRange.to;
+    fromLabel = colorRange.fromLabel;
+    toLabel = colorRange.toLabel;
+
+    
+    grad = horizontal ? [0, 0, 1, 0] : [0, 1, 0, 0]; 
+    if (!horizontal) {
+      tmpLabel = fromLabel;
+      fromLabel = toLabel;
+      toLabel = tmpLabel;
+    } 
+
+    
+    gradientColor = {
+      linearGradient: { x1: grad[0], y1: grad[1], x2: grad[2], y2: grad[3] },
+      stops: 
+      [
+        [0, from],
+        [1, to]
+      ]
+    };
+
+    
+    legendItems = [{
+      chart: series.chart,
+      options: {},
+      fromLabel: fromLabel,
+      toLabel: toLabel,
+      color: gradientColor,
+      drawLegendSymbol: this.drawLegendSymbolGradient,
+      visible: true,
+      setState: function () {},
+      setVisible: function () {}
+    }];
+    </handleColorRangeGradient>
+    <setSeriesLegendItemsGradient>
+    series.legendItems = legendItems;
+    </setSeriesLegendItemsGradient>
+  }
+  </handleColorRangeAndValueRanges>
+}
+</modifySeriesAndLegend>
+
+<getNearbyPlaces>
+function getNearby() {
+  
+  if (nearbyPlaces)
+    return;
+
+  <logInitialRequest>
+  logResponse("[getNearby] get nearby data.");
+  </logInitialRequest>
+
+  <getCurrentLocation>
+  navigator.geolocation.getCurrentPosition(function(location) {
+    
+    <logLocationResult>
+    logResponse(location);
+    </logLocationResult>
+
+    <requestNearbyPlaces>
+    $.ajax({
+        url: '/search',
+        data: {
+            type: 'place',
+            q: 'restaurant',
+            center: location.coords.latitude + ',' + location.coords.longitude,
+            distance: 1000,
+            fields: 'id,name,picture'
+        }
+    }).success(function (response) {
+        nearbyPlaces = response.data;
+        logResponse(nearbyPlaces);
+        displayPlaces(nearbyPlaces);
+    }).error(function(err) {
+        logResponse("Error fetching nearby place data.");
+    });
+    </requestNearbyPlaces>
+  });
+  </getCurrentLocation>
+}
+</getNearbyPlaces>

@@ -1,0 +1,271 @@
+```javascript
+<function1>
+function (token, charset) {
+    var arity = [ 1, 1 ];
+    <validateTokenStructure>
+    if (   token.len >= 5
+        && token.peek(0) === "{"
+        && token.peek(1).match(/^[0-9]+$/)
+        && token.peek(2) === ","
+        && token.peek(3).match(/^(?:[0-9]+|oo)$/)
+        && token.peek(4) === "}"          ) {
+        arity = [
+            parseInt(token.peek(1), 10),
+            (  token.peek(3) === "oo"
+             ? Number.MAX_VALUE
+             : parseInt(token.peek(3), 10))
+        ];
+        token.skip(5);
+    }
+    </validateTokenStructure>
+    <validateSingleCharacter>
+    else if (
+           token.len >= 1
+        && token.peek().length === 1
+        && charset.indexOf(token.peek()) >= 0) {
+        var c = token.peek();
+        switch (c) {
+            case "?": arity = [ 0, 1 ];                break;
+            case "*": arity = [ 0, Number.MAX_VALUE ]; break;
+            case "+": arity = [ 1, Number.MAX_VALUE ]; break;
+        }
+        token.skip();
+    }
+    </validateSingleCharacter>
+    return arity;
+}
+</function1>
+
+<function2>
+function (context, authorisationRequest, callback) {
+    <handleAuthorization>
+    try {
+        this._isAuthorized(context, authorisationRequest);
+        callback();
+    } catch (e) {
+        callback(e);
+    }
+    </handleAuthorization>
+}
+</function2>
+
+<function3>
+function(module, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    <assert>
+    function assert(condition, message) {
+        
+        if (!condition) {
+            throw new Error('ASSERT: ' + message);
+        }
+    }
+    exports.assert = assert;
+    </assert>
+}
+</function3>
+
+<function4>
+function(fragment) {
+    <matchAndHandleFragment>
+    if (!this.matchRoot()) return false;
+    fragment = this.fragment = this.getFragment(fragment);
+    return _.some(this.handlers, function(handler) {
+      if (handler.route.test(fragment)) {
+        handler.callback(fragment);
+        return true;
+      }
+    });
+    </matchAndHandleFragment>
+}
+</function4>
+
+<function5>
+function calculate_encoding_from_tree_position(position_array){
+    <calculateEncoding>
+    if(position_array.length==1){
+        return get_parsed_encodings({
+            numerator:position_array[0],
+            denominator:1
+        });
+    }
+    </calculateEncoding>
+  
+    <prepareData>
+    var data = {
+        parts:_.map(position_array, function(v){return v;}),
+        unityparts:[]
+    };
+    
+    for(var i=0; i<data.parts.length; i++)
+    {   
+        data.unityparts.push(data.parts[i]);
+
+        if(i<data.parts.length-1)
+        {
+            data.unityparts.push(1);
+        }
+    }
+    </prepareData>
+
+    <calculateNumeratorDenominator>
+    data.numerator = data.unityparts.pop();
+    data.denominator = 1;
+  
+    data.integer = 0;
+  
+    while(data.unityparts.length>0)
+    {
+        data.integer = data.unityparts.pop();
+        data = reduce_continued_fraction_step(data);
+    }
+    </calculateNumeratorDenominator>
+  
+    return get_parsed_encodings(data);
+}
+</function5>
+
+<function6>
+function(iteratee, instance) {
+    <resolveIteratee>
+    if (_.isFunction(iteratee)) return iteratee;
+    if (_.isObject(iteratee) && !instance._isModel(iteratee)) return modelMatcher(iteratee);
+    if (_.isString(iteratee)) return function(model) { return model.get(iteratee); };
+    return iteratee;
+    </resolveIteratee>
+}
+</function6>
+
+<function7>
+function Queue(parameters) {
+    <configureParameters>
+    parameters = parameters || new composites.Parameters(new Catalog());
+    if (!parameters.getParameter('$type')) parameters.setParameter('$type', '/bali/collections/Queue/v1');
+    abstractions.Collection.call(this, utilities.types.QUEUE, parameters);
+    </configureParameters>
+    
+    <initializeQueue>
+    var capacity = 1024;  
+    if (parameters) {
+        const value = parameters.getParameter('$capacity', 2);
+        if (value) capacity = value.toNumber();
+    }
+    const array = [];
+    </initializeQueue>
+
+    <queueMethods>
+    this.acceptVisitor = function(visitor) {
+        visitor.visitQueue(this);
+    };
+
+    this.toArray = function() {
+        return array.slice();  
+    };
+
+    this.getSize = function() {
+        return array.length;
+    };
+
+    this.addItem = function(item) {
+        if (array.length < capacity) {
+            item = this.convert(item);
+            array.push(item);
+            return true;
+        }
+        throw new utilities.Exception({
+            $module: '/bali/collections/Queue',
+            $procedure: '$addItem',
+            $exception: '$resourceLimit',
+            $capacity: capacity,
+            $text: '"The queue has reached its maximum capacity."'
+        });
+    };
+
+    this.removeItem = function() {
+        if (array.length > 0) return array.splice(0, 1)[0];  
+    };
+
+    this.getHead = function() {
+        return array[0];
+    };
+
+    this.deleteAll = function() {
+        array.splice(0);
+    };
+    </queueMethods>
+
+    return this;
+}
+</function7>
+
+<function8>
+function (cfg) {
+    <applyStyleTransformations>
+    this.style.transform = (_.isStrictlyObject (cfg) && (
+                                (cfg.translate ? ('translate(' + cfg.translate.x.toFixed (0) + 'px,' + cfg.translate.y.toFixed (0) + 'px) ') : '') +
+                                (cfg.rotate ? ('rotate(' + cfg.rotate + 'rad) ') : '') +
+                                (cfg.scale ? ('scale(' + (new Vec2 (cfg.scale).separatedWith (',')) + ')') : ''))) || ''
+    </applyStyleTransformations>
+}
+</function8>
+
+<function9>
+function () {
+    <cleanupEvents>
+    var self = this;
+    if (self.boundEvents) {
+      var i = self.boundEvents.length;
+
+      while (i--) {
+        var item = self.boundEvents[i];
+        this.events.unbind(item[0], item[1], item[2]);
+      }
+
+      self.boundEvents = null;
+    }
+    </cleanupEvents>
+
+    <resetSizzle>
+    if (Sizzle.setDocument) {
+      Sizzle.setDocument();
+    }
+    </resetSizzle>
+
+    self.win = self.doc = self.root = self.events = self.frag = null;
+}
+</function9>
+
+<function10>
+function _checkAnnotation (op) {
+    <handleAnnotationOperation>
+    switch (op.type) {
+        case 'create':
+        case 'delete': {
+            let node = op.val
+            if (node.hasOwnProperty('start') && node.start.path) {
+                updated[getKeyForPath(node.start.path)] = true
+            }
+            if (node.hasOwnProperty('end') && node.end.path) {
+                updated[getKeyForPath(node.end.path)] = true
+            }
+            break
+        }
+        case 'update':
+        case 'set': {
+            let node = doc.get(op.path[0])
+            if (node) {
+                if (node.isPropertyAnnotation()) {
+                    updated[getKeyForPath(node.start.path)] = true
+                } else if (node.isContainerAnnotation()) {
+                    affectedContainerAnnos.push(node)
+                }
+            }
+            break
+        }
+        default:
+            // No specific operations for other types.
+    }
+   </handleAnnotationOperation>
+}
+</function10>
+```

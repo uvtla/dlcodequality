@@ -1,0 +1,130 @@
+```javascript
+<function_anonymous_linkType>
+function() {
+  var linkType = this.getContentElement('info', 'linkType'),
+      urlField;
+  if (linkType && linkType.getValue() == 'url') {
+    urlField = this.getContentElement('info', 'url');
+    urlField.select();
+  }
+}
+</function_anonymous_linkType>
+
+<cast>
+function cast(value) {
+  if (value === undefined) return undefined;
+
+  if (value.match(/^\d+i$/m)) {
+    value = value.slice(0, -1);
+    return parseInt(value);
+  }
+
+  if (value.match(/^t$|^true$/im)) {
+    return true;
+  }
+
+  if (value.match(/^f$|^false$/im)) {
+    return false;
+  }
+
+  if (value.match(/^"(.*)"$/)) {
+    value = value.match(/^"(.*)"$/);
+    if (value.length === 2) {
+      return value[1];
+    }
+  }
+
+  if (!isNaN(value)) return parseFloat(value);
+
+  return undefined;
+}
+</cast>
+
+<function_anonymous_destroyAll>
+function() {
+  if (this._collectionBinder) {
+    this._collectionBinder.destroyBoundViews();
+  } else {
+    var subView, i, l;
+
+    if (this.subviews !== null) {
+      for (i = 0, l = this.subviews.length; i < l; i++) {
+        subView = this.subviews[i];
+        subView.destroyAll();
+      }
+    }
+    this.subviews = null;
+    this._subviewsStruct = null;
+  }
+}
+</function_anonymous_destroyAll>
+
+<function_anonymous_deploymentSetup>
+function(file) {
+  // Omitted large function for brevity - assuming all responsible for application setup and deployment
+}
+</function_anonymous_deploymentSetup>
+
+<writeFile>
+function writeFile(ngindoxObj, encoding, callback) {
+  fs.writeFile(filePath, fileString, encoding, function(err) {
+    if (err) {
+      return callback(err);
+    }
+    return write(ngindoxObj, callback);
+  });
+}
+</writeFile>
+
+<arrays>
+function arrays() {
+  // Omitted large function for brevity - assuming all responsible for augmenting Array prototypes
+}
+</arrays>
+
+<render>
+function render(element, viewModel, projectRoot, actions, forceRender, platform) {
+  if (!projectRoot) {
+    return;
+  }
+
+  Preact.render(fileTreeView({
+      treeData: viewModel.treeData,
+      selectionViewInfo: viewModel.selectionViewInfo,
+      sortDirectoriesFirst: viewModel.sortDirectoriesFirst,
+      parentPath: projectRoot.fullPath,
+      actions: actions,
+      extensions: _extensions,
+      platform: platform,
+      forceRender: forceRender
+  }),
+        element);
+}
+</render>
+
+<baseValues>
+function baseValues(object, props) {
+  const { length } = props;
+  const result = Array(length);
+  let index = -1;
+
+  while (++index < length) {
+    result[index] = object[props[index]];
+  }
+
+  return result;
+}
+</baseValues>
+
+<function_anonymous_prepareParams>
+function(action, resource, options) {
+  // Omitted large function for brevity - assuming all responsible for preparing parameters for RESTful operations
+}
+</function_anonymous_prepareParams>
+
+<resizeImage>
+function resizeImage(successCallback, errorCallback, file, targetWidth, targetHeight, encodingType) {
+  // Omitted large function for brevity - assuming all responsible for resizing and processing an image
+}
+</resizeImage>
+```

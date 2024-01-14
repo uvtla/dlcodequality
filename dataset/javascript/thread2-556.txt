@@ -1,0 +1,420 @@
+```javascript
+<updateInstallationParameters>
+function () {
+    <createInfoObject>
+    var infoObj = {
+        installerPath: formattedInstallerPath,
+        logFilePath: formattedLogFilePath,
+        installStatusFilePath: installStatusFilePath
+    };
+    </createInfoObject>
+
+    <handleMacPlatform>
+    if (brackets.platform === "mac") {
+        var additionalParams = getAdditionalParams(),
+            key;
+
+        for (key in additionalParams) {
+            if (additionalParams.hasOwnProperty(key)) {
+                infoObj[key] = additionalParams[key];
+            }
+        }
+    }
+    </handleMacPlatform>
+
+    <updateParamsAndHandleErrors>
+    if (brackets.app.setUpdateParams) {
+        brackets.app.setUpdateParams(JSON.stringify(infoObj), function (err) {
+            if (err) {
+                resetStateInFailure("AutoUpdate : Update parameters could not be set for the installer. Error encountered: " + err);
+            } else {
+                setAppQuitHandler();
+                CommandManager.execute(Commands.FILE_QUIT);
+            }
+        });
+    } else {
+        resetStateInFailure("AutoUpdate : setUpdateParams could not be found in shell");
+    }
+    </updateParamsAndHandleErrors>
+}
+</updateInstallationParameters>
+
+<handleLoggingSetup>
+function (scribeOpt) {
+    <setDefaultOptions>
+    if (!scribeOpt) {
+        scribeOpt = {};
+    }
+
+    scribeOpt.rootPath = scribeOpt.rootPath || 'logs';
+    scribeOpt.createDefaultConsole = scribeOpt.createDefaultConsole !== false;
+    </setDefaultOptions>
+
+    <initializeConsolesArray>
+    var consoles = [];
+    </initializeConsolesArray>
+
+    <listenOnConsoleFunction>
+    var listenOnConsole = function (console2, logWriter) {
+        <attachEventForNewLog>
+        console2.on('new', function (log) {
+            logWriter.save(log, {
+                logger: log.opt
+            });
+        });
+        </attachEventForNewLog>
+
+        <attachEventForNewLogger>
+        console2.on('newLogger', function (logger, loggerOpt) {
+            logWriter.addLogger(loggerOpt);
+        });
+        </attachEventForNewLogger>
+    };
+    </listenOnConsoleFunction>
+
+    <createBasicFunction>
+    var createBasic = function (console) {
+        <defineLoggers>
+        var loggers = [
+            {
+                name: 'log',
+                color: 'white'
+            },
+            {
+                name: 'info',
+                color: 'cyan'
+            },
+            {
+                name: 'error',
+                color: 'red'
+            },
+            {
+                name: 'warning',
+                color: 'yellow'
+            },
+            {
+                name: 'dir',
+                color: 'white'
+            }
+        ];
+        </defineLoggers>
+
+        <addLoggersToConsole>
+        loggers.forEach(function (logger) {
+            console.addLogger(logger.name, logger.color);
+        });
+        </addLoggersToConsole>
+    };
+    </createBasicFunction>
+
+    <addConsoleFunction>
+    var addConsole = function (config, logWriter) {
+        <setDefaultConfig>
+        if (!config) {
+            config = {};
+        }
+
+        config.createBasic = config.createBasic !== false;
+        </setDefaultConfig>
+
+        <createNewConsole>
+        var console = new Console2(config.console || {});
+        </createNewConsole>
+
+        <setupLogWriter>
+        if (config.logWriter !== false) {
+            if (!logWriter) {
+                <createLogWriter>
+                var rootPath = config.logWriter ?
+                    config.logWriter.rootPath || scribeOpt.rootPath :
+                    scribeOpt.rootPath;
+
+                logWriter = new LogWriter(rootPath);
+                </createLogWriter>
+            }
+            <listenOnConsoleInvocation>
+            listenOnConsole(
+                console,
+                logWriter
+            );
+            </listenOnConsoleInvocation>
+        }
+        </setupLogWriter>
+
+        <addConsoleToConsolesArray>
+        consoles.push({
+            console: console,
+            logWriter: config.logWriter !== false ? logWriter : null
+        });
+        </addConsoleToConsolesArray>
+
+        <invokeCreateBasicIfRequired>
+        if (config.createBasic) {
+            createBasic(console);
+        }
+        </invokeCreateBasicIfRequired>
+
+        <returnConsole>
+        return console;
+        </returnConsole>
+    };
+    </addConsoleFunction>
+
+    <initWebPanelFunction>
+    var initWebPanel = function () {
+        return webPanel(consoles);
+    };
+    </initWebPanelFunction>
+
+    <createDefaultConsoleIfFlagSet>
+    if (scribeOpt.createDefaultConsole) {
+        process.console = addConsole();
+    }
+    </createDefaultConsoleIfFlagSet>
+
+    <returnLoggingAPI>
+    return {
+        console: addConsole,
+        webPanel: initWebPanel,
+        express: ExpressLogger,
+        Console2: Console2,
+        LogWriter: LogWriter
+    };
+    </returnLoggingAPI>
+}
+</handleLoggingSetup>
+
+<getBranchFromTreeFunction>
+function getBranchFromTree(tree, ary, index, i) {
+    <initializeDefaultValues>
+    if (index == null) {
+        index = null;
+    }
+    if (i == null) {
+        i = 0;
+    }
+    if (index == null) {
+        index = ary.length;
+    }
+    </initializeDefaultValues>
+    
+    <processBranchRetrieval>
+    if (i === index) {
+        return tree;
+    }
+    return getBranchFromTree(tree[ary[i]], ary, index, ++i);
+    </processBranchRetrieval>
+}
+</getBranchFromTreeFunction>
+
+<someFunction>
+function some(coll, iteratee, callback) {
+    return createTester(Boolean, res => res)(eachOf, coll, iteratee, callback);
+}
+</someFunction>
+
+<slideDataUpdate>
+function (slide) {
+    <prepareUpdateData>
+    var d = {
+        title: "",
+        description: "",
+        date: slide.getFormattedDate()
+    };
+
+    if (slide.data.text) {
+        if (slide.data.text.headline) {
+            d.title = slide.data.text.headline;
+        }
+    }
+    </prepareUpdateData>
+
+    <invokeUpdateMethod>
+    this._update(d);
+    </invokeUpdateMethod>
+}
+</slideDataUpdate>
+
+<_wishInContextFunction>
+function _wishInContext(wish) {
+    return (
+        _contextIsDefault(_context) ||
+        _contextIsDefault(wish.context) ||
+        wish.context === _context ||
+        _wishInThisContext(wish, _context)
+    );
+}
+</_wishInContextFunction>
+
+<generateRegexForLengthConstraints>
+function (args) {
+    <setDefaultsForArguments>
+    if (!args) {
+        args = {};
+    }
+    var minLength = args.minLength || 1;
+    var maxLength = args.maxLength || null;
+    var allowUpperCase = args.allowUpperCase || false;
+    var allowNonASCII = args.allowNonASCII || false;
+    </setDefaultsForArguments>
+
+    <createRegexPattern>
+    var regex = "[^/]";
+    if (minLength === 1 && !maxLength) {
+        regex += "+";
+    } else {
+        regex += "{";
+        regex += minLength;
+        if (maxLength !== minLength) {
+            regex += ",";
+            if (maxLength) {
+                regex += maxLength;
+            }
+        }
+        regex += "}";
+    }
+    </createRegexPattern>
+
+    <returnStringConverterInstance>
+    return spawn(StringConverter.prototype, {
+        regex: regex,
+        _allowUpperCase: allowUpperCase,
+        _allowNonASCII: allowNonASCII
+    });
+    </returnStringConverterInstance>
+}
+</generateRegexForLengthConstraints>
+
+<compileSassWithConfiguredLibraries>
+function compassStyle(input, output) {
+    <prepareSassLibraryList>
+    let sassList = config.sassLib || [],
+        inputList = [];
+    sassList.forEach((v) => {
+        if (!!path.parse(v).dir) {
+            inputList.push(v);
+        } else {
+            try {
+                inputList = inputList.concat(require(v).includePaths);
+            } catch (err) {
+                console.log(`没有找到 ${v} 库`);
+            }
+        }
+    });
+    </prepareSassLibraryList>
+
+    <processSassCompilation>
+    task.src(input)
+        .pipe(plumberPlugin())
+        .pipe(taskIf(styleType === 'scss', sassPlugin({ includePaths: inputList })))
+        .pipe(connectPlugin.reload())
+        .pipe(task.dest(output));
+    </processSassCompilation>
+}
+</compileSassWithConfiguredLibraries>
+
+<TrojanHorseConstructor>
+function TrojanHorse(credentials) {
+    'use strict';
+    if (!(this instanceof TrojanHorse))
+        return new TrojanHorse(credentials);
+    <initializeTrojanHorse>
+    var
+        uid = '',
+        xhrArgs = ['POST', '/.trojan-horse', true].concat(
+            credentials ? [credentials.user, credentials.pass] : []
+        ),
+        createXHR = function (data) {
+            <setupXhrRequest>
+            var xhr = new XMLHttpRequest;
+            xhr.open.apply(xhr, xhrArgs);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.send(data + '&uid=' + uid);
+            return xhr;
+            </setupXhrRequest>
+        },
+        parse = function (xhr) {
+            return JSON.parse(xhr.responseText);
+        },
+        Promise = TrojanHorse.Promise;
+    </initializeTrojanHorse>
+
+    <execMethod>
+    this.exec = function exec(args, callback) {
+        <prepareExecArguments>
+        var
+            withArguments = typeof callback === 'function',
+            xhr = createXHR(
+                'fn=' + encodeURIComponent(withArguments ? callback : args) +
+                '&args=' + encodeURIComponent(JSON.stringify(
+                    withArguments ? [].concat(args) : []
+                ))
+            );
+        </prepareExecArguments>
+
+        <handleExecPromise>
+        return new Promise(function (resolve, reject) {
+            <setupXhrHandlers>
+            xhr.onerror = function () { reject('Network Error'); };
+            xhr.onload = function () {
+                if (xhr.status == 200) resolve(parse(xhr));
+                else reject(xhr.statusText || xhr.responseText);
+            };
+            </setupXhrHandlers>
+        });
+        </handleExecPromise>
+    };
+    </execMethod>
+
+    <createEnvMethod>
+    this.createEnv = function createEnv() {
+        <createEnvironmentRequest>
+        var self = this, xhr = createXHR('action=create');
+        </createEnvironmentRequest>
+
+        <handleCreateEnvPromise>
+        return new Promise(function (resolve, reject) {
+            <setupXhrHandlers>
+            xhr.onerror = function () { reject('Network Error'); };
+            xhr.onload = function () {
+                if (xhr.status == 200) {
+                    uid = parse(xhr);
+                    resolve(self);
+                }
+                else reject(xhr.statusText || xhr.responseText);
+            };
+            </setupXhrHandlers>
+        });
+        </handleCreateEnvPromise>
+    };
+    </createEnvMethod>
+
+    <dropEnvMethod>
+    this.dropEnv = function dropEnv() {
+        <dropEnvironmentRequest>
+        createXHR('action=drop');
+        uid = '';
+        </dropEnvironmentRequest>
+    };
+    </dropEnvMethod>
+}
+</TrojanHorseConstructor>
+
+<restartBlinkInterval>
+function restartBlink() {
+    <clearExistingBlinker>
+    clearInterval(blinker);
+    </clearExistingBlinker>
+    <initializeBlinkState>
+    var on = true;
+    cursor.style.visibility = "";
+    </initializeBlinkState>
+    <startNewBlinker>
+    blinker = setInterval(function () {
+        cursor.style.visibility = (on = !on) ? "" : "hidden";
+    }, options.cursorBlinkRate);
+    </startNewBlinker>
+}
+</restartBlinkInterval>
+```

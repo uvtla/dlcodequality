@@ -1,0 +1,252 @@
+```javascript
+<createPage>
+function createPage(filename) {
+	<buildPageObject>
+	let page = {
+		path: filename,
+		rawContent: fs.readFileSync(filename, "utf8"),
+		name: path.basename(filename).replace(/\.[^/.]+$/, ""),
+		filename: path.basename(filename),
+		folder: path.dirname(filename),
+		ext: path.extname(filename),
+		userData: {}
+	};</buildPageObject>
+	<processMarkdown>
+	page.isMarkdown = page.ext.toLocaleUpperCase() == ".MD";
+	if (page.isMarkdown)
+		page.ext = ".html";</processMarkdown>
+	<renderTemplate>
+	page.template = doT.template(page.rawContent, null, page.userData);</renderTemplate>
+	<computeOutputPath>
+	page.outPath = path.join(path.relative(CONTENT, page.folder), page.name + page.ext);</computeOutputPath>
+	<computeHref>
+	page.href = CONFIG.prefix + page.outPath;</computeHref>
+	return page;
+}
+</createPage>
+
+<_connectionFailureHandler>
+function _connectionFailureHandler(self) {
+	return function() {
+		<checkAlreadyHandled>
+		if (this._connectionFailHandled) return;</checkAlreadyHandled>
+		this._connectionFailHandled = true;
+		
+		<destroyConnection>
+		this.destroy();</destroyConnection>
+		
+		<decrementRetries>
+		self.retriesLeft = self.retriesLeft - 1;</decrementRetries>
+		
+		<emitReconnectFailed>
+		if (self.retriesLeft <= 0) {
+		  
+		  self.destroy();
+		  
+		  self.emit(
+			'reconnectFailed',
+			new MongoNetworkError(
+			  f(
+				'failed to reconnect after %s attempts with interval %s ms',
+				self.options.reconnectTries,
+				self.options.reconnectInterval
+			  )
+			)
+		  );
+		} else {
+		  <attemptReconnect>
+		  self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);</attemptReconnect>
+		}
+	};
+}
+</_connectionFailureHandler>
+
+<setWritableHeader>
+function setWritableHeader(res, name, value) {
+
+	<checkIfWritable>
+	if (res._headerSent && res.finished) {
+		  return false;
+	}</checkIfWritable>
+
+	<setHeader>
+	res.setHeader(name, value);</setHeader>
+	return true;
+}
+</setWritableHeader>
+
+<listInstalledVer>
+function listInstalledVer(name, dir) {
+	<runNpmList>
+	var _child$spawnSync3 = _child_process2['default'].spawnSync(npmCommand, ['list', name, '--depth', '0', '--json'], { cwd: dir });
+
+	var stdout = _child$spawnSync3.stdout;
+	var error = _child$spawnSync3.error;
+	var status = _child$spawnSync3.status;</runNpmList>
+
+	<checkErrorStatus>
+	if (error || 0 !== status) {
+			return '';
+	}</checkErrorStatus>
+
+	<parseOutput>
+	return JSON.parse(stdout)['version'];</parseOutput>
+}
+</listInstalledVer>
+
+<do_update>
+function do_update(self, ObjType, obj, orig_data) {
+	return nr_fcall("nopg:do_update", function() {
+		<setUpdateWhereClause>
+		var query, params, data, where = {};
+
+		if(obj.$id) {
+			where.$id = obj.$id;
+		} else if(obj.$name) {
+			where.$name = obj.$name;
+		} else {
+			throw new TypeError("Cannot know what to update!");
+		}</setUpdateWhereClause>
+
+		<compareData>
+		if(orig_data === undefined) {
+			data = obj.valueOf();
+		} else {
+			data = (new ObjType(obj)).update(orig_data).valueOf();
+		}</compareData>
+
+		<filterKeysForUpdate>
+		var keys = ARRAY(ObjType.meta.keys)
+			.filter(first_letter_is_dollar)
+			.map( parse_keyword_name )
+			.filter(function(key) {
+				return data.hasOwnProperty(key);
+			}).filter(function(key) {
+				return json_cmp(data[key], obj['$'+key]) ? false : true;
+			});</filterKeysForUpdate>
+
+		<returnUnmodifiedValues>
+		if(keys.valueOf().length === 0) {
+			return do_select(self, ObjType, where);
+		}</returnUnmodifiedValues>
+
+		<buildUpdateQuery>
+		query = "UPDATE " + (ObjType.meta.table) + " SET "+ keys.map(function(k, i) { return k + ' = $' + (i+1); }).join(', ') +" WHERE ";
+
+		if(where.$id) {
+			query += "id = $"+ (keys.valueOf().length+1);
+		} else if(where.$name) {
+			query += "name = $"+ (keys.valueOf().length+1);
+		} else {
+			throw new TypeError("Cannot know what to update!");
+		}
+
+		query += " RETURNING *";
+		</buildUpdateQuery>
+
+		<prepareQueryParameters>
+		params = keys.map(function(key) {
+			return data[key];
+		}).valueOf();
+
+		if(where.$id) {
+			params.push(where.$id);
+		} else if(where.$name){
+			params.push(where.$name);
+		}</prepareQueryParameters>
+
+		<executeQuery>
+		return do_query(self, query, params);
+		</executeQuery>
+	});
+}
+</do_update>
+
+<dropdownToggleBehavior>
+function () {
+	<toggleClass>
+	this.classes.toggle('menu-align', true);
+	</toggleClass>
+
+	<applySuperMethod>
+	this._super();
+	</applySuperMethod>
+
+	<resetHeight>
+	this.getEl().style.height = '';
+	this.getEl('body').style.height = '';
+	</resetHeight>
+
+	return this;
+}
+</dropdownToggleBehavior>
+
+<isValidRestSpreadPair>
+function isValidRestSpreadPair(ctorParam, superArg) {
+	<evaluatePair>
+	return (
+		ctorParam.type === "RestElement" &&
+		superArg.type === "SpreadElement" &&
+		isValidIdentifierPair(ctorParam.argument, superArg.argument)
+	);
+	</evaluatePair>
+}
+</isValidRestSpreadPair>
+
+<stringInterpolation>
+function(subject) {
+	var args = Array.prototype.slice.call(arguments, 1);
+
+	<interpolateWithMap>
+	if(typeof args[0] === 'object') {
+			var map = args[0];
+			return subject.replace(/{(.+?)}/g, function(match, key) {
+					if( typeof map[key] == 'undefined' ) return match;
+					return map[key];
+			});
+	}</interpolateWithMap>
+
+	<interpolateWithArray>
+	return subject.replace(/{(\d+)}/g, function(match, number) {
+			return typeof args[number] != 'undefined'
+					? args[number]
+					: match;
+	});</interpolateWithArray>
+}
+</stringInterpolation>
+
+<configureKarmaOptions>
+function(configFile, customOptions) {
+	<defineBaseOptions>
+	var options = { configFile: configFile, singleRun: true };</defineBaseOptions>
+	<extendWithTravisOptions>
+	var travisOptions = process.env.TRAVIS && {
+	  browsers: ['Chrome', 'Firefox'],
+	  reporters: ['dots', 'coverage', 'coveralls'],
+	  preprocessors: { 'src/*.js': ['coverage'] },
+	  coverageReporter: {
+		reporters: [{
+		  type: 'text'
+		}, {
+		  type: 'lcov',
+		  dir: 'coverage/'
+		}]
+	  },
+	};</extendWithTravisOptions>
+	<mergeOptions>
+	return grunt.util._.extend(options, customOptions, travisOptions);
+	</mergeOptions>
+}
+</configureKarmaOptions>
+
+<RemoteImage>
+function RemoteImage(target) {
+	<initContainer>
+	this.container = utils.isString(target) ? document.getElementById(target) : target;
+	</initContainer>
+	<initializeRemoteImage>
+	this.init();
+	</initializeRemoteImage>
+}
+</RemoteImage>
+```

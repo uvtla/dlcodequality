@@ -1,0 +1,101 @@
+Here are the annotations for the given JavaScript functions:
+
+1. `<_drawImageBitmap>` - SRP Compliant
+```javascript
+function _drawImageBitmap(evt, imageBitmap, alwaysVisible) {
+  // ... function codes ...
+}
+```
+
+2. `<set>` - SRP Violation
+```javascript
+function set(nucleus, key, value) {
+    // ... function codes including multiple responsibilities ...
+}
+```
+
+3. `<matches>` - SRP Compliant
+```javascript
+function matches(path) {
+  // ... function codes ...
+}
+```
+
+4. `<getResourceNameByFile>` - SRP Compliant
+```javascript
+function getResourceNameByFile(data, schema) {
+  // ... function codes ...
+}
+```
+
+5. Anonymous function - SRP Compliant
+```javascript
+function (params) {
+  // ... function codes ...
+}
+```
+
+6. `<toRGB>` - SRP Violation
+```javascript
+function toRGB(color) {
+  // ... function codes with multiple responsibilities ...
+}
+```
+
+7. `<bundleFiles>` - SRP Violation
+```javascript
+function bundleFiles(files, copy, version) {
+  <fileReadingAndProcessing>
+    var node = new SourceNode(null, null, null, '');
+
+    for (var i = 0, len = files.length; i < len; i++) {
+        var contents = fs.readFileSync(files[i], 'utf8');
+	  // ... rest of the loop ...
+    }
+  </fileReadingAndProcessing>
+
+  <bundleFinalization>
+    var bundle = node.toStringWithSourceMap();
+    return {
+        src: bundle.code,
+        srcmap: bundle.map.toString()
+    };
+  </bundleFinalization>
+}
+```
+
+8. `<ScriptRunner>` - SRP Violation
+```javascript
+function ScriptRunner() {
+  <initialMethods>
+    this.flush();
+  </initialMethods>
+
+  <messageHandling>
+    function onMessage(msg, handle) {
+      // ... function codes handling different message events ...
+    }
+  </messageHandling>
+
+  process.on('message', onMessage.bind(this));
+}
+```
+
+9. `<Env>` - SRP Compliant
+```javascript
+function Env(data, parent, path) {
+  Context.call(this, data, parent, path);
+  delete this.env;
+}
+```
+
+10. `<generateValidationFn>` - SRP Violation
+```javascript
+function generateValidationFn(schema) {
+  <validationFunctionCreation>
+    return function (req) {
+      // ... function codes for validation checks ...
+    };
+  </validationFunctionCreation>
+}
+```

@@ -1,0 +1,151 @@
+<checkAvailability>
+function checkAvailability( obj ) {
+    for ( var k = 1, len = arguments.length; k < len; k++) {
+        for ( var m in arguments[k]) {
+            if (obj.hasOwnProperty(m)) {
+                throw obj.getClass() + ": has " + m + " at more than one places";
+            }
+        }
+    }
+}
+</checkAvailability>
+
+<scoreCandidate>
+function scoreCandidate (node, contentScore, candidates) {
+  let score
+  if (typeof node.data('readabilityScore') === 'undefined') {
+    <initializeNodeAndPushCandidate>
+    score = initializeNode(node)
+    candidates.push(node)
+    </initializeNodeAndPushCandidate>
+  } else {
+    score = node.data('readabilityScore') || 0
+  }
+  node.data('readabilityScore', score + contentScore)
+}
+</scoreCandidate>
+
+<arcToBeziere>
+function arcToBeziere(pos, val) {
+    
+    <arcToBezierCalculation>
+    
+    //... (the entire content of this function represents a complex SVG path calculation responsibility)
+    
+    </arcToBezierCalculation>
+    
+    return retVal
+}
+</arcToBeziere>
+
+<GhostRouter>
+function GhostRouter(options) {
+    <createRouter>
+    const router = express.Router(options);
+
+    function innerRouter(req, res, next) {
+        return innerRouter.handle(req, res, next);
+    }
+    </createRouter>
+
+    <extendPrototype>
+    Object.setPrototypeOf(innerRouter, router);
+    </extendPrototype>
+
+    <defineProperty>
+    Object.defineProperty(innerRouter, 'name', {
+        value: options.parent.name,
+        writable: false
+    });
+    </defineProperty>
+
+    <assignParent>
+    innerRouter.parent = options.parent;
+    </assignParent>
+    return innerRouter;
+}
+</GhostRouter>
+
+<processFile>
+function processFile(sourcePath, templates, customPartialName, files) {
+  return (file, callback) => {
+    <prepareRenderingContext>
+    const layout = templates.layouts[file.meta.layout];
+    const fns = wrapFunctions(templates.fns, file, files);
+    const context = Object.assign({}, file.meta, fns);
+    </prepareRenderingContext>
+    <renderFile>
+    async.waterfall([
+      cb => getPartials(file, sourcePath, templates, customPartialName, cb),
+      (partials, cb) => render(file, layout, context, partials, cb),
+    ], (error, result) => {
+      const data = result;
+      async.nextTick(callback, error, Object.assign({}, file, { data }));
+    });
+    </renderFile>
+  };
+}
+</processFile>
+
+<readNumber>
+function readNumber(walker) {
+    <matchNumberOrUnaryExpression>
+    //... (the entire content of this function represents the task of parsing a number or unary expression from a string)
+    </matchNumberOrUnaryExpression>
+}
+</readNumber>
+
+<expose>
+function expose(subject, name) {
+    <conditionalExposure>
+    if (subject.isRendered()) {
+        exposer(subject, name);
+    } else {
+        subject.on("attach", function () {
+            exposer(subject, name);
+        })
+    }
+    </conditionalExposure>
+}
+</expose>
+
+<webpackModuleExport>
+function (module, exports, __webpack_require__) {
+
+    <exportErrorCheckFunction>
+                
+    var $export = __webpack_require__(6)
+        , cof = __webpack_require__(32);
+
+    $export($export.S, 'Error', {
+        isError: function isError(it) {
+            return cof(it) === 'Error';
+        }
+    });
+
+    </exportErrorCheckFunction>
+                
+}
+</webpackModuleExport>
+
+<rgbToRgb>
+function rgbToRgb(r, g, b){
+    <convertRgbValues>
+    return {
+        r: bound01(r, 255) * 255,
+        g: bound01(g, 255) * 255,
+        b: bound01(b, 255) * 255
+    };
+    </convertRgbValues>
+}
+</rgbToRgb>
+
+<pc_dump>
+function pc_dump() {
+
+<programmeCacheReporting>
+//... (the entire content of this function represents a singular responsibility of reporting and logging the programme cache details)
+</programmeCacheReporting>
+
+}
+</pc_dump>

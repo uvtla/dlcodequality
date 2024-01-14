@@ -1,0 +1,148 @@
+Below are the annotations for the provided JavaScript functions:
+
+Function 1: Calibration Check and Execute
+```javascript
+<runCalibrationTest>
+function(onCalibrated) {
+  for (var i = 0; i < Test.CALIBRATIONS.length; i++) {
+    var cal = Test.CALIBRATIONS[i];
+    if (cal.running) return true;
+    if (!cal.count) {
+      cal.isCalibration = true;
+      cal.onStop = onCalibrated;
+
+      <startCalibration>
+      cal.run(2e4);
+      </startCalibration>
+      return true;
+    }
+  }
+  return false;
+}
+</runCalibrationTest>
+```
+Compliant Function. Although "run" and the calibration property settings could be considered separate, they serve the single cohesive purpose of running a calibration test.
+
+Function 2: Schema Stringification
+```javascript
+<formatSchema>
+function stringify(schema) {
+  ... (entire function content)
+}
+</formatSchema>
+```
+Compliant Function. The entire function works towards formatting a schema into a string representation.
+
+Function 3: Bid Request Builder
+```javascript
+<buildBidRequest>
+function(validBidRequests, bidderRequest) {
+  ... (entire function content)
+}
+</buildBidRequest>
+```
+Compliant Function. This function composes a bid request with various parameters and could be deemed to have just one responsibility – to prepare and return the bid request payload.
+
+Function 4: Message Broadcast
+```javascript
+<broadcastMessage>
+function(msg) {
+  for (var id in openSocketsById) {
+    if (openSocketsById.hasOwnProperty(id)) {
+      openSocketsById[id].send('0|' + msg + '|null');
+    }
+  }
+}
+</broadcastMessage>
+```
+Compliant Function. This function's sole purpose is to send a broadcast message to all open sockets.
+
+Function 5: Command Execution
+```javascript
+<executeCommand>
+function execute(id) {
+  var command = _commands[id];
+
+  if (command) {
+      <commandExecutionPreparation>
+      try {
+          exports.trigger("beforeExecuteCommand", id);
+      } catch (err) {
+          console.error(err);
+      }
+      </commandExecutionPreparation>
+
+      return command.execute.apply(command, Array.prototype.slice.call(arguments, 1));
+  } else {
+      return (new $.Deferred()).reject().promise();
+  }
+}
+</executeCommand>
+```
+Compliant Function. Although there is a trigger event before the execution, it can be considered part of the command execution process.
+
+Function 6: Template Formatting
+```javascript
+<formatTemplate>
+function(formatString, value) {
+  ... (entire function content)
+}
+</formatTemplate>
+```
+Compliant Function. All the various steps are related to formatting a string based on a template.
+
+Function 7: Retrieve CRUD Entities
+```javascript
+<retrieveCRUDEntities>
+function() {
+  return new Promise(function(resolve, reject) {
+      exec("find . ! -name '" + __filename.split('/').pop() + "' -iname '*\.js' | xargs grep 'CRUD.Entity.call(this);' -isl", {
+          timeout: 3000,
+          cwd: process.cwd()
+      }, function(err, stdout, stdin) {
+          var results = stdout.trim().split('\n');
+          for (var i = 0; i < results.length; i++) {
+              <readAndEvalFiles>
+              eval(fs.readFileSync(results[i]) + '');
+              </readAndEvalFiles>
+          }
+          resolve(Object.keys(CRUD.entities));
+      });
+  });
+}
+</retrieveCRUDEntities>
+```
+Violates SRP. This function is handling both the search for files and the evaluation of code within those files.
+
+Function 8: Legacy Package Check
+```javascript
+<checkLegacyPackage>
+function legacyPackageCheck(legacyDirectory) {
+  return fs.existsSync(legacyDirectory) && !fs.existsSync(path.join(legacyDirectory, "package.json"));
+}
+</checkLegacyPackage>
+```
+Compliant Function. The function checks for the existence of a legacy directory and the absence of a package.json file in one action.
+
+Function 9: Websocket Connection Initialization
+```javascript
+<initializeWebsocketConnection>
+function(opts) {
+  ... (entire function content)
+}
+</initializeWebsocketConnection>
+```
+Compliant Function. Although the function has many steps, they all serve the single responsibility of initializing a websocket connection.
+
+Function 10: Get Native Selection
+```javascript
+<getNativeSelection>
+function() {
+  if ( this._.cache.nativeSel !== undefined )
+    return this._.cache.nativeSel;
+
+  return ( this._.cache.nativeSel = isMSSelection ? this.document.$.selection : this.document.getWindow().$.getSelection() );
+}
+</getNativeSelection>
+```
+Compliant Function. This function retrieves the native selection object depending on the environment.

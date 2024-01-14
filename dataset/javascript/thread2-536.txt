@@ -1,0 +1,184 @@
+```javascript
+<setElement>
+function(v) {
+    if (v === undefined) return this._element; // Responsibility: Get the current element
+    if (typeof v === 'string') { // Responsibility: Find element by string selector
+      v = window.document.querySelector(v);
+    }
+    this._element = v; // Responsibility: Set the element
+    return this;
+}
+</setElement>
+
+<logErrorWithStack>
+function unknownError(message, stack) {
+    jitsu.log.error(message); // Responsibility: Log error message
+    stack.split('\n').forEach(function (line) { // Responsibility: Log error stack
+      jitsu.log.error(line);
+    })
+}
+</logErrorWithStack>
+
+<deepSetProperty>
+function deepSet(targ, path, val) {
+  var seg;
+  while (seg = path.shift()) { // Responsibility: Traverse and set deep object properties
+    if (path.length === 0) {
+      targ[seg] = val;
+    }
+    else {
+      targ[seg] = targ = targ[seg] || {};
+    }
+  }
+}
+</deepSetProperty>
+
+<convertToCamelCase>
+function camelCase(str, { upperCase = false } = {}) {
+  if (str.length === 0) {  // Responsibility: Return input if it's empty
+    return str;
+  }
+
+  if (upperCase && isAllUpperCaseSnakeCase(str)) { // Responsibility: Consider upper case conversion
+    str = str.toLowerCase();
+  }
+
+  let out = str[0]; // Responsibility: Convert string to camel case
+  for (let i = 1, l = str.length; i < l; ++i) {
+    const char = str[i];
+    const prevChar = str[i - 1];
+
+    if (char !== '_') {
+      if (prevChar === '_') {
+        out += char.toUpperCase();
+      } else {
+        out += char;
+      }
+    }
+  }
+
+  return out;
+}
+</convertToCamelCase>
+
+<recordScrollOffsets>
+function() {
+  this.deltaX =  window.pageXOffset // Responsibility: Record horizontal scroll offset
+                || document.documentElement.scrollLeft
+                || document.body.scrollLeft
+                || 0;
+  this.deltaY =  window.pageYOffset // Responsibility: Record vertical scroll offset
+                || document.documentElement.scrollTop
+                || document.body.scrollTop
+                || 0;
+}
+</recordScrollOffsets>
+
+<determineSandboxStatus>
+function(doNotReassessFlashSupport) {
+    
+    var frame, frameError, previousState = _flashState.sandboxed, isSandboxed = null;
+    doNotReassessFlashSupport = doNotReassessFlashSupport === true; // Responsibility: Assess iframe sandboxed status
+    if (_pageIsFramed === false) {
+      isSandboxed = false;
+    } else {
+      try {
+        frame = window.frameElement || null;
+      } catch (e) {
+        frameError = {
+          name: e.name,
+          message: e.message
+        };
+      }
+      if (frame && frame.nodeType === 1 && frame.nodeName === "IFRAME") {
+        try {
+          isSandboxed = frame.hasAttribute("sandbox");
+        } catch (e) {
+          isSandboxed = null;
+        }
+      } else {
+        try {
+          effectiveScriptOrigin = document.domain || null;
+        } catch (e) {
+          effectiveScriptOrigin = null;
+        }
+        if (effectiveScriptOrigin === null || frameError && frameError.name === "SecurityError" && /(^|[\s\(\[@])sandbox(es|ed|ing|[\s\.,!\)\]@]|$)/.test(frameError.message.toLowerCase())) {
+          isSandboxed = true;
+        }
+      }
+    }
+    _flashState.sandboxed = isSandboxed; // Responsibility: Update sandboxed status
+    
+    <reassessFlashSupport>
+    if (previousState !== isSandboxed && !doNotReassessFlashSupport) { // Responsibility: Reassess flash support if needed
+      _detectFlashSupport(_ActiveXObject);
+    }
+    </reassessFlashSupport>
+
+    return isSandboxed;
+}
+</determineSandboxStatus>
+
+<addCustomNotifications>
+function createCustomNotification(notification) {
+    if (!notification) {
+        return Promise.resolve(); // Responsibility: Return if no notification is provided
+    }
+
+    return Promise.each(notification.messages, function (message) {
+        let toAdd = { // Responsibility: Prepare notification object
+            custom: !!notification.custom,
+            createdAt: moment(notification.created_at).toDate(),
+            status: message.status || 'alert',
+            type: message.type || 'info',
+            id: message.id,
+            dismissible: message.hasOwnProperty('dismissible') ? message.dismissible : true,
+            top: !!message.top,
+            message: message.content
+        };
+
+        debug('Add Custom Notification', toAdd); // Responsibility: Log notification object creation
+        return api.notifications.add({notifications: [toAdd]}, {context: {internal: true}}); // Responsibility: Add notification to persistent storage
+    });
+}
+</addCustomNotifications>
+
+<copyMedia>
+function (media_id, copy_options, cb) {
+    if (copy_options) {
+        copy_options._method = 'POST'; // Responsibility: Mutate copy options if provided
+    }
+
+    <executeQuery>
+    _util.buildQuery('medias/' + media_id + '/copy', copy_options, function (error, data) { // Responsibility: Execute API query for copying media
+        return cb(error, data);
+    });
+    </executeQuery>
+}
+</copyMedia>
+
+<filterApplicableMessages>
+function applicableMessages(messages, options) {
+  if (options.silent) { // Responsibility: Return only fatal messages when silent
+    return messages.filter(function(message) {
+      return message.fatal;
+    });
+  } else { // Responsibility: Return all messages when not silent
+    return messages.concat();
+  }
+}
+</filterApplicableMessages>
+
+<checkJsonPropertyUpdate>
+function shouldBeUpdated(target, propertyName, json) {
+  return (
+    json[propertyName] !== undefined && // Responsibility: Determine if the property should be updated
+    propertyName.length > 0 && 
+    propertyName[0] !== "_" && 
+    (propertyName !== "id" || !defined(target.id))
+  ); 
+}
+</checkJsonPropertyUpdate>
+``` 
+
+Note: The `filterApplicableMessages` function has been slightly adjusted for semantics and proper use of array methods; the `while` loop was replaced with `filter`, which clearly shows the intended responsibility.

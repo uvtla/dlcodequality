@@ -1,0 +1,148 @@
+<callbackDefinition>
+function (callbackDefinition) {
+  callbackDefinition = this.$normCallback(callbackDefinition);
+  var valid = ariaUtilsType.isFunction(callbackDefinition.fn);
+  this._scope = valid ? callbackDefinition.scope : this;
+  this._function = valid ? callbackDefinition.fn : this._warnDisposed;
+  this._args = callbackDefinition.args;
+  this._resIndex = callbackDefinition.resIndex;
+  this._apply = callbackDefinition.apply;
+}
+</callbackDefinition>
+
+<handleDom>
+function() {
+  var doc = this._doc;
+  this._removeNodes(doc.getElementsByTagName("style"));
+  if (doc.body) {
+    this._replaceBrs(doc.body);
+  }
+  this._replaceNodeTags(doc.getElementsByTagName("font"), "SPAN");
+}
+</handleDom>
+
+<addDropdownToMenu>
+function addDropdownToMenu(dropdownName, routerName, glyphiconName, enableTranslation, clientFramework) {
+  let navbarPath;
+  <exceptionHandling>
+  try {
+  </exceptionHandling>
+    <editFileStructure>
+    if (clientFramework === 'angular1') {
+      navbarPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.html`;
+      jhipsterUtils.rewriteFile({
+        file: navbarPath,
+        needle: 'jhipster-needle-add-element-to-menu',
+        splicable: [ `<li ng-class="{active: vm.$state.includes('${dropdownName}')}" ng-switch-when="true" uib-dropdown class="dropdown pointer">...</li>` ]
+      }, this);
+    } else {
+      navbarPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.component.html`;
+      jhipsterUtils.rewriteFile({
+        file: navbarPath,
+        needle: 'jhipster-needle-add-element-to-menu',
+        splicable: [`<li *ngSwitchCase="true" ngbDropdown class="nav-item dropdown pointer">...</li>` ]
+      }, this);
+    }
+    </editFileStructure>
+  <exceptionHandling>
+  } catch (e) {
+    this.log(`${chalk.yellow('\nUnable to find ') + navbarPath + chalk.yellow(' or missing required jhipster-needle. Reference to ') + dropdownName} ${chalk.yellow('not added to menu.\n')}`);
+    this.debug('Error:', e);
+    this.log('Error:', e);
+  }
+  </exceptionHandling>
+}
+</addDropdownToMenu>
+
+<navigate>
+function(){
+  var startDir = this.currentDirection,
+      currentDir = this.currentDirection;
+  var i = 0;
+  while(i < 6){
+    i++;
+    var currentDirAdjustCoords = this.directionToAdjustCoord(currentDir),
+        targetX = this.x + currentDirAdjustCoords.x,
+        targetY = this.y + currentDirAdjustCoords.y;
+    if(this.canMoveTo(targetX, targetY)){
+      this.currentDirection = currentDir;
+      this.moveTo(targetX, targetY);
+      return;
+    }
+    currentDir = this.getNextDirection(currentDir);
+    if(currentDir === startDir){
+      return false;
+    }
+  }
+}
+</navigate>
+
+<getProperty3>
+function getProperty3() {
+  const type = NodeType.PropertyType;
+  const token = tokens[pos];
+  const line = token.ln;
+  const column = token.col;
+  const content = [getVariable()];
+  return newNode(type, content, line, column);
+}
+</getProperty3>
+
+<isClassConstructor>
+function isClassConstructor(node) {
+  return node.type === "FunctionExpression" &&
+      node.parent &&
+      node.parent.type === "MethodDefinition" &&
+      node.parent.kind === "constructor";
+}
+</isClassConstructor>
+
+<copyFromDir>
+function copyFromDir(starter, root) {
+  if (!fs.existsSync(starter)) {
+    throw new Error(`starter ${starter} doesn't exist`);
+  }
+  return fs.mkdirp(root, {mode: 493}).then(() => {
+    console.log(`Creating new theme from local starter: ${chalk.green(starter)}`);
+    return fs.copy(starter, root, {
+      filter: (file) =>
+        !/^\.(git|hg)$/.test(path.basename(file)) && !/node_modules/.test(file),
+    });
+  });
+}
+</copyFromDir>
+
+<timestamp>
+function timestamp() {
+  var d = new Date();
+  return d.getHours() + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+}
+</timestamp>
+
+<collapseControl>
+function () {
+  var includeShowLess = true;
+  if(this.isExplicitlyCollapsed) {
+    this.isExplicitlyCollapsed = false;
+    includeShowLess = false;
+  }
+  if (!this.isCollapsed) {
+    return;
+  }
+  this.isCollapsed = false;
+  this.element.innerHTML = this.isTruncated ? this.original + (includeShowLess ? this.options.showLess : "") : this.original;
+}
+</collapseControl>
+
+<Reader>
+function Reader(data, ctors) {
+  if (!_.isObject(data)) {
+    console.error("Reader constructor: 'data' parameter should be JSON object");
+    return;
+  }
+  this.data = data;
+  this.ctors = ctors;
+  this.current = this.data;
+  this.idMap = {};
+}
+</Reader>

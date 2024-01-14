@@ -1,0 +1,391 @@
+```javascript
+<processArray>
+function(arr, iterator, callback) {
+  callback = _doOnce(callback || noop);
+  var amount = arr.length;
+
+  <checkArrayValidity>
+  if (!isArray(arr)) return callback();
+  </checkArrayValidity>
+
+  var completed = 0;
+  <iterateArrayElements>
+  doEach(arr, function(item) {
+    iterator(item, doOnce(function(err) {
+      if (err) {
+        callback(err);
+        callback = noop;
+      } else {
+        completed++;
+        <checkCompletion>
+        if (completed >= amount) callback(null);
+        </checkCompletion>
+      }
+    }));
+  });
+  </iterateArrayElements>
+}
+</processArray>
+
+<createWindow>
+function(name, title, url, setupTemplate, setup, showDevTools){
+    
+    <checkExistingWindow>
+    if(windowManager.windows[name]){
+        console.log('Window ' + name + ' already exists!');
+        
+        windowManager.focusOn(name);
+        return;
+    }
+    </checkExistingWindow>
+
+    <initializeWindow>
+    this.name = name || ( 'window_' + ( Object.keys(windowManager.windows).length + 1 ) );
+    this.object = null;
+    this.setup = {
+        'show': false,
+        'setupTemplate': setupTemplate
+    };
+    if(title) this.setup.title = title;
+    if(url) this.setup.url = url;
+    if(showDevTools) this.setup.showDevTools = showDevTools;
+    
+    if(isString(setup) && setup.indexOf('x') >= 0){
+        const dimensions = setup.split('x');
+        setup = {
+            'width': parseInt(dimensions[0], 10),
+            'height': parseInt(dimensions[1], 10)
+        };
+    }
+
+    if(isObject(setup)){
+        this.setup = Object.assign(this.setup, setup);
+    }
+    </initializeWindow>
+
+    <registerWindow>
+    windowManager.windows[this.name] = this;
+    </registerWindow>
+}
+</createWindow>
+
+<uploadFunction>
+function(fileName) {
+    let file = assets[fileName] || {};
+    fileName = basePath + "/" + fileName.replace(/\\/g, '/');
+    let key = path.posix.join(uploadPath, fileName);
+
+    <uploadPromise>
+    return new Promise((resolve, reject) => {
+        let begin = Date.now();
+        cos.putObject(
+            {
+                Bucket: bucket,
+                Region: region,
+                Key: key,
+                Body: fs.createReadStream(file.existsAt),
+                ContentLength: fs.statSync(file.existsAt).size
+            },
+            function(err, body) {
+                uploadedFiles++;
+                spinner.text = tip(uploadedFiles, totalFiles);
+
+                if (err) return reject(err);
+                body.duration = Date.now() - begin;
+                resolve(body);
+            }
+        );
+    });
+    </uploadPromise>
+}
+</uploadFunction>
+
+<deferredObjectCreator>
+function() {
+    var _status = STATUS_PENDING;
+    var _args;
+    var _callbacks = {
+        success: [],
+        fail: [],
+        done: []
+    };
+
+    <registerCallback>
+    function _registerCallback(resultType, callback) {
+        if (typeof callback !== 'function') {
+            
+            throw 'Invalid argument: callback. Must be a function.';
+        }
+
+        if (_status !== STATUS_PENDING) {
+            if (_status === resultType || resultType === RESULT_TYPE_DONE) {
+                
+                
+                callback.apply(null, _args);
+            }
+        } else {
+            
+            
+            _callbacks[resultType].push(callback);
+        }
+    }
+    </registerCallback>
+
+    <satisfyCallbacks>
+    function _satisfy(resultType, args) {
+        if (_status !== STATUS_PENDING) {
+            return;
+        }
+        _args = args;
+        _status = resultType;
+
+        function doCallback(item, index) {
+            item.apply(null, _args);
+        }
+
+        _callbacks[resultType].forEach(doCallback);
+        _callbacks.done.forEach(doCallback);
+        
+        _callbacks.succes = [];
+        _callbacks.fail = [];
+        _callbacks.done = [];
+    }
+    </satisfyCallbacks>
+
+    var _promise = {
+        
+        done: function(callback) {
+            _registerCallback(RESULT_TYPE_DONE, callback);
+            return (_promise);
+        },
+        success: function(callback) {
+            _registerCallback(STATUS_SUCCESS, callback);
+            return (_promise);
+        },
+        fail: function(callback) {
+            _registerCallback(STATUS_FAIL, callback);
+            return (_promise);
+        },
+        results: function() {
+            return _args;
+        }
+    }
+
+    var deferredObject = {
+        done: _promise.done,
+        success: _promise.success,
+        fail: _promise.fail,
+        resolve: function() {
+            _satisfy(STATUS_SUCCESS, Array.prototype.slice.call(arguments, 0));
+        },
+        reject: function() {
+            _satisfy(STATUS_FAIL, Array.prototype.slice.call(arguments, 0));
+        },
+        promise: function() {
+            return Object.create(_promise);
+        },
+        getResolver: function() {
+            var ctxArgs = Array.prototype.slice.call(arguments, 0);
+            return function(err, data) {
+                if (!err) {
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    deferredObject.resolve.apply(null,
+                        ctxArgs.concat(args));
+                } else {
+                    deferredObject.reject.apply(null,
+                        ctxArgs.concat([err]));
+                }
+            };
+        },
+        getMultiStepResolver: function(count) {
+            var _count = count;
+            var ctxArgs = Array.prototype.slice.call(arguments, 1);
+
+            if (_count === 0) {
+                deferredObject.resolve.apply(null, ctxArgs);
+            }
+
+            return {
+                stepComplete: function() {
+                    var ca
+                    _count--;
+                    if (_count === 0) {
+                        var args = Array.prototype.slice.call(arguments, 0);
+                        deferredObject.resolve.apply(null,
+                            ctxArgs.concat(args));
+                    }
+                },
+                reject: function() {
+                    var args = Array.prototype.slice.call(arguments, 0);
+                    deferredObject.reject.apply(null, ctxArgs.concat(args));
+                }
+            }
+        }
+    };
+
+    return deferredObject;
+}
+</deferredObjectCreator>
+
+<handleMessage>
+function onMessage(message) {
+  <runCommand>
+  if (message.command === 'run') {
+    run(message.opts);
+    return;
+  }
+  </runCommand>
+
+  <stopCommand>
+  if (message.command === 'stop') {
+    cleanup();
+  }
+  </stopCommand>
+}
+</handleMessage>
+
+<ServerConstructor>
+function(options) {
+  options = options || {};
+  
+  <serverInitialization>
+  EventEmitter.call(this);
+  this.id = id++;
+  
+  this.s = {
+    options: options,
+    logger: Logger('Server', options),
+    Cursor: options.cursorFactory || BasicCursor,
+    bson: ...
+    
+    pool: null,
+    disconnectHandler: options.disconnectHandler,
+    monitoring: ...,
+    inTopology: !!options.parent,
+    monitoringInterval: ...,
+    topologyId: -1,
+    compression: { compressors: createCompressionInfo(options) },
+    parent: options.parent
+  };
+  
+  if (!this.s.parent) {
+    this.s.clusterTime = null;
+  }
+  </serverInitialization>
+
+  <objectStateInitialization>
+  this.ismaster = null;
+  this.lastIsMasterMS = -1;
+  this.monitoringProcessId = null;
+  this.initialConnect = true;
+  this._type = 'server';
+  this.clientInfo = createClientInfo(options);
+  
+  this.lastUpdateTime = 0;
+  this.lastWriteDate = 0;
+  this.staleness = 0;
+  </objectStateInitialization>
+}
+</ServerConstructor>
+
+<ContainerConstructor>
+function (cfg, ctxt) {
+    var configurationOfCommonBinding = this._getConfigurationOfCommonBinding(cfg);
+
+    <bindProperties>
+    if (configurationOfCommonBinding != null) {
+        var bind = cfg.bind;
+        var inside = configurationOfCommonBinding.inside;
+
+        bind.controlledTabPanelId = {
+            inside: inside,
+            to: this._getControlledTabPanelIdPropertyName(cfg)
+        };
+
+        bind.labelId = {
+            inside: inside,
+            to: this._getLabelIdPropertyName(cfg)
+        };
+    }
+    </bindProperties>
+
+    <waiAriaSupport>
+    if (cfg.waiAria) {
+        this._customTabIndexProvided = true;
+    }
+    </waiAriaSupport>
+
+    <ContainerSuperCall>
+    this.$Container.constructor.apply(this, arguments);
+    this._setSkinObj(this._skinnableClass);
+    </ContainerSuperCall>
+
+    <initializeContainerState>
+    this._mouseOver = false;
+    this._hasFocus = false;
+    this._updateState(true);
+    </initializeContainerState>
+
+    <createFrame>
+    this._frame = ariaWidgetsFramesFrameFactory.createFrame({
+        height : cfg.height,
+        state : this._state,
+        width : cfg.width,
+        sclass : cfg.sclass,
+        skinnableClass : this._skinnableClass,
+        printOptions : cfg.printOptions,
+        id : Aria.testMode ? this._domId + "_" + cfg.tabId : undefined
+    });
+    </createFrame>
+
+    <stylingInitialization>
+    this._spanStyle = "z-index:100;vertical-align:top;";
+    </stylingInitialization>
+}
+</ContainerConstructor>
+
+<viewSessionMessage>
+function view_session_message(req, msg) {
+	<copyMessage>
+    var result = copy(msg);
+    </copyMessage>
+    <createRef>
+    result.$ref = ref(req, opts.path + '/messages', msg.$id );
+    </createRef>
+    return result;
+}
+</viewSessionMessage>
+
+<defineOptionConstructor>
+function defineOptionConstructor(constructor, code, name, repeatable, ...args) {
+    <storeConstructor>
+    optionConstructors[code] = optionConstructors[name] =
+        constructor.create.bind(constructor, ...[code, name, repeatable, ...args]);
+    </storeConstructor>
+}
+</defineOptionConstructor>
+
+<flattenGlobalProperties>
+function flattenProperties(obj, prefix = null, globals = {}) {
+    <setPrefix>
+    prefix = prefix ? (prefix + '.') : 'global.';
+    </setPrefix>
+
+    <iterateProperties>
+    for (const p in obj) {
+        const key = prefix + p;
+        const val = obj[p];
+        globals[key] = val;
+
+        <recursivelyFlatten>
+        if (typeof val === 'object' && !Array.isArray(val)) {
+            flattenProperties(val, key, globals);
+        }
+        </recursivelyFlatten>
+    }
+    </iterateProperties>
+    
+    return globals;
+}
+</flattenGlobalProperties>
+```

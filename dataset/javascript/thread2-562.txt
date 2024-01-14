@@ -1,0 +1,261 @@
+1.
+```javascript
+<sortAndCategorizePoints>
+function () {
+  <initializeVariables>
+  var _this = this;
+  var _points = Array.from(this._points);
+  var sortedPoints = [];
+  var sortOrder = {
+      vertical: ['top', 'top', 'bottom', 'bottom'],
+      horizontal: ['left', 'right', 'right', 'left']
+  };
+  </initializeVariables>
+  
+  <sortPointsLoop>
+  var _loop_1 = function (i) {
+      var roles = Array.from([sortOrder.vertical[i], sortOrder.horizontal[i]]);
+      sortedPoints.push(_points.filter(function (point) {
+          return _this.limitsService.compareArray(point.roles, roles);
+      })[0]);
+  };
+  for (var i = 0; i < 4; i++) {
+      _loop_1(i);
+  }
+  </sortPointsLoop>
+  
+  <assignSortedPoints>
+  this._sortedPoints = sortedPoints;
+  </assignSortedPoints>
+}
+</sortAndCategorizePoints>
+```
+
+2.
+```javascript
+<loadIconFromSet>
+function loadFromIconSet(id) {
+  <extractIdAndSetName>
+  var setName = id.substring(0, id.lastIndexOf(':')) || '$default';
+  var iconSetConfig = config[setName];
+  </extractIdAndSetName>
+
+  <loadOrReportNotFound>
+  return !iconSetConfig ? announceIdNotFound(id) : loadByURL(iconSetConfig.url).then(extractFromSet);
+  </loadOrReportNotFound>
+
+  <nested>
+  function extractFromSet(set) {
+    <extractIcon>
+    var iconName = id.slice(id.lastIndexOf(':') + 1);
+    var icon = set.querySelector('#' + iconName);
+    </extractIcon>
+    <constructOrAnnounce>
+    return icon ? new Icon(icon, iconSetConfig) : announceIdNotFound(id);
+    </constructOrAnnounce>
+  }
+
+  function announceIdNotFound(id) {
+    <logWarning>
+    var msg = 'icon ' + id + ' not found';
+    $log.warn(msg);
+    </logWarning>
+    <rejectPromise>
+    return $q.reject(msg || id);
+    </rejectPromise>
+  }
+  </nested>
+}
+</loadIconFromSet>
+```
+
+3.
+```javascript
+<sendMessage>
+function Channel_sendMessage(message) {
+  <checkWebsocketAvailability>
+  if (!this._websocket) return;
+  </checkWebsocketAvailability>
+
+  <serializeAndSendMessage>
+  message = JSON.stringify(message);
+  this._websocket.send(message);
+  </serializeAndSendMessage>
+}
+</sendMessage>
+```
+
+4.
+```javascript
+<setTextPolyfill>
+function(text) {
+  <polyfillSetTextFunction>
+  CKEDITOR.dom.element.prototype.setText = (this.$.innerText != undefined) ?
+    function(text) {
+      <setTextUsingInnerText>
+      return this.$.innerText = text;
+      </setTextUsingInnerText>
+    } :
+    function(text) {
+      <setTextUsingTextContent>
+      return this.$.textContent = text;
+      </setTextUsingTextContent>
+    };
+  </polyfillSetTextFunction>
+
+  <invokeSetText>
+  return this.setText(text);
+  </invokeSetText>
+}
+</setTextPolyfill>
+```
+
+5.
+```javascript
+<convertEulerToQuaternion>
+function fromEuler(q, euler) {
+  <calculateHalfAngles>
+  var x = euler[0];
+  var y = euler[1];
+  var z = euler[2];
+  var cx = Math.cos(x / 2);
+  var cy = Math.cos(y / 2);
+  var cz = Math.cos(z / 2);
+  var sx = Math.sin(x / 2);
+  var sy = Math.sin(y / 2);
+  var sz = Math.sin(z / 2);
+  </calculateHalfAngles>
+  
+  <computeQuaternion>
+  q[0] = sx * cy * cz + cx * sy * sz;
+  q[1] = cx * sy * cz - sx * cy * sz;
+  q[2] = cx * cy * sz + sx * sy * cz;
+  q[3] = cx * cy * cz - sx * sy * sz;
+  </computeQuaternion>
+
+  <returnQuaternion>
+  return q;
+  </returnQuaternion>
+}
+</convertEulerToQuaternion>
+```
+
+6.
+```javascript
+<initializeLink>
+function Link(properties) {
+  <initializeSignatures>
+  this.signatures = [];
+  </initializeSignatures>
+  <assignProperties>
+  if (properties)
+    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+      if (properties[keys[i]] != null)
+        this[keys[i]] = properties[keys[i]];
+  </assignProperties>
+}
+</initializeLink>
+```
+
+7.
+```javascript
+<setCookieOrLocalStorageValue>
+function set(name, value) {
+  <removeIfNoValue>
+  if (!value) {
+      remove(name);
+      return;
+  }
+  </removeIfNoValue>
+
+  <attemptLocalStorageSet>
+  if (localStorage) {
+      try {
+          localStorage.setItem(name, value);
+      }
+      catch (ex) {}
+  }
+  </attemptLocalStorageSet>
+
+  <setCookieValue>
+  _.isFunction($cookies.put) ?
+      $cookies.put(name, value, { domain: cookieDomain }) :
+      $cookies[name] = value;
+  </setCookieValue>
+}
+</setCookieOrLocalStorageValue>
+```
+
+8.
+```javascript
+<getTagsFromDatabase>
+function getTags(params, config, conn) {
+  <setDefaultConfigAndLimit>
+  config = config || require('../config/config.js');
+  params.limit = 100;
+  </setDefaultConfigAndLimit>
+
+  <fetchTagsPromise>
+  return new Promise((resolve, reject) => {
+    <obtainConnection>
+    if (!conn) {
+      var conn = wc_db.getConnection(config.db);
+    }
+    </obtainConnection>
+
+    <constructAndExecuteQuery>
+    if (params.uri) {
+      var sql = 'SELECT t.tag from Media m left join MediaTag mt on m.id = mt.media_id left join Tag t on mt.tag_id = t.id  where m.uri = :uri order by t.tag LIMIT :limit ';
+    } else {
+      var sql = 'SELECT * from Tag order by id LIMIT :limit ';
+    }
+    debug(sql);
+
+    conn.query(sql, { replacements: { "limit" : params.limit, "uri" : params.uri } }).then(function(ret){
+      <resolvePromiseWithData>
+      return resolve({"ret" : ret, "conn" : conn});
+      </resolvePromiseWithData>
+    }).catch(function(err) {
+      <rejectPromiseWithError>
+      return reject({"err" : err, "conn" : conn});
+      </rejectPromiseWithError>
+    })
+    </constructAndExecuteQuery>
+  })
+  </fetchTagsPromise>
+}
+</getTagsFromDatabase>
+```
+
+9.
+```javascript
+<sortCssClasses>
+function _sortCssClassesValues(cssClasses) {
+  <processAndSortClasses>
+  var classList = (cssClasses || '').split(' ');
+  return _(classList)
+      .filter()
+      .uniq()
+      .sort()
+      .join(' ');
+  </processAndSortClasses>
+}
+</sortCssClasses>
+```
+
+10.
+```javascript
+<initializeEngine>
+function Engine(opts) {
+  <setDefaultOptions>
+  opts = opts || {};
+  this.ext = opts.ext || 'html';
+  mkdirp = opts.mkdirp || mkdirp;
+  </setDefaultOptions>
+
+  <setEngineVersion>
+  this.version = require('./../package.json').version;
+  </setEngineVersion>
+}
+</initializeEngine>
+```

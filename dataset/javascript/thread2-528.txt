@@ -1,0 +1,292 @@
+```javascript
+<withSharoFunction>
+function withSharo(nextConfig = {}) {
+  <setupExtensions>
+  const withMdx = require('@zeit/next-mdx')({
+    extension: /\.mdx?$/
+  })
+  </setupExtensions>
+  
+  <returnEnhancedConfig>
+  return (
+    withSass(withMdx(
+      Object.assign(
+        {},
+        nextConfig,
+        {
+          <modifyWebpackConfig>
+          webpack(config, options) {
+            config.resolve.extensions.push('.md', '.mdx', '.scss', '.sass')
+          
+            if (typeof nextConfig.webpack === 'function') {
+              return nextConfig.webpack(config, options)
+            }
+          
+            return config
+          }
+          </modifyWebpackConfig>
+        }
+      )
+    ))
+  )
+  </returnEnhancedConfig>
+}
+</withSharoFunction>
+
+<_arrayCopyFunction>
+function _arrayCopy(dest, src) {
+  <copyArrayContent>
+  if (Array.isArray(src)) {
+    src.forEach(function (item) {
+      dest.push(item);
+    });
+  }
+  </copyArrayContent>
+}
+</_arrayCopyFunction>
+
+<_buildResponseFunction>
+function _buildResponse(xhr, fullResponse) {
+  <parseHeaders>
+  var _parseHeaders = function (headers) {
+    var parsed = {};
+  
+    if (headers) {
+      headers = headers.trim().split("\n");
+      for (var h in headers) {
+        // Violating SRP by incorporating "hasOwnProperty" check within the loop.
+        if (headers.hasOwnProperty(h)) {
+          var header = headers[h].match(/([^:]+):(.*)/);
+          parsed[header[1].trim().toLowerCase()] = header[2].trim();
+        }
+      }
+    }
+    return parsed;
+  };
+  </parseHeaders>
+ 
+  <processResponse>
+  var headers = _parseHeaders(xhr.getAllResponseHeaders()),
+    response = null;
+  
+  if (xhr.responseText) {
+    var contentType = headers['content-type'];
+    if (contentType && contentType.indexOf('application/json') !== -1) {
+      try {
+        response = JSON.parse(xhr.responseText);
+      } catch (e) {
+        response = xhr.responseText;
+      }
+    } else {
+      response = xhr.responseText;
+    }
+  }
+  
+  if (fullResponse) {
+    response = {
+      data: response,
+      headers: headers,
+      status: xhr.status
+    };
+  
+    if (response.data && response.data.errors) {
+      response.errors = response.data.errors;
+      delete response.data.errors;
+    }
+  }
+  </processResponse>
+
+  return response;
+}
+</_buildResponseFunction>
+
+<streamDataHandler>
+function(viewers, req) {
+  <createStream>
+  var stream = bl();
+  </createStream>
+
+  <handleRequestData>
+  req.on('data', function(chunk) {
+    stream.append(chunk);
+  });
+  </handleRequestData>
+
+  <handleRequestEnd>
+  req.on('end', function() {
+    var data = stream.toString('ascii');
+    console.log('Dispatching: ' + data);
+  })
+  </handleRequestEnd>
+}
+</streamDataHandler>
+
+<randomNumberGenerator>
+function random(len) {
+  <handleRandomGenerationStrategy>
+  if (subtle) {
+      return safeRandom(len);
+  } else if (nodeCrypto) {
+      return new Uint8Array(nodeCrypto.randomBytes(len));
+  } else {
+      throw new KdbxError(Consts.ErrorCodes.NotImplemented, 'Random not implemented');
+  }
+  </handleRandomGenerationStrategy>
+}
+</randomNumberGenerator>
+
+<fileUploadAndReadDataFunction>
+function (file, callback) {
+  <initializeUpload>
+  var self = this,
+      reader = new FileReader();
+  
+  var uploadDesign = this.$.imageUploadService.upload(file, function (err) {
+      <handleUploadResponse>
+      if (!err) {
+          self.trigger("uploadComplete", {
+              uploadDesign: uploadDesign
+          });
+      } else {
+          self.trigger("uploadError", {
+              error: err,
+              uploadDesign: uploadDesign
+          });
+      }
+      </handleUploadResponse>
+
+      callback && callback(err, uploadDesign);
+  });
+  </initializeUpload>
+
+  <setupReaderOnload>
+  reader.onload = function(evt) {
+    var img = new Image();
+    img.onload = function() {
+      uploadDesign.set({
+          previewImage: evt.target.result,
+          localImage: evt.target.result
+      });
+    };
+    img.src = evt.target.result;
+  };
+  </setupReaderOnload>
+
+  reader.readAsDataURL(file);
+  
+  return uploadDesign;
+}
+</fileUploadAndReadDataFunction>
+
+<generateLegendFunction>
+function generateLegend(legendHelper) {
+  <determineLegendProperties>
+  var legendProps;
+  if (
+    !defined(legendHelper.tableColumn) ||
+    !defined(legendHelper.tableColumn.values)
+  ) {
+    // The function's responsibility is split further but collectively serves to determineLegendProperties.
+    
+    <handleNoValuesCase>
+    if (legendHelper.regionProvider) {
+      legendHelper._binColors = buildEnumBinColors(
+        legendHelper,
+        legendHelper.regionProvider.regions,
+        "top",
+        undefined
+      );
+      legendProps = buildEnumLegendProps(
+        legendHelper,
+        legendHelper.regionProvider.regions
+      );
+    } else {
+      legendProps = defined(legendHelper.name)
+        ? {
+            items: [
+              {
+                title: legendHelper.name,
+                color: convertColorArrayToCssString(
+                  legendHelper._noColumnColorArray
+                )
+              }
+            ]
+          }
+        : undefined;
+    }
+    </handleNoValuesCase>
+  } else if (legendHelper.tableColumn.isEnum) {
+    <handleEnumCase>
+    var tableColumnStyle = legendHelper.tableColumnStyle;
+    var uniqueValues = legendHelper.tableColumn.uniqueValues;
+    legendHelper._binColors = buildEnumBinColors(
+      legendHelper,
+      uniqueValues,
+      tableColumnStyle.colorBinMethod,
+      tableColumnStyle.colorBins
+    );
+    legendProps = buildEnumLegendProps(legendHelper, uniqueValues);
+    </handleEnumCase>
+  } else {
+    <handleScalarCase>
+    var colorMap = defaultValue(
+      legendHelper.tableColumnStyle.colorMap,
+      defaultScalarColorMap
+    );
+    var colorBins = defaultValue(
+      legendHelper.tableColumnStyle.colorBins,
+      defaultNumberOfColorBins
+    );
+    
+    legendHelper._colorGradient = buildColorGradient(colorMap);
+    legendHelper._binColors = buildBinColors(legendHelper, colorBins);
+    legendProps = buildLegendProps(legendHelper, colorMap);
+    </handleScalarCase>
+  }
+  </determineLegendProperties>
+  
+  <createLegendInstance>
+  if (defined(legendProps)) {
+    legendHelper._legend = new Legend(legendProps);
+  } else {
+    legendHelper._legend = null;
+  }
+  </createLegendInstance>
+}
+</generateLegendFunction>
+
+<resolveFunction>
+function resolve(variable, model) {
+  <resolveVariable>
+  if (variable[0] == '-') {
+    var value = model[variable.slice(1)];
+    return value === undefined? undefined : !value;
+  } else return model[variable];
+  </resolveVariable>
+}
+</resolveFunction>
+
+<buildURLPathFunction>
+function(first) {
+  <determineURLPath>
+  if (first === "/") {
+      return "/" + _url_join.apply(_url_join, [].splice.call(arguments, 1));
+  } else {
+      return _url_join.apply(_url_join, [].splice.call(arguments, 0));
+  }
+  </determineURLPath>
+}
+</buildURLPathFunction>
+
+<PowerSampleClassConstructor>
+function PowerSample(series, start, power) {
+  <invokeParentConstructor>
+  Event.call(this);
+  </invokeParentConstructor>
+
+  this.series_ = series;
+  this.start_ = start;
+  this.power_ = power;
+}
+</PowerSampleClassConstructor>
+```

@@ -1,0 +1,492 @@
+```javascript
+<getContainerNode>
+function (start) {
+        var container, parent, sibling, siblingName, root;
+
+        <initializeVariables>
+        container = parent = start ? startContainer : endContainer;
+        siblingName = start ? 'previousSibling' : 'nextSibling';
+        root = dom.getRoot();
+        </initializeVariables>
+
+        <checkTextNodeNotWhitespace>
+        if (container.nodeType === 3 && !isWhiteSpaceNode(container)) {
+          if (start ? startOffset > 0 : endOffset < container.nodeValue.length) {
+            return container;
+          }
+        }
+        </checkTextNodeNotWhitespace>
+
+        <traverseDOM>
+        while (true) {
+          <checkBlockExpandAndIsBlock>
+          if (!format[0].block_expand && dom.isBlock(parent)) {
+            return parent;
+          }
+          </checkBlockExpandAndIsBlock>
+
+          <findValidSibling>
+          for (sibling = parent[siblingName]; sibling; sibling = sibling[siblingName]) {
+            if (!isBookmarkNode(sibling) && !isWhiteSpaceNode(sibling) && !isBogusBr(sibling)) {
+              return parent;
+            }
+          }
+          </findValidSibling>
+
+          <checkParentRootRelation>
+          if (parent === root || parent.parentNode === root) {
+            container = parent;
+            break;
+          }
+          </checkParentRootRelation>
+
+          parent = parent.parentNode;
+        }
+        </traverseDOM>
+
+        return container;
+      }
+</getContainerNode>
+
+<validateStreamEventRecord>
+function _validateStreamEventRecord(record) {
+  <validateRecordIsObject>
+  if (!record || typeof record !== 'object') {
+    throw new Error(`Invalid stream event record (${record}) - record must be a non-null object`);
+  }
+  </validateRecordIsObject>
+  <checkRequiredFields>
+  if (!record.eventID) {
+    throw new Error(`Missing eventID property for stream event record (${record.eventID})`);
+  }
+  if (!record.eventSourceARN) {
+    throw new Error(`Missing eventSourceARN property for stream event record (${record.eventID})`);
+  }
+  if (!record.eventSource) {
+    throw new Error(`Missing eventSource property for stream event record (${record.eventID})`);
+  }
+  if (!record.eventName) {
+    throw new Error(`Missing eventName property for stream event record (${record.eventID})`);
+  }
+  </checkRequiredFields>
+}
+</validateStreamEventRecord>
+
+<chartRedraw>
+function (animation) {
+            <getChartComponents>
+            var chart = this,
+              axes = chart.axes,
+              series = chart.series,
+              pointer = chart.pointer,
+              legend = chart.legend,
+              redrawLegend = chart.isDirtyLegend,
+              hasStackedSeries,
+              hasDirtyStacks,
+              hasCartesianSeries = chart.hasCartesianSeries,
+              isDirtyBox = chart.isDirtyBox, 
+              seriesLength = series.length,
+              i = seriesLength,
+              serie,
+              renderer = chart.renderer,
+              isHiddenChart = renderer.isHidden(),
+              afterRedraw = [];
+            </getChartComponents>
+
+            <configureAnimation>
+            setAnimation(animation, chart);
+            </configureAnimation>
+
+            <handleHiddenChart>
+            if (isHiddenChart) {
+                chart.cloneRenderTo();
+            }
+            </handleHiddenChart>
+
+            <layoutChartTitles>
+            chart.layOutTitles();
+            </layoutChartTitles>
+
+            <markDirtyStacksAndSeries>
+            while (i--) {
+                serie = series[i];
+
+                <checkSeriesStackingAndDirtyStatus>
+                if (serie.options.stacking) {
+                    hasStackedSeries = true;
+
+                    if (serie.isDirty) {
+                        hasDirtyStacks = true;
+                        break;
+                    }
+                }
+                </checkSeriesStackingAndDirtyStatus>
+            }
+            if (hasDirtyStacks) { 
+                i = seriesLength;
+                while (i--) {
+                    serie = series[i];
+                    <markStackingSeriesDirty>
+                    if (serie.options.stacking) {
+                        serie.isDirty = true;
+                    }
+                    </markStackingSeriesDirty>
+                }
+            }
+            </markDirtyStacksAndSeries>
+
+            <updateLegendAndRedraw>
+            each(series, function (serie) {
+                <checkSeriesDirtyForLegend>
+                if (serie.isDirty) {
+                    if (serie.options.legendType === 'point') {
+                        redrawLegend = true;
+                    }
+                }
+                </checkSeriesDirtyForLegend>
+            });
+
+            <redrawLegendIfNecessary>
+            if (redrawLegend && legend.options.enabled) {
+                <renderLegend>
+                legend.render();
+                </renderLegend>
+
+                chart.isDirtyLegend = false;
+            }
+            </redrawLegendIfNecessary>
+            </updateLegendAndRedraw>
+
+            <handleStackedSeries>
+            if (hasStackedSeries) {
+                chart.getStacks();
+            }
+            </handleStackedSeries>
+
+
+            <handleCartesianSeries>
+            if (hasCartesianSeries) {
+                <handleResizing>
+                if (!chart.isResizing) {
+                    <resetMaxTicks>
+                    chart.maxTicks = null;
+                    </resetMaxTicks>
+
+                    <setScaleOnAxes>
+                    each(axes, function (axis) {
+                        axis.setScale();
+                    });
+                    </setScaleOnAxes>
+                }
+                </handleResizing>
+
+                chart.adjustTickAmounts();
+            }
+
+            chart.getMargins();
+            </handleCartesianSeries>
+
+            <redrawAxesAndHandleExtremes>
+            if (hasCartesianSeries) {
+                <checkAxesDirtyStatusAndUpdate>
+                each(axes, function (axis) {
+                    if (axis.isDirty) {
+                        isDirtyBox = true;
+                    }
+                });
+
+                <handleAxisExtremes>
+                each(axes, function (axis) {
+                    <checkAxisDirtyExtremes>
+                    if (axis.isDirtyExtremes) {
+                        axis.isDirtyExtremes = false;
+                        afterRedraw.push(function () {
+                            fireEvent(axis, 'afterSetExtremes', extend(axis.eventArgs, axis.getExtremes()));
+                            delete axis.eventArgs;
+                        });
+                    }
+                    </checkAxisDirtyExtremes>
+
+                    <redrawAxisIfNecessary>
+                    if (isDirtyBox || hasStackedSeries) {
+                        axis.redraw();
+                    }
+                    </redrawAxisIfNecessary>
+                });
+                </handleAxisExtremes>
+                </checkAxesDirtyStatusAndUpdate>
+            }
+            </redrawAxesAndHandleExtremes>
+
+            <drawChartBoxIfDirty>
+            if (isDirtyBox) {
+                chart.drawChartBox();
+            }
+            </drawChartBoxIfDirty>
+
+            <redrawDirtySeries>
+            each(series, function (serie) {
+                <checkSeriesDirtyAndVisible>
+                if (serie.isDirty && serie.visible &&
+                  (!serie.isCartesian || serie.xAxis)) {
+                    serie.redraw();
+                }
+                </checkSeriesDirtyAndVisible>
+            });
+            </redrawDirtySeries>
+
+            <resetPointer>
+            if (pointer) {
+                pointer.reset(true);
+            }
+            </resetPointer>
+
+            <drawRenderer>
+            renderer.draw();
+            </drawRenderer>
+
+            <fireRedrawEvent>
+            fireEvent(chart, 'redraw');
+            </fireRedrawEvent>
+
+            <handleHiddenChartPostRedraw>
+            if (isHiddenChart) {
+                chart.cloneRenderTo(true);
+            }
+            </handleHiddenChartPostRedraw>
+
+            <callAfterRedrawCallbacks>
+            each(afterRedraw, function (callback) {
+                callback.call();
+            });
+            </callAfterRedrawCallbacks>
+        }
+</chartRedraw>
+
+<ErrorMessage>
+function ErrorMessage() {
+  <initializeErrorMessage>
+  this.eventTime = (new Date()).toISOString();
+  this.serviceContext = {service : 'node', version : undefined};
+  this.message = '';
+  this.context = {
+    httpRequest : {
+      method : '',
+      url : '',
+      userAgent : '',
+      referrer : '',
+      responseStatusCode : 0,
+      remoteIp : ''
+    },
+    user : '',
+    reportLocation : {filePath : '', lineNumber : 0, functionName : ''}
+  };
+  </initializeErrorMessage>
+}
+</ErrorMessage>
+
+<getValue>
+function getValue($el) {
+    <deriveValueBasedOnElementType>
+    return $el.is('[type="checkbox"]') ? $el.prop('checked')                                     :
+           $el.is('[type="radio"]')    ? !!$('[name="' + $el.attr('name') + '"]:checked').length :
+           $el.is('select[multiple]')  ? ($el.val() || []).length                                :
+                                         $el.val()
+    </deriveValueBasedOnElementType>
+  }
+</getValue>
+
+<runHTMLTaskStream>
+function runHTMLTaskStream(gulp, s, config, startFun, endFun) {    
+    <resolvePaths>
+    var destPath = path.resolve(config.root, config.dest || '');
+    var jsDestPath = path.resolve(destPath, config.jsDest || ''); 
+    var cssDestPath = path.resolve(destPath, config.cssDest || ''); 
+    var htmlDestPath = path.resolve(destPath, config.htmlDest || ''); 
+    var fileDestPath = path.resolve(destPath, config.fileDest || ''); 
+    </resolvePaths>
+
+    <determineDestination>
+    if(s.__dest) {
+        var dest = s.__dest;
+    }
+    else {
+        var dest = path.resolve(destPath, config.htmlDest || '', s.dest || '');
+    }
+    </determineDestination>
+
+    <createGulpStream>
+    var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
+    </createGulpStream>
+    <invokeStartFunction>
+    if(startFun && typeof startFun == 'function') {
+        stream = startFun(stream, s);
+     }
+     </invokeStartFunction>
+
+     <pipeStreamToDestination>
+     stream = stream.pipe(gulp.dest(dest));
+     </pipeStreamToDestination>
+
+     <parseAndPipeStream>
+     stream = stream.pipe(parse.parse({
+            "type": 'html',
+            "debug": config.debug,
+            "root": config.root,
+            "dest": dest,
+            "destPath": destPath,
+            "jsDestPath": jsDestPath,
+            "cssDestPath": cssDestPath,
+            "htmlDestPath": htmlDestPath,
+            "fileDestPath": fileDestPath,
+            "urlMaps": config.urlMaps || [],
+            "config": s
+        })).pipe(gulp.dest(dest));
+     </parseAndPipeStream>
+
+     <handleRenameAndEndFunction>
+     if(s.rename) {
+        stream = stream.pipe(rename(s.rename));
+     }
+     if(endFun && typeof endFun == 'function') {
+        stream = endFun(stream, s);
+     }
+     </handleRenameAndEndFunction>
+     <finalPipeToDestination>
+     return stream.pipe(gulp.dest(dest));
+     </finalPipeToDestination>
+}
+</runHTMLTaskStream>
+
+<inverseHelper>
+function(expr, options) {
+    <swapFnAndInverse>
+    var fn = options.fn;
+    options.fn = options.inverse;
+    options.inverse = fn;
+    </swapFnAndInverse>
+    <applyInverseHelper>
+    return Mustache._helpers['if'].fn.apply(this, arguments);
+    </applyInverseHelper>
+}
+</inverseHelper>
+
+<traverseObject>
+function traverse(obj) {
+      <eachObjectPropOrIndex>
+      each(obj, (val, indexOrProp) => {
+        <getNextValue>
+        const next = obj[indexOrProp];
+        </getNextValue>
+
+        <recurseOrFilterArray>
+        if (MongoObject.isBasicObject(next)) {
+          traverse(next);
+        } else if (Array.isArray(next)) {
+          obj[indexOrProp] = without(next, REMOVED_MARKER);
+          traverse(obj[indexOrProp]);
+        }
+        </recurseOrFilterArray>
+      });
+      </eachObjectPropOrIndex>
+    }
+</traverseObject>
+
+<RingBuffer>
+function RingBuffer(maxSize){
+    <initializeRingBuffer>
+    var data = [];
+    var cursor = 0;
+    var isFull = false;
+    </initializeRingBuffer>
+    <appendData>
+    this.append = function(x){
+        if (isFull){
+            data[cursor] = x;
+            cursor = (cursor + 1) % maxSize;
+        }
+        else{
+            data.push(x);
+            cursor++;
+            if (data.length === maxSize){
+                cursor = 0;
+                isFull = true;
+            }
+        }
+    };
+    </appendData>
+    <calculateAverage>
+    this.avg = function(){
+        var sum = data.reduce(function(a, b){ return a + b });
+        return sum / (isFull ? maxSize : cursor);
+    };
+    </calculateAverage>
+    <getSize>
+    this.size = function(){
+        return isFull ? maxSize : cursor;
+    };
+    </getSize>
+    <clearData>
+    this.clear = function(){
+        data = [];
+        cursor = 0;
+        isFull = false;
+    };
+    </clearData>
+}
+</RingBuffer>
+
+<setElementPosition>
+function(item) {
+    <checkValidItem>
+    if(!item || (item && !item.element) || (item && !item.position))
+        return;
+    </checkValidItem>
+
+    <classifyElementByPosition>
+    switch(item.position) {
+        case 'left':
+            <addClassTimelineMeLeft>
+            item.element
+            .removeClass('timeline-me-top')
+            .removeClass('timeline-me-right')
+            .removeClass('timeline-me-bottom')
+            .addClass('timeline-me-left');
+            </addClassTimelineMeLeft>
+            break;
+        case 'top':
+            <addClassTimelineMeTop>
+            item.element
+            .removeClass('timeline-me-left')
+            .removeClass('timeline-me-right')
+            .removeClass('timeline-me-bottom')
+            .addClass('timeline-me-top');
+            </addClassTimelineMeTop>
+            break;
+        case 'right':
+            <addClassTimelineMeRight>
+            item.element
+            .removeClass('timeline-me-top')
+            .removeClass('timeline-me-left')
+            .removeClass('timeline-me-bottom')
+            .addClass('timeline-me-right');
+            </addClassTimelineMeRight>
+            break;
+        case 'bottom':
+            <addClassTimelineMeBottom>
+            item.element
+            .removeClass('timeline-me-top')
+            .removeClass('timeline-me-right')
+            .removeClass('timeline-me-left')
+            .addClass('timeline-me-bottom');
+            </addClassTimelineMeBottom>
+            break;
+    }
+    </classifyElementByPosition>
+
+    return item;
+}
+</setElementPosition>
+```
+
+Each function is annotated with the primary responsibility it holds and additional tags for subsidiary responsibilities where separate self-contained functionalities are realized. These annotations help maintain a clear structure for analysis of SRP principle compliance or violations.

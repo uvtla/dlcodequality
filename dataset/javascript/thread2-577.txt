@@ -1,0 +1,191 @@
+1.
+<toArray>
+function toArray(item) {
+	if (!(item instanceof Array)) {
+		var newitem = [];
+		if (item) {
+			newitem.push(item);
+		}
+		return newitem;
+	}
+	else {
+		return item;
+	}
+}
+</toArray>
+
+2.
+<getNormalizedEventCoords>
+function getNormalizedEventCoords(ev, pageOffset, clientRect) {
+  const { x, y } = pageOffset;
+  const documentX = x + clientRect.left;
+  const documentY = y + clientRect.top;
+  
+  let normalizedX;
+  let normalizedY;
+  
+  if (ev.type === 'touchstart') {
+    normalizedX = ev.changedTouches[0].pageX - documentX;
+    normalizedY = ev.changedTouches[0].pageY - documentY;
+  } else {
+    normalizedX = ev.pageX - documentX;
+    normalizedY = ev.pageY - documentY;
+  }
+
+  return { x: normalizedX, y: normalizedY };
+}
+</getNormalizedEventCoords>
+
+3.
+<map>
+async function map(array, fn, self = undefined) {
+  const v = await Promise.resolve(array);
+  if (!Array.isArray(v)) {
+    throw TypeError('not an array');
+  }
+  
+  const arr = (v);
+  const n = arr.length;
+  const values = new Array(n);
+  
+  for (let i = 0; i < n; i++) {
+    if (i in arr) {
+      values[i] = await Promise.resolve(fn.call(self, arr[i], i, arr));
+    }
+  }
+  return values;
+}
+</map>
+
+4.
+<unnamedFunction> (Function should have a name. Assuming an appropriate name related to the execution flow represented by the code.)
+function(value) {
+    this.terminal._caretChange = Caret.NO_CHANGE;
+
+    return this.requisition.update(value).then(function(updated) {
+      
+      if (!updated) {
+        return RESOLVED;
+      }
+      this.textChanged();
+      return this.terminal.unsetChoice();
+    }.bind(this));
+}
+</unnamedFunction>
+
+5.
+<MySQL>
+function MySQL(config) {
+  var self = this;
+  
+  config = config || {};
+  config.host = config.host || 'localhost';
+  config.port = config.port || 3306;
+  
+  this.className = this.constructor.name;
+  
+  this.config = config;
+  
+  this.client = mysql.createConnection(config);
+
+  if (typeof config.storage == 'string') {
+    this.storage = app.getResource('storages/' + config.storage);
+  } else if (config.storage instanceof protos.lib.storage) {
+    this.storage = config.storage;
+  }
+  
+  this.db = config.database;
+      
+  protos.util.onlySetEnumerable(this, ['className', 'db']);
+}
+</MySQL>
+
+6.
+<unnamedFunction> (Function should have a name. Assuming an appropriate name related to loading template context dependencies.)
+function (tplCtxt) {
+  this.$assert(133, tplCtxt.$TemplateCtxt);
+  
+  var toLoad = tplCtxt.getCSSDependencies();
+  var tplClasspath = tplCtxt.tplClasspath;
+  var loadResult = this.loadClassPathDependencies(tplClasspath, toLoad, {
+      isTemplate : true
+  });
+
+  if (loadResult.changes) {
+      this.$raiseEvent({
+          name : "styleChange",
+          templateClasspath : tplClasspath
+      });
+  }
+
+  this.$raiseEvent({
+      name : "dependenciesLoaded",
+      templateClasspath : tplClasspath
+  });
+
+  return loadResult.classes;
+}
+</unnamedFunction>
+
+7.
+<Null>
+function Null() {
+	spec.Asn1Spec.call(this, new spec.Asn1Tag(spec.TagClass.Universal, spec.TagFormat.Primitive, UniversalTag.Null));
+}
+</Null>
+
+8.
+<buildShaderProgram>
+function buildShaderProgram(gl, name, config, resources) {
+  const progConfig = config.programs[name];
+  
+  <compileShaders>
+  const compiledVertexShader = compileShader(
+    gl,
+    progConfig.vertexShader,
+    gl.VERTEX_SHADER
+  );
+  const compiledFragmentShader = compileShader(
+    gl,
+    progConfig.fragmentShader,
+    gl.FRAGMENT_SHADER
+  );
+  </compileShaders>
+
+  const program = createShaderProgram(gl, [
+    compiledVertexShader,
+    compiledFragmentShader,
+  ]);
+
+  resources.programs[name] = program;
+
+  if (progConfig.mapping) {
+    applyProgramDataMapping(gl, name, progConfig.mapping, config, resources);
+  }
+
+  return program;
+}
+</buildShaderProgram>
+
+9.
+<loadComponentFile>
+function loadComponentFile (meta, key, filepath, messages) {
+  const ext = path.extname(filepath).slice(1)
+  const loader = fileLoaders[ext] || fileLoaders.DEFAULT
+
+  return loader(meta, key, filepath, messages)
+}
+</loadComponentFile>
+
+10.
+<isChild>
+function isChild(child, parent) {
+	while (child = child.parentNode) {
+		if (child == parent) {
+			return true;
+		}
+	}
+
+	return false;
+}
+</isChild>

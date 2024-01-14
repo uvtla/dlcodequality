@@ -1,0 +1,382 @@
+```html
+<match>
+function match(source, cases, isExec) {
+  <throwErr_check>
+  if (!isObj(cases)) throwErr('obj'); </throwErr_check>
+  <isExec_default>
+  if (isUdf(isExec)) isExec = true; </isExec_default>
+  var symbol = '__@fnMatch__';
+  <determine_symbol>
+  if (has(cases, source)) {
+    symbol = source;
+  } else if (has(cases, 'default')) {
+    symbol = 'default';
+  } </determine_symbol>
+  <resolve_matched>
+  var matched = cases[symbol];
+  if (matched === '@next') {
+    var ks = keys(cases), i = ks.indexOf(symbol) - 1;
+    while (++i < ks.length) if (cases[ks[i]] !== '@next') { matched = cases[ks[i]]; break; }
+  } </resolve_matched>
+  <execute_or_return>
+  if (isExec && isFun(matched)) {
+    return len(matched) ? matched(source) : matched();
+  } else {
+    return matched === '@next' ? UDF : matched;
+  } </execute_or_return>
+}
+</match>
+
+<getErrorReportURL>
+function getErrorReportURL(projectId, key) {
+  var url = [API, projectId, 'events:report'].join('/');
+  <append_key_param>
+  if (isString(key)) {
+    url += '?key=' + key;
+  } </append_key_param>
+  return url;
+}
+</getErrorReportURL>
+
+<pursue>
+function pursue(targetBoid) {
+  <calculate_predicted_target>
+  const lookAheadTime = position.distanceSq(targetBoid.position) / maxSpeedSq;
+
+  const scaledVelocity = targetBoid.velocity.clone().scaleBy(lookAheadTime);
+  const predictedTarget = targetBoid.position.clone().add(scaledVelocity);
+
+  seek(predictedTarget);
+
+  scaledVelocity.dispose();
+  predictedTarget.dispose();
+  </calculate_predicted_target>
+
+  return boid;
+}
+</pursue>
+
+<injectNumbers>
+function injectNumbers (funcs, task) {
+  <inject>
+  function inject (taskKey) {
+    var taskName = task[taskKey]
+
+    var num = parseFloat(taskName)
+
+    if (!isNaN(num)) {
+      funcs[taskName] = function () { return num }
+    }
+  } </inject>
+
+  <loop_through_tasks>
+  Object.keys(task)
+    .forEach(inject)
+  </loop_through_tasks>
+}
+</injectNumbers>
+
+<clean>
+function clean(obj) {
+  <remove_null_properties>
+  for (var prop in obj) if (obj[prop] == null) delete obj[prop]; </remove_null_properties>
+  return obj;
+}
+</clean>
+
+<anonymous_event_function>
+function(event_type) {
+  <setup>
+	var rest_args = arguments.length > 1 ? rest(arguments) : root,
+		
+		event = new CJSEvent(false, false, function(transition) {
+			var targets = [],
+				<timeout_management>
+				timeout_id = false,
+				event_type_val = [],
+				listener = bind(this._fire, this),
+				fsm = transition.getFSM(),
+				from = transition.getFrom(),
+				state_selector = new StateSelector(from),
+				from_state_selector = new TransitionSelector(true, state_selector, new AnyStateSelector()),
+				on_listener = function() {
+					<timeout_set_up>
+					each(event_type_val, function(event_type) {
+						
+						if(event_type === timeout_event_type) {
+						
+							if(timeout_id) {
+								cTO(timeout_id);
+								timeout_id = false;
+							}
+
+							var delay = cjs.get(rest_args[0]);
+							if(!isNumber(delay) || delay < 0) {
+								delay = 0;
+							}
+
+							timeout_id = sTO(listener, delay);
+						} else {
+							<event_listening>
+							each(targets, function(target) {
+								
+								aEL(target, event_type, listener);
+							});
+							</event_listening>
+						}
+					});
+					</timeout_set_up>
+				},
+				off_listener = function() {
+					each(event_type_val, function(event_type) {
+						each(targets, function(target) {
+							if(event_type === timeout_event_type) {
+								
+								if(timeout_id) {
+									cTO(timeout_id);
+									timeout_id = false;
+								}
+							} else {
+								<remove_event_listener>
+								rEL(target, event_type, listener);
+								</remove_event_listener>
+							}
+						});
+					});
+				},
+				live_fn = cjs.liven(function() {
+					<live_functionality>
+					off_listener();
+
+					event_type_val = split_and_trim(cjs.get(event_type));
+					
+					targets = flatten(map(filter(get_dom_array(rest_args), isElementOrWindow), getDOMChildren , true));
+
+					fsm	.on(state_selector, on_listener)
+						.on(from_state_selector, off_listener);
+
+					if(fsm.is(from)) {
+						
+						on_listener();
+					}
+					</live_functionality>
+				});
+			return live_fn;
+		});
+		return event;
+	</setup>
+}
+</anonymous_event_function>
+
+<main>
+function main (options, done) {
+  <input_assertions>
+  const token = options.token
+  const filename = options.filename
+
+  assert.equal(typeof token, 'string', 'markdown-to-medium: token should be a string')
+  </input_assertions>
+
+  <medium_setup>
+  const client = new medium.MediumClient({
+    clientId: token,
+    clientSecret: token
+  })
+
+  client.setAccessToken(token)
+  </medium_setup>
+
+  var src
+
+  <read_file>
+  try {
+    src = fs.readFileSync(filename, 'utf8')
+  } catch (e) {
+    throw new Error('Could not read file ' + filename)
+  }
+  </read_file>
+
+  <prepare_content>
+  const matter = frontMatter(src)
+  let title = options.title || matter.attributes.title
+  const tags = (options.tags && options.tags.split(',')) || matter.attributes.tags
+  const publication = options.publication || matter.attributes.publication
+  const canonicalUrl = options.canonicalUrl || matter.attributes.canonicalUrl || ''
+  const license = checkLicense(options.license || matter.attributes.license)
+
+  var content = `
+  # ${title}
+
+  ${matter.body}
+
+  `
+
+  if (!title && getTitle(src)) {
+    title = getTitle(src).text
+    content = matter.body
+  }
+
+  if (canonicalUrl.length) {
+    content += `
+*Cross-posted from [${canonicalUrl}](${canonicalUrl}).*
+    `
+  }
+  </prepare_content>
+
+  <user_authentication_and_post>
+  client.getUser((err, user) => {
+    <handle_errors>
+    if (err) {
+      throw new Error(err)
+    } </handle_errors>
+
+    console.log(`Authenticated as ${user.username}`.blue)
+
+    const options = {
+      userId: user.id,
+      title,
+      tags,
+      content,
+      canonicalUrl,
+      license,
+      contentFormat: 'markdown',
+      publishStatus: 'draft'
+    }
+
+    const successMsg = `Draft post "${title}" published to Medium.com`.green
+
+    <publish_to_publication>
+    if (publication) {
+      client.getPublicationsForUser({userId: user.id}, (err, publications) => {
+        if (err) {
+          throw new Error(err)
+        }
+        const myPub = publications.filter((val) => { return val.name === publication })
+        if (myPub.length === 0) {
+          throw new Error('No publication by that name!')
+        }
+        client.createPostInPublication(Object.assign(options, {publicationId: myPub[0].id}), (err, post) => {
+          if (err) {
+            throw new Error(err)
+          }
+          console.log(successMsg)
+          open(post.url)
+        })
+      })
+    </publish_to_publication>
+    <publish_to_user>
+    else {
+      client.createPost(options, (err, post) => {
+        if (err) {
+          throw new Error(err)
+        }
+        console.log(successMsg)
+        open(post.url)
+      })
+    }
+    </publish_to_user>
+  })
+  </user_authentication_and_post>
+}
+</main>
+
+<generateQuestions>
+function generateQuestions(config = {}, questions = {}) {
+  const questionKeys = Object.keys(questions)
+
+  <return_all_questions>
+  if (!config) {
+    return questionKeys.map(question => questions[question])
+  }
+  </return_all_questions>
+
+  <generate_custom_questions>
+  if (config.type === 'custom') {
+    return generateQuestionsCustom(config, questions)
+  }
+  </generate_custom_questions>
+  
+  <filter_and_return_questions>
+  const filteredQuestions = []
+  questionKeys.forEach((question) => {
+    if (!(question in config)) {
+      filteredQuestions.push(questions[question])
+    }
+  })
+
+  return filteredQuestions
+  </filter_and_return_questions>
+}
+</generateQuestions>
+
+<normalizeText>
+function normalizeText(text, start, end, removeTrailingSemiColons) {
+  var trimmedText;
+
+  <trim_left>
+  trimmedText = _.trimLeft(text);
+
+  if (trimmedText.length < text.length) {
+    start += (text.length - trimmedText.length);
+  }
+
+  text = trimmedText;
+  </trim_left>
+  
+  <trim_right>
+  trimmedText = _.trimRight(text);
+
+  if (trimmedText.length < text.length) {
+    end -= (text.length - trimmedText.length);
+  }
+
+  text = trimmedText;
+  </trim_right>
+  
+  <remove_semicolons>
+  if (removeTrailingSemiColons) {
+    trimmedText = _.trimRight(text, ';');
+
+    if (trimmedText.length < text.length) {
+      end -= (text.length - trimmedText.length);
+    }
+  }
+  </remove_semicolons>
+
+  return {
+    text: trimmedText,
+    start: start,
+    end: end
+  };
+}
+</normalizeText>
+
+<f_teklif_onay_durum_idsi>
+function f_teklif_onay_durum_idsi(_olay) {
+  <determine_teklif_type>
+  var tipi = "";
+  switch (_olay) {
+    case schema.SABIT.OLAY.TEKLIF_KAZANDI:
+    {
+      tipi = schema.SABIT.ONAY_DURUM.teklif.KAZANDI;
+    }
+      break;
+    case schema.SABIT.OLAY.TEKLIF_IHALEDEN_ATILDI:
+    {
+      tipi = schema.SABIT.ONAY_DURUM.teklif.IHALEDEN_ATILDI;
+    }
+      break;
+    case schema.SABIT.OLAY.TEKLIF_REDDEDILDI:
+    {
+      tipi = schema.SABIT.ONAY_DURUM.teklif.REDDEDILDI;
+    }
+      break;
+    default:
+      throw "Gelen olaya uygun teklif onay durumu bulunamadı!";
+      break;
+  }
+  </determine_teklif_type>
+  return tipi;
+}
+</f_teklif_onay_durum_idsi>
+```

@@ -1,0 +1,346 @@
+```javascript
+<dirsExist>
+function dirsExist(dirs) {
+  <checkEmptyDirs>
+  if (0 === dirs.length) {
+    return new Promise((resolve) => {
+      resolve({});
+    });
+  }
+  </checkEmptyDirs>
+
+  <organizeDirsByDepth>
+  const dirsByDepth = dirs.reduce(function(prev, curItem) {
+    const depth = curItem.split(path.sep).length;
+    (prev[depth] = prev[depth] || []).push(curItem);
+
+    return prev;
+  }, {});
+  </organizeDirsByDepth>
+
+  <findCurrentDirs>
+  const allDepths = Object.keys(dirsByDepth).map(Number);
+  const currDepth = Math.min(...allDepths);
+  const currDirs = dirsByDepth[currDepth];
+  </findCurrentDirs>
+
+  <initializeResultObject>
+  const result = dirs.reduce(function(prev, item) {
+    prev[item] = null;
+
+    return prev;
+  }, {});
+  </initializeResultObject>
+
+  <checkCurrentDirsExistence>
+  return stupidDirsExist(currDirs).then((localResult) => {
+    Object.keys(result).forEach((dir) => {
+      if (null !== result[dir]) {
+        return;
+      }
+
+      Object.keys(localResult).forEach((localDir) => {
+        
+        result[localDir] = localResult[localDir];
+
+        
+        
+        if (false === localResult[localDir] &&
+          dir.slice(0, localDir.length + 1) === localDir + path.sep) {
+          result[dir] = false;
+        }
+      });
+    });
+    </checkCurrentDirsExistence>
+
+    <filterRestAndRecurse>
+    const restDirs = dirs.filter((dir) => {
+      return null === result[dir];
+    });
+
+    return dirsExist(restDirs);
+    </filterRestAndRecurse>
+  }).then((finalResult) => {
+    <mergeFinalResult>
+    Object.keys(finalResult).forEach((finalDir) => {
+      result[finalDir] = finalResult[finalDir];
+    });
+
+    return result;
+    </mergeFinalResult>
+  });
+}
+</dirsExist>
+
+<processOutput>
+function (o, cb) {
+    <checkOutputDir>
+    if (!o.out) {
+      throw new Error('output dir missing');
+    }
+    </checkOutputDir>
+
+    <pipeToDestination>
+    this.src(o)
+      .on('error', handleCallbackError(cb))
+      .pipe(vfs.dest(function (file) {
+        return file.base;
+      }))
+      .on('error', handleCallbackError(cb))
+      .on('end', function () {
+        <executeCallback>
+        if (_.isFunction(cb) && !error) {
+          cb();
+        }
+        </executeCallback>
+      });
+    </pipeToDestination>
+}
+</processOutput>
+
+<applyChangesAttributes>
+function() {
+    <applyChanges>
+    for (var name in this.changes) {
+      if (this.changes.hasOwnProperty(name)) {
+        this.attributes[name] = this.changes[name][0]
+      }
+    }
+    </applyChanges>
+
+    <resetChanges>
+    this.changes = {}
+    return this
+    </resetChanges>
+}
+</applyChangesAttributes>
+
+<andEvaluator>
+function andEvaluator(conditions, leafEvaluator) {
+  var sawNullResult = false;
+  <evaluateConditions>
+  for (var i = 0; i < conditions.length; i++) {
+    var conditionResult = evaluate(conditions[i], leafEvaluator);
+    if (conditionResult === false) {
+      return false;
+    }
+    if (conditionResult === null) {
+      sawNullResult = true;
+    }
+  }
+  </evaluateConditions>
+  return sawNullResult ? null : true;
+}
+</andEvaluator>
+
+<parseRGB>
+function parseSimpleColor(color) {
+  <normalizeAndMatch>
+	color = normalizeColor(color);
+	var matches = /^rgb\(([0-9]+), ([0-9]+), ([0-9]+)\)$/.exec(color);
+  
+  if (matches) {
+    <constructHexColor>
+		return "#"
+			+ parseInt(matches[1]).toString(16).replace(/^.$/, "0$&")
+			+ parseInt(matches[2]).toString(16).replace(/^.$/, "0$&")
+			+ parseInt(matches[3]).toString(16).replace(/^.$/, "0$&");
+    </constructHexColor>
+	}
+  </normalizeAndMatch>
+	return null;
+}
+</parseRGB>
+
+<addWeight>
+function addWeight (canonicalNodeWithPath, query) {
+  
+  <initializeVariable>
+  const cnwp = canonicalNodeWithPath
+  </initializeVariable>
+
+  <computePresentableName>
+  const name = presentableName(cnwp.node, preferredLocale)
+  </computePresentableName>
+
+  <computeSynonym>
+  const synonym = cnwp.path
+    .map(pathNode => presentableName(pathNode.node, pathNode.locale))
+    .map(nameInPath => nameInPath.toLowerCase())
+    .pop()
+  </computeSynonym>
+
+  <indexOfQueryCalculation>
+  const indexOfQuery = indexOfLowerCase(name, query)
+  </indexOfQueryCalculation>
+
+  <countryChecks>
+  const isUk = name === 'United Kingdom'
+  const isUs = name === 'United States'
+  </countryChecks>
+
+  <countryBiases>
+  const ukBias = 2
+  const usBias = 1.5
+  const defaultCountryBias = 1
+  </countryBiases>
+
+  <matchChecks>
+  const isExactMatchToCanonicalName = name.toLowerCase() === query.toLowerCase()
+  const canonicalNameStartsWithQuery = indexOfQuery === 0
+  const wordInCanonicalNameStartsWithQuery = name
+      .split(' ')
+      .filter(w => w.toLowerCase().indexOf(query.toLowerCase()) === 0)
+      .length > 0
+  </matchChecks>
+
+  <synonymMatchChecks>
+  var synonymIsExactMatch = false
+  var synonymStartsWithQuery = false
+  var wordInSynonymStartsWith = false
+  var indexOfSynonymQuery = false
+  var synonymContainsQuery = false
+
+  if (synonym) {
+    synonymIsExactMatch = synonym === query.toLowerCase()
+
+    synonymStartsWithQuery = synonym
+      .indexOf(query.toLowerCase()) === 0
+
+    wordInSynonymStartsWith = synonym
+      .split(' ')
+      .filter(w => w.toLowerCase().indexOf(query.toLowerCase()) === 0)
+      .length > 0
+
+    indexOfSynonymQuery = indexOfLowerCase(synonym, query)
+  }
+  </synonymMatchChecks>
+
+  <updateWeightBasedOnName>
+  const canonicalNameContainsQuery = indexOfQuery > 0
+  synonymContainsQuery = indexOfSynonymQuery > 0
+
+  if (isExactMatchToCanonicalName) {
+    cnwp.weight = 100
+  } else if (canonicalNameStartsWithQuery) {
+    cnwp.weight = 76
+  } else if (wordInCanonicalNameStartsWithQuery) {
+    cnwp.weight = 60
+  } else if (synonymIsExactMatch) { 
+    cnwp.weight = 50
+  } else if (synonymStartsWithQuery) {
+    cnwp.weight = 45
+  } else if (wordInSynonymStartsWith) {
+    cnwp.weight = 37
+  } else if (canonicalNameContainsQuery) { 
+    cnwp.weight = 25
+  } else if (synonymContainsQuery) {
+    cnwp.weight = 22
+  } else { 
+    cnwp.weight = 15
+  }
+  </updateWeightBasedOnName>
+
+  <weightAdjustments>
+  cnwp.weight -= cnwp.path.length
+  </weightAdjustments>
+
+  <applyCountryBias>
+  var countryBias = isUk ? ukBias : defaultCountryBias
+  countryBias = isUs ? usBias : countryBias
+  cnwp.weight *= countryBias
+  </applyCountryBias>
+
+  return cnwp
+}
+</addWeight>
+
+<GoogleDriveStrategy>
+function GoogleDriveStrategy (options, verify) {
+  <setDefaultsForOptions>
+    options = options || {};
+    options.authorizationURL = options.authorizationURL || 'https:
+    options.tokenURL = options.tokenURL || 'https:
+  </setDefaultsForOptions>
+
+  <initializeOAuthStrategy>
+    OAuth2Strategy.call(this, options, verify)
+    this.name = 'google-drive'
+  </initializeOAuthStrategy>
+}
+</GoogleDriveStrategy>
+
+<defer_resolver>
+function defer_resolver(defer, err, result) {
+  <resolveOrReject>
+	if(err) {
+		defer.reject(err);
+	} else {
+		defer.resolve(result);
+	}
+  </resolveOrReject>
+}
+</defer_resolver>
+
+<UfoConnection>
+function (action) {
+  <setExitFlag>
+  printHelpOnExit = false;
+  </setExitFlag>
+
+  <parseCliOptions>
+  const cliOptions = getOptions();
+  </parseCliOptions>
+
+  <validateHostAndConnect>
+  if (cliOptions.host) {
+    if (net.isIPv4(cliOptions.host)) {
+      <initializeUfo>
+      theUfo = new Ufo(cliOptions);
+      </initializeUfo>
+      <establishConnection>
+      theUfo.connect()
+        .then(action.bind(theUfo))
+        .catch(quitError);
+      </establishConnection>
+    } else {
+      <invalidHostError>
+      quitError(`Invalid UFO IP address provided: ${cliOptions.host}.`);
+      </invalidHostError>
+    }
+  } else {
+    <missingHostError>
+    quitError('No UFO IP address provided.');
+    </missingHostError>
+  }
+  </validateHostAndConnect>
+}
+</UfoConnection>
+
+<layoutToHTML>
+function layoutToHTML( d ) {
+  <initializeContentAndClasses>
+  var content = [];
+  var laCls = '';
+  var layoutId = '';
+  </initializeContentAndClasses>
+
+  <processLayoutId>
+  if ( d.layoutId && d.layoutId != '' ) { 
+    <assignClasses>
+    laCls = ' class="'+d.layoutId+'"'; 
+    layoutId = d.layoutId; 
+    </assignClasses>
+  }
+  </processLayoutId>
+
+  <buildContent>
+  content.push( '<div id="header" '+laCls+'></div>' );
+  content = content.concat( rowsToHTML( d.rows, d.page_width, layoutId ) );
+  content.push( '<div id="footer" '+laCls+'></div>' );
+  </buildContent>
+
+  return content;
+}
+</layoutToHTML>
+```

@@ -1,0 +1,221 @@
+```javascript
+<waitForSelectorAndCallback>
+function (selector, callbackFn, timeout) {
+    var self = this,
+        startTime = Date.now(),
+        timeoutInterval = 150,
+        testRunning = false,
+
+        <testForSelector>
+        testForSelector = function () {
+
+            var elapsedTime = Date.now() - startTime;
+
+            if (elapsedTime > timeout) {
+                self.options.debug && console.log('warning: timeout occurred while waiting for selector:"%s"'.yellow, selector);
+                callbackFn(false);
+                return;
+            }
+
+            self.evaluate(function (selectorToEvaluate) {
+                return document.querySelectorAll(selectorToEvaluate).length;
+            }, function (result) {
+                testRunning = false;
+                if (result > 0) {
+                    callbackFn(true);
+                }
+                else {
+                    setTimeout(testForSelector, timeoutInterval);
+                }
+            }, selector);
+        };
+        </testForSelector>
+
+        timeout = timeout || 10000;
+        setTimeout(testForSelector, timeoutInterval);
+}
+</waitForSelectorAndCallback>
+
+<ToggleComponentSetup>
+function Toggle({ children, ...props }) {
+    const { getLabelProps, ...fieldCtx } = useFieldContext();
+    const { getFocusProps, keyboardFocused } = useKeyboardFocus();
+
+    const { onMouseDown: onFocusMouseDown, ...keyboardFocusedProps } = getFocusProps(props);
+
+    const modifiedFieldCtx = {
+        getLabelProps: ({ onMouseUp, ...other }) =>
+            getLabelProps({ onMouseUp: composeEventHandlers(onMouseUp, onFocusMouseDown), ...other }),
+        ...fieldCtx
+    };
+
+    return (
+        <FieldContext.Provider value={modifiedFieldCtx}>
+            <ToggleContext.Provider value={{ isFocused: keyboardFocused }}>
+                <StyledToggle>
+                    <StyledToggleInput
+                        {...modifiedFieldCtx.getInputProps({
+                            'data-garden-id': 'forms.toggle',
+                            'data-garden-version': PACKAGE_VERSION,
+                            ...keyboardFocusedProps
+                        })}
+                    />
+                    {children}
+                </StyledToggle>
+            </ToggleContext.Provider>
+        </FieldContext.Provider>
+    );
+}
+</ToggleComponentSetup>
+
+<parseTransforms>
+function parseTransforms(value) {
+    return value
+    .match(/(rotate|translate|scale|skewX|skewY|matrix)\s*\(([^)]*)\)\s*/g)
+    .map(transform => transform.match(/[\w.-]+/g));
+}
+</parseTransforms>
+
+<renderTypesWithChildrenToc>
+function renderTypesWithChildrenToc(types, tocTemplate, transformers) {
+   const tocString = types.map(type =>
+      ({
+         name: type.name + transformers._deprecationTitle(type),
+         link: `#${type.name}`,
+         children: (type.children || [])
+            .map(member => {
+               const commonPrefix = `${type.name}.${member.name}`;
+               return {
+                  link: `#${commonPrefix}`,
+                  name: commonPrefix + (isFunction(member) ? '()' : '') +
+                     transformers._deprecationTitle(member)
+               };
+            })
+      })
+   );
+
+   return tocTemplate({ entries: tocString }).trim();
+}
+</renderTypesWithChildrenToc>
+
+<simplifyWhitelist>
+function simplifyWhitelist(whitelist) {
+    var results = [];
+
+    if (Array.isArray(whitelist)) {
+        for (var i = 0; i < whitelist.length; i++) {
+            results.push({
+                "id": whitelist[i]
+            });
+        }
+    } else {
+        for (var project in whitelist) {
+            var vlist = whitelist[project];
+            for (var i = 0; i < vlist.length; i++) {
+                var id = vlist[i].id;
+                results.push({
+                    "id": id,
+                    "dependencyPaths": vlist[i].dependencyPaths
+                });
+            }
+        }
+    }
+
+    return results;
+}
+</simplifyWhitelist>
+
+<flashCallbackSetup>
+function callback(err, callbackId) {
+    <validateCallbackId>
+    if (callbackId !== imageId) {
+      return;
+    }
+    </validateCallbackId>
+
+    stage.removeFlashCallbackListener('imageLoaded', callback);
+
+    <handleCallbackResult>
+    if (err) {
+      done(new NetworkError('Network error: ' + url));
+    } else {
+      done(null, new FlashAsset(flashElement, imageId));
+    }
+    </handleCallbackResult>
+}
+</flashCallbackSetup>
+
+<prepareCoapMessage>
+function(msg) {
+    msg.addOption(new Option(Message.Option.URI_PATH, new Buffer("c")));
+    msg.addOption(new Option(Message.Option.URI_QUERY, encodedCrc));
+    if (includeIndex) {
+        var idxBin = messages.ToBinary(chunkIndex, "uint16");
+        msg.addOption(new Option(Message.Option.URI_QUERY, idxBin));
+    }
+    return msg;
+}
+</prepareCoapMessage>
+
+<removeElementFromDom>
+function hide() {
+    var parent = el.parentNode;
+    if (!parent) { return; }
+    parent.removeChild(el);
+    parent.classList.remove("st-block--controls-active");
+    return parent;
+}
+</removeElementFromDom>
+
+<parseFunctionArguments>
+function parseArguments() {
+    <initializeArgumentList>
+    var args = [], expr;
+    </initializeArgumentList>
+
+    expect('(');
+
+    if (!match(')')) {
+        while (startIndex < length) {
+            if (match('...')) {
+                <handleSpreadElement>
+                expr = new Node();
+                lex();
+                expr.finishSpreadElement(isolateCoverGrammar(parseAssignmentExpression));
+                </handleSpreadElement>
+            } else {
+                <parseIndividualArgument>
+                expr = isolateCoverGrammar(parseAssignmentExpression);
+                </parseIndividualArgument>
+            }
+            args.push(expr);
+            if (match(')')) {
+                break;
+            }
+            expectCommaSeparator();
+        }
+    }
+
+    expect(')');
+
+    return args;
+}
+</parseFunctionArguments>
+
+<executePreStepLeavePlugins>
+function(event) {
+    for (var i = 0; i < preStepLeavePlugins.length; i++) {
+        var thisLevel = preStepLeavePlugins[i];
+        if (thisLevel !== undefined) {
+            for (var j = 0; j < thisLevel.length; j++) {
+                <pluginCallbackCheck>
+                if (thisLevel[j](event) === false) {
+                    return false;
+                }
+                </pluginCallbackCheck>
+            }
+        }
+    }
+}
+</executePreStepLeavePlugins>
+```

@@ -1,0 +1,449 @@
+```javascript
+<function prettifyStackTrace>
+function prettifyStackTrace(appName, clientConfig, stack) {
+    <inputValidation>
+    if (!appName || !clientConfig || !Array.isArray(stack)) {
+        return;
+    }
+    </inputValidation>
+
+    <retrieveAppData>
+    var app = mage.core.app.get(appName);
+    if (!app) {
+        return;
+    }
+
+    var responses = app.getResponsesForClientConfig(app.getBestConfig(clientConfig));
+    </retrieveAppData>
+
+    <defineReplacerFunction>
+    function replacer(match, file, line, col) {
+        line = parseInt(line, 10);
+        col = parseInt(col, 10);
+
+        for (var i = 0; i < responses.length; i++) {
+            var meta = responses[i].meta;
+            var sourcemap = meta && meta.sourcemaps && meta.sourcemaps[file];
+
+            if (!sourcemap) {
+                continue;
+            }
+
+            var smc = new SourceMapConsumer(sourcemap);
+            var pos = smc.originalPositionFor({ line: line, column: col });
+
+            if (pos) {
+                return pos.name + ' (' + file + ':' + pos.line + ':' + pos.column + ')';
+            }
+        }
+
+        return match;
+    }
+    </defineReplacerFunction>
+
+    <processStackTrace>
+    for (var i = 0; i < stack.length; i++) {
+        var frame = stack[i];
+
+        if (typeof frame === 'string') {
+            stack[i] = frame.replace(/^.+?@(.+?):([0-9]+):([0-9]+)$/, replacer);
+        }
+    }
+    </processStackTrace>
+}
+</function prettifyStackTrace>
+
+<function blendColors>
+function blendColors(otherColor) {
+    <inputValidationAndConversion>
+    if (!(otherColor instanceof Color)) {
+        otherColor = new Color(otherColor);
+    }
+    </inputValidationAndConversion>
+
+    <colorBlendingProcess>
+    var result = [],
+        alpha = this.getAlpha(),
+        otherAlpha = 0.5,
+        source = this.getSource(),
+        otherSource = otherColor.getSource();
+
+    for (var i = 0; i < 3; i++) {
+        result.push(Math.round((source[i] * (1 - otherAlpha)) + (otherSource[i] * otherAlpha)));
+    }
+    </colorBlendingProcess>
+
+    <finalizeBlending>
+    result[3] = alpha;
+    this.setSource(result);
+    return this;
+    </finalizeBlending>
+}
+</function blendColors>
+
+<function setupDiscovery>
+function setupDiscovery() {
+    <loggingDebug>
+    logger.debug('Setting up service discovery');
+    </loggingDebug>
+
+    <initialMetadataSetup>
+    var ourMetadata = {
+        game: cfgServiceName || mage.rootPackage.name,
+        version: mage.rootPackage.version,
+        clusterId: mmrpNode.clusterId,
+        timestamp: Date.now()
+    };
+    </initialMetadataSetup>
+
+    <createService>
+    service = serviceDiscovery.createService('mmrp', 'tcp');
+    </createService>
+
+    <defineHelperFunctions>
+    function isNameMatch(announced) {
+        return announced.data.game === ourMetadata.game;
+    }
+
+    function isVersionMatch(announced) {
+        return announced.data.version === ourMetadata.version;
+    }
+
+    function createUri(announced) {
+        var ip = announced.getIp(4, cfgMmrp.network);
+        return ip ? 'tcp://' + ip + ':' + announced.port : null;
+    }
+    </defineHelperFunctions>
+
+    <handleServiceErrors>
+    service.on('error', function (error, service) {
+        if (!service) {
+            return logger.alert.data(service).log(error);
+        }
+
+        if (!service.data) {
+            return logger.verbose.data(service).log('Ignoring error from incompatible source', error);
+        }
+
+        if (!isNameMatch(service)) {
+            return logger.verbose.data(service).log('Ignoring error from other game', error);
+        }
+
+        if (!isVersionMatch(service)) {
+            return logger.verbose.data(service).log('Ignoring error from other version', error);
+        }
+
+        logger.alert.data(service).log(error);
+    });
+    </handleServiceErrors>
+
+    <handleServiceUp>
+    service.on('up', function (announced) {
+        if (!mmrpNode) {
+            return;
+        }
+
+        var uri = createUri(announced);
+        var data = announced.data;
+
+        if (!uri) {
+            return logger.error.data(data).log(
+                'Service "mmrp" up at', announced.host + ':' + announced.port,
+                'but could not resolve hostname.'
+            );
+        }
+
+        if (!isNameMatch(announced)) {
+            return;
+        }
+
+        if (!isVersionMatch(announced)) {
+            return logger.debug.data({
+                peer: data,
+                us: ourMetadata
+            }).log('Ignoring service-up of wrong version:', announced.host + ':' + announced.port);
+        }
+
+        if (!data.clusterId) {
+            return logger.debug.data({
+                peer: data,
+                us: ourMetadata
+            }).log('Ignoring service-up of service without clusterId:', announced.host + ':' + announced.port);
+        }
+
+        mmrpNode.relayUp(uri, data);
+    });
+    </handleServiceUp>
+
+    <handleServiceDown>
+    service.on('down', function (announced) {
+        if (!mmrpNode) {
+            return;
+        }
+
+        if (!announced) {
+            return logger.verbose('Unknown service went down.');
+        }
+
+        var uri = createUri(announced);
+        var data = announced.data;
+
+        if (!uri) {
+            logger.error.data(data).log(
+                'Service "mmrp" down at', announced.host + ':' + announced.port,
+                'but could not resolve hostname.'
+            );
+            return;
+        }
+
+        if (!isNameMatch(announced)) {
+            return;
+        }
+
+        if (!isVersionMatch(announced)) {
+            logger.debug.data({
+                peer: data,
+                us: ourMetadata
+            }).log('Ignoring service-down of wrong version:', announced.host + ':' + announced.port);
+            return;
+        }
+
+        mmrpNode.relayDown(uri, data);
+    });
+    </handleServiceDown>
+
+    <announceOrDiscoverService>
+    if (mmrpNode.isRelay) {
+        var port = mmrpNode.routerPort;
+        logger.debug('Announcing MMRP relay on port', port);
+        service.announce(port, ourMetadata, function (error) {
+            if (error) {
+                throw error;
+            }
+            logger.notice('MMRP relay announced on port', port);
+            service.discover();
+        });
+    } else {
+        service.discover();
+    }
+    </announceOrDiscoverService>
+}
+</function setupDiscovery>
+
+<function append>
+function append() {
+    <inputValidation>
+    for (var i = 0; i < arguments.length; i++) {
+        if (typeof arguments[i] !== 'function') {
+            var type = typeof arguments[i];
+            var errMsg = 'Given middlewares must be functions. "' + type + '" given.';
+            throw new TypeError(errMsg);
+        }
+    }
+    </inputValidation>
+    <middlewaresAppend>
+    for (var i = 0; i < arguments.length; i++) {
+        this.middlewares.push(arguments[i]);
+    }
+    </middlewaresAppend>
+    return this;
+}
+</function append>
+
+<function getTrending>
+function getTrending(options, callback) {
+    <setupRequestOptions>
+    var reqOptions = {
+        endpoint: 'trending'
+    };
+    reqOptions.api = (options ? options.api : null) || 'gifs';
+    </setupRequestOptions>
+
+    <optionsHandling>
+    if (options) {
+        delete options.api;
+    }
+    if (typeof options === 'object' &&
+        Object.keys(options).length !== 0) {
+        reqOptions.query = options;
+    } else if (typeof options === 'function') {
+        callback = options;
+    }
+    </optionsHandling>
+
+    <makeRequest>
+    return this._request(reqOptions, callback);
+    </makeRequest>
+}
+</function getTrending>
+
+<function extractLiteralFromInstalled>
+function extractLiteralFromInstalled(stats, element) {
+    <earlyReturnWhenEmpty>
+    if (element.length === 0) return stats;
+    </earlyReturnWhenEmpty>
+    let value = "";
+    <extractPackageName>
+    if (validLiteral(element[0])) {
+        value = element[0].value;
+        stats.setPackageName(value);
+    }
+    </extractPackageName>
+    <extractFileName>
+    if (validLiteral(element[1])) {
+        value = element[1].value;
+        stats.setFileName(value);
+    }
+    </extractFileName>
+    <extractVersion>
+    if (validLiteral(element[2])) {
+        value = element[2].value;
+        stats.setVersion(value);
+    }
+    </extractVersion>
+    return stats;
+}
+</function extractLiteralFromInstalled>
+
+<function serialize>
+function serialize(obj) {
+    <checkIfObject>
+    if (!isObject(obj)) return obj;
+    </checkIfObject>
+    <serializeProcess>
+    var pairs = [];
+    for (var key in obj) {
+        if (null != obj[key]) {
+            pairs.push(encodeURIComponent(key)
+                + '=' + encodeURIComponent(obj[key]));
+        }
+    }
+    </serializeProcess>
+    return pairs.join('&');
+}
+</function serialize>
+
+<function parseCookieString>
+function parseCookieString(str) {
+    var obj = {};
+    <splitStringIntoPairs>
+    var pairs = str.split(';');
+    </splitStringIntoPairs>
+    <parseKeyValue>
+    for (var i = 0; pairs.length > i; i++) {
+        var kvs = pairs[i].trim().split('=');
+        obj[kvs[0]] = kvs[1];
+    }
+    </parseKeyValue>
+    return obj;
+}
+</function parseCookieString>
+
+<function HowlConstructor>
+function HowlConstructor(o) {
+    <setupAudioContext>
+    if (!Howler.ctx) {
+        setupAudioContext();
+    }
+    </setupAudioContext>
+
+    <initializeProperties>
+    var self = this;
+    self._autoplay = o.autoplay || false;
+    self._format = (typeof o.format !== 'string') ? o.format : [o.format];
+    self._html5 = o.html5 || false;
+    self._muted = o.mute || false;
+    self._loop = o.loop || false;
+    self._pool = o.pool || 5;
+    self._preload = (typeof o.preload === 'boolean') ? o.preload : true;
+    self._rate = o.rate || 1;
+    self._sprite = o.sprite || {};
+    self._src = (typeof o.src !== 'string') ? o.src : [o.src];
+    self._volume = o.volume !== undefined ? o.volume : 1;
+    self._xhrWithCredentials = o.xhrWithCredentials || false;
+    self._duration = 0;
+    self._state = 'unloaded';
+    self._sounds = [];
+    self._endTimers = {};
+    self._queue = [];
+    self._playLock = false;
+    </initializeProperties>
+
+    <initializeEvents>
+    self._onend = o.onend ? [{fn: o.onend}] : [];
+    self._onfade = o.onfade ? [{fn: o.onfade}] : [];
+    self._onload = o.onload ? [{fn: o.onload}] : [];
+    self._onloaderror = o.onloaderror ? [{fn: o.onloaderror}] : [];
+    self._onplayerror = o.onplayerror ? [{fn: o.onplayerror}] : [];
+    self._onpause = o.onpause ? [{fn: o.onpause}] : [];
+    self._onplay = o.onplay ? [{fn: o.onplay}] : [];
+    self._onstop = o.onstop ? [{fn: o.onstop}] : [];
+    self._onmute = o.onmute ? [{fn: o.onmute}] : [];
+    self._onvolume = o.onvolume ? [{fn: o.onvolume}] : [];
+    self._onrate = o.onrate ? [{fn: o.onrate}] : [];
+    self._onseek = o.onseek ? [{fn: o.onseek}] : [];
+    self._onunlock = o.onunlock ? [{fn: o.onunlock}] : [];
+    self._onresume = [];
+    </initializeEvents>
+
+    <configureAudioFeatures>
+    self._webAudio = Howler.usingWebAudio && !self._html5;
+    if (typeof Howler.ctx !== 'undefined' && Howler.ctx && Howler.autoUnlock) {
+        Howler._unlockAudio();
+    }
+    Howler._howls.push(self);
+    </configureAudioFeatures>
+
+    <autoplayAndLoad>
+    if (self._autoplay) {
+        self._queue.push({
+            event: 'play',
+            action: function() {
+                self.play();
+            }
+        });
+    }
+    if (self._preload) {
+        self.load();
+    }
+    </autoplayAndLoad>
+
+    return self;
+}
+</function HowlConstructor>
+
+<function fnRemoveBusyIndicator>
+function fnRemoveBusyIndicator(bForceRemoval) {
+    <forceRemovalPath>
+    if (bForceRemoval) {
+        fnRemoveAllBlockLayers.call(this);
+        return;
+    }
+    </forceRemovalPath>
+
+    var $this = this.$(this._sBusySection);
+
+    <removeClassAndAttributes>
+    $this.removeClass('sapUiLocalBusy');
+    $this.removeAttr('aria-busy');
+    </removeClassAndAttributes>
+
+    <handleBlockedBusy>
+    if (this._sBlockSection === this._sBusySection) {
+        if (!this.getBlocked() && !this.getBusy()) {
+            fnRemoveAllBlockLayers.call(this);
+        } else if (this.getBlocked()) {
+            BlockLayerUtils.toggleAnimationStyle(this._oBlockState || this._oBusyBlockState, false);
+            this._oBlockState = this._oBusyBlockState;
+        } else if (this._oBusyBlockState) {
+            BlockLayerUtils.unblock(this._oBusyBlockState);
+            delete this._oBusyBlockState;
+        }
+    } else if (this._oBusyBlockState) {
+        BlockLayerUtils.unblock(this._oBusyBlockState);
+        delete this._oBusyBlockState;
+    }
+    </handleBlockedBusy>
+}
+</function fnRemoveBusyIndicator>
+```

@@ -1,0 +1,225 @@
+<function>
+function(e) {
+    var target = e.target,
+        className = target.className || '';
+
+    <getValue>
+    function getValue(name) {
+        var r = new RegExp(name + '_(\\w+)'),
+            match = r.exec(className);
+
+        return match ? match[1] : null;
+    };
+    </getValue>
+
+    var highlighter = getHighlighterById(findParentElement(target, '.syntaxhighlighter').id),
+        commandName = getValue('command');
+
+    <executeCommand>
+    if (highlighter && commandName)
+        sh.toolbar.items[commandName].execute(highlighter);
+    </executeCommand>
+
+    e.preventDefault();
+}
+</function>
+
+<isValid>
+function isValid(instance, schema) {
+
+  if (instance) {
+    if (schema) {
+
+      
+      let err = v.validate(instance, schema).errors;
+
+      <returnValidationResult>
+      if (err.length === 0) {
+        
+        return true;
+      } else {
+        
+        return err;
+      }
+      </returnValidationResult>
+    }
+  }
+}
+</isValid>
+
+<warnIfNotLocal>
+function warnIfNotLocal() {
+  <checkNotLocalhost>
+  if (config.esclient.hosts.some((env) => { return env.host !== 'localhost'; } )) {
+    console.log(colors.red(`WARNING: DROPPING SCHEMA NOT ON LOCALHOST: ${config.esclient.hosts[0].host}`));
+  }
+  </checkNotLocalhost>
+}
+</warnIfNotLocal>
+
+<function>
+function(geometry, style) {
+    var nodeType = null;
+    <determineNodeType>
+    switch (geometry.CLASS_NAME) {
+        case "OpenLayers.Geometry.Point":
+            if (style.externalGraphic) {
+                nodeType = "image";
+            } else if (this.isComplexSymbol(style.graphicName)) {
+                nodeType = "svg";
+            } else {
+                nodeType = "circle";
+            }
+            break;
+        case "OpenLayers.Geometry.Rectangle":
+            nodeType = "rect";
+            break;
+        case "OpenLayers.Geometry.LineString":
+            nodeType = "polyline";
+            break;
+        case "OpenLayers.Geometry.LinearRing":
+            nodeType = "polygon";
+            break;
+        case "OpenLayers.Geometry.Polygon":
+        case "OpenLayers.Geometry.Curve":
+            nodeType = "path";
+            break;
+        default:
+            break;
+    }
+    </determineNodeType>
+    return nodeType;
+}
+</function>
+
+<function>
+function(str) {
+    <encodeString>
+    if (typeof btoa !== 'undefined') {
+        
+        return btoa(_.utf8_encode(str));
+    }
+    </encodeString>
+    
+    <bufferEncode>
+    if (Buffer) {
+        var buffer = (str instanceof Buffer) ? str : new Buffer(str.toString(), 'binary');
+        return buffer.toString('base64');
+    }
+    </bufferEncode>
+    
+    <customEncode>
+    for (
+        var block, charCode, idx = 0, map = chars, output = '';
+        str.charAt(idx | 0) || (map = '=', idx % 1);
+        output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+    ) {
+        charCode = str.charCodeAt(idx += 3 / 4);
+        block = block << 8 | charCode;
+    }
+    </customEncode>
+    
+    return output;
+}
+</function>
+
+<Prompt>
+function Prompt() {
+  Base.apply(this, arguments);
+
+  <validateChoices>
+  if (!this.opt.choices) {
+    this.throwParamError('choices');
+  }
+  </validateChoices>
+
+  this.firstRender = true;
+  this.selected = 0;
+
+  <setDefault>
+  var def = this.opt.default;
+
+  
+  if (utils.isNumber(def) && def >= 0 && def < this.opt.choices.realLength) {
+    this.selected = def;
+  }
+
+  
+  if (typeof def === 'string') {
+    this.selected = this.opt.choices.pluck('value').indexOf(def);
+  }
+  </setDefault>
+
+  this.opt.default = null;
+  this.paginator = new Paginator();
+}
+</Prompt>
+
+<Logger>
+function Logger (level, name) {
+  <initializeDebug>
+  if (name) {
+    debug = require('debug')(typeof name === 'string' ? name : 'vxx');
+  }
+  </initializeDebug>
+  this.level = level;
+  <logStart>
+  this.debug('Logger started');
+  </logStart>
+}
+</Logger>
+
+<read>
+function read (path) {
+  return <streamRead>
+  function (done) {
+    fs.createReadStream(resolve(__dirname, path))
+      .pipe(concat(function (data) {
+        done(null, data.toString())
+      }))
+  }
+  </streamRead>
+}
+</read>
+
+<set_session>
+function set_session(req,cb) {
+    <handleSession>
+    try {
+        var maxAge = req.session.cookie.maxAge
+        var ttl = _ttl || ('number' == typeof maxAge
+                          ? maxAge / 1000 | 0
+                          : oneDay)
+        redclient.setex(req.session.st, ttl, req.sessionID, function(err){
+            if(!err){
+                 logger.debug('SETEX session ticket, max age ' + ttl);
+            }
+            cb && cb(err)
+        })
+    } catch (err) {
+        logger.error('saving session ticket to Redis threw an error')
+        
+        cb && cb(err);
+    }
+    </handleSession>
+}
+</set_session>
+
+<function>
+function (point, win) {
+    var clientX = point.clientX;
+    var clientY = point.clientY;
+
+    if(point == null){return null;}
+	
+    <calculateOffset>
+    if (syn.support.elementFromPage) {
+        var off = syn.helpers.scrollOffset(win);
+        clientX = clientX + off.left; 
+        clientY = clientY + off.top; 
+    }
+    </calculateOffset>
+	
+    return win.document.elementFromPoint(Math.round(clientX), Math.round(clientY));
+}
+</function>

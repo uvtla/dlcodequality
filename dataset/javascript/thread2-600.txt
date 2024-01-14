@@ -1,0 +1,421 @@
+```javascript
+<lstatFiles>
+async function lstatFiles(dirPath, dirContent) {
+    <resolveAndLstat>
+    const readFiles = dirContent.map(async (relativePath) => {
+        const path = resolve(dirPath, relativePath)
+        const lstat = await makePromise(fs.lstat, path)
+        return {
+            lstat,
+            path,
+            relativePath,
+        }
+    })
+    </resolveAndLstat>
+    return Promise.all(readFiles)
+}
+</lstatFiles>
+
+<anonymousFunction>
+function(edata, ename) {
+    <debugLog>
+    try {
+        BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata, undefined, 1) + ", " + ename, "rt");
+    }
+    catch(err) {
+        BOOMR.debug("Called done with " + err + ", " + ename, "rt");
+    }
+    </debugLog>
+    
+    <initVariables>
+    var t_start, t_done, t_now=BOOMR.now(),
+        subresource = false;
+
+    impl.complete = false;
+    </initVariables>
+
+    <validateLoadTimestamp>
+    t_done = impl.validateLoadTimestamp(t_now, edata);
+    </validateLoadTimestamp>
+
+    <setPageLoadTimers>
+    if(ename==="load" || ename==="visible" || ename==="xhr") {
+        if (!impl.setPageLoadTimers(ename, t_done, edata)) {
+            return this;
+        }
+    }
+    </setPageLoadTimers>
+
+    <determineTStart>
+    t_start = impl.determineTStart(ename, edata);
+    </determineTStart>
+
+    <prepareEventData>
+    if(edata && edata.data) {
+        edata = edata.data;
+    }
+    if(ename === "xhr" && edata) {
+        subresource = edata.subresource;
+    }
+    </prepareEventData>
+
+    <endTimer>
+    this.endTimer("t_done", t_done);
+    </endTimer>
+
+    <removeVariables>
+    BOOMR.removeVar(
+        "t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
+        "r", "r2", "rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
+        "http.errno", "http.method", "xhr.sync"
+    );
+    </removeVariables>
+
+    <setSupportingTimestamps>
+    impl.setSupportingTimestamps(t_start);
+    </setSupportingTimestamps>
+
+    <addTimersToBeacon>
+    this.addTimersToBeacon();
+    </addTimersToBeacon>
+
+    <addVars>
+    BOOMR.addVar("r", BOOMR.utils.cleanupURL(impl.r));
+
+    if(impl.r2 !== impl.r) {
+        BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
+    }
+    </addVars>
+
+    <handleXHRData>
+    if(ename === "xhr" && edata) {
+        <additionalProcessing>
+        if(edata && edata.data) {
+            edata = edata.data;
+        }
+        </additionalProcessing>
+
+        <updateSubresource>
+        subresource = edata.subresource;
+        </updateSubresource>
+
+        <addVarsForXHR>
+        if(edata.url) {
+            BOOMR.addVar("u", BOOMR.utils.cleanupURL(edata.url.replace(/#.*/, "")));
+            impl.addedVars.push("u");
+        }
+
+        if(edata.status && (edata.status < -1 || edata.status >= 400)) {
+            BOOMR.addVar("http.errno", edata.status);
+        }
+
+        if(edata.method && edata.method !== "GET") {
+            BOOMR.addVar("http.method", edata.method);
+        }
+
+        if(edata.headers) {
+            BOOMR.addVar("http.hdr", edata.headers);
+        }
+
+        if(edata.synchronous) {
+            BOOMR.addVar("xhr.sync", 1);
+        }
+
+        if(edata.initiator) {
+            BOOMR.addVar("http.initiator", edata.initiator);
+        }
+        </addVarsForXHR>
+        
+        <pushAddedVars>
+        impl.addedVars.push("http.errno", "http.method", "http.hdr", "xhr.sync", "http.initiator");
+        </pushAddedVars>
+    }
+    </handleXHRData>
+
+    <handleSubresource>
+    if(subresource) {
+        BOOMR.addVar("rt.subres", 1);
+        impl.addedVars.push("rt.subres");
+    }
+    </handleSubresource>
+    
+    <updateCookie>
+    impl.updateCookie();
+    </updateCookie>
+
+    <handleUnload>
+    if(ename==="unload") {
+        BOOMR.addVar("rt.quit", "");
+
+        if(!impl.onloadfired) {
+            BOOMR.addVar("rt.abld", "");
+        }
+
+        if(!impl.visiblefired) {
+            BOOMR.addVar("rt.ntvu", "");
+        }
+    }
+    </handleUnload>
+
+    <completeFunction>
+    impl.complete = true;
+    </completeFunction>
+
+    <sendBeacon>
+    BOOMR.sendBeacon();
+    </sendBeacon>
+
+    return this;
+}
+</anonymousFunction>
+
+<getExtraTasks>
+async function getExtraTasks() {
+  <configInitialization>
+  config = config || (await getConfig());
+  </configInitialization>
+  
+  <configureExtraTasks>
+  switch (config.env) {
+    case 'pl':
+      extraTasks.patternLab = require('./pattern-lab-tasks');
+      break;
+    case 'static':
+      extraTasks.static = require('./static-tasks');
+      break;
+    case 'pwa':
+      <clearCache>
+      delete require.cache[require.resolve('./api-tasks')];
+      </clearCache>
+      extraTasks.api = require('./api-tasks');
+      extraTasks.patternLab = require('./pattern-lab-tasks');
+      extraTasks.static = require('./static-tasks');
+      break;
+  }
+  </configureExtraTasks>
+  
+  <conditionalServerTasks>
+  if (config.wwwDir) {
+    extraTasks.server = require('./server-tasks');
+  }
+  </conditionalServerTasks>
+  
+  return extraTasks;
+}
+</getExtraTasks>
+
+<getEnvironment>
+function getEnvironment(opts) {
+  if (opts.app) {
+    <mergeEnvironments>
+    var processEnv = _.cloneDeep(process.env);
+    var appEnv = opts.app.env.getEnv();
+    return _.merge(processEnv, appEnv);
+    </mergeEnvironments>
+  } else {
+    <returnGlobalEnv>
+    return process.env;
+    </returnGlobalEnv>
+  }
+}
+</getEnvironment>
+
+<createCrudState>
+function createCrudState (appname, masterSpec, moduleName, state, parentStateName, moduleUrl, agents) {
+  <initializePaths>
+  var controllerPath = path.join(appname, 'generated', 'crud', parentStateName, 'controllers'),
+    partialPath = path.join(appname, 'generated', 'partials', 'crud', parentStateName),
+    crudType
+  </initializePaths>
+
+  <determineCrudType>
+  if (moduleName == 'POST' || moduleName == 'PUT') {
+    crudType = 'postPut'
+  }
+  if (moduleName == 'FIND') {
+    crudType = 'find'
+  }
+  if (moduleName == 'GET' || moduleName == 'DELETE') {
+    crudType = 'get'
+  }
+  </determineCrudType>
+
+  <prepareSpecModel>
+  var specModel = {
+    parentStateName: parentStateName,
+    moduleName: moduleName,
+    state: state,
+    agents: agents,
+    agentSpec: masterSpec.agents,
+    crudAgent: crudAgent
+  }
+  var crudAgent = getUnrenderedTemplateContents(path.join('generated', 'crud', 'crudAgents.js'))
+  </prepareSpecModel>
+
+  <mergeContents>
+  var contents = getUnrenderedTemplateContents(path.join('generated', 'crud', crudType + 'Controller.js'))
+  var controllerContents = mergeTemplateAndModel(contents, specModel)
+  var agentControllerContents = mergeTemplateAndModel(crudAgent, specModel)
+  </mergeContents>
+
+  <generateCrudControllerTemplate>
+  createTemplate(appname, path.join('generated', 'crud', 'crudController.js'), {
+    parentStateName: parentStateName,
+    moduleName: moduleName,
+    state: state,
+    agents: agents,
+    agentSpec: masterSpec.agents,
+    crudControllerContents: controllerContents
+  })
+  </generateCrudControllerTemplate>
+
+  <renameCrudController>
+  var oldControllerPath = path.join(appname, 'generated', 'crud', 'crudController.js'),
+    newControllerPath = path.join(controllerPath, moduleName + '.js')
+  fs.renameSync(oldControllerPath, newControllerPath)
+  </renameCrudController>
+
+  <handleAgentIfExists>
+  if (agents.length) {
+    <generateCrudAgentControllerTemplate>
+    createTemplate(appname, path.join('generated', 'crud', 'crudAgentController.js'), {
+      parentStateName: parentStateName,
+      moduleName: moduleName,
+      state: state,
+      agents: agents,
+      agentSpec: masterSpec.agents,
+      crudControllerContents: agentControllerContents
+    })
+    </generateCrudAgentControllerTemplate>
+
+    <renameCrudAgentController>
+    var oldAgentControllerPath = path.join(appname, 'generated', 'crud', 'crudAgentController.js'),
+      newAgentControllerPath = path.join(controllerPath, parentStateName + 'AgentController.js')
+    fs.renameSync(oldAgentControllerPath, newAgentControllerPath)
+    </renameCrudAgentController>
+  }
+  </handleAgentIfExists>
+
+  <generateHtmlTemplate>
+  createTemplate(appname, path.join('generated', 'crud', crudType + '.html'), {
+    moduleName: moduleName,
+    parentStateName: parentStateName,
+    state: state,
+    moduleUrl: moduleUrl,
+    agents: agents,
+    agentSpec: masterSpec.agents 
+  })
+  </generateHtmlTemplate>
+
+  <renameHtml>
+  var oldHtmlPath = path.join(appname, 'generated', 'crud', crudType + '.html'),
+    newHtmlPath = path.join(partialPath, moduleName + '.html')
+  fs.renameSync(oldHtmlPath, newHtmlPath)
+  </renameHtml>
+}
+</createCrudState>
+
+<addToCollectionByForeignKey>
+function(record, foreign_key) {
+    <updateCollectionsByForeignKey>
+    if (foreign_key in this._collections_by_foreign_id) {
+        this._collections_by_foreign_id[foreign_key].push(record);
+    } else {
+        this._collections_by_foreign_id[foreign_key] = [record];
+    }
+    </updateCollectionsByForeignKey>
+}
+</addToCollectionByForeignKey>
+
+<capitalizeFirstCharacter>
+function (str) {
+    if (str.length > 0) {
+        <performCapitalization>
+        var first = str.substr(0, 1).toUpperCase();
+        var spare = str.substr(1, str.length);
+        return first + spare;
+        </performCapitalization>
+    }
+}
+</capitalizeFirstCharacter>
+
+<readWith1ArgumentCb>
+function readWith1ArgumentCb(opts, cb) {
+  <readAndExtractSingleValue>
+  return read(opts, function(err, a, b) {
+    cb(err, a);
+  });
+  </readAndExtractSingleValue>
+}
+</readWith1ArgumentCb>
+
+<watchFile>
+function watchFile(file) {
+    <validateInput>
+    if (!file || '' === file) {
+        return
+    }
+    </validateInput>
+
+    <convertToStringAndCheckWatchers>
+    file = file.toString()
+    if (watchers.hasOwnProperty(file)) {
+        return
+    }
+    </convertToStringAndCheckWatchers>
+
+    <initializeWatcher>
+    watchers[file] = chokidar.watch(file, { ignored: /[\/\\]\./, persistent: true })
+    </initializeWatcher>
+
+    <attachEventHandlers>
+    var that = this
+    watchers[file]
+    .on('unlink', function(path) {
+        <handleOnUnlink>
+        that.opts.storageMethod.remove(path, function(err) {
+            if (err && that.opts.logging) {
+                console.log(err);
+            }
+        });
+        </handleOnUnlink>
+    })
+    .on('change', function(path) {
+        <addToMainQueue>
+        mainQueue.add(function(mainDone) {
+            <readFileAndStoreContents>
+            fs.readFile(path, function(err, fileContents) {
+                mainDone();
+                if (err && that.opts.logging) {
+                    console.log(err);
+                    return;
+                }
+                var parsed = LocalJson.TryParse.call(that, JSON.parse, fileContents);
+                that.opts.storageMethod.set(path, parsed, function(err) {
+                    if (err && that.opts.logging) {
+                        console.log(err);
+                    }
+                });
+            </readFileAndStoreContents>
+        });
+        </addToMainQueue>
+    });
+    </attachEventHandlers>
+}
+</watchFile>
+
+<removeContainer>
+function(container) {
+    <removeSpecifiedContainer>
+    var index = WireIt.indexOf(container, this.containers);
+    if(index != -1) {
+        container.remove();
+        this.containers[index] = null;
+        this.containers = WireIt.compact(this.containers);
+        this.eventRemoveContainer.fire(container);
+        this.eventChanged.fire(this);
+    }
+    </removeSpecifiedContainer>
+}
+</removeContainer>
+```

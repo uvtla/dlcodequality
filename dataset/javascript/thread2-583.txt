@@ -1,0 +1,163 @@
+<function>
+function() {
+  var me = this;
+  var labels = me.getLabels();
+  me.minIndex = 0;
+  me.maxIndex = labels.length - 1;
+  var findIndex;
+  <setMinIndex>
+  if (me.options.ticks.min !== undefined) {
+    findIndex = helpers.indexOf(labels, me.options.ticks.min);
+    me.minIndex = findIndex !== -1 ? findIndex : me.minIndex;
+  }
+  </setMinIndex>
+  <setMaxIndex>
+  if (me.options.ticks.max !== undefined) {
+    findIndex = helpers.indexOf(labels, me.options.ticks.max);
+    me.maxIndex = findIndex !== -1 ? findIndex : me.maxIndex;
+  }
+  </setMaxIndex>
+  me.min = labels[me.minIndex];
+  me.max = labels[me.maxIndex];
+}
+</function>
+
+<reactRedata>
+function reactRedata(loader, shouldReload, mapper) {
+  return _redataComponent2.default.bind(null, _redata2.default.bind(null, loader, shouldReload, mapper));
+}
+</reactRedata>
+
+<parseAll>
+function parseAll(text) {
+  var urls = url_regex;
+  var emails = email_regex;
+  var hashTags = hashtag_regex;
+  text = text ? String(text).replace(/<[^>]+>/gm, '') : '';
+  <parseURLs>
+  if (text.match(urls)) {
+    text = text.replace(urls, "<a href=\"$1\" target=\"_blank\">$1</a>");
+  }
+  </parseURLs>
+  <parseEmails>
+  if (text.match(emails)) {
+    text = text.replace(emails, "<a href=\"mailto:$1\">$1</a>");
+  }
+  </parseEmails>
+  <parseHashtags>
+  if (text.match(hashTags)) {
+    text = text.replace(hashTags, "<a href=\"javascript:;\" target=\"_blank\">$1</a>");
+  }
+  </parseHashtags>
+  return text.replace(/\n\r?/g, '<br />');
+}
+</parseAll>
+
+<stringifyArray>
+function stringifyArray(arr, prefix) {
+  var ret = [];
+  if (!prefix) throw new TypeError('stringify expects an object');
+  for (var i = 0; i < arr.length; i++) {
+    ret.push(stringify(arr[i], prefix + '[]'));
+  }
+  return ret.join('&');
+}
+</stringifyArray>
+
+<function>
+function(name, value) {
+  <checkCondition>
+  if (Lava.schema.DEBUG && name == 'id') Lava.t();
+  if (Lava.schema.DEBUG && (name in this._property_bindings)) {
+    Lava.t("Property is bound to an argument and cannot be set directly: " + name);
+  }
+  </checkCondition>
+  this._static_properties[name] = value;
+}
+</function>
+
+<wrap_sync>
+function wrap_sync(fn) {
+  return function (params) {
+    var val = fn(params);
+    <checkIfNotPromise>
+    if (val && !isPromise(val)) throw val;
+    </checkIfNotPromise>
+    return val;
+  };
+}
+</wrap_sync>
+
+<repeatTheNumber>
+function repeatTheNumber(digit) {
+  return interval(inner).pipe(
+    take(digit),
+    map(() => " " + fruitCharacter[digit] + " "),
+    endWith(" ✅\n"),
+    tap(digit => {
+      append(digit)
+    })
+  )
+}
+</repeatTheNumber>
+
+<function>
+function() {
+  var evt = this.evt, detached = 0, i;
+  <detachEvents>
+  if (evt) {
+    if (Y.Lang.isArray(evt)) {
+      for (i = 0; i < evt.length; i++) {
+        detached += evt[i].detach();
+      }
+    } else { 
+      evt._delete(this.sub);
+      detached = 1;
+    }
+  }
+  </detachEvents>
+  return detached;
+}
+</function>
+
+<unshift>
+function unshift(arr) {
+  var items = [];
+  for (var _i = 1; _i < arguments.length; _i++) {
+    items[_i - 1] = arguments[_i];
+  }
+  <concatFlatten>
+  arr = arr.concat(flatten(items));
+  </concatFlatten>
+  return {
+    array: arr,
+    val: arr.length
+  };
+}
+</unshift>
+
+<function>
+function() {
+  var OPERATORS = [
+    [Blockly.Msg.CONTROLS_FLOW_STATEMENTS_OPERATOR_BREAK, 'BREAK'],
+    [Blockly.Msg.CONTROLS_FLOW_STATEMENTS_OPERATOR_CONTINUE, 'CONTINUE']
+  ];
+  this.setHelpUrl(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_HELPURL);
+  this.setColour(Blockly.Blocks.loops.HUE);
+  this.appendDummyInput()
+    .appendField(new Blockly.FieldDropdown(OPERATORS), 'FLOW');
+  this.setPreviousStatement(true);
+
+  var thisBlock = this;
+  <setTooltip>
+  this.setTooltip(function() {
+    var op = thisBlock.getFieldValue('FLOW');
+    var TOOLTIPS = {
+      'BREAK': Blockly.Msg.CONTROLS_FLOW_STATEMENTS_TOOLTIP_BREAK,
+      'CONTINUE': Blockly.Msg.CONTROLS_FLOW_STATEMENTS_TOOLTIP_CONTINUE
+    };
+    return TOOLTIPS[op];
+  });
+  </setTooltip>
+}
+</function>

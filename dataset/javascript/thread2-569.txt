@@ -1,0 +1,234 @@
+Let's annotate the given functions with respect to the Single Responsibility Principle (SRP):
+
+```javascript
+function(options) {
+    <setupDefaultOptions>
+    options = options || {};
+    if (!('pull' in options)) options.pull = true;
+    </setupDefaultOptions>
+
+    if (!options.pull) return this._run();
+
+    <handlePullStream>
+    return new Promise(function(accept, reject) {
+        var pullStream = utils.pullImageIfMissing(this.docker, this._createConfig.Image);
+        pullStream.pipe(this.stdout, { end: false });
+        pullStream.once('error', reject);
+        pullStream.once('end', function() {
+            pullStream.removeListener('error', reject);
+            this._run().then(accept, reject);
+        }.bind(this));
+    }.bind(this));
+    </handlePullStream>
+}
+
+function addDeclaredGlobals(globalScope, configGlobals, { exportedVariables, enabledGlobals }) {
+    <processGlobals>
+    for (const id of new Set([...Object.keys(configGlobals), ...Object.keys(enabledGlobals)])) {
+        const configValue = configGlobals[id] === void 0 ? void 0 : ConfigOps.normalizeConfigGlobal(configGlobals[id]);
+        const commentValue = enabledGlobals[id] && enabledGlobals[id].value;
+        const value = commentValue || configValue;
+        const sourceComments = enabledGlobals[id] && enabledGlobals[id].comments;
+        if (value === "off") {
+            continue;
+        }
+        let variable = globalScope.set.get(id);
+        if (!variable) {
+            variable = new eslintScope.Variable(id, globalScope);
+            globalScope.variables.push(variable);
+            globalScope.set.set(id, variable);
+        }
+        variable.eslintImplicitGlobalSetting = configValue;
+        variable.eslintExplicitGlobal = sourceComments !== void 0;
+        variable.eslintExplicitGlobalComments = sourceComments;
+        variable.writeable = (value === "writable");
+    }
+    </processGlobals>
+
+    <markExportedVariables>
+    Object.keys(exportedVariables).forEach(name => {
+        const variable = globalScope.set.get(name);
+        if (variable) {
+            variable.eslintUsed = true;
+        }
+    });
+    </markExportedVariables>
+
+    <filterThroughReferences>
+    globalScope.through = globalScope.through.filter(reference => {
+        const name = reference.identifier.name;
+        const variable = globalScope.set.get(name);
+        if (variable) {
+            reference.resolved = variable;
+            variable.references.push(reference);
+            return false;
+        }
+        return true;
+    });
+    </filterThroughReferences>
+}
+
+function buildSelect () {
+    <collectColumnNames>
+    var columns = this.isSelectOnlyIds ? ['id'] : this.model.columnNames
+    </collectColumnNames>
+
+    <buildSelectQueries>
+    _.each(columns, columnName => {
+        columnName = this.model.columnName(columnName, true);
+        var spec = this.model.columns[columnName];
+        this.select.push(this.selectColumnSql(this.model, columnName, spec, this.table));
+    });
+    </buildSelectQueries>
+}
+
+function(req) {
+    <parsePrimaryKey>
+    var pk = module.exports.parsePk(req);
+    if (!pk) {
+        var err = new Error(
+            'No `id` parameter provided.'
+            + '(Note: even if the model\'s primary key is not named `id`- '
+            + '`id` should be used as the name of the parameter- it will be '
+            + 'mapped to the proper primary key name)'
+        );
+        err.status = 400;
+        throw err;
+    }
+    return pk;
+    </parsePrimaryKey>
+}
+
+function unsubscribeError(message, exceptionMessage, exceptionType) {
+    <handleUnsubscribeError>
+    reply(proto.writeUnsubscribeException(message.id, exceptionMessage, exceptionType));
+    dequeueSubUnsubRequest(message.itemName);
+    fireFirstSubUnsubEvent(message.itemName);
+    </handleUnsubscribeError>
+}
+
+function validateModel(json, model) {
+    <collectSchemaKeys>
+    var schemaKeys = [];
+    for (var keyInSchema in model) {
+        schemaKeys.push(keyInSchema);
+    }
+    </collectSchemaKeys>
+
+    <checkUnknownFields>
+    if (!model[SCHEMAALLOWUNKNOWN]) {
+        checkUnknown(json, schemaKeys);
+    }
+    </checkUnknownFields>
+
+    <validateFields>
+    for (var schemaKeyI = 0; schemaKeyI < schemaKeys.length; schemaKeyI++) {
+        var node = null;
+        var schemaKey = schemaKeys[schemaKeyI];
+        if (json[schemaKey]) {
+            node = json[schemaKey];
+        }
+        if (!isReservedWord(schemaKey)) {
+            validateNode(node, model[schemaKey], schemaKey);
+        }
+    }
+    </validateFields>
+}
+
+function fixPrepatch(to, ___) {
+    <handlePrepatchUpdates>
+    var _this3 = this;
+    if (this._hashChanged) return;
+    __WEBPACK_IMPORTED_MODULE_6_vue__["default"].nextTick(function () {
+        var instances = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["g" ])(to);
+        _lastComponentsFiles = instances.map(function (instance, i) {
+            if (!instance) return '';
+            if (_lastPaths[i] === instance.constructor._path && typeof instance.constructor.options.data === 'function') {
+                var newData = instance.constructor.options.data.call(instance);
+                for (var key in newData) {
+                    __WEBPACK_IMPORTED_MODULE_6_vue__["default"].set(instance.$data, key, newData[key]);
+                }
+            }
+            return instance.constructor.options.__file;
+        });
+
+        if (_this3._hadError && _this3._dateLastError === _this3.$options._nuxt.dateErr) {
+            _this3.error();
+        }
+        var layout = _this3.$options._nuxt.err ? __WEBPACK_IMPORTED_MODULE_8__index__["a" ].layout : to.matched[0].components.default.options.layout;
+        if (typeof layout === 'function') {
+            layout = layout(_this3._context);
+        }
+        _this3.setLayout(layout);
+
+        setTimeout(function () {
+            return hotReloadAPI(_this3);
+        }, 100);
+    });
+    </handlePrepatchUpdates>
+}
+
+function ParameterValue (parameterObject, raw) {
+    <initializeProperties>
+    var pPath = JsonRefs.pathFromPtr(parameterObject.ptr);
+    var processed = false;
+    var schema = parameterObject.schema;
+    var error;
+    var isValid;
+    var processedValue;
+    this.parameterObject = parameterObject;
+    this.raw = raw;
+    </initializeProperties>
+
+    <defineProperties>
+    Object.defineProperties(this, {
+        error: { /* ... */ },
+        valid: { /* ... */ },
+        value: { /* ... */ }
+    });
+    </defineProperties>
+}
+
+function onHover (selection) {
+    <handleHoverFeature>
+    var feature = selection.feature;
+    if (feature) {
+        if (selection.changed) {
+            var info;
+            if (scene.introspection) {
+                info = getFeaturePropsHTML(feature);
+            }
+            else {
+                var name = feature.properties.name || feature.properties.kind ||
+                    (Object.keys(feature.properties).length+' properties');
+                name = '<b>'+name+'</b>';
+                name += '<br>(click for details)';
+                name = '<span class="labelInner">' + name + '</span>';
+                info = name;
+            }
+            if (info) {
+                tooltip.setContent(info);
+            }
+        }
+        layer.openTooltip(selection.leaflet_event.latlng);
+    }
+    else {
+        layer.closeTooltip();
+    }
+    </handleHoverFeature>
+}
+
+function(tabId, url) {
+    <manageTabContext>
+    var entry = tabContexts.get(tabId);
+    if ( entry === undefined ) {
+        entry = push(tabId, url);
+    } else if ( entry.commit(url) ) {
+        popupCandidateTest(tabId);
+    }
+    return entry;
+    </manageTabContext>
+}
+```
+
+Annotations are provided giving a broad indication of potential SRP compliance. Each function is structured to show cohesive blocks of responsibility related to their main purpose.

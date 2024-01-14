@@ -1,0 +1,272 @@
+```javascript
+<abortMultipartUploadWithErrorHandling>
+function (rootError) {
+    cachedClient.abortMultipartUpload(
+      {
+        Bucket: destinationDetails.Bucket,
+        Key: destinationDetails.Key,
+        UploadId: multipartUploadID
+      },
+      function (abortError) {
+        if (abortError)
+          ws.emit('error', rootError + '\n Additionally failed to abort the multipart upload on S3: ' + abortError);
+        else
+          ws.emit('error', rootError);
+      }
+    );
+  }
+</abortMultipartUploadWithErrorHandling>
+
+<rightShiftBuffer>
+function _rightShift(buffer) {
+        var carry, prevcarry;
+        for (var i = 0; i < buffer.length; i++) {
+            carry = prevcarry;
+            prevcarry = (buffer[i] & 0x1) !== 0;
+            buffer[i] >>= 1;
+            if (carry && i > 0) {
+                buffer[i] |= 0x80;
+            }
+        }
+    }
+</rightShiftBuffer>
+
+<buildGlobalAndPluginSpecificOverrides>
+function(options, results) {
+    
+    var overrides = {};
+    
+    _.forEach(options, function(opt) {
+      
+      if (opt.conf.type === 'global') {
+        overrides[opt.conf.key] = results[opt.name];
+      }
+      
+      else {
+        
+        var type = opt.conf.type;
+        var plugin = opt.conf.plugin;
+        var key = opt.conf.key;
+
+        
+        if (!overrides[type]) {
+          overrides[type] = {};
+        }
+        if (!overrides[type][plugin]) {
+          overrides[type][plugin] = {};
+        }
+
+        
+        overrides[type][plugin][key] = results[opt.name];
+      }
+    });
+
+    
+    return overrides;
+}
+</buildGlobalAndPluginSpecificOverrides>
+
+<PromptComponent>
+function Prompt({ message, when = true }) {
+  return (
+    <RouterContext.Consumer>
+      {context => {
+        invariant(context, "You should not use <Prompt> outside a <Router>");
+
+        if (!when || context.staticContext) return null;
+
+        const method = context.history.block;
+
+        return (
+          <Lifecycle
+            onMount={self => {
+              self.release = method(message);
+            }}
+            onUpdate={(self, prevProps) => {
+              if (prevProps.message !== message) {
+                self.release();
+                self.release = method(message);
+              }
+            }}
+            onUnmount={self => {
+              self.release();
+            }}
+            message={message}
+          />
+        );
+      }}
+    </RouterContext.Consumer>
+  );
+}
+</PromptComponent>
+
+<byteArrayToStringConversion>
+function (byteArray) {
+    var result = "",
+        len = byteArray.byteLength,
+        i;
+
+    for (i = 0; i < len; i += 1) {
+        result += String.fromCharCode(byteArray[i]);
+    }
+    return result;
+}
+</byteArrayToStringConversion>
+
+<updateCalendarInputValues>
+function(elem, keyUp) {
+			var inst = this._getInst(elem);
+			if (!$.isEmptyObject(inst)) {
+				var value = '';
+				var altValue = '';
+				var sep = (inst.options.multiSelect ? inst.options.multiSeparator :
+					inst.options.rangeSeparator);
+				var calendar = inst.options.calendar;
+				var dateFormat = inst.get('dateFormat');
+				var altFormat = inst.options.altFormat || dateFormat;
+				var settings = {localNumbers: inst.options.localNumbers};
+				for (var i = 0; i < inst.selectedDates.length; i++) {
+					value += (keyUp ? '' : (i > 0 ? sep : '') +
+						calendar.formatDate(dateFormat, inst.selectedDates[i], settings));
+					altValue += (i > 0 ? sep : '') +
+						calendar.formatDate(altFormat, inst.selectedDates[i], settings);
+				}
+				if (!inst.inline && !keyUp) {
+					$(elem).val(value);
+				}
+				$(inst.options.altField).val(altValue);
+				if ($.isFunction(inst.options.onSelect) && !keyUp && !inst.inSelect) {
+					inst.inSelect = true; 
+					inst.options.onSelect.apply(elem, [inst.selectedDates]);
+					inst.inSelect = false;
+				}
+			}
+		}
+</updateCalendarInputValues>
+
+<replaceFileContent>
+function replaceContent(args, generator) {
+    args.path = args.path || process.cwd();
+    const fullPath = path.join(args.path, args.file);
+
+    const re = args.regex ? new RegExp(args.pattern, 'g') : args.pattern;
+
+    let body = generator.fs.read(fullPath);
+    body = body.replace(re, args.content);
+    generator.fs.write(fullPath, body);
+}
+</replaceFileContent>
+
+<injectContentIntoFile>
+function getNewContent(target, collection, opt) {
+  var logger = opt.quiet ? noop : function (filesCount) {
+    if (filesCount) {
+      var pluralState = filesCount > 1 ? 's' : '';
+      log(cyan(filesCount) + ' file' + pluralState + ' into ' + magenta(target.relative) + '.');
+    } else {
+      log('Nothing to inject into ' + magenta(target.relative) + '.');
+    }
+  };
+  var content = String(target.contents);
+  var targetExt = extname(target.path);
+  var files = prepareFiles(collection, targetExt, opt, target);
+  var filesPerTags = groupArray(files, 'tagKey');
+  var startAndEndTags = Object.keys(filesPerTags);
+  var matches = [];
+  var injectedFilesCount = 0;
+
+  startAndEndTags.forEach(function (tagKey) {
+    var files = filesPerTags[tagKey];
+    var startTag = files[0].startTag;
+    var endTag = files[0].endTag;
+    var tagsToInject = getTagsToInject(files, target, opt);
+    content = inject(content, {
+      startTag: startTag,
+      endTag: endTag,
+      tagsToInject: tagsToInject,
+      removeTags: opt.removeTags,
+      empty: opt.empty,
+      willInject: function (filesToInject) {
+        injectedFilesCount += filesToInject.length;
+      },
+      onMatch: function (match) {
+        matches.push(match[0]);
+      }
+    });
+  });
+
+  logger(injectedFilesCount);
+
+  if (opt.empty) {
+    var ext = '{{ANY}}';
+    var startTag = getTagRegExp(opt.tags.start(targetExt, ext, opt.starttag), ext, opt);
+    var endTag = getTagRegExp(opt.tags.end(targetExt, ext, opt.endtag), ext, opt);
+
+    content = inject(content, {
+      startTag: startTag,
+      endTag: endTag,
+      tagsToInject: [],
+      removeTags: opt.removeTags,
+      empty: opt.empty,
+      shouldAbort: function (match) {
+        return matches.indexOf(match[0]) !== -1;
+      }
+    });
+  }
+  return Buffer.from(content);
+}
+</injectContentIntoFile>
+
+<findNodesAfterIndex>
+function findAllAfter(parent, index, test) {
+  var results = []
+  var children
+  var child
+  var length
+
+  if (!parent || !parent.type || !parent.children) {
+    throw new Error('Expected parent node')
+  }
+
+  children = parent.children
+  length = children.length
+
+  if (index && index.type) {
+    index = children.indexOf(index)
+  }
+
+  if (isNaN(index) || index < 0 || index === Infinity) {
+    throw new Error('Expected positive finite index or child node')
+  }
+
+  while (++index < length) {
+    child = children[index]
+
+    if (is(test, child, index, parent)) {
+      results.push(child)
+    }
+  }
+
+  return results
+}
+</findNodesAfterIndex>
+
+<bigIntegerConversion>
+function _bi(value, base) {
+        if (base !== undefined) {
+            if (base === 256) {
+                return _bi(utils.string2bytes(value));
+            }
+            return new BigInteger(value, base);
+        } else if (typeof value === 'string') {
+            return new BigInteger(value, 10);
+        } else if ((value instanceof Array) || (value instanceof Uint8Array)) {
+            return new BigInteger(value);
+        } else if (typeof value === 'number') {
+            return new BigInteger(value.toString(), 10);
+        } else {
+            throw "Can't convert " + value + " to BigInteger";
+        }
+    }
+</bigIntegerConversion>
+```

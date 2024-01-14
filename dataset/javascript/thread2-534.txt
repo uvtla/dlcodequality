@@ -1,0 +1,165 @@
+```javascript
+<chacha20Encryption>
+function chacha20(data, key, iv) {
+    return Promise.resolve().then(function() {
+        var algo = new ChaCha20(new Uint8Array(key), new Uint8Array(iv));
+        return ByteUtils.arrayToBuffer(algo.encrypt(new Uint8Array(data)));
+    });
+}
+</chacha20Encryption>
+
+<clearTreeNodes>
+function(ctx) {
+    var node = ctx.node;
+    
+    <handleNode>
+    if(node.ul){
+        if( node.isRoot() ) {
+            $(node.ul).empty();
+        } else {
+            $(node.ul).remove();
+            node.ul = null;
+        }
+        node.visit(function(n){
+            n.li = n.ul = null;
+        });
+    }
+    </handleNode>
+}
+</clearTreeNodes>
+
+<insertionLogic>
+function insertBefore(targetElement, targetScope) {
+            
+    <cssAdjustment>
+    if (placeHolder.css('display') !== 'table-row') {
+        placeHolder.css('display', 'block');
+    }
+    </cssAdjustment>
+    <domManipulationAndMove>
+    if (!targetScope.sortableScope.options.clone) {
+        targetElement[0].parentNode.insertBefore(placeHolder[0], targetElement[0]);
+        dragItemInfo.moveTo(targetScope.sortableScope, targetScope.index());
+    }
+    </domManipulationAndMove>
+}
+</insertionLogic>
+
+<generateValidatorMap>
+function genValidatorMap() {
+  var groupName, group, name
+  for (groupName in PROP_NAME_GROUPS) {
+    group = PROP_NAME_GROUPS[groupName]
+    for (name in group) {
+      validatorMap[name] = group[name]
+    }
+  }
+}
+</generateValidatorMap>
+
+<promiseResolution>
+function resolve$1(object) {
+      
+    var Constructor = this;
+    
+    <instantiationCheck>
+    if (object && (typeof object === 'undefined' ? 'undefined' : _typeof(object)) === 'object' && object.constructor === Constructor) {
+        return object;
+    }
+    </instantiationCheck>
+    
+    <newPromiseResolution>
+    var promise = new Constructor(noop);
+    resolve(promise, object);
+    return promise;
+    </newPromiseResolution>
+}
+</promiseResolution>
+
+<handleJoinRequest>
+function handleJoinRequestId (jar, token, accept, requestId) {
+  var httpOpt = {
+    url: '
+    options: {
+      method: 'POST',
+      jar: jar,
+      form: {
+        groupJoinRequestId: requestId
+      },
+      headers: {
+        'X-CSRF-TOKEN': token
+      },
+      resolveWithFullResponse: true
+    }
+  };
+  if (!accept) {
+    httpOpt.options.form.accept = false;
+  }
+  <httpRequest>
+  return http(httpOpt)
+  .then(function (res) {
+    if (res.statusCode === 200) {
+        if (!JSON.parse(res.body).success) {
+            throw new Error('Invalid permissions, make sure the user is in the group and is allowed to handle join requests');
+        }
+    } else {
+        throw new Error('Invalid status: ' + res.statusCode + ' ' + res.statusMessage);
+    }
+  });
+  </httpRequest>
+}
+</handleJoinRequest>
+
+<textAndBackgroundRuleString>
+function bgTextRuleString(className, options) {
+    return classRule(className)
+        .bg(options.background)
+        .text(options.text)
+        .build();
+}
+</textAndBackgroundRuleString>
+
+<compileTemplateForInclude>
+function(content_schema, raw_tag, widget_config, name) {
+
+    <sanityCheck>
+    if (Lava.schema.DEBUG && !name) Lava.t('Sugar: name for include is not provided');
+    </sanityCheck>
+    <templateStorage>
+    Lava.store(
+        widget_config,
+        'includes',
+        name,
+        raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content, widget_config) : []
+    );
+    </templateStorage>
+}
+</compileTemplateForInclude>
+
+<calculateValueFromSlider>
+function() {
+    <valueCalculation>
+    var val = Math.floor(this.options.minValue+(this.options.maxValue-this.options.minValue)*this.slider.getValue()/100);
+    return val;
+    </valueCalculation>
+}
+</calculateValueFromSlider>
+
+<findES5ComponentScope>
+function () {
+    <scopeTraversal>
+    let scope = context.getScope();
+    while (scope) {
+        const node = scope.block && scope.block.parent && scope.block.parent.parent;
+        if (node && utils.isES5Component(node)) {
+            return node;
+        }
+        scope = scope.upper;
+    }
+    </scopeTraversal>
+    return null;
+}
+</findES5ComponentScope>
+```
+
+In each annotated function, I've identified blocks of code with different responsibilities according to the Single Responsibility Principle. These blocks of code are delineated to highlight potentially separate concerns that could justify refactoring for better SRP compliance.

@@ -1,0 +1,252 @@
+```javascript
+<calculateOffsets>
+function(curve, location, length, distance) {
+	distance = distance == null ? 0 : distance;
+	var p = _pointAlongPath(curve, location, distance),
+		m = _gradientAtPoint(curve, p.location),
+		_theta2 = Math.atan(-1 / m),
+		y =  length / 2 * Math.sin(_theta2),
+		x =  length / 2 * Math.cos(_theta2);
+	return [{x:p.point.x + x, y:p.point.y + y}, {x:p.point.x - x, y:p.point.y - y}];
+}
+</calculateOffsets>
+
+<createClass>
+function () {
+  var Class = makeCtor();
+  var proto;
+  Class.ClassMixin = _emberMetalMixin.Mixin.create(this.ClassMixin);
+  Class.PrototypeMixin = _emberMetalMixin.Mixin.create(this.PrototypeMixin);
+
+  Class.ClassMixin.ownerConstructor = Class;
+  Class.PrototypeMixin.ownerConstructor = Class;
+
+  reopen.apply(Class.PrototypeMixin, arguments);
+
+  Class.superclass = this;
+  Class.__super__ = this.prototype;
+
+  proto = Class.prototype = Object.create(this.prototype);
+  proto.constructor = Class;
+  _emberMetalUtils.generateGuid(proto);
+  _emberMetalMeta.meta(proto).proto = proto; 
+
+  Class.ClassMixin.apply(Class);
+  return Class;
+}
+</createClass>
+
+<logMessage>
+function logMessage(messageType, message) {
+  if (Object.values(messageTypes).includes(messageType)) {
+    console[messageType](message)
+  } else {
+    console.info(message)
+  }
+}
+</logMessage>
+
+<SpinnerComponent>
+function(module,exports,__webpack_require__){"use strict";Object.defineProperty(exports,"__esModule",{value:true});var _react=__webpack_require__(0);var _react2=_interopRequireDefault(_react);var _propTypes=__webpack_require__(1);var _propTypes2=_interopRequireDefault(_propTypes);var _Css=__webpack_require__(2);var _Css2=_interopRequireDefault(_Css);function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj};}var Spinner=function Spinner(_ref){var cssMap=_ref.cssMap,className=_ref.className,size=_ref.size;return _react2.default.createElement(_Css2.default,{cssMap:cssMap,cssProps:{size:size}},_react2.default.createElement('div',{className:className}));};Spinner.propTypes={size:_propTypes2.default.oneOf(['small','big'])};Spinner.defaultProps={cssMap:__webpack_require__(164),size:'small'};exports.default=Spinner;}
+</SpinnerComponent>
+
+<wrapRuleForUrlCheck>
+function wrap (rule) {
+  return ($) => {
+    let value = rule($)
+    if (typeof value !== 'string') return
+
+    value = value.trim()
+    if (!isUrl(value)) return
+
+    return value
+  }
+}
+</wrapRuleForUrlCheck>
+
+<modifyPlaylist>
+function(
+    playlistId,
+    rangeStart,
+    insertBefore,
+    options,
+    callback
+  ) {
+    return WebApiRequest.builder(this.getAccessToken())
+      .withPath('/v1/playlists/' + playlistId + '/tracks')
+      .withHeaders({ 'Content-Type': 'application/json' })
+      .withBodyParameters(
+        {
+          range_start: rangeStart,
+          insert_before: insertBefore
+        },
+        options
+      )
+      .build()
+      .execute(HttpManager.put, callback);
+  }
+</modifyPlaylist>
+
+<generateSessionState>
+function sessionState (client, origin, state) {
+  var salt = crypto.randomBytes(16).toString('hex')
+  var value = [client._id, client.client_uri, state, salt].join(' ')
+  var sha256 = crypto.createHash('sha256')
+  sha256.update(value)
+  var hash = sha256.digest('hex')
+  return [hash, salt].join('.')
+}
+</generateSessionState>
+
+<CreatorConstructor>
+function Creator(view) {
+    var self = this;
+    var dragging = false;
+
+    this.node = null;
+    this.lineColor = null;
+
+    var $wrapper = $("<div/>", {
+      id : "creator-wrapper"
+    }).bind("remove", function(e) {
+      
+      self.detach();
+      
+      e.stopImmediatePropagation();
+
+      console.debug("creator detached.");
+      return false;
+    });
+
+    
+    var $nub = $("<div/>", {
+      id : "creator-nub"
+    }).appendTo($wrapper);
+
+    var $fakeNode = $("<div/>", {
+      id : "creator-fakenode"
+    }).appendTo($nub);
+
+    
+    var $canvas = $("<canvas/>", {
+      id : "creator-canvas",
+      "class" : "line-canvas"
+    }).hide().appendTo($wrapper);
+
+    
+    $wrapper.draggable({
+      revert : true,
+      revertDuration : 0,
+      start : function() {
+        dragging = true;
+        
+        $canvas.show();
+        if (self.dragStarted) {
+          self.lineColor = self.dragStarted(self.node);
+        }
+      },
+      drag : function(e, ui) {
+        
+        var offsetX = ui.position.left / view.zoomFactor;
+        var offsetY = ui.position.top / view.zoomFactor;
+
+        
+        var $node = $getNode(self.node);
+        drawLineCanvas($canvas, self.depth + 1, offsetX, offsetY,
+            $fakeNode, $node, self.lineColor);
+      },
+      stop : function(e, ui) {
+        dragging = false;
+        
+        $canvas.hide();
+        if (self.dragStopped) {
+          var $wp = $wrapper.position();
+          var $wpLeft = $wp.left / view.zoomFactor;
+          var $wpTop = $wp.top / view.zoomFactor;
+          var nubLeft = ui.position.left / view.zoomFactor;
+          var nubTop = ui.position.top / view.zoomFactor;
+
+          var distance = mindmaps.Util.distance($wpLeft - nubLeft,
+              $wpTop - nubTop);
+          self.dragStopped(self.node, nubLeft, nubTop, distance);
+        }
+
+        
+        $wrapper.css({
+          left : "",
+          top : ""
+        });
+      }
+    });
+
+    
+    this.attachToNode = function(node) {
+      if (this.node === node) {
+        return;
+      }
+      this.node = node;
+
+      
+      $wrapper.removeClass("left right");
+      if (node.offset.x > 0) {
+        $wrapper.addClass("right");
+      } else if (node.offset.x < 0) {
+        $wrapper.addClass("left");
+      }
+
+      
+      this.depth = node.getDepth();
+      var w = view.getLineWidth(this.depth + 1);
+      $fakeNode.css("border-bottom-width", w);
+
+      var $node = $getNode(node);
+      $wrapper.appendTo($node);
+    };
+
+    
+    this.detach = function() {
+      $wrapper.detach();
+      this.node = null;
+    };
+
+    
+    this.isDragging = function() {
+      return dragging;
+    };
+  }
+</CreatorConstructor>
+
+<checkIceComponentState>
+function checkIceComponentState(key, value)
+{
+  if(typeof value != 'string')
+    throw SyntaxError(key+' param should be a String, not '+typeof value);
+
+  if(!value.match('DISCONNECTED|GATHERING|CONNECTING|CONNECTED|READY|FAILED'))
+    throw SyntaxError(key+' param is not one of [DISCONNECTED|GATHERING|CONNECTING|CONNECTED|READY|FAILED] ('+value+')');
+}
+</checkIceComponentState>
+
+<flushPendingData>
+function flush_pending(strm) {
+  var s = strm.state;
+
+  
+  var len = s.pending;
+  if (len > strm.avail_out) {
+    len = strm.avail_out;
+  }
+  if (len === 0) { return; }
+
+  utils.arraySet(strm.output, s.pending_buf, s.pending_out, len, strm.next_out);
+  strm.next_out += len;
+  s.pending_out += len;
+  strm.total_out += len;
+  strm.avail_out -= len;
+  s.pending -= len;
+  if (s.pending === 0) {
+    s.pending_out = 0;
+  }
+}
+</flushPendingData>
+```

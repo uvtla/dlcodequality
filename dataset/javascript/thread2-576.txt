@@ -1,0 +1,285 @@
+<function _Overlay_resolveCommands>
+function _Overlay_resolveCommands(commands) {
+
+    <resolveElements>
+    commands = _resolveElements(commands);
+    </resolveElements>
+                    
+    var result = {};
+    <initializeResult>
+    result.commands = [];
+    result.others = [];
+    </initializeResult>
+    <collectCommands>
+    var allCommands = this.element.querySelectorAll(".win-command");
+    var countAll, countIn;
+    for (countAll = 0; countAll < allCommands.length; countAll++) {
+        var found = false;
+        for (countIn = 0; countIn < commands.length; countIn++) {
+            if (commands[countIn] === allCommands[countAll]) {
+                result.commands.push(allCommands[countAll]);
+                commands.splice(countIn, 1);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            result.others.push(allCommands[countAll]);
+        }
+    }
+    </collectCommands>
+    return result;
+}
+</function _Overlay_resolveCommands>
+
+<dispatchCustomEvent>
+function(eventName, data) {
+    <createAndInitEvent>
+    var event = document.createEvent('Event');
+    event.initEvent(eventName,  false,  true);
+    assign(event, data);
+    </createAndInitEvent>
+    <dispatchEvent>
+    this.el.dispatchEvent(event);
+    </dispatchEvent>
+    return !event.defaultPrevented;
+}
+</dispatchCustomEvent>
+
+<findNode>
+function findNode(value, node) {
+    <try_catch_block>
+    var e_1, _a;
+    if (value === node.value)
+        return node;
+    try {
+        for (var _b = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(node.children), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var child = _c.value;
+            var node_1 = findNode(value, child);
+            if (node_1)
+                return node_1;
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    </try_catch_block>
+    return null;
+}
+</findNode>
+
+<checkStagedFiles>
+function() {
+    var result = false;
+    <getRootAndFilterStaged>
+    that.model.getRoot(function(root) {
+        if (root.children && root.children.length > 1) {
+            var selection = root.children.filter(function(item) {
+                return mGitUtil.isStaged(item);
+            });
+            result = selection.length === Math.max(0, root.children.length - 1);
+        }
+    });
+    </getRootAndFilterStaged>
+    return result;
+}
+</checkStagedFiles>
+
+<handlerFor>
+function handlerFor( scope ) {
+    <setupVisibilityHandlers>
+    const { axVisibility } = widgetServices( scope );
+    axVisibility.onChange( updateState );
+    scope.$on( '$destroy', () => { axVisibility.unsubscribe( updateState ); } );
+    let lastState = axVisibility.isVisible();
+    </setupVisibilityHandlers>
+
+    <apiInitialization>
+    const api = {
+        isVisible() {
+            return axVisibility.isVisible();
+        },
+        onChange( handler ) {
+            addHandler( handler, true );
+            addHandler( handler, false );
+            return api;
+        },
+        onShow( handler ) {
+            addHandler( handler, true );
+            return api;
+        },
+        onHide( handler ) {
+            addHandler( handler, false );
+            return api;
+        },
+        clear
+    };
+    </apiInitialization>
+
+    <clearHandlers>
+    const showHandlers = [];
+    const hideHandlers = [];
+    </clearHandlers>
+
+    return api;
+
+    <clearFunction>
+    function clear() {
+        showHandlers.splice( 0, showHandlers.length );
+        hideHandlers.splice( 0, hideHandlers.length );
+        return api;
+    }
+    </clearFunction>
+
+    <updateStateFunction>
+    function updateState( targetState ) {
+        const state = axVisibility.isVisible();
+        if( state === lastState ) {
+            return;
+        }
+        lastState = state;
+        heartbeat.onAfterNext( () => {
+            const handlers = targetState ? showHandlers : hideHandlers;
+            handlers.forEach( f => f( targetState ) );
+        } );
+    }
+    </updateStateFunction>
+
+    <addHandlerFunction>
+    function addHandler( handler, targetState ) {
+        ( targetState ? showHandlers : hideHandlers ).push( handler );
+        if( targetState && axVisibility.isVisible() === targetState ) {
+            handler( targetState );
+        }
+    }
+    </addHandlerFunction>
+}
+</handlerFor>
+
+<fileStat>
+function fileStat(path) {
+    return new Promise(function (resolve, reject) {
+        <statFile>
+        fs.stat(path, function (err, stats) {
+            if ((null !== err) && (undefined !== err)) {
+                reject(err);
+            }
+            else {
+                resolve(stats);
+            }
+        });
+        </statFile>
+    });
+}
+</fileStat>
+
+<objectToDocument>
+function objectToDocument(entityObject, onlyDirty) {
+    <validation>
+    expect(arguments).to.have.length.below(
+        3,
+        'Invalid arguments length when converting an entity object in a ' +
+        'MongoDB document (it has to be passed less than 3 arguments)'
+    );
+    expect(entityObject).to.be.an.instanceOf(
+        Entity,
+        'Invalid argument "entityObject" when converting an entity object in a ' +
+        'MongoDB document (it has to be an Entity instances)'
+    );
+    if (onlyDirty) {
+        expect(onlyDirty).to.be.a(
+            'boolean',
+            'Invalid argument "onlyDirty" when converting an entity object in a ' +
+            'MongoDB document (it has to be a boolean)'
+        );
+    }
+    </validation>
+
+    <convertToObject>
+    var document = {};
+    var entityAttributes = entityObject.Entity.attributes;
+    for (var attributeName in entityAttributes) {
+        if (!onlyDirty || entityObject.isDirty(attributeName)) {
+            var attribute = entityAttributes[attributeName];
+            var attributeDataName = attribute.getDataName(entityObject.adapterName);
+            var attributeDataValue = attribute.getDataValue(
+                entityObject[attributeName]
+            );
+            document[attributeDataName] = attributeDataValue;
+        }
+    }
+    document.Entity = entityObject.Entity.specification.name;
+    if (!onlyDirty) {
+        document._id = entityObject.id;
+    }
+    delete document.id;
+    </convertToObject>
+
+    return document;
+}
+</objectToDocument>
+
+<benchmark>
+function benchmark( b ) {
+    var i;
+
+    <startBenchmark>
+    b.tic();
+    for ( i = 0; i < b.iterations; i++ ) {
+        if ( TODO ) {
+            b.fail( 'something went wrong' );
+        }
+    }
+    b.toc();
+    if ( TODO ) {
+        b.fail( 'something went wrong' );
+    }
+    b.pass( 'benchmark finished' );
+    b.end();
+    </startBenchmark>
+}
+</benchmark>
+
+<fetchFilePathsByType>
+function fetchFilePathsByType(distFiles, basePath, type) {
+    return distFiles
+        .filter(function(filePath) {
+            <filterFilePaths>
+            return new RegExp('assets/.*\\.' + type + '$').test(filePath);
+            </filterFilePaths>
+        })
+        .map(function(filePath) {
+            <mapFilePaths>
+            return path.join(basePath, filePath);
+            </mapFilePaths>
+        });
+}
+</fetchFilePathsByType>
+
+<getPostQuery>
+function getPostQuery(body) {
+    if (!body) return {};
+
+    let result = {};
+    <parseBody>
+    let commentReg = /^\[(\w+)\]\:([\s|\S]+)/;
+    body.split('\r\n').every((item) => {
+        let itemMatch = item.match(commentReg);
+        if (itemMatch && itemMatch.length == 3) {
+            let queryKey = itemMatch[1],
+                queryVal = itemMatch[2];
+            result[queryKey] = queryVal && queryVal.trim();
+            return true;
+        } else {
+            return false;
+        }
+    })
+    </parseBody>
+
+    return result;
+}
+</getPostQuery>

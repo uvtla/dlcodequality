@@ -1,0 +1,190 @@
+<formatAdMarkup>
+function formatAdMarkup(bid) {
+  let adm = bid.adm;
+  if ('nurl' in bid) {
+    adm += utils.createTrackPixelHtml(`${bid.nurl}&px=1`);
+  }
+  return adm;
+}
+</formatAdMarkup>
+
+<requestNextHashTree>
+function requestNextHashTree(ws) {
+  <countLeftQuery>
+  db.query("SELECT COUNT(1) AS count_left FROM catchup_chain_balls", function (rows) {
+    if (rows.length > 0) {
+      if (catchup_balls_at_start == -1) { 
+        catchup_balls_at_start = rows[0].count_left;
+      }
+      catchup_balls_left = rows[0].count_left;
+    }
+  });
+  </countLeftQuery>
+  <selectAndProcessBalls>
+  db.query("SELECT ball FROM catchup_chain_balls ORDER BY member_index LIMIT 2", function (rows) {
+    if (rows.length === 0)
+      return comeOnline();
+    if (rows.length === 1) {
+      db.query("DELETE FROM catchup_chain_balls WHERE ball=?", [rows[0].ball], function () {
+        comeOnline();
+      });
+      return;
+    }
+
+    let from_ball = rows[0].ball;
+    let to_ball = rows[1].ball;
+
+    <checkPendingRequests>
+    for (let tag in ws.assocPendingRequests) {
+      if (ws.assocPendingRequests[tag].request.command === 'get_hash_tree') {
+        console.log("already requested hash tree from this peer");
+        return;
+      }
+    }
+    </checkPendingRequests>
+
+    <sendHashTreeRequest>
+    sendRequest(ws, 'get_hash_tree', {from_ball: from_ball, to_ball: to_ball}, true, handleHashTree);
+  });
+  </selectAndProcessBalls>
+}
+</requestNextHashTree>
+
+<_ensurePaneIsFocused>
+function _ensurePaneIsFocused(paneId) {
+  var pane = MainViewManager._getPane(paneId);
+
+  <focusPane>
+  setTimeout(function () {
+      pane.focus();
+      this._lastFocusedElement = pane.$el[0];
+      MainViewManager.setActivePaneId(paneId);
+  }, 1);
+  </focusPane>
+}
+</_ensurePaneIsFocused>
+
+<createPipeReducer>
+function createPipeReducer (container) {
+  return (state, action = {data: {}}) => {
+    const pipes = container[$pipes].entries()
+    <reduceState>
+    reduce()
+    return state
+
+    function reduce () {
+      const step = pipes.next()
+      const done = step.done
+      const pipe = step.value ? step.value[1] : null
+      if (done) return
+      else if (false === pipe(state, action)) return
+      else return reduce()
+    }
+    </reduceState>
+  }
+}
+</createPipeReducer>
+
+<flush>
+function flush() {
+  <processQueue>
+  if (queue.length) {
+    let bench = queue[0]
+    process.nextTick(() => {
+      run(bench).then(() => {
+        queue.shift()
+        flush()
+      }, console.error)
+    })
+  }
+  </processQueue>
+}
+</flush>
+
+<_callbackAndReset>
+function _callbackAndReset(e) {
+  <fireCallback>
+  _fireCallback.call(this, callback, e, combo);
+  </fireCallback>
+
+  <ignoreNextKeyup>
+  if (action !== 'keyup') {
+    this._ignoreNextKeyup = _characterFromEvent(e);
+  }
+  </ignoreNextKeyup>
+
+  <resetSequences>
+  setTimeout(_resetSequences.bind(this), 10);
+  </resetSequences>
+}
+</_callbackAndReset>
+
+<forEachArray>
+function forEachArray(arr, iteratee, context) {
+  var index = 0;
+  var len = arr.length;
+
+  context = context || null;
+
+  <iterateArray>
+  for (; index < len; index += 1) {
+    if (iteratee.call(context, arr[index], index, arr) === false) {
+      break;
+    }
+  }
+  </iterateArray>
+}
+</forEachArray>
+
+<webpackMathClz32>
+function (module, exports, __webpack_require__) {
+
+  var $export = __webpack_require__(0);
+  
+  <exportClz32>
+  $export($export.S, 'Math', {
+    clz32: function clz32(x) {
+      return (x >>>= 0) ? 31 - Math.floor(Math.log(x + 0.5) * Math.LOG2E) : 32;
+    }
+  });
+  </exportClz32>
+}
+</webpackMathClz32>
+
+<handler>
+function handler (eventDetails){
+  var Alert = models.getModels().Alert;
+  <logEventProcessing>
+  logger.logger.trace(loggerPrefix +'Processing Alerts for Event: ', eventDetails);
+  </logEventProcessing>
+
+  <queryAndProcessAlerts>
+  Alert.queryAlerts(eventDetails.uid, eventDetails.env, eventDetails.domain, function(err, alerts){
+    if(err) {
+      logger.logger.warn({ error:err }, loggerPrefix +'Failed to query Alerts for uid and env', uid, env);
+    } else {
+      if(alerts && alerts.length > 0){
+        logger.logger.trace(loggerPrefix +'Found ['+ alerts.length +'] Alerts. Matching and send emails', alerts);
+        matchAndIssueAlertEmails(eventDetails, alerts);
+      } else {
+        logger.logger.trace(loggerPrefix +'No Alerts for event. No emails to send.');
+      }
+    }
+  });
+  </queryAndProcessAlerts>
+}
+</handler>
+
+<isPathAbsolute>
+function isPathAbsolute(path) {
+  <checkPath>
+  if (process.platform === 'win32') {
+      const result = npm.patterns.splitDevice.exec(path);
+      const device = result[1] || '';
+      const isUnc = !!device && device.charAt(1) !== ':';
+      return !!result[2] || isUnc;
+  }
+  return path.charAt(0) === '/';
+  </checkPath>
+}
+</isPathAbsolute>

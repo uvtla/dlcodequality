@@ -1,0 +1,266 @@
+```javascript
+<polygonRemoveCollinearPoints>
+function polygonRemoveCollinearPoints(polygon, precision){
+    var num = 0;
+    for(var i=polygon.length-1; polygon.length>3 && i>=0; --i){
+        if(collinear(polygonAt(polygon, i-1),polygonAt(polygon, i),polygonAt(polygon, i+1),precision)){
+            polygon.splice(i%polygon.length,1);
+            num++;
+        }
+    }
+    return num;
+}
+</polygonRemoveCollinearPoints>
+
+<_gpfAttributesGet>
+function _gpfAttributesGet (objectOrClass, baseAttributeClass) {
+    var classConstructor;
+    if (typeof objectOrClass === "function") {
+        classConstructor = objectOrClass;
+    } else {
+        classConstructor = _gpfAttributesGetConstructorFrom(objectOrClass);
+    }
+    return _gpfAttributesGetFromClass(classConstructor, baseAttributeClass);
+}
+</_gpfAttributesGet>
+
+<discard>
+function discard (bboxes, exclude = null) {
+    if (this.obb) { 
+        return Label.prototype.occluded.call(this, bboxes, exclude);
+    }
+    else if (this.obbs) { 
+        for (let i = 0; i < this.obbs.length; i++){
+            let aabb = this.aabbs[i];
+            let obb = this.obbs[i];
+            let obj = { aabb, obb };
+            let should_discard = Label.prototype.occluded.call(obj, bboxes, exclude);
+            if (should_discard) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+</discard>
+
+<build>
+function build(obj, options) {
+  
+  let opt = Object.assign(defaultOptions, options);
+
+  let map = '';
+
+  let tab = '';
+  for (let i = 0; i < opt.tabSize; i++) {
+    tab += ' ';
+  }
+
+  determineKeyValueSpaces(obj, opt.tabSize);
+
+  obj.forEach((line) => {
+    if (line.isEmpty) {
+      if (opt.emptyLines) {
+        map += opt.lineBreak;
+      }
+    } else {
+      if (line.isComment) {
+        if (opt.comments) {
+          map += determineTabs(line, tab) + '#' + opt.commentPrefix + line.comment + opt.lineBreak;
+        }
+      } else {
+        if (line.key) {
+          if (line.isKeyOnly) {
+            map += determineTabs(line, tab) + line.key + opt.lineBreak;
+          } else {
+            map += determineTabs(line, tab) + line.key;
+            if (line.value) {
+              if (line.includesComment) {
+                map += line.keyValueSpaces + line.value;
+                if (opt.comments) {
+                  if (line.comment) {
+                    map += tab + '#' + opt.commentPrefix + line.comment + opt.lineBreak;
+                  } else {
+                    map += opt.lineBreak;
+                  }
+                } else {
+                  map += opt.lineBreak;
+                }
+              } else {
+                map += line.keyValueSpaces + line.value + opt.lineBreak;
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return map;
+}
+</build>
+
+<deriveKey>
+async function deriveKey (password, nonce, options = {
+  kdf_params: DEFAULTS.crypto.kdf_params,
+  kdf: DEFAULTS.crypto.kdf
+}) {
+  if (typeof password === 'undefined' || password === null || !nonce) {
+    throw new Error('Must provide password and nonce to derive a key')
+  }
+
+  if (!DERIVED_KEY_FUNCTIONS.hasOwnProperty(options.kdf)) throw new Error('Unsupported kdf type')
+
+  return DERIVED_KEY_FUNCTIONS[options.kdf](password, nonce, options)
+}
+</deriveKey>
+
+<Cam>
+function Cam(gl) {
+  this._projection = mat4.create();
+  this._camModelView = mat4.create();
+  this._modelView = mat4.create();
+  this._rotation = mat4.create();
+  this._translation = mat4.create();
+  this._near = 0.10;
+  this._onCameraChangedListeners = [];
+  this._far = 4000.0;
+  this._fogNear = -5;
+  this._fogFar = 50;
+  this._fog = true;
+  this._fovY = Math.PI * 45.0 / 180.0;
+  this._fogColor = vec3.fromValues(1, 1, 1);
+  this._outlineColor = vec3.fromValues(0.1, 0.1, 0.1);
+  this._outlineWidth = 1.0;
+  this._outlineEnabled = true;
+  this._selectionColor = vec4.fromValues(0.1, 1.0, 0.1, 0.7);
+  this._center = vec3.create();
+  this._zoom = 50;
+  this._screenDoorTransparency = false;
+  this._updateProjectionMat = true;
+  this._updateModelViewMat = true;
+  this._upsamplingFactor = 1;
+  this._gl = gl;
+  this._currentShader = null;
+  this._stateId = 0;
+  this.setViewportSize(gl.viewportWidth, gl.viewportHeight);
+}
+</Cam>
+
+<Parser>
+function Parser(stdout) {
+  this._name = null;
+  this._description = null;
+  this._version = "0.0.0";
+  this._epilog = null;
+  this._commands = { };
+  this._short = { };
+  this._default = this.showHelp.bind(this);
+  this._hooks = { };
+  this._width = 0;
+  this._out = isFunction(stdout) ? stdout : console.log;
+  this.option("H", "help", "show this help information", this.showHelp.bind(this));
+  this.option("V", "version", "show version information", this.showVersion.bind(this));
+  return this;
+}
+</Parser>
+
+<function(fn, includeSelf, _recursion)>
+function(fn, includeSelf, _recursion) {
+  var dfd,
+    res,
+    loaders,
+    node = this;
+
+  if (fn && includeSelf === true) {
+    res = fn(node);
+    if (res === false || res === "skip") {
+      return _recursion ? res : _getResolvedPromise();
+    }
+  }
+  if (!node.children && !node.lazy) {
+    return _getResolvedPromise();
+  }
+  dfd = new $.Deferred();
+  loaders = [];
+
+  node.load().done(function() {
+    for (var i = 0, l = node.children.length; i < l; i++) {
+      res = node.children[i].visitAndLoad(fn, true, true);
+      if (res === false) {
+        dfd.reject();
+        break;
+      } else if (res !== "skip") {
+        loaders.push(res);
+      }
+    }
+    $.when.apply(this, loaders).then(function() {
+      dfd.resolve();
+    });
+  });
+  return dfd.promise();
+}
+</function(fn, includeSelf, _recursion)>
+
+<tryToLoadNextProperties>
+function tryToLoadNextProperties(oBundle, bAsync) {
+  var sLocale = oBundle._sNextLocale;
+  oBundle._sNextLocale = nextFallbackLocale(sLocale);
+
+  var aSupportedLanguages = window.sap && window.sap.ui && sap.ui.getCore && sap.ui.getCore().getConfiguration().getSupportedLanguages();
+
+  if ( sLocale != null && isSupported(sLocale, aSupportedLanguages) ) {
+    var oUrl = oBundle.oUrlInfo,
+      sUrl, mHeaders;
+
+    if ( oUrl.ext === '.hdbtextbundle' ) {
+      if ( M_SUPPORTABILITY_TO_XS[sLocale] ) {
+        sUrl = oUrl.prefix + oUrl.suffix + '?' + (oUrl.query ? oUrl.query + "&" : "") + "sap-language=" + M_SUPPORTABILITY_TO_XS[sLocale] + (oUrl.hash ? "#" + oUrl.hash : "");
+      } else {
+        sUrl = oUrl.url;
+      }
+      
+      mHeaders = {
+        "Accept-Language": convertLocaleToBCP47(sLocale) || ""
+      };
+    } else {
+      sUrl = oUrl.prefix + (sLocale ? "_" + sLocale : "") + oUrl.suffix;
+    }
+
+    var vProperties = Properties.create({
+      url: sUrl,
+      headers: mHeaders,
+      async: !!bAsync,
+      returnNullIfMissing: true
+    });
+
+    var addProperties = function(oProps) {
+      if ( oProps ) {
+        oBundle.aPropertyFiles.push(oProps);
+        oBundle.aLocales.push(sLocale);
+      }
+      return oProps;
+    };
+
+    return bAsync ? vProperties.then( addProperties ) : addProperties( vProperties );
+  }
+  return bAsync ? Promise.resolve(null) : null;
+}
+</tryToLoadNextProperties>
+
+<function(value)>
+function(value) {
+  value = value.toString().replace(/\s*/, '');
+
+  if (!isNaN(parseFloat(value)) && parseFloat(value).toString() == value) {    
+    return parseFloat(value);
+  } else if(geolib.isSexagesimal(value) == true) {
+    return parseFloat(geolib.sexagesimal2decimal(value));
+  } else {
+    throw 'Unknown format.';
+  }
+}
+</function(value)>
+```
+
+Each function has been annotated with `<functionName>` tags indicating the boundary of the function's responsibilities. In cases where the function body contains multiple cohesive tasks that could be considered as distinctive responsibilities, further nested tags might be added, but these functions do not require such nested tagging as they perform actions within the scope of a single responsibility.

@@ -1,0 +1,224 @@
+Function 1: Compliant
+
+<fixSet>
+function _fixSet( set ){
+  return (set |
+      (( set & ~~BLEND_FUNC_A_SET   ) >>> 2 ) |
+      (( set & ~~BLEND_EQ_A_SET     ) >>> 2 ) |
+      (( set & ~~STENCIL_B_FUNC_SET ) >>> 3 ) |
+      (( set & ~~STENCIL_B_OP_SET   ) >>> 3 ) |
+      (( set & ~~STENCIL_B_MASK_SET ) >>> 3 )
+    );
+}
+</fixSet>
+
+Function 2: Compliant
+
+<checkModuleLicense>
+function checkModuleLicense(folder) {
+    var licensePath = folder + "/LICENSE",
+        readMePath = folder + "/README.md",
+        licenseContent;
+
+    if(fs.existsSync(licensePath)){
+        licenseContent = fs.readFileSync(licensePath, "utf-8");
+        return { isMIT : isLicense.mit(licenseContent), content : licenseContent };
+    }
+    
+    else if(fs.existsSync(readMePath)) {
+        licenseContent = fs.readFileSync(readMePath, "utf-8");
+        return { isMIT : isLicense.mit(licenseContent), content : "Check the README" };
+    }
+    else {
+        return { isMIT : false, content : "not found" };
+    }
+}
+</checkModuleLicense>
+
+Function 3: Compliant
+
+<createCopyDescriptors>
+function createCopyDescriptors(obj, deep, template) {
+  const pdc = {};
+  const _tpl = template || { enumerable: true };
+  Object.keys(obj).forEach(key => {
+    const val = obj[key];
+    const valueDesc = { value: { value:  deep ? deepCopy(val, _tpl) : val } };
+    pdc[key] = Object.create(_tpl, valueDesc);
+  });
+  return pdc;
+}
+</createCopyDescriptors>
+
+Function 4: Compliant
+
+<isActionAllowedInSignalingState>
+function isActionAllowedInSignalingState(action, type, signalingState) {
+  return {
+    offer: {
+      setLocalDescription: ['stable', 'have-local-offer'],
+      setRemoteDescription: ['stable', 'have-remote-offer']
+    },
+    answer: {
+      setLocalDescription: ['have-remote-offer', 'have-local-pranswer'],
+      setRemoteDescription: ['have-local-offer', 'have-remote-pranswer']
+    }
+  }[type][action].indexOf(signalingState) !== -1;
+}
+</isActionAllowedInSignalingState>
+
+Function 5: Compliant
+
+<encode5>
+function encode5(n) {
+  assert(0 <= n && n <= 0x3fffffff, ENCODE_OUTOFBOUNDS + n)
+  
+  const lower = isolate(n, 0, 6)
+  const aboveLower = isolate(n, 6, 6)
+  const mid = isolate(n, 12, 6)
+  const belowUpper = isolate(n, 18, 6)
+  const upper = isolate(n, 24, 6)
+  return encode(upper) + encode(belowUpper)
+    + encode(mid) + encode(aboveLower) + encode(lower)
+}
+</encode5>
+
+Function 6: Compliant
+
+<definition>
+function definition(node) {
+  var content = uri(node.url)
+
+  if (node.title) {
+    content += space + title(node.title)
+  }
+
+  return (
+    leftSquareBracket +
+    (node.label || node.identifier) +
+    rightSquareBracket +
+    colon +
+    space +
+    content
+  )
+}
+</definition>
+
+Function 7: Violation Detected - Multiple distinct responsibilities within the parsing logic.
+
+<parseConfigText>
+function(text)
+	{
+		if (text != null)
+		{
+			<splitTextIntoLines>
+			var lines = text.split('\n');
+			</splitTextIntoLines>
+			
+			for (var i = 0; i < lines.length; i++)
+			{
+				<skipComments>
+				if (lines[i].charAt(0) != '#')
+				</skipComments>
+				{
+					<parseKeyAndValue>
+					var index = lines[i].indexOf('=');
+					
+					if (index > 0)
+					{
+						var key = lines[i].substring(0, index);
+						var idx = lines[i].length;
+						
+						if (lines[i].charCodeAt(idx - 1) == 13)
+						{
+							idx--;
+						}
+						
+						var value = lines[i].substring(index + 1, idx);
+					</parseKeyAndValue>
+					
+					<decodeAndAssignValue>
+					if (this.resourcesEncoded)
+					{
+						value = value.replace(/\\(?=u[a-fA-F\d]{4})/g,"%");
+						mxResources.resources[key] = unescape(value);
+					}
+					else
+					{
+						mxResources.resources[key] = value;
+					}
+					</decodeAndAssignValue>
+				}
+			}
+		}
+	}
+</parseConfigText>
+
+Function 8: Violation Detected - Initial setup and registration are separate concerns.
+
+<previewerInitialization>
+function (type, updater, supportedLanguages, initializer) {
+	<setupPreviewerInstance>
+	this._elt = null;
+	this._type = type;
+	this._clsRegexp = RegExp('(?:^|\\s)' + type + '(?=$|\\s)');
+	this._token = null;
+	this.updater = updater;
+	this._mouseout = this.mouseout.bind(this);
+	this.initializer = initializer;
+	</setupPreviewerInstance>
+
+	var self = this;
+
+	<registerSupportedLanguages>
+	if (!supportedLanguages) {
+		supportedLanguages = ['*'];
+	}
+	if (!Array.isArray(supportedLanguages)) {
+		supportedLanguages = [supportedLanguages];
+	}
+	supportedLanguages.forEach(function (lang) {
+		if (typeof lang !== 'string') {
+			lang = lang.lang;
+		}
+		if (!Previewer.byLanguages[lang]) {
+			Previewer.byLanguages[lang] = [];
+		}
+		if (Previewer.byLanguages[lang].indexOf(self) < 0) {
+			Previewer.byLanguages[lang].push(self);
+		}
+	});
+	Previewer.byType[type] = this;
+	</registerSupportedLanguages>
+}
+</previewerInitialization>
+
+Function 9: Compliant
+
+<_onChildNodeCountUpdated>
+function _onChildNodeCountUpdated(event, res) {
+    if (res.nodeId > 0) {
+        Inspector.DOM.requestChildNodes(res.nodeId);
+    }
+}
+</_onChildNodeCountUpdated>
+
+Function 10: Violation Detected - Validation and list modification are distinct operations.
+
+<listModification>
+function (index, count) {
+    <validateIndex>
+    validateListIndex(this, index + count - 1);
+    </validateIndex>
+
+    <removeElements>
+    var len = this.length - count;
+
+    for (; index < len; index++) {
+        this[index] = this[index + count];
+    }
+
+    shrinkList(this, len);
+	</removeElements>
+}
+</listModification>

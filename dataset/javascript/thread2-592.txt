@@ -1,0 +1,302 @@
+```javascript
+<generateGeometryFromNode>
+function ( geoNode, skeleton, morphTarget, preTransform ) {
+
+            var geo = new THREE.BufferGeometry();
+            <setName>
+            if ( geoNode.attrName ) geo.name = geoNode.attrName;
+            </setName>
+
+            <parseGeoNodeAndGenerateBuffers>
+            var geoInfo = this.parseGeoNode( geoNode, skeleton );
+            var buffers = this.genBuffers( geoInfo );
+            </parseGeoNodeAndGenerateBuffers>
+
+            <createAndApplyPosition>
+            var positionAttribute = new THREE.Float32BufferAttribute( buffers.vertex, 3 );
+            preTransform.applyToBufferAttribute( positionAttribute );
+            geo.addAttribute( 'position', positionAttribute );
+            </createAndApplyPosition>
+
+            <addColorAttribute>
+            if ( buffers.colors.length > 0 ) {
+                geo.addAttribute( 'color', new THREE.Float32BufferAttribute( buffers.colors, 3 ) );
+            }
+            </addColorAttribute>
+
+            <handleSkeleton>
+            if ( skeleton ) {
+                geo.addAttribute( 'skinIndex', new THREE.Uint16BufferAttribute( buffers.weightsIndices, 4 ) );
+
+                geo.addAttribute( 'skinWeight', new THREE.Float32BufferAttribute( buffers.vertexWeights, 4 ) );
+                geo.FBX_Deformer = skeleton;
+            }
+            </handleSkeleton>
+
+            <addNormalAttribute>
+            if ( buffers.normal.length > 0 ) {
+                var normalAttribute = new THREE.Float32BufferAttribute( buffers.normal, 3 );
+                var normalMatrix = new THREE.Matrix3().getNormalMatrix( preTransform );
+                normalMatrix.applyToBufferAttribute( normalAttribute );
+                geo.addAttribute( 'normal', normalAttribute );
+            }
+            </addNormalAttribute>
+
+            <addUVAttributes>
+            buffers.uvs.forEach( function ( uvBuffer, i ) {
+                var name = 'uv' + ( i + 1 ).toString();
+                if ( i === 0 ) {
+                    name = 'uv';
+                }
+                geo.addAttribute( name, new THREE.Float32BufferAttribute( buffers.uvs[ i ], 2 ) );
+            } );
+            </addUVAttributes>
+
+            <addGroupsBasedOnMaterialIndex>
+            if ( geoInfo.material && geoInfo.material.mappingType !== 'AllSame' ) {
+                var prevMaterialIndex = buffers.materialIndex[ 0 ];
+                var startIndex = 0;
+                buffers.materialIndex.forEach( function ( currentIndex, i ) {
+                    if ( currentIndex !== prevMaterialIndex ) {
+                        geo.addGroup( startIndex, i - startIndex, prevMaterialIndex );
+                        prevMaterialIndex = currentIndex;
+                        startIndex = i;
+                    }
+                } );
+                </addGroupsBasedOnMaterialIndexFinalSteps>
+                if ( geo.groups.length > 0 ) {
+                    var lastGroup = geo.groups[ geo.groups.length - 1 ];
+                    var lastIndex = lastGroup.start + lastGroup.count;
+                    if ( lastIndex !== buffers.materialIndex.length ) {
+                        geo.addGroup( lastIndex, buffers.materialIndex.length - lastIndex, prevMaterialIndex );
+                    }
+                }
+                if ( geo.groups.length === 0 ) {
+                    geo.addGroup( 0, buffers.materialIndex.length, buffers.materialIndex[ 0 ] );
+                }
+                </addGroupsBasedOnMaterialIndexFinalSteps>
+            }
+            </addGroupsBasedOnMaterialIndex>
+
+            <addMorphTargets>
+            this.addMorphTargets( geo, geoNode, morphTarget, preTransform );
+            </addMorphTargets>
+
+            return geo;
+}
+</generateGeometryFromNode>
+
+<parseWallets>
+function parseWallets(br) {
+  const count = br.readU32();
+  const wids = new Set();
+
+  <parseWalletIDs>
+  for (let i = 0; i < count; i++)
+    wids.add(br.readU32());
+  </parseWalletIDs>
+
+  return wids;
+}
+</parseWallets>
+
+<morganLoggerSetup>
+function morgan (format, options) {
+  <formatHandling>
+  var fmt = format
+  var opts = options || {}
+  if (format && typeof format === 'object') {
+    opts = format
+    fmt = opts.format || 'default'
+    deprecate('morgan(options): use morgan(' + (typeof fmt === 'string' ? JSON.stringify(fmt) : 'format') + ', options) instead')
+  }
+  if (fmt === undefined) {
+    deprecate('undefined format: specify a format')
+  }
+  </formatHandling>
+
+  <optionsSetup>
+  var immediate = opts.immediate
+  var skip = opts.skip || false
+  var formatLine = typeof fmt !== 'function'
+    ? getFormatFunction(fmt)
+    : fmt
+  var buffer = opts.buffer
+  var stream = opts.stream || process.stdout
+  </optionsSetup>
+
+  <bufferStreamSetup>
+  if (buffer) {
+    deprecate('buffer option')
+    var interval = typeof buffer !== 'number'
+      ? DEFAULT_BUFFER_DURATION
+      : buffer
+    stream = createBufferStream(stream, interval)
+  }
+  </bufferStreamSetup>
+
+  return <createLoggerMiddleware>
+  function logger (req, res, next) {
+    <initializeRequestResponse>
+    req._startAt = undefined
+    req._startTime = undefined
+    req._remoteAddress = getip(req)
+    res._startAt = undefined
+    res._startTime = undefined
+    </initializeRequestResponse>
+
+    <recordStartTime>
+    recordStartTime.call(req)
+    </recordStartTime>
+
+    function <logRequestFunction>logRequest () {
+      if (skip !== false && skip(req, res)) {
+        debug('skip request')
+        return
+      }
+      var line = formatLine(morgan, req, res)
+      if (line == null) {
+        debug('skip line')
+        return
+      }
+      debug('log request')
+      stream.write(line + '\n')
+    };
+    </logRequestFunction>
+
+    <handleImmediateLogging>
+    if (immediate) {
+      logRequest()
+    } else {
+      onHeaders(res, recordStartTime)
+      onFinished(res, logRequest)
+    }
+    </handleImmediateLogging>
+
+    next()
+  }
+  </createLoggerMiddleware>
+}
+</morganLoggerSetup>
+
+<skipIndex>
+function skipIndex() {
+		<trimArrayTypeIndicator>
+		if( childType && childType.indexOf('[]') === childType.length-2 ) {
+			childType = childType.substring(0, childType.length-2);
+		}
+		</trimArrayTypeIndicator>
+}
+</skipIndex>
+
+<createHash>
+function hashMany(obj) {
+    <initialHashCalculation>
+    var h = hash(obj, false);
+    </initialHashCalculation>
+
+    <combineHashArguments>
+    if (arguments.length > 1) {
+        var len = arguments.length,
+            i = 0;
+        while (i < len) {
+            h = combineHash(h, hash(arguments[i++], false));
+        }
+    }
+    </combineHashArguments>
+
+    return h;
+}
+</createHash>
+
+<buildChildrenItems>
+function buildChildren(reflection, parent) {
+                    <sortModules>
+                    var modules = reflection.getChildrenByKind(td.models.ReflectionKind.SomeModule);
+                    modules.sort(function (a, b) {
+                        return a.getFullName() < b.getFullName() ? -1 : 1;
+                    });
+                    </sortModules>
+                    <iterateAndBuild>
+                    modules.forEach(function (reflection) {
+                        var item = output.NavigationItem.create(reflection, parent);
+                        includeDedicatedUrls(reflection, item);
+                        buildChildren(reflection, item);
+                    });
+                    </iterateAndBuild>
+}
+</buildChildrenItems>
+
+<routeBinding>
+function bind(method, path, controller, action) {
+    <lookupControllerHandler>
+    let handler = controllerRegistry[controller] && controllerRegistry[controller][action]
+    if (!handler) {
+      console.warn(`can't bind route ${ path } to unknown action ${ controller }.${ action }`)
+      return
+    }
+    </lookupControllerHandler>
+
+    <getAndApplyPolicy>
+    const policyName = LocalUtil.getPolicyName(policy, controller, action)
+    let currentPolicy
+    if (policyName) currentPolicy = policyRegistry[policyName]
+    if (currentPolicy) {
+      router[method](path, currentPolicy, handler)
+    } else {
+      router[method](path, handler)
+    }
+    </getAndApplyPolicy>
+}
+</routeBinding>
+
+<calculateSRPClientS>
+function client_getS(params, k_num, x_num, a_num, B_num, u_num) {
+  <assertions>
+  assertIsBigInteger(k_num);
+  assertIsBigInteger(x_num);
+  assertIsBigInteger(a_num);
+  assertIsBigInteger(B_num);
+  assertIsBigInteger(u_num);
+  if((zero.compareTo(B_num) > 0) && (N.compareTo(B_num) < 0))
+    throw new Error("invalid server-supplied 'B', must be 1..N-1");
+  </assertions>
+  <calculateSecret>
+  var S_num = B_num.subtract(k_num.multiply(params.g.modPow(x_num, params.N))).modPow(a_num.add(u_num.multiply(x_num)), params.N).mod(params.N);
+  </calculateSecret>
+
+  return <padSecret>
+  padToN(S_num, params);
+  </padSecret>
+}
+</calculateSRPClientS>
+
+<logMessage>
+function log(msg) {
+  <writeTime>
+  process.stdout.write(time + ' ');
+  </writeTime>
+  <logColoredMessage>
+  console.log(colors.log(msg));
+  </logColoredMessage>
+}
+</logMessage>
+
+<createGroupByBehavior>
+function(behavior) {
+    return <createGroupByFunction>
+    function(obj, iteratee, context) {
+      var result = {};
+      iteratee = _.iteratee(iteratee, context);
+      <applyBehaviorToEach>
+      _.each(obj, function(value, index) {
+        var key = iteratee(value, index, obj);
+        behavior(result, value, key);
+      });
+      </applyBehaviorToEach>
+      return result;
+    };
+    </createGroupByFunction>
+  }
+</createGroupByBehavior>
+```

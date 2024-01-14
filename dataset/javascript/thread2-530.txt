@@ -1,0 +1,315 @@
+```javascript
+<findVarItem>
+function findVarItem(valueNode) {
+  <resolveVariableName>
+  var varNames = [];
+  var varName;
+  if (valueNode.type === 'name') {
+    varName = valueNode.value;
+  } else if (valueNode.type === 'dot' || valueNode.type === 'call') {
+    varNames = expressionNames(valueNode);
+    if (!varNames) {
+      return;
+    }
+    varName = varNames.shift();
+  }
+  if (!varName) {
+    return;
+  }
+  </resolveVariableName>
+  
+  <findVariableItemInScope>
+  var varItem = valueNode.item('var.' + varName);
+  if (typeof varItem === 'undefined') {
+    return;
+  }
+  varItem = findVarProperty(varNames, varItem);
+  return varItem;
+  </findVariableItemInScope>
+}
+</findVarItem>
+
+<placeholder>
+function placeholder(word) {
+  <initializeInputAndClone>
+  var input = this;
+  var clone = input.prev(".hint");
+  
+  input.css({
+    backgroundColor: "transparent",
+    position: "relative",
+  });
+
+  if (!clone.length) {
+    input.wrap(
+      $("<div>").css({position: "relative", height: input.css("height")})
+    );
+    clone = input
+      .clone()
+      .attr("tabindex", -1)
+      .removeAttr("id name placeholder")
+      .addClass("hint")
+      .insertBefore(input);
+    clone.css({
+      position: "absolute",
+    });
+  }
+  </initializeInputAndClone>
+  
+  <calculateAndSetHint>
+  var hint = "";
+  if (typeof word !== "undefined") {
+    var value = input.val();
+    hint = value + word.substr(value.split(/ |\n/).pop().length);
+  }
+  
+  clone.val(hint);
+  </calculateAndSetHint>
+}
+</placeholder>
+
+<normalizeModules>
+function normalizeModules(modules) {
+  <normalizeModuleStructure>
+  var normalized = {};
+  Object.keys(modules).forEach(function (key) {
+      var module = modules[key];
+      
+      normalized[key] = {
+          actions: module.actions || {},
+          getters: module.getters || {},
+          modules: module.modules ? normalizeModules(module.modules) : {},
+          mutations: module.mutations || {},
+          namespaced: module.namespaced || false,
+          state: {}
+      };
+  </normalizeModuleStructure>
+  
+  <handleModuleStates>
+      if (typeof module.state === 'function') {
+          normalized[key].state = module.state();
+      } else if (_typeof(module.state) === 'object') {
+          normalized[key].state = JSON.parse(JSON.stringify(module.state));
+      }
+  </handleModuleStates>
+  });
+  
+  return normalized;
+}
+</normalizeModules>
+
+<EventOn>
+function(name, callback, context) {
+  <validateAndSetupEventListening>
+      if (!(eventsApi(this, 'on', name, [callback, context]) && callback)) return this;
+      this._events || (this._events = {});
+  </validateAndSetupEventListening>
+  
+  <storeEventHandlers>
+      var list = this._events[name] || (this._events[name] = []);
+      list.push({callback: callback, context: context, ctx: context || this});
+      return this;
+  </storeEventHandlers>
+}
+</EventOn>
+
+<getColHeaderInfos>
+function getColHeaderInfos(table) {
+  <collectColumnHeaders>
+  var cols = this.getCols(table);
+  var arr = cols.map(function (col) {
+    <formatColumnHeaderInformation>
+    var text = tiaEJ.convertTextToFirstLocKey(col.text);
+    if (text === col.emptyCellText) {
+      text = ''; 
+    }
+    var info = col.getConfig('xtype') + ': "' + text + '"';
+    var toolTip = col.getConfig().toolTip;
+    if (toolTip) {
+      info += ', toolTip: ' + tiaEJ.convertTextToFirstLocKey(toolTip);
+    }
+    return info;
+    </formatColumnHeaderInformation>
+  });
+  </collectColumnHeaders>
+  return arr;
+}
+</getColHeaderInfos>
+
+<scopeRemoting>
+function scopeRemoting (scopeName, scope, define) {
+  <setupRemotingConfiguration>
+  var pathName = (scope.options &&
+    scope.options.http &&
+    scope.options.http.path) ||
+    scopeName
+  var isStatic = scope.isStatic
+  var toModelName = scope.modelTo.modelName
+  
+  
+  var relation = this.relations[scopeName]
+  </setupRemotingConfiguration>
+  
+  <determineTargetModel>
+  if (relation && relation.modelTo) {
+    toModelName = relation.modelTo.modelName
+  }
+  </determineTargetModel>
+
+  <defineRemotingMethod>
+  define('__get__' + scopeName, {
+    isStatic: isStatic,
+    accessType: 'READ',
+    description: 'Queries ' + scopeName + ' of ' + this.modelName + '.',
+    http: {
+      verb: 'get',
+      path: '/' + pathName
+    },
+    accepts: {
+      arg: 'filter',
+      type: 'object'
+    },
+    returns: {
+      arg: scopeName,
+      type: [toModelName],
+      root: true
+    }
+  })
+  </defineRemotingMethod>
+}
+</scopeRemoting>
+
+<clickRegion>
+function clickRegion(e) {
+  <determineMousePosition>
+  let pos  = {
+    x : e.clientX,
+    y : e.clientY
+  };
+  </determineMousePosition>
+  
+  <computeClickRegion>
+  region     = '',
+  dividant   = 4,
+  right      = window.innerWidth - (window.innerWidth / dividant),
+  left       = (window.innerWidth / dividant),
+  top        = (window.innerHeight / dividant),
+  bottom     = window.innerHeight - (window.innerHeight / dividant);
+
+  if (pos.y <= top) { region = 'top'; }
+  else if (pos.y >= bottom) { region = 'bottom'; }
+  if (pos.x <= left) { region = 'left'; }
+  else if (pos.x >= right) { region = 'right'; }
+  </computeClickRegion>
+
+  return region;
+}
+</clickRegion>
+
+<sequentialAsyncProcessor>
+function (arr, handler) {
+  <setupAsyncSequence>
+        var tmp = when.defer();
+        var index = -1;
+        var results = [];
+  </setupAsyncSequence>
+  
+  <asyncOperationLoop>
+        var doNext = function () {
+            try {
+                index++;
+                if (index > arr.length) {
+                    tmp.resolve(results);
+                }
+                var file = arr[index];
+                var promise = handler(file);
+                if (promise) {
+                    when(promise).then(function (result) {
+                        results.push(result);
+                        process.nextTick(doNext);
+                    }, function () {
+                        process.nextTick(doNext);
+                    });
+                }
+                else {
+                    process.nextTick(doNext);
+                }
+            }
+            catch (ex) {
+                logger.error("pdas error: " + ex);
+            }
+        };
+  </asyncOperationLoop>
+  
+  <initiateAsyncProcess>
+        process.nextTick(doNext);
+  </initiateAsyncProcess>
+        
+        return tmp.promise;
+    }
+</sequentialAsyncProcessor>
+
+<focusEvent>
+function (event, avoidCallback) {
+  <focusEventSetup>
+            this._hasFocus = true;
+            if (!this._keepFocus) {
+                var cfg = this._cfg;
+                if (cfg.readOnly) {
+                    return;
+                }
+                this.setHelpText(false);
+                if (this._isPrefilled) {
+                    this.setPrefillText(false);
+                    this.checkValue({
+                        value : cfg.prefill
+                    });
+                }
+                this.checkValue({
+                    stopValueProp : true
+                });
+
+                if (this._cfg) {
+                    cfg = this._cfg;
+                    if (cfg.validationEvent === 'onFocus'
+                            && ((cfg.formatError && cfg.formatErrorMessages.length) || (cfg.error && cfg.errorMessages.length))) {
+                        this._validationPopupShow();
+                    }
+                }
+                this._updateState();
+            } else {
+                var caretPosition = this._currentCaretPosition;
+                this._currentCaretPosition = null;
+                if (caretPosition) {
+                    this.setCaretPosition(caretPosition.start, caretPosition.end);
+                }
+            }
+  </focusEventSetup>
+            
+  <invokeFocusCallback>
+            if (!!this._cfg.onfocus && !avoidCallback) {
+                this.evalCallback(this._cfg.onfocus);
+            }
+  </invokeFocusCallback>
+  
+  <triggerAutoSelection>
+            ariaCoreTimer.addCallback({
+                fn : this._autoselect,
+                scope : this,
+                delay : 1
+            });
+  </triggerAutoSelection>
+        }
+</focusEvent>
+
+<updateGreyColorBuffer>
+function updateGreyColorBuffer(buf) {
+  <applyGreyScaleToBuffer>
+  for (let i = 0; i < buf.length; ++i) {
+    buf[i] = 0.5;
+  }
+  </applyGreyScaleToBuffer>
+  return buf;
+}
+</updateGreyColorBuffer>
+```

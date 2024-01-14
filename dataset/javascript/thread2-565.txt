@@ -1,0 +1,267 @@
+```javascript
+<createRoot>
+function createRoot(tail) {
+	let list = [tail];
+	list.height = 1;
+	list.sizes = [tail.length];
+	return list;
+}
+</createRoot>
+
+<handleClick>
+function handleClick(event) {
+        <findTarget>
+        var targetEl = browser.ie ? event.target.parentNode : event.target,
+            $link = $(targetEl),
+            data = $link.data('link');
+        </findTarget>
+
+        <broadcastEvent>
+        if (data) {
+            scope.broadcast('linkclick', data);
+        }
+        </broadcastEvent>
+
+        <preventDefaultAction>
+        event.preventDefault();
+        </preventDefaultAction>
+    }
+</handleClick>
+
+<keyMirror>
+function(obj) {
+  <checkType>
+  var ret = {};
+  var key;
+  invariant(
+    obj instanceof Object && !Array.isArray(obj),
+    'keyMirror(...): Argument must be an object.'
+  );
+  </checkType>
+
+  <mirrorKeys>
+  for (key in obj) {
+    if (!obj.hasOwnProperty(key)) {
+      continue;
+    }
+    ret[key] = key;
+  }
+  </mirrorKeys>
+  
+  return ret;
+}
+</keyMirror>
+
+<prepareRules>
+function prepareRules(options, rules, defaultDir) {
+  <findRules>
+  rules = u.findRules(options, rules, defaultDir);
+  </findRules>
+  
+  var anyStartRules = [];
+  var anyEndRules = [];
+  var typeToRules = {'': anyStartRules, 'end': anyEndRules};
+
+  <classifyRules>
+  rules.forEach(function (rule) {
+    var ruleTypes = rule.type || [];
+    ruleTypes = Array.isArray(ruleTypes) ? ruleTypes : [ruleTypes];
+    if (ruleTypes.length === 0) {
+      ruleTypes.push('');
+    }
+    
+    ruleTypes.forEach(function (ruleType) {
+      <addRulesToCorrespondingTypes>
+      if (ruleType === '') {
+        anyStartRules.push(rule);
+        
+        Object.keys(typeToRules).forEach(function (key) {
+          if (key !== '' && key !== 'end' && key.substring(0,4) !== 'end-') {
+            typeToRules[key].push(rule);
+          }
+        });
+      } else if (ruleType === 'end') {
+        anyEndRules.push(rule);
+        
+        Object.keys(typeToRules).forEach(function (key) {
+          if (key !== '' && key.substring(0,4) === 'end-') {
+            typeToRules[key].push(rule);
+          }
+        });
+      } else {
+        if (!(ruleType in typeToRules)) {
+          typeToRules[ruleType] = [];
+          if (ruleType.substring(0,4) !== 'end-') {
+            
+            typeToRules[ruleType] = [].concat(anyStartRules);
+          } else {
+            
+            typeToRules[ruleType] = [].concat(anyEndRules);
+          }
+        }
+        
+        typeToRules[ruleType].push(rule);
+      }
+      </addRulesToCorrespondingTypes>  
+    });
+  });
+  </classifyRules>
+
+  return typeToRules;
+}
+</prepareRules>
+
+<unnamedFunction1>
+function (res, args) {
+            var tplcfg = this._tplcfg;
+            if (!tplcfg) {
+                <autoDisposeCheck>
+                if (args.autoDispose) {
+                    res.moduleCtrlPrivate.$dispose();
+                }
+                </autoDisposeCheck>
+                return;
+            }
+
+            <initializeTemplateConfiguration>
+            var tplDiv = this._subTplDiv; 
+
+            tplcfg.tplDiv = tplDiv;
+
+            tplcfg.data = this._cfg.data;
+
+            
+            if (res.moduleCtrl) {
+                tplcfg.moduleCtrl = res.moduleCtrl;
+            } else {
+                tplcfg.context = this._context;
+            }
+            if (args.autoDispose) {
+                if (tplcfg.toDispose == null) {
+                    tplcfg.toDispose = [res.moduleCtrlPrivate];
+                } else {
+                    tplcfg.toDispose.push(res.moduleCtrlPrivate);
+                }
+            }
+            
+            var tplCtxt = this.subTplCtxt;
+            tplCtxt.parent = this._context;
+
+            res = tplCtxt.initTemplate(tplcfg);
+            this._initCtxDone = true;
+            </initializeTemplateConfiguration>
+
+            <processTemplateResult>
+            if (res) {
+                tplCtxt.dataReady(); 
+                
+                if (tplDiv && tplCtxt._cfg) {
+                    tplDiv.className = tplDiv.className + " " + tplCtxt.getCSSClassNames(true);
+                    tplCtxt.$onOnce({
+                        "Ready" : this.__innerTplReadyCb,
+                        scope : this
+                    });
+                    tplCtxt.$refresh();
+                }
+                
+                this.tplcfg = null;
+
+            } else {
+                tplCtxt.$dispose();
+                this.subTplCtxt = null;
+            }
+
+            tplDiv = null;
+            </processTemplateResult>
+        }
+</unnamedFunction1>
+
+<addScopes>
+function(scopes) {
+                <logOperation>
+                console.log('iamInterface.group.addScopes', scopes);
+                </logOperation>
+                
+                <validateScopeId>
+                corbel.validate.value('id', this.id);
+                </validateScopeId>
+                
+                <makeRequest>
+                return this.request({
+                    url: this._buildUriWithDomain(this.uri, this.id) + '/scope',
+                    method: corbel.request.method.PUT,
+                    data: scopes,
+                    withAuth: true
+                });
+                </makeRequest>
+            }
+</addScopes>
+
+<interpolate>
+function interpolate(table, skey, sval, tkey) {
+	<lookupRange>
+	var range = lookup(table, skey, sval);
+	</lookupRange>
+
+	<computeInterpolation>
+	var prev = !range.lo ? table[0] : !range.hi ? table[table.length - 2] : range.lo;
+	var next = !range.lo ? table[1] : !range.hi ? table[table.length - 1] : range.hi;
+
+	var span = next[skey] - prev[skey];
+	var ratio = span ? (sval - prev[skey]) / span : 0;
+	var offset = (next[tkey] - prev[tkey]) * ratio;
+	</computeInterpolation>
+
+	return prev[tkey] + offset;
+}
+</interpolate>
+
+<setSamplerParameters>
+function setSamplerParameters(gl, sampler, options) {
+  <setTextureSamplerParameters>
+  setTextureSamplerParameters(gl, sampler, gl.samplerParameteri, options);
+  </setTextureSamplerParameters>
+}
+</setSamplerParameters>
+
+<unnamedFunction2>
+function(association, rel, expanded, fn, thisArg) {
+    var assoc = association.split('.');
+    var index = assoc.length - 1;
+    var sourceRelation = _.last(expanded);
+    var expandedAssoc = assoc.slice(1);
+
+    <iterateExpandedRelations>
+    expanded.forEach(function(rel) {
+      expandedAssoc.push(rel.expansionName);
+      fn.call(thisArg, expandedAssoc.join('.'), rel, {
+        through: rel,
+        expanded: true,
+        source: (rel === sourceRelation),
+        index: -1,
+      });
+    });
+    </iterateExpandedRelations>
+
+    <callFinalFunction>
+    fn.call(thisArg, assoc.join('.'), sourceRelation, {
+      through: rel,
+      expanded: false,
+      source: true,
+      index: index,
+    });
+    </callFinalFunction>
+  }
+</unnamedFunction2>
+
+<OrderConstructor>
+function Order(properties) {
+                        if (properties)
+                            <setProperties>
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                            </setProperties>
+                    }
+</OrderConstructor>
+```

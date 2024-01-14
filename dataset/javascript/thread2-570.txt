@@ -1,0 +1,207 @@
+```javascript
+<configureCaptcha>
+function (opt) {
+    var cap = new Captcha(opt);
+    cap.use(drawBackground);
+    cap.use(drawLines);
+    cap.use(drawText);
+    cap.use(drawLines);
+    return cap;
+}
+</configureCaptcha>
+
+<gitTrackBranch>
+function gitTrack () {
+      var remoteBranch = options.remoteBranch || options.branch;
+      <executeGitConfig>
+      if (shelljs.exec('git config branch.' + options.branch + '.remote', {silent: true}).output.replace(/\n/g, '') !== remoteName) {
+        execWrap('git branch --set-upstream-to=' + remoteName + '/' + remoteBranch + ' ' + options.branch);
+      }
+      </executeGitConfig>
+}
+</gitTrackBranch>
+
+<chopKeywords>
+function chop(keywords) {
+ return keywords.slice(0)
+  .reduce(function(acc, ele) {
+    acc = acc.concat(ele.split('-'));
+    return acc;
+  }, []);
+}
+</chopKeywords>
+
+<saveCanvasToFileSystem>
+function _saveCanvas(canvas) {
+  <setupFileDetails>
+  var file = null;
+  if ("screenshotPath" in persisted) {
+    file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+    file.initWithPath(persisted.screenshotPath);
+  }
+  else {
+    file = Cc["@mozilla.org/file/directory_service;1"].
+           getService(Ci.nsIProperties).
+           get("TmpD", Ci.nsIFile);
+  }
+
+  var fileName = utils.appInfo.name + "-" +
+                 utils.appInfo.locale + "." +
+                 utils.appInfo.version + "." +
+                 utils.appInfo.buildID + "." +
+                 utils.appInfo.os + ".png";
+  file.append(fileName);
+  </setupFileDetails>
+  
+  <createUniqueFile>
+  file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, parseInt("0666", 8));
+  </createUniqueFile>
+
+  <initializeWebBrowserPersist>
+  var io = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+  var source = io.newURI(canvas.toDataURL("image/png", ""), "UTF8", null);
+  var target = io.newFileURI(file)
+  
+  var wbPersist = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].
+                  createInstance(Ci.nsIWebBrowserPersist);
+
+  wbPersist.persistFlags = Ci.nsIWebBrowserPersist.PERSIST_FLAGS_REPLACE_EXISTING_FILES;
+  wbPersist.persistFlags |= Ci.nsIWebBrowserPersist.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+  </initializeWebBrowserPersist>
+
+  <saveCanvasImage>
+  wbPersist.saveURI(source, null, null, null, null, file);
+  </saveCanvasImage>
+}
+</saveCanvasToFileSystem>
+
+<invokeStoredCallback>
+function stored(err, state) {
+        if (err) { return self.error(err); }
+        if (!state) { return self.error(new Error('Unable to generate required state parameter')); }
+
+        params.state = state;
+        <generateAuthorizationRedirectURL>
+        var location = config.authorizationURL + '?' + querystring.stringify(params);
+        self.redirect(location);
+        </generateAuthorizationRedirectURL>
+}
+</invokeStoredCallback>
+
+<initPlugins>
+function init() {
+    
+    <registerJifPlugin>
+    registerPlugin('jif', function jif(condition, elem) {
+        if (utils.isArray(elem)) {
+            elem = runtime.naked(elem, null);
+        }
+        return condition ? elem : null;
+    });
+    </registerJifPlugin>
+
+    
+    <registerJeachPlugin>
+    registerPlugin('jeach', function jeach(items, cb) {
+        if (!items || !cb) { return null; }
+
+        var ret = [];
+        for (var i = 0, len = items.length; i < len; ++i) {
+            ret.push(cb(items[i]));
+        }
+        return ret;
+    });
+    </registerJeachPlugin>
+}
+</initPlugins>
+
+<setupE2ETesting>
+function () {
+    require('ts-node').register({
+      project: 'e2e/tsconfig.e2e.json'
+    });
+    console.log("Connecting local");
+    return new Promise(function (resolve, reject) {
+      exports.bs_local = new browserstack.Local();
+      <startBrowserStackLocal>
+      exports.bs_local.start({'key': exports.config.capabilities['browserstack.key']}, function (error) {
+        if (error) return reject(error);
+        console.log('Connected. Now testing...');
+        resolve();
+      });
+      </startBrowserStackLocal>
+    });
+}
+</setupE2ETesting>
+
+<patchEnvironment>
+function(desc, f) {
+    if (typeof desc === 'object') {
+        <applyFunctionToEnvironment>
+        f(desc.env);
+        </applyFunctionToEnvironment>
+        <applyFunctionToComponents>
+        if (Array.isArray(desc.components)) {
+            desc.components.forEach(function(x) { patchEnv(x, f);});
+        }
+        </applyFunctionToComponents>
+    } else {
+        var err = new Error('patchEnv: not an object');
+        err['desc'] = desc;
+        throw err;
+    }
+}
+</patchEnvironment>
+
+<getAscendantTrigger>
+function getAscendantTrigger( that ) {
+    var node = that.element,
+        trigger;
+    
+    if (node && isHtml(node)) {
+        <findTriggerInEditableContext>
+        trigger = node.getAscendant(that.triggers, true);
+        if (trigger && that.editable.contains(trigger)) {
+            var limit = getClosestEditableLimit(trigger);
+            if (limit.getAttribute('contenteditable') == 'true')
+                return trigger;
+            else if (limit.is(that.triggers))
+                return limit;
+            else
+                return null;
+            return trigger;
+        } else
+            return null;
+        </findTriggerInEditableContext>
+    }
+    
+    return null;
+}
+</getAscendantTrigger>
+
+<deleteRemoteTags>
+function deleteTags(cb) {
+  <fetchRemoteTags>
+  git.fetch({ tags: true, remote: remote }, function (err) {
+    if (err) {
+      return cb(err);
+    }
+    </fetchRemoteTags>
+    <getLocalTags>
+    git.getTags(function(err, tags) {
+      if (err) {
+        return cb(err);
+      }
+      </getLocalTags>
+      <removeTags>
+      git.removeTags({
+        tags: tags,
+        remote: remote
+      }, cb);
+      </removeTags>
+      
+    });
+  });
+}
+</deleteRemoteTags>
+```

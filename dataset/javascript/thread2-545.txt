@@ -1,0 +1,261 @@
+;
+            }
+            
+            <handleNestedMenus>
+            if (menuValues[i].menu) {
+              if (setSelected(menuValues[i].menu)) {
+                return true;
+              }
+            }</handleNestedMenus>
+          }
+        }</setSelected>
+
+        <superAndSettings>
+        self._super(settings);
+        settings = self.settings;</superAndSettings>
+
+        <setupValues>
+        self._values = values = settings.values;
+        if (values) {
+          <applyDefaultSelected>
+          if (typeof settings.value != "undefined") {
+            setSelected(values);
+          }
+          if (!selected && values.length > 0) {
+            selectedText = values[0].text;
+            self.state.set('value', values[0].value);
+          }</applyDefaultSelected>
+
+          self.state.set('menu', values);
+        }</setupValues>
+
+        <initializeState>
+        self.state.set('text', settings.text || selectedText);
+        self.classes.add('listbox');</initializeState>
+
+        <selectEventHandling>
+        self.on('select', function (e) {
+          var ctrl = e.control;
+
+          <recordLastControl>
+          if (lastItemCtrl) {
+            e.lastControl = lastItemCtrl;
+          }</recordLastControl>
+
+          <handleMultipleSelection>
+          if (settings.multiple) {
+            ctrl.active(!ctrl.active());
+          } else {
+            self.value(e.control.value());
+          }</handleMultipleSelection>
+
+          lastItemCtrl = ctrl;
+        });</selectEventHandling>
+      }</configureListBox>
+
+<cartesian2polar>
+function cartesian2polar(x, y){
+  <calculatePolarCoordinates>
+	var distance = Math.sqrt(x*x + y*y)
+	var radians = Math.atan2(y,x) 
+	var polarCoor = { rho:distance, theta:radians }
+	return polarCoor
+  </calculatePolarCoordinates>
+}</cartesian2polar>
+
+<getFrameLocation>
+function getFrameLocation(stackFrame) {
+  <parseStackFrame>
+  var frameString = stackFrame.toString()
+  var lastParenIndex = frameString.lastIndexOf('(')
+  return lastParenIndex === -1 ? frameString : frameString.slice(lastParenIndex + 1, -1)
+  </parseStackFrame>
+}</getFrameLocation><validateRequest>
+function validateRequest(request, response, mockRequest, onValid) {
+    
+    <assembleRawBody>
+    request._rawBody = '';
+    request.on('data', function(chunk) {
+        request._rawBody += chunk;
+    });</assembleRawBody>
+    
+    <handleRequestEnd>
+    request.on('end', function() {
+        <parseAndValidate>
+        var requestValues = getRequestValues(request, mockRequest);
+        var errors = validateDataType(requestValues);</parseAndValidate>
+        <respondToRequest>
+        if (errors.length > 0) {
+            response.set(util.CORS_HEADER)
+                    .status(400)
+                    .jsonp({
+                        status: 400,
+                        statusInfo: errors
+                    });
+        </respondToRequest>
+        <triggerValidCallback>
+        } else { 
+            onValid();
+        }</triggerValidCallback>
+    });</handleRequestEnd>
+}</validateRequest>
+
+<menuHandling>
+function( panel, blockName, offsetParent, corner, offsetX, offsetY ) {				
+				<panelControl>
+        if ( this._.activeChild == panel && panel._.panel._.offsetParentId == offsetParent.getId() )
+					return;
+				this.hideChild();
+				panel.onHide = CKEDITOR.tools.bind( function() {
+					<delayedHide>
+          CKEDITOR.tools.setTimeout( function() {
+						if ( !this._.focused )
+							this.hide();
+					}, 0, this );</delayedHide>
+				}, this );
+				this._.activeChild = panel;
+				this._.focused = false;
+				panel.showBlock( blockName, offsetParent, corner, offsetX, offsetY );
+				this.blur();
+				</panelControl>
+				
+				<ieDisplayFix>
+        if ( CKEDITOR.env.ie7Compat || CKEDITOR.env.ie6Compat ) {
+					setTimeout( function() {
+						panel.element.getChild( 0 ).$.style.cssText += '';
+					}, 100 );
+				}</ieDisplayFix>
+			}</menuHandling>
+
+<getMimeType>
+function getMimeType(types) {
+        <mimeLookup>
+        if (!types) return MSIE_MIME_TYPE; 
+        for (var i = 0; i < types.length; i++) {
+          if (types[i] == MSIE_MIME_TYPE || types[i] == EDGE_MIME_TYPE ||
+              types[i].substr(0, MIME_TYPE.length) == MIME_TYPE) {
+            return types[i];
+          }
+        }
+        return null;
+        </mimeLookup>
+      }</getMimeType>
+
+<calculateMigration>
+function calculateMigration(target, available, applied) {
+	<sortVersions>
+  available.sort(semver.compare);
+	applied.sort(semver.compare);
+	</sortVersions>
+
+  <findCurrentVersion>
+	var current = applied.length ? applied[applied.length - 1] : 'v0.0.0';
+	if (current === target) {
+		logger.notice('Already at version:', target);
+		return {
+			direction: null,
+			versions: []
+		};
+	}</findCurrentVersion>
+
+  <determineMigrationDirectionAndRange>
+	var direction = semver.gt(target, current) ? 'up' : 'down';
+	var range;
+	if (direction === 'up') {
+		range = '<=' + target;
+		available = available.filter(function (version) {
+			return applied.indexOf(version) === -1;
+		});
+	} else {
+		range = '>' + target + ' <=' + current;
+		available.reverse();
+		available = available.filter(function (version) {
+			return applied.indexOf(version) !== -1;
+		});
+	}</determineMigrationDirectionAndRange>
+	
+  <finalizeMigrationPlan>
+	available = available.filter(function (version) {
+		return semver.satisfies(version, range);
+	});
+	return {
+		direction: direction,
+		versions: available
+	};</finalizeMigrationPlan>
+}</calculateMigration>
+
+<DiscoveryServiceInitialization>
+function() {
+	this.initialized = false;
+	this.ENL_PORT = 3610;
+	this.ENL_MULTICAST_ADDRESS = "224.0.23.0";
+	this.udp = null;
+  
+  <setInitialCallbacks>
+	this.dataCallback = function(){};
+	this.sentCallback = function(){};</setInitialCallbacks>
+
+  <initializeDiscoveryVariables>
+	this._is_discovering = false;
+	this._discovery_timer = null;
+	this._discovery_multicast_try_num = 0;
+	this._DISCOVERY_MULTICAST_TRY_MAX = 3;
+	this._DISCOVERY_MULTICAST_INTERVAL = 1000;</initializeDiscoveryVariables>
+
+	this._netif = null;
+}</DiscoveryServiceInitialization>
+
+<UIInitialization>
+function UI(options) {
+  <ensureInstance>
+  if (!(this instanceof UI)) {
+    var ui = Object.create(UI.prototype);
+    UI.apply(ui, arguments);
+    return ui;
+  }</ensureInstance>
+
+  <initDebug>
+  debug('initializing from <%s>', __filename);</initDebug>
+
+  <setupOptions>
+  this.options = utils.createOptions(options);</setupOptions>
+
+  <initProperties>
+  this.appendedLines = 0;
+  this.height = 0;</initProperties>
+  
+  <initInterface>
+  this.initInterface();</initInterface>
+}</UIInitialization>
+
+<createQueryOrder>
+function(key) {
+      var self = this; 
+      <initializeOrderIfNeeded>
+      if (!this._order) {
+        this._order = [];
+      }</initializeOrderIfNeeded>
+
+      <parseAndAddKeysToOrder>
+      Parse._arrayEach(arguments, function(key) {
+        if (Array.isArray(key)) {
+          key = key.join();
+        }
+        self._order = self._order.concat(key.replace(/\s/g, "").split(","));
+      });</parseAndAddKeysToOrder>
+
+      return this;
+    }</createQueryOrder>
+
+<configureListBox>
+function (settings) {
+        var self = this, values, selected, selectedText, lastItemCtrl;
+        
+        <setSelected>
+        function setSelected(menuValues) {
+          for (var i = 0; i < menuValues.length; i++) {
+            selected = menuValues[i].selected || settings.value === menuValues[i].value;
+            if (selected) {
+              selectedText = selectedText || menuValues[i].text;
+              self.state.set('value', menuValues[i].value);
+              return true

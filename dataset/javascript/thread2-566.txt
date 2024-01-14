@@ -1,0 +1,194 @@
+<compile>
+function compile(
+  source,
+  filename = '',
+  includeModule = false,
+  debugMode = false,
+) {
+  <compileInitialization>
+  let res
+  let resName
+  let errors
+  </compileInitialization>
+
+  <compileProcess>
+  try {
+    const [moduleName, bsCode, diagnosticErrors] = Retyped.compile(filename, source, debugMode)
+    const fmtCode = format(bsCode)
+    res = fmtCode
+    resName = moduleName
+    errors = diagnosticErrors
+  } catch (e) {
+    console.error(e)
+    throw new Error(`${e[0][0]}`)
+  }
+
+  if (res.includes('SYNTAX ERROR>')) {
+    throw new Error(res)
+  }
+  </compileProcess>
+
+  <compileReturn>
+  if (!includeModule) {
+    return res
+  } else {
+    return {
+      moduleName: resName,
+      bsCode: res,
+      diagnosticErrors: errors
+    }
+  }
+  </compileReturn>
+}
+</compile>
+
+<mapHeader>
+function mapHeader (h) {
+  <mapHeaderValidation>
+  if (h === undefined) return undefined;
+  </mapHeaderValidation>
+
+  <mapHeaderTransformation>
+  return {
+    test: toBoolean(getElementText(h, 'Test', mes)),
+    id: getElementText(h, 'ID', mes)),
+    prepared: getElementText(h, 'Prepared', mes)),
+    sender: mapParty(_getFirstChildNS(h, 'Sender', mes)),
+    receiver: mapParty(_getFirstChildNS(h, 'Receiver', mes))
+  };
+  </mapHeaderTransformation>
+}
+</mapHeader>
+
+<parseStringSeedlist>
+function parseStringSeedlist(seedlist) {
+  return seedlist.split(',').map(seed => ({
+    host: seed.split(':')[0],
+    port: seed.split(':')[1] || 27017
+  }));
+}
+</parseStringSeedlist>
+
+<syncRoutes>
+async function syncRoutes (dir, routes, opts) {
+  <syncRoutesGeneration>
+  let text = routes.map(it => {
+    return `\tapp.Handle("${it.modalName}", "${it.actionName}", func(ctx interface{}, ctrl sav.Controller, handler sav.DataHandler, extra interface{}) {
+${it.routeBody}
+\t})`
+  }).join('\n')
+  let data = `${noticeString}package ${opts.packageName}
+
+import (
+\t"github.com/savfx/savgo/sav"
+\t"github.com/savfx/savgo/server/sgin"
+\t"github.com/savfx/savgo/util/convert"
+)
+
+func registerRoutes(app sgin.GinApplication) {
+${text}
+}
+`
+  </syncRoutesGeneration>
+
+  <syncRoutesFileOperations>
+  let file = path.resolve(dir, 'routes.go')
+  if (await pathExists(file)) {
+    let src = await inputFile(file)
+    if (data === src.toString()) {
+      return
+    }
+  }
+  await outputFile(file, data)
+  </syncRoutesFileOperations>
+}
+</syncRoutes>
+
+<unnamedTimeStampFunction>
+function (timestamp) {
+  <unnamedTimeStampFunctionProcessing>
+  var time = (new Date(timestamp)).toISOString();
+  return {
+      msg       : time,
+      msgLength : time.length
+  };
+  </unnamedTimeStampFunctionProcessing>
+}
+</unnamedTimeStampFunction>
+
+<needBuild>
+function needBuild(mode, system, cdef, out, cb) {
+  <needBuildCommandGeneration>
+  var cmds = commands(os.platform());
+  var tag = cmds.generateTag(config, system, cdef);
+  var baseUrl = 'http:';
+  var url = tag.replace(config.registry, baseUrl) + '/tags';
+  </needBuildCommandGeneration>
+
+  <needBuildRequest>
+  request({ url: url, json: true }, function(err, res, body) {
+    if (err) { return cb(err); }
+    cb(null, Object.keys(body).length === 0 ? cdef : null);
+  });
+  </needBuildRequest>
+}
+</needBuild>
+
+<unnamedTimegroupInitialization>
+function () {
+  <unnamedTimegroupInitializationDOMManipulation>
+  this._el.message = TL.Dom.create("div", "tl-timegroup-message", this._el.container);
+  this._el.message.innerHTML = this.data.label;
+  </unnamedTimegroupInitializationDOMManipulation>
+}
+</unnamedTimegroupInitialization>
+
+<unnamedConfigurationInitialization>
+function(baseDir, config) {
+  <unnamedConfigurationInitializationAssignments>
+  this._baseDir = baseDir;
+  this._config = _.merge({}, DEFAULT_CONFIG, config);
+  this._folderPercentages = {};
+  </unnamedConfigurationInitializationAssignments>
+}
+</unnamedConfigurationInitialization>
+
+<sshKeyToPEM>
+function sshKeyToPEM(key) {
+  <sshKeyToPEMValidationConversion>
+  assert.string(key, 'ssh_key');
+  var k = sshpk.parseKey(key, 'ssh');
+  return (k.toString('pem'));
+  </sshKeyToPEMValidationConversion>
+}
+</sshKeyToPEM>
+
+<injectAttribute>
+function injectAttribute(attrNameToInject) {
+  <injectAttributeValidations>
+  ngDevMode && assertPreviousIsParent();
+  ngDevMode && assertNodeType(lElement, 3 );
+  ngDevMode && assertDefined(tElement, 'expecting tNode');
+  </injectAttributeValidations>
+
+  <injectAttributeExtraction>
+  var lElement = getPreviousOrParentNode();
+  var tElement = lElement.tNode;
+  var attrs = tElement.attrs;
+  if (attrs) {
+      for (var i = 0; i < attrs.length; i = i + 2) {
+          var attrName = attrs[i];
+          if (attrName === 1 )
+              break;
+          if (attrName == attrNameToInject) {
+              return attrs[i + 1];
+          }
+      }
+  }
+  </injectAttributeExtraction>
+  
+  <injectAttributeDefaultReturn>
+  return undefined;
+  </injectAttributeDefaultReturn>
+}
+</injectAttribute>

@@ -1,0 +1,216 @@
+```javascript
+function generateDocs(specjs) {
+  <generateModule>
+  var docs = GENERATE_MODULE(specjs.MODULE, '');
+  </generateModule>
+  <generateTypeFunction>
+  GENERATE_TYPE = (function(enums) { 
+    return function(type) {
+      return (_.contains(enums, type) ? ('Enum ' + type) : type);  
+    }
+  })(_.keys(specjs.ENUMS_BY_GROUP));
+  </generateTypeFunction>
+  <reduceMethodsToDocs>
+  docs = _.reduce(specjs.METHODS, function(memo, methodSpec, methodName) {
+    return memo += GENERATE_METHOD(methodName, methodSpec);
+  }, docs);
+  </reduceMethodsToDocs>
+  <reduceEnumsToDocs>
+  docs = _.reduce(specjs.ENUMS, function(memo, enumSpec, enumName) {
+    return memo += GENERATE_ENUM(enumName, enumSpec);
+  }, docs);
+  </reduceEnumsToDocs>
+  <handleClassGroups>
+  if (_.isEmpty(specjs.CLASSGROUPS)) {
+      docs += GENERATE_CLASSES(specjs.CLASSES);
+  } else {
+    docs += GENERATE_MODULE('common', '');
+    var grouped = _.flatten(_.pluck(_.values(specjs.CLASSGROUPS), 'classes'));
+    var ungrouped = _.difference(_.keys(specjs.CLASSES), grouped);
+    docs += GENERATE_CLASSES(_.pick(specjs.CLASSES, ungrouped), 'common'); 
+    _.each(specjs.CLASSGROUPS, function(groupSpec, groupName) {
+      docs += GENERATE_CLASSES(_.pick(specjs.CLASSES, groupSpec.classes), groupName);
+    });
+    
+    _.each(specjs.CLASSGROUPS, function(groupSpec, groupName) {
+        docs += GENERATE_MODULE(groupName, groupSpec.description);
+    });
+  }
+  </handleClassGroups>
+  return docs;
+}
+
+function _fetchHostMeta(host, callback) {
+  <logRequest>
+	var url = "http://example.com/.well-known/host-meta";
+	console.log("Requesting host meta at " + url);
+  </logRequest>
+  <performHttpRequest>
+   	Http.get(url, function(err, response, content) {
+		if (err) return callback(err);
+		if (response.statusCode == 200) {
+			try {
+			    callback(null, _parseHostMeta(content));
+			} catch (e) {
+			    callback(e);
+			}
+   		} else {
+   			callback(new Error("Fetching host meta returned HTTP Status " + response.statusCode));
+   		}
+    });
+  </performHttpRequest>
+}
+
+function formatLine(startIndex) {
+  <buildHexString>
+      let result = ' ';
+      for (let i = 0; i < kBytesPerLine; ++i) {
+        result += ' ';
+        if ((i % 8) === 0) {
+          result += ' ';
+        }
+        const byteIndex = startIndex + i;
+        if (byteIndex < bytes.length) {
+          result += byteToPaddedHex(bytes[byteIndex]);
+        } else {
+          result += '  ';
+        }
+      }
+      result += '   ';
+  </buildHexString>
+  <buildPrintableString>
+      for (let i = 0; i < kBytesPerLine; ++i) {
+        const byteIndex = startIndex + i;
+        if (byteIndex >= bytes.length) {
+          break;
+        }
+        const curByte = bytes[byteIndex];
+        if (curByte >= 0x20 && curByte <= 0x7E) {
+          result += String.fromCharCode(curByte);
+        } else if (curByte === 0x00) {
+          result += ' ';
+        } else {
+          result += '.';
+        }
+      }
+  </buildPrintableString>
+      return result;
+    }
+
+function parseWithStatement(node) {
+  <handleStrictModeWith>
+        if (strict) {
+            tolerateError(Messages.StrictModeWith);
+        }
+  </handleStrictModeWith>
+  <parseWithStructure>
+        expectKeyword('with');
+        expect('(');
+        object = parseExpression();
+        expect(')');
+        body = parseStatement();
+  </parseWithStructure>
+  <finishWithStatement>
+        return node.finishWithStatement(object, body);
+  </finishWithStatement>
+    }
+
+function getEmitter(config) {
+  <defineEmitterClass>
+      function Emitter(n) {
+        n = n || this;
+        n.__events = n.__events || {};
+        n.__once = n.__once || {};
+      }
+  </defineEmitterClass>
+  <emitterPrototypeMethods>
+      Emitter.prototype.on = function(name, fn) {
+        // omitted for brevity
+      }
+      Emitter.prototype.once = function(name, fn) {
+        // omitted for brevity
+      }
+      Emitter.prototype.off = function(name, fn) {
+        // omitted for brevity
+      }
+      Emitter.prototype.emit = function(name) {
+        // omitted for brevity
+      }
+      Emitter.prototype.emitCtx = function(name, ctx) {
+        // omitted for brevity
+      }
+  </emitterPrototypeMethods>
+      return Emitter;
+    }
+
+function(rule, i) {
+  <updateSelectorRules>
+  if (rule.selector.match(reALL_PSEUDO)) {
+    rule.selector = rule.selector.replace(/::/g, ':');
+  }
+  </updateSelectorRules>
+}
+
+function(context, coords) {
+  <drawTriangle>
+		context.beginPath();
+		context.moveTo(coords[0], coords[1]);
+		context.lineTo(coords[2], coords[3]);
+		context.lineTo(coords[4], coords[5]);
+		context.closePath();
+  </drawTriangle>
+	}
+
+function Lazy(source) {
+  <handleArrayOrStringSource>
+    if (source instanceof Array) {
+      return new ArrayWrapper(source);
+    } else if (typeof source === "string") {
+      return new StringWrapper(source);
+    } else if (source instanceof Sequence) {
+      return source;
+    }
+  </handleArrayOrStringSource>
+  <tryExtensions>
+    if (Lazy.extensions) {
+      var extensions = Lazy.extensions, length = extensions.length, result;
+      while (!result && length--) {
+        result = extensions[length](source);
+      }
+      if (result) {
+        return result;
+      }
+    }
+  </tryExtensions>
+  <wrapObject>
+    return new ObjectWrapper(source);
+  </wrapObject>
+  }
+
+function(id, registrationName, listener) {
+  <invariantCheck>
+    ("production" !== "development" ? invariant(
+      !listener || typeof listener === 'function',
+      'Expected %s listener to be a function, instead got type %s',
+      registrationName, typeof listener
+    ) : invariant(!listener || typeof listener === 'function'));
+  </invariantCheck>
+  <registerListener>
+    var bankForRegistrationName = listenerBank[registrationName] || (listenerBank[registrationName] = {});
+    bankForRegistrationName[id] = listener;
+  </registerListener>
+  }
+
+function discoverKey(arr, discoverableKeys, defaultKey) {
+  <findDiscoverableKey>
+  if (arr.length === 0) return defaultKey;
+  if (arr.length === 1) return arr[0];
+  for (var i = 0; i < arr.length; i++) {
+    if (discoverableKeys[arr[i]]) return arr[i];
+  }
+  </findDiscoverableKey>
+  <returnDefaultKey>
+  return defaultKey;
+  </returnDefaultKey>
+}
+```

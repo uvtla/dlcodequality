@@ -1,0 +1,411 @@
+Function 1:
+```javascript
+function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass, tooltip, selectionClass, defaultActionId, extraClasses) {
+  <initializeContributionStructure>
+  if (!this._contributionsByScopeId[scopeId]) {
+    this._contributionsByScopeId[scopeId] = {};
+  }
+  var parentTable = this._contributionsByScopeId[scopeId];
+  if (parentPath) {
+    parentTable = this._createEntryForPath(parentTable, parentPath);   
+  }
+  </initializeContributionStructure>
+
+  <updateOrCreateGroupEntry>
+  if (parentTable[groupId]) {
+    
+    <updateGroupProperties>
+    if (title) {
+      parentTable[groupId].title = title;
+    }
+    if (position) {
+      parentTable[groupId].position = position;
+    }
+    if (imageClass) {
+      parentTable[groupId].imageClass = imageClass;
+    }
+    if (tooltip) {
+      parentTable[groupId].tooltip = tooltip;
+    }
+    if (selectionClass) {
+      parentTable[groupId].selectionClass = selectionClass;
+    }
+    if (extraClasses) {
+      parentTable[groupId].extraClass = extraClasses;
+    }
+    </updateGroupProperties>
+
+    <handleDefaultActionId>
+    if(defaultActionId === true){
+      parentTable[groupId].pretendDefaultActionId = true;
+    } else {
+      parentTable[groupId].defaultActionId = defaultActionId;
+    }
+    </handleDefaultActionId>
+
+    parentTable[groupId].emptyGroupMessage = emptyGroupMessage;
+  } else {
+    parentTable[groupId] = {
+      title: title, 
+      position: position, 
+      emptyGroupMessage: emptyGroupMessage,
+      imageClass: imageClass,
+      tooltip: tooltip,
+      selectionClass: selectionClass,
+      defaultActionId: defaultActionId === true ? null : defaultActionId,
+      pretendDefaultActionId: defaultActionId === true,
+      children: {},
+      extraClasses: extraClasses
+    };
+    parentTable.sortedContributions = null;
+  }
+  </updateOrCreateGroupEntry>
+}
+```
+
+Function 2:
+```javascript
+function(cy, elements, options) {
+  <validateCoreAccess>
+  if(cy === undefined || !is.core(cy)) {
+    util.error('A collection must have a reference to the core');
+    return;
+  }
+  </validateCoreAccess>
+
+  let map = new Map();
+  let createdElements = false;
+
+  <handleElementsInitialization>
+  if(!elements) {
+    elements = [];
+  } else if(elements.length > 0 && is.plainObject(elements[0]) && !is.element(elements[0])) {
+    createdElements = true;
+
+    <prepareElements>
+    let eles = [];
+    let elesIds = new Set();
+
+    for(let i = 0, l = elements.length; i < l; i++) {
+      let json = elements[i];
+
+      if(json.data == null) {
+        json.data = {};
+      }
+
+      let data = json.data;
+
+      <handleElementIdCreation>
+      if(data.id == null) {
+        data.id = idFactory.generate(cy, json);
+      } else if(cy.hasElementWithId(data.id) || elesIds.has(data.id)) {
+        continue;
+      }
+      </handleElementIdCreation>
+
+      let ele = new Element(cy, json, false);
+      eles.push(ele);
+      elesIds.add(data.id);
+    }
+
+    elements = eles;
+    </prepareElements>
+  }
+  </handleElementsInitialization>
+
+  this.length = 0;
+
+  <populateCollection>
+  for(let i = 0, l = elements.length; i < l; i++) {
+    let element = elements[i][0];
+    if(element == null) {
+      continue;
+    }
+
+    let id = element._private.data.id;
+
+    if(options == null || (options.unique && !map.has(id))) {
+      map.set(id, {
+        index: this.length,
+        ele: element
+      });
+
+      this[this.length] = element;
+      this.length++;
+    }
+  }
+  </populateCollection>
+
+  this._private = {
+    cy: cy,
+    map: map
+  };
+
+  <restoreCreatedElements>
+  if(createdElements) {
+    this.restore();
+  }
+  </restoreCreatedElements>
+}
+```
+
+Function 3:
+```javascript
+<generateNumberSeries>
+function generateNumber(beginValue, endValue, duration, easing, interval) {
+  verifyParams(duration, interval)
+  const count = duration / interval
+  const times = endValue - beginValue
+  const numbers = generate(easing, count, times).map(number => (number + beginValue).toFixed(4))
+  return numbers
+}
+</generateNumberSeries>
+```
+
+Function 4:
+```javascript
+<manageItemVisibility>
+function(e, elem, $pane, $items, pos) {
+  $prev.add($next).show();
+  if(pos == 0)
+    $prev.hide();
+  else if(pos == $items.length-1)
+    $next.hide();
+}
+</manageItemVisibility>
+```
+
+Function 5:
+```javascript
+<composeFunctions>
+function compose(...fns) {
+  return function(x) {
+    return fns.reduceRight((result, val) => val(result), x);
+  };
+}
+</composeFunctions>
+```
+
+Function 6:
+```javascript
+<performCanvasClipping>
+function clipRect(x, y, width, height) {
+  var canvas = this.backBufferCanvas; 
+
+  <conditionalClipping>
+  if(x !== 0 || y !== 0 || width !== canvas.width || height !== canvas.height) {
+    var currentScissor = this.currentScissor; 
+
+    <updateScissorIfChanged>
+    if(currentScissor[0] !== x || currentScissor[1] !== y || currentScissor[2] !== width || currentScissor[3] !== height) {
+      var context = this.backBufferContext2D;
+      context.beginPath();
+      context.rect(x, y, width, height);
+      context.clip(); 
+
+      currentScissor[0] = x;
+      currentScissor[1] = y;
+      currentScissor[2] = width;
+      currentScissor[3] = height;
+    }
+    </updateScissorIfChanged>
+  }
+  </conditionalClipping>
+}
+</performCanvasClipping>
+```
+
+Function 7:
+```javascript
+<batchPubFiles>
+function batchPubFiles(awpConfig, pubConfig, filePath, fileBasePath) {
+  "use strict";
+
+  <initializeFileBasePath>
+  fileBasePath = fileBasePath || './htmls-dist/';
+  </initializeFileBasePath>
+
+  <defineEnvironmentMappings>
+  var awpEnvPrefixMap = {
+    'daily': 'daily.',
+    'prepub': 'pre.',
+    'wapp': '',
+    'online': ''
+  },
+  baseUri = 'http://';
+  </defineEnvironmentMappings>
+
+  <setHeaders>
+  var headers = {
+    'X-Forwarded-For': '10.232.135.52'
+  };
+  </setHeaders>
+
+  <prepareRequestParams>
+  var params = {
+    api: 'push_file',
+    t: Date.now(),
+    operator: awpConfig.cname,
+    token: awpConfig.dToken,
+    data: {
+      uri: null,
+      operator: awpConfig.cname,
+      data: null,
+      isPub: !(pubConfig.env === 'wapp'),
+      webappId: awpConfig.dWebappId,
+      pageData: JSON.stringify({
+        isautoparse: true,
+        needPerform: true,
+        autoPub: true,
+        delVersionIfExist: true
+      })
+    }
+  };
+  </prepareRequestParams>
+
+  <adjustForEnvironment>
+  if(pubConfig.env === 'daily') {
+    baseUri += awpConfig.dWebappId;
+  } else {
+    baseUri += awpConfig.oWebappId;
+    params.data.webappId = awpConfig.oWebappId;
+    params.token = awpConfig.oToken;
+  }
+  </adjustForEnvironment>
+
+  <createFileParameters>
+  var fileParam = JSON.parse(JSON.stringify(params));
+  </createFileParameters>
+
+  <updateTimestamp>
+  fileParam.t = Date.now();
+  </updateTimestamp>
+
+  <setFileUri>
+  fileParam.data.uri = [awpConfig.oWebappDir, filePath.replace(fileBasePath, '').replace(/\\/g, '/')].join('/');
+  </setFileUri>
+
+  <readFileData>
+  fileParam.data.data = fs.readFileSync(filePath.replace(fileBasePath, ''), 'utf-8');
+  </readFileData>
+
+  <stringifyData>
+  fileParam.data = JSON.stringify(fileParam.data);
+  </stringifyData>
+
+  <generateToken>
+  fileParam.token = getToken(fileParam);
+  </generateToken>
+
+  <performHttpPostRequest>
+  request.post({
+    headers: headers,
+    url: baseUri,
+    form: fileParam,
+    encoding: 'utf8',
+    json: true
+  }, function(err, response, ret) {
+    <handleRequestResponse>
+    if(err) {
+      console.log('亲，抱歉发布失败了,请检查下您的网络连接！');
+      console.error(err);
+    } else if(!ret.success) {
+      console.log(error('>> 发布失败 <%s>'), filePath);
+      console.log(error(' | %s'), ret.msg.replace(/\n/igm, ''));
+      process.exit(0);
+    } else {
+      if(ret.data) {
+        console.log(success('>> 发布成功，版本号：%s <%s>\n | 预览地址：%s\n | 线上地址：%s'), ret.data.versionId?ret.data.versionId:'预发无版本号', filePath, ret.data.previewUrl, ret.data.onlineUrl);
+        if(pubConfig.env == 'online') {
+          console.log('你会发现上面的预览地址已经生效了，下面的线上地址h5.m.tao'+''+'bao.com还没生效，此时系统正在进行性能验收，请耐心等待旺旺通知，一般需要3-5分钟，验收通过会自动发布！')
+        }
+      } else {
+        console.log(success('>> 发布成功 -> %s'), filePath);
+      }
+    }
+    </handleRequestResponse>
+  });
+  </performHttpPostRequest>
+}
+</batchPubFiles>
+```
+
+Function 8:
+```javascript
+<calculateContainerCorners>
+function(container) {
+  var top = container.el.offsetTop;
+  var bottom = top+container.el.offsetHeight;
+  
+  var left = container.el.offsetLeft;
+  var right = left+container.el.offsetWidth;
+  
+  return [
+      {x : left, y: top},
+      {x : left, y: bottom},
+      {x : right, y: top},
+      {x : right, y: bottom}
+  ];
+}
+</calculateContainerCorners>
+```
+
+Function 9:
+```javascript
+<definePanelPreset>
+function PanelProviderConfig($mdPanelProvider) {
+  $mdPanelProvider.definePreset('demoPreset', {
+    attachTo: angular.element(document.body),
+    controller: PanelMenuCtrl,
+    controllerAs: 'ctrl',
+    template: '' +
+        '<div class="menu-panel" md-whiteframe="4">' +
+        '  <div class="menu-content">' +
+        '    <div class="menu-item" ng-repeat="item in ctrl.items">' +
+        '      <button class="md-button">' +
+        '        <span>{{item}}</span>' +
+        '      </button>' +
+        '    </div>' +
+        '    <md-divider></md-divider>' +
+        '    <div class="menu-item">' +
+        '      <button class="md-button" ng-click="ctrl.closeMenu()">' +
+        '        <span>Close Menu</span>' +
+        '      </button>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>',
+    panelClass: 'menu-panel-container',
+    focusOnOpen: false,
+    zIndex: 100,
+    propagateContainerEvents: true,
+    groupName: 'menus'
+  });
+}
+</definePanelPreset>
+```
+
+Function 10:
+```javascript
+function Controller(name, options) {
+  <initializeController>
+  if(typeof name === "function") {
+    var _constructor = name; name = null;
+    return register(_constructor, options);
+  }
+  </initializeController>
+
+  return register;
+
+  <registerController>
+  function register(constructor, opts) {
+    registerLock(constructor);
+    var meta = (0, _utils.funcMeta)(constructor);
+
+    name = name || opts && opts.name || meta.name;
+    meta.controller.name = name;
+
+    _app.app.controller(name, constructor);
+  }
+  </registerController>
+}
+```

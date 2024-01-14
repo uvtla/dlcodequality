@@ -1,0 +1,177 @@
+```javascript
+<nullCharacterInForeignContent>
+function nullCharacterInForeignContent(p, token) {
+    token.chars = UNICODE.REPLACEMENT_CHARACTER;
+    p._insertCharacters(token);
+}
+</nullCharacterInForeignContent>
+
+<formatAwards>
+function formatAwards(raw) {
+    var wins, nominations;
+
+    <parseRawData>
+    if (!raw) {
+        return { wins: 0, nominations: 0, text: '' };
+    }
+
+    wins = raw.match(/(\d+) wins?/i);
+    nominations = raw.match(/(\d+) nominations?/i);
+    </parseRawData>
+
+    <formatResponse>
+    return {
+        wins: wins ? +wins[1] : 0,
+        nominations: nominations ? +nominations[1] : 0,
+        text: raw
+    };
+    </formatResponse>
+}
+</formatAwards>
+
+<result>
+function result(object, property) {
+    
+    if (!object) {
+      return null;
+    }
+    var value = object[property];
+    return toString.call(value) == funcClass ? object[property]() : value;
+}
+</result>
+
+<anonymousFunction>
+function (t) {
+      var self  = this;
+      this.node = t.node; // Initializing the node property
+      
+      <configureOptions>
+      var userOpts = this.get('opts');
+      this.opts = extend(defaultOpts, userOpts);
+      </configureOptions>
+
+      <scheduleInitialization>
+      setTimeout(function () {
+        self.s = new IScroll(t.node, self.opts);
+        t.complete();
+      }, 0);
+      </scheduleInitialization>
+}
+</anonymousFunction>
+
+<CFFDict_setByKey>
+function CFFDict_setByKey(key, value) {
+      <validateKey>
+      if (!(key in this.keyToNameMap)) {
+        return false;
+      }
+      </validateKey>
+
+      <processValue>
+      if (value.length === 0) {
+        return true;
+      }
+      var type = this.types[key];
+      
+      if (type === 'num' || type === 'sid' || type === 'offset') {
+        value = value[0];
+      }
+      </processValue>
+
+      <setValue>
+      this.values[key] = value;
+      return true;
+      </setValue>
+}
+</CFFDict_setByKey>
+
+<clean>
+function clean (args, cb) {
+  <setupParameters>
+  if (!cb) cb = args, args = [];
+  if (!args) args = [];
+  args = args.join("/").split("@").join("/");
+  if (args.substr(-1) === "/") args = args.substr(0, args.length - 1);
+  </setupParameters>
+
+  <removeDirectory>
+  rm(path.join(npm.cache, path.normalize(args)), cb);
+  </removeDirectory>
+}
+</clean>
+
+<sendSessionResponse>
+function sendSessionResponse(req, res, next) {
+  
+  <setCookie>
+  res.cookie('session', req.session.id);
+  </setCookie>
+
+  <setLocation>
+  res.location('/sessions/' + req.session.id);
+  </setLocation>
+
+  <sendJsonResponse>
+  res.status(201).json(req.session);
+  </sendJsonResponse>
+}
+</sendSessionResponse>
+
+<remotePackages>
+function remotePackages (args, index, doVersion, doTag, recurring, cb) {
+  if (recurring || index < 3) {
+    <setupVariables>
+    var name = (args.length + 1 === index) ? args[args.length - 1] : "";
+    if (name === undefined) name = "";
+    if (name.indexOf("/") !== -1) return cb(null, []);
+    </setupVariables>
+    
+    <retrieveAndProcessPackages>
+    registry.get("/", null, 3600, function (er, d) {
+      if (er) return cb(er);
+      <processResults>
+      var remoteList = Object.keys(d), ...; // Truncated for brevity
+      
+      // Further processing logic here ...
+
+      return cb(null, list);
+      </processResults>
+    });
+    </retrieveAndProcessPackages>
+  }
+}
+</remotePackages>
+
+<anonymousFunctionProcessingResults>
+function(results) {
+    <stopWaiting>
+    onWait(false);
+    </stopWaiting>
+    
+    <processMultipleResults>
+    angular.forEach(results, function(result) {
+      self.when(result, true);  
+    });
+    </processMultipleResults>
+
+    <executeCallback>
+    applyCallback();
+    </executeCallback>
+}
+</anonymousFunctionProcessingResults>
+
+<getNodeDefinitionOverride>
+function() {
+    <callSuperclass>
+    var def = YAHOO.widget.HTMLNode.superclass.getNodeDefinition.call(this);
+    if (def === false) { return false; }
+    </callSuperclass>
+
+    <customizeDefinition>
+    def.html = this.html;
+    </customizeDefinition>
+    
+    return def;
+}
+</getNodeDefinitionOverride>
+```

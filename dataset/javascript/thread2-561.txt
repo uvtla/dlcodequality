@@ -1,0 +1,300 @@
+<validateChildrenAreOptionsAndMaximumOnePlaceholder>
+function validateChildrenAreOptionsAndMaximumOnePlaceholder(props, propName, componentName) {
+  <filterValidChildren>
+  const validChildren = filterReactChildren(props[propName], (node) => (
+    (isOption(node) || isSeparator(node) || isPlaceholder(node))
+  ));
+  if (React.Children.count(props[propName]) !== React.Children.count(validChildren)) {
+    return new Error(`Invalid children supplied to \`${componentName}\`, expected an Option, Separator or Placeholder component from Belle.`);
+  }
+  </filterValidChildren>
+
+  <checkPlaceholdersCount>
+  const placeholders = filterReactChildren(props[propName], (node) => isPlaceholder(node));
+  if (React.Children.count(placeholders) > 1) {
+    return new Error(`Invalid children supplied to \`${componentName}\`, expected only one Placeholder component.`);
+  }
+  </checkPlaceholdersCount>
+
+  return undefined;
+}
+</validateChildrenAreOptionsAndMaximumOnePlaceholder>
+
+<_cleanURL>
+function _cleanURL(url) {
+  <cleanURLLogic>
+  var index = url.search(/[#\?]/);
+  if (index >= 0) {
+    url = url.substr(0, index);
+  }
+  </cleanURLLogic>
+  return url;
+}
+</_cleanURL>
+
+<defaultStrategy>
+function defaultStrategy(projectDir, builder, cb)
+{
+  <buildFromPackage>
+  const pkg = fs.realpathSync(INSTALLER_PACKAGE);
+  builder.buildFromPackage(pkg, projectDir, cb);
+  </buildFromPackage>
+}
+</defaultStrategy>
+
+<validateMaxValue>
+function(value, attr, maxValue, model) {
+  <validateNumberAndMaxValue>
+  if (!isNumber(value) || value > maxValue) {
+    return this.format(getMessageKey(this.msgKey, defaultMessages.max), this.formatLabel(attr, model), maxValue);
+  }
+  </validateNumberAndMaxValue>
+}
+</validateMaxValue>
+
+<AudioConnection>
+function( connection, sessionId, options ) {
+  if( sessionId === undefined ) { sessionId = null; }
+
+  <initializeProperties>
+  var self = this;
+  this.connection = connection;
+  this.sessionId = sessionId;
+
+  this.eventEmitter = new EventEmitter();
+  this.frames = [];
+
+  this.writtenUntil = Date.now();
+  if( options ) {
+    this.noEmptyFrames = options.noEmptyFrames;
+  }
+
+  if( !this.noEmptyFrames ) {
+    this.emptyFrame = new Buffer( this.connection.FRAME_SIZE * 2 );
+    this.emptyFrame.fill( 0 );
+  }
+  </initializeProperties>
+
+  <setupVoiceListener>
+  this.voiceListener = function( data ) { self._addAudio( data ); };
+
+  if( sessionId === null ) {
+    connection.on( 'voice', this.voiceListener );
+  } else {
+    connection.on( 'voice-user-' + sessionId, this.voiceListener );
+  }
+  </setupVoiceListener>
+
+  <extendReadableStream>
+  ReadableStream.call( this, options );
+  </extendReadableStream>
+}
+</AudioConnection>
+
+<_removeHints>
+function _removeHints() {
+  <queryAndRemoveHints>
+  var hints = this._targetElement.querySelectorAll('.introjs-hint');
+
+  if (hints && hints.length > 0) {
+    for (var i = 0; i < hints.length; i++) {
+      _removeHint.call(this, hints[i].getAttribute('data-step'));
+    }
+  }
+  </queryAndRemoveHints>
+}
+</_removeHints>
+
+<parseObjectPropertyKey>
+function parseObjectPropertyKey() {
+  <initializeAndLexToken>
+  var token;
+
+  index = lookahead.start;
+  token = lex();
+  </initializeAndLexToken>
+
+  <checkTokenTypeAndFinish>
+  if (token.type === TokenStringLiteral || token.type === TokenNumericLiteral) {
+    if (token.octal) {
+      throwError(token, MessageStrictOctalLiteral);
+    }
+    return finishLiteral(token);
+  }
+  
+  return finishIdentifier(token.value);
+  </checkTokenTypeAndFinish>
+}
+</parseObjectPropertyKey>
+
+<handleRequest>
+function (endPoint, request, response) {
+  <initializeValues>
+  var self = this,
+      context,
+      requestHandler,
+      handledWithErrorHandler = false,
+      buffers = [],
+      bufferLength = 0;
+  </initializeValues>
+
+  <setupDomain>
+  var domain = Domain.create();
+
+  domain.add(request);
+  domain.add(response);
+  </setupDomain>
+
+  <handleRequestData>
+  request.on('data', function (chunk) {
+    buffers.push(chunk);
+    bufferLength += chunk.length;
+  });
+  
+  response.on('close', function () {
+    domain.dispose();
+  });
+
+  domain.on('error', handleError);
+  </handleRequestData>
+
+  <processRequestEnd>
+  request.on('end', function () {
+    <compileRequestBody>
+    request.body = new Buffer(bufferLength);
+
+    var pos = 0;
+
+    for (var i = 0; i < buffers.length; i++) {
+      buffers[i].copy(request.body, pos);
+      pos += buffers[i].length;
+    }
+
+    request.body.content = request.body.toString();
+
+    buffers = null;
+    </compileRequestBody>
+
+    <handleRequestInDomain>
+    domain.run(function () {
+      <createCommandContext>
+      context = new Context(self, endPoint, request, response);
+      requestHandler = self.$handlers.getRequestHandler(context);
+      context.handler = requestHandler;
+      </createCommandContext>
+
+      <executeRequestFlow>
+      flow()
+        .seq(function (cb) {
+          context._executeHook("beginRequest", cb);
+        })
+        .seq(function (cb) {
+          if (requestHandler.$.autoStartSession) {
+            context.session.start(cb);
+          } else {
+            cb();
+          }
+        })
+        .seq(function (cb) {
+          requestHandler.handleRequest(context, cb);
+        })
+        .exec(function (err) {
+          if (err) {
+            handleError(err);
+          } else {
+            context.response.end();
+          }
+        });
+      </executeRequestFlow>
+    });
+    </handleRequestInDomain>
+  });
+  </processRequestEnd>
+
+  <handleErrorFunction>
+  function handleError(err) {
+    if (!handledWithErrorHandler) {
+      handledWithErrorHandler = true;
+
+      <handleErrorWithExceptionHandler>
+      var exceptionHandler = new ExceptionHandler(err);
+      try {
+        exceptionHandler.handleRequest(context, function (err) {
+          err && handleErrorTheHardWay(err);
+        });
+      } catch (e) {
+        handleErrorTheHardWay(err);
+      }
+      </handleErrorWithExceptionHandler>
+
+    } else {
+      <handleErrorDirectly>
+      handleErrorTheHardWay(err);
+      </handleErrorDirectly>
+    }
+  }
+  </handleErrorFunction>
+
+  <handleErrorTheHardWayFunction>
+  function handleErrorTheHardWay(error) {
+    <logAndSend500Error>
+    console.error(error);
+
+    try {
+      response.writeHead(500);
+    } catch (error) {
+      console.error('Error sending 500', error, request.url);
+    }
+
+    response.end('Internal Server Error');
+    domain.dispose();
+    </logAndSend500Error>
+  }
+  </handleErrorTheHardWayFunction>
+}
+</handleRequest>
+
+<localizeElements>
+function(language){
+  
+  <queryElementsWithDataI18n>
+  var els, x, id, html;
+
+  els = document.querySelectorAll('[data-i18n]');
+  </queryElementsWithDataI18n>
+
+  <updateElementInnerHTML>
+  for(x=0; x<els.length; x++){
+    id = els[x].getAttribute('data-i18n');
+
+    if(id == ''){
+      id = els[x].innerText();
+    }
+
+    html = hashedit.i18n(id);
+
+    els[x].innerHTML = html;
+  }
+  </updateElementInnerHTML>
+}
+</localizeElements>
+
+<readFileAsText>
+function (o, cb) {
+  <tryReadFile>
+  try {
+    <setupFileReader>
+    var reader = new FileReader();
+    reader.onload = function (event) {
+      cb && cb(reader.result);
+    };
+    </setupFileReader>
+    <performFileRead>
+    reader.readAsText(o);
+    </performFileRead>
+  } catch (error) {
+    throw error
+  }
+  </tryReadFile>
+}
+</readFileAsText>

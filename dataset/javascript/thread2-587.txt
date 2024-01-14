@@ -1,0 +1,335 @@
+```javascript
+<wilddogObject>
+function(wilddogRef) {
+<wilddogRefValidation>
+  if (Object.prototype.toString.call(wilddogRef) !== "[object Object]") {
+    throw new Error("wilddogRef must be an instance of Wilddog");
+  }
+</wilddogRefValidation>
+<wilddogRefAssignment>
+  var _wilddogRef = wilddogRef;
+</wilddogRefAssignment>
+<refFunction>
+  this.ref = function() {
+    return _wilddogRef;
+  };
+</refFunction>
+<setFunction>
+  this.set = function(keyOrLocations, location) {
+    <inputValidation>
+    var locations;
+    if (typeof keyOrLocations === "string" && keyOrLocations.length !== 0) {
+      locations = {};
+      locations[keyOrLocations] = location;
+    } else if (typeof keyOrLocations === "object") {
+      if (typeof location !== "undefined") {
+        throw new Error("The location argument should not be used if you pass an object to set().");
+      }
+      locations = keyOrLocations;
+    } else {
+      throw new Error("keyOrLocations must be a string or a mapping of key - location pairs.");
+    }
+    </inputValidation>
+
+    <updateDataStructure>
+    var newData = {};
+    Object.keys(locations).forEach(function(key) {
+      validateKey(key);
+      var location = locations[key];
+      if (location === null) {
+        newData[key] = null;
+      } else {
+        validateLocation(location);
+        var geohash = encodeGeohash(location);
+        newData[key] = encodeWildGeoObject(location, geohash);
+      }
+    });
+    </updateDataStructure>
+
+    <wilddogRefUpdate>
+    return new RSVP.Promise(function(resolve, reject) {
+      function onComplete(error) {
+        if (error !== null) {
+          reject("Error: Wilddog synchronization failed: " + error);
+        }
+        else {
+          resolve();
+        }
+      }
+      _wilddogRef.update(newData, onComplete);
+    });
+    </wilddogRefUpdate>
+  };
+</setFunction>
+<getFunction>
+  this.get = function(key) {
+    <validateKey>
+    validateKey(key);
+    </validateKey>
+    <wilddogRefRead>
+    return new RSVP.Promise(function(resolve, reject) {
+      _wilddogRef.child(key).once("value", function(dataSnapshot) {
+        if (dataSnapshot.val() === null) {
+          resolve(null);
+        } else {
+          resolve(decodeWildGeoObject(dataSnapshot.val()));
+        }
+      }, function (error) {
+        reject("Error: Wilddog synchronization failed: " + error);
+      });
+    });
+    </wilddogRefRead>
+  };
+</getFunction>
+<removeFunction>
+  this.remove = function(key) {
+    return this.set(key, null);
+  };
+</removeFunction>
+<queryFunction>
+  this.query = function(queryCriteria) {
+    return new GeoQuery(_wilddogRef, queryCriteria);
+  };
+</queryFunction>
+}
+</wilddogObject>
+
+<carouselInitialization>
+function () {
+  <eventBindings>
+  var carousel = this,
+      cssClass = carousel.CLASSES;
+  carousel.on("keydown", carousel._keyboardEventHandler);
+  carousel.on(afterScrollEvent, syncNavigation);
+  carousel.on(itemAddedEvent, syncUi);
+  carousel.on(itemRemovedEvent, syncUi);
+  carousel.on(itemReplacedEvent, syncUi);
+  carousel.on(itemSelectedEvent, function () {
+      if (carousel._hasFocus) {
+          carousel.focus();
+      }
+  });
+  carousel.on(loadItemsEvent, syncUi);
+  carousel.on(allItemsRemovedEvent, function (ev) {
+      carousel.scrollTo(0);
+      syncNavigation.call(carousel);
+      syncPagerUi.call(carousel);
+  });
+  carousel.on(pageChangeEvent, syncPagerUi, carousel);
+  carousel.on(renderEvent, function (ev) {
+      if (carousel.get("selectedItem") === null ||
+          carousel.get("selectedItem") <= 0) { 
+      carousel.set("selectedItem", carousel.get("firstVisible"));
+      }
+      syncNavigation.call(carousel, ev);
+      syncPagerUi.call(carousel, ev);
+      carousel._setClipContainerSize();
+      carousel.show();
+  });
+  carousel.on("selectedItemChange", function (ev) {
+      setItemSelection.call(carousel, ev.newValue, ev.prevValue);
+      if (ev.newValue >= 0) {
+          carousel._updateTabIndex(
+                  carousel.getElementForItem(ev.newValue));
+      }
+      carousel.fireEvent(itemSelectedEvent, ev.newValue);
+  });
+  carousel.on(uiUpdateEvent, function (ev) {
+      syncNavigation.call(carousel, ev);
+      syncPagerUi.call(carousel, ev);
+  });
+  carousel.on("firstVisibleChange", function (ev) {
+      if (!carousel.get("selectOnScroll")) {
+          if (ev.newValue >= 0) {
+              carousel._updateTabIndex(
+                      carousel.getElementForItem(ev.newValue));
+          }
+      }
+  });
+  carousel.on("click", function (ev) {
+      if (carousel.isAutoPlayOn()) {
+          carousel.stopAutoPlay();
+      }
+      carousel._itemClickHandler(ev);
+      carousel._pagerClickHandler(ev);
+  });
+  </eventBindings>
+  <focusEvents>
+  var focussedLi;
+  Event.onFocus(carousel.get("element"), function (ev, obj) {
+      var target = Event.getTarget(ev);
+      if (target && target.nodeName.toUpperCase() == "A" &&
+          Dom.getAncestorByClassName(target, cssClass.NAVIGATION)) {
+          if (focussedLi) {
+              Dom.removeClass(focussedLi, cssClass.PAGE_FOCUS);
+          }
+          focussedLi = target.parentNode;
+          Dom.addClass(focussedLi, cssClass.PAGE_FOCUS);
+      } else {
+          if (focussedLi) {
+              Dom.removeClass(focussedLi, cssClass.PAGE_FOCUS);
+          }
+      }
+      obj._hasFocus = true;
+      obj._updateNavButtons(Event.getTarget(ev), true);
+  }, carousel);
+  Event.onBlur(carousel.get("element"), function (ev, obj) {
+      obj._hasFocus = false;
+      obj._updateNavButtons(Event.getTarget(ev), false);
+  }, carousel);
+  </focusEvents>
+}
+</carouselInitialization>
+
+<countryCodeConversion>
+function getAbbr(wofData) {
+  <getProperty>
+  const iso2 = getPropertyValue(wofData, 'wof:country');
+  </getProperty>
+  <isoCodeCheck>
+  if (iso2 !== false && iso3166.is2(iso2)) {
+    return iso3166.to3(iso2);
+  }
+  </isoCodeCheck>
+  return null;
+}
+</countryCodeConversion>
+
+<umbralFilter>
+function(sel) {
+  <lengthCheck>
+  if (!this.length) {
+    return this;
+  }
+  </lengthCheck>
+  <siblingFilter>
+  var el = this[0];
+  return u(array.filter.call(el.parentNode.children, function(child) {
+    return sel ? child !== el && u(child).is(sel) : child !== el;
+  }));
+  </siblingFilter>
+}
+</umbralFilter>
+
+<arrayRemoveItem>
+function (item) {
+  <findIndex>
+  var i = this.indexOf(item);
+  </findIndex>
+  <conditionalSpliceAndEmit>
+  if (!~i) return false;
+  this.source.splice(i, 1);
+  this._updateInfo();
+  this.emit("remove", item, i);
+  this.emit("update", { remove: [item] });
+  </conditionalSpliceAndEmit>
+  return item;
+}
+</arrayRemoveItem>
+
+<preloadConfigSetup>
+function () {
+  <configSet>
+  this.setConfig({components: this.preload});
+  </configSet>
+  <preloadComponents>
+  var preload = this.getConfig().components;
+  if (preload != undefined) {
+    this.setComponents(preload);
+  }
+  </preloadComponents>
+  return this;
+}
+</preloadConfigSetup>
+
+<ipRetrieval>
+function ip() {
+  <networkInterfaceAcquisition>
+  let network = os.networkInterfaces(),
+      keys = Object.keys(network),
+      ips = [];
+  </networkInterfaceAcquisition>
+  <ipCollection>
+  for (let key of keys) {
+      network[key].forEach(ip => {
+          ip.family === 'IPv4' && !ip.internal && ips.push(ip.address);
+      });
+  }
+  </ipCollection>
+  return ips.length ? ips[0] : '127.0.0.1';
+}
+</ipRetrieval>
+
+<apiBlueprintResourceBuilder>
+function build(data) {
+  <resourceStructureCreation>
+  const resources = resources_1.ResourcesStructure.create();
+  </resourceStructureCreation>
+  <annotationsStructureCreation>
+  const annotations = annotations_1.AnnotationsStructure.create();
+  </annotationsStructureCreation>
+  <dataTraversal>
+  data.content[0].content.forEach((content) => {
+    if (content.element === 'annotation') {
+      annotations.add(content.content);
+      return;
+    }
+    <resourceAddition>
+    const resource = resources.createResource(content.attributes.href.content);
+    </resourceAddition>
+    <transitionBuilding>
+    content.content.forEach((transition_data) => {
+      const transition = resource.createTransition(transition_data);
+      </transitionBuilding>
+      <httpTransactionBuilding>
+      transition_data.content.forEach((http_transaction_data) => {
+        const http_transaction = transition.createHttpTransaction();
+        http_transaction.setHttpRequest(http_transaction.createHttpRequest(http_transaction_data.content[0]));
+        http_transaction.setHttpResponse(http_transaction.createHttpResponse(http_transaction_data.content[1]));
+        transition.addHttpTransaction(http_transaction);
+      });
+      </httpTransactionBuilding>
+      resource.addTransition(transition);
+    });
+    resources.add(resource);
+  });
+  </dataTraversal>
+  return resources;
+}
+</apiBlueprintResourceBuilder>
+
+<notifierClosingFunction>
+function(that) {
+  <notifiersLoop>
+  var mNotifiers = that.getNotifiers();
+  for (var i = 0; i < mNotifiers.length; i++) {
+    var oNotifier = mNotifiers[i];
+    oNotifier._oCallout.close();
+  }
+  </notifiersLoop>
+  <messageNotifierClose>
+  if (that.getMessageNotifier()) {
+    that.getMessageNotifier()._oCallout.close();
+  }
+  </messageNotifierClose>
+}
+</notifierClosingFunction>
+
+<reducerToAggregateMapping>
+function make_reducer_agg(target_field, reducer, arg) {
+  <reducerLookup>
+  if (! _.has(REDUCERS_TO_ES_AGGRS, reducer)) {
+    return null;
+  }
+  var aggr_name = REDUCERS_TO_ES_AGGRS[reducer];
+  </reducerLookup>
+  <aggregationDefinition>
+  var aggr = {};
+  aggr[aggr_name] = { field: arg };
+  </aggregationDefinition>
+  return [ target_field, aggr ];
+}
+</reducerToAggregateMapping>
+```
+
+Annotations are added to each function to identify areas of distinct responsibilities within the functions. As per the SRP, responsibilities are grouped to avoid over-segmentation, with tags placed before and after coherent blocks of code serving specific, identifiable purposes within the functions.

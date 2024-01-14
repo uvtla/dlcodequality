@@ -1,0 +1,195 @@
+```javascript
+<getDockerExecutablePath>
+function getDockerExecutablePath() {
+    
+    var dockerPath = getBinPath();
+    var dockerBin = path.join(dockerPath, 'docker');
+    
+    switch (process.platform) {
+        case 'darwin': return dockerBin;
+        case 'linux': return dockerBin;
+        case 'win32': return dockerBin + '.exe';
+    }
+}
+</getDockerExecutablePath>
+
+<_GpfDate>
+function _GpfDate() {
+    var firstArgument = arguments[_GPF_START], values = _gpfIsISO8601String(firstArgument);
+    if (values) {
+        return new _GpfGenuineDate(_GpfGenuineDate.UTC.apply(_GpfGenuineDate.UTC, values));
+    }
+    return _gpfNewApply(_GpfGenuineDate, arguments);
+}
+</_GpfDate>
+
+<buildJS>
+function buildJS(src, filename, dest, applyHeader, forceIncludePaths) {
+  dest = dest || config.dist.jsPath;
+  applyHeader = applyHeader || false;
+  forceIncludePaths = forceIncludePaths || false;
+
+  return gulp.src(src)
+    .pipe(gulpif(
+      forceIncludePaths,
+      include({
+        includePaths: [
+          path.dirname(src),
+          __dirname,
+          config.packagesPath
+        ]
+      }),
+      include()
+    ))
+    .on('error', console.log) 
+    .pipe(babel())
+    .pipe(uglify({
+      output: {
+        
+        comments: /^(!|---)/
+      }
+    }))
+    .pipe(gulpif(applyHeader, header(config.prj.header, {
+      config: config
+    })))
+    .pipe(rename(filename))
+    .pipe(gulp.dest(dest));
+}
+</buildJS>
+
+<rotatePoint>
+function rotatePoint(point, degrees) {
+    
+    var angle = Math.PI / 180 * degrees;
+    point.x = point.x * Math.cos(angle) - point.y * Math.sin(angle);
+    point.y = point.x * Math.sin(angle) + point.y * Math.cos(angle);
+    return point;
+}
+</rotatePoint>
+
+<encodeHeader>
+function encodeHeader(header) {
+    var cursor = new BufferCursor(new buffer.Buffer(6));
+
+    cursor.writeUInt16BE(header.getFileType());
+    cursor.writeUInt16BE(header._trackCount);
+    cursor.writeUInt16BE(header.getTicksPerBeat() & 0x7FFF);
+
+    return encodeChunk('MThd', cursor.buffer);
+}
+</encodeHeader>
+
+<getYmlsInsideFolder>
+function getYmlsInsideFolder(folderPath) {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(folderPath)) {
+      reject('Cant\' find syntax templates folder: ' + folderPath)
+    } else {
+      fs.readdir(folderPath, (err, data) => {
+        if (err) reject('Error reading syntax templates folder: ' + folderPath)
+        else {
+          resolve(
+            data
+            .filter(i => path.basename(i) !== path.basename(i, '.yml'))
+            .map(i => path.resolve(folderPath, i))
+          )
+        }
+      })
+    }
+  })
+}
+</getYmlsInsideFolder>
+
+<uploadHandler>
+function uploadHandler(event) {
+    const target = event.target;
+
+    if (target.files && target.files[0]) {
+      file = target.files[0];
+      const reader = new FileReader();
+
+      reader.addEventListener('load', loadHandler);
+
+      reader.readAsDataURL(file);
+    }
+}
+</uploadHandler>
+
+<getNodeInfo>
+function getNodeInfo(x, y){
+        var nodeInfo = {};
+        var bestNodeInfo = {
+            node: null,
+            boundSize: 0
+        };
+        getBestNode(appTree, x, y, bestNodeInfo);
+        var bestNode = bestNodeInfo.node;
+        if(bestNode){
+            var text = bestNode.text || bestNode.label;
+            if(text){
+                text = text.replace(/\s*\r?\n\s*/g,' ');
+                text = text.replace(/^\s+|\s+$/g, '');
+                var textLen = byteLen(text);
+                text = textLen > 20 ? leftstr(text, 20) + '...' : text;
+                nodeInfo.text = text;
+            }
+            nodeInfo.path = getNodeXPath(bestNode);
+        }
+        else{
+            nodeInfo.x = x;
+            nodeInfo.y = y;
+        }
+        return nodeInfo;
+}
+</getNodeInfo>
+
+<add>
+function add(f)  {
+    if (handlers.every(isnt(f)))  handlers.push(f)
+    return notify }
+</add>
+
+<getModelProperty>
+function getModelProperty(type, definitions) {
+      var isPrimitive, listType;
+
+      if (type instanceof Array) {
+        listType = true;
+        type = type[0];
+      }
+
+      
+      if (typeof type === 'undefined') {
+        type = 'undefined';
+        isPrimitive = true;
+
+      } else if (definitions[type]){
+        
+        type = definitions[type]; 
+        isPrimitive = false;
+
+      } else if (getInlineModel(type)) {
+        type = getInlineModel(type); 
+        isPrimitive = false;
+
+      } else {
+        
+        isPrimitive = true;
+      }
+
+      if (isPrimitive) {
+        if (listType) {
+          return 'Array[' + type + ']';
+        } else {
+          return type.toString();
+        }
+      } else {
+        if (listType) {
+          return 'Array[' + getModelSignature(type.name, type.definition, type.models, type.modelPropertyMacro) + ']';
+        } else {
+          return getModelSignature(type.name, type.definition, type.models, type.modelPropertyMacro);
+        }
+      }
+}
+</getModelProperty>
+```

@@ -1,0 +1,291 @@
+```javascript
+<parsePath>
+function parsePath(path) {
+        var lastSlash = path.lastIndexOf("/"), folder, rest;
+        if (lastSlash === path.length - 1) {
+            lastSlash = path.slice(0, path.length - 1).lastIndexOf("/");
+        }
+        if (lastSlash >= 0) {
+            rest = " - " + (lastSlash ? path.slice(0, lastSlash) : "/");
+            folder = path.slice(lastSlash + 1);
+        } else {
+            rest = "/";
+            folder = path;
+        }
+
+        return {path: path, folder: folder, rest: rest};
+    }
+</parsePath>
+
+<parse_children>
+function parse_children(lines, parent_node_names)
+{
+	<filter_lines_for_parsing>
+	lines = filter_lines_for_parsing(lines)
+	</filter_lines_for_parsing>
+
+	<check_lines_empty>
+	if (lines.length === 0)
+	{
+		return {}
+	}
+	</check_lines_empty>
+
+	<process_lines>
+	return split_lines_by_child_nodes(lines).map(function(lines)
+	{
+		<get_declaration_line>
+		const declaration_line = lines.shift()
+		</get_declaration_line>
+
+		<check_declaration_indentation>
+		if (declaration_line.tabs !== 0)
+		{
+			throw new Error(`Excessive indentation (${declaration_line.tabs} more "tabs" than needed) at line ${declaration_line.index}: "${declaration_line.original_line}"`)
+		}
+		</check_declaration_indentation>
+
+		<split_declaration>
+		const declaration = declaration_line.line
+		const names = declaration.split(',').map(name => name.trim())
+		</split_declaration>
+
+		<validate_names>
+		validate_child_style_class_types(parent_node_names, names)
+		</validate_names>
+
+		<parse_style_class>
+		const style_json = parse_style_class(lines, names)
+		</parse_style_class>
+
+		<generate_nodes>
+		return names.map(function(node_declaration)
+		{
+			const { name, is_a_modifier } = parse_node_name(node_declaration)
+			const json = extend({}, style_json)
+
+			if (is_a_modifier)
+			{
+				json._is_a_modifier = true
+			}
+
+			return { name, json }
+		})
+		</generate_nodes>
+	})
+	<concat_child_arrays>
+	.reduce(function(array, child_array)
+	{
+		return array.concat(child_array);
+	}, 
+	[])
+	</concat_child_arrays>
+	<build_nodes_object>
+	.reduce(function(nodes, node)
+	{
+		if (nodes[node.name])
+		{
+			extend(nodes[node.name], node.json)
+		}
+		else
+		{
+			nodes[node.name] = node.json
+		}
+		
+		return nodes
+	}, 
+	{})
+	</build_nodes_object>
+}
+</parse_children>
+
+<attributes>
+function attributes(attrs) {
+  attrs = attrs || {};
+  var ident = attrs.id || '';
+  var classes = attrs.classes || [];
+  var keyvals = [];
+  <parse_keys>
+  Object.keys(attrs).forEach(function (k) {
+    if (k !== 'classes' && k !== 'id') keyvals.push([k,attrs[k]]);
+  });
+  </parse_keys>
+  return [ident, classes, keyvals];
+}
+</attributes>
+
+<pathToRegexp>
+function pathToRegexp(val, keys, options) {
+  return new RegExp(toRegexpSource(val, keys, options), flags(options));
+}
+</pathToRegexp>
+
+<anonymous_function_navigation>
+function (sId, bPrevious) {
+  <iterate_buttons>
+	this.getButtons().some(function (oButton, iIndex, aArray) {
+		if (sId === oButton.getId()) {
+			if (bPrevious) {
+				this._setFocusOnPreviousButton(aArray, iIndex);
+			} else {
+				this._setFocusOnNextButton(aArray, iIndex);
+			}
+			return true;
+		}
+	}.bind(this));
+  </iterate_buttons>
+}
+</anonymous_function_navigation>
+
+<getNodeText>
+function _getNodeText(node) {
+    return node.sourceFile.text.substr(node.start, node.end - node.start);
+}
+</getNodeText>
+
+<anonymous_function_template_initialization>
+function (out) {
+    out.writeln("__$initTemplate: function() {");
+    out.increaseIndent();
+    if (out.parentClassType == this._classType) {
+        
+        out.writeln("if (! this.$", out.parentClassName, ".__$initTemplate.call(this)) { return false; }");
+    }
+    <write_block_content>
+    out.write(out.getBlockContent("initTemplate"));
+    </write_block_content>
+    var gv = out.getBlockContent("globalVars");
+    if (gv.length > 0) {
+        out.writeln("try {");
+        out.increaseIndent();
+        <use_global_vars>
+        out.writeln("with (this) {");
+        out.increaseIndent();
+        out.write(gv);
+        </use_global_vars>
+        out.decreaseIndent();
+        out.writeln("}"); 
+        out.decreaseIndent();
+        out.writeln("} catch (_ex) {");
+        out.increaseIndent();
+        <log_var_init_error>
+        out.writeln("this.$logError(this.EXCEPTION_IN_VARINIT,[this.$classpath],_ex);");
+        out.writeln("return false;");
+        </log_var_init_error>
+        out.decreaseIndent();
+        out.writeln("}");
+    }
+    out.writeln("return true;");
+    out.decreaseIndent();
+    out.writeln("}");
+}
+</anonymous_function_template_initialization>
+
+<tuple>
+function tuple(name, ...types) {
+  if (name[TYPICAL_TYPE]) {
+    types.unshift(name);
+    name = `Some${types.length}Tuple`;
+  }
+
+  <validate_input_DEV>
+  if (__DEV__) {
+    assert(typeof name === 'string', `tuple()'s name must be a string`);
+    for (const type of types) {
+      assert(type[TYPICAL_TYPE], `tuple()'s type must be a typical type`);
+    }
+  }
+  </validate_input_DEV>
+
+  const api = this;
+
+  <Tuple_constructor>
+  function Tuple(value, context) {
+    if (Context.isRequired(context)) {
+      return Context.with(value, Tuple, context, api);
+    } else if (!context.isArray(value) || value.length !== types.length) {
+      return context.valueIsNotOfType(value, Tuple);
+    }
+
+    return forEachTypedProperty(
+      value,
+      value.keys(),
+      k => types[k],
+      context.validateAndCopy ? [] : void 0,
+      context
+    );
+  }
+  </Tuple_constructor>
+
+  <decorate_Tuple>
+  return decorate(Tuple, name, tuple, ...types);
+  </decorate_Tuple>
+}
+</tuple>
+
+<readJson>
+function readJson(file) {
+  <read_and_parse_json>
+  return when(
+    readText(file),
+    function(result) {
+      try {
+        return JSON.parse(result);
+      } catch (e) {
+        if (e instanceof SyntaxError) {
+          return json5.parse(result);
+        } else {
+          throw e;
+        }
+      }
+    },
+    function(e) {
+      throw e;
+    }
+  );
+  </read_and_parse_json>
+}
+</readJson>
+
+<encodeEmailAddress>
+function encodeEmailAddress(addr) {
+
+        <char2hex>
+        function char2hex(ch) {
+            var hexDigits = '0123456789ABCDEF';
+            var dec = ch.charCodeAt(0);
+            return(hexDigits.charAt(dec>>4) + hexDigits.charAt(dec&15));
+        }
+        </char2hex>
+
+        var encode = [
+            function(ch){return "&#"+ch.charCodeAt(0)+";";},
+            function(ch){return "&#x"+char2hex(ch)+";";},
+            function(ch){return ch;}
+        ];
+
+        <prefix_email>
+        addr = "mailto:" + addr;
+        </prefix_email>
+
+        <encode_characters>
+        addr = addr.replace(/./g, function(ch) {
+            if (ch == "@") {
+                ch = encode[Math.floor(Math.random()*2)](ch);
+            } else if (ch !=":") {
+                var r = Math.random();
+                ch =  (r > .9 ? encode[2](ch) : r > .45 ? encode[1](ch) : encode[0](ch));
+            }
+            return ch;
+        });
+        </encode_characters>
+
+        <create_mailto_link>
+        addr = "<a href=\"" + addr + "\">" + addr + "</a>";
+        addr = addr.replace(/">.+:/g,"\">");
+        </create_mailto_link>
+
+        return addr;
+    }
+</encodeEmailAddress>
+```

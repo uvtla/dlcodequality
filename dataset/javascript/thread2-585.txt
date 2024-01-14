@@ -1,0 +1,505 @@
+<addPropToValue>
+function addPropToValue( prop, value ) {
+    <validateValue>
+    if ( value === undefined || value === null ) return;
+    if ( value.isContentChangeAware !== true ) return;
+    </validateValue>
+    <handleProperties>
+    var properties = value[ PROPERTY_SYMBOL ];
+    if ( !Array.isArray( properties ) ) {
+        properties = [ prop ];
+    } else if ( properties.indexOf( prop ) === -1 ) {
+        properties.push( prop );
+    }
+    value[ PROPERTY_SYMBOL ] = properties;
+    </handleProperties>
+}
+</addPropToValue>
+
+<buildGradient>
+function buildGradient() {
+    <createLinearGradient>
+    if (!linearGradient) {
+        linearGradient = svg.select('.metadata-group')
+          .append('linearGradient')
+            .attr('id', lineGradientId)
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '100%')
+            .attr('y2', '0%')
+            .attr('gradientUnits', 'userSpaceOnUse')
+            .selectAll('stop')
+            .data([
+                {offset:'0%', color: singleLineGradientColors[0]},
+                {offset:'100%', color: singleLineGradientColors[1]}
+            ])
+            .enter()
+              .append('stop')
+                .attr('offset', ({offset}) => offset)
+                .attr('stop-color', ({color}) => color)
+    }
+    </createLinearGradient>
+}
+</buildGradient>
+
+<factory>
+function factory(
+    configuration,
+    Logger,
+    assert,
+    Errors,
+    Constants,
+    uuid,
+    Hogan,
+    Promise,
+    Rx,
+    _,
+    env,
+    waterline,
+    validator,
+    taskLibrary,
+    injector
+) {
+    <defineCommonConstants>
+    var COMMON_OPTIONS_SCHEMA = 'common-task-options.json';
+    var TaskStates = Constants.Task.States;
+    var logger = Logger.initialize(factory);
+    </defineCommonConstants>
+
+    
+
+    
+    <TaskDefinition>
+    function Task(definition, taskOverrides, context) {
+
+        
+        <basicAssertionsAndInitializations>
+        var self = this;
+        assert.object(context, 'Task shared context object');
+        self.definition = _.cloneDeep(definition);
+        self.cancelled = false;
+        taskOverrides = taskOverrides || {};
+        </basicAssertionsAndInitializations>
+
+        <processOverridesAndDefaults>
+        self.compileOnly = taskOverrides.compileOnly || false;
+        self.instanceId = taskOverrides.instanceId || uuid.v4();
+        if (_.has(context, 'target')) {
+            self.nodeId = context.target;
+        }
+        self.name = taskOverrides.name || self.definition.injectableName;
+        self.friendlyName = taskOverrides.friendlyName || self.definition.friendlyName;
+        self.waitingOn = taskOverrides.waitingOn || [];
+        self.ignoreFailure = taskOverrides.ignoreFailure || false;
+        self.error = null;
+        self.properties = definition.properties;
+        </processOverridesAndDefaults>
+
+        <linkContextAndSetInitialState>
+        self.context = context;
+        self.state = TaskStates.Pending;
+        self.successStates = [TaskStates.Succeeded];
+        self.failedStates = [TaskStates.Failed, TaskStates.Timeout, TaskStates.Cancelled];
+        </linkContextAndSetInitialState>
+
+        <setupServerAndFilesUri>
+        var server;
+        if (_.has(context, 'proxy')) {
+            server = context.proxy;
+        } else {
+            server = 'http://'+ Task.configCache.apiServerAddress + ':' + Task.configCache.apiServerPort;
+        }
+        var fileServerUri;
+        if (_.has(Task.configCache, 'fileServerAddress')) {
+            fileServerUri = 'http://' + Task.configCache.fileServerAddress;
+            if (_.has(Task.configCache, 'fileServerPort')) {
+                fileServerUri = fileServerUri + ':' + Task.configCache.fileServerPort;
+            }
+            if (_.has(Task.configCache, 'fileServerPath')) {
+                fileServerUri = fileServerUri + Task.configCache.fileServerPath;
+                fileServerUri = _.trimRight(fileServerUri, '/');
+            }
+        } else {
+            fileServerUri = server;
+        }
+        </setupServerAndFilesUri>
+
+        <defineRenderContext>
+        self.renderContext = {
+            server: Task.configCache,
+            api: { server: server },
+            file: {
+                server: fileServerUri
+            },
+            task: self,
+            options: self.definition.options,
+            context: self.context
+        };
+        self.renderContext.api.base = self.renderContext.api.server + '/api/current';
+        self.renderContext.api.templates = self.renderContext.api.base + '/templates';
+        self.renderContext.api.profiles = self.renderContext.api.base + '/profiles';
+        self.renderContext.api.lookups = self.renderContext.api.base + '/lookups';
+        self.renderContext.api.files = self.renderContext.api.base + '/files';
+        self.renderContext.api.nodes = self.renderContext.api.base + '/nodes';
+        </defineRenderContext>
+
+        <retrieveTaskTimeout>
+        self._taskTimeout = self.definition.options._taskTimeout;
+        </retrieveTaskTimeout>
+
+        return self;
+    }
+
+    <SkuIdMethods>
+    Task.prototype.getSkuId = function(nodeId) {
+        if(!nodeId)  {
+            return Promise.resolve();
+        }
+
+        return waterline.nodes.needByIdentifier(nodeId)
+            .then(function(node) {
+                if (node.sku) {
+                    return node.sku;
+                }
+            });
+    };
+    </SkuIdMethods>
+
+    <RenderMethods>
+    Task.prototype.renderAll = function(nodeId, options){
+        // Omitted for brevity
+    };
+    Task.prototype._isDeferredRender = function(renderKey) {
+        // Omitted for brevity
+    };
+    Task.prototype.renderString = function(str, context, depth, maxDepth) {
+        // Omitted for brevity
+    };
+    Task.prototype.parse = function(source) {
+        // Omitted for brevity
+    };
+    Task.prototype.renderComplex = function(source, context) {
+        // Omitted for brevity
+    };
+    Task.prototype.render = function(source, context, depth) {
+        // Omitted for brevity
+    };
+    Task.prototype.renderOptions = function(toRender, renderContext) {
+        // Omitted for brevity
+    };
+    Task.prototype.renderOwnOptions = function(toRender) {
+        // Omitted for brevity
+    };
+    </RenderMethods>
+
+    <JobManagementMethods>
+    Task.prototype.instantiateJob = function() {
+        // Omitted for brevity
+    };
+    Task.prototype.run = function() {
+        // Omitted for brevity
+    };
+    Task.prototype._run = function() {
+        // Omitted for brevity
+    };
+    Task.prototype.stop = function() {
+        // Omitted for brevity
+    };
+    Task.prototype.cancel = function(error) {
+        // Omitted for brevity
+    };
+    </JobManagementMethods>
+
+    <SerializationMethods>
+    Task.prototype.toJSON = function toJSON() {
+        return this.serialize();
+    };
+    Task.prototype.serialize = function serialize() {
+        // Omitted for brevity
+    };
+    </SerializationMethods>
+
+    <CompileAndValidationMethods>
+    Task.prototype.compile = function compile() {
+        // Omitted for brevity
+    };
+    
+    function handleCommonOptions(options) {
+        // Omitted for brevity
+    }
+
+    function _validateSchemaProperty(schema, title) {
+        // Omitted for brevity
+    }
+
+    Task.getBaseTask = function(query) {
+        // Omitted for brevity
+    };
+
+    Task.validateBaseTask = function(baseTask) {
+        // Omitted for brevity
+    };
+
+    
+    Task.validateDefinition = function validateDefinition(definition) {
+        // Omitted for brevity
+    };
+
+    
+    Task.create = function create(definition, taskOverrides, context) {
+        // Omitted for brevity
+    };
+
+    Task.getCommonSchema = function () {
+        // Omitted for brevity
+    };
+
+    Task.getTaskSpecificSchema = function(definition) {
+        // Omitted for brevity
+    };
+
+    Task.getJobSchema = function(definition) {
+        // Omitted for brevity
+    };
+
+    Task.getFullSchema = function getFullSchema(definition) {
+        // Omitted for brevity
+    };
+
+    Task.validateOptions = function (definition, options, flags) {
+        // Omitted for brevity
+    };
+    </CompileAndValidationMethods>
+
+    <ConfigurationCacheInitialization>
+    Task.configCache = configuration.getAll();
+    </ConfigurationCacheInitialization>
+
+    return Task;
+}
+</factory>
+
+<min>
+function min(x) {
+    <findMinimumValue>
+    var value;
+    for (var i = 0; i < x.length; i++) {
+        
+        if (x[i] < value || value === undefined) value = x[i];
+    }
+    </findMinimumValue>
+    return value;
+}
+</min>
+
+<bitDepth>
+function bitDepth(input, original, target, output) {
+  <validateBitDepths>
+  validateBitDepth_(original);
+  validateBitDepth_(target);
+  </validateBitDepths>
+  
+  <computeTransformFunction>
+  let toFunction = getBitDepthFunction_(original, target);
+  </computeTransformFunction>
+  
+  <setupOptions>
+  let options = {
+    oldMin: Math.pow(2, parseInt(original, 10)) / 2,
+    newMin: Math.pow(2, parseInt(target, 10)) / 2,
+    oldMax: (Math.pow(2, parseInt(original, 10)) / 2) - 1,
+    newMax: (Math.pow(2, parseInt(target, 10)) / 2) - 1,
+  };
+  </setupOptions>
+  
+  <adjustInputOnOriginalBitDepth>
+  const len = input.length;
+  if (original == "8") {
+    for (let i=0; i<len; i++) {
+      output[i] = input[i] -= 128;
+    }
+  }
+  </adjustInputOnOriginalBitDepth>
+  
+  <performBitDepthConversion>
+  for (let i=0; i<len; i++) {        
+    output[i] = toFunction(input[i], options);
+  }
+  </performBitDepthConversion>
+  
+  <adjustOutputOnTargetBitDepth>
+  if (target == "8") {
+    for (let i=0; i<len; i++) {
+      output[i] = output[i] += 128;
+    }
+  }
+  </adjustOutputOnTargetBitDepth>
+}
+</bitDepth>
+
+<searchFunction>
+function(input) {
+  input = input || {};
+  
+  <mergeAggregations>
+  input.aggregations = helpers.mergeAggregations(configuration.aggregations, input);
+  </mergeAggregations>
+
+  <performSearch>
+  return service.search(items, input, configuration, fulltext);
+  </performSearch>
+}
+</searchFunction>
+
+<getFormatterResults>
+function getFormatterResults() {
+  <dependencies>
+  const stripAnsi = require("strip-ansi");
+  </dependencies>
+
+  <loadFormatterFiles>
+  const formatterFiles = fs.readdirSync("./lib/formatters/"),
+  <setupRules>
+      rules = {
+          "no-else-return": "warn",
+          indent: ["warn", 4],
+          "space-unary-ops": "error",
+          semi: ["warn", "always"],
+          "consistent-return": "error"
+      },
+  </setupRules>
+  <initializeCLI>
+      cli = new CLIEngine({
+          useEslintrc: false,
+          baseConfig: { extends: "eslint:recommended" },
+          rules
+      }),
+  </initializeCLI>
+  <prepareCodeStringAndExecute>
+      codeString = [
+          "function addOne(i) {",
+          "    if (i != NaN) {",
+          "        return i ++",
+          "    } else {",
+          "      return",
+          "    }",
+          "};"
+      ].join("\n"),
+      rawMessages = cli.executeOnText(codeString, "fullOfProblems.js", true),
+  </prepareCodeStringAndExecute>
+  <prepareRulesMapAndMeta>
+      rulesMap = cli.getRules(),
+      rulesMeta = {};
+  
+  Object.keys(rules).forEach(ruleId => {
+      rulesMeta[ruleId] = rulesMap.get(ruleId).meta;
+  });
+  </prepareRulesMapAndMeta>
+
+  <performFormatting>
+  return formatterFiles.reduce((data, filename) => {
+      const fileExt = path.extname(filename),
+          name = path.basename(filename, fileExt);
+  
+      if (fileExt === ".js") {
+          const formattedOutput = cli.getFormatter(name)(
+              rawMessages.results,
+              { rulesMeta }
+          );
+  
+          data.formatterResults[name] = {
+              result: stripAnsi(formattedOutput)
+          };
+      }
+      return data;
+  }, { formatterResults: {} });
+  </performFormatting>
+}
+</getFormatterResults>
+
+<genericCircularLayout>
+function genericCircularLayout(assign, graph, options) {
+  <validateGraph>
+  if (!isGraph(graph))
+    throw new Error('graphology-layout/random: the given graph is not a valid graphology instance.');
+  </validateGraph>
+
+  <setDefaultOptions>
+  options = defaults(options, DEFAULTS);
+  </setDefaultOptions>
+
+  <initializePositionsAndNodes>
+  var positions = {},
+      nodes = graph.nodes(),
+      center = options.center,
+      scale = options.scale,
+      tau = Math.PI * 2;
+  </initializePositionsAndNodes>
+
+  <calculatePositions>
+  var l = nodes.length,
+      node,
+      x,
+      y,
+      i;
+  
+  for (i = 0; i < l; i++) {
+    node = nodes[i];
+  
+    x = scale * Math.cos(i * tau / l);
+    y = scale * Math.sin(i * tau / l);
+  
+    if (center !== 0.5) {
+      x += center - 0.5 * scale;
+      y += center - 0.5 * scale;
+    }
+  
+    positions[node] = {
+      x: x,
+      y: y
+    };
+  
+    if (assign) {
+      graph.setNodeAttribute(node, options.attributes.x, x);
+      graph.setNodeAttribute(node, options.attributes.y, y);
+    }
+  }
+  </calculatePositions>
+
+  return positions;
+}
+</genericCircularLayout>
+
+<getEntriesFromIterable>
+function getEntriesFromIterable(collection) {
+  <handleArrayFrom>
+  if (isFunction(Array.from)) {
+    return Array.from(collection.entries());
+  }
+  </handleArrayFrom>
+
+  <fallbackEntriesImplementation>
+  let entries = [];
+  
+  collection.forEach((value, key) => {
+    entries.push([key, value]);
+  });
+  </fallbackEntriesImplementation>
+
+  return entries;
+}
+</getEntriesFromIterable>
+
+<onRequestBefore>
+function(xhr) {
+    <superCall>
+    CompositeComponent.prototype.onRequestBefore.call(this, xhr);
+    </superCall>
+
+    <showLoading>
+    if (this.options.showLoading) {
+        this.position(Toolkit.messages.loading);
+    }
+    </showLoading>
+}
+</onRequestBefore>

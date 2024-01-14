@@ -1,0 +1,228 @@
+```javascript
+<replace>
+function replace(script) {
+    var parent = script.parentNode
+    if (!parent) return
+
+    LARGE = /\?large/.test(script.src)
+    var iframe = document.createElement('iframe')
+    var iframePath = '/iframe' + (LARGE ? '?large' : '')
+    iframe.src = script.src.replace(/\/slackin\.js.*/, iframePath)
+    iframe.style.borderWidth = 0
+    iframe.className = '__slackin'
+
+    iframe.style.width = (LARGE ? 190 : 140) + 'px'
+    iframe.style.height = (LARGE ? 30 : 20) + 'px'
+    iframe.style.visibility = 'hidden'
+
+    parent.insertBefore(iframe, script)
+    parent.removeChild(script)
+
+    iframe.onload = function() {
+        setup(iframe)
+    }
+}
+</replace>
+
+<cloneTransforms>
+function _cloneTransforms(transforms) {
+    transforms = extendObject({}, transforms);
+    transforms.masks = transforms.masks.slice(0);
+    return transforms;
+}
+</cloneTransforms>
+
+<toggleMenu>
+function(toggle) {
+    var self = this, menu;
+
+    if (self.menu && self.menu.visible() && toggle !== false) {
+        return self.hideMenu();
+    }
+
+    if (!self.menu) {
+        menu = self.state.get('menu') || [];
+
+        if (menu.length) {
+            menu = {
+                type: 'menu',
+                items: menu
+            };
+        } else {
+            menu.type = menu.type || 'menu';
+        }
+
+        if (!menu.renderTo) {
+            self.menu = Factory.create(menu).parent(self).renderTo();
+        } else {
+            self.menu = menu.parent(self).show().renderTo();
+        }
+
+        self.fire('createmenu');
+        self.menu.reflow();
+        self.menu.on('cancel', function(e) {
+            if (e.control.parent() === self.menu) {
+                e.stopPropagation();
+                self.focus();
+                self.hideMenu();
+            }
+        });
+
+        self.menu.on('select', function() {
+            self.focus();
+        });
+
+        self.menu.on('show hide', function(e) {
+            if (e.control == self.menu) {
+                self.activeMenu(e.type == 'show');
+            }
+            self.aria('expanded', e.type == 'show');
+        }).fire('show');
+    }
+
+    self.menu.show();
+    self.menu.layoutRect({ w: self.layoutRect().w });
+    self.menu.moveRel(self.getEl(), self.isRtl() ? ['br-tr', 'tr-br'] : ['bl-tl', 'tl-bl']);
+    self.fire('showmenu');
+}
+</toggleMenu>
+
+<implicitGrant>
+function implicitGrant(iconfig) {
+    let link = iconfig.link;
+    window.location.href = `${iconfig.host + link.href}?response_type=${link.responseType}&client_id=${iconfig.clientID}`;
+    return new Promise.resolve()
+}
+</implicitGrant>
+
+<initializePlugin>
+function() {
+    $.extend(this.defaultOptions, (this.regionalOptions && this.regionalOptions['']) || {});
+    var jqName = camelCase(this.name);
+    $[jqName] = this;
+    $.fn[jqName] = function(options) {
+        var otherArgs = Array.prototype.slice.call(arguments, 1);
+        if ($[jqName]._isNotChained(options, otherArgs)) {
+            return $[jqName][options].apply($[jqName], [this[0]].concat(otherArgs));
+        }
+        return this.each(function() {
+            if (typeof options === 'string') {
+                if (options[0] === '_' || !$[jqName][options]) {
+                    throw 'Unknown method: ' + options;
+                }
+                $[jqName][options].apply($[jqName], [this].concat(otherArgs));
+            } else {
+                $[jqName]._attach(this, options);
+            }
+        });
+    };
+}
+</initializePlugin>
+
+<fetchAllRows>
+function(rows) {
+    var row;
+    if (!rows) rows = [];
+    while ((row = this.fetchAsArray())) rows.push(row);
+    this.reset();
+    return rows;
+}
+</fetchAllRows>
+
+<applyNodeExtensionResolution>
+function applyNodeExtensionResolution(unqualifiedPath, {extensions}) {
+    while (true) {
+        let stat;
+
+        try {
+            stat = statSync(unqualifiedPath);
+        } catch (error) {}
+
+        if (stat && !stat.isDirectory()) {
+            if (lstatSync(unqualifiedPath).isSymbolicLink()) {
+                unqualifiedPath = path.normalize(path.resolve(path.dirname(unqualifiedPath), readlinkSync(unqualifiedPath)));
+            }
+            return unqualifiedPath;
+        }
+
+        if (stat && stat.isDirectory()) {
+            let pkgJson;
+            try {
+                pkgJson = JSON.parse(readFileSync(`${unqualifiedPath}/package.json`, 'utf-8'));
+            } catch (error) {}
+
+            let nextUnqualifiedPath;
+            if (pkgJson && pkgJson.main) {
+                nextUnqualifiedPath = path.resolve(unqualifiedPath, pkgJson.main);
+            }
+            if (nextUnqualifiedPath && nextUnqualifiedPath !== unqualifiedPath) {
+                const resolution = applyNodeExtensionResolution(nextUnqualifiedPath, {extensions});
+                if (resolution !== null) {
+                    return resolution;
+                }
+            }
+        }
+
+        const qualifiedPath = extensions
+            .map(extension => {
+                return `${unqualifiedPath}${extension}`;
+            })
+            .find(candidateFile => {
+                return existsSync(candidateFile);
+            });
+        if (qualifiedPath) {
+            return qualifiedPath;
+        }
+
+        if (stat && stat.isDirectory()) {
+            const indexPath = extensions
+                .map(extension => {
+                    return `${unqualifiedPath}/index${extension}`;
+                })
+                .find(candidateFile => {
+                    return existsSync(candidateFile);
+                });
+            if (indexPath) {
+                return indexPath;
+            }
+        }
+
+        return null;
+    }
+}
+</applyNodeExtensionResolution>
+
+<do_msgid_header>
+function do_msgid_header(cb) {
+    const msgid = trans.header.get('message-id');
+    const mmatch = /@([^>]+)>/.exec(msgid);
+    if (mmatch) {
+        return plugin.do_lookups(connection, cb, mmatch[1], 'msgid');
+    }
+    cb();
+}
+</do_msgid_header>
+
+<sortChildren>
+function sortChildren(parent, sortingFunction) {
+    if (!parent.children) return;
+    parent.children = new Map([...parent.children.entries()].sort(sortingFunction));
+    for (var i = 0; i < parent.children.length; ++i)
+        recalculateSiblings(parent.children[i], i);
+    for (var child of parent.children.values())
+        sortChildren(child, sortingFunction);
+}
+</sortChildren>
+
+<executeNext>
+function executeNext(gremlin, i, callback) {
+    if (stopped) return;
+    if (i >= nb) return callDone();
+    executeInSeries([gremlin], [], horde, function() {
+        setTimeout(function() {
+            executeNext(pickGremlin(gremlins, distribution), ++i, callback);
+        }, config.delay);
+    });
+}
+</executeNext>
+```

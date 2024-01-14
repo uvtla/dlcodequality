@@ -1,0 +1,226 @@
+Sure, let's annotate them:
+
+1. getUserProfile - Violates SRP
+```javascript
+<getUserProfile>
+function getUserProfile(callback) {
+    <checkCallback>
+    if (_.isUndefined(callback)) { 
+    } else { </checkCallback>
+      <buildRequestUrl>
+      var u = baseUrl + "/me"; </buildRequestUrl>
+      <retrieveAndValidateAuthToken>
+      var tokenData = this.getAuthToken();
+      if (tokenData.type != "bearer") {
+        throw new Error("Invalid token type. Must use a token of type bearer.");
+      } </retrieveAndValidateAuthToken>
+      return <performApiRequest>helper.get(tokenData, u, callback);</performApiRequest>
+    }
+}
+</getUserProfile>
+```
+
+2. (anonymous) - Compliant with SRP
+```javascript
+<getMinimumLastModifiedTime>
+function() {
+    return Q.all(this.tech
+        .getPaths(PATH.resolve(this.root, this.output), this.tech.getBuildSuffixes())
+        .map(function(path) {
+            return QFS.lastModified(path)
+                .fail(function() {
+                    return -1;
+                });  
+        }))
+        .spread(Math.min);
+}
+</getMinimumLastModifiedTime>
+```
+
+3. (anonymous) - Violates SRP
+```javascript
+<removeViewFromIndexes>
+function(view){
+  <removeFromModelIndex>
+  var viewCid = view.cid;  
+  if (view.model){
+    delete this._indexByModel[view.model.cid];
+  } </removeFromModelIndex>
+  
+  <removeFromCustomIndex>
+  _.any(this._indexByCustom, function(cid, key) {
+    if (cid === viewCid) {
+      delete this._indexByCustom[key];
+      return true;
+    }
+  }, this); </removeFromCustomIndex>
+  
+  <removeFromViews>
+  delete this._views[viewCid]; </removeFromViews>
+  
+  <updateCollectionLength>this._updateLength();</updateCollectionLength>
+}
+</removeViewFromIndexes>
+```
+
+4. (anonymous) - Compliant with SRP
+```javascript
+<parseStatusLine>
+function (line) {
+  var pieces = line.split(' ')
+  var output = {
+    version: pieces.shift(),
+    status: parseFloat(pieces.shift()),
+    statusText: pieces.join(' ')
+  }
+  return output
+}
+</parseStatusLine>
+```
+
+5. makeConstructor - Violates SRP
+```javascript
+<makeConstructor>
+function makeConstructor(name, defaults) {
+  <assertParameterTypes>
+  assert.string(name, 'name');
+  assert.optionalObject(defaults, 'defaults'); </assertParameterTypes>
+
+  <prepareDefaultCodes>
+  var defaultCode = name.replace(new RegExp('[Ee]rror$'), '');
+  var prototypeDefaults = _.assign({}, {
+      name: name,
+      code: (defaults && defaults.code) || defaultCode,
+      restCode: _.get(defaults, 'restCode', defaultCode)
+  }, defaults); </prepareDefaultCodes>
+
+  <checkIfConstructorExists>
+  assert.equal(
+      typeof module.exports[name],
+      'undefined',
+      'Constructor already exists!'
+  ); </checkIfConstructorExists>
+
+  <createErrorConstructor>
+  var ErrCtor = function() { 
+      
+      RestError.apply(this, arguments);
+      this.name = name;
+  };
+  util.inherits(ErrCtor, RestError); </createErrorConstructor>
+  
+  <augmentErrorConstructorPrototype>
+  _.assign(ErrCtor.prototype, prototypeDefaults); </augmentErrorConstructorPrototype>
+
+  <setDisplayName>
+  ErrCtor.displayName = name; </setDisplayName>
+
+  return ErrCtor;
+}
+</makeConstructor>
+```
+
+6. getLastSeen - Violates SRP
+```javascript
+<getLastSeen>
+function getLastSeen(params, config, conn) {
+  <prepareDefaultConfigAndParams>
+  config = config || require('../config/config.js')
+  params = params || {}
+  params.webid = params.webid || 'http://example.com' </prepareDefaultConfigAndParams>
+
+  return new Promise((resolve, reject) => {
+    <establishDatabaseConnection>
+    if (!conn) {
+      var conn = wc_db.getConnection(config.db)
+    } </establishDatabaseConnection>
+
+    <executeFragmentQuery>
+    var sql = "..."; 
+    var fragLastSeen;
+    var mediaLastSeen;
+    var val;
+    debug('getLastSeen', sql, params);
+    conn.query(sql, { replacements: { "webid" : params.webid } }).then(function(frag){ ... }) </executeFragmentQuery>
+    
+    .then(function(media) {
+      ... 
+      if (mediaLastSeen > fragLastSeen) { 
+        ...
+      } else {
+        ...
+      }
+    })
+    .catch(function(err) {
+      return <handleQueryError>reject({"err" : err, "conn" : conn})</handleQueryError>
+    });
+  });
+}
+</getLastSeen>
+```
+
+7. renameValue - Compliant with SRP
+```javascript
+<cleanAndRenameValue>
+function renameValue(item, rawName) {
+  ...
+  return trimmedName;
+}
+</cleanAndRenameValue>
+```
+
+8. query - Violates SRP
+```javascript
+<query>
+function query(params, callback) {
+  <prepareArguments>
+  const args = utils.getArgs(params, [config], callback); </prepareArguments>
+  <buildUrl>
+  const url = `http://example.com`; </buildUrl>
+
+  return <executeHttpRequest>request.get({
+    ...
+  }, function(err, res, body) {
+    if (err) {
+      return args.callback(err);
+    }
+    return args.callback(null, body);
+  });</executeHttpRequest>
+}
+</query>
+```
+
+9. radio - Compliant with SRP
+```javascript
+<createRadioElements>
+function radio(bind, el, param, value) {
+  ...
+  bind.set = function(value) { ... };
+}
+</createRadioElements>
+```
+
+10. findPartials - Violates SRP
+```javascript
+<findAndRenamePartials>
+function findPartials(source, source_path, options, deps) {
+  ...
+  while ((result = reg.exec(source)) !== null) {
+    ...
+    <registerPartial>
+    name = addDustDependency(partial.name, source_path, options, deps);
+    dep = deps[deps.length - 1];
+    log(options, 'found partial dependency "' + partial.name + '"'); </registerPartial>
+    
+    <renameAndReplacePartial>
+    if (name != partial.name) {
+      ...
+      source = source.substring(0, result.index) + ... + source.substring(result.index + result[0].length);
+      reg.lastIndex += ...;
+    } </renameAndReplacePartial>
+  }
+
+  return source;
+}
+</findAndRenamePartials>
+```

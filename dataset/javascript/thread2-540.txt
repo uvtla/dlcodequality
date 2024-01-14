@@ -1,0 +1,224 @@
+```javascript
+<validateResourcePermission>
+function(resource) {
+      if (resource === "projectrequests" || _.includes(resource, "/") || _.includes(REVIEW_RESOURCES, resource)) {
+        return false;
+      } else {
+        return true;
+      }
+}
+</validateResourcePermission>
+
+<loadConfiguration>
+function loadEnvFile() {
+    if (flags.env || flags.envfile) {
+        try {
+            const dotenv = require("dotenv");
+
+            if (flags.envfile)
+                dotenv.config({ path: flags.envfile });
+            else
+                dotenv.config();
+        } catch(err) {
+            throw new Error("The 'dotenv' package is missing! Please install it with 'npm install dotenv --save' command.");
+        }
+    }
+}
+</loadConfiguration>
+
+<validateAndUpdateModel>
+function(attrs, setOptions){
+          var model = this;
+          var opt = _.extend({}, options, setOptions);
+          <prepareModelAttributes>
+          var validatedAttrs = getValidatedAttrs(model, getOptionsAttrs(options));
+          var allAttrs = _.extend({}, validatedAttrs, model.attributes, attrs);
+          var flattened = _.extend(flatten(allAttrs), attrs);
+          var changedAttrs = attrs ? flatten(attrs) : flattened;
+          </prepareModelAttributes>
+          <performValidation>
+          var result = validateModel(model, allAttrs, _.pick(flattened, _.keys(validatedAttrs)));
+          model._isValid = result.isValid;
+          </performValidation>
+
+          <triggerValidationEvents>
+          _.defer(function() {
+            model.trigger('validated', model._isValid, model, result.invalidAttrs);
+            model.trigger('validated:' + (model._isValid ? 'valid' : 'invalid'), model, result.invalidAttrs);
+          });
+          </triggerValidationEvents>
+
+          <applyValidationResults>
+          if (!opt.forceUpdate && _.intersection(_.keys(result.invalidAttrs), _.keys(changedAttrs)).length > 0) {
+            return result.invalidAttrs;
+          }
+          </applyValidationResults>
+}
+</validateAndUpdateModel>
+
+<initCustomDataTable>
+function(elContainer) {
+    SDT.superclass._initContainerEl.call(this, elContainer);
+    
+    if(this._elContainer) {
+        elContainer = this._elContainer; 
+        Dom.addClass(elContainer, DT.CLASS_SCROLLABLE);
+        
+        <createHeaderContainer>
+        var elHdContainer = document.createElement("div");
+        elHdContainer.style.width = this.get("width") || "";
+        elHdContainer.style.backgroundColor = this.get("COLOR_COLUMNFILLER");
+        Dom.addClass(elHdContainer, SDT.CLASS_HEADER);
+        this._elHdContainer = elHdContainer;
+        elContainer.appendChild(elHdContainer);
+        </createHeaderContainer>
+    
+        <createBodyContainer>
+        var elBdContainer = document.createElement("div");
+        elBdContainer.style.width = this.get("width") || "";
+        elBdContainer.style.height = this.get("height") || "";
+        Dom.addClass(elBdContainer, SDT.CLASS_BODY);
+        Ev.addListener(elBdContainer, "scroll", this._onScroll, this); 
+        this._elBdContainer = elBdContainer;
+        elContainer.appendChild(elBdContainer);
+        </createBodyContainer>
+    }
+}
+</initCustomDataTable>
+
+<refreshMaterialUniforms>
+function refreshUniformsCommon ( uniforms, material ) {
+        <transferMaterialProperties>
+		uniforms.opacity.value = material.opacity;
+
+		if ( _this.gammaInput ) {
+			uniforms.diffuse.value.copyGammaToLinear( material.color );
+		} else {
+			uniforms.diffuse.value = material.color;
+		}
+        </transferMaterialProperties>
+
+        <setTextureUniforms>
+		uniforms.map.texture = material.map;
+		if ( material.map ) {
+			uniforms.offsetRepeat.value.set( material.map.offset.x, material.map.offset.y, material.map.repeat.x, material.map.repeat.y );
+		}
+        </setTextureUniforms>
+
+        <setEnvironmentMapUniforms>
+		uniforms.lightMap.texture = material.lightMap;
+		uniforms.envMap.texture = material.envMap;
+		uniforms.flipEnvMap.value = ( material.envMap instanceof THREE.WebGLRenderTargetCube ) ? 1 : -1;
+		uniforms.reflectivity.value = material.reflectivity;
+		uniforms.refractionRatio.value = material.refractionRatio;
+		uniforms.combine.value = material.combine;
+		uniforms.useRefract.value = material.envMap && material.envMap.mapping instanceof THREE.CubeRefractionMapping;
+        </setEnvironmentMapUniforms>
+}
+</refreshMaterialUniforms>
+
+<getStyleForURL>
+function styleForURL(url) {
+        <retrieveStyles>
+        var styleSheetId, styles = {};
+        url = _canonicalize(url);
+        for (styleSheetId in _styleSheetDetails) {
+            if (_styleSheetDetails[styleSheetId].canonicalizedURL === url) {
+                styles[styleSheetId] = _styleSheetDetails[styleSheetId];
+            }
+        }
+        </retrieveStyles>
+        return styles;
+}
+</getStyleForURL>
+
+<updateResultWithFrameContext>
+function pushFrame(resultSet, options, frameElement, frameSelector) {
+	'use strict';
+	<frameIdentification>
+	var frameXpath = axe.utils.getXpath(frameElement);
+	var frameSpec = {
+		element: frameElement,
+		selector: frameSelector,
+		xpath: frameXpath
+	};
+	</frameIdentification>
+
+	<embedResultsInFrameContext>
+	resultSet.forEach(function(res) {
+		res.node = axe.utils.DqElement.fromFrame(res.node, options, frameSpec);
+
+		var checks = axe.utils.getAllChecks(res);
+		if (checks.length) {
+			checks.forEach(function(check) {
+				check.relatedNodes = check.relatedNodes.map(node =>
+					axe.utils.DqElement.fromFrame(node, options, frameSpec)
+				);
+			});
+		}
+	});
+	</embedResultsInFrameContext>
+}
+</updateResultWithFrameContext>
+
+<matchXMLToXSLTExpression>
+function xsltMatch(match, context) {
+  var expr = xpathParse(match);
+
+  <evaluateSingleNodeMatch>
+  var ret;
+  if (expr.steps && !expr.absolute && expr.steps.length == 1 &&
+      expr.steps[0].axis == 'child' && expr.steps[0].predicate.length == 0) {
+    ret = expr.steps[0].nodetest.evaluate(context).booleanValue();
+  } else {
+  </evaluateSingleNodeMatch>
+
+  <evaluateMultipleNodeMatch>
+    ret = false;
+    var node = context.node;
+    while (!ret && node) {
+      var result = expr.evaluate(context.clone(node,0,[node])).nodeSetValue();
+      for (var i = 0; i < result.length; ++i) {
+        if (result[i] == context.node) {
+          ret = true;
+          break;
+        }
+      }
+      node = node.parentNode;
+    }
+  </evaluateMultipleNodeMatch>
+  return ret;
+}
+</matchXMLToXSLTExpression>
+
+<initializeTattletale>
+function Tattletale(socket, opts) {
+  stream.Transform.call(this, {  });
+
+  <mergeOptions>
+  this.options = merge(Object.create(Tattletale.DEFAULTS), opts || {});
+  </mergeOptions>
+  this.socket = socket;
+
+  <definePeersFunction>
+  this.peers = function() {
+    return [];
+  };
+  </definePeersFunction>
+}
+</initializeTattletale>
+
+<lazyLoadUnifiedLibrary>
+function resolveDependenciesToUnified() {
+        if ( !Calendar || !DateRange ) {
+            sap.ui.getCore().loadLibrary("sap.ui.unified");
+            <loadCalendarSynchronously>
+            Calendar = sap.ui.requireSync("sap/ui/unified/Calendar");
+            </loadCalendarSynchronously>
+            <loadDateRangeSynchronously>
+            DateRange = sap.ui.requireSync("sap/ui/unified/DateRange");
+            </loadDateRangeSynchronously>
+        }
+}
+</lazyLoadUnifiedLibrary>
+```

@@ -1,0 +1,199 @@
+<repaintClockHourCanvas>
+function repaintClockHourCanvas(hoverHour, hoverSign) {
+				
+				<canvasSetup>
+				var ctx = clockHourCanvas.get(0).getContext('2d');
+				</canvasSetup>
+
+				<inputProcessing>
+				(new RegExp('^(-|\\+)?([0-9]+).([0-9]{1,2})$')).test(inputElement.val());
+				var negative = RegExp.$1 == '-' ? true : false;
+				var hour = parseInt(RegExp.$2);
+				</inputProcessing>
+
+				<clearCanvas>
+				ctx.clearRect(0, 0, canvasSize, canvasSize);
+				</clearCanvas>
+
+				<popupVisibilityControl>
+				if (hour >= 24) {
+					popup.css('visibility', 'hidden');
+					return;
+				} else {
+					if (!settings.onlyShowClockOnMobile) popup.css('visibility', 'visible');
+				}
+				</popupVisibilityControl>
+
+				<adjustHourValue>
+				if (hour == 0) hour = 24;
+				if (!inputElement.val()) hour = -1;	
+				</adjustHourValue>
+
+				<drawClockFace>
+				ctx.beginPath();
+				ctx.arc(clockCenterX, clockCenterY, clockRadius, 0, 2 * Math.PI, false);
+				ctx.fillStyle = settings.colors.clockFaceColor;
+				ctx.fill();
+				</drawClockFace>
+
+				<hoverCircleDrawing>
+				if (!isMobile() && hoverHour) {
+					var isMinMaxFullfilled = true;
+					... // Code to determine if min/max conditions are fulfilled
+					if (isMinMaxFullfilled) {
+						... // Code to draw the hover circle
+					}
+				}
+				</hoverCircleDrawing>
+
+				<drawClockCenter>
+				ctx.beginPath();
+				ctx.arc(clockCenterX, clockCenterY, 3, 0, 2 * Math.PI, false);
+				ctx.fillStyle = settings.colors.selectorColor;
+				ctx.fill();
+				</drawClockCenter>
+
+				<currentHourIndicatorDrawing>
+				if (hour > -1 && (!settings.maximum || hour == 24 || isTimeSmallerOrEquals(hour, settings.maximum))) {
+					... // Drawing code for the current hour indicator
+				}
+				</currentHourIndicatorDrawing>
+
+				<drawOuterCircleNumbers>
+				ctx.font = settings.fonts.clockOuterCircleFontSize + 'px ' + settings.fonts.fontFamily;
+				for(i = 1; i <= 12; i++) {
+					... // Code for drawing the numbers on the outer circle
+				}
+				</drawOuterCircleNumbers>
+
+				<drawInnerCircleNumbers>
+				ctx.font = settings.fonts.clockInnerCircleFontSize + 'px ' + settings.fonts.fontFamily;
+				for(i = 1; i <= 12; i++) {
+					... // Code for drawing the numbers on the inner circle
+				}
+				</drawInnerCircleNumbers>
+
+				<repaintSignButtonConditional>
+				if (settings.duration && settings.durationNegative) repaintSignButton(ctx, hoverSign);
+				</repaintSignButtonConditional>
+			}
+</repaintClockHourCanvas>
+
+<_sanitizeCoefficients>
+function _sanitizeCoefficients(coefficients) {
+  <initializeDefaultCoefficients>
+  if (coefficients == undefined) {
+    coefficients = {};
+  }
+  </initializeDefaultCoefficients>
+  <setPropertyCoefficients>
+  for (let property in Utils.DEFAULT_ROOM_MATERIALS) {
+    if (!(coefficients.hasOwnProperty(property))) {
+      coefficients[property] = Utils.ROOM_MATERIAL_COEFFICIENTS[
+        Utils.DEFAULT_ROOM_MATERIALS[property]];
+    }
+  }
+  </setPropertyCoefficients>
+  return coefficients;
+}
+</_sanitizeCoefficients>
+
+<batchSendData>
+function batchSendData (ops, callback) {
+  <createClient>
+  var client = dgram.createSocket('udp4');
+  </createClient>
+
+  <sendData>
+  executeSendData(client, ops, 0, function () {
+    try {
+      client.close();
+    } finally {
+      callback();
+    }
+  });
+  </sendData>
+}
+</batchSendData>
+
+<stock_args>
+function stock_args(f, _params, _psize, _phead, _ptail){
+  <curryFunctionDefinition>
+  function purry_wrapper(){
+    ... // Code defining the wrapper behavior for currying the function
+  }
+  </curryFunctionDefinition>
+  return purry_wrapper;
+}
+</stock_args>
+
+<displayScore>
+function (renderer) {
+  <drawScore>
+  this.font.draw(renderer, game.data.score, this.pos.x, this.pos.y);
+  </drawScore>
+}
+</displayScore>
+
+<_create>
+function _create(f) {
+  <createContract>
+  var c = Object.create(Contract);
+  c._wrapped = f;
+  return c;
+  </createContract>
+}
+</_create>
+
+<validateResponse>
+function validateResponse(type, noSchema, options) {
+  <checkArguments>
+  if (arguments.length < 3) {
+    throw new Error('Handlebars Helper \'validateResponse\'' +
+      'needs 2 parameters');
+  }
+  </checkArguments>
+
+  <returnBlockHelpers>
+  if (!noSchema && mediaTypeContainsJson(type)) {
+    return options.fn(this);
+  } else {
+    return options.inverse(this);
+  }
+  </returnBlockHelpers>
+}
+</validateResponse>
+
+<repeat>
+function repeat(input, n) {
+  <repeatString>
+  var times = ~~n;
+  return (!isString(input) || !times) ? input : strRepeat(input, n);
+  </repeatString>
+}
+</repeat>
+
+<validateFile>
+async function validateFile (file, options) {
+  <fileValidation>
+  if (file instanceof File === false) {
+    return null
+  }
+  await file.setOptions(Object.assign(file.validationOptions, options)).runValidations()
+  return _.size(file.error()) ? file.error().message : null
+  </fileValidation>
+}
+</validateFile>
+
+<resolveConstraints>
+function(){
+  <iterateConstraintResolution>
+  var its = this.options.iterations
+  ,coef = 1 / its;
+  for (var i = 0; i < its; i++){
+    this.resolveDistanceConstraints( coef );
+    this.resolveAngleConstraints( coef );
+  }
+  </iterateConstraintResolution>
+}
+</resolveConstraints>
