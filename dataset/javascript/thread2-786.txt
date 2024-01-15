@@ -1,0 +1,218 @@
+```javascript
+<validateCompatibleTypes>
+function validateCompatibleTypes(startPos, endPos, x, y) {
+  <checkCompatibility>
+  if (joinTypes(x.type(), y.type()) === null) {
+    fail(startPos, endPos,
+      'expected-values-to-have-compatible-types', [
+        x.type(),
+        y.type(),
+      ]
+    );
+  }
+  </checkCompatibility>
+}
+</validateCompatibleTypes>
+
+<buildTree>
+function buildTree(entries, opt_modules) {
+  <sortInitialEntries>
+  sortEntries(entries);
+  </sortInitialEntries>
+
+  const delimiter = opt_modules ? '/' : '.';
+  let roots = [];
+  let stack = [];
+  let allEntries = new Set;
+  
+  let fakeEntries = [];
+  let entriesToResort = new Set;
+
+  <recordEntryFunction>
+  function recordEntry(entry) {
+    //...
+  }
+  </recordEntryFunction>
+  
+  <recordFakeEntryFunction>
+  function recordFakeEntry(name, qualifiedName) {
+    //...
+  }
+  </recordFakeEntryFunction>
+
+  <processEntryFunction>
+  function processEntry(entry, name) {
+    //...
+  }
+  </processEntryFunction>
+
+  <processEntries>
+  entries.forEach(entry => {
+    //...
+  });
+  </processEntries>
+
+  <processFakeEntries>
+  for (let i = fakeEntries.length - 1; i >= 0; i -= 1) {
+    //...
+  }
+  </processFakeEntries>
+
+  <sortFinalEntries>
+  if (fakeEntries.length) {
+    sortEntries(roots);
+  }
+  </sortFinalEntries>
+
+  return roots;
+}
+</buildTree>
+
+<editRow>
+function editRow($tr, colIndex) {
+  // Multiple responsibilities are woven together in this function
+  // including conditional column initialization, row editing, form creation,
+  // and event handling. Therefore, separate tags within show distinct responsibilities.
+  
+  <initializeEditingEnvironment>
+  if (colIndex < 0) return;
+  var oThis = this;
+  var isFixedCol = false;
+  if ($tr && $tr.parents('table').attr('id').indexOf('_fixed_') > -1) isFixedCol = true;
+  $tr = $tr || $('#' + this.options.id + '_content_tbody tr[role="row"]:eq(' + this.eidtRowIndex + ')');
+  colIndex = colIndex || 0;
+  var row = this.dataSourceObj.rows[this.eidtRowIndex].value;
+  this.editRowObj = this.cloneObj(row);
+  </initializeEditingEnvironment>
+
+  <defaultEditMode>
+  if (this.options.editType == 'default') {
+    // ...
+  }
+  </defaultEditMode>
+
+  <formEditMode>
+  else if (this.options.editType == 'form') {
+    // ...
+  }
+  </formEditMode>
+}
+</editRow>
+
+<switchMapToFunction>
+function(module, exports, __webpack_require__) {
+  <functionBody>
+  "use strict";
+  // ...
+  </functionBody>
+}
+</switchMapToFunction>
+
+<getClassOf>
+function getClassOf(value) {
+  <determineClass>
+  return value == null
+    ? capitalize(value)
+    : toString.call(value).slice(8, -1);
+  </determineClass>
+}
+</getClassOf>
+
+<ConnectionServer>
+function ConnectionServer(endpoint, options, connectionListener) {
+  <initiateEventEmitter>
+  events.EventEmitter.call(this);
+  </initiateEventEmitter>
+
+  <argumentNormalization>
+  if (!(endpoint instanceof Endpoint)) {
+    endpoint = new Endpoint(endpoint);
+  }
+  if (typeof options === 'function') {
+    connectionListener = options;
+    options = undefined;
+  }
+  </argumentNormalization>
+
+  <assignProperties>
+  this.endpoint = endpoint;
+  this.options = options || {};
+  if (typeof connectionListener === 'function') {
+    <setupListener>
+    this.on('connection', connectionListener);
+    </setupListener>
+  }
+  </assignProperties>
+
+  <establishConnection>
+  listen.call(this);
+  </establishConnection>
+}
+</ConnectionServer>
+
+<getChildrenFunction>
+function(node) {
+  <getChildNodes>
+  node = Y.Dom.get(node);
+  if (!node) {
+    YAHOO.log('getChildren failed: invalid node argument', 'error', 'Dom');
+  }
+
+  return Y.Dom.getChildrenBy(node);
+  </getChildNodes>
+}
+</getChildrenFunction>
+
+<ViewConstructor>
+function View(template) {
+  <initializeContext>
+  this.context = null;
+  if (!template) template = this;
+  this.template = template;
+  if (!this.template.bindings) this.template.bindings = [];
+  </initializeContext>
+
+  <setupBindings>
+  this.bindings = this.template.bindings.map(mapBinding.bind(this), this);
+  </setupBindings>
+
+  <setViewNodes>
+  this.firstViewNode = this.firstChild;
+  this.lastViewNode = this.lastChild;
+  if (this.firstViewNode) {
+    this.firstViewNode.view = this;
+    this.lastViewNode.view = this;
+  }
+  </setViewNodes>
+}
+</ViewConstructor>
+
+<setUpSelectionLayer>
+function(source) {
+  <selectionLayerSetup>
+  var selectionLayer;
+  if (!this.layerCache[source.id]) {
+    // Code to setup selection layer
+  } else {
+    selectionLayer = this.layerCache[source.id];
+  }
+  return selectionLayer;
+  </selectionLayerSetup>
+}
+</setUpSelectionLayer>
+
+<TracerConstructor>
+function Tracer(ringpop, config, opts) {
+  <tracerSetup>
+  if (!(this instanceof Tracer)) {
+      return new Tracer(opts);
+  }
+
+  this.ringpop = ringpop;
+  _.extend(this, config);
+  this.opts = _.defaults({}, opts, tracerOptsDefaults);
+  this.listener = null;
+  </tracerSetup>
+}
+</TracerConstructor>
+```

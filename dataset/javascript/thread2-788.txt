@@ -1,0 +1,343 @@
+```javascript
+<buildBody>
+function buildBody({lineDescriptor, timeseriesesByRange}, descriptorFlags,
+    revisionInfo) {
+  
+  <getDescriptorParts>
+  const descriptorParts = getDescriptorParts(lineDescriptor, descriptorFlags);
+  </getDescriptorParts>
+
+  <stringifyDescriptor>
+  const descriptor = ChartTimeseries.stringifyDescriptor(lineDescriptor);
+  </stringifyDescriptor>
+
+  <initializeRows>
+  const scalarRowsByLabel = new Map();
+  const linkRowsByLabel = new Map();
+  const columnCount = timeseriesesByRange.length;
+  </initializeRows>
+
+  <buildCells>
+  for (const [columnIndex, {range, timeserieses}] of enumerate(
+      timeseriesesByRange)) {
+    const setScalar = (rowLabel, value, unit) => setCell(
+        scalarRowsByLabel, rowLabel, columnCount, columnIndex, {value, unit});
+    const setLink = (rowLabel, href, label) => setCell(
+        linkRowsByLabel, rowLabel, columnCount, columnIndex, {href, label});
+
+    DetailsTable.buildCell(setLink, setScalar, timeserieses, range,
+        revisionInfo);
+  }
+  </buildCells>
+
+  <collectRows>
+  const scalarRows = collectRowsByLabel(scalarRowsByLabel);
+  const linkRows = collectRowsByLabel(linkRowsByLabel);
+  </collectRows>
+
+  return {descriptor, descriptorParts, scalarRows, linkRows};
+}
+</buildBody>
+
+<anonymousFunction>
+function (i) {
+      return function (e) {
+        
+        <checkDisabled>
+        if (this.props.disabled) return;
+        </checkDisabled>
+
+        <getMousePosition>
+        var position = this._getMousePosition(e);
+        </getMousePosition>
+
+        <startInteraction>
+        this._start(i, position[0]);
+        </startInteraction>
+
+        <addHandlers>
+        this._addHandlers(this._getMouseEventMap());
+        </addHandlers>
+
+        <pauseEvent>
+        pauseEvent(e);
+        </pauseEvent>
+
+      }.bind(this);
+    }
+</anonymousFunction>
+
+<serializeCookie>
+function serializeCookie(cookie) {
+  
+  return {
+    path: cookie.path,
+    name: cookie.key,
+    value: cookie.value,
+    domain: cookie.domain
+  };
+  
+}
+</serializeCookie>
+
+<sendRecursively>
+function sendRecursively(event, currentState, isUnhandledPass) {
+  var log = this.enableLogging,
+      eventName = isUnhandledPass ? 'unhandledEvent' : event,
+      action = currentState[eventName],
+      contexts, sendRecursiveArguments, actionArguments;
+
+  <getContexts>
+  contexts = [].slice.call(arguments, 3);
+  </getContexts>
+
+  <invokeActionFunction>
+  if (typeof action === 'function') {
+    if (log) {
+      if (isUnhandledPass) {
+        Ember.Logger.log(`STATEMANAGER: Unhandled event '${event}' being sent to state ${currentState.get('path')}.`);
+      } else {
+        Ember.Logger.log(`STATEMANAGER: Sending event '${event}' to state ${currentState.get('path')}.`);
+      }
+    }
+
+    actionArguments = contexts;
+    if (isUnhandledPass) {
+      actionArguments.unshift(event);
+    }
+    actionArguments.unshift(this);
+
+    return action.apply(currentState, actionArguments);
+  }
+  </invokeActionFunction>
+  else {
+    <handleParentState>
+    var parentState = get(currentState, 'parentState');
+    if (parentState) {
+
+      sendRecursiveArguments = contexts;
+      sendRecursiveArguments.unshift(event, parentState, isUnhandledPass);
+
+      return sendRecursively.apply(this, sendRecursiveArguments);
+    } else if (!isUnhandledPass) {
+      return sendEvent.call(this, event, contexts, true);
+    }
+    </handleParentState>
+  }
+}
+</sendRecursively>
+
+<anonymousFunctionComplex>
+function() {
+      
+
+      <initializeVariables>
+      var a = this['re'];
+      var b = this['im'];
+      </initializeVariables>
+
+      <calc>
+      var noIM = a > 1 && b === 0;
+      var oneMinus = 1 - a;
+      var onePlus = 1 + a;
+      var d = oneMinus * oneMinus + b * b;
+      </calc>
+
+      <computeNewComplexNumber>
+      var x = (d !== 0)
+              ? new Complex(
+                      (onePlus * oneMinus - b * b) / d,
+                      (b * oneMinus + onePlus * b) / d)
+              : new Complex(
+                      (a !== -1) ? (a / 0) : 0,
+                      (b !== 0) ? (b / 0) : 0);
+      </computeNewComplexNumber>
+
+      <modifyComplexNumber>
+      var temp = x['re'];
+      x['re'] = logHypot(x['re'], x['im']) / 2;
+      x['im'] = Math.atan2(x['im'], temp) / 2;
+      if (noIM) {
+        x['im'] = -x['im'];
+      }
+      </modifyComplexNumber>
+
+      return x;
+    }
+</anonymousFunctionComplex>
+
+<mountAt>
+function mountAt(url) {
+	  var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	  var name = opts.name;
+
+    <buildMountObject>
+	  return {
+		  state: this,
+		  url: url,
+		  name: name,
+		  buildUiRouterState: builder
+	  };
+    </buildMountObject>
+
+    <builder>
+	  function builder(options) {
+		  var state = buildUiRouterState(this.state, options);
+
+      <extendStateWithUrlAndName>
+		  if (this.url !== undefined) {
+			  state.url = url;
+		  }
+
+		  if (this.name !== undefined) {
+			  state.name = name;
+		  }
+      </extendStateWithUrlAndName>
+
+		  return state;
+	  }
+    </builder>
+}
+</mountAt>
+
+<dateList>
+function dateList(numbers, type) {
+  
+  <handleSingleElement>
+    if (numbers.length < 2) {
+      return numberToDateName('' + numbers[0], type);
+    }
+  </handleSingleElement>
+
+  <buildDateList>
+    var lastVal = '' + numbers.pop();
+    var outputText = '';
+
+    for (var i = 0, value; value = numbers[i]; i++) {
+      if (outputText.length > 0) {
+        outputText += ', ';
+      }
+      outputText += numberToDateName(value, type);
+    }
+    return outputText + ` ${locale['and']} ` + numberToDateName(lastVal, type);
+    </buildDateList>
+}
+</dateList>
+
+<anonymousFunctionPieChartNode>
+function (node, startAngle) {
+            
+            if (!node) {
+                return;
+            }
+
+            var endAngle = startAngle;
+
+            <computeAngleAndLayout>
+            
+            if (node !== virtualRoot) {
+                
+                var value = node.getValue();
+
+                var angle = (sum === 0 && stillShowZeroSum)
+                    ? unitRadian : (value * unitRadian);
+                if (angle < minAngle) {
+                    angle = minAngle;
+                    restAngle -= minAngle;
+                }
+                else {
+                    valueSumLargerThanMinAngle += value;
+                }
+
+                endAngle = startAngle + dir * angle;
+
+                var depth = node.depth - rootDepth
+                    - (renderRollupNode ? -1 : 1);
+                var rStart = r0 + rPerLevel * depth;
+                var rEnd = r0 + rPerLevel * (depth + 1);
+
+                var itemModel = node.getModel();
+                if (itemModel.get('r0') != null) {
+                    rStart = parsePercent(itemModel.get('r0'), size / 2);
+                }
+                if (itemModel.get('r') != null) {
+                    rEnd = parsePercent(itemModel.get('r'), size / 2);
+                }
+
+                node.setLayout({
+                    angle: angle,
+                    startAngle: startAngle,
+                    endAngle: endAngle,
+                    clockwise: clockwise,
+                    cx: cx,
+                    cy: cy,
+                    r0: rStart,
+                    r: rEnd
+                });
+            }
+
+            
+            if (node.children && node.children.length) {
+                
+                var siblingAngle = 0;
+                zrUtil.each(node.children, function (node) {
+                    siblingAngle += renderNode(node, startAngle + siblingAngle);
+                });
+            }
+
+            </computeAngleAndLayout>
+
+            return endAngle - startAngle;
+        }
+</anonymousFunctionPieChartNode>
+
+<isWritable>
+function isWritable(p) {
+    if (!fs.existsSync(p)) {
+        return false;
+    }
+    let stats = fs.statSync(p);
+    let mode = stats.mode;
+    let uid = process.getuid ? process.getuid() : 0;
+    let gid = process.getgid ? process.getgid() : 0;
+    let owner = uid === stats.uid;
+    let group = gid === stats.gid;
+    return !!(owner && (mode & parseInt('00200', 8)) ||
+        group && (mode & parseInt('00020', 8)) ||
+        (mode & parseInt('00002', 8)));
+}
+</isWritable>
+
+<clearAjax>
+function clearAjax() {
+  <iterateOverRequestsToClear>
+  each(function(request) {
+    try {
+      <resetEventHandlers>
+      request.onload = noop;
+      request.onerror = noop;
+      request.onabort = noop;
+      request.onreadystatechange = noop;
+      </resetEventHandlers>
+
+      <applyQueuedHandlers>
+      each(function(added) {
+        request[added[0]].apply(request, added[1]);
+      }, request._queue || []);
+      </applyQueuedHandlers>
+
+      <abortRequest>
+      request.abort();
+      </abortRequest>
+    } catch (e) {
+      
+    }
+  }, requests);
+  </iterateOverRequestsToClear>
+
+  <clearRequestsList>
+  requests.length = [];
+  </clearRequestsList>
+}
+</clearAjax>
+```

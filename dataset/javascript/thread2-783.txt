@@ -1,0 +1,180 @@
+```javascript
+<Text>
+function Text(annotations) {
+  this._parent = annotations;
+  this._root = undefined;
+  this._children = {};
+  this._config = {
+    'width': 200,
+    'height': 20,
+    'position': {
+      'left': 0,
+      'top': 0
+    },
+    'text': ''
+  };
+
+  if (annotations._config.hasOwnProperty('text')) {
+    annotations._config.text.push(this._config);
+  } else {
+    annotations._config.text = [this._config];
+  }
+  if (annotations._children.hasOwnProperty('text')) {
+    annotations._children.text.push(this);
+  } else {
+    annotations._children.text = [this];
+  }
+
+  return this;
+}
+</Text>
+
+<readFiles>
+function readFiles() {
+  var self = this;
+  
+  async.waterfall([
+    function(callback) {
+      storeFileContent.init(self.options.testSrc, callback);
+    },
+    function(data, callback) {
+      self.testFiles = data;
+      storeFileContent.init(self.options.viewSrc, callback);
+    },
+    function(data, callback) {
+      self.viewFiles = data;
+      callback(null, 'success');
+    }
+  ], function() {
+    findElementSelectors.call(self);
+  });
+}
+</readFiles>
+
+<getTarget>
+function getTarget(index, headersChain, getHeader) {
+  if (index === 0) {
+    return Promise.resolve({ bits: MAX_BITS, target: MAX_TARGET })
+  }
+
+  return Promise.try(function() {
+    var firstHeader = getHeader((index - 1) * 2016)
+    var lastHeader = _.find(headersChain, { height: index * 2016 - 1 })
+    if (lastHeader === undefined) {
+      lastHeader = getHeader(index * 2016 - 1)
+    }
+    return Promise.all([firstHeader, lastHeader])
+  })
+  .spread(function(firstHeader, lastHeader) {
+    var nTargetTimestamp = 14 * 24 * 60 * 60;
+    var nActualTimestamp = lastHeader.time - firstHeader.time;
+    // ...
+    // Further calculations to determine 'target'
+    // ...
+    return { bits: c + MM * i, target: target.toHex() }
+  })
+}
+</getTarget>
+
+<function_EarliestTime>
+function(earliestTime, callback) {
+  if (!callback && utils.isFunction(earliestTime)) {
+    callback = earliestTime;
+    earliestTime = undefined;
+  }
+
+  var query = "| datamodel \"" + this.dataModel.name + "\" " + this.name + " search | tscollect";
+  var args = earliestTime ? { earliest_time: earliestTime } : {};
+
+  this.dataModel.service.search(query, args, callback);
+}
+</function_EarliestTime>
+
+<normalizeValidator>
+function normalizeValidator(validator) {
+  if (validator.validate !== undefined) {
+    return function(c) { return validator.validate(c); };
+  }
+  else {
+    return validator;
+  }
+}
+</normalizeValidator>
+
+<makeLookAt>
+function makeLookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz) {
+  var eye = $V([ex, ey, ez]);
+  var center = $V([cx, cy, cz]);
+  var up = $V([ux, uy, uz]);
+  
+  var z = eye.subtract(center).toUnitVector();
+  var x = up.cross(z).toUnitVector();
+  var y = z.cross(x).toUnitVector();
+  
+  var m = $M([ [x.e(1), x.e(2), x.e(3), 0],
+               [y.e(1), y.e(2), y.e(3), 0],
+               [z.e(1), z.e(2), z.e(3), 0],
+               [0, 0, 0, 1] ]);
+  
+  var t = $M([ [1, 0, 0, -ex],
+               [0, 1, 0, -ey],
+               [0, 0, 1, -ez],
+               [0, 0, 0, 1] ]);
+  return m.x(t);
+}
+</makeLookAt>
+
+<function_d>
+function(d) {
+  "use strict";
+
+  if (typeof d === "number") {
+    d = new Date(d);
+  }
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+}
+</function_d>
+
+<fromBoot>
+function fromBoot(options) {
+  var version;
+  var bootPath = Path.resolve(
+    options.directory,
+    'bundle',
+    'programs',
+    'server',
+    'boot.js');
+
+  try {
+    version = Fs.readFileSync(bootPath, 'utf8')
+      .split('\n')
+      .find((line) => line.indexOf('MIN_NODE_VERSION') >= 0)
+      .split(' ')[3]
+      .replace(/[v;']/g, '');
+  } catch (err) {
+    return false;
+  }
+  return version;
+}
+</fromBoot>
+
+<svgToString>
+function svgToString(filename) {
+  if (!/\.svg$/i.test(filename)) {
+    return through();
+  }
+
+  return through(function(buf, enc, next) {
+    this.push('module.exports=' + JSON.stringify(buf.toString('utf8')));
+    next();
+  });
+}
+</svgToString>
+
+<computeBuffer>
+function computeBuffer() {
+  this._buffer = map.layerPointToLatLng(new L.Point(0, 0)).lat -
+                 map.layerPointToLatLng(new L.Point(this.options.snapDistance, 0)).lat;
+}
+</computeBuffer>
+```

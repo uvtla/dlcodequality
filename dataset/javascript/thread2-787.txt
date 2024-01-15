@@ -1,0 +1,426 @@
+```javascript
+<Prompt>
+function Prompt() {
+  Base.apply(this, arguments);
+
+  <validateOptChoices>
+  if (!this.opt.choices) {
+    this.throwParamError("choices");
+  } </validateOptChoices>
+
+  <validateInstance>
+  this.validate();
+  </validateInstance>
+
+  <appendHelpChoice>
+  this.opt.choices.push({
+    key: "h",
+    name: "Help, list all options",
+    value: "help"
+  }); </appendHelpChoice>
+
+  <setRenderFunction>
+  this.opt.choices.setRender(renderChoice);
+  </setRenderFunction>
+
+  <setDefaultChoice>
+  var defIndex = 0;
+  if (_.isNumber(this.opt.default) && this.opt.choices.getChoice(this.opt.default)) {
+    defIndex = this.opt.default;
+  }
+  var defStr = this.opt.choices.pluck("key");
+  this.rawDefault = defStr[defIndex];
+  defStr[defIndex] = String(defStr[defIndex]).toUpperCase();
+  this.opt.default = defStr.join("");
+  </setDefaultChoice>
+
+  return this;
+}
+</Prompt>
+
+<anonymousFunction>
+function (entries, exchangePrefix, connectionFunc, options) {
+  events.EventEmitter.call(this);
+
+  <assertValidatorOption>
+  assert(options.validator, 'options.validator must be provided');
+  </assertValidatorOption>
+
+  <initializeProperties>
+  this._conn = null;
+  this.__reconnectTimer = null;
+  this._connectionFunc = connectionFunc;
+  this._channel = null;
+  this._connecting = null;
+  this._entries = entries;
+  this._exchangePrefix = exchangePrefix;
+  this._options = options;
+  this._errCount = 0;
+  this._lastErr = Date.now();
+  this._lastTime = 0;
+  this._sleeping = null;
+  this._sleepingTimeout = null;
+  </initializeProperties>
+
+  <handleDeprecatedOptions>
+  if (options.drain || options.component) {
+    console.log('taskcluster-lib-stats is now deprecated!\n' +
+      'Use the `monitor` option rather than `drain`.\n' +
+      '`monitor` should be an instance of taskcluster-lib-monitor.\n' +
+      '`component` is no longer needed. Prefix your `monitor` before use.');
+  }
+  </handleDeprecatedOptions>
+
+  <initializeMonitor>
+  var monitor = null;
+  if (options.monitor) {
+    monitor = options.monitor;
+  }
+  </initializeMonitor>
+
+  <entryInitializers>
+  entries.forEach((entry) => {
+    this[entry.name] = (...args) => {
+
+      <buildMessage>
+      var message = entry.messageBuilder.apply(undefined, args);
+      common.validateMessage(this._options.rootUrl, this._options.serviceName, this._options.version,
+        options.validator, entry, message);
+      </buildMessage>
+
+      <buildRoutingKey>
+      var routingKey = common.routingKeyToString(entry, entry.routingKeyBuilder.apply(undefined, args));
+      </buildRoutingKey>
+
+      <buildCCs>
+      var CCs = entry.CCBuilder.apply(undefined, args);
+      assert(CCs instanceof Array, 'CCBuilder must return an array');
+      </buildCCs>
+
+      <serializePayload>
+      var payload = new Buffer(JSON.stringify(message), 'utf8');
+      </serializePayload>
+
+      <determineExchange>
+      var exchange = exchangePrefix + entry.exchange;
+      </determineExchange>
+
+      <debugMessage>
+      debug('Publishing message on exchange: %s', exchange);
+      </debugMessage>
+
+      <publishMessage>
+      return this._connect().then(channel => {
+        return new Promise((accept, reject) => {
+
+          <monitorStart>
+          var start = null;
+          if (monitor) {
+            start = process.hrtime();
+          }
+          </monitorStart>
+
+          <timeoutHandling>
+          let done = false;
+          this._sleep12Seconds().then(() => {
+            if (!done) {
+              let err = new Error('publish message timed out after 12s');
+              this._handleError(err);
+              reject(err);
+            }
+          });
+          </timeoutHandling>
+
+          <channelPublish>
+          channel.publish(exchange, routingKey, payload, {
+            persistent: true,
+            contentType: 'application/json',
+            contentEncoding: 'utf-8',
+            CC: CCs,
+          }, (err, val) => {
+
+            <monitorFinish>
+            done = true;
+            if (monitor) {
+              var d = process.hrtime(start);
+              monitor.measure(exchange, d[0] * 1000 + d[1] / 1000000);
+              monitor.count(exchange);
+            }
+            </monitorFinish>
+
+            <errorHandling>
+            if (err) {
+              err.methodName = entry.name;
+              err.exchange = exchange;
+              err.routingKey = routingKey;
+              err.payload = payload;
+              err.ccRoutingKeys = CCs;
+              debug('Failed to publish message: %j and routingKey: %s, ' +
+                'with error: %s, %j', message, routingKey, err, err);
+              if (monitor) {
+                monitor.reportError(err);
+              }
+              return reject(err);
+            }
+            </errorHandling>
+            accept(val);
+          });
+          </channelPublish>
+        });
+      });
+      </publishMessage>
+    };
+  });
+  </entryInitializers>
+}
+</anonymousFunction>
+
+<handleParamTree>
+function handleParamTree(api, field) {
+  <extractParams>
+  var params = api[field];
+  </extractParams>
+
+  <processParams>
+  if (params && params.length) {
+
+    <filterParams>
+    params.forEach(function(param, k) {
+
+      <splitField>
+      var paramNames = param.field.split('.');
+      </splitField>
+      <nullifyAndHandleBelonging>
+      if (paramNames && paramNames.length > 1) {
+        
+        params[k] = null;
+        handleParamBelong(field, paramNames, params, param)
+      }
+      </nullifyAndHandleBelonging>
+    });
+    </filterParams>
+
+    <cleanParams>
+    api[field] = params.filter(function(param) {
+      return param ? true : false;
+    });
+    </cleanParams>
+  }
+  </processParams>
+}
+</handleParamTree>
+
+<toggleList>
+function(oList) {
+  var jListContRef = oList.$("lst");
+
+  <checkListState>
+  if (jListContRef.hasClass("sapUiUx3ExactLstExpanded")) {
+    <closeListPopup>
+    oList._oPopup.close();
+    </closeListPopup>
+  } else {
+    <openListPopup>
+    oList._oPopup.open();
+    </openListPopup>
+  }
+  </checkListState>
+}
+</toggleList>
+
+<validateForm>
+function validateForm(formEl, nativeSubmit) {
+  <checkFormValidity>
+  if (formEl.checkValidity && !formEl.checkValidity()) {
+    <logError>
+    log("Form did not pass validation checks - will not upload.", "error");
+    </logError>
+    <invokeNativeSubmit>
+    nativeSubmit();
+    </invokeNativeSubmit>
+  }
+  else {
+    return true;
+  }
+  </checkFormValidity>
+}
+</validateForm>
+
+<customModuleCompile>
+function customModuleCompile(content, filename) {
+  <initializeModuleExceptions>
+  var moduleExceptions, parentDefine = global.define;
+  </initializeModuleExceptions>
+
+  <setGlobalDefine>
+  if (!this._globalDefine) {
+    setGlobalDefine(this);
+  }
+  </setGlobalDefine>
+
+  <compileModule>
+  moduleExceptions = originalModuleCompile.call(this, content, filename);
+  </compileModule>
+
+  <restoreDefine>
+  global.define = parentDefine;
+  </restoreDefine>
+
+  return moduleExceptions;
+}
+</customModuleCompile>
+
+<formatVersion>
+function (version) {
+  <sanitizeVersion>
+  version = version.toLowerCase();
+  version = version.replace(' ', '');
+  version = version.replace('-', '.');
+  version = version.replace('_', '.');
+  version = version.replace('+', '.');
+  </sanitizeVersion>
+
+  <initializeVersionComponents>
+  var length = version.length;
+  var newVersion = false;
+  newVersion = version[0];
+  </initializeVersionComponents>
+
+  <reformatVersion>
+  for (var i = 1; i < length; i++) {
+    <versionLogic>
+    var a = version[i - 1];
+    var b = version[i];
+    if ('.' === a || '.' === b) {
+      newVersion += b;
+      continue;
+    }
+    var sameType = (isNaN(a) === isNaN(b));
+    if (sameType) {
+      newVersion += b;
+    } else {
+      newVersion += "." + b;
+    }
+    </versionLogic>
+  }
+  </reformatVersion>
+
+  <splitToVersionArray>
+  var versionArray = newVersion.split('.');
+  </splitToVersionArray>
+
+  <filterEmptyVersionParts>
+  versionArray = versionArray.filter(function (e) { return (e !== ""); });
+  </filterEmptyVersionParts>
+
+  <mapVersionLabels>
+  versionArray = versionArray.map(function (e) {
+    switch (e) {
+      case 'alpha':
+        return 'a';
+      case 'beta':
+        return 'b';
+      case 'pl':
+        return 'p';
+      default:
+        return e;
+    }
+  });
+  </mapVersionLabels>
+
+  <joinVersionParts>
+  return versionArray.join('.');
+  </joinVersionParts>
+}
+</formatVersion>
+
+<tryCatchWrapper>
+function (func, context, args, callback) {
+  <tryInvokeFunction>
+  try {
+    func.apply(context, args);
+  }
+  catch (err) {}
+  </tryInvokeFunction>
+
+  <invokeCallback>
+  if (callback) {
+    callback();
+  }
+  </invokeCallback>
+}
+</tryCatchWrapper>
+
+<getItem>
+function getItem(key, callback) {
+  var self = this;
+
+  <warnNonStringKey>
+  if (typeof key !== 'string') {
+    globalObject.console.warn(key + ' used as a key, but it is not a string.');
+    key = String(key);
+  }
+  </warnNonStringKey>
+
+  <getItemPromise>
+  var promise = self.ready().then(function () {
+    <initializeDbInfo>
+    var dbInfo = self._dbInfo;
+    </initializeDbInfo>
+    <retrieveItem>
+    var result = localStorage.getItem(dbInfo.keyPrefix + key);
+    </retrieveItem>
+
+    <deserializeResult>
+    
+    if (result) {
+      result = dbInfo.serializer.deserialize(result);
+    }
+    </deserializeResult>
+
+    return result;
+  });
+  </getItemPromise>
+
+  <executeCallback>
+  executeCallback(promise, callback);
+  </executeCallback>
+  return promise;
+}
+</getItem>
+
+<DbfConstructor>
+function Dbf(fileName) {
+
+  <initializeFileName>
+  this._fileName = fileName;
+  </initializeFileName>
+  var self = this;
+  this._promise = new Promise(function (resolve, reject) {
+
+    <openFile>
+    fs.open(fileName, 'r', function (err, fd) {
+      if (err)
+        reject(err);
+      else {
+        <readFileHeader>
+        fs.read(fd, new Buffer(32), 0, 0x20, 0, function (err, bytes, buffer) {
+          if (err)
+            reject(err);
+          else if (bytes === 0x20) {
+            try {
+              self._parse(fd, buffer, resolve, reject);
+            } catch (e) {
+              reject(e);
+            }
+          } else
+            reject(new Error('Invalid file length'));
+        });
+        </readFileHeader>
+      }
+    });
+    </openFile>
+  });
+}
+</DbfConstructor>
+```

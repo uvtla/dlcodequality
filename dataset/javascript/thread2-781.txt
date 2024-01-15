@@ -1,0 +1,333 @@
+```javascript
+<detachEventHandler>
+function(fn, context){
+      var cursor = this;
+      var prev;
+
+      <getCursorTarget>
+      while (prev = cursor, cursor = cursor.handler)
+        if (cursor.fn === fn && cursor.context === context)
+        </getCursorTarget>  
+        {
+          <nullifyHandler>
+          cursor.fn = $undef;
+          cursor.destroy = cursor.destroy && $undef;
+          </nullifyHandler>
+
+          <updateHandlerChain>
+          prev.handler = cursor.handler;
+          </updateHandlerChain>
+
+          return;
+        }
+      </detachEventHandler>
+
+      <logWarning>
+      consoleMethods.warn('basis.Token#detach: fn & context pair not found, nothing was removed');
+      </logWarning>
+</detachEventHandler>
+
+<addRiotTags>
+function addRiotTags(arr) {
+    var list = ''
+    <eachValidTag>
+    each(arr, function (e) {
+      if (!/[^-\w]/.test(e))
+        list += ',*[' + RIOT_TAG + '=' + e.trim() + ']'
+    })
+    </eachValidTag>
+    return list
+}
+</addRiotTags>
+
+<computePlotCoordinates>
+function(plot) {
+            var self = this;
+
+            <computeCoordinatesFromOptions>
+            if (plot.options.x !== undefined && plot.options.y !== undefined) {
+                plot.coords = {
+                    x: plot.options.x,
+                    y: plot.options.y
+                };
+            } else if (plot.options.plotsOn !== undefined && self.areas[plot.options.plotsOn] !== undefined) {
+                var areaBBox = self.areas[plot.options.plotsOn].mapElem.getBBox();
+                plot.coords = {
+                    x: areaBBox.cx,
+                    y: areaBBox.cy
+                };
+            } else {
+                plot.coords = self.mapConf.getCoords(plot.options.latitude, plot.options.longitude);
+            }
+            </computeCoordinatesFromOptions>
+}
+</computePlotCoordinates>
+
+<checkEquality>
+function equal(a, b, diff) {
+  <initializeDiff>
+  diff = diff || {};
+  </initializeDiff>
+
+  <checkType>
+  if (a.type !== b.type) {
+    return equalDiff(a, b, diff);
+  }
+  </checkType>
+  
+  <checkValue>
+  if (a.value !== b.value) {
+    return equalDiff(a, b, diff);
+  }
+  </checkValue>
+  
+  <checkValueNode>
+  if (isValueNode(a) !== isValueNode(b)) {
+    return equalDiff(a, b, diff);
+  }
+  </checkValueNode>
+
+  <checkNodeEquality>
+  if (!isValueNode(a)) {
+    if (a.nodes.length !== b.nodes.length) {
+      return equalDiff(a, b, diff);
+    }
+    for (var i = 0; i < b.nodes.length; i++) {
+      if (!equal(a.nodes[i], b.nodes[i], diff)) {
+        return false;
+      }
+    }
+  }
+  </checkNodeEquality>
+  
+  return true;
+}
+</checkEquality>
+
+<explodeAllSources>
+function explodeall(sources) {
+		<expandSources>
+		sources = grunt.file.expand({ nonull: true }, sources);
+		</expandSources>
+		<filterAndMapRelativePaths>
+		return explode(sources.filter(exists).map(relpath));
+		</filterAndMapRelativePaths>
+}
+</explodeAllSources>
+
+<checkLineTriangleCollisions>
+function _noAreaTriangleCollides (triangle, viewportAABB) {
+    <destructureTriangle>
+    const [v1, v2, v3] = triangle;
+    </destructureTriangle>
+
+    <setLineVariables>
+    const a = v1;
+    const b = equalPoints(v2, a) ? v3 : v2;
+    </setLineVariables>
+
+    <defineBoundingArea>
+    const bbox = [viewportAABB.minx, viewportAABB.miny, viewportAABB.maxx, viewportAABB.maxy];
+    </defineBoundingArea>
+
+    <checkLineClipping>
+    const collides = lineclip([[a.x, a.y], [b.x, b.y]], bbox);
+    </checkLineClipping>
+    
+    <returnCollisionResult>
+    return (collides.length > 0);
+    </returnCollisionResult>
+}
+</checkLineTriangleCollisions>
+
+<registerFilters>
+function registerFilter(name, filter, options, mergeConfig) {
+  <initializeParameters>
+  var params = name;
+
+  if (!isObject(name)) {
+    params = {};
+    params[name] = {
+      filter: filter,
+      options: options
+    };
+  }
+  </initializeParameters>
+
+  <registerOrUpdateFilters>
+  each(params, function (v, name) {
+    if (v) {
+      var _filter = v.filter,
+          _options = v.options;
+
+      <updateOperatorAndAliasConfigurations>
+      if (_options) {
+        if (_options.isOperator) {
+          var createRegexOperators = nj.createRegexOperators;
+
+          if (createRegexOperators) {
+            createRegexOperators(name);
+          }
+        }
+
+        var alias = _options.alias;
+
+        if (alias) {
+          var createFilterAlias = nj.createFilterAlias;
+
+          if (createFilterAlias) {
+            createFilterAlias(name, alias);
+            name = alias;
+          }
+        }
+      }
+      </updateOperatorAndAliasConfigurations>
+
+      <assignFilterFunctions>
+      if (_filter) {
+        filters[name] = _filter;
+      } else if (!mergeConfig) {
+        filters[name] = v;
+      }
+
+      if (mergeConfig) {
+        if (!filterConfig[name]) {
+          filterConfig[name] = _config$1();
+        }
+
+        assign(filterConfig[name], _options);
+      } else {
+        filterConfig[name] = _config$1(_options);
+      }
+      </assignFilterFunctions>
+    }
+  }, false);
+  </registerOrUpdateFilters>
+}
+</registerFilters>
+
+<retrieveAgentProfile>
+function (key, cfg) {
+  <initialSetup>
+  this.log("retrieveAgentProfile");
+  var requestCfg = {},
+      requestResult,
+      callbackWrapper,
+      requestHeaders,
+      self = this;
+  </initialSetup>
+
+  <prepareRequestHeaders>
+  requestHeaders = cfg.requestHeaders || {};
+  </prepareRequestHeaders>
+
+  <configureRequest>
+  <setupBaseRequestConfig>
+  requestCfg = {
+      method: "GET",
+      params: {
+          profileId: key
+      },
+      ignore404: true,
+      headers: requestHeaders
+  };
+  </setupBaseRequestConfig>
+  
+  <setProfileRequestQuery>
+  if (this.version === "0.9") {
+      requestCfg.url = "actors/profile";
+      requestCfg.params.actor = JSON.stringify(cfg.agent.asVersion(this.version));
+  }
+  else {
+      requestCfg.url = "agents/profile";
+      requestCfg.params.agent = JSON.stringify(cfg.agent.asVersion(this.version));
+  }
+  </setProfileRequestQuery>
+  </configureRequest>
+  
+  <wrapCallbackIfNeeded>
+  if (typeof cfg.callback !== "undefined") {
+      callbackWrapper = function (err, xhr) {
+          // ... The current content is omitted for brevity. The full function's body follows the same structure shown prior to the omittance.
+      };
+      requestCfg.callback = callbackWrapper;
+  }
+  </wrapCallbackIfNeeded>
+
+  <sendRequestAndGetResult>
+  requestResult = this.sendRequest(requestCfg);
+  </sendRequestAndGetResult>
+  
+  <handleSyncResponse>
+  if (! callbackWrapper) {
+      // ... The current content is omitted for brevity. The full function's body follows the same structure shown prior to the omittance.
+  }
+  </handleSyncResponse>
+  
+  <returnResult>
+  return requestResult;
+  </returnResult>
+}
+</retrieveAgentProfile>
+
+<undoClosedWindow>
+function undoClosedWindow(controller, event)
+{
+  <getClosedWindowsCount>
+  var count = sessionStoreService.getClosedWindowCount(controller.window);
+  </getClosedWindowsCount>
+
+  <handleEventType>
+  switch (event.type) {
+    case "menu":
+      throw new Error("Menu gets build dynamically and cannot be accessed.");
+      break;
+    case "shortcut":
+      <triggerShortcut>
+      var cmdKey = utils.getEntity(this.getDtds(), "newNavigatorCmd.key");
+      controller.keypress(null, cmdKey, {accelKey: true, shiftKey: true});
+      </triggerShortcut>
+      break;
+  }
+  </handleEventType>
+
+  <assertWindowStateChange>
+  if (count > 0)
+    controller.assertJS("subject.newWindowCount < subject.oldWindowCount",
+                        {
+                         newWindowCount : sessionStoreService.getClosedWindowCount(controller.window),
+                         oldWindowCount : count
+                        });
+  </assertWindowStateChange>
+}
+</undoClosedWindow>
+
+<createOrientationModal>
+function createOrientationModal (onClick) {
+  <createModalDiv>
+  var modal = document.createElement('div');
+  modal.className = ORIENTATION_MODAL_CLASS;
+  modal.classList.add(HIDDEN_CLASS);
+  modal.setAttribute(constants.AFRAME_INJECTED, '');
+  </createModalDiv>
+
+  <createExitButton>
+  var exit = document.createElement('button');
+  exit.setAttribute(constants.AFRAME_INJECTED, '');
+  exit.innerHTML = 'Exit VR';
+  </createExitButton>
+
+  <bindClickListener>
+  exit.addEventListener('click', onClick);
+  </bindClickListener>
+
+  <appendExitToModal>
+  modal.appendChild(exit);
+  </appendExitToModal>
+
+  <returnModalElement>
+  return modal;
+  </returnModalElement>
+}
+</createOrientationModal>
+```

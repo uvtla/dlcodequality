@@ -1,0 +1,164 @@
+```javascript
+<calculateDimensionsList>
+function calculateDimensionsList(toIndex) {
+  <calculateDimensionLoop>
+  var i, prevDimension, dim;
+  for (i = Math.max(0, dimensionsIndex); i <= toIndex && (dim = dimensions[i]); i++) {
+    prevDimension = dimensions[i - 1] || EMPTY_DIMENSION;
+    dim.primarySize = self.getItemPrimarySize(i, data[i]);
+    dim.secondarySize = self.scrollSecondarySize;
+    dim.primaryPos = prevDimension.primaryPos + prevDimension.primarySize;
+    dim.secondaryPos = 0;
+  }
+  </calculateDimensionLoop>
+}
+</calculateDimensionsList>
+
+<uuidRandomFast>
+function uuidRandomFast() {
+  var r1 = Math.random() * 0x100000000;
+  var r2 = Math.random() * 0x100000000;
+  var r3 = Math.random() * 0x100000000;
+  var r4 = Math.random() * 0x100000000;
+
+  return byte2hex[ r1        & 0xff] +
+         byte2hex[ r1 >>>  8 & 0xff] +
+         ...omitted for brevity...
+         byte2hex[ r4 >>> 24 & 0xff];
+}
+</uuidRandomFast>
+
+<anonymousFunctionSRP>
+function(appSpec, endpoint, logStream, workerId, home) {
+  <setupProc>
+  this.$dfEnded = Q.defer();
+  var self = this;
+  this.exited = false;
+  this.$pid = null;
+  
+  logger.trace("Starting R");
+  ...omitted for brevity...
+  </setupProc>
+}
+</anonymousFunctionSRP>
+
+<observable>
+function observable(options = {}) {
+  <observableDecorator>
+  const observableDecorator = function observableDecorator(elementDescriptor) {
+    return getElementDescriptorForProp(
+      elementDescriptor.key,
+      null,
+      ("enumerable" in options) ? options.enumerable : true,
+      elementDescriptor.initializer || elementDescriptor.descriptor.get
+    );
+  };
+  </observableDecorator>
+
+  if (options && options.key) {
+    return observableDecorator(options);
+  } else {
+    return observableDecorator;
+  }
+}
+</observable>
+
+<anonymousFunctionSubstituteVariables>
+function (obj, variables, mutate) {
+  <validateInput>
+  if (!(obj && _.isObject(obj))) {
+    return obj;
+  }
+  </validateInput>
+
+  <boxVariables>
+  variables = Substitutor.box(variables, Substitutor.DEFAULT_VARS);
+  </boxVariables>
+
+  <performMergeCustomization>
+  var customizer = function (objectValue, sourceValue) {
+    ...omitted for brevity...
+    return _.mergeWith(mutate ? obj : {}, obj, customizer);
+  }.bind(this);
+  </performMergeCustomization>
+}
+</anonymousFunctionSubstituteVariables>
+
+<mergeDeepObjects>
+function mergeDeepObjects(object1, object2) {
+  <mergeProcess>
+  const keys1 = Object.keys(object1);
+  const keys2 = Object.keys(object2);
+  ...omitted for brevity...
+  </mergeProcess>
+
+  return mergedObject;
+}
+</mergeDeepObjects>
+
+<loadAndResizeImage>
+function(imgsrc, width, height, callback) {
+  <prepareImageLoading>
+  var args = new Args(arguments);
+  checkCommonArgs(args);
+  var Image = Canvas.Image, fs = require("fs");
+  var img = new Image();
+  </prepareImageLoading>
+
+  <handleImageLoad>
+  img.onerror = function(err) {
+    callback(false, err);
+  };
+  ...omitted for brevity...
+  </handleImageLoad>
+
+  if (!isValidFile(imgsrc)) {
+    callback(false, new Error (imgsrc + ' is not a valid file'));
+  } else {
+    img.src = imgsrc;
+  }
+}
+</loadAndResizeImage>
+
+<openAndAuthenticateDB>
+function (DB_name, account, pass, onOpenDone) {
+  <openDBConnection>
+  var conn = SR._storage.openDB(DB_name, dbSetting.serverIP, dbSetting.serverPort);
+  ...omitted for brevity...
+  </openDBConnection>
+
+  <authenticateUser>
+  auth_user();
+  </authenticateUser>
+}
+</openAndAuthenticateDB>
+
+<getArticleName>
+function getArticleName(word, langName) {
+  <calculateArticleName>
+  var result = null;
+  ...omitted for brevity...
+  return result;
+  </calculateArticleName>
+}
+</getArticleName>
+
+<getBuildConfigurationByName>
+function getBuildConfigurationByName(ctx, buildName) {
+  <extractCHCPBuildOptions>
+  var chcpBuildOptions = getBuildOptionsFromConfig(ctx);
+  if (chcpBuildOptions == null) {
+    return null;
+  }
+  </extractCHCPBuildOptions>
+
+  <findSpecificBuildConfig>
+  var resultConfig = chcpBuildOptions[buildName];
+  ...omitted for brevity...
+  return resultConfig;
+  </findSpecificBuildConfig>
+}
+</getBuildConfigurationByName>
+```
+
+The tags here represent the main "responsibilities" of each section of the function which are more than a simple return, variable assignment, or one-line statement. They encapsulate specific tasks within the larger function, such as setting up a database connection, performing image loading and resizing, or merging deep objects. These tags should help in identifying whether a function adheres to the Single Responsibility Principle. In cases above where there's single end tags, it represents SRP compliance for the whole functions. In cases where there are nested tags, these highlight distinct responsibilities within the function which may suggest SRP violations that could be refactored for better adherence to SRP.

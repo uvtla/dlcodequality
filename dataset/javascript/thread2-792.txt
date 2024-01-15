@@ -1,0 +1,293 @@
+```javascript
+function( elems, callback, arg ) {
+    var value,
+        i = 0,
+        length = elems.length,
+        isArray = isArraylike( elems ),
+        ret = [];
+
+    if ( isArray ) {
+        for ( ; i < length; i++ ) {
+            value = callback( elems[ i ], i, arg );
+
+            if ( value != null ) {
+                ret[ ret.length ] = value;
+            }
+        }
+    } else {
+        for ( i in elems ) {
+            value = callback( elems[ i ], i, arg );
+
+            if ( value != null ) {
+                ret[ ret.length ] = value;
+            }
+        }
+    }
+
+    return core_concat.apply( [], ret );
+}
+
+function(ql) {
+    var fm      = ql.fm,
+    mimes   = fm.arrayFlip(['text/x-markdown']),
+    preview = ql.preview,
+    marked  = null,
+    show = function(data, loading) {
+        ql.hideinfo();
+        
+        <iframeCreation>
+        var doc = $('<iframe class="elfinder-quicklook-preview-html"/>').appendTo(preview)[0].contentWindow.document;
+        doc.open();
+        doc.write(marked(data.content));
+        doc.close();
+        </iframeCreation>
+        
+        loading.remove();
+    },
+    error = function(loading) {
+        marked = false;
+        loading.remove();
+    };
+    
+    preview.on(ql.evUpdate, function(e) {
+        var file = e.file, jqxhr, loading;
+        
+        if (mimes[file.mime] && fm.options.cdns.marked && marked !== false && ql.dispInlineRegex.test(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
+            e.stopImmediatePropagation();
+            
+            loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+
+            preview.one('change', function() {
+                jqxhr.state() == 'pending' && jqxhr.reject();
+            }).addClass('elfinder-overflow-auto');
+            
+            jqxhr = fm.request({
+                data           : {cmd : 'get', target : file.hash, conv : 1, _t : file.ts},
+                options        : {type: 'get', cache : true},
+                preventDefault : true
+            })
+            .done(function(data) {
+                if (marked || window.marked) {
+                    if (!marked) {
+                        marked = window.marked;
+                    }
+                    show(data, loading);
+                } else {
+                    fm.loadScript([fm.options.cdns.marked],
+                        function(res) { 
+                            marked = res || window.marked || false;
+                            delete window.marked;
+                            if (marked) {
+                                show(data, loading);
+                            } else {
+                                error(loading);
+                            }
+                        },
+                        {
+                            tryRequire: true,
+                            error: function() {
+                                error(loading);
+                            }
+                        }
+                    );
+                }
+            })
+            .fail(function() {
+                error(loading);
+            });
+        }
+    });
+}
+
+function(point) {
+    var resolution = this.getResolution();
+    
+    <coordinateConversion>
+    var x = ((point.x - this.featureDx) / resolution + this.left);
+    var y = (this.top - point.y / resolution);
+    </coordinateConversion>
+    
+    if (this.inValidRange(x, y)) { 
+        return x + "," + y;
+    } else {
+        return false;
+    }
+}
+
+function transformSourcesMap (options) {
+    
+    <processSourceMap>
+    return (
+        readFileJSON(options.sourceMap)
+        .then(sourceMap => (
+            mapSources(sourceMap, path => {
+                const relativePath = stripProjectRoot(options.projectRoot, path)
+                return doesFileExist(path).then(exists => {
+                    if (exists && options.uploadSources) {
+                        if (path.indexOf('node_modules') !== -1) {
+                            if (options.uploadNodeModules) {
+                                options.sources[relativePath] = path
+                            }
+                        } else {
+                            options.sources[relativePath] = path
+                        }
+                    }
+                    return relativePath
+                })
+            })
+        ))
+        .then(sourceMap => {
+            
+            const tempMap = path.join(options.tempDir, path.basename(options.sourceMap))
+            fs.writeFileSync(tempMap, JSON.stringify(sourceMap)) 
+            options.sourceMap = tempMap
+            return options
+        })
+        .catch(err => {
+            if (err.name === 'SyntaxError') {
+                throw new Error(`Source map file was not valid JSON (${options.sourceMap})`)
+            }
+            if (err.code === 'ENOENT') {
+                throw new Error(`Source map file does not exist (${options.sourceMap})`)
+            }
+            throw new Error(`Source map file could not be read (doesn't exist or isn't valid JSON).`)
+        })
+    )
+    </processSourceMap>
+}
+
+function predefine(obj, pattern) {
+    pattern = pattern || predefine.READABLE;
+
+    <defineProperties>
+    return function predefined(method, description, clean) {
+        if (
+            !predefine.descriptor(description)
+            || is(description, 'object')
+            && !clean
+            && !predefine.descriptor(predefine.mixin({}, pattern, description))
+        ) { description = {
+            value: description
+        };
+        }
+
+        var described = Object.getOwnPropertyDescriptor(obj, method);
+        if (described && !described.configurable) {
+            return predefined;
+        }
+
+        Object.defineProperty(obj, method, !clean
+            ? predefine.mixin({}, pattern, description)
+            : description
+        );
+
+        return predefined;
+    };
+    </defineProperties>
+}
+
+function bootstrap(next) {
+    if (!options.commands || !options.commands.length) {
+        return next();
+    }
+
+    <sshInteraction>
+    var hasErr;
+
+    self.ssh({
+        keys: options.keys,
+        server: options.server,
+        commands: options.commands,
+        remoteUser: options.remoteUser,
+        tunnel: options.tunnel
+    }).on('error', function (err) {
+        if (!hasErr) {
+            hasErr = true;
+            next(err);
+        }
+    }).on('complete', function (server, stdout) {
+        if (!hasErr) {
+            next(null, stdout);
+        }
+    });
+    </sshInteraction>
+}
+
+function configureBundleStats(config) {
+    if (interactiveBundleStats)
+        <interactiveBundleStatistics>
+        config.plugins.push(new BundleAnalyzerPlugin)
+        </interactiveBundleStatistics>
+    
+    if (bundleStats) {
+        <bundleStatistics>
+        config.plugins.push(new StatsWriterPlugin({
+            filename: 'bundle-stats.json',
+            fields: null,
+        }))
+        </bundleStatistics>
+    }
+}
+
+function getSetWeek (input) {
+    
+    <handleWeekLogic>
+    var week = this.localeData().week(this);
+    return input == null ? week : this.add((input - week) * 7, 'd');
+    </handleWeekLogic>
+}
+
+function remove (arr, item) {
+    if (arr.length) {
+        
+        <arrayItemRemoval>
+        var index = arr.indexOf(item);
+        if (index > -1) {
+            return arr.splice(index, 1)
+        }
+        </arrayItemRemoval>
+        
+    }
+}
+
+function (geometry) {
+    
+    <boundaryAdjustment>
+    var boundary = this._boundary;
+    if (boundary) {
+        var boundaryGeometry = boundary;
+        if (boundary == ariaUtilsDom.VIEWPORT) {
+            var viewportSize = ariaUtilsDom._getViewportSize();
+            boundaryGeometry = {
+                x: 0,
+                y: 0,
+                width: viewportSize.width,
+                height: viewportSize.height
+            };
+        }
+        var deltaLeft = geometry.x - boundaryGeometry.x;
+        var deltaTop = geometry.y - boundaryGeometry.y;
+        var deltaRight = boundaryGeometry.x + boundaryGeometry.width - geometry.x - geometry.width;
+        var deltaBottom = boundaryGeometry.y + boundaryGeometry.height - geometry.y - geometry.height;
+        if (deltaLeft < 0) {
+            geometry.x -= deltaLeft;
+            geometry.width += deltaLeft;
+        }
+        if (deltaTop < 0) {
+            geometry.y -= deltaTop;
+            geometry.height += deltaTop;
+        }
+        if (deltaRight < 0) {
+            geometry.width += deltaRight;
+        }
+        if (deltaBottom < 0) {
+            geometry.height += deltaBottom;
+        }
+    }
+    </boundaryAdjustment>
+    
+    return geometry;
+}
+```
+
+The provided functions vary in complexity. The annotations have been added directly before and after the specific lines of code representing distinct responsibilities within each function to identify SRP compliance or violations. The tags help clarify areas where a single responsibility may be split, particularly in complex functions with multiple steps or operations.

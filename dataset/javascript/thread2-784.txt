@@ -1,0 +1,231 @@
+```javascript
+<parseVariableIdentifier>
+function parseVariableIdentifier() {
+    var token, startToken;
+
+    <startTokenAssignment>
+    startToken = lookahead;
+    </startTokenAssignment>
+
+    <tokenAssignment>
+    token = lex();
+    </tokenAssignment>
+
+    <tokenTypeCheck>
+    if (token.type !== Token.Identifier) {
+        throwUnexpected(token);
+    }
+    </tokenTypeCheck>
+
+    <delegateOperation>
+    return delegate.markEnd(delegate.createIdentifier(token.value), startToken);
+    </delegateOperation>
+}
+</parseVariableIdentifier>
+
+<unknownFunctionDurationSettings>
+function (duration, settings) {
+    <swingRatioCalculation>
+    var ratio = settings && settings.swingRatio ? settings.swingRatio : 1;
+    </swingRatioCalculation>
+
+    <durationCalculation>
+    return Math.round(ticksPerBeat * duration.value(ratio));
+    </durationCalculation>
+}
+</unknownFunctionDurationSettings>
+
+<parseValidationString>
+function(validationString) {
+    var validationParameters, validationMethod;
+
+    <validationStringCheck>
+    if (!validationString.contains(":")) {
+        return [validationString];
+    }
+    </validationStringCheck>
+
+    <splitValidationString>
+    validationParameters = validationString.split(":");
+    </splitValidationString>
+
+    <extractValidationMethod>
+    validationMethod = validationParameters.shift();
+    </extractValidationMethod>
+
+    <prepareParameters>
+    return [validationMethod, this.prepareParameters(validationParameters)];
+    </prepareParameters>
+}
+</parseValidationString>
+
+<makeChange>
+function makeChange(doc, change, selUpdate, ignoreReadOnly) {
+    <cmOperations>
+    if (doc.cm) {
+      if (!doc.cm.curOp) return operation(doc.cm, makeChange)(doc, change, selUpdate, ignoreReadOnly);
+      if (doc.cm.state.suppressEdits) return;
+    }
+    </cmOperations>
+
+    <beforeChangeHandlers>
+    if (hasHandler(doc, "beforeChange") || doc.cm && hasHandler(doc.cm, "beforeChange")) {
+        change = filterChange(doc, change);
+        if (!change) return;
+    }
+    </beforeChangeHandlers>
+
+    <readOnlyHandling>
+    var split = sawReadOnlySpans && !ignoreReadOnly && removeReadOnlyRanges(doc, change.from, change.to);
+    if (split) {
+      for (var i = split.length - 1; i >= 1; --i)
+        makeChangeNoReadonly(doc, {from: split[i].from, to: split[i].to, text: [""]});
+      if (split.length)
+        makeChangeNoReadonly(doc, {from: split[0].from, to: split[0].to, text: change.text}, selUpdate);
+    } else {
+      makeChangeNoReadonly(doc, change, selUpdate);
+    }
+    </readOnlyHandling>
+}
+</makeChange>
+
+<getListenersGlobal>
+function(el, recurse, type) {
+    <querySelectorSetup>
+    var oEl = (Y.Lang.isString(el)) ?  Y.Selector.query(el, null, true) : el,
+        lis = this.getListeners(oEl, type), i, len, props, children, child;
+    </querySelectorSetup>
+
+    <recursiveListenerExtraction>
+    if (recurse && oEl) {
+        lis = lis || [];
+        children = Y.Selector.query('*', oEl);
+        i = 0;
+        len = children.length;
+        for (; i < len; ++i) {
+            child = this.getListeners(children[i], type);
+            if (child) {
+                lis = lis.concat(child);
+            }
+        }
+    }
+    </recursiveListenerExtraction>
+
+    <detachAndRemoveListeners>
+    if (lis) {
+        i = 0;
+        len = lis.length;
+        for (; i < len; ++i) {
+            props = lis[i];
+            props.detachAll();
+            remove(props.el, props.type, props.fn, props.capture);
+            delete _wrappers[props.key];
+            delete _el_events[props.domkey][props.key];
+        }
+    }
+    </detachAndRemoveListeners>
+}
+</getListenersGlobal>
+
+<initSubject>
+function init(subject) {  
+    <subjectMasterCheck>
+    if (subject.master) {
+        throw O.log.error(subject, 'Duplicit `subject.master`', {master: subject.master._lid});
+    }
+    </subjectMasterCheck>
+
+    <subjectMasterInit>
+    this.subject = subject;
+    subject.master = this;
+    </subjectMasterInit>
+
+    <onGwCallbackSetup>
+    this.subject.getGw(onGw.bind(null, subject));
+    </onGwCallbackSetup>
+}
+</initSubject>
+
+<checkPackageJson>
+function checkPackageJson () {
+    <requirePackageJson>
+    const pkg = requireFresh(path.join(project, 'package.json'));
+    </requirePackageJson>
+
+    <packageExpectations>
+    expect(pkg.name).toEqual(appId);
+    expect(pkg.displayName).toEqual(appName);
+    expect(pkg.version).toEqual(appVersion);
+    </packageExpectations>
+}
+</checkPackageJson>
+
+<anonymousEventHandlers>
+function () {
+    <domElementSetup>
+    var dom = this.domElement;
+    </domElementSetup>
+
+    <addEventListenerTouchstart>
+    vendor.addEventListener(dom, 'touchstart', this._mouseDownHandler);
+    </addEventListenerTouchstart>
+
+    <addEventListenerMousedownWheel>
+    vendor.addEventListener(dom, 'mousedown', this._mouseDownHandler);
+    vendor.addEventListener(dom, 'wheel', this._mouseWheelHandler);
+    </addEventListenerMousedownWheel>
+
+    <timelineUpdateHandling>
+    if (this.timeline) {
+        this.timeline.on('frame', this.update, this);
+    }
+    </timelineUpdateHandling>
+
+    <decomposeTransformIfTarget>
+    if (this.target) {
+        this.decomposeTransform();
+    }
+    </decomposeTransformIfTarget>
+}
+</anonymousEventHandlers>
+
+<PackageDependents>
+function PackageDependents(name, version, callback) {
+    <versionCallbackCheck>
+    if (typeof version === "function") {
+        callback = version
+        version = "latest"
+    }
+    </versionCallbackCheck>
+
+    <GetDependentsCallback>
+    GetDependents(name, function(err, packages) {
+        if (err) { return callback(err) }
+        SameTime(packages.map(function (c) {
+            return function (fn) {
+                <PackageJsonPromise>
+                PackageJson(c, version).then(function (json) {
+                    fn(null, json)
+                }).catch(function (err) {
+                    fn(err)
+                })
+                </PackageJsonPromise>
+            }
+        }), function (err, packages) {
+            callback(err, packages || [])
+        })
+    })
+    </GetDependentsCallback>
+}
+</PackageDependents>
+
+<accumulateTwoPhaseDispatchesSingle>
+function accumulateTwoPhaseDispatchesSingle(event) {
+    <traverseTwoPhase>
+    if (event && event.dispatchConfig.phasedRegistrationNames) {
+        EventPluginUtils.traverseTwoPhase(event._targetInst, accumulateDirectionalDispatches, event);
+    }
+    </traverseTwoPhase>
+}
+</accumulateTwoPhaseDispatchesSingle>
+```

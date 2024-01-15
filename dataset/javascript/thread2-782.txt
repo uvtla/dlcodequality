@@ -1,0 +1,326 @@
+```javascript
+<getSourceCodeOfFiles>
+function getSourceCodeOfFiles(patterns, providedOptions, providedCallback) {
+    <initializeVariables>
+    const sourceCodes = {};
+    const globPatternsList = typeof patterns === "string" ? [patterns] : patterns;
+    let options, callback;
+
+    const defaultOptions = Object.assign({}, baseDefaultOptions, { cwd: process.cwd() });
+
+    if (typeof providedOptions === "undefined") {
+        options = defaultOptions;
+        callback = null;
+    } else if (typeof providedOptions === "function") {
+        callback = providedOptions;
+        options = defaultOptions;
+    } else if (typeof providedOptions === "object") {
+        options = Object.assign({}, defaultOptions, providedOptions);
+        callback = providedCallback;
+    }
+    debug("constructed options:", options);
+    </initializeVariables>
+
+    <searchAndReadFiles>
+    const filenames = globUtils.listFilesToProcess(globPatternsList, options)
+        .filter(fileInfo => !fileInfo.ignored)
+        .reduce((files, fileInfo) => files.concat(fileInfo.filename), []);
+
+    if (filenames.length === 0) {
+        debug(`Did not find any files matching pattern(s): ${globPatternsList}`);
+    }
+    filenames.forEach(filename => {
+        const sourceCode = getSourceCodeOfFile(filename, options);
+
+        if (sourceCode) {
+            debug("got sourceCode of", filename);
+            sourceCodes[filename] = sourceCode;
+        }
+        if (callback) {
+            callback(filenames.length); 
+        }
+    });
+    </searchAndReadFiles>
+    
+    return sourceCodes;
+}
+</getSourceCodeOfFiles>
+
+<objMap>
+function objMap(callback, thisArg = UNDEFINED) {
+    <mapOverObject>
+    const dst = [];
+    each.call(this, (value, key, src) => {
+        const result = callback.call(thisArg, value, key, src);
+        if (result === BREAK) return BREAK;
+        if (result !== UNDEFINED) {
+            dst.push(result);
+        }
+    });
+    </mapOverObject>
+    return dst;
+}
+</objMap>
+
+<onLanguageInitialized>
+function onLanguageInitialized(sLanguage, resolve, hyphenateMethod) {
+		<setHyphenationMethod>
+		oHyphenateMethods[sLanguage] = hyphenateMethod;
+		oHyphenationInstance.bIsInitialized = true;
+		</setHyphenationMethod>
+		
+		<processLanguageQueue>
+		if (aLanguagesQueue.length > 0) {
+			aLanguagesQueue.forEach(function (oElement) {
+				initializeLanguage(oElement.sLanguage, oElement.oConfig, oElement.resolve);
+			});
+			aLanguagesQueue = [];
+		}
+		</processLanguageQueue>
+
+		<updateLoadingStateAndResolve>
+		oHyphenationInstance.bLoading = false;
+		resolve(
+			getLanguageFromPattern(sLanguage)
+		);
+		</updateLoadingStateAndResolve>
+	}
+</onLanguageInitialized>
+
+<doCreate>
+function doCreate(path, isFolder) {
+        <validationAndDeferredInitialization>
+        var d = new $.Deferred();
+        var filename = FileUtils.getBaseName(path);
+
+        
+        if (!isValidFilename(filename)){
+            return d.reject(ERROR_INVALID_FILENAME).promise();
+        }
+
+        
+        
+        if (!isValidPath(path)) {
+            return d.reject(ERROR_INVALID_FILENAME).promise();
+        }
+        </validationAndDeferredInitialization>
+
+        <fileSystemOperation>
+        FileSystem.resolve(path, function (err) {
+            if (!err) {
+                
+                d.reject(FileSystemError.ALREADY_EXISTS);
+            } else {
+                if (isFolder) {
+                    <createDirectory>
+                    var directory = FileSystem.getDirectoryForPath(path);
+
+                    directory.create(function (err) {
+                        if (err) {
+                            d.reject(err);
+                        } else {
+                            d.resolve(directory);
+                        }
+                    });
+                    </createDirectory>
+                } else {
+                    <createFile>
+                    var file = FileSystem.getFileForPath(path);
+
+                    FileUtils.writeText(file, "").then(function () {
+                        d.resolve(file);
+                    }, d.reject);
+                    </createFile>
+                }
+            }
+        });
+        </fileSystemOperation>
+
+        return d.promise();
+    }
+</doCreate>
+
+<hasCallback>
+function hasCallback (callbackContext = null) {
+        <determineIfCallbackExists>
+        if (!this.state[ACTION]
+            || callbackContext === this.state[CONTEXT]
+            || !this.isText()) {
+
+            return false;
+        }
+        </determineIfCallbackExists>
+        return true;
+    }
+</hasCallback>
+
+<parseHealthcheck>
+function parseHealthcheck(cmd) {
+    <parseDirectiveAndArguments>
+    var words = parseWords(cmd.rest),
+        cmdDirectiveIndex = words.indexOf("CMD"),        
+        noneDirectiveIndex = words.indexOf("NONE");
+
+    if (cmdDirectiveIndex === -1 && noneDirectiveIndex === -1) {
+        cmd.error = 'A HEALTHCHECK instruction must specify either NONE, or a valid CMD and options';
+        return false;
+    } else if (cmdDirectiveIndex !== -1) {
+        
+        if (cmdDirectiveIndex === words.length - 1) {
+            cmd.error = 'A CMD directive must specify a command for the healthcheck to run';
+            return false;
+        }
+        
+        cmd.args = { command: words.slice(cmdDirectiveIndex + 1).join(" ") };
+
+        if (cmdDirectiveIndex > 0) {
+            
+            <parseCmdOptions>
+            var cmdDirectiveOptions = words.slice(0, cmdDirectiveIndex),
+                validCmdOptions = ["interval", "retries", "timeout", "start-period"];
+
+            for (var i = 0; i < cmdDirectiveOptions.length; i++) {
+                var match = /--([a-zA-Z0-9_-]+)=(\d+)/.exec(cmdDirectiveOptions[i]);
+                if (!match) {
+                    cmd.error = '"' + cmdDirectiveOptions[i] + '" isn\'t a syntactically valid CMD option';
+                    return false;
+                } else if (validCmdOptions.indexOf(match[1]) === -1) {
+                    cmd.error = '"' + match[1] + '" isn\'t a valid CMD option';
+                    return false;
+                }
+
+                cmd.args[match[1]] = match[2];
+            }
+            </parseCmdOptions>
+        }
+    } else if (noneDirectiveIndex !== -1) {
+        if (words.length > 1) {
+            cmd.error = 'The NONE directive doesn\'t support additional options';
+            return false;
+        }
+
+        cmd.args = { isNone: true };
+    }
+    </parseDirectiveAndArguments>
+
+    return true;
+}
+</parseHealthcheck>
+
+<attachListener>
+function attachListener (msg, listener) {
+  <attachOrRetrieveListener>
+  var attached = msg.__onFinished
+
+  if (!attached || !attached.queue) {
+    attached = msg.__onFinished = createListener(msg)
+    attachFinishedListener(msg, attached)
+  }
+  </attachOrRetrieveListener>
+
+  <enqueueListener>
+  attached.queue.push(listener)
+  </enqueueListener>
+}
+</attachListener>
+
+<Conrec>
+function Conrec(drawContour) {
+    <initialization>
+    if (!drawContour) {
+      var c = this;
+      c.contours = {};
+      
+      <initializeDrawContour>
+      this.drawContour = function(startX, startY, endX, endY, contourLevel, k) {
+        var cb = c.contours[k];
+        if (!cb) {
+          cb = c.contours[k] = new ContourBuilder(contourLevel);
+        }
+        cb.addSegment({x: startX, y: startY}, {x: endX, y: endY});
+      }
+      </initializeDrawContour>
+      
+      <initializeContourList>
+      this.contourList = function() {
+        var l = [];
+        var a = c.contours;
+        for (var k in a) {
+          var s = a[k].s;
+          var level = a[k].level;
+          while (s) {
+            var h = s.head;
+            var l2 = [];
+            l2.level = level;
+            l2.k = k;
+            while (h && h.p) {
+              l2.push(h.p);
+              h = h.next;
+            }
+            l.push(l2);
+            s = s.next;
+          }
+        }
+        l.sort(function(a, b) { return a.k - b.k });
+        return l;
+      }
+      </initializeContourList>
+    } else {
+      <setProvidedDrawContour>
+      this.drawContour = drawContour;
+      </setProvidedDrawContour>
+    }
+    </initialization>
+
+    <initializeArrays>
+    this.h  = new Array(5);
+    this.sh = new Array(5);
+    this.xh = new Array(5);
+    this.yh = new Array(5);
+    </initializeArrays>
+  }
+</Conrec>
+
+<parallelClear>
+function (callback) {
+    var self = this;
+    <parallelTasksExecution>
+    async.parallel([
+      function (callback) {
+        <clearCollections>
+        async.each(self.dispatcher.tree.getCollections(), function (col, callback) {
+          if (col.noReplay) {
+            return callback(null);
+          }
+          col.repository.clear(callback);
+        }, callback);
+        </clearCollections>
+      },
+      function (callback) {
+        <clearStore>
+        self.store.clear(callback);
+        </clearStore>
+      }
+    ], callback);
+    </parallelTasksExecution>
+  }
+</parallelClear>
+
+<getCheckedAndUnchecked>
+function getCheckedAndUnchecked (checkboxes) {
+  <identifyingCheckedAndUnchecked>
+  var checked = [], unchecked = [];
+  for (var i = 0; i < arguments.length; i++) {
+    var checkbox = arguments[i];
+    if (checkbox.is(":checked")) {
+      checked.push(checkbox.data("value"));
+    }
+    else {
+      unchecked.push(checkbox.data("value"));
+    }
+  }
+  </identifyingCheckedAndUnchecked>
+  return { checked: checked, unchecked: unchecked };
+}
+</getCheckedAndUnchecked>
+```

@@ -1,0 +1,272 @@
+```javascript
+<getLastCharIndex>
+function getLastCharIndex(font) {
+  return Math.max(0, Math.min(0xffff, Math.abs(_.maxBy(Object.keys(font.codePoints), function (point) {
+    return parseInt(point, 10);
+  }))));
+}
+</getLastCharIndex>
+
+<checkId>
+function checkId(id) {
+  id = id || "";
+  id = id.toString();
+  return _.isString(id) && id.length === 24;
+}
+</checkId>
+
+<_createPlaceholder>
+function _createPlaceholder(treeData, basedir, name, isFolder, options) {
+    options = options || {};
+    var parentPath = _filePathToObjectPath(treeData, basedir);
+
+    if (!parentPath) {
+        return;
+    }
+
+    var newObject = {
+    };
+
+    if (!options.notInCreateMode) {
+        newObject.creating = true;
+    }
+
+    if (isFolder) {
+        
+        
+        
+        if (options.notInCreateMode) {
+            newObject.children = null;
+        } else {
+            newObject.children = Immutable.Map();
+        }
+    }
+
+    var newFile = Immutable.Map(newObject);
+
+    if (!options.doNotOpen) {
+        treeData = _openPath(treeData, basedir);
+    }
+    if (parentPath.length > 0) {
+        var childrenPath = _.clone(parentPath);
+        childrenPath.push("children");
+
+        treeData = treeData.updateIn(childrenPath, function (children) {
+            return children.set(name, newFile);
+        });
+    } else {
+        treeData = treeData.set(name, newFile);
+    }
+    return treeData;
+}
+</_createPlaceholder>
+
+<loggingConfiguration>
+function(app) {
+  if (process.env.POMELO_LOGGER !== 'off') {
+    var env = app.get(Constants.RESERVED.ENV);
+    var originPath = path.join(app.getBase(), Constants.FILEPATH.LOG);
+    var presentPath = path.join(app.getBase(), Constants.FILEPATH.CONFIG_DIR, env, path.basename(Constants.FILEPATH.LOG));
+    if(fs.existsSync(originPath)) {
+      log.configure(app, originPath);
+    } else if(fs.existsSync(presentPath)) {
+      log.configure(app, presentPath);
+    } else {
+      logger.error('logger file path configuration is error.');
+    }
+  }
+}
+</loggingConfiguration>
+
+<ActionMiddleware>
+function ActionMiddleware(...middleware) {
+    return function (target, propertyKey, descriptor) {
+        if (middleware != undefined) {
+            let m = exports.globalKCState.getOrInsertController(target.constructor).getOrInsertMethod(propertyKey);
+            m.middleware = middleware.concat(m.middleware);
+        }
+    };
+}
+</ActionMiddleware>
+
+<defineReactive$$1>
+function defineReactive$$1 (
+  obj,
+  key,
+  val,
+  customSetter,
+  shallow
+) {
+  var dep = new Dep();
+
+  var property = Object.getOwnPropertyDescriptor(obj, key);
+  if (property && property.configurable === false) {
+    return
+  }
+
+  
+  var getter = property && property.get;
+  var setter = property && property.set;
+  if ((!getter || setter) && arguments.length === 2) {
+    val = obj[key];
+  }
+
+  var childOb = !shallow && observe(val);
+  Object.defineProperty(obj, key, {
+    enumerable: true,
+    configurable: true,
+    get: function reactiveGetter () {
+      var value = getter ? getter.call(obj) : val;
+      if (Dep.target) {
+        dep.depend();
+        if (childOb) {
+          childOb.dep.depend();
+          if (Array.isArray(value)) {
+            dependArray(value);
+          }
+        }
+      }
+      return value
+    },
+    set: function reactiveSetter (newVal) {
+      var value = getter ? getter.call(obj) : val;
+      
+      if (newVal === value || (newVal !== newVal && value !== value)) {
+        return
+      }
+      
+      if (process.env.NODE_ENV !== 'production' && customSetter) {
+        customSetter();
+      }
+      
+      if (getter && !setter) { return }
+      if (setter) {
+        setter.call(obj, newVal);
+      } else {
+        val = newVal;
+      }
+      childOb = !shallow && observe(newVal);
+      dep.notify();
+    }
+  });
+}
+</defineReactive$$1>
+
+<MultiPoint>
+function MultiPoint(input){
+    if(input && input.type === "MultiPoint" && input.coordinates){
+      extend(this, input);
+    } else if(isArray(input)) {
+      this.coordinates = input;
+    } else {
+      throw "Terraformer: invalid input for Terraformer.MultiPoint";
+    }
+
+    this.type = "MultiPoint";
+  }
+</MultiPoint>
+
+<selectNthNode>
+function(n, r) {
+        r = r || 0;
+        var nodes = [];
+        NodeList.each(this, function(node, i) {
+            if (i % n === r) {
+                nodes.push(node);
+            }
+        });
+
+        return Y.all(nodes);
+    }
+</selectNthNode>
+
+<updateExpression>
+function updateExpression() {
+  
+  var nullHighlighter = function(item) { return false; }
+
+  var input = $('.expression');
+  var expression = input.val();
+
+  var highlighter;
+
+  if (!expression) {
+    
+    highlighter = nullHighlighter;
+    input.css('background-color', '#fff');
+  } else {
+    try {
+      
+      highlighter = compileExpression(expression); 
+      input.css('background-color', '#dfd');
+    } catch (e) {
+      
+      highlighter = nullHighlighter;
+      input.css('background-color', '#fdd');
+    }
+  }
+
+  highlightRows(highlighter);
+}
+</updateExpression>
+
+<replacePlaceholders>
+function replacePlaceholders(quasisDoc, expressionDocs) {
+  if (!expressionDocs || !expressionDocs.length) {
+    return quasisDoc;
+  }
+
+  const expressions = expressionDocs.slice();
+  let replaceCounter = 0;
+  const newDoc = mapDoc(quasisDoc, doc => {
+    if (!doc || !doc.parts || !doc.parts.length) {
+      return doc;
+    }
+    let parts = doc.parts;
+    const atIndex = parts.indexOf("@");
+    const placeholderIndex = atIndex + 1;
+    if (
+      atIndex > -1 &&
+      typeof parts[placeholderIndex] === "string" &&
+      parts[placeholderIndex].startsWith("prettier-placeholder")
+    ) {
+      
+      const at = parts[atIndex];
+      const placeholder = parts[placeholderIndex];
+      const rest = parts.slice(placeholderIndex + 1);
+      parts = parts
+        .slice(0, atIndex)
+        .concat([at + placeholder])
+        .concat(rest);
+    }
+    const atPlaceholderIndex = parts.findIndex(
+      part =>
+        typeof part === "string" && part.startsWith("@prettier-placeholder")
+    );
+    if (atPlaceholderIndex > -1) {
+      const placeholder = parts[atPlaceholderIndex];
+      const rest = parts.slice(atPlaceholderIndex + 1);
+      const placeholderMatch = placeholder.match(
+        /@prettier-placeholder-(.+)-id([\s\S]*)/
+      );
+      const placeholderID = placeholderMatch[1];
+      
+      
+      const suffix = placeholderMatch[2];
+      const expression = expressions[placeholderID];
+
+      replaceCounter++;
+      parts = parts
+        .slice(0, atPlaceholderIndex)
+        .concat(["${", expression, "}" + suffix])
+        .concat(rest);
+    }
+    return Object.assign({}, doc, {
+      parts: parts
+    });
+  });
+
+  return expressions.length === replaceCounter ? newDoc : null;
+}
+</replacePlaceholders>
+```

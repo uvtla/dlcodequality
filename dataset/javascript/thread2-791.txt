@@ -1,0 +1,188 @@
+Here are the annotations for the provided functions:
+
+1. This function looks like it's meant to normalize or ensure an options object has a name and alias with additional default values if they are not present.
+```javascript
+function(option) {
+  <normalizeOption>
+  if (option.name && option.alias && option.name.length > option.alias.length) {
+    var name = option.alias;
+    option.alias = option.name;
+    option.name = name;
+  }
+
+  var defaults = {
+    alias: null,
+    kind: 'boolean'
+  };
+  var keys = Object.keys(option);
+  _.each(defaults, function(val, key) {
+    if (!_.contains(keys, key)) {
+      option[key] = val;
+    }
+  });
+  </normalizeOption>
+}
+```
+
+2. This constructor function sets up a new `ModuleResource` object with given configuration; it adheres to SRP as it's only setting up its own state and not performing any other actions.
+```javascript
+<ModuleResource>
+function ModuleResource( pkg, config ) {
+  ModuleResource.super.call( this, pkg, config );
+  this.imports = config.imports || null;
+  this.exports = config.exports || null;
+  this.propertyNamePattern = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+}
+</ModuleResource>
+```
+
+3. This function searches for a data point nearest to the mouse position on a chart and returns it. The function serves a single cohesive responsibility of finding the nearest data point.
+```javascript
+<getNearestDataPoint>
+function getNearestDataPoint(mouseX) {
+  let adjustedMouseX = mouseX - margin.left,
+      epsilon = xScale2.bandwidth(),
+      nearest = [];
+
+  layers.forEach(function (data) {
+    let found = data.values.find((d2) => Math.abs(adjustedMouseX >= xScale(d2[nameLabel]) + xScale2(d2[groupLabel])) && Math.abs(adjustedMouseX - xScale2(d2[groupLabel]) - xScale(d2[nameLabel]) <= epsilon));
+
+    if (found) {
+      found.values = data.values;
+      found.key = found.name;
+      nearest.push(found);
+    }
+  });
+
+  return nearest.length ? nearest[0] : undefined;
+}
+</getNearestDataPoint>
+```
+
+4. This function updates the tool mode across multiple elements, tracking the change globally and setting the mode for each element individually. It intermingles tracking state changes with updating elements, thus it contains multiple responsibilities.
+```javascript
+<setToolMode>
+<globalToolModeChange>
+_trackGlobalToolModeChange(mode, toolName, options);
+</globalToolModeChange>
+<updateToolModeForElements>
+store.state.enabledElements.forEach(element => {
+  setToolModeForElement(mode, changeEvent, element, toolName, options);
+});
+</updateToolModeForElements>
+</setToolMode>
+```
+
+5. This function searches a JSON object for a given path and returns the value. This function remains focused on a single task.
+```javascript
+<findValueByPath>
+function findValueByPath(jsonData, path){
+    var errorParts = false;
+    path.split('.').forEach(function(part){
+        if(!errorParts){
+            jsonData = jsonData[part];
+            if(!jsonData) errorParts = true;
+        }
+    });
+    return errorParts ? 0 : parseFloat(jsonData);
+}
+</findValueByPath>
+```
+
+6. This is a mathematical function that calculates the perpendicular distance from a point to a line defined by two points. It is a pure function with a single responsibility.
+```javascript
+<calculateDistanceFromPointToLine>
+function(x1, y1, x2, y2, px, py) {
+  return Math.abs((y2 - y1) * px - (x2 - x1) * py + x2 * y1 - y2 * x1) /
+      Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
+}
+</calculateDistanceFromPointToLine>
+```
+
+7. This function is designed to parse data, potentially handle callback shifting, look for a license within content, and normalize the result. There are multiple distinct functionalities bundled together, meaning it violates SRP.
+```javascript
+<parse>
+<dataRetrieval>
+data = this.get(data);
+
+if ('function' === typeof options) {
+  next = options;
+  options = {};
+}
+</dataRetrieval>
+<processData>
+if (!data) return next();
+
+if (data.file && /readme/i.test(data.file)) {
+  data.content.split('\n')
+    .some(function some(line, index, lines) {
+      if (
+        /^.{0,7}\s{0,}(?:licen[cs]e[s]?|copyright).{0,2}\s{0,}$/gim.test(
+          line.trim())
+      ) {
+        data.content = lines.slice(index).join('\n');
+        debug('matched %s as license header, slicing data', JSON.stringify(line));
+      return true;
+    }
+
+    return false;
+  });
+}
+</processData>
+<detectLicense>
+var license = this.scan(data.content);
+if (!license) {
+  license = this.test(data.content);
+
+  if (license) debug('used regexp to detect %s in content', license);
+} else {
+  debug('license file scan resulted in %s as matching license', license);
+}
+
+next(undefined, this.normalize(license));
+</detectLicense>
+</parse>
+```
+
+8. This function is a crawler to traverse DOM elements or spirits. It contains logic to handle various cases in traversal and conditional logic for handling globals and hosted environments. It does multiple things and should be refactored for SRP.
+```javascript
+<ModuleResource>
+<startTraversal>
+this.direction = gui.Crawler.ASCENDING;
+var supports = gui.hasModule('gui-spirits@wunderbyte.com');
+var isspirit = supports && start instanceof gui.Spirit;
+</startTraversal>
+<traverseDOM>
+var win, elm = isspirit ? start.element : start;
+do {
+  // Each iteration is looking at a different aspect (node types, global handlers, and elements),
+  // representing different responsibilities within traversal logic.
+  // ...
+} while (elm);
+</traverseDOM>
+</ModuleResource>
+```
+
+9. This function attempts to delete a blob from a storage service and logs an error if unsuccessful. It deals with both the deletion and the error logging, which are separate concerns.
+```javascript
+<removeContainerBlob>
+<deleteBlob>
+blob.svc.deleteBlobIfExists(blob.container, path, function(error, result, response) {
+  if (error) {
+    __log('Cannot delete ' + path + 'on container ' + blob.container);
+  }
+</deleteBlob>
+<handleCallback>
+  return callback(error);
+</handleCallback>
+</removeContainerBlob>
+```
+
+10. The function checks whether a given object represents an entity by examining certain properties. It serves a single responsibility.
+```javascript
+<isEntity>
+function isEntity (d) {
+  return isText(d.type) && Array.isArray(d.params) && Array.isArray(d.content)
+}
+</isEntity>
+```
