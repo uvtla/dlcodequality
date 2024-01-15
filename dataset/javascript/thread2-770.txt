@@ -1,0 +1,460 @@
+<sortFacesByMaterial>
+function sortFacesByMaterial (geometry, material) {
+  var f, fl, face, materialIndex, vertices,
+    groupHash, hash_map = {};
+
+  var numMorphTargets = geometry.morphTargets.length;
+  var numMorphNormals = geometry.morphNormals.length;
+
+  <usesFaceMaterial>
+  var usesFaceMaterial = material instanceof THREE.MeshFaceMaterial;
+  </usesFaceMaterial>
+
+  geometry.geometryGroups = {};
+
+  <groupingFaces>
+  for (f = 0, fl = geometry.faces.length; f < fl; f++) {
+    face = geometry.faces[f];
+    materialIndex = usesFaceMaterial ? face.materialIndex : 0;
+
+    if (hash_map[materialIndex] === undefined) {
+      hash_map[materialIndex] = {'hash': materialIndex, 'counter': 0};
+    }
+
+    groupHash = hash_map[materialIndex].hash + '_' + hash_map[materialIndex].counter;
+
+    if (geometry.geometryGroups[groupHash] === undefined) {
+      geometry.geometryGroups[groupHash] = {'faces3': [], 'materialIndex': materialIndex, 'vertices': 0, 'numMorphTargets': numMorphTargets, 'numMorphNormals': numMorphNormals};
+    }
+
+    vertices = 3;
+
+    if (geometry.geometryGroups[groupHash].vertices + vertices > 65535) {
+      hash_map[materialIndex].counter += 1;
+      groupHash = hash_map[materialIndex].hash + '_' + hash_map[materialIndex].counter;
+
+      if (geometry.geometryGroups[groupHash] === undefined) {
+        geometry.geometryGroups[groupHash] = {'faces3': [], 'materialIndex': materialIndex, 'vertices': 0, 'numMorphTargets': numMorphTargets, 'numMorphNormals': numMorphNormals};
+      }
+    }
+
+    geometry.geometryGroups[groupHash].faces3.push(f);
+    geometry.geometryGroups[groupHash].vertices += vertices;
+  }
+  </groupingFaces>
+
+  <creatingGeometryGroupsList>
+  geometry.geometryGroupsList = [];
+
+  for (var g in geometry.geometryGroups) {
+    geometry.geometryGroups[g].id = _geometryGroupCounter++;
+    geometry.geometryGroupsList.push(geometry.geometryGroups[g]);
+  }
+  </creatingGeometryGroupsList>
+}
+</sortFacesByMaterial>
+
+<updatePseudoClassStyle>
+function updatePseudoClassStyle(ratingWrapperStyleId, properties, preventFocusStyleForTouchAndClick) {
+  <decideRatingFocusStyle>
+  let ratingFocusStyle;
+  if (preventFocusStyleForTouchAndClick) {
+    ratingFocusStyle = { outline: 0 };
+  } else {
+    ratingFocusStyle = {
+      ...style.focusStyle,
+      ...properties.focusStyle,
+    };
+  }
+  </decideRatingFocusStyle>
+
+  <prepareStyles>
+  const styles = [
+    {
+      id: ratingWrapperStyleId,
+      style: ratingFocusStyle,
+      pseudoClass: 'focus',
+    },
+  ];
+  </prepareStyles>
+
+  <injectPreparedStyles>
+  injectStyles(styles);
+  </injectPreparedStyles>
+}
+</updatePseudoClassStyle>
+
+<getDefaultExcerpt>
+function getDefaultExcerpt(content) {
+  var pTags = [];
+
+  <createDOM>
+  doc = doc || createDom(content);
+  </createDOM>
+  
+  <queryParagraphs>
+  pTags = doc.querySelectorAll('p');
+  </queryParagraphs>
+
+  <getFirstParagraphOrEmpty>
+  if (pTags.length) {
+    return '<p>' + pTags[0].innerHTML + '</p>';
+  } else {
+    return '';
+  }
+  </getFirstParagraphOrEmpty>
+}
+</getDefaultExcerpt>
+
+<updateSatellite>
+function(name, satellite, autoSet){
+  <satelliteManagementVars>
+  var oldSatellite = this.satellite[name] || null;
+  var auto = this.satellite[AUTO];
+  var autoConfig = auto && auto[name];
+  var preserveAuto = autoSet && autoConfig;
+  </satelliteManagementVars>
+
+  <preserveAutoConfiguration>
+  if (preserveAuto) {
+    satellite = autoConfig.instance;
+    if (satellite && autoConfig.config.instance)
+      delete autoConfig.config.instance.setOwner;
+  }
+  </preserveAutoConfiguration>
+
+  <processSatelliteConfig>
+  else {
+    satellite = processSatelliteConfig(satellite);
+
+    <checkSatelliteNameChange>
+    if (satellite && satellite.owner === this && auto && satellite.ownerSatelliteName && auto[satellite.ownerSatelliteName]) {
+      basis.dev.warn(namespace + ': auto-create satellite can\'t change name inside owner');
+      return;
+    }
+    </checkSatelliteNameChange>
+
+    <deleteOldAutoConfig>
+    if (autoConfig) {
+      delete auto[name];
+
+      if (autoConfig.config.instance)
+        autoConfig.config.instance.removeHandler(AUTO_SATELLITE_INSTANCE_HANDLER, autoConfig);
+
+      if (autoConfig.config.handler)
+        this.removeHandler(autoConfig.config.handler, autoConfig);
+    }
+    </deleteOldAutoConfig>
+  }
+  </processSatelliteConfig>
+
+  <updateSatelliteInstance>
+  if (oldSatellite !== satellite) {
+    var satelliteListen = this.listen.satellite;
+    var satellitePersonalListen = this.listen['satellite:' + name];
+    var destroySatellite;
+
+    if (oldSatellite) {
+      <removeOldSatellite>
+      delete this.satellite[name];
+      var oldSatelliteName = oldSatellite.ownerSatelliteName;
+      if (oldSatelliteName != null) {
+        oldSatellite.ownerSatelliteName = null;
+        oldSatellite.emit_ownerSatelliteNameChanged(oldSatelliteName);
+      }
+
+      if (autoConfig && oldSatellite.destroy === warnOnAutoSatelliteDestoy) {
+        destroySatellite = oldSatellite;
+      }
+      </removeOldSatellite>
+
+      <destroyOrPreserveOldSatellite>
+      else {
+        if (satelliteListen)
+          oldSatellite.removeHandler(satelliteListen, this);
+        if (satellitePersonalListen)
+          oldSatellite.removeHandler(satellitePersonalListen, this);
+
+        oldSatellite.setOwner(null);
+      }
+      </destroyOrPreserveOldSatellite>
+
+      <managePreserveAuto>
+      if (preserveAuto && !satellite && autoConfig.config.instance)
+        autoConfig.config.instance.setOwner = warnOnAutoSatelliteOwnerChange;
+      </managePreserveAuto>
+    }
+
+    <updateNewSatellite>
+    if (satellite) {
+      if (satellite instanceof AbstractNode == false) {
+        <initializeAutoConfig>
+        var autoConfig = {
+          owner: this,
+          name: name,
+          config: satellite,
+          factoryType: null,
+          factory: null,
+          instance: null,
+          instanceRA_: null,
+          existsRA_: null
+        };
+        </initializeAutoConfig>
+
+        <addSatelliteHandlers>
+        if (satellite.handler)
+          this.addHandler(satellite.handler, autoConfig);
+
+        if (satellite.instance) {
+          satellite.instance.addHandler(AUTO_SATELLITE_INSTANCE_HANDLER, autoConfig);
+          satellite.instance.setOwner = warnOnAutoSatelliteOwnerChange;
+        }
+        </addSatelliteHandlers>
+
+        <updateAutoSatellite>
+        if (!auto) {
+          if (this.satellite === NULL_SATELLITE)
+            this.satellite = {};
+          auto = this.satellite[AUTO] = {};
+        }
+
+        auto[name] = autoConfig;
+        SATELLITE_UPDATE.call(autoConfig, this);
+
+        if (!autoConfig.instance && oldSatellite)
+          this.emit_satelliteChanged(name, oldSatellite);
+
+        if (destroySatellite) {
+          delete destroySatellite.destroy;
+          destroySatellite.destroy();
+        }
+        </updateAutoSatellite>
+
+        return;
+      }
+
+      <finalOwnerAdjustment>
+      if (satellite.owner !== this) {
+        if (autoConfig && autoConfig.config.delegate) {
+          var autoDelegate = satellite.autoDelegate;
+          satellite.autoDelegate = false;
+          satellite.setOwner(this);
+          satellite.autoDelegate = autoDelegate;
+        }
+        else
+          satellite.setOwner(this);
+
+        if (satellite.owner !== this) {
+          this.setSatellite(name, null);
+          return;
+        }
+
+        if (satelliteListen)
+          satellite.addHandler(satelliteListen, this);
+        if (satellitePersonalListen)
+          satellite.addHandler(satellitePersonalListen, this);
+      }
+      else {
+        if (satellite.ownerSatelliteName) {
+          delete this.satellite[satellite.ownerSatelliteName];
+          this.emit_satelliteChanged(satellite.ownerSatelliteName, satellite);
+        }
+      }
+
+      <setNewSatellite>
+      if (this.satellite == NULL_SATELLITE)
+        this.satellite = {};
+
+      this.satellite[name] = satellite;
+      var oldSatelliteName = satellite.ownerSatelliteName;
+      if (oldSatelliteName != name) {
+        satellite.ownerSatelliteName = name;
+        satellite.emit_ownerSatelliteNameChanged(oldSatelliteName);
+      }
+      </setNewSatellite>
+      </finalOwnerAdjustment>
+    }
+
+    <emitSatelliteChanges>
+    this.emit_satelliteChanged(name, oldSatellite);
+
+    if (destroySatellite) {
+      delete destroySatellite.destroy;
+      destroySatellite.destroy();
+    }
+    </emitSatelliteChanges>
+  }
+  </updateSatelliteInstance>
+}
+</updateSatellite>
+
+<showInterfaceIdl>
+function showInterfaceIdl(intf, html) {
+  <initializeIdlDisplay>
+  html.push("<div class='show-Idl'><h3>IDL</h3><pre>")
+  html.push("interface {")
+  </initializeIdlDisplay>
+
+  <appendMethods>
+  intf.methods.forEach(function(method){
+    showInterfaceIdlMethod(method, html)
+  })
+  </appendMethods>
+
+  <appendAttributes>
+  if (intf.attributes.length > 0) html.push("<table>")
+  intf.attributes.forEach(function(attribute){
+    showInterfaceIdlAttribute(attribute, html)
+  })
+  if (intf.attributes.length > 0) html.push("</table>")
+  </appendAttributes>
+
+  <finalizeIdlDisplay>
+  html.push("};")
+  html.push("</pre></div>")
+  </finalizeIdlDisplay>
+}
+</showInterfaceIdl>
+
+<updateListeners>
+function updateListeners(
+  on,
+  oldOn,
+  add,
+  remove$$1,
+  vm
+) {
+  var name, cur, old, fn, event, capture;
+  <compareListeners>
+  for (name in on) {
+    cur = on[name];
+    old = oldOn[name];
+    if (!cur) {
+      "development" !== 'production' && warn(
+        "Invalid handler for event \"" + name + "\": got " + String(cur),
+        vm
+      );
+    } else if (!old) {
+      capture = name.charAt(0) === '!';
+      event = capture ? name.slice(1) : name;
+      if (Array.isArray(cur)) {
+        add(event, (cur.invoker = arrInvoker(cur)), capture);
+      } else {
+        if (!cur.invoker) {
+          fn = cur;
+          cur = on[name] = {};
+          cur.fn = fn;
+          cur.invoker = fnInvoker(cur);
+        }
+        add(event, cur.invoker, capture);
+      }
+    } else if (cur !== old) {
+      if (Array.isArray(old)) {
+        old.length = cur.length;
+        for (var i = 0; i < old.length; i++) { old[i] = cur[i]; }
+        on[name] = old;
+      } else {
+        old.fn = cur;
+        on[name] = old;
+      }
+    }
+  }
+  </compareListeners>
+  <removeUnusedListeners>
+  for (name in oldOn) {
+    if (!on[name]) {
+      event = name.charAt(0) === '!' ? name.slice(1) : name;
+      remove$$1(event, oldOn[name].invoker);
+    }
+  }
+  </removeUnusedListeners>
+}
+</updateListeners>
+
+<_walk>
+function _walk(node) {
+  var i, l, child, s, state, allSelected, someSelected,
+    children = node.children;
+
+  <iterateChildren>
+  if (children && children.length) {
+    allSelected = true;
+    someSelected = false;
+
+    for (i = 0, l = children.length; i < l; i++) {
+      child = children[i];
+      
+      <updateChildState>
+      s = _walk(child);
+      if (s !== false) {
+        someSelected = true;
+      }
+      if (s !== true) {
+        allSelected = false;
+      }
+      </updateChildState>
+    }
+    state = allSelected ? true : (someSelected ? undefined : false);
+  } else {
+    state = !!node.selected;
+  }
+  </iterateChildren>
+
+  <changeSelectStatusAttrs>
+  node._changeSelectStatusAttrs(state);
+  </changeSelectStatusAttrs>
+  return state;
+}
+</_walk>
+
+<isIn>
+function isIn(arrayLike, value) {
+  var result = false;
+
+  <checkForValue>
+  for (var i = 0, len = arrayLike.length; i < len; i++) {
+    if (areSVZ(value, arrayLike[i])) {
+      result = true;
+      break;
+    }
+  }
+  </checkForValue>
+
+  return result;
+}
+</isIn>
+
+<cleanupFiles>
+function cleanupFiles(workingDir, zipFileName, callback) {
+  <constructDeleteCommand>
+  var command = "rm -rf " + workingDir + " " + zipFileName;
+  </constructDeleteCommand>
+  <executeDeleteCommand>
+  exec(command, function(err) {
+    if (callback) {
+      callback(err);
+    }
+  });
+  </executeDeleteCommand>
+}
+</cleanupFiles>
+
+<localization>
+function (lang) {
+  <languageSpecificAssignments>
+  if (lang == "es") {
+    <spanishLocalization>
+    // ... Spanish localization data ...
+    </spanishLocalization>
+  } else if (lang == "fr") {
+    <frenchLocalization>
+    // ... French localization data ...
+    </frenchLocalization>
+  } else if (lang == "pt-BR") {
+    <brazilianPortugueseLocalization>
+    // ... Brazilian Portuguese localization data ...
+    </brazilianPortugueseLocalization>
+  }
+  </languageSpecificAssignments>
+}
+</localization>

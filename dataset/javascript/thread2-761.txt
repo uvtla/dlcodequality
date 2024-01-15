@@ -1,0 +1,399 @@
+<processArray>
+function processArray(req, res, nextarray) {
+    <argumentValidation>
+    if (!nextarray || !nextarray.length)
+        return;
+    </argumentValidation>
+    <recursiveProcessing>
+    var proc = nextarray.shift();
+    proc(req, res, function () {
+        processArray(req, res, nextarray);
+    });
+    </recursiveProcessing>
+}
+</processArray>
+
+<buildLineContent>
+function buildLineContent(cm, lineView) {
+    <elementCreation>
+    var content = elt("span", null, null, webkit ? "padding-right: .1px" : null);
+    var builder = {pre: elt("pre", [content]), content: content, col: 0, pos: 0, cm: cm};
+    lineView.measure = {};
+    </elementCreation>
+
+    <lineStyling>
+    for (var i = 0; i <= (lineView.rest ? lineView.rest.length : 0); i++) {
+        var line = i ? lineView.rest[i - 1] : lineView.line, order;
+        builder.pos = 0;
+        builder.addToken = buildToken;
+        </lineStyling>
+
+        <browserSpecificAdjustments>
+        if ((ie || webkit) && cm.getOption("lineWrapping"))
+            builder.addToken = buildTokenSplitSpaces(builder.addToken);
+        if (hasBadBidiRects(cm.display.measure) && (order = getOrder(line)))
+            builder.addToken = buildTokenBadBidi(builder.addToken, order);
+        </browserSpecificAdjustments>
+        
+        <lineContentInsertion>
+        builder.map = [];
+        var allowFrontierUpdate = lineView != cm.display.externalMeasured && lineNo(line);
+        insertLineContent(line, builder, getLineStyles(cm, line, allowFrontierUpdate));
+        </lineContentInsertion>
+
+        <styleClassesApplication>
+        if (line.styleClasses) {
+            if (line.styleClasses.bgClass)
+                builder.bgClass = joinClasses(line.styleClasses.bgClass, builder.bgClass || "");
+            if (line.styleClasses.textClass)
+                builder.textClass = joinClasses(line.styleClasses.textClass, builder.textClass || "");
+        }
+        </styleClassesApplication>
+
+        <mapAndCacheManagement>
+        if (builder.map.length == 0)
+            builder.map.push(0, 0, builder.content.appendChild(zeroWidthElement(cm.display.measure)));
+
+        if (i == 0) {
+            lineView.measure.map = builder.map;
+            lineView.measure.cache = {};
+        } else {
+            (lineView.measure.maps || (lineView.measure.maps = [])).push(builder.map);
+            (lineView.measure.caches || (lineView.measure.caches = [])).push({});
+        }
+        </mapAndCacheManagement>
+    }
+
+    <webkitAdjustment>
+    if (webkit && /\bcm-tab\b/.test(builder.content.lastChild.className))
+        builder.content.className = "cm-tab-wrap-hack";
+    </webkitAdjustment>
+
+    <eventTriggering>
+    signal(cm, "renderLine", cm, lineView.line, builder.pre);
+    if (builder.pre.className)
+        builder.textClass = joinClasses(builder.pre.className, builder.textClass || "");
+    </eventTriggering>
+
+    return builder;
+}
+</buildLineContent>
+
+<convertCodePoints>
+function convertCodePoints(regexp) {
+		return regexp.replace(/\\x\{([0-9a-fA-F]+)\}/g, function(m, chars) {
+			<paddingZeros>
+			while (chars.length < 4) {
+				chars = '0' + chars;
+			}
+			</paddingZeros>
+			<transformToUnicode>
+			return '\\u' + chars;
+			</transformToUnicode>
+		});
+	}
+</convertCodePoints>
+
+<pushOutBoundPeersToExplorer>
+function pushOutBoundPeersToExplorer(){
+	<checkConditions>
+	if(!conf.IF_BYZANTINE)
+		return;
+	if (conf.bLight )
+		return;
+	</checkConditions>
+	<fineOutboundPeerOrConnect>
+	findOutboundPeerOrConnect
+	(
+		explorerUrl,
+		(err, oWsByExplorerUrl) =>
+		{
+			<onValidPeer>
+			if ( ! err )
+			{
+				<createOutboudPeerUrlsArray>
+				let arrOutboundPeerUrls = arrOutboundPeers.map(function (ws) {
+					return ws.peer;
+				});
+				</createOutboudPeerUrlsArray>
+				<sendPeersToExplorer>
+				sendJustsaying( oWsByExplorerUrl, 'push_outbound_peers', arrOutboundPeerUrls );
+				</sendPeersToExplorer>
+			}
+			</onValidPeer>
+		}
+	);
+	</fineOutboundPeerOrConnect>
+}
+</pushOutBoundPeersToExplorer>
+
+<setError>
+function (field, error) {
+	<fieldsObjectCheck>
+    if (field instanceof Object) {
+        this.$errors.set(field);
+    }
+	</fieldsObjectCheck>
+	<elseCase>
+    else {
+        this.$errors.set(field, error);
+    }
+	</elseCase>
+
+    <triggerEvent>
+    this.trigger('isValidChanged');
+    </triggerEvent>
+}
+</setError>
+
+<compressFile>
+function (file, compression) {
+      var result = new JSZip.CompressedObject(), content;
+
+      <handlePreCompressedObject>
+      if (file._data instanceof JSZip.CompressedObject) {
+         result.uncompressedSize = file._data.uncompressedSize;
+         result.crc32 = file._data.crc32;
+         </handlePreCompressedObject>
+
+         <specialCaseCompression>
+         if (result.uncompressedSize === 0 || file.options.dir) {
+            compression = JSZip.compressions['STORE'];
+            result.compressedContent = "";
+            result.crc32 = 0;
+         } else if (file._data.compressionMethod === compression.magic) {
+            result.compressedContent = file._data.getCompressedContent();
+         } else {
+            content = file._data.getContent()
+        	<compressContent>
+            result.compressedContent = compression.compress(JSZip.utils.transformTo(compression.compressInputType, content));
+       		</compressContent>
+         }
+         <specialCaseCompression>
+      } else {
+         <getContent>
+         content = getBinaryData(file);
+         if (!content || content.length === 0 || file.options.dir) {
+            compression = JSZip.compressions['STORE'];
+            content = "";
+         }
+         result.uncompressedSize = content.length;
+         result.crc32 = this.crc32(content);
+         </getContent>
+         <compressContent>
+         result.compressedContent = compression.compress(JSZip.utils.transformTo(compression.compressInputType, content));
+         </compressContent>
+      }
+
+      <finalizeCompressionResult>
+      result.compressedSize = result.compressedContent.length;
+      result.compressionMethod = compression.magic;
+      </finalizeCompressionResult>
+
+      return result;
+   }
+</compressFile>
+
+<checkTypeRegistered>
+function(Type) {
+	<nullCheck>
+	if (Type) {
+		<registrationCheck>
+		if (this._map) {
+			var classid = Type.$classid;
+			var typeobj = this._map[classid];
+			return typeobj ? true : false;
+		}
+		</registrationCheck>
+		return false;
+	} else {
+		<exception>
+		throw new Error("Something is undefined");
+		</exception>
+	}
+</nullCheck>
+</checkTypeRegistered>
+
+<parseChildInputpaths>
+function parseChildInputpaths(build) {
+  <recursiveParseDefinition>
+  function parse(build) {
+    let inputpaths = [];
+
+    <buildIteration>
+    build.forEach(build => {
+      inputpaths = inputpaths.concat(build.inputpaths, build.builds ? parse(build.builds) : []);
+    });
+    </buildIteration>
+
+    return inputpaths;
+  }
+  </recursiveParseDefinition>
+
+  <assignChildInputpaths>
+  build.childInputpaths = parse(build.builds);
+  </assignChildInputpaths>
+}
+</parseChildInputpaths>
+
+<insertImageWYSIWYG>
+function(wysiwygeditor)
+        {
+            
+            <insertImageFunction>
+            var insert_image_wysiwyg = function( url, filename )
+            {
+                <createImageHTML>
+                var html = '<img id="wysiwyg-insert-image" src="" alt=""' + (filename ? ' title="'+html_encode(filename)+'"' : '') + '>';
+                wysiwygeditor.insertHTML( html ).closePopup().collapseSelection();
+                var $image = $('#wysiwyg-insert-image').removeAttr('id');
+                if( max_imagesize )
+                {
+                    $image.css({maxWidth: max_imagesize[0]+'px',
+                                maxHeight: max_imagesize[1]+'px'})
+                    <imageResize>
+                          .load( function() {
+                                $image.css({maxWidth: '',
+                                            maxHeight: ''});
+                                var image_width = $image.width(),
+                                    image_height = $image.height();
+                                if( image_width > max_imagesize[0] || image_height > max_imagesize[1] )
+                                {
+                                    if( (image_width/image_height) > (max_imagesize[0]/max_imagesize[1]) )
+                                    {
+                                        image_height = parseInt(image_height / image_width * max_imagesize[0]);
+                                        image_width = max_imagesize[0];
+                                    }
+                                    else
+                                    {
+                                        image_width = parseInt(image_width / image_height * max_imagesize[1]);
+                                        image_height = max_imagesize[1];
+                                    }
+                                    $image.prop('width',image_width)
+                                          .prop('height',image_height);
+                                }
+                            });
+                    </imageResize>
+                }
+                $image.prop('src', url);
+                </createImageHTML>
+            };
+            </insertImageFunction>
+
+            <uiCreation>
+            var $content = $('<div/>').addClass('wysiwyg-toolbar-form')
+                                      .prop('unselectable','on');
+            </uiCreation>
+
+            <fileUploaderSetup>
+            var $fileuploader = null,
+                $fileuploader_input = $('<input type="file">')
+                                        .css({position: 'absolute',
+                                              left: 0,
+                                              top: 0,
+                                              width: '100%',
+                                              height: '100%',
+                                              opacity: 0,
+                                              cursor: 'pointer'});
+            if( ! force_imageupload && window.File && window.FileReader && window.FileList )
+            {
+                <loadImageFromFileFunction>
+                var loadImageFromFile = function( file )
+                {
+                    <imageTypeFilter>
+                    if( typeof(filter_imageType) === 'function' && ! filter_imageType(file) )
+                        return;
+                    else if( ! file.type.match(filter_imageType) )
+                        return;
+                    </imageTypeFilter>
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        var dataurl = event.target.result;
+                        insert_image_wysiwyg( dataurl, file.name );
+                    };
+                    <readImage>
+                    reader.readAsDataURL( file );
+                    </readImage>
+                };
+                </loadImageFromFileFunction>
+                $fileuploader = $fileuploader_input
+                                    .prop('draggable','true')
+                                    <fileUploaderEvents>
+                                    .change(function(event){
+                                        var files = event.target.files; 
+                                        for(var i=0; i < files.length; ++i)
+                                            loadImageFromFile( files[i] );
+                                    })
+                                    .on('dragover',function(event){
+                                        event.originalEvent.dataTransfer.dropEffect = 'copy'; 
+                                        event.stopPropagation();
+                                        event.preventDefault();
+                                        return false;
+                                    })
+                                    .on('drop', function(event){
+                                        var files = event.originalEvent.dataTransfer.files; 
+                                        for(var i=0; i < files.length; ++i)
+                                            loadImageFromFile( files[i] );
+                                        event.stopPropagation();
+                                        event.preventDefault();
+                                        return false;
+                                    });
+                                    </fileUploaderEvents>
+            }
+            else if( on_imageupload )
+            {
+                <externalImageUploadFunction>
+                var $input = $fileuploader_input
+                                    .change(function(event){
+                                        on_imageupload.call( this, insert_image_wysiwyg );
+                                    });
+                $fileuploader = $('<form/>').append($input);
+                </externalImageUploadFunction>
+            }
+            if( $fileuploader )
+            <fileUploaderUi>
+                $('<div/>').addClass( 'wysiwyg-browse' )
+                           .html( label_selectImage )
+                           .append( $fileuploader )
+                           .appendTo( $content );
+            </fileUploaderUi>
+            </fileUploaderSetup>
+
+            <urlInputAndSubmit>
+            var $inputurl = $('<input type="text" value="">').addClass('wysiwyg-input')
+                                .keypress(function(event){
+                                    if( event.which == 10 || event.which == 13 )
+                                        insert_image_wysiwyg( $inputurl.val() );
+                                });
+            if( placeholder_url )
+                $inputurl.prop( 'placeholder', placeholder_url );
+            var $okaybutton = $();
+            if( toolbar_submit )
+                $okaybutton = toolbar_button(toolbar_submit).click(function(event){
+                                    insert_image_wysiwyg( $inputurl.val() );
+                                    event.stopPropagation();
+                                    event.preventDefault();
+                                    return false;
+                                });
+            $content.append( $('<div/>').append($inputurl).append($okaybutton) );
+            </urlInputAndSubmit>
+            return $content;
+        }
+</insertImageWYSIWYG>
+
+<startServer>
+function start() {
+      <startListening>
+      app.listen(hrsConfigs.port, function (err) {
+        <errorHandling>
+        if (err) {
+          info(err);
+        }
+        </errorHandling>
+        <logStartup>
+        info('Running on http://localhost:' + hrsConfigs.port);
+        </logStartup>
+      });
+      </startListening>
+    }
+</startServer>

@@ -1,0 +1,385 @@
+<user_interaction><Prompt>
+function Prompt () {
+  <initialization_checks>
+  Base.apply(this, arguments);
+
+  if (!this.opt.basePath) {
+    this.throwParamError('basePath');
+  }
+  </initialization_checks>
+
+  <setup_properties>
+  this.pathIndexHash = {};
+  this.originalBaseDir = this.currentPath =
+    path.normalize(path.isAbsolute(this.opt.basePath) ?
+      path.resolve(this.opt.basePath) : path.resolve(process.cwd(), this.opt.basePath));
+
+  if (String(this.currentPath).endsWith(path.sep)) {
+    this.currentPath = String(this.currentPath).slice(0, -1);
+  }
+
+  this.onlyOneFile = !!this.opt.onlyOneFile;
+
+  this.opt.choices = new Choices(this.createChoices(this.currentPath), this.answers);
+  this.selected = 0;
+
+  if (this.opt.filterItems) {
+    assert(typeof this.opt.filterItems === 'function', ' "filterItems" option property must be a function.');
+  }
+  </setup_properties>
+
+  <paginator_setup>
+  this.firstRender = true;
+  
+  this.opt.default = null;
+  this.searchTerm = '';
+  this.paginator = new Paginator();
+  </paginator_setup>
+}
+</Prompt>
+
+<core_framework_initialization>
+function() {
+  <initial_sanity_checks>
+  if (typeof(Firestorm) == 'undefined') Lava.t('init: Firestorm is not loaded');
+  </initial_sanity_checks>
+
+  <namespaces_and_root_setup>
+  this.ClassManager.registerRootNamespace('Lava', this);
+  this.ScopeManager.init();
+
+  for (path in this.classes) {
+    this._loadClass(path);
+  }
+  </namespaces_and_root_setup>
+
+  <serializer_setup>
+  this.serializer = new Lava.system.Serializer(Lava.schema.default_serializer_config);
+  </serializer_setup>
+
+  <environment_specific_initialization>
+  if (typeof(window) != 'undefined') {
+    this._initGlobals();
+    this.ClassManager.registerExistingConstructor('Lava.WidgetConfigExtensionGateway', this.WidgetConfigExtensionGateway);
+    this.ClassManager.registerExistingConstructor('Lava.ClassLocatorGateway', this.ClassLocatorGateway);
+    this.Cron.init();
+  }
+  </environment_specific_initialization>
+
+  <sugar_classes_registration>
+  for (count = this.schema.SUGAR_CLASSES.length; i < count; i++) {
+    this.registerSugar(this.schema.SUGAR_CLASSES[i]);
+  }
+  </sugar_classes_registration>
+
+  <final_setup>
+  this.define = this.define_Normal;
+  this.init = null;
+  </final_setup>
+}
+</core_framework_initialization>
+
+<simple_random_string_generation>
+function () {
+  var text = ''
+  var regx = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  for (var idx = 0; idx < 8; idx++) {
+    text += regx.charAt(Math.floor(Math.random() * regx.length))
+  }
+  return text
+}
+</simple_random_string_generation>
+
+<column_attribute_retrieval>
+function(attr, field) {
+  for (var i = 0; i < this.gridCompColumnArr.length; i++) {
+    if (this.gridCompColumnArr[i].options.field == field) {
+      return $(this.gridCompColumnArr[i].options).attr(attr);
+    }
+  }
+  return "";
+}
+</column_attribute_retrieval>
+
+<throttle_configuration><throttle>
+function throttle(options) {
+  <assertions>
+  assert.object(options, 'options');
+  assert.number(options.burst, 'options.burst');
+  assert.number(options.rate, 'options.rate');
+  if (!xor(options.ip, options.xff, options.username)) {
+    throw new Error('(ip ^ username ^ xff)');
+  }
+  </assertions>
+
+  for (key in options.overrides) {
+    <overrides>
+    var override = options.overrides[key];
+    try {
+      var block = new Netmask(key);
+
+      if (block.first !== block.last) {
+        override.block = block;
+      }
+    }
+    catch(err) {
+      
+    }
+    </overrides>
+  }
+
+  <default_message_setup>
+  var message = options.message || 'You have exceeded your request rate of %s r/s.';
+  </default_message_setup>
+
+  <token_table_setup>
+  var table = options.tokensTable || new TokenTable({size: options.maxKeys});
+  </token_table_setup>
+
+  <rate_limiting_middleware>
+  function rateLimit(req, res, next) {
+    var attr;
+    var burst = options.burst;
+    var rate = options.rate;
+
+    <identify_attribute>
+    if (options.ip) {
+      attr = req.connection.remoteAddress;
+    } else if (options.xff) {
+      attr = req.headers['x-forwarded-for'];
+    } else if (options.username) {
+      attr = req.username;
+    }
+    </identify_attribute>
+
+    
+    if (!attr) {
+      return next(new Error('Invalid throttle configuration'));
+    }
+
+    
+    attr = attr.split(',')[0];
+
+    
+    <override_check>
+    if (options.overrides) {
+      var override = options.overrides[attr];
+
+      
+      if (override) {
+        if (override.burst !== undefined && override.rate !== undefined) {
+          burst = override.burst;
+          rate = override.rate;
+        }
+      }
+      
+      else {
+        for (key in options.overrides) {
+          override = options.overrides[key];
+          var contained = false;
+
+          try {
+            contained = override.block && override.block.contains(attr);
+          }
+          catch(err) {
+            
+          }
+
+          if (contained) {
+            burst = override.burst;
+            rate = override.rate;
+            break;
+          }
+        }
+      }
+    }
+    </override_check>
+
+    if (!rate || !burst) {
+      return next();
+    }
+
+    var bucket = table.get(attr);
+    if (!bucket) {
+      bucket = new TokenBucket({
+        capacity: burst,
+        fillRate: rate
+      });
+      table.put(attr, bucket);
+    }
+
+    if (!bucket.consume(1)) {
+      var msg = sprintf(message, rate);
+      var err = new Error(msg);
+      err.status = 429; 
+      return next(err);
+    }
+
+    return next();
+  }
+  </rate_limiting_middleware>
+
+  return rateLimit;
+}
+</throttle></throttle_configuration>
+
+<build_bid_request>
+function buildGiBidRequest(bidRequest) {
+  let giBidRequest = {
+    <assign_basic_attributes>
+    bid_id: bidRequest.bidId,
+    pid: bidRequest.params.pid, 
+    tid: bidRequest.params.tid, 
+    known: bidRequest.params.known || 1,
+    is_video: bidRequest.mediaType === 'video',
+    resp_type: 'JSON',
+    provider: 'direct.prebidjs'
+    </assign_basic_attributes>
+  };
+  <handle_optional_sizes>
+  if (bidRequest.sizes) {
+    giBidRequest.size = produceSize(bidRequest.sizes);
+  }
+  </handle_optional_sizes>
+  <add_additional_params>
+  addVideo(bidRequest.params.video, giBidRequest);
+  addOptional(bidRequest.params, giBidRequest, OPTIONAL_PROPERTIES);
+  </add_additional_params>
+  return giBidRequest;
+}
+</build_bid_request>
+
+<draw_pie_chart>
+function Pie (ctx, data, cfg) {
+  <setup_chart_dimensions_and_context>
+  var canvas = ctx.canvas;
+  this.width = canvas.width;
+  this.height = canvas.height;
+
+  this.ctx = ctx;
+  this.data = data;
+  this.cfg = cfg;
+
+  this.pieRadius = min([this.height / 2, this.width / 2]) - 5;
+  </setup_chart_dimensions_and_context>
+
+  <calculate_segment_total>
+  var segmentTotal = 0, i = 0, d;
+  while ((d = data[i++])) {
+    segmentTotal += d.value;
+  }
+  this.segmentTotal = segmentTotal;
+  </calculate_segment_total>
+
+  <invoke_drawing_method>
+  this.draw();
+  </invoke_drawing_method>
+}
+</draw_pie_chart>
+
+<check_child_workflow_completion>
+function(control) {
+  return this._events.some(function (evt) {
+     if (evt.eventType === "ChildWorkflowExecutionCompleted") {
+        var initiatedEventId = evt.childWorkflowExecutionCompletedEventAttributes.initiatedEventId;
+        var initiatedEvent = this.eventById(initiatedEventId);
+
+        if (initiatedEvent.startChildWorkflowExecutionInitiatedEventAttributes.control === control) {
+           return true;
+        }
+     }
+  }, this);
+}
+</check_child_workflow_completion>
+
+<change_task_action>
+function changeAction(newAction, newClientRecord) {
+        var self = this;
+        return storeTaskRunner.run(function() {
+            <determine_operations>
+            var dataOperation, 
+                logOperation = { 
+                    tableName: operationTableName,
+                    action: 'upsert',
+                    data: makeCopy(pushOperation.logRecord)
+                };
+            
+            if (newClientRecord) {
+                if (!newClientRecord.id) {
+                    throw new Error('New client record value must specify the record ID');
+                }
+                    
+                if (newClientRecord.id !== pushOperation.logRecord.itemId) {
+                    throw new Error('New client record value cannot change the record ID. Original ID: ' +
+                                    pushOperation.logRecord.id + ' New ID: ' + newClientRecord.id);
+                }
+
+                
+                logOperation.data.metadata = logOperation.data.metadata || {};
+                logOperation.data.metadata[tableConstants.sysProps.versionColumnName] = newClientRecord[tableConstants.sysProps.versionColumnName];
+            }
+            </determine_operations>
+
+            <handle_action_change>
+            if (newAction === 'insert' || newAction === 'update') {
+                
+                
+                var oldAction = logOperation.data.action;
+                logOperation.data.action = newAction;
+
+                
+                if (newClientRecord) {
+                    
+                    dataOperation = {
+                        tableName: pushOperation.logRecord.tableName,
+                        action: 'upsert',
+                        data: newClientRecord
+                    };
+                    
+                } else if (oldAction !== 'insert' && oldAction !== 'update') {
+
+                    
+                    
+                    
+                    throw new Error('Changing action from ' + oldAction + ' to ' + newAction +
+                                    ' without specifying a value for the associated record is not allowed!');
+                }
+                
+            } else if (newAction === 'delete' || newAction === 'del') {
+
+                
+                logOperation.data.action = 'delete';
+
+                
+                dataOperation = {
+                    tableName: pushOperation.logRecord.tableName,
+                    action: 'delete',
+                    id: pushOperation.logRecord.id
+                };
+
+            } else {
+                throw new Error('Action ' + newAction + ' not supported.');
+            }
+            </handle_action_change>
+
+            <perform_batch_operation>
+            return store.executeBatch([logOperation, dataOperation]).then(function() {
+                self.isHandled = true;
+            });
+            </perform_batch_operation>
+        });
+    }
+</change_task_action>
+
+<adapter_initialization>
+function Adapter(clientPtcl, serverPtcl, fingerprint) {
+  <set_protocols_and_fingerprint>
+  this._clientPtcl = clientPtcl;
+  this._serverPtcl = serverPtcl;
+  this._fingerprint = fingerprint;
+  </set_protocols_and_fingerprint>
+  <resolver_setup>
+  this._rsvs = clientPtcl.equals(serverPtcl) ? null : this._createResolvers();
+  </resolver_setup>
+}
+</adapter_initialization>

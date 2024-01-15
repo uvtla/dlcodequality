@@ -1,0 +1,177 @@
+```javascript
+function pathRotate(contour, angle, centerX, centerY) {
+    angle = angle === undefined ? 0 : angle;
+    var x = centerX || 0;
+    var y = centerY || 0;
+    var cos = Math.cos(angle);
+    var sin = Math.sin(angle);
+    var px;
+    var py;
+    var p;
+
+    
+    <pathRotation>
+    for (var i = 0, l = contour.length; i < l; i++) {
+        p = contour[i];
+        px = cos * (p.x - x) - sin * (p.y - y);
+        py = cos * (p.y - y) + sin * (p.x - x);
+        p.x = px + x;
+        p.y = py + y;
+    }
+    </pathRotation>
+
+    return contour;
+}
+```
+
+```javascript
+function isPathUnsynced(fs, path, callback) {
+  <hasAttrCheck>
+  hasAttr(fs, path, constants.attributes.unsynced, callback);
+  </hasAttrCheck>
+}
+```
+
+```javascript
+function(object) {
+  <convertToObjectArray>
+  return Array.isArray(object) ? object : [object.x, object.y, object.z];
+  </convertToObjectArray>
+}
+```
+
+```javascript
+function _buildEntityInformation(entityName) {
+    <getEntityConfiguration>
+    const entityDomainInfos = entityContainer.getEntityConfiguration(entityName);
+    checkIsNotNull('entityDomainInfos', entityDomainInfos);
+    </getEntityConfiguration>
+    let container = {};
+    
+    <buildFieldInformation>
+    for (let key in entityDomainInfos) {
+        container[key] = _buildFieldInformation(`${entityName}${SEPARATOR}${key}`);
+    }
+    </buildFieldInformation>
+    <setComputedEntityContainer>
+    computedEntityContainer = computedEntityContainer.set(entityName, Immutable.Map(container));
+    </setComputedEntityContainer>
+}
+```
+
+```javascript
+function probeServer(address, port, callback) {
+    <defaultParameters>
+    address = address || 'localhost';
+    port    = port || 443;
+    </defaultParameters>
+
+    <pingServer>
+    pingServer({
+        address:  address,
+        port:     port,
+        attempts: 1,
+        timeout:  5000
+    }, function(err, data) {
+        var available = data.min !== undefined;
+        callback(err, available);
+    });
+    </pingServer>
+}
+```
+
+```javascript
+function parseHighlight() {
+		let pos = reader.getPos(), start, end;
+		<checkSnippetBoundary>
+		if (!(  (pos === 0 || reader.getPrevChar() === '\n') && src.indexOf('```', pos) === pos && src.indexOf('\n```', pos+3) > 0  )) {
+			return 0;
+		}
+		</checkSnippetBoundary>
+		
+		let str = src.substring(pos);
+		<handleSnippetText>
+		let rs = /(^```[\s\S]*?\r?\n)([\s\S]*?)\r?\n```[\s\S]*?\r?(\n|$)/.exec(str);
+		let len = rs[0].length;
+		</handleSnippetText>
+
+		<createTokensForHighlighting>
+		createTokens(pos, rs, tokens, options, $code, reader);
+		</createTokensForHighlighting>
+		
+		<updateReaderPosition>
+		reader.skip(len); 
+		</updateReaderPosition>
+		return 1;
+	}
+
+// Note: the actual token creation function 'createTokens' would need to be defined elsewhere in the code.
+```
+
+```javascript
+function addToQueue(url, resolve, reject, count) {
+	<countInitialization>
+	count = count || 0;
+	</countInitialization>
+	<createAndPushFunction>
+	var functionToBeCalled = createParameters(url, resolve, reject, count);
+	queue.push(functionToBeCalled);
+	</createAndPushFunction>
+	<initiateQueueProcessing>
+	callNext();
+	</initiateQueueProcessing>
+}
+```
+
+```javascript
+function() {
+    <initiateBlocklyJson>
+    this.jsonInit({
+      /*... block configuration ...*/
+    });
+    </initiateBlocklyJson>
+    <appendStatementInput>
+    this.appendStatementInput('DO')
+        .appendField(Blockly.Msg.CONTROLS_FOR_INPUT_DO);
+    </appendStatementInput>
+    
+    <setTooltip>
+    var thisBlock = this;
+    this.setTooltip(function() {
+      return Blockly.Msg.CONTROLS_FOR_TOOLTIP.replace('%1',
+          thisBlock.getFieldValue('VAR'));
+    });
+    </setTooltip>
+  }
+```
+
+```javascript
+function compactObject(source) {
+    <compactSourceObject>
+    var result = {}, key;
+
+    for (key in source) {
+        var value = source[key];
+        if (value != void 0)
+            result[key] = value;
+    }
+    </compactSourceObject>
+
+    return result;
+}
+```
+
+```javascript
+function (name) {
+    <checkNameValid>
+    if (!name || !_.isString(name)) {
+      throw new Error('Please pass in an aggregate name!');
+    }
+    </checkNameValid>
+    <findAggregate>
+    return _.find(this.aggregates, function (agg) {
+      return agg.name === name;
+    });
+    </findAggregate>
+  }
+```

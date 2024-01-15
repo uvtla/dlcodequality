@@ -1,0 +1,345 @@
+<buildConstraints>
+function buildConstraints(ctx) {
+    const res = [];
+
+    <fillLinearCombination>
+    function fillLC(dst, src) {
+        if (src.type != "LINEARCOMBINATION") throw new Error("Constraint is not a LINEARCOMBINATION");
+        for (let s in src.values) {
+            const v = src.values[s].toString();
+            const id = ctx.signalName2Idx[s];
+            dst[id] = v;
+        }
+    }
+    </fillLinearCombination>
+
+    <createConstraintsList>
+    for (let i=0; i<ctx.constraints.length; i++) {
+        const A = {};
+        const B = {};
+        const C = {};
+
+        fillLC(A, ctx.constraints[i].a);
+        fillLC(B, ctx.constraints[i].b);
+        fillLC(C, ctx.constraints[i].c.negate());
+
+        res.push([A,B,C]);
+    }
+    </createConstraintsList>
+
+    return res;
+}
+</buildConstraints>
+
+<addAllFilesAndSubdirectories>
+function addAllFilesAndSubdirectories(dir, doneCallback) {
+    <resolveDirectory>
+    FileSystem.resolve(dir, function (err, directory) {
+        
+
+        <entryVisitor>
+        function visitor(entry) {
+            if (entry.isFile) {
+                if (!isFileExcluded(entry)) { 
+                    addFilesToTern([entry.fullPath]);
+                }
+            } else {
+                
+
+
+                return !isDirectoryExcluded(entry.fullPath) &&
+                    entry.name.indexOf(".") !== 0 &&
+                    !stopAddingFiles;
+            }
+        }
+        </entryVisitor>
+
+        if (err) {
+            return;
+        }
+
+        <visitDirectoryCallback>
+        if (dir === FileSystem.getDirectoryForPath(rootTernDir)) {
+            doneCallback();
+            return;
+        }
+
+        directory.visit(visitor, doneCallback);
+        </visitDirectoryCallback>
+    });
+    </resolveDirectory>
+}
+</addAllFilesAndSubdirectories>
+
+<evaluate>
+function evaluate(expr) {
+    <expressionParser>
+    switch (expr[0]) {
+        case "string":
+        case "num":
+            return expr[1];
+        case "name":
+        case "atom":
+            <parsePrimitives>
+            switch (expr[1]) {
+                case "true": return true;
+                case "false": return false;
+                case "null": return null;
+            }
+            </parsePrimitives>
+            break;
+        case "unary-prefix":
+            <evaluateUnaryExpressions>
+            switch (expr[1]) {
+                case "!": return !evaluate(expr[2]);
+                case "typeof": return typeof evaluate(expr[2]);
+                case "~": return ~evaluate(expr[2]);
+                case "-": return -evaluate(expr[2]);
+                case "+": return +evaluate(expr[2]);
+            }
+            </evaluateUnaryExpressions>
+            break;
+        case "binary":
+            <evaluateBinaryExpressions>
+            var left = expr[2], right = expr[3];
+            switch (expr[1]) {
+                
+                case "&&"         : return evaluate(left) &&         evaluate(right);
+                case "||"         : return evaluate(left) ||         evaluate(right);
+                
+                case "|"          : return evaluate(left) |          evaluate(right);
+                case "&"          : return evaluate(left) &          evaluate(right);
+                case "^"          : return evaluate(left) ^          evaluate(right);
+                
+                case "+"          : return evaluate(left) +          evaluate(right);
+                case "*"          : return evaluate(left) *          evaluate(right);
+                case "/"          : return evaluate(left) /          evaluate(right);
+                case "%"          : return evaluate(left) %          evaluate(right);
+                case "-"          : return evaluate(left) -          evaluate(right);
+                
+                case "<<"         : return evaluate(left) <<         evaluate(right);
+                case ">>"         : return evaluate(left) >>         evaluate(right);
+                case ">>>"        : return evaluate(left) >>>        evaluate(right);
+                
+                case "=="         : return evaluate(left) ==         evaluate(right);
+                case "==="        : return evaluate(left) ===        evaluate(right);
+                case "!="         : return evaluate(left) !=         evaluate(right);
+                case "!=="        : return evaluate(left) !==        evaluate(right);
+                
+                case "<"          : return evaluate(left) <          evaluate(right);
+                case "<="         : return evaluate(left) <=         evaluate(right);
+                case ">"          : return evaluate(left) >          evaluate(right);
+                case ">="         : return evaluate(left) >=         evaluate(right);
+                
+                case "in"         : return evaluate(left) in         evaluate(right);
+                case "instanceof" : return evaluate(left) instanceof evaluate(right);
+            }
+            </evaluateBinaryExpressions>
+    }
+    </expressionParser>
+    throw $NOT_CONSTANT;
+}
+</evaluate>
+
+<extendObservableFromPromise>
+function(module, exports, __webpack_require__) {
+
+    "use strict";
+    <attachFromPromiseToObservable>
+    var Observable_1 = __webpack_require__(5);
+    var fromPromise_1 = __webpack_require__(28);
+    Observable_1.Observable.fromPromise = fromPromise_1.fromPromise;
+    </attachFromPromiseToObservable>
+}
+</extendObservableFromPromise>
+
+<bnpDLShiftTo>
+function bnpDLShiftTo(n, r) {
+    <shiftArrayByN>
+    var i;
+    for (i = this.t - 1; i >= 0; --i)
+        r[i + n] = this[i];
+    for (i = n - 1; i >= 0; --i)
+        r[i] = 0;
+    r.t = this.t + n;
+    r.s = this.s;
+    </shiftArrayByN>
+}
+</bnpDLShiftTo>
+
+<removeCallbacksFromArray>
+function (callbacksMap, name, scope, fn, src, firstOnly) {
+    
+    if (callbacksMap == null) {
+        return; 
+    }
+
+    <findAndRemoveCallbacks>
+    var arr = callbacksMap[name];
+
+    if (arr) {
+        var length = arr.length, removeThis = false, cb;
+        for (var i = 0; i < length; i++) {
+            cb = arr[i];
+
+            
+
+
+            removeThis = (!src || cb.src == src)
+                        
+                    && (!scope || scope == cb.scope)
+                    
+                    && (!fn || fn == cb.fn);
+
+            if (removeThis) {
+                
+                
+                
+                cb.removed = true;
+                arr.splice(i, 1);
+                if (firstOnly) {
+                    break;
+                } else {
+                    i--;
+                    length--;
+                }
+            }
+        }
+        if (arr.length === 0) {
+            
+            callbacksMap[name] = null;
+            delete callbacksMap[name];
+        }
+    }
+    </findAndRemoveCallbacks>
+}
+</removeCallbacksFromArray>
+
+<generateCosineMap>
+function(N) {
+  <initializeCosMap>
+  cosMap = cosMap || {};
+  cosMap[N] = new Array(N*N);
+  </initializeCosMap>
+
+  <cosineComputation>
+  var PI_N = Math.PI / N;
+
+  for (var k = 0; k < N; k++) {
+    for (var n = 0; n < N; n++) {
+      cosMap[N][n + (k * N)] = Math.cos(PI_N * (n + 0.5) * k);
+    }
+  }
+  </cosineComputation>
+}
+</generateCosineMap>
+
+<setCookie>
+function(name, value, options) {
+    <buildCookieObject>
+    var cookie = typeof options == 'object'
+        ? {value: value, expires: options.expires, secure: options.secure || false, new: options.new || false}
+        : {value: value}
+    </buildCookieObject>
+    <storeCookieIfNotExpired>
+    if (this.checkNotExpired(name, cookie)) {
+      this.cookies[name] = cookie
+    }
+    </storeCookieIfNotExpired>
+}
+</setCookie>
+
+<initializeContext>
+function Context(state, generics) {
+  <assignProperties>
+  this.state = state;
+  this.generics = generics;
+  this.namespace = state.g.opts.namespace;
+  this.target = state.g.opts.target;
+  this.module = state.g.opts.module;
+  this.skipImport = state.g.opts.skipImport;
+  </assignProperties>
+}
+</initializeContext>
+
+<TaskQueue>
+function TaskQueue(listener) {
+    <initializeTaskQueue>
+    const _t = this;
+    _t._worker = null;
+    _t._taskList = [];
+    _t._requests = [];
+    if (listener == null) {
+        listener = function() { };
+    }
+    </initializeTaskQueue>
+
+    <defineTaskQueueMethod>
+    _t.taskQueue = function(tid, fn, pri) {
+        _t._taskList.push({
+            tid: tid,
+            fn: fn,
+            status: 0,
+            priority: pri,
+            step: function(tid) {
+                
+                
+                _log.t(tid, 'load:step');
+                listener(_t, 'load:step', {
+                    task: tid
+                });
+            },
+            end: function() {
+                this.status = 2;
+                let _h = this;
+                _log.t(_h.tid, 'load:next', 'timer:task:stop');
+                listener(_t, 'load:next', {
+                    task: _h.tid
+                });
+                _t._taskList.splice(this.index, 1);
+                _t.taskCheck();
+                if (this._callback != null) {
+                    this._callback.call(this);
+                }
+            },
+            callback: function(callback) {
+                this._callback = callback;
+            }
+        });
+        _log.t(tid, 'task added', pri, 'priority');
+        _t._taskList.sort(function(a, b) {
+            return (a.priority > b.priority) ?
+                1 :
+                ((b.priority > a.priority)
+                    ? -1 : 0);
+        } );
+        _t.taskCheck();
+    };
+    </defineTaskQueueMethod>
+
+    <defineTaskCheckMethod>
+    _t.taskCheck = function() {
+        for (let i = 0; i < _t._taskList.length; i++) {
+            if (_t._taskList[i].status === 0) {
+                _t._taskList[i].status = 1;
+                _log.t(_t._taskList[i].tid, 'load:begin', 'timer:task:start');
+                listener(_t, 'load:begin', {
+                    task: _t._taskList[i].tid
+                });
+                _t._taskList[i].index = i;
+                (_t._taskList[i].fn).call(_t._taskList[i]);
+                return;
+            } else if (_t._taskList[i].status === 1) {
+                
+                return;
+            } else if (_t._taskList[i].status === 2) {
+                
+                return;
+            }
+        }
+        _log.t('load:end');
+        listener(_t, 'load:end');
+    };
+    </defineTaskCheckMethod>
+}
+</TaskQueue>

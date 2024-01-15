@@ -1,0 +1,230 @@
+```javascript
+<checkUserNotificationAccess>
+function (username, channel) {
+  var list = this.getUserNotifications(username);
+
+  if (list === null) {
+    return false;
+  }
+
+  return list.indexOf(channel) >= 0;
+}
+</checkUserNotificationAccess>
+
+<getFormat0Segment>
+function getFormat0Segment(glyfUnicodes) {
+  var unicodes = [];
+  glyfUnicodes.forEach(function (u) {
+    if (u.unicode !== undefined && u.unicode < 256) {
+      unicodes.push([u.unicode, u.id]);
+    }
+  });
+
+  unicodes.sort(function (a, b) {
+    return a[0] - b[0];
+  });
+
+  return unicodes;
+}
+</getFormat0Segment>
+
+<unregisterMathJaxExplorerHook>
+function() {
+  if (Explorer.hook) {
+    MathJax.Hub.UnRegister.MessageHook(Explorer.hook);
+    Explorer.hook = null;
+  }
+}
+</unregisterMathJaxExplorerHook>
+
+<constructChainObject>
+function Chain(opts) {
+  if (!(this instanceof Chain)) {
+    return new Chain(opts);
+  }
+
+  if (opts.constructor) {
+    this.devices = new opts.constructor(opts.actuators);
+  } else {
+    this.devices = opts.actuators;
+  }
+
+  this.chainType = opts.chainType;
+
+  this.links = opts.links;
+
+  this.origin = opts.origin || [0, 0, 0];
+  this.position = opts.startAt || [0, 0, 0];
+
+  this.require = opts.require || true;
+}
+</constructChainObject>
+
+<verifyCalibrationConstants>
+function verifyCalibrationConstants(bundle, testName) {
+  var defered = q.defer();
+  var msg = '';
+  if (bundle.calibrationInfoValid) {
+    <getHighResADCState>
+    var checkHighRes = false;
+    try {
+      checkHighRes = bundle.device.savedAttributes.HARDWARE_INSTALLED.highResADC;
+    } catch (err) {
+      checkHighRes = false;
+    }
+    </getHighResADCState>
+    var deviceTypeName = bundle.device.savedAttributes.deviceTypeName;
+    
+    <validateCalibrationInfo>
+    var calCheckResult = getInvalidCalibrationValues(deviceTypeName, checkHighRes, bundle.calibrationInfo);
+    </validateCalibrationInfo>
+
+    <updateBundleWithCalibrationTestResult>
+    if (calCheckResult.length > 0) {
+      msg = calCheckResult.length.toString() + ' calibration constants are out of range.';
+      bundle.hardwareTests[testName].status = false;
+      bundle.hardwareTests[testName].executed = true;
+      bundle.hardwareTests[testName].testMessage = msg;
+    } else {
+      msg = 'Device calibration constants are in range.';
+      bundle.hardwareTests[testName].status = true;
+      bundle.hardwareTests[testName].executed = true;
+      bundle.hardwareTests[testName].testMessage = msg;
+    }
+    </updateBundleWithCalibrationTestResult>
+  } else {
+    msg = 'Skipped due to invalid calibration info';
+    bundle.hardwareTests[testName].status = false;
+    bundle.hardwareTests[testName].executed = true;
+    bundle.hardwareTests[testName].testMessage = msg;
+  }
+  defered.resolve(bundle);
+  return defered.promise;
+}
+</verifyCalibrationConstants>
+
+<getImageDataFromSource>
+function getImageData(img) {
+  let data = null;
+  return new Promise((reslove, reject) => {
+    if (img.src) {
+      <handleBase64Source>
+      if (/^data\:/i.test(img.src)) {
+        data = base64ToArrayBuffer(img.src);
+        reslove(data)
+      }
+      </handleBase64Source>
+      <handleBlobSource>
+      else if (/^blob\:/i.test(img.src)) {
+        var fileReader = new FileReader();
+        fileReader.onload = function (e) {
+          data = e.target.result;
+          reslove(data)
+        };
+        objectURLToBlob(img.src, function (blob) {
+          fileReader.readAsArrayBuffer(blob);
+        });
+      }
+      </handleBlobSource>
+      <handleHttpSource>
+      else {
+        var http = new XMLHttpRequest();
+        http.onload = function () {
+          if (this.status == 200 || this.status === 0) {
+            data = http.response
+            reslove(data)
+          } else {
+            throw "Could not load image";
+          }
+          http = null;
+        };
+        http.open("GET", img.src, true);
+        http.responseType = "arraybuffer";
+        http.send(null);
+      }
+      </handleHttpSource>
+    } else {
+      reject('img error')
+    }
+  })
+}
+</getImageDataFromSource>
+
+<filterOptionsBasedOnValue>
+function filterOptions(options, value) {
+  
+  if (!value) {
+    return options;
+  }
+
+  value = value.toLowerCase();
+
+  return options.filter(({ label }) => label.toLowerCase().indexOf(value) >= 0);
+}
+</filterOptionsBasedOnValue>
+
+<outputBindingDataForElement>
+function xPropOutput(element, bindInfo, data) {
+  
+  if (!element.lifeCycle.created) {
+    return;
+  }
+
+  var el = element.el;
+
+  if (element.tagName === 'input' && bindInfo.name === 'checked') {
+    var bindValue = getANodeProp(element.aNode, 'value');
+    var bindType = getANodeProp(element.aNode, 'type');
+
+    if (bindValue && bindType) {
+      switch (el.type.toLowerCase()) {
+        case 'checkbox':
+          data[el.checked ? 'push' : 'remove'](bindInfo.expr, el.value);
+          return;
+
+        case 'radio':
+          el.checked && data.set(bindInfo.expr, el.value, {
+            target: {
+              node: element,
+              prop: bindInfo.name
+            }
+          });
+          return;
+      }
+    }
+  }
+
+  data.set(bindInfo.expr, el[bindInfo.name], {
+    target: {
+      node: element,
+      prop: bindInfo.name
+    }
+  });
+}
+</outputBindingDataForElement>
+
+<dynamicFilesCompilation>
+function() {
+  for (var i = 0; i < DYNAMIC_FILES.length; i++) {
+    addFile(dynamicFilesCompiled[i](options), { name: DYNAMIC_FILES[i] });
+  }
+}
+</dynamicFilesCompilation>
+
+<addOrdinalNumberSuffix>
+function addOrdinalNumberSuffix(num) {
+  var j = num % 10,
+    k = num % 100;
+  if (j == 1 && k != 11) {
+    return num + "st";
+  }
+  if (j == 2 && k != 12) {
+    return num + "nd";
+  }
+  if (j == 3 && k != 13) {
+    return num + "rd";
+  }
+  return num + "th";
+}
+</addOrdinalNumberSuffix>
+```

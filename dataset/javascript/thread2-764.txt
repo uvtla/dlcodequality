@@ -1,0 +1,270 @@
+```javascript
+<ScreenImage_constructor>
+function (screenOffset, imageSource) {
+    <ArgumentValidation>
+    if (!screenOffset) {
+        throw new ArgumentError(
+            Logger.logMessage(Logger.LEVEL_SEVERE, "ScreenImage", "constructor", "missingOffset"));
+    }
+    if (!imageSource) {
+        throw new ArgumentError(
+            Logger.logMessage(Logger.LEVEL_SEVERE, "ScreenImage", "constructor", "missingImage"));
+    }
+    </ArgumentValidation>
+
+    <BaseClassSetup>
+    Renderable.call(this);
+    </BaseClassSetup>
+
+    <PropertyInitialization>
+    this.screenOffset = screenOffset;
+    this._imageSource = imageSource;
+    this.imageColor = Color.WHITE;
+    this.imageOffset = new Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 0.5);
+    this.imageScale = 1;
+    this.imageRotation = 0;
+    this.imageTilt = 0;
+    this.enabled = true;
+    this.opacity = 1;
+    this.pickDelegate = null;
+    this.activeTexture = null;
+    this.imageTransform = Matrix.fromIdentity();
+    this.texCoordMatrix = Matrix.fromIdentity();
+    this.imageBounds = null;
+    this.layer = null;
+    </PropertyInitialization>
+}
+</ScreenImage_constructor>
+
+<deserializeProperty>
+function deserializeProperty (bunsenId, value, bunsenModel) {
+  <SubModelRetrieval>
+  const subModel = getSubModel(bunsenModel, bunsenId)
+  </SubModelRetrieval>
+
+  <DeserializationLogic>
+  switch (subModel.type) {
+    case 'integer':
+      return parseInt(value)
+    case 'number':
+      return parseFloat(value)
+    default:
+      return value
+  }
+  </DeserializationLogic>
+}
+</deserializeProperty>
+
+<line_number>
+function line_number(index, source) {
+  var i = start_index;
+  var count = 0;
+  <CharIterationAndCount>
+  while (i < index) {
+    if (source[i] === "\n") {
+      count++;
+    }
+    i++;
+  }
+  </CharIterationAndCount>
+
+  <LineNumberAdjustment>
+  start_linenr = count + start_linenr;
+  start_index = index;
+  </LineNumberAdjustment>
+
+  return start_linenr;
+}
+</line_number>
+
+<Publisher>
+function(message) {
+  <TimeoutCalculation>
+  let publishTimeout = message.timeout || options.publishTimeout || message.connectionPublishTimeout || 0;
+  logger.silly(`Publish called in state ${this.state}`);
+  </TimeoutCalculation>
+  
+  <PublishExecution>
+  return new Promise((resolve, reject) => {
+    let timeout;
+    let timedOut;
+    <TimeoutSetup>
+    if(publishTimeout > 0) {
+      timeout = setTimeout(() => {
+        timedOut = true;
+        reject(new Error('Publish took longer than configured timeout'));
+        this.removeDeferred(reject);
+      }, publishTimeout);
+    }
+    </TimeoutSetup>
+    
+    <SuccessAndFailureHandlers>
+    const onPublished = () => {
+      resolve();
+      this.removeDeferred(reject);
+    };
+    const onRejected = (err) => {
+      reject(err);
+      this.removeDeferred(reject);
+    };
+    </SuccessAndFailureHandlers>
+    
+    <PublishOperation>
+    let op = () => {
+      if(timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      if(!timedOut) {
+        return this.channel.publish(message)
+          .then(onPublished, onRejected);
+      }
+      return Promise.resolve();
+    };
+    </PublishOperation>
+    
+    <DeferAndHandle>
+    this.deferred.push(reject);
+    this.handle('publish', op);
+    </DeferAndHandle>
+    
+  });
+  </PublishExecution>
+}
+</Publisher>
+
+<mul_inv>
+function mul_inv(a, b){
+  var b0 = b;
+  var x0 = 0;
+  var x1 = 1;
+  var q, tmp;
+  if( b== 1){
+    return 1;
+  }
+  <ExtendedEuclideanAlgorithm>
+  while(a>1){
+    q = parseInt(a/b);
+    tmp = a;
+    a = b;
+    b = tmp%b;
+    tmp = x0;
+    x0 = x1 - (q * x0);
+    x1 = tmp;
+  }
+  </ExtendedEuclideanAlgorithm>
+  
+  <ResultAdjustment>
+  if(x1 <0){
+    x1 = x1+b0;
+  }
+  </ResultAdjustment>
+  
+  return x1;
+}
+</mul_inv>
+
+<addAmbushObject>
+function add(object) {
+  <Validation>
+	if (!_isValidAmbush(object)) {
+		return false;
+	}
+  </Validation>
+
+  <DescriptionCleaning>
+	object.description = _cleanDescription(object.description);
+  </DescriptionCleaning>
+
+  <AdditionLogic>
+	if (!_belongToAStoredAmbush(object.id)) {
+		const newObject = Object.assign({}, object);
+		goblin.ambush.push(newObject);
+		goblin.ambushEmitter.emit('change', { type: 'add', value: newObject });
+	} else {
+		logger('AMBUSH_ADD_ERROR');
+	}
+  </AdditionLogic>
+}
+</addAmbushObject>
+
+<getMaxPoints>
+function getMaxPoints(font) {
+  <MaxPointsCalculation>
+  return _.max(_.map(font.glyphs, function (glyph) {
+    return _.reduce(glyph.ttfContours, function (sum, ctr) { return sum + ctr.length; }, 0);
+  }));
+  </MaxPointsCalculation>
+}
+</getMaxPoints>
+
+<locationSort>
+function locationSort(_ref, _ref2) {
+  let locA = _ref.location;
+  let locB = _ref2.location;
+
+  <ComparisonLogic>
+  if (locA.line === locB.line) {
+    return locA.col - locB.col;
+  }
+  return locA.line - locB.line;
+  </ComparisonLogic>
+}
+</locationSort>
+
+<transform>
+function transform(context, file, fileSet, next) {
+  <FatalStatusCheck>
+  if (stats(file).fatal) {
+    next()
+  } else {
+  </FatalStatusCheck>
+    <DocumentTransformationSetup>
+    debug('Transforming document `%s`', file.path)
+    context.processor.run(context.tree, file, onrun)
+    </DocumentTransformationSetup>
+  }
+
+  <OnRunCompletion>
+  function onrun(error, node) {
+    debug('Transformed document (error: %s)', error)
+    context.tree = node
+    next(error)
+  }
+  </OnRunCompletion>
+}
+</transform>
+
+<isRemovedToken>
+function isRemovedToken(context, token) {
+  var removedNodes = context.removedNodes;
+  var nodeIdx = removedNodes.length - 1;
+
+  <NodeTraversal>
+  while (nodeIdx >= 0 && removedNodes[nodeIdx].start > token.start) {
+    nodeIdx--;
+  }
+  </NodeTraversal>
+
+  <NodeValidityCheck>
+  var node = removedNodes[nodeIdx];
+  if (nodeIdx === -1 || node.end < token.end) {
+    return false;
+  }
+  </NodeValidityCheck>
+
+  <TokenComparison>
+  var tokens = context.ast.tokens;
+  var tokenIdx = findTokenIndex(tokens, node.start);
+  while (tokens[tokenIdx].end <= node.end) {
+    if (token === tokens[tokenIdx]) {
+      return true;
+    }
+    tokenIdx++;
+  }
+  </TokenComparison>
+
+  return false;
+}
+</isRemovedToken>
+```

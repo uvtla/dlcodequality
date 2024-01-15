@@ -1,0 +1,444 @@
+```javascript
+<execHttp>
+function execHttp(options, callback) {
+
+  <configureProxy>
+  if (proxyList) {
+    options.proxy = proxyList.getProxy().getUrl();
+  }
+  </configureProxy>
+
+  <logHttpRequest>
+  log.debug({"url" : options.url, "step" : "queue-requester.execHttp", "message" : "Execute the request"});
+  </logHttpRequest>
+
+  <performHttpRequest>
+  request.get(options, function(error, result) {
+    log.debug({"url" : options.url, "step" : "queue-requester.execHttp", "message" : "Execute the request done"});
+
+    
+    
+    <handleHttpResponse>
+    if (result.statusCode && result.statusCode >= 400 && result.statusCode <= 499 && result.retry400) {
+      error = new Error("40* Error");
+      error.code = result.statusCode;
+    }
+    </handleHttpResponse>
+
+    <processHttpError>
+    if (error) {
+      onRequestError(error, result, function(error){
+        process.nextTick(function() {callback(error);});
+      });
+    }
+    </processHttpError>
+    <processSuccessResponse>
+    else {
+      onCrawl(null, result, function(error){
+        process.nextTick(function() {callback(error);});
+      });
+    }
+    </processSuccessResponse>
+
+  });
+  </performHttpRequest>
+
+
+}
+</execHttp>
+
+<resolveBase>
+function resolveBase(app) {
+  <defineResolutionPaths>
+  const paths = [
+    { name: 'base', path: path.resolve(cwd, 'node_modules/base') },
+    { name: 'base-app', path: path.resolve(cwd, 'node_modules/base-app') },
+    { name: 'assemble-core', path: path.resolve(cwd, 'node_modules/assemble-core') },
+    { name: 'assemble', path: path.resolve(cwd, 'node_modules/assemble') },
+    { name: 'generate', path: path.resolve(cwd, 'node_modules/generate') },
+    { name: 'update', path: path.resolve(cwd, 'node_modules/update') },
+    { name: 'verb', path: path.resolve(cwd, 'node_modules/verb') },
+    { name: 'core', path: path.resolve(__dirname, '..') }
+  ];
+  </defineResolutionPaths>
+
+  <lookupAndResolveApp>
+  for (const file of paths) {
+    if (opts.app && file.name === opts.app && (app = resolveApp(file))) {
+      return app;
+    }
+  }
+  </lookupAndResolveApp>
+
+  <resolveOrFallback>
+  if (opts.app) {
+    app = resolveApp({
+      name: opts.app,
+      path: path.resolve(cwd, 'node_modules', opts.app)
+    });
+  }
+  </resolveOrFallback>
+
+  return app;
+}
+</resolveBase>
+
+<checkVariable>
+function checkVariable(i) {
+  <variableChecking>
+  const start = i;
+  
+  if (i >= tokensLength) return 0;
+
+  if (tokens[i].type === TokenType.DollarSign) i++;
+  else return 0;
+
+  <validateIdentifier>
+  let l;
+  if (l = checkIdent(i)) i += l;
+  else return 0;
+  </validateIdentifier>
+
+  return i - start;
+  </variableChecking>
+}
+</checkVariable>
+
+<rgbToRgba>
+function rgbToRgba(rgbValue) {
+  <convertToRgba>
+  var rgb = /rgb\((\d+,\s*[\d]+,\s*[\d]+)\)/g.exec(rgbValue);
+  return rgb ? ("rgba(" + (rgb[1]) + ",1)") : rgbValue;
+  </convertToRgba>
+}
+</rgbToRgba>
+
+<linear_regression>
+function linear_regression() {
+  var linreg = {},
+      data = [];
+
+  <setData>
+  linreg.data = function(x) {
+      if (!arguments.length) return data;
+      data = x.slice();
+      return linreg;
+  };
+  </setData>
+
+  <calculateSlopeAndIntercept>
+  linreg.mb = function() {
+      var m, b;
+
+      
+      
+      <determineDataLength>
+      var data_length = data.length;
+      </determineDataLength>
+
+      
+      
+      <handleSingleDataPoint>
+      if (data_length === 1) {
+          m = 0;
+          b = data[0][1];
+      }
+      </handleSingleDataPoint> 
+      <computeLinearCoefficients>
+      else {
+          
+          
+          var sum_x = 0, sum_y = 0,
+              sum_xx = 0, sum_xy = 0;
+
+          
+          
+          var point, x, y;
+
+          
+          
+          
+          
+          
+          
+          for (var i = 0; i < data_length; i++) {
+              point = data[i];
+              x = point[0];
+              y = point[1];
+
+              sum_x += x;
+              sum_y += y;
+
+              sum_xx += x * x;
+              sum_xy += x * y;
+          }
+
+          
+          m = ((data_length * sum_xy) - (sum_x * sum_y)) /
+              ((data_length * sum_xx) - (sum_x * sum_x));
+
+          
+          b = (sum_y / data_length) - ((m * sum_x) / data_length);
+      }
+      </computeLinearCoefficients>
+
+      
+      return { m: m, b: b };
+  };
+  </calculateSlopeAndIntercept>
+
+  <getSlope>
+  linreg.m = function() {
+      return linreg.mb().m;
+  };
+  </getSlope>
+
+  <getIntercept>
+  linreg.b = function() {
+      return linreg.mb().b;
+  };
+  </getIntercept>
+
+  <generateLineFunction>
+  linreg.line = function() {
+
+      
+      var mb = linreg.mb(),
+          m = mb.m,
+          b = mb.b;
+
+      
+      
+      
+      return function(x) {
+          return b + (m * x);
+      };
+  };
+  </generateLineFunction>
+
+  return linreg;
+}
+</linear_regression>
+
+<ampmStrings>
+function() {
+  <initializeVariables>
+  var ampmL = this.options.template.indexOf('a') !== -1,
+  ampmU = this.options.template.indexOf('A') !== -1,
+  </initializeVariables>            
+  <computeItemsArray>
+  items = [
+  ['am', ampmL ? 'am' : 'AM'],
+  ['pm', ampmL ? 'pm' : 'PM']
+  ];
+  </computeItemsArray>
+  return items;
+}
+</ampmStrings>
+
+<circleReportPath>
+function circleReportPath () {
+  <environmentValidation>
+	const CIRCLE_JOB = process.env.CIRCLE_JOB;
+	const CIRCLE_WORKING_DIRECTORY = process.env.CIRCLE_WORKING_DIRECTORY;
+	if (!(ci.CIRCLE && CIRCLE_JOB && CIRCLE_WORKING_DIRECTORY)) {
+		return;
+	}
+  </environmentValidation>
+
+  <resolveCwd>
+	const cwd = resolveHomePath(CIRCLE_WORKING_DIRECTORY);
+  </resolveCwd>
+  
+  <readConfiguration>
+	let config = path.join(cwd, '.circleci/config.yml');
+	config = fs.readFileSync(config, 'utf-8');
+	config = yaml.safeLoad(config);
+  </readConfiguration>
+
+  <aggregateTestResultsPaths>
+	config = config.jobs[CIRCLE_JOB].steps.reduce((results, step) => {
+		step = step.store_test_results;
+		if (step) {
+			step = step.paths || step.path;
+			if (step) {
+				results = results.concat(step);
+			}
+		}
+		return results;
+	}, []);
+  </aggregateTestResultsPaths>
+
+  <selectTestResultPath>
+	config = config.find(path => !/\w+\.\w+$/.test(path)) || config[0];
+  </selectTestResultPath>
+
+  <resolvePath>
+	if (config) {
+		return path.resolve(cwd, resolveHomePath(config));
+	}
+  </resolvePath>
+}
+</circleReportPath>
+
+<processLess>
+function processLess() {
+    let index = 0;
+    while (index < lessFilePool.length) {
+      (function (index) {
+        <processLessFiles>
+        if (lessFilePool[index].indexOf('.less') != -1) {
+          <readLessFile>
+          fs.readFile(lessFilePool[index], function (e, data) {
+              if (data) {
+                  <renderLess>
+                  less.render(data.toString(), {
+                      filename: lessFilePool[index]
+                  }, function (e, output) {
+                      if (e) {
+                          console.log(e);
+                      } else {
+                          <processCssAfterLess>
+                          cssImage(output.css, lessFilePool[index]).then(res => {
+                              saveToCss(res);
+                              lessFilePool[index] = '';
+                              doneOne();
+                          });
+                          </processCssAfterLess>
+                      }
+                  })
+                  </renderLess>
+              }
+          });
+          </readLessFile>
+        }
+        </processLessFiles>
+        
+        <processSassFiles>
+        if (lessFilePool[index].indexOf('.scss') != -1) {
+          <renderScss>
+          scss.render({
+              file: lessFilePool[index]
+          }, function (e, output) {
+              if (e) {
+                  console.log(e);
+              } else {
+                  <processCssAfterScss>
+                  cssImage(output.css, lessFilePool[index]).then(res => {
+                      saveToCss(res);
+                      lessFilePool[index] = '';
+                      doneOne();
+                  });
+                  </processCssAfterScss>
+              }
+          });
+          </renderScss>
+        }
+        </processSassFiles>
+
+        <processCssFiles>
+        if (lessFilePool[index].indexOf('.css') != -1) {
+          <readCssFile>
+          fs.readFile(lessFilePool[index], function (e, data) {
+              if (e) {
+                  console.log(e)
+              } else {
+                  <processCss>
+                  cssImage(data.toString(), lessFilePool[index]).then(res => {
+                      saveToCss(res);
+                      lessFilePool[index] = '';
+                      doneOne();
+                  });
+                  </processCss>
+              }
+          });
+          </readCssFile>
+        }
+        </processCssFiles>
+
+      })(index);
+      index += 1
+    }
+}
+</processLess>
+
+<sendSmsFunction>
+function(to,tempId,params,callback){
+  <generateTimeStamp>
+  var timeStamp = index.createTimeStamp(cfg.timeFmt);
+  </generateTimeStamp>
+
+  <createSignature>
+  var sigParameter = index.hashMD5(cfg.accountSid+cfg.accountToken+timeStamp).toUpperCase();
+  </createSignature>
+
+  <formatUrl>
+  var url = util.format('/%s/Accounts/%s/%s/%s?sig=%s', cfg.softVersion, cfg.accountSid, cfg.func, cfg.funcdes, sigParameter);
+  </formatUrl>
+
+  <encodeAuthentication>
+  var authBuff = new Buffer(cfg.accountSid+':'+timeStamp);
+  var authcode = authBuff.toString('base64');
+  </encodeAuthentication>
+
+  <defineHeaders>
+  var headers = {
+    'Accept':'application/json',
+    'Content-Type':'application/json;charset=utf-8',
+    'Authorization':authcode,
+  };
+  </defineHeaders>
+
+  <generateVerificationCode>
+  var code = smsCodeGen();
+  </generateVerificationCode>
+
+  <prepareRequestBody>
+  var body = {
+    to:to,
+    templateId:tempId.toString(),
+    appId:cfg.appId,
+    datas:params,
+  };
+  </prepareRequestBody>
+
+  <configurePostOptions>
+  var postOptions = {
+    method: 'POST',
+    baseUrl:cfg.serverIP+':'+cfg.serverPort,
+    url: url,
+    json:true,
+    body:body,
+    headers:headers,
+  };
+  </configurePostOptions>
+
+  <sendRequest>
+  request(postOptions, function(err,res,body){
+    err = getSmsInfo(body);
+    callback(err,body);
+  });
+  </sendRequest>
+}
+</sendSmsFunction>
+
+<anomaly>
+function anomaly() {
+  <retrieveId>
+  var id = this instanceof events.EventEmitter && this.id ? String(this.id) : '' 
+  </retrieveId>
+
+  <collectArguments>
+  var body = getBody(id, Array.prototype.slice.call(arguments))
+  </collectArguments>
+
+  <logEvent>
+  log(id, body)
+  </logEvent>
+
+  <conditionalEmailAction>
+  if (!isShutdown && isEmailOn() && emailer.hasSendMail()) enqueueEmail(body)
+  </conditionalEmailAction>
+}
+</anomaly>
+```

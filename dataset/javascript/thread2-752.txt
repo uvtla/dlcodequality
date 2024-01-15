@@ -1,0 +1,279 @@
+<createFunc>
+function createFunc (a, info) {
+    var fn = function () {
+        
+        <parseArguments>
+        var args = slice.call(arguments), alen = args.length;
+        var cbk, opts;
+        if (alen === 0 || 'function' !== typeof args[alen-1]) {
+            throw new Error('Lack callback function');
+        } else {
+            cbk = args[alen-1];
+            opts = alen > 1 ? args[0] : {};
+        }
+        </parseArguments>
+
+        <validateRequiredParams>
+        for (var i in info.required) {
+            var p = info.required[i];
+            if (opts[p] === undefined)
+                return cbk(new Error('Lack required params: ' + p));
+            if (Reg.test(p) && !Object.isArray(opts[p]))
+                return cbk(new Error('Param ' + p + ' should be a array'));
+        }
+        </validateRequiredParams>
+
+        <prepareParams>
+        var params = createCommonParam();
+        params.action = a;
+        var ps = [].concat(info.required).concat(info.optional);
+        for (var i in ps) {
+            var p = ps[i];
+            if (opts[p] !== undefined) {
+                if (!Reg.test(p)) {
+                    params[p] = opts[p];
+                } else if (Array.isArray(opts[p])) {  
+                    for(var j in opts[p]){
+                        var tmpp = p;
+                        params[tmpp.replace(Reg, '.'+(Number(j)+1))] = opts[p][j];
+                    }
+                } else {
+                    return cbk(new Error('Param ' + p + ' should be a array'));
+                }
+            }
+        }
+        </prepareParams>
+
+        <buildQueryString>
+        var params_arra = [];
+        for (var i in params) {
+            params_arra.push(i + '=' + utils.escape(params[i]));
+        }
+        </buildQueryString>
+
+        <generateSignature>
+        var query = params_arra.sort().join('&');
+        var sign_str = 'GET' + "\n" + '/iaas/' + "\n" + query;
+        var signature = utils.sign(sign_str, qing.secret_access_key, 'sha256');
+        query += '&signature=' + utils.escape(signature);  
+        </generateSignature>
+
+        <makeApiRequest>
+        var url = config.host + '?' + query;
+        request(url, function(err, response, body){
+            if (err)
+                cbk(err);
+            else
+                cbk(null, JSON.parse(body));
+        });
+        </makeApiRequest>
+    }
+    return fn;
+}
+</createFunc>
+
+<transformIERangeToRange>
+function transformIERangeToRange( ieRange, range ) {
+        <setRangeStart>
+        if ( ieRange.item ) {
+            range.selectNode( ieRange.item( 0 ) );
+        } else {
+            var bi = getBoundaryInformation( ieRange, true );
+            range.setStart( bi.container, bi.offset );
+        </setRangeStart>
+        <setRangeEnd>
+            if ( ieRange.compareEndPoints( 'StartToEnd', ieRange ) != 0 ) {
+                bi = getBoundaryInformation( ieRange, false );
+                range.setEnd( bi.container, bi.offset );
+            }
+        </setRangeEnd>
+        return range;
+}
+</transformIERangeToRange>
+
+<destRoot>
+function destRoot(type, drizzle) {
+  
+  const options = drizzle.options;
+
+  
+  <mapTypeToKey>
+  const keys = new Map([
+    ['page', 'pages'],
+    ['collection', 'collections'],
+    ['pattern', 'patterns']
+  ]);
+  </mapTypeToKey>
+
+  <generateRelativePath>
+  return relativePath(options.dest.root, options.dest[keys.get(type)]);
+  </generateRelativePath>
+}
+</destRoot>
+
+<clip>
+function( clip ) {
+
+    <initializeActions>
+    var actions = this._actions,
+        clipUuid = clip.uuid,
+        actionsByClip = this._actionsByClip,
+        actionsForClip = actionsByClip[ clipUuid ];
+    </initializeActions>
+
+    <deactivateAndRemoveActions>
+    if (actionsForClip !== undefined) {
+        var actionsToRemove = actionsForClip.knownActions;
+        for ( var i = 0, n = actionsToRemove.length; i !== n; ++ i ) {
+            var action = actionsToRemove[ i ];
+            this._deactivateAction( action );
+            var cacheIndex = action._cacheIndex,
+                lastInactiveAction = actions[ actions.length - 1 ];
+            action._cacheIndex = null;
+            action._byClipCacheIndex = null;
+            lastInactiveAction._cacheIndex = cacheIndex;
+            actions[ cacheIndex ] = lastInactiveAction;
+            actions.pop();
+            this._removeInactiveBindingsForAction( action );
+        }
+        delete actionsByClip[ clipUuid ];
+    }
+    </deactivateAndRemoveActions>
+}
+</clip>
+
+<processSlotOutlet>
+function processSlotOutlet (el) {
+    <slotProcessing>
+    if (el.tag === 'slot') {
+        el.slotName = getBindingAttr(el, 'name');
+        if (process.env.NODE_ENV !== 'production' && el.key) {
+            warn$2(
+                "`key` does not work on <slot> because slots are abstract outlets " +
+                "and can possibly expand into multiple elements. " +
+                "Use the key on a wrapping element instead.",
+                getRawBindingAttr(el, 'key')
+            );
+        }
+    }
+    </slotProcessing>
+}
+</processSlotOutlet>
+
+<deleteCommandOnCmdEditor>
+function deleteCommandOnCmdEditor (config) {
+    <initializeDeletionOptions>
+    var commands = config.commands || {};
+    var command_names = Object.keys(commands);
+    command_names.unshift('<< Cancel');
+    var promise = inquirer.prompt([{
+        type: 'list',
+        name: 'cmdName',
+        message: 'Choose the command you want to delete',
+        choices: command_names
+    }]);
+    </initializeDeletionOptions>
+
+    <processDeletion>
+    return promise.then(function (answer) {
+        if (answer.cmdName == '<< Cancel') {
+            return false;
+        }
+        delete config.commands[answer.cmdName];
+        console.log(colors.bold.green('\n\nThis command has been deleted: ' + answer.cmdName));
+        console.log('\nWriting to ' + process.cwd() + '/' + COMMANDS_FILENAME);
+        fs.writeFileSync(COMMANDS_FILENAME, JSON.stringify(config.commands));
+        console.log('Writing has been completed.\n\n');
+        return true;
+    });
+    </processDeletion>
+}
+</deleteCommandOnCmdEditor>
+
+<objectSchema>
+function objectSchema(obj) {
+    <constructSchema>
+    const props = Object.entries(obj).reduce(
+        (reduced, [key, val]) => Object.assign(reduced, { [key]: typeof val }),
+        {}
+    );
+    </constructSchema>
+    return props;
+}
+</objectSchema>
+
+<wrapInner>
+function wrapInner(parent, wrapper) {
+    <createAndAppendWrapper>
+    if (typeof wrapper === "string") wrapper = document.createElement(wrapper);
+    parent.appendChild(wrapper);
+    </createAndAppendWrapper>
+    <relocateChildren>
+    while (parent.firstChild !== wrapper) wrapper.appendChild(parent.firstChild);
+    </relocateChildren>
+}
+</wrapInner>
+
+<UnnamedFunctionWithExtension>
+function(extension, tab, pageStatus, pageOptions, port) {
+  
+  <initializeProperties>
+  this.extension_ = extension;
+  this.tabId_ = tab.id;
+  this.pageUrl_ = URI.canonicalize(tab.url);
+  this.pageOptions_ = pageOptions;
+  this.port_ = port;
+  this.debugger_ = null;
+  </initializeProperties>
+
+  <configureDebugger>
+  if (pageStatus == PageStatus.WHITELISTED &&
+      pageOptions['wtf.trace.provider.chromeDebug'] !== false) {
+    var timelineEnabled =
+        pageOptions['wtf.trace.provider.chromeDebug.timeline'] !== false;
+    var memoryInfoEnabled =
+        pageOptions['wtf.trace.provider.chromeDebug.memoryInfo'];
+    var tracingEnabled =
+        pageOptions['wtf.trace.provider.chromeDebug.tracing'];
+    if (timelineEnabled || memoryInfoEnabled || tracingEnabled) {
+      this.debugger_ = new Debugger(this.tabId_, this.pageOptions_);
+    }
+  }
+  </configureDebugger>
+
+  <setMessageHandlers>
+  this.eventHandlers_ = {
+    onMessage: this.messageReceived_.bind(this),
+    onDisconnect: this.disconnected_.bind(this)
+  };
+  this.port_.onMessage.addListener(this.eventHandlers_.onMessage);
+  this.port_.onDisconnect.addListener(this.eventHandlers_.onDisconnect);
+  </setMessageHandlers>
+
+  <scheduleDebuggerDataTransmission>
+  this.debuggerTransmitId_ = -1;
+  if (this.debugger_) {
+    this.debuggerTransmitId_ = window.setInterval((function() {
+      var records = this.debugger_.getRecords();
+      if (records.length) {
+        this.port_.postMessage(JSON.stringify({
+          'command': 'debugger_data',
+          'records': records
+        }));
+        this.debugger_.clearRecords();
+      }
+    }).bind(this), 1000);
+  }
+  </scheduleDebuggerDataTransmission>
+}
+</UnnamedFunctionWithExtension>
+
+<unregister>
+function unregister() {
+    <checkPresenceInDOM>
+    for (var p = d.wrapper.parentNode; p && p != document.body; p = p.parentNode) {}
+    if (p) setTimeout(unregister, 5000);
+    else off(window, "resize", onResize);
+    </checkPresenceInDOM>
+}
+</unregister>

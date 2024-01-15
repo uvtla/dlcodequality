@@ -1,0 +1,183 @@
+Here are the annotated functions:
+
+<nestTwoLevels>
+function nestTwoLevels(samples) {
+  return samples.reduce(function(acc, sample) {
+    var page     = sample.hierarchy.length > 0 ? sample.hierarchy[0] : 'API';
+    var heading  = sample.hierarchy.length > 1 ? sample.hierarchy[1] : 'Samples';
+    acc[page] = acc[page] || {};
+    acc[page][heading] = acc[page][heading] || [];
+    acc[page][heading].push(sample);
+    return acc;
+  }, {});
+}
+</nestTwoLevels>
+
+<functionWithMultipleResponsibilities>
+function(oList, oAttribute, iSelectedIndex, bSkipNotify){
+    <removeSelectedIndex>
+	oList._lb.removeSelectedIndex(iSelectedIndex);
+    </removeSelectedIndex>
+	<clearSelection>
+	oAttribute._clearSelection();
+	</clearSelection>
+	<conditionalNotification>
+	if (!bSkipNotify) {
+		var aSubLists = oList.getSubLists();
+		for (var i = 0; i < aSubLists.length; i++) {
+			if (aSubLists[i].getData() === oAttribute.getId()) {
+				close(aSubLists[i], true);
+			}
+		}
+	}
+	</conditionalNotification>
+}
+</functionWithMultipleResponsibilities>
+
+<getSequentialFilePath>
+function(filepath, index) {
+    index = index || 1;
+    var params = this.get_path_info(filepath);
+    params.index = index;
+    var newpath = Handlebars.compile(this.config.sequential_template)(params);
+    return (fs.existsSync(newpath)) ? this.get_sequential_filepath(filepath, index + 1) : newpath;
+}
+</getSequentialFilePath>
+
+<saveState>
+function saveState () {
+    winston.info('Saving current state');
+    jsonfile.writeFileSync(STATE_FILE, {
+        subscriptions: subscriptions,
+        callback: callback,
+        history: history,
+        version: CURRENT_VERSION
+    }, {
+        spaces: 4
+    });
+}
+</saveState>
+
+<simpleArrayReduce>
+function(reducer, initialValue) {
+  for (var i = 0; i < this.length; i++) {
+    initialValue = reducer(initialValue, this[i]);
+  }
+  return initialValue;
+}
+</simpleArrayReduce>
+
+<findNearest>
+function(latlng, coords, offset) {
+	offset = offset || 0;
+	var ordered = geolib.orderByDistance(latlng, coords);
+	return ordered[offset];
+}
+</findNearest>
+
+<addToRegistry>
+function(nodeName, objectOrBaseName, objectOrStatic, staticObject) {
+    cache = {};
+	var stack = registry[nodeName] || [];
+	stack.push(Array.prototype.slice.call(arguments, 0));
+	registry[nodeName] = stack;
+}
+</addToRegistry>
+
+<inheritPrototype>
+function extender (d, b) {
+  <transferProperties>
+  _.each(b, (p) => {
+    if (Object.prototype.hasOwnProperty.call(b, p)) {
+      d[p] = b[p];
+    }
+  });
+  </transferProperties>
+  <setupFactoryAndPrototype>
+  function Factory () {
+    this.constructor = d;
+  }
+  d.prototype = b === null ? Object.create(b) : (Factory.prototype = b.prototype, new Factory());
+  </setupFactoryAndPrototype>
+}
+</inheritPrototype>
+
+<cpFunction>
+function cp() {
+	<initialChecksAndSetup>
+	var args = arguments,
+		nargs = args.length,
+		tmpl = 'default',
+		opts = {},
+		options,
+		fpath,
+		dpath,
+		dest,
+		clbk,
+		err,
+		flg;
+	if (!nargs) {
+		throw new Error('insufficient input arguments. Must provide a file destination.');
+	}
+	// ...remaining initial checks and setup...
+	</initialChecksAndSetup>
+
+	<validationChecks>
+	if (flg) {
+		err = validate(opts, options);
+		if (err) {
+			throw err;
+		}
+	}
+	</validationChecks>
+
+	<templateProcessing>
+	opts = merge({}, defaults[tmpl], opts);
+	tmpl = opts.template || tmpl;
+	opts.keywords = keywords(opts.keywords);
+	fpath = path.join(__dirname, tmpl, 'package.json');
+	dpath = path.join(dest, 'package.json');
+	</templateProcessing>
+
+	<availabilityAndWriteFiles>
+	if (opts.name) {
+		packageName(opts.name, isAvailable);
+	} else {
+		isAvailable(null, true);
+	}
+	// ...remaining file operations...
+	</availabilityAndWriteFiles>
+}
+</cpFunction>
+
+<sendMsgFunction>
+function sendMsg(that) {
+  <msgPreparation>
+  var msg, to, ids;
+  if (that.isDisabled()) return;
+  msg = that.readTextarea();
+  </msgPreparation>
+
+  <verifyMsgAndRecipients>
+  if (msg === '') {
+      node.warn('Chat: message has no text, not sent.');
+      return;
+  }
+  ids = that.recipientsIds;
+  if (ids.length === 0) {
+      node.warn('Chat: empty recipient list, message not sent.');
+      return;
+  }
+  </verifyMsgAndRecipients>
+
+  <sendMessage>
+  to = ids.length === 1 ? ids[0] : ids;
+  that.writeMsg('outgoing', { msg: msg });
+  node.say(that.chatEvent, to, msg);
+  </sendMessage>
+
+  <clearTextarea>
+  setTimeout(function() { that.textarea.value = ''; });
+  </clearTextarea>
+}
+</sendMsgFunction>

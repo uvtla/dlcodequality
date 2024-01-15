@@ -1,0 +1,335 @@
+<function>
+function(id, key) {
+  <validation>
+  if (typeof id === 'string') {
+    if (typeof key === 'string') </validation> {
+      <memStoreAccess>
+      if (memStore[id] && memStore[id][key]) {
+        let deletedKey = _.cloneDeep(memStore[id][key]);
+        delete memStore[id][key];
+        return when(deletedKey);
+      } else {
+        return when.reject(new Error('bot.forget() could not find the value referenced by id/key'));
+      } </memStoreAccess>
+    <validation>
+    } else if (typeof key === 'undefined') </validation> { 
+      <memStoreAccess>
+      if (memStore[id]) {
+        let deletedId = _.cloneDeep(memStore[id]);
+        delete memStore[id];
+        return when(deletedId);
+      } else {
+        return when.reject(new Error('bot.forget() has no key/values defined'));
+      } </memStoreAccess>
+    <validation>
+    } else {
+      return when.reject(new Error('bot.forget() key must be of type "string"'));
+    }
+  } else {
+    return when.reject(new Error('bot.forget() Storage module must include a "id" argument of type "string"'));
+  }</validation>
+}
+</function>
+
+<attacher>
+function attacher(destination, options) {
+  var settings
+  <configuration>
+  if (destination && !destination.process) {
+    settings = destination
+    destination = null
+  }
+
+  settings = settings || options || {}
+
+  if (settings.document === undefined || settings.document === null) {
+    settings.document = true
+  }
+  </configuration>
+  <attachOrMutate>
+  return destination ? bridge(destination, settings) : mutate(settings)
+  </attachOrMutate>
+}
+</attacher>
+
+<compose>
+function compose() {
+        <defineCompose>
+        var fns = arguments;
+        </defineCompose>
+        <executionCompose>
+        return function() {
+            var result = void 0;
+
+            for (var i = fns.length - 1; i > -1; i--) {
+                if (i === fns.length - 1) {
+                    result = fns[i].apply(fns[i], arguments);
+                } else {
+                    result = fns[i].call(this, result);
+                }
+            }
+
+            return result;
+        };
+        </executionCompose>
+    }
+</compose>
+
+<function>
+function(clusterCriteria, subClusterCriteria, numClusters, isReversed){
+    <sortClusters>
+		var sorted = this.colors.slice(0),
+			clusters = [],
+			d = 1,
+			i = 0,
+			num = sorted.length,
+			slice;
+
+		sorted.sort(clusterCriteria.compare).reverse();
+		for (var j = 0; j < num; j++) {
+			var c = sorted[j];
+			if (c.getComponentValue(clusterCriteria) < d) {
+				slice = sorted.slice(i, j);
+				slice.sort(subClusterCriteria.compare);
+				clusters.push.apply(clusters, slice);
+				d -= 1.0 / numClusters;
+				i = j;
+			}
+		}
+		slice = [];
+		Array.prototype.push.apply(slice, sorted.slice(i, sorted.length));
+		slice.sort(subClusterCriteria.compare);
+		clusters.push.apply(clusters, slice);
+		if (isReversed) {
+			clusters.reverse();
+		}
+		this.colors = clusters;
+		return this;
+    </sortClusters>
+}
+</function>
+
+<validateOptions>
+function validateOptions(options) {
+  <nullCheck>
+  if (_.isNil(options)) {
+    return null;
+  }
+  </nullCheck>
+  <validateObject>
+  if (!_.isPlainObject(options)) {
+    return new TypeError('Expected `options` to be an object or not defined.');
+  }
+  </validateObject>
+  <validateTime>
+  if (!isOptionalIntAbove(options.time, 0)) {
+    return new TypeError('Expected `options.time` to be an integer that is 0 or greater.');
+  }
+  </validateTime>
+  <validateCount>
+  if (!isOptionalIntAbove(options.count, 1)) {
+    return new TypeError('Expected `options.count` to be an integer greater than 0.');
+  }
+  </validateCount>
+  return null;
+}
+</validateOptions>
+
+<github>
+function github(url, destination) {
+  <downloadRepository>
+  return new Promise((resolve, reject) => {
+    (0, _downloadGithubRepo2.default)(url, destination, err => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+  </downloadRepository>
+}
+</github>
+
+<lintCss>
+function lintCss() {
+  <linting>
+  return gulp
+    .src([appSrc + '*.less'])
+    .pipe(stylelint({
+      failAfterError: true,
+      reporters: [
+        {formatter: 'string', console: true}
+      ]
+    }));
+  </linting>
+}
+</lintCss>
+
+<validStore>
+function validStore(store) {
+    <checkStoreFunctions>
+    return store &&
+      typeof store.getNodes === 'function' &&
+      typeof store.getNode === 'function' &&
+      typeof store.getDevices === 'function' &&
+      typeof store.getDevice === 'function' &&
+      typeof store.getSources === 'function' &&
+      typeof store.getSource === 'function' &&
+      typeof store.getSenders === 'function' &&
+      typeof store.getSender === 'function' &&
+      typeof store.getReceivers === 'function' &&
+      typeof store.getReceiver === 'function' &&
+      typeof store.getFlows === 'function' &&
+      typeof store.getFlow === 'function';
+    </checkStoreFunctions>  
+}
+</validStore>
+
+<condor_classads_stream>
+function condor_classads_stream(cmd, opts, cb) {
+    <setup>
+    var deferred = Q.defer();
+    var p = spawn(cmd, opts, { env: get_condor_env() });
+    var buffer = "";
+    var items = [];
+    var parser = new xml2js.Parser();
+    </setup>
+    <parseXmlBlock>
+    function getblock() {
+        var s = buffer.indexOf("\n<c>\n");
+        var e = buffer.indexOf("\n</c>\n");
+        if (s != -1 && e != -1) {
+            xml = buffer.substring(s, e + 5);
+            buffer = buffer.substring(e + 5);
+            parser.parseString(xml, function (err, attrs) {
+                if (err) {
+                    console.log("failed to parse job xml (skipping)");
+                    console.error(err);
+                    console.log(xml);
+                } else {
+                    var event = {};
+                    if (!attrs.c || !attrs.c.a) {
+                        event._no_attributes = true;
+                    } else {
+                        if (!attrs.c.a.forEach) {
+                            attrs.c.a = [attrs.c.a];
+                        }
+                        attrs.c.a.forEach(function (attr) {
+                            var name = attr.$.n;
+                            event[name] = parse_attrvalue(attr);
+                        });
+                    }
+                    if (cb) {
+                        cb(null, event);
+                    }
+                    items.push(event);
+                }
+            });
+            return true;
+        } else {
+            return false;
+        }
+    }
+    </parseXmlBlock>
+    <handleStreamData>
+    p.stdout.on('data', function (data) {
+        buffer += data.toString();
+        while (getblock());
+    });
+    </handleStreamData>
+    <handleStreamError>
+    var stderr = "";
+    p.stderr.on('data', function (data) {
+        stderr += data;
+    });
+    p.on('error', function (err) {
+        console.error(err);
+        deferred.reject(err);
+        cb(err);
+    });
+    </handleStreamError>
+    <handleProcessClose>
+    p.on('close', function (code, signal) {
+        while (getblock());
+        if (signal) {
+            deferred.reject(cmd + " was killed by signal " + signal);
+            if (cb) {
+                cb({ code: code, signal: signal, stdout: buffer, stderr: stderr });
+            }
+        } else if (code !== 0) {
+            deferred.reject(cmd + " failed with exit code " + code + "\nSTDERR:" + stderr + "\nbuffer:" + buffer);
+            if (cb) {
+                cb({ code: code, signal: signal, stdout: buffer, stderr: stderr });
+            }
+        } else {
+            deferred.resolve(items);
+        }
+    });
+    </handleProcessClose>
+    return deferred.promise;
+}
+</condor_classads_stream>
+
+<clone>
+function clone(obj, deep) {
+    <checkSimpleCases>
+    if (!obj || typeof obj !== "object" || isFunction(obj)) {
+        return obj;
+    }
+    if (obj instanceof Date) {
+        return new Date(obj.getTime());
+    }
+    </checkSimpleCases>
+    var result, index, length, value;
+    <cloneArray>
+    if (isArray(obj)) {
+        result = [];
+        <deepCloneArray>
+        if (deep) {
+            for (index = 0, length = obj.length; index < length; index += 1) {
+                if (index in obj) {
+                    value = obj[index];
+                    value = value.clone ? value.clone(true) : clone(value);
+                    result.push(clone(value));
+                }
+            }
+        </deepCloneArray> 
+        <shallowCloneArray>
+        else {
+            for (index = 0, length = obj.length; index < length; index += 1) {
+                if (index in obj) {
+                    result.push(value);
+                }
+            }
+        }
+        </shallowCloneArray>
+        return result;
+    }
+    </cloneArray>
+
+    <cloneObjectWithCloneMethod>
+    if (obj.clone) {
+        return obj.clone(obj, deep);
+    }
+    </cloneObjectWithCloneMethod>
+
+    <cloneObject>
+    result = obj.constructor ? new obj.constructor() : {};
+
+    for (index in obj) {
+        if (true) {
+            value = obj[index];
+            if (
+                !(index in result) ||
+                (result[index] !== value && (!(index in EMPTY) || EMPTY[index] !== value))
+            ) {
+                result[index] = clone(value);
+            }
+        }
+    }
+    </cloneObject>
+
+    return result;
+}
+</clone>

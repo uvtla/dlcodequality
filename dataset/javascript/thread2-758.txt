@@ -1,0 +1,292 @@
+Below are the annotations for SRP compliance on the given JavaScript functions:
+
+1. `extractTypedef` Function:
+
+```javascript
+<extractTypedef>
+async function extractTypedef(config) {
+  const {
+    source,
+    destination,
+    writable,
+  } = config
+  try {
+    
+    const s = createReadStream(source)
+    const ts = createRegexTransformStream(typedefRe)
+    const ps = new Properties()
+    const readable = new PassThrough()
+    const xml = new XML()
+
+    await writeOnce(readable, '<types>\n')
+
+    s.pipe(ts).pipe(ps).pipe(xml).pipe(readable, { end: false })
+
+    <chooseStreamResponsibility>
+    const p = whichStream({
+      readable,
+      source,
+      writable,
+      destination,
+    })
+    </chooseStreamResponsibility>
+
+    <handleStreamEvents>
+    await new Promise((r, j) => {
+      s.on('error', e => { LOG('Error in Read'); j(e) })
+      ts.on('error', e => { LOG('Error in Transform'); j(e) })
+      ps.on('error', e => { LOG('Error in RegexTransform'); j(e) })
+      xml.on('error', e => { LOG('Error in XML'); j(e) })
+      readable.on('error', e => { LOG('Error in Stream'); j(e) })
+      xml.on('end', r)
+    })
+    </handleStreamEvents>
+
+    await new Promise(r => readable.end('</types>\n', r))
+    await p
+  } catch (err) {
+    <handleError>
+    catcher(err)
+    </handleError>
+  }
+}
+</extractTypedef>
+```
+
+2. `_createRequestParams` Function:
+
+```javascript
+<_createRequestParams>
+function _createRequestParams(params) {
+  var resourcePath = params.resourcePath;
+  
+  <modifyResourcePath>
+  resourcePath = resourcePath.replace(":domain", params.domain)
+    .replace(":projectid", params.projectid)
+    .replace(":guid", params.appid);
+  </modifyResourcePath>
+
+  <logActivity>
+  log.logger.debug("Creating Request Params For Core ", params);
+  </logActivity>
+
+  <constructCoreHost>
+  var coreHost = params.appMbaasModel.coreHost;
+  if(coreHost.indexOf("http") !== 0){
+    coreHost = "https://" + coreHost;
+  }
+  </constructCoreHost>
+
+  <createRequestObject>
+  return {
+    url: url.format(coreHost + resourcePath),
+    method: params.method,
+    headers: {
+      'x-fh-auth-app' : params.apiKey
+    },
+    json: true,
+    body: params.data || {}
+  };
+  </createRequestObject>
+}
+</_createRequestParams>
+```
+
+3. The third function does not have a name, but handles unpaired HTML tags:
+
+```javascript
+<handleUnpairedTags>
+function (tag) {
+  if (voidElements.indexOf(tag.name) < 0) {
+    reporter.warn(
+      tag.pos,
+      '035',
+      'Tag ' + tag.name + ' is not paired.'
+    );
+  }
+}
+</handleUnpairedTags>
+```
+
+4. The fourth function does not have a name, but constructs event handling metadata:
+
+```javascript
+<constructEventHandlingMetadata>
+function(_element,_type,_handler,_capture){
+  var _result = {};
+  
+  _element = _e._$get(_element);
+  if (!_element){
+      return null;
+  }
+  _e._$id(_element);
+  _result.element = _element;
+  
+  if (!_u._$isFunction(_handler)){
+      return null;
+  }
+  _result.handler = _handler;
+  
+  var _type = _getTypeList(_type);
+  if (!_type){
+      return null;
+  }
+  
+  _result.type = _type;
+  _result.capture = !!_capture;
+  return _result;
+}
+</constructEventHandlingMetadata>
+```
+
+5. The fifth function does not have a name, but performs a cache update and adds a class name:
+
+```javascript
+<updateCacheAndAddClassName>
+function(_id,_clazz,_event){
+  _cache[_id] = _v._$page(_event);
+  _e._$addClassName(_id,_clazz);
+}
+</updateCacheAndAddClassName>
+```
+
+6. `quote` Function:
+
+```javascript
+<quote>
+function quote(inst, list, argv, event, fin) {
+    
+  if (!ok(inst, inst.options.quoteTransaction)) return exit(inst, list, fin);
+  var entity = list[list.length - 1];
+  if (_isValue(entity)) return fin(null, entity);
+  var quotation = {};
+  quotation[RUNIQ_QUOTED_ENTITY_PROP_NAME] = entity;
+  return fin(null, quotation);
+}
+</quote>
+```
+
+7. `hookChildProcEvents` Function:
+
+```javascript
+<hookChildProcEvents>
+function hookChildProcEvents() {
+  childProc.on('error', function (err) {
+      logger.error('error: ', err);
+      _childProcLastError = err;
+  });
+  childProc.on('disconnect', function () {
+      logger.debug('script-boilerplate process disconnected');
+  });
+  
+  <handleUncaughtException>
+  childProc.on('uncaughtException', function (err) {
+      logger.error('uncaughtException: ', (err && err.stack) ? err.stack : err);
+      _childProcLastError = err;
+  });
+  </handleUncaughtException>
+
+  <handleExit>
+  childProc.on('exit', function (code, signal) {
+      logger.debug('script-boilerplate process exited with code: ' + code + ', signal: ' + signal);
+      if (dbg) {
+          dbg.close();
+      }
+  </handleExit>
+  
+  <handleExitConditionally>
+      if (code && code !== 0) {
+          var promise, error;
+          if (_isRunning || _isDisposing) {
+              promise = _isRunning ? _whenFinished : _whenDisposed;
+              error = _childProcLastError || new Error('script-boilerplate process exited with code: ' + code);
+              promise.reject(error);
+              resetGlobalVariables();
+          }
+      }
+  </handleExitConditionally>
+
+  <handleMessages>
+  childProc.on('message', function (msg) {
+    
+  });
+  </handleMessages>
+</hookChildProcEvents>
+```
+
+8. `printFileSizesAfterBuild` Function:
+
+```javascript
+<printFileSizesAfterBuild>
+function printFileSizesAfterBuild( ... ) {
+  
+}
+</printFileSizesAfterBuild>
+```
+
+9. `recover` Function:
+
+```javascript
+<recover>
+function recover(rawTx, v, r, s) {
+  <decodeAndRecover>
+  const rawTransaction = typeof(rawTx) === 'string' ? new Buffer(stripHexPrefix(rawTx), 'hex') : rawTx;
+  const signedTransaction = rlp.decode(rawTransaction);
+  const raw = [];
+
+  transactionFields.forEach((fieldInfo, fieldIndex) => {
+    raw[fieldIndex] = signedTransaction[fieldIndex];
+  });
+
+  const publicKey = secp256k1.recoverPubKey((new Buffer(keccak256(rlp.encode(raw)), 'hex')), { r, s }, v - 27);
+  return (new Buffer(publicKey.encode('hex', false), 'hex')).slice(1);
+  </decodeAndRecover>
+}
+</recover>
+```
+
+10. The tenth function does not have a name, but performs dialog-related operations:
+
+```javascript
+<performDialogOperations>
+function (fromQueue) {
+    
+    var item = queue[0],
+        self = this,
+        transitionDone;
+
+    
+    isopen = true;
+    
+    <bindTransition>
+    transitionDone = function (event) {
+        event.stopPropagation();
+        self.setFocus();
+        
+        self.unbind(elDialog, self.transition.type, transitionDone);
+    };
+    
+    if (this.transition.supported && !fromQueue) {
+        this.bind(elDialog, this.transition.type, transitionDone);
+    }
+    </bindTransition>
+    
+    <updateDialogContent>
+    elDialog.innerHTML = this.build(item);
+    
+    btnReset  = $("alertify-resetFocus");
+    btnOK     = $("alertify-ok")     || undefined;
+    btnCancel = $("alertify-cancel") || undefined;
+    btnFocus  = (_alertify.buttonFocus === "cancel") ? btnCancel : ((_alertify.buttonFocus === "none") ? $("alertify-noneFocus") : btnOK),
+    input     = $("alertify-text")   || undefined;
+    form      = $("alertify-form")   || undefined;
+    
+    if (typeof item.placeholder === "string" && item.placeholder !== "") input.value = item.placeholder;
+    if (fromQueue) this.setFocus();
+    this.addListeners(item.callback);
+    </updateDialogContent>
+}
+</performDialogOperations>
+```
+
+Each of these functions has been annotated according to the Single Responsibility Principle. Where multiple responsibilities were identified within a function, they were wrapped in separate tags. Some functions did not exhibit clearly separable responsibilities and hence are contained within a single set of tags.

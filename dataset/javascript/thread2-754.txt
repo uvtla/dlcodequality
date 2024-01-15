@@ -1,0 +1,256 @@
+Here are the annotations for SRP compliance or violations:
+
+```javascript
+<isAdmin>
+function isAdmin(options, username) {
+	return (options.configParams.get("orion.auth.user.creation") || "").split(",").some(function(user) {
+		return user === username;
+	});
+}
+</isAdmin>
+```
+
+```javascript
+<RenderManager>
+function RenderManager(view) {
+	this.running = false;
+	this._frame = 0;
+
+	this.view = view;
+	this.skipFrames = 0;
+	this.skipFramesCounter = 0;
+	this.onEnterFrame = new signals.Signal();
+	this.onExitFrame = new signals.Signal();
+	this.render = this.render.bind(this);
+	this.renderLoop = this.renderLoop.bind(this);
+}
+</RenderManager>
+```
+
+```javascript
+<paginatedInfo>
+function paginatedInfo() {
+      var first = (this.currentPage - 1) * this.currentPerPage + 1;
+      var last = Math.min(this.total, this.currentPage * this.currentPerPage);
+
+      if (last === 0) {
+        first = 0;
+      }
+
+      return "".concat(first, " - ").concat(last, " ").concat(this.ofText, " ").concat(this.total);
+}
+</paginatedInfo>
+```
+
+```javascript
+<updateRating>
+function (rate) {
+      var value = parseFloat(rate);
+      
+      <parseAndValidate>
+      if (this._contains(value)) {
+      </parseAndValidate>
+        this._fillUntil(this._rateToIndex(value));
+        this.$input.val(value);
+      
+      <handleEmptyRate>  
+      } else if (rate === '') {
+        this._fillUntil(0);
+        this.$input.val('');
+      }
+      </handleEmptyRate>
+}
+</updateRating>
+```
+
+```javascript
+<sendHAR>
+function(url, response, method, status, headers) {
+			<checkPlayStarted>
+			if (!_private.isPlayStarted()) {
+				throw new Error("Start the player first before you add a response.");
+			}
+			</checkPlayStarted>
+			
+			<buildAndAddHAREntry>
+			var sMethod = method || "GET";
+			var aHeaders = headers || [{
+				"name": "Content-Type",
+				"value": "text/plain;charset=utf-8"
+			}];
+			var iStatus = status || 200;
+			var oEntry = {
+				"startedDateTime": new Date().toISOString(),
+				"time": 0,
+				"request": {
+					"headers": [],
+					"url": url,
+					"method": sMethod
+				},
+				"response": {
+					"status": iStatus,
+					"content": {
+						"text": response
+					},
+					"headers": aHeaders
+				}
+			};
+			var iIndex = _private.mHarFileContent.log.entries.push(oEntry) - 1;
+			_private.addEntryToMapping(_private.mHarFileContent, _private.mHarFileContent.log.entries, iIndex);
+			</buildAndAddHAREntry>
+}
+</sendHAR>
+```
+
+```javascript
+<releaseTriggeredEvent>
+function releaseTriggeredEvent(oHandler) {
+		<validateHandler>
+		if (!oHandler) {
+			Log.error("Release trigger events must not be called without passing a valid handler!");
+			return;
+		}
+		</validateHandler>
+		
+		<handleEventRelease>
+		var mEventInfo = mTriggerEventInfo[oHandler.type];
+
+		if (!mEventInfo) {
+			return;
+		} else if (!mEventInfo.domRefs[oHandler.id] || !mEventInfo.domRefs[oHandler.id].domRef) {
+			Log.warning("Release trigger event for event type " + oHandler.type + "on Control " + oHandler.id + ": DomRef does not exists");
+			return;
+		}
+
+		delete mEventInfo.domRefs[oHandler.id];
+		</handleEventRelease>
+}
+</releaseTriggeredEvent>
+```
+
+```javascript
+<colorPickerComponent>
+function colorPickerComponent(ngeoColorpickerTemplateUrl) {
+  return {
+    restrict: 'A',
+    scope: {
+      colors: '<?ngeoColorpicker',
+      color: '=?ngeoColorpickerColor'
+    },
+    controller: 'NgeoColorpickerController as ctrl',
+    bindToController: true,
+    templateUrl: ngeoColorpickerTemplateUrl
+  };
+}
+</colorPickerComponent>
+```
+
+```javascript
+<hasChangedAttribute>
+function(attr) {
+      if (attr == null) return !!Object.keys(this.changed).length;
+      return _.has(this.changed, attr);
+}
+</hasChangedAttribute>
+```
+
+```javascript
+<buildCookieString>
+function (name , value , encodeValue , options )  {
+        
+        var lang = YAHOO.lang,
+            text = encodeURIComponent(name) + "=" + (encodeValue ? encodeURIComponent(value) : value);
+
+        <optionsProcessing>
+        if (lang.isObject(options)){
+            
+            if (options.expires instanceof Date){
+                text += "; expires=" + options.expires.toUTCString();
+            }
+            
+            if (lang.isString(options.path) && options.path !== ""){
+                text += "; path=" + options.path;
+            }
+            
+            if (lang.isString(options.domain) && options.domain !== ""){
+                text += "; domain=" + options.domain;
+            }
+            
+            if (options.secure === true){
+                text += "; secure";
+            }
+        }
+        </optionsProcessing>
+        
+        return text;
+}
+</buildCookieString>
+```
+
+```javascript
+<processNode>
+function processNode(state, node, data) {
+  <prepareNode>
+  if (typeof node === 'string') {
+    node = document.getElementById(node);
+  }
+  if (data == null) {
+    data = {};
+  }
+  </prepareNode>
+  
+  state.stack.push(node.nodeName + (node.id ? '#' + node.id : ''));
+  var pushedNode = false;
+  
+  <processNodeAttributesAndEvents>
+  try {
+    
+    if (node.attributes && node.attributes.length) {
+      
+      <handleSpecialAttributes>
+      if (node.hasAttribute('foreach')) {
+        processForEach(state, node, data);
+        return;
+      }
+      if (node.hasAttribute('if')) {
+        if (!processIf(state, node, data)) {
+          return;
+        }
+      }
+      </handleSpecialAttributes>
+      
+      state.nodes.push(data.__element);
+      data.__element = node;
+      pushedNode = true;
+      
+      ...
+    }
+    </processNodeAttributesAndEvents>
+  
+    ...
+    
+    <processChildNodes>
+    var childNodes = Array.prototype.slice.call(node.childNodes);
+    for (var j = 0; j < childNodes.length; j++) {
+      processNode(state, childNodes[j], data);
+    }
+    </processChildNodes>
+    
+    <processTextNode>
+    if (node.nodeType === 3 ) {
+      processTextNode(state, node, data);
+    }
+    </processTextNode>
+    
+  }
+  finally {
+    if (pushedNode) {
+      data.__element = state.nodes.pop();
+    }
+    state.stack.pop();
+  }
+}
+</processNode>
+```
+
+The `<processNodeAttributesAndEvents>` tag includes a large block of the function to demonstrate that although it's a big chunk of logic, it's all related to processing the node's attributes and events and thus constitutes a single responsibility. The rest of the function is also SRP-compliant as each section is dealing with a particular aspect of processing a node or its children.

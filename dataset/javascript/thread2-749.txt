@@ -1,0 +1,252 @@
+```javascript
+<startDispatching>
+function startDispatching(action) {
+  require('./debug.es6').logDispatch(action);
+  
+  Object.keys(this[CALLBACKS]).forEach((id) => {
+    this[IS_PENDING][id] = false;
+    this[IS_HANDLED][id] = false;
+  });
+
+  this[PENDING_ACTION] = action;
+  this[IS_DISPATCHING] = true;
+}
+</startDispatching>
+
+<anonymous>
+function(
+  component,
+  keys_to_watch_for_changes,
+  additonal_callback = null
+) {
+  if (!Array.isArray(keys_to_watch_for_changes)) {
+    throw keys_to_watch_for_changes + ' must be an array'
+  }
+  component.state = component.state || {} 
+  
+  <_callback>
+  function _callback(changed_keys) {
+    if (intersection(keys_to_watch_for_changes, changed_keys).length) {
+      let state_update_obj = {}
+      keys_to_watch_for_changes.forEach(k => (state_update_obj[k] = store._store[k]))
+      this.setState(state_update_obj)
+      
+      if (additonal_callback) {
+        additonal_callback(changed_keys)
+      }
+    }
+  }
+  </_callback>
+  
+  let callback_bound_to_component = _callback.bind(component)
+  
+  for (let k of keys_to_watch_for_changes) {
+    if (!store._store.hasOwnProperty(k)) {
+      throw 'Store does not have key ' + k
+    }
+    if (component.state.hasOwnProperty(k)) {
+      console.warn('Overwriting existing state key ' + k)
+    }
+    component.state[k] = store._store[k]
+
+    store._recordKeySubscriber(k, component.constructor.name)
+  }
+  return store.subscribe(callback_bound_to_component)
+}
+</anonymous>
+
+<wrapFailCB>
+function wrapFailCB(cb, result) {
+  let errorCode = 3; 
+  if (result && result.errorCode !== undefined) {
+    if (result.errorCode === -1) {
+      errorCode = 6; 
+    } else {
+      ({ errorCode } = result);
+    }
+  }
+
+  const newResult = assign({
+    errorMessage: '',
+  }, (result || {}), {
+    errorCode,
+  });
+
+  if (cb) {
+    cb(newResult);
+  }
+}
+</wrapFailCB>
+
+<focusElement>
+function focusElement(tabStopElements, direction) {
+  let start = 0;
+  let end = tabStopElements.length - 1;
+  let increment = 1;
+  if (direction === "previous") {
+    start = tabStopElements.length - 1;
+    end = 0;
+    increment = -1;
+  }
+
+  let current = document.activeElement.tabIndex;
+  if (current === -1 && direction === "previous") {
+    current = tabStopElements[tabStopElements.length - 1].tabIndex + 1;
+  }
+
+  for (let i = start; i * increment <= end * increment; i += increment) {
+    if (tabStopElements[i].tabIndex * increment > current * increment && isTabStopElement(tabStopElements[i])) {
+      tabStopElements[i].focus();
+      return;
+    }
+  }
+  for (let i = start; i * increment <= current * increment; i += increment) {
+    if (isTabStopElement(tabStopElements[i])) {
+      tabStopElements[i].focus();
+      return;
+    }
+  }
+}
+</focusElement>
+
+<anonymous>
+function(property) {
+  var prop = $.splat(property || [ 'current', 'start', 'end' ]);
+  <NodeDimComputeAndLevel>
+  NodeDim.compute(this.graph, prop, this.config);
+  this.graph.computeLevels(this.root, 0, "ignore");
+  </NodeDimComputeAndLevel>
+  var lengthFunc = this.createLevelDistanceFunc();
+  <computeAngularWidths>
+  this.computeAngularWidths(prop);
+  </computeAngularWidths>
+  <computePositions>
+  this.computePositions(prop, lengthFunc);
+  </computePositions>
+}
+</anonymous>
+
+<viewNotFound>
+function (viewId, requirePath, err) {
+  var that = this,
+      message = 'View Not Found. Searched for "' + viewId + '" via path "' + requirePath + '".';
+
+  return system.defer(function(dfd) {
+      dfd.resolve(that.processMarkup('<div class="durandal-view-404">' + message + '</div>'));
+  }).promise();
+}
+</viewNotFound>
+
+<set>
+function set(appName, keyValues, keyLimits, callback) {
+  var config = {};
+
+  if (!isObject(keyValues)) {
+    return callback(new Error('To set a variable pass an object'));
+  }
+
+  config.values = keyValues;
+
+  if (isObject(keyLimits)) {
+    if (keyLimits.hasOwnProperty('memory')) {
+      config.memory = keyLimits.memory;
+    }
+    if (keyLimits.hasOwnProperty('cpu')) {
+      config.cpu = keyLimits.cpu;
+    }
+  } else {
+    callback = keyLimits;
+  }
+
+  var uri = format('/%s/apps/%s/config/', deis.version, appName);
+  <postConfig>
+  commons.post(uri, config, function onSetResponse(err, result) {
+    callback(err, result ? result.values : null);
+  });
+  </postConfig>
+}
+</set>
+
+<moveFile>
+function(filePath, targetPath, callback) {
+  client
+    .moveFile(filePath, targetPath)
+    .then(function() {
+      __executeCallbackAsync(callback, [null]);
+    })
+    .catch(callback);
+}
+</moveFile>
+
+<fromData>
+function fromData(aData) {
+  var propsToCopy = ["weeks", "days", "hours",
+                     "minutes", "seconds", "isNegative"];
+
+  for (var key in propsToCopy) {
+    if (!propsToCopy.hasOwnProperty(key)) {
+      continue;
+    }
+    var prop = propsToCopy[key];
+    if (aData && prop in aData) {
+      this[prop] = aData[prop];
+    } else {
+      this[prop] = 0;
+    }
+  }
+}
+</fromData>
+
+<AvrYamahaNodePut>
+function AvrYamahaNodePut(config) {
+  RED.nodes.createNode(this, config);
+
+  this.device = config.device;
+  this.deviceNode = RED.nodes.getNode(this.device);
+  this.name = config.name;
+  this.topic = config.topic;
+  this.payload = config.payload;
+
+  var node = this;
+  if (this.deviceNode) {
+
+  	this.on('input', function(msg) {
+
+      var topic = (node.topic) ? node.topic : msg.topic;
+      if (!topic) {
+        node.error('No topic given. Specify either in the config or via msg.topic!');
+        return;
+      }
+
+      var payload = (node.payload) ? node.payload : msg.payload;
+      if (payload === null || payload === undefined) {
+        node.error('invalid payload: ' + payload.toString());
+        return;
+      }
+
+      var jsonPayload = tryParseJSON(payload);
+      if (jsonPayload !== false) {
+        payload = jsonPayload
+      } else {
+        var addPayloadFormat = references.hasAdditionalPayload(topic);
+        if (addPayloadFormat) {
+          payload = JSON.parse(addPayloadFormat.replace('%s', payload).trim());
+        }
+      }
+
+      <sendPutCommand>
+      node.deviceNode.sendPutCommand(topic, payload).then(function(value) {
+        node.send(msg);
+      }).catch(function(error) {
+        node.error("Failed to put data to AVR with error: " + error);
+      });
+      </sendPutCommand>
+
+  	});
+
+  } else {
+    this.error(RED._("avr-yamaha.errors.missing-config"));
+  }
+}
+</AvrYamahaNodePut>
+```

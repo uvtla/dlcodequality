@@ -1,0 +1,332 @@
+```javascript
+<createGroupHeaderListItem>
+function (oGroup) {
+  var sTitle = "{i18n>systemData}";
+
+  if (oGroup.key === "custom") {
+    sTitle = "{i18n>externalReferences}";
+  }
+
+  return new GroupHeaderListItem({
+    title: sTitle,
+    upperCase: false
+  });
+}
+</createGroupHeaderListItem>
+
+<renderTree>
+function render(files, baseDir, renderLabelFn, options = {}) {
+  <normalizeBaseDir>
+  baseDir = baseDir.replace(/\/$/, '/');
+  </normalizeBaseDir>
+
+  <stripBaseDirFromFiles>
+  const strippedFiles = files.map(file => {
+    
+    if (file.lastIndexOf(baseDir, 0) === 0) {
+      return file.substr(baseDir.length)
+    }
+    
+    throw new Error('Basedir ' + baseDir + ' must be a prefix of ' + file)
+  });
+  </stripBaseDirFromFiles>
+
+  <createAndCondenseTree>
+  const rootNode = treeFromPaths(strippedFiles, baseDir, renderLabelFn, options)
+  const condensed = condense(rootNode)
+  </createAndCondenseTree>
+
+  return archy(condensed);
+}
+</renderTree>
+
+<handleEventLog>
+async function handleLog(log, rule, contractVersion, context) {
+  <decodeLog>
+  log.decoded = web3.eth.abi.decodeLog(
+    rule.eventAbi.inputs,
+    log.data,
+    log.topics.slice(1)
+  );
+  </decodeLog>
+
+  <assignLogMetadata>
+  log.contractName = contractVersion.contractName;
+  log.eventName = rule.eventName;
+  log.contractVersionKey = contractVersion.versionKey;
+  log.networkId = context.networkId;
+  </assignLogMetadata>
+
+  <logToConsole>
+  console.log(
+    `Processing log \
+    blockNumber=${log.blockNumber} \
+    transactionIndex=${log.transactionIndex} \
+    eventName=${log.eventName} \
+    contractName=${log.contractName}`
+  );
+  </logToConsole>
+
+  <processRuleFunction>
+  let ruleResults = undefined;
+  await withRetrys(async () => {
+    ruleResults = await rule.ruleFn(log);
+  });
+  </processRuleFunction>
+
+  <prepareOutput>
+  const output = {
+    log: log,
+    related: ruleResults
+  };
+  </prepareOutput>
+
+  <serializeAndLogOutput>
+  const json = JSON.stringify(output, null, 2);
+  if (context.config.verbose) {
+    console.log(json);
+    console.log('\n----\n');
+  }
+  </serializeAndLogOutput>
+
+  <processRelatedEntities>
+  const userAddress = log.decoded.party;
+  const ipfsHash = log.decoded.ipfsHash;
+  
+  const listing = output.related.listing;
+  delete listing.ipfs.data.pictures;
+  const listingId = listing.id;
+
+  const ipfsListingId = listingId.split('-')[2];
+  if (ipfsListingId !== log.decoded.listingID) {
+    throw `ListingId mismatch: ${ipfsListingId} !== ${log.decoded.listingID}`;
+  }
+  </processRelatedEntities>
+
+  <checkAndReturn>
+  if(output.related.listing.ipfs.data.price === undefined){
+    return;
+  }
+  </checkAndReturn>
+
+  <indexDataIfConfigured>
+  if (context.config.elasticsearch) {
+    console.log('INDEXING ', listingId);
+    await withRetrys(async () => {
+      await search.Listing.index(
+        listingId,
+        userAddress,
+        ipfsHash,
+        listing
+      );
+    });
+    if (output.related.offer !== undefined) {
+      const offer = output.related.offer;
+      await withRetrys(async () => {
+        await search.Offer.index(offer, listing);
+      });
+    }
+    if (output.related.seller !== undefined) {
+      await withRetrys(async () => {
+        await search.User.index(output.related.seller);
+      });
+    }
+    if (output.related.buyer !== undefined) {
+      await withRetrys(async () => {
+        await search.User.index(output.related.buyer);
+      });
+    }
+  }
+  </indexDataIfConfigured>
+
+  <insertIntoDbIfConfigured>
+  if (context.config.db) {
+    await withRetrys(async () => {
+      await db.Listing.insert(
+        listingId,
+        userAddress,
+        ipfsHash,
+        listing.ipfs.data
+      );
+    });
+  }
+  </insertIntoDbIfConfigured>
+
+  <triggerWebhookIfConfigured>
+  if (context.config.webhook) {
+    console.log('\n-- WEBHOOK to ' + context.config.webhook + ' --\n');
+    await withRetrys(async () => {
+      await postToWebhook(context.config.webhook, json);
+    });
+  }
+  </triggerWebhookIfConfigured>
+}
+</handleEventLog>
+
+<filterByYear>
+function filterYear(arr, { disabledDateObj, minDate, maxDate }) {
+  <getDateTimeRange>
+  const minDateTime = new Date(minDate).getTime();
+  const maxDateTime = new Date(maxDate).getTime();
+  </getDateTimeRange>
+
+  <getYearRange>
+  const yearRangeArr = getDateRangeArr(disabledDateObj, minDateTime, maxDateTime);
+  </getYearRange>
+
+  <processYears>
+  const yearArr = [];
+  yearRangeArr.forEach((item) => {
+    let { start, end } = item;
+    start = new Date(start);
+    end = new Date(end);
+    const yearStart = start.getFullYear();
+    const monthStart = start.getMonth();
+    const dayStart = start.getDate();
+    const yearEnd = end.getFullYear();
+    const monthEnd = end.getMonth();
+    const dayEnd = new Date(end.getTime() + 86400000).getDate();
+    // Calculations to get the range of years
+    // ...
+  });
+  </processYears>
+
+  <filterArray>
+  return arr.filter((item) => {
+    const year = item.value;
+    return yearArr.indexOf(year) === -1;
+  });
+  </filterArray>
+}
+</filterByYear>
+
+<validateNestingStructure>
+function validateNesting(node) {
+  <initializeQueue>
+  let queue = [...node.parent.children];
+  </initializeQueue>
+
+  let child;
+  let opener;
+
+  <traverseNodeTree>
+  while (queue.length) {
+    child = queue.shift();
+    opener = child.openingElement;
+
+    <checkIfInputElement>
+    if (child.type === 'JSXElement' && opener && (opener.name.name === 'input' || opener.name.name === 'textarea')) {
+      return true;
+    }
+    </checkIfInputElement>
+
+    <addToQueueIfChildrenExist>
+    if (child.children) {
+      queue = queue.concat(child.children);
+    }
+    </addToQueueIfChildrenExist>
+  }
+  </traverseNodeTree>
+
+  return false;
+}
+</validateNestingStructure>
+
+<importAsset>
+function(asset, options) {
+  <traverseToRootApp>
+  var app = this.app;
+  while (app.app) {
+    app = app.app;
+  }
+  </traverseToRootApp>
+
+  <performImport>
+  app.import(asset, options);
+  </performImport>
+}
+</importAsset>
+
+<initStructorController>
+function initStructorController () {
+  <setupEndpoint>
+  server.app.post('/structor-invoke', bodyParser.json({limit: '50mb'}), (req, res) => {
+    callControllerMethod(structorController, req, res);
+  });
+  </setupEndpoint>
+
+  <initializeStructorController>
+  structorController.setServer(server);
+  </initializeStructorController>
+}
+</initStructorController>
+
+<replaceCharacterInSubject>
+function replaceCharacter(search, replace, subject, count) {
+  <initializeVariables>
+  var i = 0, j = 0, temp = '', repl = '', sl = 0,
+    fl = 0, f = [].concat(search), r = [].concat(replace),
+    s = subject, ra = Object.prototype.toString.call(r) === '[object Array]',
+    sa = Object.prototype.toString.call(s) === '[object Array]', s = [].concat(s);
+  </initializeVariables>
+
+  <handleSearchReplaceTypes>
+  if(typeof(search) === 'object' && typeof(replace) === 'string' ) {
+    // Logic to handle specific case
+    // ...
+  }
+  </handleSearchReplaceTypes>
+
+  <optionalCountInitialization>
+  if (count) {
+    this.window[count] = 0;
+  }
+  </optionalCountInitialization>
+
+  <replaceSubstring>
+  for (i = 0, sl = s.length; i < sl; i++) {
+    // Further logic to perform replacement
+    // ...
+  }
+  </replaceSubstring>
+
+  return sa ? s : s[0];
+}
+</replaceCharacterInSubject>
+
+<computeParentMatrix>
+function parentsMatrix(e, focusingCamera) {
+  <checkAndComputeParentMatrix>
+  if (e.parent && e.parent.getMatrix) {
+    var m1 = e.parent.getMatrix();
+    var m2 = parentsMatrix(e.parent, focusingCamera);
+    if (m2) {
+      return m1.multiplyNew(m2);
+    }
+    return m1;
+  }
+  </checkAndComputeParentMatrix>
+
+  <handleFocusingCamera>
+  else {
+    if (focusingCamera) {
+      return focusingCamera.getMatrix();
+    }
+  }
+  </handleFocusingCamera>
+
+  return undefined;
+}
+</computeParentMatrix>
+
+<generateTreeFromPaths>
+function treeFromPaths(files, baseDir, renderLabelFn, options = {}) {
+  <createRootNode>
+  return {
+    label: options.label || '',
+    nodes: childNodesFromPaths(files, baseDir, renderLabelFn, files, baseDir)
+  };
+  </createRootNode>
+}
+</generateTreeFromPaths>
+```

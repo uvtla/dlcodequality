@@ -1,0 +1,288 @@
+```javascript
+<getBlogUrl>
+function getBlogUrl(secure) {
+    var blogUrl;
+
+    <toggleSecureProtocol>
+    if (secure) {
+        blogUrl = config.get('url').replace('http:', 'https:');
+    } else {
+        blogUrl = config.get('url');
+    }
+    </toggleSecureProtocol>
+
+    <ensureTrailingSlash>
+    if (!blogUrl.match(/\/$/)) {
+        blogUrl += '/';
+    }
+    </ensureTrailingSlash>
+
+    return blogUrl;
+}
+</getBlogUrl>
+
+<anonymousFunction>
+function(resources, start, min, max) {
+  <convertStartToDateFormat>
+  start = start ? new Date(start) : new Date();
+  </convertStartToDateFormat>
+  <getReservationCall>
+  return getReservation(resources, start.getTime(), min || 1, max);
+  </getReservationCall>
+}
+</anonymousFunction>
+
+<parseMultiPolygonGeometry>
+function parseMultiPolygonGeometry(coordinates) {
+    var multiPolygonWkt = [];
+    <parseCoordinates>
+    for (var i = 0; i < coordinates.length; i++) {
+        multiPolygonWkt.push('(' + parsePolygonGeometry(coordinates[i]) + ')');
+    }
+    </parseCoordinates>
+    return multiPolygonWkt.join(', ');
+}
+</parseMultiPolygonGeometry>
+
+<derive>
+function derive(makeDefaultOpt, initialize, proto) {
+
+    <resolveInitializeProto>
+    if (typeof initialize == 'object') {
+        proto = initialize;
+        initialize = null;
+    }
+    </resolveInitializeProto>
+
+    var _super = this;
+
+    <derivePropertyList>
+    var propList;
+    if (!(makeDefaultOpt instanceof Function)) {
+        propList = [];
+        for (var propName in makeDefaultOpt) {
+            if (makeDefaultOpt.hasOwnProperty(propName)) {
+                propList.push(propName);
+            }
+        }
+    }
+    </derivePropertyList>
+
+    <deriveSubFunction>
+    var sub = function(options) {
+        _super.apply(this, arguments);
+
+        <applyDefaults>
+        if (makeDefaultOpt instanceof Function) {
+            extend(this, makeDefaultOpt.call(this, options));
+        }
+        else {
+            extendWithPropList(this, makeDefaultOpt, propList);
+        }
+        </applyDefaults>
+
+        <callInitializers>
+        if (this.constructor === sub) {
+            var initializers = sub.__initializers__;
+            for (var i = 0; i < initializers.length; i++) {
+                initializers[i].apply(this, arguments);
+            }
+        }
+        </callInitializers>
+    };
+    </deriveSubFunction>
+    
+    <setupPrototypeChain>
+    sub.__super__ = _super;
+    if (!_super.__initializers__) {
+        sub.__initializers__ = [];
+    } else {
+        sub.__initializers__ = _super.__initializers__.slice();
+    }
+    if (initialize) {
+        sub.__initializers__.push(initialize);
+    }
+    var Ctor = function() {};
+    Ctor.prototype = _super.prototype;
+    sub.prototype = new Ctor();
+    sub.prototype.constructor = sub;
+    extend(sub.prototype, proto);
+    </setupPrototypeChain>
+
+    <extendSub>
+    sub.extend = _super.extend;
+    sub.derive = _super.extend;
+    </extendSub>
+
+    return sub;
+}
+</derive>
+
+<_applys_to_us_p>
+function _applys_to_us_p(data){
+    var ret = false;
+
+    <checkForApplicableModelId>
+    var mid = data['model_id'] || null;
+    if( ! mid || mid != anchor.model_id ){
+        ll('skip packet--not for us');
+    }else{
+        ret = true;
+    }
+    </checkForApplicableModelId>
+
+    return ret;
+}
+</_applys_to_us_p>
+
+<pathExpressions>
+function pathExpressions (token, tokens) {
+  <initializeExpressions>
+  const expressions = []
+  token = tokens.shift()
+  </initializeExpressions>
+  <parsePathExpressions>
+  while (true) {
+    if (!token) {
+      throw new Error(`A path expression should end with ")"`)
+    }
+    if (token === ')') {
+      break
+    }
+    expressions.push(pathExpression(token, tokens))
+    token = tokens.shift()
+  }
+  </parsePathExpressions>
+  return { _type: pathExpressions.name, expressions }
+}
+</pathExpressions>
+
+<importEnvironmentVariablesFromObject>
+function importEnvironmentVariablesFromObject(object) {
+    const environmentVariables = <mergeEnvironmentVariables>
+    Object.assign(
+        {},
+        Object(object).environmentVariables || Object(object)['environment-variables']
+    );
+    </mergeEnvironmentVariables>
+
+    <parseEnvironmentVariables>
+    for (const key in environmentVariables) {
+        environmentVariables[key] = valueParser(environmentVariables[key]).parse().nodes;
+    }
+    </parseEnvironmentVariables>
+
+    return environmentVariables;
+}
+</importEnvironmentVariablesFromObject>
+
+<RTCChannelStream>
+function RTCChannelStream(channel) {
+  <validateInstanceOf>
+  if (! (this instanceof RTCChannelStream)) {
+    return new RTCChannelStream(channel);
+  }
+  </validateInstanceOf>
+
+  <initializeStream>
+  stream.Duplex.call(this, {
+    decodeStrings: false,
+    objectMode: true
+  });
+  </initializeStream>
+
+  <initializeQueues>
+  this._rq = [];
+  this._wq = [];
+  </initializeQueues>
+
+  <setClosedState>
+  this._closed = channel.readyState === 'closed';
+  </setClosedState>
+
+  <assignChannel>
+  this.channel = channel;
+  </assignChannel>
+
+  <setBinaryType>
+  channel.binaryType = 'arraybuffer';
+  </setBinaryType>
+
+  <assignEventHandlers>
+  this._handlers = {
+    message: this._handleMessage.bind(this),
+    close: this._handleClose.bind(this),
+    open: this._handleOpen.bind(this)
+  };
+  </assignEventHandlers>
+
+  <addEventListener>
+  if (typeof channel.addEventListener == 'function') {
+    channel.addEventListener('message', this._handlers.message);
+    channel.addEventListener('close', this._handlers.close);
+    channel.addEventListener('open', this._handlers.open);
+  } else {
+    channel.onmessage = this._handlers.message;
+    channel.onclose = this._handlers.close;
+    channel.onopen = this._handlers.open;
+  }
+  </addEventListener>
+
+  <handleOpenState>
+  if (channel.readyState === 'open') {
+    this._handlers.open();
+  }
+  </handleOpenState>
+
+  <bindFinishEvent>
+  this.once('finish', this._dcsend.bind(this, ENDOFSTREAM));
+  </bindFinishEvent>
+}
+</RTCChannelStream>
+
+<camelcase>
+function camelcase(flag) {
+  <convertToCamelCase>
+  return flag.split('-').reduce(function(str, word){
+    return str + word[0].toUpperCase() + word.slice(1);
+  });
+  </convertToCamelCase>
+}
+</camelcase>
+
+<linterResults>
+function linterResults(_results, code) {
+        
+        var results = <parseResults>JSON.parse(_results);</parseResults>
+        var res = [{
+            filePath: resourcePath,
+            messages: Object.assign([], results[resourcePath])
+        }];
+
+        <processMessages>
+        if (res[0].messages.length > 0) {
+            (function () {
+                var warnings = 0;
+                var errors = 0;
+                var messages = res[0].messages;
+                messages.forEach(function (linter) {
+                    if (linter.severity === 'warning') {
+                        warnings++;
+                    } else if (linter.severity === 'error') {
+                        errors++;
+                    }
+                });
+                var msg = (0, _scsslintStylish2.default)(res);
+                var emitter = void 0;
+                if (errors > 0) {
+                    emitter = webpack.emitError;
+                } else {
+                    emitter = webpack.emitWarning;
+                }
+                emitter(msg);
+            })();
+        }
+        </processMessages>
+    }
+</linterResults>
+```

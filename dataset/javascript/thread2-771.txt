@@ -1,0 +1,227 @@
+```javascript
+<disableFileInput>
+function(state) {
+  var runtime = this.getRuntime();
+  if (runtime) {
+    runtime.exec.call(this, 'FileInput', 'disable', Basic.typeOf(state) === 'undefined' ? true : state);
+  }
+}
+</disableFileInput>
+
+<createSyntaxErrorAndLog>
+function error(sMessage, sInput, iAt) {
+  var oError = new SyntaxError(sMessage);
+  oError.at = iAt;
+  oError.text = sInput;
+  if (iAt !== undefined) {
+    sMessage += " at position " + iAt;
+  }
+  Log.error(sMessage, sInput, sExpressionParser);
+  throw oError;
+}
+</createSyntaxErrorAndLog>
+
+<processFile>
+function process (filePath, complete) {
+  var filename = path.basename(filePath),
+      pathParts = path.dirname(filePath).split(path.sep)
+
+  pathParts = pathParts.slice(transform.by)
+  pathParts.push(filename)
+
+  var newPath = pathParts.join(path.sep),
+      fileData = files[filePath]
+
+  delete files[filePath]
+  files[newPath] = fileData
+
+  complete()
+}
+</processFile>
+
+<initializeView>
+function(options){
+  this._initChildViewStorage();
+
+  Marionette.View.prototype.constructor.apply(this, slice(arguments));
+
+  this._initialEvents();
+}
+</initializeView>
+
+<storeDeviceKeys>
+async function _storeDeviceKeys(_olmDevice, userStore, deviceResult) {
+  if (!deviceResult.keys) {
+    return false;
+  }
+
+  const deviceId = deviceResult.device_id;
+  const userId = deviceResult.user_id;
+
+  const signKeyId = "ed25519:" + deviceId;
+  const signKey = deviceResult.keys[signKeyId];
+  if (!signKey) {
+    logger.warn("Device " + userId + ":" + deviceId + " has no ed25519 key");
+    return false;
+  }
+
+  const unsigned = deviceResult.unsigned || {};
+
+  try {
+    await olmlib.verifySignature(_olmDevice, deviceResult, userId, deviceId, signKey);
+  } catch (e) {
+    logger.warn("Unable to verify signature on device " + userId + ":" + deviceId + ":" + e);
+    return false;
+  }
+
+  let deviceStore;
+
+  if (deviceId in userStore) {
+    deviceStore = userStore[deviceId];
+
+    if (deviceStore.getFingerprint() != signKey) {
+      logger.warn("Ed25519 key for device " + userId + ":" + deviceId + " has changed");
+      return false;
+    }
+  } else {
+    userStore[deviceId] = deviceStore = new DeviceInfo(deviceId);
+  }
+
+  deviceStore.keys = deviceResult.keys || {};
+  deviceStore.algorithms = deviceResult.algorithms || [];
+  deviceStore.unsigned = unsigned;
+  return true;
+}
+</storeDeviceKeys>
+
+<processQuery>
+function(json, queryStr, unique) { 
+  var pick = new RegExp(/select|pivot/),
+      trim = /^\s+|\s+$/g,
+      _query = {};
+
+  queryStr = queryStr && _.isString(queryStr) && queryStr.replace(/["]/g, '');
+  if (pick.test(queryStr)) {
+    _query = _.reduce(queryStr.split(/,/), function(res, str) {
+      if (str.replace(trim, '').split(/ /)) {
+        res[_.first(str.replace(trim, '').split(/ /))] = _.last(str.split(pick)).replace(trim, '');
+      }
+      return res;
+    }, {'select': ''});
+  } else {
+    _query = {'select': ''};
+  }
+
+  return _query.hasOwnProperty('pivot') 
+    ? pivot(select(json, _query.select, unique))
+    : select(json, _query.select, unique);
+}
+</processQuery>
+
+<diffArrays>
+function (array1, array2) {
+  var result = [];
+
+  array.each(array1, function(i) {
+    if (!array.contains(array2, i)) {
+      array.add(result, i);
+    }
+  });
+
+  array.each(array2, function(i) {
+    if (!array.contains(array1, i)) {
+      array.add(result, i);
+    }
+  });
+
+  return result;
+}
+</diffArrays>
+
+<middlewareHandler>
+function handle(type, req, res, out) {
+  var index = 0;
+  var ended = false;
+
+  res.end = end;
+
+  function next(err) {
+    var middleware = stack[index++];
+
+    if (!middleware || ended) {
+      if (out) out(err, req, res);
+      return;
+    }
+
+    if (middleware.type.indexOf(type) === -1 && middleware.type.length > 0)
+      return next(err);
+
+    try {
+      var arity = middleware.cb.length;
+      if (err) {
+        if (arity === 4) {
+          middleware.cb(err, req, res, next);
+        } else {
+          next(err);
+        }
+      } else if (arity < 4) {
+        middleware.cb(req, res, next);
+      } else {
+        next();
+      }
+    }
+    catch (e) {
+      next(e);
+    }
+  }
+
+  function end() {
+    ended = true;
+  }
+
+  next();
+}
+</middlewareHandler>
+
+<logWithColorAndMethod>
+function stamp() {
+  let i = 0;
+  const args = new Array(arguments.length);
+
+  for (; i < args.length; ++i) {
+    args[i] = arguments[i];
+  }
+
+  process.stdout.write(clorox[this.color](getTime()) + ' ');
+  console[this.method].apply(console, (this.custom ? [this.custom].concat(args) : args));
+}
+</logWithColorAndMethod>
+
+<attemptEnableFullscreenAndPointerLock>
+function tryFullscreen(shell) {
+    var elem = shell.element
+
+    if(shell._wantFullscreen && !shell._fullscreenActive) {
+        var fs = elem.requestFullscreen ||
+                elem.requestFullScreen ||
+                elem.webkitRequestFullscreen ||
+                elem.webkitRequestFullScreen ||
+                elem.mozRequestFullscreen ||
+                elem.mozRequestFullScreen ||
+                function() {}
+        fs.call(elem)
+    }
+    if(shell._wantPointerLock && !shell._pointerLockActive) {
+        var pl = elem.requestPointerLock ||
+                elem.webkitRequestPointerLock ||
+                elem.mozRequestPointerLock ||
+                elem.msRequestPointerLock ||
+                elem.oRequestPointerLock ||
+                function() {}
+        pl.call(elem)
+    }
+}
+</attemptEnableFullscreenAndPointerLock>
+```
+
+Each of these functions is annotated with a single responsibility enclosed in tags denoting what they aim to achieve. The responsibilities are identified based on the blocks of code serving specific purposes within the functions.

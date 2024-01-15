@@ -1,0 +1,201 @@
+```javascript
+<xhrProgressListener>
+function() {
+  var xhr = $.ajaxSettings.xhr();
+  if (!xhr.upload) return xhr;
+  xhr.upload.addEventListener('progress', function(e) {
+    options.progress(e.loaded / e.total);
+  });
+  return xhr;
+}
+</xhrProgressListener>
+
+<ViolationConstructor>
+function Violation(assert, value, violation) {
+  if (!(this instanceof Violation)) {
+    return new Violation(assert, value, violation);
+  }
+
+  this.__class__ = 'Violation';
+
+  if (!(assert instanceof Assert || assert.__parentClass__ === 'Assert'))
+    throw new Error('Should give an assertion implementing the Assert interface');
+
+  this.assert = assert;
+  this.value = value;
+
+  if ('undefined' !== typeof violation)
+    this.violation = violation;
+}
+</ViolationConstructor>
+
+<rulesProcessing>
+function(rules) {
+  if (typeOf(rules) === "string") { 
+    var tmp = {};
+    tmp[rules] = arguments[1];
+    rules = tmp;
+  }
+  
+  for (var i in rules) {
+    var rule = rules[i];
+    if (typeOf(rule) !== "object") {
+      rule = {
+        regexp: rule
+      };
+    }
+    var reg = rule.regexp;
+    if (typeOf(reg) === "regexp") {
+      rule.regexp = reg.toString().slice(1, -1);
+    }
+    
+    if (rule.order === undefined) rule.order = 1;
+    this._rules[i] = rule;
+  }
+  
+  this.setup();
+  return this;
+}
+<rulesProcessing>
+
+<putAllLogging>
+function(pairs, opts) {
+  var ctx = u.context(BIG);
+  logger.debugl(function() { return ['Invoke putAll(msgId=%d,pairs=%s,opts=%s)',
+                                     ctx.id, JSON.stringify(pairs), JSON.stringify(opts)]; });
+  return future(ctx, 0x2D, p.encodeMultiKeyValue(pairs), p.complete(_.constant(undefined)), opts);
+}
+</putAllLogging>
+
+<saveAccessorValue>
+function saveAccessorValue(model, property) {
+
+if (!nativeProperties[property]) {
+  let value = model[property];
+  if (value !== undefined) {
+    if (model.__data) {
+      
+      model._setPendingProperty(property, value);
+    } else {
+      
+      if (!model.__dataProto) {
+        model.__dataProto = {};
+      } else if (!model.hasOwnProperty(JSCompiler_renameProperty('__dataProto', model))) {
+        model.__dataProto = Object.create(model.__dataProto);
+      }
+      model.__dataProto[property] = value;
+    }
+  }
+}
+</saveAccessorValue>
+
+<TagFinder>
+function(req, res, next) {
+  Tag.findOne({ name: req.params.name }, function(err, tag) {
+    if (err) return next(err);
+    if (!tag) return res.json(404, { error: 'failed to load tag ' + req.params.name });
+    req.tag = tag;
+    next();
+  });
+}
+</TagFinder>
+
+<getNodeValue>
+function getNodeVaue(path, obj) {
+  
+  var output = null;
+  try {
+      var arrayDots = path.split(".");
+      for (var i = 0; i < arrayDots.length; i++) {
+          if (arrayDots[i].indexOf('[') > -1) {
+              
+              var arrayAB = arrayDots[i].split("[");
+              var arrayName = arrayAB[0];
+              var arrayPosition = Number(arrayAB[1].substring(0, arrayAB[1].length - 1));
+
+              if (obj[arrayName] != null || obj[arrayName] != 'undefined') {
+                  if (obj[arrayName][arrayPosition] != null || obj[arrayName][arrayPosition] != 'undefined')
+                      obj = obj[arrayName][arrayPosition];
+
+              }
+              else {
+                  currentObject = null;
+              }
+
+          }
+          else {
+              
+              if (obj[arrayDots[i]] != null || obj[arrayDots[i]] != 'undefined')
+                obj = obj[arrayDots[i]];
+          }
+      }
+      output = obj;
+  } catch (err) {
+      
+      output = null;
+  }
+  return output;
+}
+</getNodeValue>
+
+<controlInformationRetrieval>
+function (controlId) {
+        var result = Object.create(null);
+        var control = sap.ui.getCore().byId(controlId);
+        var bindingContext;
+
+        if (!control) {
+            return result;
+        }
+
+        bindingContext = control.getBindingContext();
+
+        result.meta = Object.create(null);
+        result.contextPath = bindingContext ? bindingContext.getPath() : null;
+        result.aggregations = controlInformation._getBindDataForAggregations(control);
+        result.properties = controlInformation._getBindDataForProperties(control);
+
+        return result;
+    }
+</controlInformationRetrieval>
+
+<createTableLayout>
+function createTableLayout(){
+  var tableItem = {
+      type: 'component',
+      componentName: 'Table'
+  };
+
+  var stackItem = myLayout.root.getItemsById('stack-topleft')[0];
+  stackItem.addChild(tableItem);
+  
+  stackItem.setActiveContentItem(myLayout.root.getItemsById('node-list')[0]);
+  globalFunc.initTable();
+}
+</createTableLayout>
+
+<int128leToHex>
+function int128le_to_hex(a, b, c, d) {
+  var ra = ""
+  var t = 0
+  var ta = 0
+  for (var i = 3; i >= 0; i--) {
+      ta = arguments[i]
+      t = (ta & 0xFF)
+      ta = ta >>> 8
+      t = t << 8
+      t = t | (ta & 0xFF)
+      ta = ta >>> 8
+      t = t << 8
+      t = t | (ta & 0xFF)
+      ta = ta >>> 8
+      t = t << 8
+      t = t | ta
+      ra = ra + to_zerofilled_hex(t)
+  }
+  return ra
+}
+</int128leToHex>
+```
+
+Each function has been annotated with opening and closing tags that reflect either the compliance or violation of the Single Responsibility Principle, considering the cohesiveness of the functions' tasks. Simple functions without internal separate responsibilities are enclosed by a single set of tags. 

@@ -1,0 +1,302 @@
+Here are the annotations for the provided functions with respect to the Single Responsibility Principle:
+
+```javascript
+<manageDragEvent>
+function( event ){
+                
+    var dd = event.data;
+    
+    switch ( event.type ){
+        
+        case !dd.dragging && 'touchmove':
+            event.preventDefault();
+
+        case !dd.dragging && 'mousemove':
+            
+            if ( Math.pow(  event.pageX-dd.pageX, 2 ) + Math.pow( event.pageY-dd.pageY, 2 ) < Math.pow( dd.distance, 2 ) )
+                break; 
+            event.target = dd.target; 
+            drag.hijack( event, "dragstart", dd ); 
+            if ( dd.propagates ) 
+                dd.dragging = true; 
+            
+        case 'touchmove':
+            event.preventDefault();
+
+        case 'mousemove':
+            if ( dd.dragging ){
+                
+                drag.hijack( event, "drag", dd );
+                if ( dd.propagates ){
+                    
+                    if ( dd.drop !== false && $special.drop )
+                        $special.drop.handler( event, dd ); 
+                    break; 
+                }
+                event.type = "mouseup"; 
+            }
+            
+        case 'touchend':
+        case 'mouseup':
+        default:
+            if ( drag.touched )
+                $event.remove( drag.touched, "touchmove touchend", drag.handler ); 
+            else
+                $event.remove( document, "mousemove mouseup", drag.handler ); 
+            if ( dd.dragging ){
+                if ( dd.drop !== false && $special.drop )
+                    $special.drop.handler( event, dd ); 
+                drag.hijack( event, "dragend", dd ); 
+            }
+            drag.textselect( true ); 
+            
+            if ( dd.click === false && dd.dragging )
+                $.data( dd.mousedown, "suppress.click", new Date().getTime() + 5 );
+            dd.dragging = drag.touched = false; 
+            break;
+    }
+}
+</manageDragEvent>
+
+<login>
+function login(username, password) {
+<checkAPIAccess>
+    if (!cocoonSDK.CocoonAPI.checkAPIAccess()) {
+</checkAPIAccess>
+    <performTokenExchange>
+        return oAuth.tokenExchangePassword(username, password)
+        .then((result) => {
+            cocoonSDK.CocoonAPI.setupAPIAccess(result.access_token, result.refresh_token, result.expires_in);
+            return undefined;
+        })
+        .catch((error) => {
+            console.error("Login not successful.");
+            console.trace(error);
+            throw error;
+        });
+    } else {
+</performTokenExchange>
+    <alreadyHasAPIAccess>
+        return Promise.resolve();
+    }
+</alreadyHasAPIAccess>
+}
+</login>
+
+<registerCallback>
+function( id, callback ){
+<defaultID>
+        var ID = id;
+        
+        if( typeof id == 'function' ){
+            ID = 'ID_' + this._ID;
+            callback = id;
+        }
+</defaultID>
+<maintainCallbackRegistry>
+        this._callbacks[ID] = callback;
+        this._ID++;
+</maintainCallbackRegistry>
+<returnID>
+        return ID;
+</returnID>
+}
+</registerCallback>
+
+<getCss>
+function getCss(el, prop) {
+<cssRetrievalByProp>
+    var styles = parse(el.attribs.style);
+    if (typeof prop === 'string') {
+        return styles[prop];
+    } else if (Array.isArray(prop)) {
+        return _.pick(styles, prop);
+    } else {
+        return styles;
+    }
+</cssRetrievalByProp>
+}
+</getCss>
+
+<mesh1D>
+function mesh1D(array, level) {
+<generateMeshData>
+    var zc = zeroCrossings(array, level)
+    var n = zc.length
+    var npos = new Array(n)
+    var ncel = new Array(n)
+    for(var i=0; i<n; ++i) {
+        npos[i] = [ zc[i] ]
+        ncel[i] = [ i ]
+    }
+</generateMeshData>
+<returnMesh>
+    return {
+        positions: npos,
+        cells: ncel
+    }
+</returnMesh>
+}
+</mesh1D>
+
+<printTheme>
+function print( theme ) {
+<chooseGridPrintPath>
+    if ( theme === 'grid' || ( !theme && isGrid() ) ) {
+        let swapped = false;
+        dialog.prompt( 'Enter valid paper format', 'A4' )
+            .then( format => {
+                if ( !format ) {
+                    throw new Error( 'Print cancelled by user.' );
+                }
+                swapped = styleToAll();
+                return fixGrid( {
+                    format
+                } );
+            } )
+            .then( window.print )
+            .catch( console.error )
+            .then( () => {
+                if ( swapped ) {
+                    setTimeout( styleReset, 500 );
+                }
+            } );
+    } else {
+</chooseGridPrintPath>
+<defaultPrint>
+        window.print();
+    }
+</defaultPrint>
+}
+</printTheme>
+
+<touchAction>
+function (input) {
+<handleTouchInput>
+    
+    if (NATIVE_TOUCH_ACTION) {
+      return;
+    }
+
+    var srcEvent = input.srcEvent;
+    var direction = input.offsetDirection;
+
+    
+    if (this.manager.session.prevented) {
+      srcEvent.preventDefault();
+      return;
+    }
+
+    var actions = this.actions;
+    var hasNone = inStr(actions, TOUCH_ACTION_NONE);
+    var hasPanY = inStr(actions, TOUCH_ACTION_PAN_Y);
+    var hasPanX = inStr(actions, TOUCH_ACTION_PAN_X);
+
+    if (hasNone ||
+      (hasPanY && direction & DIRECTION_HORIZONTAL) ||
+      (hasPanX && direction & DIRECTION_VERTICAL)) {
+      return this.preventSrc(srcEvent);
+    }
+</handleTouchInput>
+  }
+</touchAction>
+
+<_buildDirsFirstComparator>
+function _buildDirsFirstComparator(contents) {
+<compareWithDirsFirst>
+        function _dirsFirstCompare(a, b) {
+            var aIsFile = FileTreeViewModel.isFile(contents.get(a)),
+                bIsFile = FileTreeViewModel.isFile(contents.get(b));
+
+            if (!aIsFile && bIsFile) {
+                return -1;
+            } else if (aIsFile && !bIsFile) {
+                return 1;
+            } else {
+                return FileUtils.compareFilenames(a, b);
+            }
+        }
+</compareWithDirsFirst>
+<returnComparator>
+        return _dirsFirstCompare;
+</returnComparator>
+    }
+</_buildDirsFirstComparator>
+
+<deepCleaner>
+function deepCleaner(obj, target = null) {
+<executeCleaningStrategies>
+  if (utils.isArray(target)) {
+    removeKeyLoop(obj, target);
+  } else {
+    cleanCyclicObject(obj, target);
+  }
+</executeCleaningStrategies>
+<returnCleanedObject>
+  return obj;
+</returnCleanedObject>
+}
+</deepCleaner>
+
+<processDataPagination>
+function(args, connectionInfo, processPagedResults) {
+<initializePaging>
+  args.page = {value: 1};
+  args.pageSize = {value: 200};
+  args.consignmentIdIndex = {value: 0};
+  args.consignmentId = {value: args.consignmentIds.value[args.consignmentIdIndex.value]};
+</initializePaging>
+<setupArrayAccessors>
+  args.getArray = function(){
+    return this.consignmentIds.value;
+  };
+  args.getArrayIndex = function(){
+    return this.consignmentIdIndex.value;
+  };
+</setupArrayAccessors>
+  
+<retrievePaginatedResults>
+  return utils.processPromisesSerially(
+    args.consignmentIds.value,
+    args.consignmentIdIndex.value,
+    args,
+    function mergeStrategy(newData, previousData){
+      log.debug('inside mergeStrategy()');
+      
+      
+      if (previousData && previousData.length>0) {
+        if (newData.length>0) {
+          log.debug('previousData.length: ', previousData.length);
+          newData = newData.concat(previousData);
+          log.debug('combinedData.length: ', newData.length);
+        }
+        else {
+          newData = previousData;
+        }
+      }
+      
+      log.debug('finalData.length ', newData.length);
+      return Promise.resolve(newData); 
+    },
+    function setupNext(updateArgs){
+      updateArgs.consignmentIdIndex.value = updateArgs.consignmentIdIndex.value + 1;
+      if (updateArgs.consignmentIdIndex.value < updateArgs.consignmentIds.value.length) {
+        updateArgs.consignmentId.value = updateArgs.consignmentIds.value[updateArgs.consignmentIdIndex.value];
+        log.debug('next is consignmentId: ' + updateArgs.consignmentId.value);
+      }
+      else {
+        updateArgs.consignmentId.value = null;
+        log.debug('finished iterating through all the consignmentIds');
+      }
+      return updateArgs;
+    },
+    function executeNext(updatedArgs){
+      log.debug('executing for consignmentId: ' + updatedArgs.consignmentId.value);
+      
+      return fetchAllProductsByConsignment(updatedArgs, connectionInfo, processPagedResults);
+    }
+  );
+</retrievePaginatedResults>
+}
+</processDataPagination>
+```

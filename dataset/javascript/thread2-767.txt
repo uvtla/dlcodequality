@@ -1,0 +1,150 @@
+Here are the annotations for the given JavaScript functions:
+
+1. Function `screenshot`:
+
+<screenshot>
+function screenshot(name, options) {
+  var options  = options || {};
+  var newPath = path;
+
+  if(options.selector) { selector = options.selector; }
+  if(options.path) { newPath = path + '/' + options.path; }
+  if(Array.isArray(options.exclude)) { exclude = exclude.concat(options.exclude); }
+
+  if(window.callPhantom && window.PhantomScreenshot) {
+    asyncScreenshot(name, newPath);
+  }
+}
+</screenshot>
+
+2. Function for calculating distance vector:
+
+<calculateDistanceVector>
+function (v) {
+  var dx = this.x - v.x, dy = this.y - v.y, dz = this.z - (v.z || 0);
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+</calculateDistanceVector>
+
+3. Function `StanzaError`:
+
+<createStanzaError>
+function StanzaError(message, type, condition) {
+  Error.apply(this, arguments);
+  Error.captureStackTrace(this, arguments.callee);
+  this.name = 'StanzaError';
+  this.message = message || null;
+  this.type = type || 'wait';
+  this.condition = condition || 'internal-server-error';
+}
+</createStanzaError>
+
+4. Function for data zoom model handling:
+
+<dataZoomModelHandling>
+function (dataZoomModel) {
+  if (dataZoomModel !== this._dataZoomModel) {
+    return;
+  }
+
+  var targetSeries = this.getTargetSeriesModels();
+  this._dataExtent = calculateDataExtent(this, this._dimName, targetSeries);
+  setMinMaxSpan(this);
+  var dataWindow = this.calculateDataWindow(dataZoomModel.option);
+  this._valueWindow = dataWindow.valueWindow;
+  this._percentWindow = dataWindow.percentWindow;
+  setAxisModel(this);
+}
+</dataZoomModelHandling>
+
+5. Function `getKeyframesBlocks`:
+
+<getKeyframesBlocks>
+function getKeyframesBlocks() {
+  const type = NodeType.BlockType;
+  const token = tokens[pos];
+  const line = token.ln;
+  const column = token.col;
+  const keyframesBlocksEnd = token.block_end;
+  let content = [];
+
+  while (pos < keyframesBlocksEnd) {
+    if (checkSC(pos)) content = content.concat(getSC());
+    else if (checkKeyframesBlock(pos)) content.push(getKeyframesBlock());
+    else if (checkAtrule(pos)) content.push(getAtrule()); 
+    else break;
+  }
+
+  return newNode(type, content, line, column);
+}
+</getKeyframesBlocks>
+
+6. Function `Text`:
+
+<Text>
+function Text(text, font, color) {
+  this.DisplayObject_constructor();
+  this.text = text;
+  this.font = font;
+  this.color = color;
+  this.textAlign = "left";
+  this.textBaseline = "top";
+  this.maxWidth = null;
+  this.outline = 0;
+  this.lineHeight = 0;
+  this.lineWidth = null;
+}
+</Text>
+
+7. Function for inserting rules:
+
+<insertRules>
+function( rules, priority, options ) {
+  var args = [ this.findIndex( priority ), 0 ];
+
+  for ( var i = 0, len = rules.length; i < len; i++ ) {
+    args.push( {
+      value: rules[ i ],
+      priority: priority,
+      options: options
+    } );
+  }
+
+  this.rules.splice.apply( this.rules, args );
+}
+</insertRules>
+
+8. Function for finding the largest component:
+
+<findLargestComponent>
+function(components){
+  var largeComponent = components[0];
+  for(var i=1; i<components.length; i++){
+    if(largeComponent.nodes.length < components[i].nodes.length){ largeComponent = components[i];}
+  }
+  return (!!largeComponent ? largeComponent.color : null);
+}
+</findLargestComponent>
+
+9. Function `VideoBuffer`:
+
+<VideoBuffer>
+function VideoBuffer(video) {
+  this.readyState = video.readyState;
+  this._video = video;
+  this._canvas = null;
+  this._lastTime = -1;
+  if (this.readyState < 2) { video.addEventListener("canplaythrough", this._videoReady.bind(this)); } 
+}
+</VideoBuffer>
+
+10. Function `autoCleanup`:
+
+<autoCleanup>
+function autoCleanup (self, cleanupFn) {
+  if (self.mousedown || self.lastRipple) {
+    self.mousedown = false;
+    self.$mdUtil.nextTick(angular.bind(self, cleanupFn), false);
+  }
+}
+</autoCleanup>

@@ -1,0 +1,240 @@
+```javascript
+<_adjacentPieces>
+function _adjacentPieces(piece, getAdjacent) {
+    <initializeLoop>
+    for (var i = 1; i <= 6; i++) {
+    </initializeLoop>
+        <getAdjacentPiece>
+        adjacent = getAdjacent(i);
+        if (typeof adjacent === 'undefined') {
+            return false;
+        } else if (i === 6) {
+            return adjacent;
+        }
+        </getAdjacentPiece>
+        
+        <comparePieces>
+        var samecolor = (adjacent.piece.color === piece.color);
+        var sameshape = (adjacent.piece.shape === piece.shape);
+        </comparePieces>
+        
+        <evaluatePiece>
+        if ((samecolor || sameshape) && !(samecolor && sameshape)) {
+            if (!game.turn_pieces.some(function(x) {
+                return x.equals(adjacent);
+            })) {
+                points += 1;
+            }
+            continue;
+        }
+        </evaluatePiece>
+        <returnLast>
+        return adjacent;
+        </returnLast>
+    }
+    <returnFalse>
+    return false;
+    </returnFalse>
+}
+</_adjacentPieces>
+
+<mapBindings>
+function() {
+    this._unbindModel();
+    <bindEvents>
+    this.map.bind('change:view_bounds_sw',  this._changeBounds, this);
+    this.map.bind('change:view_bounds_ne',  this._changeBounds, this);
+    this.map.bind('change:zoom',            this._setZoom, this);
+    this.map.bind('change:scrollwheel',     this._setScrollWheel, this);
+    this.map.bind('change:keyboard',        this._setKeyboard, this);
+    this.map.bind('change:center',          this._setCenter, this);
+    this.map.bind('change:attribution',     this.setAttribution, this);
+    </bindEvents>
+}
+</mapBindings>
+
+<setFocus>
+function setFocus(hash) {
+    <retrieveElement>
+    var element = document.getElementById(hash.substring(1))
+    </retrieveElement>
+
+    <modifyAndFocusElement>
+    if (element) {
+        if (!/^(?:a|select|input|button|textarea)$/i.test(element.tagName)) {
+            element.tabIndex = -1;
+        }
+        element.focus();
+    }
+    </modifyAndFocusElement>
+}
+</setFocus>
+
+<_checkRight>
+function _checkRight(targetOffset, tooltipLayerStyleLeft, tooltipOffset, windowSize, tooltipLayer) {
+    <adjustPositioning>
+    if (targetOffset.left + tooltipLayerStyleLeft + tooltipOffset.width > windowSize.width) {
+        
+        tooltipLayer.style.left = windowSize.width - tooltipOffset.width - targetOffset.left + 'px';
+        return false;
+    }
+    tooltipLayer.style.left = tooltipLayerStyleLeft + 'px';
+    </adjustPositioning>
+    <returnTrue>
+    return true;
+    </returnTrue>
+}
+</_checkRight>
+
+<deriveKey>
+function(password, salt) {
+    <configurations>
+    var cfg = this.cfg;
+    </configurations>
+
+    <initializeHmac>
+    var hmac = HMAC.create(cfg.hasher, password);
+    </initializeHmac>
+
+    <prepareDerivedKey>
+    var derivedKey = WordArray.create();
+    var blockIndex = WordArray.create([0x00000001]);
+    </prepareDerivedKey>
+
+    <defineVariables>
+    var derivedKeyWords = derivedKey.words;
+    var blockIndexWords = blockIndex.words;
+    var keySize = cfg.keySize;
+    var iterations = cfg.iterations;
+    </defineVariables>
+
+    <generateDerivedKey>
+    while (derivedKeyWords.length < keySize) {
+        var block = hmac.update(salt).finalize(blockIndex);
+        hmac.reset();
+        var blockWords = block.words;
+        var blockWordsLength = blockWords.length;
+        var intermediate = block;
+        for (var i = 1; i < iterations; i++) {
+            intermediate = hmac.finalize(intermediate);
+            hmac.reset();
+            var intermediateWords = intermediate.words;
+            for (var j = 0; j < blockWordsLength; j++) {
+                blockWords[j] ^= intermediateWords[j];
+            }
+        }
+        derivedKey.concat(block);
+        blockIndexWords[0]++;
+    }
+    </generateDerivedKey>
+    <finalizeDerivedKey>
+    derivedKey.sigBytes = keySize * 4;
+    </finalizeDerivedKey>
+    <returnDerivedKey>
+    return derivedKey;
+    </returnDerivedKey>
+}
+</deriveKey>
+
+<handleResponse>
+function(err, data, response) {
+    <invokeComplete>
+    if (options.complete) {
+        options.complete.call(model, err, data, response, options);
+    }
+    </invokeComplete>
+    <triggerModelEvent>
+    model.trigger('complete', err, data, response, options);
+    </triggerModelEvent>
+}
+</handleResponse>
+
+<getPropWithFallback>
+function(obj, name, Prop, fallback) {
+    <assignPropertyOrDefault>
+    return _.has(obj, name) ? (new Prop(obj[name])) : fallback;
+    </assignPropertyOrDefault>
+}
+</getPropWithFallback>
+
+<propPathSatisfies>
+function propPathSatisfies(keys, pred, x) {
+    <validateInputs>
+    if (!isArray(keys)) {
+        throw new TypeError('propPathSatisfies: Array of Non-empty Strings or Integers required for first argument')
+    }
+    if (!isPredOrFunc(pred)) {
+        throw new TypeError('propPathSatisfies: Pred or predicate function required for second argument')
+    }
+    if (isNil(x)) {
+        return false
+    }
+    </validateInputs>
+
+    <traverseObjectPath>
+    let target = x
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i]
+        if (!(isString(key) && !isEmpty(key) || isInteger(key))) {
+            throw new TypeError('propPathSatisfies: Array of Non-empty Strings or Integers required for first argument')
+        }
+        if (isNil(target)) {
+            return false
+        }
+        target = target[key]
+    }
+    </traverseObjectPath>
+
+    <evaluatePredicate>
+    return !!predOrFunc(pred, target)
+    </evaluatePredicate>
+}
+</propPathSatisfies>
+
+<promisifyObject>
+function promisify_object(template, object_creator) {
+    <setDefaultCreator>
+    object_creator = object_creator || new_object;
+    </setDefaultCreator>
+    <createTransformerFunction>
+    var transformer = function (obj_promise) {
+        var res = object_creator(obj_promise);
+        for (var prop in template) {
+            res[prop] = template[prop].for_property(obj_promise, prop);
+        }
+        return res;
+    };
+    </createTransformerFunction>
+    <propertyTransformer>
+    transformer.for_property = function (parent_promise, prop) {
+        return transformer(when(parent_promise, function (obj) {
+            return obj[prop];
+        }));
+    };
+    </propertyTransformer>
+
+    <returnTransformer>
+    return transformer;
+    </returnTransformer>
+}
+</promisifyObject>
+
+<formatBlockedUser>
+function(messageContent) {
+    <createBlockedUserObject>
+    var blockedUser = {
+        blockId: messageContent.id,
+        firstName: messageContent.firstName,
+        lastName: messageContent.lastName,
+        nickName: messageContent.nickName
+    };
+    </createBlockedUserObject>
+    <returnBlockedUser>
+    return blockedUser;
+    </returnBlockedUser>
+}
+</formatBlockedUser>
+
+```
+
+Note: Single Responsibility Principle (SRP) annotations identify areas of distinct responsibilities within the code. Here, each responsibility is either compliant or non-compliant with SRP based on whether it encapsulates a cohesive and singular concern within the function. If a code contains tightly related instructions that serve a single identifiable purpose, it is marked compliant, otherwise, violation sections are indicated.

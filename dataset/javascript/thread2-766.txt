@@ -1,0 +1,238 @@
+```javascript
+<getBlock>
+function ( range, root ) {
+  var container = range.startContainer,
+    block;
+
+  <determineBlock>
+  if ( isInline( container ) ) {
+    block = getPreviousBlock( container, root );
+  } else if ( container !== root && isBlock( container ) ) {
+    block = container;
+  } else {
+    block = getNodeBefore( container, range.startOffset );
+    block = getNextBlock( block, root );
+  }
+  </determineBlock>
+
+  return block && isNodeContainedInRange( range, block, true ) ? block : null;
+}
+</getBlock>
+
+<replaceObjectWithScripts>
+function replace(obj, prefix) {
+  const retObj = {}
+  const dot = prefix ? '.' : ''
+  for (const key in obj) {
+    <handleDescriptionKey>
+    if (key === 'description') {
+      retObj[key] = obj[key]
+    }
+    </handleDescriptionKey>
+    <handleScriptKey>
+    else if (key === 'script') {
+      retObj[key] = series(
+        `cd ${relativeDir}`,
+        `npm start ${prefix}`,
+        `cd "${relativeReturn}"`,
+      )
+    }
+    </handleScriptKey>
+    <handleStringKey>
+    else if (typeof obj[key] === 'string') {
+      retObj[key] = series(
+        `cd ${relativeDir}`,
+        `npm start ${prefix}${dot}${key}`,
+      )
+    }
+    </handleStringKey>
+    <handleObjectKey>
+    else {
+      retObj[key] = Object.assign(
+        {},
+        replace(obj[key], `${prefix}${dot}${key}`, `cd "${startingDir}"`),
+      )
+    }
+    </handleObjectKey>
+  }
+  return retObj
+}
+</replaceObjectWithScripts>
+
+<inheritanceInitialize>
+function(config) {
+        config = config || {};
+        OpenLayers.Layer.Vector.prototype.initialize.apply(this, [config.name, config]);
+}
+</inheritanceInitialize>
+
+<S3ClientValidator>
+function Client(client) {
+  if (this instanceof Client === false) {
+    return new Client(client);
+  }
+
+  <validateClient>
+  if (!client) {
+    throw new Error('Must configure an S3 client before attempting to create an S3 upload stream.');
+  }
+  </validateClient>
+
+  this.cachedClient = client;
+}
+</S3ClientValidator>
+
+<defineHTMLFile>
+function define(File, utils) {
+  return class HTMLFile extends File {
+    
+    <HTMLFileConstructor>
+    constructor(id, filepath, options) {
+      super(id, filepath, 'html', options);
+
+      this.hasMaps = false;
+      this.map = null;
+      this.workflows.standard = WORKFLOW_STANDARD;
+      this.workflows.writeable = WORKFLOW_WRITEABLE;
+    }
+    </HTMLFileConstructor>
+    
+    <parseContent>
+    parse(buildOptions, fn) {
+      ...
+    }
+    </parseContent>
+    
+    <parseSidecarDependency>
+    parseSidecarDependency() {
+      ...
+    }
+    </parseSidecarDependency>
+    
+    <findSidecarDependency>
+    findSidecarDependency() {
+      ...
+    }
+    </findSidecarDependency>
+    
+    <replaceEnvironment>
+    replaceEnvironment(buildOptions, fn) {
+      ...
+    }
+    </replaceEnvironment>
+    
+    <inlineDependencies>
+    inline(buildOptions, fn) {
+      ...
+    }
+    </inlineDependencies>
+    
+  };
+}
+</defineHTMLFile>
+
+<binaryOperation>
+function (op, other) {
+  return new(tree.Dimension)
+      (tree.operate(op, this.value, other.value),
+      this.unit || other.unit);
+}
+</binaryOperation>
+
+<createDecayingCounterStore>
+function DecayingCounterStore(options) {
+  if (!(this instanceof DecayingCounterStore)) {
+    return new DecayingCounterStore(options);
+  }
+
+  <initializeOptionsAndCounters>
+  this._options = options || {};
+  this._counters = {};
+  </initializeOptionsAndCounters>
+  
+  <setDecayFactor>
+  this._decayFactor = Math.pow(2, 1/3);
+  </setDecayFactor>
+
+  <scheduleCounterDecay>
+  var self = this;
+  this._decayCountersInterval = setInterval(function() {
+    self._decayCounters();
+  }, self._options.interval / 3);
+  </scheduleCounterDecay>
+}
+</createDecayingCounterStore>
+
+<initializeTabClickEvent>
+function initClickEvent (tabheader) {
+  const box = tabheader.box
+
+  <addClickListener>
+  box.addEventListener('click', function (evt) {
+    let target = evt.target
+    ...
+    
+    fireEvent(target, 'select', { index: floor })
+  })
+  </addClickListener>
+}
+</initializeTabClickEvent>
+
+<displayMyPieces>
+function getMyPieces(player) {
+  <appendPiecesToDOM>
+  for (var i in player.pieces) {
+    ...
+  }
+  </appendPiecesToDOM>
+
+  <configureDimensions>
+  function setDimensions() {
+    ...
+  }
+
+  setDimensions();
+  setTimeout(setDimensions, 250);
+  </configureDimensions>
+
+  <enablePieceDragging>
+  if (player.has_turn)
+    $(PIECECLS).draggable({
+      ...
+    });
+  </enablePieceDragging>
+}
+</displayMyPieces>
+
+<pollCSSLoading>
+function pollWebKit() {
+  
+  var css = pending.css, i;
+  
+  <checkCSSLoaded>
+  if (css) {
+    i = styleSheets.length;
+    
+    while (--i >= 0) {
+      if (styleSheets[i].href === css.urls[0]) {
+        finish('css');
+        break;
+      }
+    }
+    
+    pollCount += 1;
+  }
+  </checkCSSLoaded>
+
+  <handlePollingTimeout>
+  if (css) {
+    if (pollCount < 200) {
+      setTimeout(pollWebKit, 50);
+    } else {
+      finish('css');
+    }
+  }
+  </handlePollingTimeout>
+}
+</pollCSSLoading>
+```

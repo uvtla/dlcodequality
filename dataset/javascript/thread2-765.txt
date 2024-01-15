@@ -1,0 +1,191 @@
+<chooseViewForRoute>
+function chooseViewForRoute() {
+    <addExtraParams>
+    var allParams = addExtraParamsTo(params,
+        layoutDelegate,
+        serverRequest,
+        serverResponse
+    );
+    </addExtraParams>
+
+    return promisify(originalHandler).apply(router, allParams)
+        .then(function(view) {
+            <validateAndViewHandling>
+            validateView(view);
+            return {
+                view: view,
+                reason: null,
+            };
+            </validateAndViewHandling>
+        })
+        .catch(function(reason) {
+            <catchError>
+            return {
+                view: null,
+                reason: reason
+            };
+            </catchError>
+        });
+}
+</chooseViewForRoute>
+
+<wrap>
+function wrap(fn, isFocus, isDescription, isSpec) {
+    if (!fn) return fn;
+    return function(name, def) {
+        <handleDescriptionAndSpec>
+        if (isDescription && depth === 0) {
+            isFaking = !shouldUseDescription(name, def);
+        }
+        hasOwnSpecs = hasOwnSpecs || (isSpec && !isFaking);
+        hasOtherSpecs = hasOtherSpecs || (isSpec && isFaking);
+        hasFocusedWhileFaking = hasFocusedWhileFaking || (isFocus && isFaking);
+        hasFocusedWithoutFaking =
+            hasFocusedWithoutFaking || (isFocus && !isFaking);
+        if (isDescription) def = wrapDescription(def);
+        </handleDescriptionAndSpec>
+
+        <forceDescribeAndFakingLogic>
+        if (!isFaking || forceDescribe) {
+            return fn.call(this, name, def);
+        } else if (isDescription) {
+            def();
+        }
+        </forceDescribeAndFakingLogic>
+    };
+}
+</wrap>
+
+<unknown>
+function(val) {
+    <urlAssignmentAndAnalysis>
+    if(val) {
+        complete_url = val;
+        url_info = JSDAS.URL.analyzeUrl(url);
+    }       
+    </urlAssignmentAndAnalysis>
+    return val;
+}
+</unknown>
+
+<deprecateMethod>
+function deprecateMethod(book, key, fn, msg) {
+    return function() {
+        <logNoticeAndApply>
+        logNotice(book, key, msg);
+        return fn.apply(this, arguments);
+        </logNoticeAndApply>
+    };
+}
+</deprecateMethod>
+
+<getFilePath>
+function getFilePath (str) {
+    <extractRootAndPathEnd>
+    var hasRoot = /^[a-z]:/i.exec(str)
+    var colonLeftIndex = 0
+    if (hasRoot) {
+      colonLeftIndex = hasRoot[0].length
+    }
+    var pathEnd = str.split('\n')[0].indexOf(':', colonLeftIndex)
+    if (pathEnd === -1) {
+      return null
+    }
+    </extractRootAndPathEnd>
+    return str.substring(0, pathEnd)
+}
+</getFilePath>
+
+<encryptGroupSessionKey>
+function encryptGroupSessionKey(opts) {
+    return encryptOlmEvent({
+        <encryptionDetails>
+        senderKey: opts.senderKey,
+        recipient: opts.recipient,
+        p2pSession: opts.p2pSession,
+        plaincontent: {
+            algorithm: 'm.megolm.v1.aes-sha2',
+            room_id: opts.room_id,
+            session_id: opts.groupSession.session_id(),
+            session_key: opts.groupSession.session_key(),
+        },
+        </encryptionDetails>
+        plaintype: 'm.room_key',
+    });
+}
+</encryptGroupSessionKey>
+
+<getId>
+function getId (transaction) {
+    <generateIdFromTransaction>
+	var hash = crypto.createHash('sha256').update(getBytes(transaction).toString('hex'), 'hex').digest();
+	var temp = new Buffer(8);
+	for (var i = 0; i < 8; i++) {
+		temp[i] = hash[7 - i];
+	}
+	var id = bignum.fromBuffer(temp).toString();
+    </generateIdFromTransaction>
+	return id;
+}
+</getId>
+
+<cast>
+function cast(data, EntityClass) {
+      <conditionalCasting>
+      if (!EntityClass && !_lodash2.default.isArray(data)) {
+        return _dataManagement2.default.cast(data, this);
+      } else if (!EntityClass && _lodash2.default.isArray(data)) {
+        return _dataManagement2.default.cast(data, [this]);
+      } else if (_lodash2.default.isArray(EntityClass) && EntityClass.length === 0) {
+        return _dataManagement2.default.cast(data, [this]);
+      } else if (_lodash2.default.isObject(EntityClass) && !_lodash2.default.isFunction(EntityClass) && _lodash2.default.values(EntityClass).length === 0) {
+        return _dataManagement2.default.cast(data, _defineProperty({}, this.name, this));
+      } else {
+        return _dataManagement2.default.cast(data, EntityClass);
+      }
+      </conditionalCasting>
+}
+</cast>
+
+<unknown>
+function(id, key) {
+      <memoryDeletion>
+      if(typeof key !== 'undefined' && typeof key === 'string') {
+        if(memStore[id] && memStore[id][key]) {
+          delete memStore[id][key];
+        }
+        return true;
+      }
+      else if(typeof key === 'undefined') {
+        delete memStore[id];
+        return true;
+      }
+      else {
+        throw new Error('invalid data type or missing value');
+        return false;
+      }
+      </memoryDeletion>
+}
+</unknown>
+
+<run>
+function run() {
+    <initializeRun>
+    var template;
+    $ionicTemplateCache._runCount++;
+    hasRun = true;
+    </initializeRun>
+    
+    <cacheHandling>
+    if (toCache.length === 0) return;
+    var i = 0;
+    while (i < 4 && (template = toCache.pop())) {
+      if (isString(template)) $http.get(template, { cache: $templateCache });
+      i++;
+    }
+    if (toCache.length) {
+      $timeout(run, 1000);
+    }
+    </cacheHandling>
+}
+</run>

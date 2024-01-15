@@ -1,0 +1,338 @@
+```javascript
+<ImmutableCoreComponentInstance>
+function ImmutableCoreComponentInstance (args) {
+    <assertValidArguments>
+    this.assert(typeof args === 'object' && args, 100)
+    
+    var component = args.component
+    
+    this.assert(typeof component === 'object' && component && component.ImmutableCoreComponent, 101)
+    </assertValidArguments>
+    
+    <initComponent>
+    this.component = component
+    
+    this.data = {}
+    </initComponent>
+
+    <handleIdInitialization>
+    if (defined(args.id)) {
+        this.id = args.id
+    }
+    
+    else {
+        
+        this.id = this.component.name
+        
+        <initNewComponent>
+        this.initNew(args)
+        </initNewComponent>
+    }
+    </handleIdInitialization>
+}
+</ImmutableCoreComponentInstance>
+
+<dispatchEvent>
+function(e) {
+    <findDispatchTarget>
+	var c = this.findDispatchTarget(e.target) || this.findDefaultTarget(e);
+    
+	e.dispatchTarget = c;
+    </findDispatchTarget>
+	
+    <executeFeatures>
+	for (var i=0, fn; (fn=this.features[i]); i++) {
+		if (fn.call(this, e) === true) {
+			return;
+		}
+	}
+    </executeFeatures>
+
+    <dispatchBubble>
+	if (c && !e.preventDispatch) {
+		this.dispatchBubble(e, c);
+	}
+    </dispatchBubble>
+}
+</dispatchEvent>
+
+<role>
+function role(value) {
+    <validateRoleValue>
+  if (typeof value === 'boolean')
+    return value;
+
+  if (value !== 'sender' && value !== 'receiver')
+    throw new errors.EncodingError(value, 'invalid role');
+    </validateRoleValue>
+
+    <determineRole>
+  return (value === 'sender') ? false : true;
+    </determineRole>
+}
+</role>
+
+<countFilteredItems>
+function() {
+    <reduceItemCount>
+    return _.reduce(this.items, function(n, item) {
+        if (this.applyFilter(item)) {
+            n = n + 1;
+        }
+        return n;
+    }, 0, this);
+    </reduceItemCount>
+}
+</countFilteredItems>
+
+<selectIndex>
+function selectIndex(element, index) {
+    <determineBoundedIndex>
+  const count = element.items.length;
+
+  const boundedIndex = (element.selectionWraps) ?
+    ((index % count) + count) % count :
+    Math.max(Math.min(index, count - 1), 0);
+    </determineBoundedIndex>
+
+    <updateSelectedIndex>
+  const previousIndex = element.selectedIndex;
+  if (previousIndex !== boundedIndex) {
+    element.selectedIndex = boundedIndex;
+    return true;
+  } else {
+    return false;
+  }
+  </updateSelectedIndex>
+}
+</selectIndex>
+
+<resolveInputType>
+function(options) {
+    <determineTypeConstructor>
+    var TypeConstructor, typeOptions, input,
+    type = options.type;
+    
+    <handleDateInputTypes>
+    if(type === 'date') {
+        <handleInlineDateType>
+        if(options.mode === 'inline') {
+            if($.fn.editabletypes.datefield) {
+                type = 'datefield';
+            } else if($.fn.editabletypes.dateuifield) {
+                type = 'dateuifield';
+            }
+        </handleInlineDateType>
+         
+        <handleRegularDateType>
+        } else {
+            if($.fn.editabletypes.date) {
+                type = 'date';
+            } else if($.fn.editabletypes.dateui) {
+                type = 'dateui';
+            }
+        }
+        </handleRegularDateType>
+        
+        <handleFallbackDateType>
+        if(type === 'date' && !$.fn.editabletypes.date) {
+            type = 'combodate';
+        }
+        </handleFallbackDateType>
+    }
+    </handleDateInputTypes>
+    
+    <handleDatetimeInputType>
+    if(type === 'datetime' && options.mode === 'inline') {
+      type = 'datetimefield';  
+    }
+    </handleDatetimeInputType>
+
+    <handleWysihtml5Fallback>
+    if(type === 'wysihtml5' && !$.fn.editabletypes[type]) {
+        type = 'textarea';
+    }
+    </handleWysihtml5Fallback>
+
+    <constructInputType>
+    if(typeof $.fn.editabletypes[type] === 'function') {
+        TypeConstructor = $.fn.editabletypes[type];
+        typeOptions = this.sliceObj(options, this.objectKeys(TypeConstructor.defaults));
+        input = new TypeConstructor(typeOptions);
+        return input;
+    } else {
+        $.error('Unknown type: '+ type);
+        return false; 
+    }
+    </constructInputType>
+    </determineTypeConstructor>
+}
+</resolveInputType>
+
+<findMany>
+function findMany(repository, options) {
+    <defineRepositoryColumns>
+    const entityColumns = repository.metadata.columns.map((columnMetadata) => columnMetadata.propertyName);
+    const entityManyToOneRelationColumns = repository
+        .metadata
+        .relations
+        .filter((relationMetadata) => relationMetadata.relationType === 'many-to-one' || relationMetadata.relationType === 'one-to-one')
+        .map((relationMetadata) => relationMetadata.propertyName);
+    </defineRepositoryColumns>
+
+    return function (source, args, context, info) {
+        return __awaiter(this, void 0, void 0, function* () {
+            <querySetup>
+            const selectedColumns = Object.keys(graphqlFields(info));
+            const selectQueryBuilder = repository.createQueryBuilder(repository.metadata.name.toLowerCase());
+            
+            const selectFactory = new select_factory_1.SelectFactory(selectQueryBuilder);
+            selectFactory.select(selectedColumns.filter((select) => entityColumns.includes(select)));
+            
+            const whereFactory = new where_factory_1.WhereFactory(selectQueryBuilder, entityManyToOneRelationColumns);
+            whereFactory.where(lodash_1.get(args, 'filter', {}));
+            
+            const joinsFactory = new joins_factory_1.JoinsFactory(selectQueryBuilder);
+            joinsFactory.join(selectedColumns.filter((select) => entityManyToOneRelationColumns.includes(select)).reduce((selectedRelationColumns, selectedRelationColumn) => {
+                selectedRelationColumns[selectQueryBuilder.alias] = selectedRelationColumn;
+                return selectedRelationColumns;
+            }, {})).join(whereFactory.selectedManyToOneOrOneToOneRelationColumns);
+            
+            const paginateFactory = new paginate_factory_1.PaginateFactory(selectQueryBuilder);
+            paginateFactory.paginate(lodash_1.get(args, 'pagination', {}));
+            
+            const orderFactory = new order_factory_1.OrderFactory(selectQueryBuilder);
+            orderFactory.order(lodash_1.get(args, 'orderBy', []));
+            
+            if (lodash_1.get(options, 'extend')) {
+                yield options.extend(selectQueryBuilder);
+            }
+            
+            return yield selectQueryBuilder.getMany();
+            </querySetup>
+        });
+    };
+}
+</findMany>
+
+<unknownOption>
+function unknownOption (flag, type = 'option') {
+    <handleUnknownOption>
+  if (this._allowUnknownOption) return
+
+  logger.error()
+  logger.error(`  error: unknown ${type}:`, flag)
+  logger.error()
+  this.outputHelp()
+  util.exit(1)
+  </handleUnknownOption>
+}
+</unknownOption>
+
+<parseNonCrossOriginStylesheet>
+function parseNonCrossOriginStylesheet(sheet, options, priority) {
+    const q = axe.utils.queue();
+
+    <getCssRules>
+	const cssRules = sheet.cssRules;
+    </getCssRules>
+
+    <initializeRulesArray>
+	const rules = Array.from(cssRules);
+	if (!rules) {
+		return q;
+	}
+    </initializeRulesArray>
+
+    <filterCssImportRules>
+	const cssImportRules = rules.filter(r => r.type === 3); 
+    </filterCssImportRules>
+
+    <addNoImportsToQueue>
+	if (!cssImportRules.length) {
+		q.defer(resolve =>
+			resolve({
+				isExternal: false,
+				priority,
+				root: options.rootNode,
+				shadowId: options.shadowId,
+				sheet
+			})
+		);
+
+		
+		return q;
+	}
+    </addNoImportsToQueue>
+
+    <queueCssImportRules>
+	cssImportRules.forEach((importRule, cssRuleIndex) =>
+		q.defer((resolve, reject) => {
+			const importUrl = importRule.href;
+			const newPriority = [...priority, cssRuleIndex];
+			const axiosOptions = {
+				method: 'get',
+				url: importUrl,
+				timeout: options.timeout
+			};
+			axe.imports
+				.axios(axiosOptions)
+				.then(({ data }) =>
+					resolve(
+						options.convertDataToStylesheet({
+							data,
+							isExternal: true,
+							priority: newPriority,
+							root: options.rootNode,
+							shadowId: options.shadowId
+						})
+					)
+				)
+				.catch(reject);
+		})
+	);
+    </queueCssImportRules>
+
+    <filterNonImportCSSRules>
+	const nonImportCSSRules = rules.filter(r => r.type !== 3);
+    </filterNonImportCSSRules>
+
+    <addNonImportsToQueue>
+	if (!nonImportCSSRules.length) {
+		return q;
+	}
+
+	q.defer(resolve =>
+		resolve(
+			options.convertDataToStylesheet({
+				data: nonImportCSSRules.map(rule => rule.cssText).join(),
+				isExternal: false,
+				priority,
+				root: options.rootNode,
+				shadowId: options.shadowId
+			})
+		)
+	);
+    </addNonImportsToQueue>
+
+    return q;
+}
+</parseNonCrossOriginStylesheet>
+
+<monthrange>
+function monthrange(year, month) {
+    <validateMonthRange>
+    if(month < 1 || month > 12) {
+      throw new IllegalMonthError();
+    }
+    </validateMonthRange>
+
+    <calculateMonthRange>
+    var day1 = weekday(year, month, 1);
+    var ndays = _DAYS_IN_MONTH[month] + (month === 2 && isleap(year));
+
+    return [day1, ndays];
+    </calculateMonthRange>
+}
+</monthrange>
+```
