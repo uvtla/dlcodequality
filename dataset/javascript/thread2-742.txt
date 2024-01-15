@@ -1,0 +1,312 @@
+```javascript
+<handleObjectAndBrowserSpecificLogic>
+function(proto, name, combo, root) {
+    <checkIfMethodAndDo>
+    if (this._ismethod(name)) {
+        this._domethod(proto, name, combo);
+    }
+    </checkIfMethodAndDo>
+    else {
+        <handleDifferentBrowsers>
+        if (gui.Client.isGecko) {
+            this._dogeckoaccessor(proto, name, combo, root);
+        } else if (gui.Client.isExplorer) {
+            this._doieaccessor(proto, name, combo);
+        } else {
+            
+        }
+        </handleDifferentBrowsers>
+    }
+}
+</handleObjectAndBrowserSpecificLogic>
+
+<convertResourceToXml>
+function resourceToXml(resource, rel, currentIndent, nextIndent) {
+    
+    <initializeXMLStructure>
+    var LF = (currentIndent || nextIndent) ? '\n' : '';
+    var xml = currentIndent + '<resource';
+    if (rel) xml += ' rel="' + escapeXml(rel) + '"';
+    if (resource.href || resource._links.self) xml += ' href="' + escapeXml(resource.href || resource._links.self.href) + '"';
+    if (resource.name) xml += ' name="' + escapeXml(resource.name) + '"';
+    xml += '>' + LF;
+    </initializeXMLStructure>
+    
+    <appendLinkElements>
+    for (var rel in resource._links) {
+        if (!resource.href && rel === 'self') continue;
+        xml += currentIndent + nextIndent + resource._links[rel].toXML() + LF;
+    }
+    </appendLinkElements>
+    
+    <appendEmbeddedResources>
+    for (var embed in resource._embedded) {
+        var rel = embed.replace(/s$/, '');
+        resource._embedded[embed].forEach(function (res) {
+            xml += resourceToXml(res, rel, currentIndent + nextIndent, currentIndent + nextIndent + nextIndent) + LF;
+        });
+    }
+    </appendEmbeddedResources>
+    
+    <appendProperties>
+    for (var prop in resource) {
+        if (resource.hasOwnProperty(prop) && prop !== '_links' && prop !== '_embedded') {
+            xml += currentIndent + nextIndent + '<' + prop + '>' + String(resource[prop]) + '</' + prop + '>' + LF;
+        }
+    }
+    </appendProperties>
+    
+    <finalizeXMLStructure>
+    xml += currentIndent + '</resource>';
+    </finalizeXMLStructure>
+
+    return xml;
+}
+</convertResourceToXml>
+
+<autoUpdateProcessHandler>
+function _updateProcessHandler(updates) {
+    <checkUpdateValidity>
+    if (!updates) {
+        console.warn("AutoUpdate : updates information not available.");
+        return;
+    }
+    </checkUpdateValidity>
+    
+    <initializeRequiredVariables>
+    var OS = brackets.getPlatformInfo(),
+        checksum,
+        downloadURL,
+        installerName,
+        platforms,
+        latestUpdate;
+    latestUpdate = updates[0];
+    platforms = latestUpdate ? latestUpdate.platforms : null;
+    </initializeRequiredVariables>
+
+    <processPlatformSpecificUpdates>
+    if (platforms && platforms[OS]) {
+        checksum = platforms[OS].checksum ? platforms[OS].checksum : 0,
+        downloadURL = platforms[OS].downloadURL ? platforms[OS].downloadURL : "",
+        installerName = downloadURL ? downloadURL.split("/").pop() : "";
+    } else {
+        return false;
+    }
+    </processPlatformSpecificUpdates>
+    
+    <validateAssetInformation>
+    if (!checksum || !downloadURL || !installerName) {
+        console.warn("AutoUpdate : asset information incorrect for the update");
+        return false;
+    }
+    </validateAssetInformation>
+
+    <initiateUpdate>
+    var updateParams = {
+        downloadURL: downloadURL,
+        installerName: installerName,
+        latestBuildNumber: latestUpdate.buildNumber,
+        checksum: checksum
+    };
+    initiateAutoUpdate(updateParams);
+    </initiateUpdate>
+    
+    return true;
+}
+</autoUpdateProcessHandler>
+
+<customErrorClass>
+function NatsError(message, code, chainedError) {
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+    this.message = message;
+    this.code = code;
+    this.chainedError = chainedError;
+}
+</customErrorClass>
+This function is compliant, as it's a single cohesive responsibility: defining a custom error class.
+
+<base64ToHex>
+function b64tohex(s) {
+    var ret = ""
+    var i;
+    var k = 0; 
+    var slop;
+    for (i = 0; i < s.length; ++i) {
+        if (s.charAt(i) == b64pad) break;
+        v = b64map.indexOf(s.charAt(i));
+        if (v < 0) continue;
+        if (k == 0) {
+            ret += int2char(v >> 2);
+            slop = v & 3;
+            k = 1;
+        }
+        else if (k == 1) {
+            ret += int2char((slop << 2) | (v >> 4));
+            slop = v & 0xf;
+            k = 2;
+        }
+        else if (k == 2) {
+            ret += int2char(slop);
+            ret += int2char(v >> 2);
+            slop = v & 3;
+            k = 3;
+        }
+        else {
+            ret += int2char((slop << 2) | (v >> 4));
+            ret += int2char(v & 0xf);
+            k = 0;
+        }
+    }
+    if (k == 1)
+        ret += int2char(slop << 2);
+    return ret;
+}
+</base64ToHex>
+This function is compliant, as it's a single responsibility: converting base64 to hex.
+
+<applyFiltersToQuery>
+function filterWhere(q, filter) {
+    if (typeof filter !== 'object' || filter.where === undefined)
+      return;
+
+    if (Object.keys(filter.where).length !== 0) {
+      check(q, filter.where);
+      q.where(filter.where);
+    }
+}
+</applyFiltersToQuery>
+This function is compliant, as it applies filters to a query, which is a single responsibility.
+
+<featureStylingAndLabeling>
+function(feature, style) {
+    <styleAndLabelFeatureOrHide>
+    if(style == null) {
+        style = feature.style;
+    }
+    if (feature.geometry) {
+        var bounds = feature.geometry.getBounds();
+        if(bounds) {
+            var worldBounds;
+            if (this.map.baseLayer && this.map.baseLayer.wrapDateLine) {
+                worldBounds = this.map.getMaxExtent();
+            }
+            if (!bounds.intersectsBounds(this.extent, {worldBounds: worldBounds})) {
+                style = {display: "none"};
+            } else {
+                this.calculateFeatureDx(bounds, worldBounds);
+            }
+            var rendered = this.drawGeometry(feature.geometry, style, feature.id);
+            if(style.display != "none" && style.label && rendered !== false) {
+                var location = feature.geometry.getCentroid(); 
+                if(style.labelXOffset || style.labelYOffset) {
+                    var xOffset = isNaN(style.labelXOffset) ? 0 : style.labelXOffset;
+                    var yOffset = isNaN(style.labelYOffset) ? 0 : style.labelYOffset;
+                    var res = this.getResolution();
+                    location.move(xOffset*res, yOffset*res);
+                }
+                this.drawText(feature.id, style, location);
+            } else {
+                this.removeText(feature.id);
+            }
+            return rendered;
+        }
+    }
+    </styleAndLabelFeatureOrHide>
+}
+</featureStylingAndLabeling>
+This function is compliant, with the single responsibility of styling and labeling a feature or hiding it if necessary.
+
+<cellMarkingAlgorithm>
+function markCells(cells, adj, edges) {
+
+    <initializeDataStructures>
+    var flags = new Array(cells.length)
+    var constraint = new Array(3*cells.length)
+    for(var i=0; i<3*cells.length; ++i) {
+        constraint[i] = false
+    }
+    var active = []
+    var next   = []
+    for(var i=0; i<cells.length; ++i) {
+        var c = cells[i]
+        flags[i] = 0
+        for(var j=0; j<3; ++j) {
+            var a = c[(j+1)%3]
+            var b = c[(j+2)%3]
+            var constr = constraint[3*i+j] = isConstraint(edges, a, b)
+            if(adj[3*i+j] >= 0) {
+                continue
+            }
+            if(constr) {
+                next.push(i)
+            } else {
+                flags[i] = 1
+                active.push(i)
+            }
+        }
+    }
+    </initializeDataStructures>
+
+    <markingActiveAndNextCells>
+    var side = 1
+    while(active.length > 0 || next.length > 0) {
+        while(active.length > 0) {
+            var t = active.pop()
+            if(flags[t] === -side) {
+                continue
+            }
+            flags[t] = side
+            var c = cells[t]
+            for(var j=0; j<3; ++j) {
+                var f = adj[3*t+j]
+                if(f >= 0 && flags[f] === 0) {
+                    if(constraint[3*t+j]) {
+                        next.push(f)
+                    } else {
+                        active.push(f)
+                        flags[f] = side
+                    }
+                }
+            }
+        }
+        var tmp = next
+        next = active
+        active = tmp
+        next.length = 0
+        side = -side
+    }
+    </markingActiveAndNextCells>
+
+    return flags
+}
+</cellMarkingAlgorithm>
+This function is compliant, as it performs a single algorithm to mark the cells within certain constraints.
+
+<cleanupInstanceRepresentation>
+function cleanupInstanceName(name) {
+    let match = name.match(/^.+:(.+)::/);
+    if (!match) {
+        match = name.match(/^<(.+):/);
+    }
+    if (match) {
+        return match[1];
+    }
+    return name;
+}
+</cleanupInstanceRepresentation>
+This function is compliant as it has a single responsibility: sanitizing or extracting a cleaner representation of an instance name.
+
+<parseURLForChartData>
+function parseURL2ChartData(url, callback) {
+    <handleAjaxRequest>
+    const success = code => {
+        const chartData = parseDSV2ChartData(code);
+        callback(chartData);
+    };
+    const fail = () => callback(null);
+    $.get(url).done(success).fail(fail);
+    </handleAjaxRequest>
+}
+</parseURLForChartData>
+This function is compliant with SRP, tasked with handling an AJAX request to retrieve chart data from a URL.

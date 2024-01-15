@@ -1,0 +1,214 @@
+```javascript
+function reinsertPartitionNodes(partition) {
+    <reinsertPartitionNodes>
+    var nodes = partition.nodes;
+    if (nodes)
+        for (var i = nodes.length - 1, child; child = nodes[i]; i--)
+            child.parentNode.insertBefore(child, child.nextSibling);
+    </reinsertPartitionNodes>
+}
+
+function resetUriRouteHandlers() {
+    <resetUriRouteHandlers>
+    uriRoutes = [
+        
+        {
+            when: /\/_pages/,
+            default: assumePublishedUnlessEditing(renderPage),
+            json: assumePublishedUnlessEditing(getDBObject)
+        },
+        
+        {
+            when: /\/_components/,
+            default: assumePublishedUnlessEditing(renderComponent),
+            json: assumePublishedUnlessEditing(components.get)
+        },
+        
+        {
+            when: /\/_uris/,
+            isUri: true,
+            html: renderUri,
+            json: db.get
+        }];
+    </resetUriRouteHandlers>
+}
+
+function encode(geom) {
+    <encoderImplementation>
+    let type = geom.getType();
+    const geometryEncoder = GeometryEncoder[type];
+    const enc = geometryEncoder(geom);
+    type = type.toUpperCase();
+    if (typeof (geom).getFlatCoordinates === 'function') {
+        const dimInfo = encodeGeometryLayout((geom));
+        if (dimInfo.length > 0) {
+            type += ' ' + dimInfo;
+        }
+    }
+    if (enc.length === 0) {
+        return type + ' ' + EMPTY;
+    }
+    return type + '(' + enc + ')';
+    </encoderImplementation>
+}
+
+function createProfile(done) {
+    <createUserProfileDirectory>
+    if (self.closed) return done(null);
+
+    temp.mkdir('browser-controller', function (err, dirpath) {
+        if (err) return done(err);
+
+        self.userDir = dirpath;
+
+        done(null);
+    });
+    </createUserProfileDirectory>
+}
+
+function(oColumn, iNewIndex) {   
+    <columnReorderValidation>
+    var oTable = oColumn.getParent();
+
+    if (!oTable || iNewIndex === undefined || !TableColumnUtils.isColumnMovable(oColumn)) {
+        
+        return false;
+    }
+
+    iNewIndex = TableColumnUtils.normalizeColumnMoveTargetIndex(oColumn, iNewIndex);
+
+    if (iNewIndex < oTable.getComputedFixedColumnCount() || iNewIndex < oTable._iFirstReorderableIndex) {
+        
+        return false;
+    }
+
+    var iCurrentIndex = oTable.indexOfColumn(oColumn),
+        aColumns = oTable.getColumns();
+
+    if (iNewIndex > iCurrentIndex) {
+        
+        var oBeforeColumn = aColumns[iNewIndex >= aColumns.length ? aColumns.length - 1 : iNewIndex];
+        var oTargetBoundaries = TableColumnUtils.getColumnBoundaries(oTable, oBeforeColumn.getId());
+        if (TableColumnUtils.hasHeaderSpan(oBeforeColumn) || oTargetBoundaries.endIndex > iNewIndex) {
+            return false;
+        }
+    } else {
+        var oAfterColumn = aColumns[iNewIndex]; 
+        if (TableColumnUtils.getParentSpannedColumns(oTable, oAfterColumn.getId()).length != 0) {
+            
+            
+            return false;
+        }
+    }
+
+    return true;
+    </columnReorderValidation>
+}
+
+function Event(oClass, name, info) {
+    <eventConstructor>
+    this.name = name;
+    this.allowPreventDefault = info.allowPreventDefault || false;
+    this.deprecated = info.deprecated || false;
+    this.visibility = 'public';
+    this.allowPreventDefault = !!info.allowPreventDefault;
+    this.enableEventBubbling = !!info.enableEventBubbling;
+    this.appData = remainder(this, info);
+    this._oParent = oClass;
+    this._sUID = 'event:' + name;
+    this._iKind = Kind.EVENT;
+    var N = capitalize(name);
+    this._sMutator = 'attach' + N;
+    this._sDetachMutator = 'detach' + N;
+    this._sTrigger = 'fire' + N;
+    </eventConstructor>
+}
+
+function generateRouter(path, modelName, generateMethod, ts, cb) {
+    <generateRouterFiles>
+    var extension = (ts) ? 'ts' : 'js';
+    var router = ft.loadTemplateSync('router.' + extension);
+    router = router.replace(/{controllerName}/g, modelName + 'Controller');
+
+    if (generateMethod === 't') {
+        ft.createDirIfIsNotDefined(path, 'routes', function () {
+            router = router.replace(/{controllerPath}/g, '\'../controllers/' + modelName + 'Controller.' + extension + '\'');
+            ft.writeFile(path + '/routes/' + modelName + 'Routes.' + extension, router, null, cb);
+        });
+    } else {
+        ft.createDirIfIsNotDefined(path, modelName, function () {
+            router = router.replace(/{controllerPath}/g, '\'./' + modelName + 'Controller.' + extension + '\'');
+            ft.writeFile(path + '/' + modelName + '/' + modelName + 'Routes.' + extension, router, null, cb);
+        });
+    }
+    </generateRouterFiles>
+}
+
+function objectToSignature(source) {
+    <sortAndExtractSignature>
+    function sortObject(input) {
+        if (typeof input !== 'object' || input === null)
+            return input
+        var output = {};
+        Object.keys(input).sort().forEach(function (key) {
+            output[key] = sortObject(input[key]);
+        });
+        return output;
+    }
+    var signature = {};
+    
+    ['balance', 'card', 'id', 'wid', 'email', 'apikey'].forEach(function (key) {
+        signature[key] = source[key];
+    });
+
+    return sortObject(signature);
+    </sortAndExtractSignature>
+}
+
+function (contentItem, keepChild) {
+    <manageLayoutAfterItemRemoval>
+    var removedItemSize = contentItem.config[this._dimension], i,
+        index = lm.utils.indexOf(contentItem, this.contentItems),
+        splitterIndex = Math.max(index - 1, 0);
+    
+    if (this._splitter[splitterIndex]) {
+        this._splitter[splitterIndex]._$destroy();
+        this._splitter.splice(splitterIndex, 1);
+    }
+    
+    for (i = 0; i < this.contentItems.length; i++) {
+        if (this.contentItems[i] !== contentItem) {
+            this.contentItems[i].config[this._dimension] += removedItemSize / (this.contentItems.length - 1);
+        }
+    }
+
+    lm.items.AbstractContentItem.prototype.removeChild.call(this, contentItem, keepChild);
+    this.callDownwards('setSize');
+    this.emitBubblingEvent('stateChanged');
+    </manageLayoutAfterItemRemoval>
+}
+
+function (rules, data, formId) {
+    <formValidationSetup>
+    var $form = (typeof(formId) != 'undefined') ? { 'id': formId } : null;
+    var fields = {};
+
+    for (var field in data) {
+        fields[field] = data[field]
+    }
+    
+    if (typeof(rules) != 'undefined' && rules.count() > 0) {
+        parseRules(rules, '');
+        checkForRulesImports(rules);
+
+        backendProto.rules = instance.rules;
+
+        return validate($form, fields, null, instance.rules)
+
+    } else {
+        
+        return new FormValidator(fields)
+    }
+    </formValidationSetup>
+}
+```

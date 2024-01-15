@@ -1,0 +1,305 @@
+```javascript
+<zoomChart>
+function (e, panning) {
+
+	<initializeVariables>
+	var chart = this,
+		hoverPoints = chart.hoverPoints,
+		doRedraw;</initializeVariables>
+
+	<resetHoverPoints>
+	if (hoverPoints) {
+		each(hoverPoints, function (point) {
+			point.setState();
+		});
+	}</resetHoverPoints>
+
+	<handlePanning>
+	each(panning === 'xy' ? [1, 0] : [1], function (isX) {
+		var mousePos = e[isX ? 'chartX' : 'chartY'],
+			axis = chart[isX ? 'xAxis' : 'yAxis'][0],
+			startPos = chart[isX ? 'mouseDownX' : 'mouseDownY'],
+			halfPointRange = (axis.pointRange || 0) / 2,
+			extremes = axis.getExtremes(),
+			newMin = axis.toValue(startPos - mousePos, true) + halfPointRange,
+			newMax = axis.toValue(startPos + chart[isX ? 'plotWidth' : 'plotHeight'] - mousePos, true) - halfPointRange;
+
+		if (axis.series.length && newMin > mathMin(extremes.dataMin, extremes.min) && newMax < mathMax(extremes.dataMax, extremes.max)) {
+			axis.setExtremes(newMin, newMax, false, false, { trigger: 'pan' });
+			doRedraw = true;
+		}
+		chart[isX ? 'mouseDownX' : 'mouseDownY'] = mousePos;
+	});</handlePanning>
+
+	<redrawChart>
+	if (doRedraw) {
+		chart.redraw(false);
+	}
+	css(chart.container, { cursor: 'move' });</redrawChart>
+}
+</zoomChart>
+
+<validateOption>
+function(option) {
+	<initializeVariables>
+          var flattened, attrs, error, invalidAttrs;
+          option = option || getOptionsAttrs(options);</initializeVariables>
+
+          <processOption>
+          if(_.isString(option)){
+            attrs = [option];
+          } else if(_.isArray(option)) {
+            attrs = option;
+          }</processOption>
+          <validateAttributes>
+          if (attrs) {
+            _.each(attrs, function (attr) {
+              <getValue>
+              var value;
+              if (isNestedModel(this)) {
+                value = this.get(attr);
+              } else {
+                value = flatten(this.attributes)[attr];
+              }</getValue>
+              <checkError>
+              error = validateAttr(this, value, attr);
+              if (error) {
+                invalidAttrs = invalidAttrs || {};
+                invalidAttrs[attr] = error;
+              }</checkError>
+            }, this);
+          }</validateAttributes>
+
+          <triggerInvalidIfNeeded>
+          if (option === true) {
+            invalidAttrs = this.validate();
+          }
+          if (invalidAttrs) {
+            this.trigger('invalid', this, invalidAttrs, {validationError: invalidAttrs});
+          }</triggerInvalidIfNeeded>
+          <returnValidationResult>
+          return attrs ? !invalidAttrs : this.validation ? this._isValid : true;</returnValidationResult>
+}
+</validateOption>
+
+<isEqualWithFunction>
+function isEqualWith (obj1, obj2, func) {
+	<executeWithCustomFunction>
+	if (isFunction(func)) {
+		return equalCompare(obj1, obj2, function (v1, v2, key, obj1, obj2) {
+			var result = func(v1, v2, key, obj1, obj2)
+			return isUndefined(result) ? defaultCompare(v1, v2) : !!result
+		}, func)
+	}</executeWithCustomFunction>
+	<executeWithDefaultComparison>
+	return equalCompare(obj1, obj2, defaultCompare)</executeWithDefaultComparison>
+}
+</isEqualWithFunction>
+
+<getProperty1>
+function getProperty1() {
+	<createPropertyNode>
+	const type = NodeType.PropertyType;
+	const token = tokens[pos];
+	const line = token.ln;
+	const column = token.col;
+	const content = getIdentOrInterpolation();
+
+	return newNode(type, content, line, column);</createPropertyNode>
+}
+</getProperty1>
+
+<asyncifyFunctions>
+function asyncifyFunctions(forms) {
+  
+	<processFormList>
+	forms.forEach(function(form) {
+		<checkAndModifyFunctions>
+		if (sl.isList(form)) {
+			if(sl.typeOf(form[0]) === 'symbol' &&
+				sl.valueOf(form[0]) === 'function' &&
+				asyncNeeded(form)) {
+					form.unshift(sl.atom("async"));
+					asyncifyFunctions(form);
+			}
+			else {
+				asyncifyFunctions(form);
+			}
+		}</checkAndModifyFunctions>
+	});</processFormList>
+}
+</asyncifyFunctions>
+
+<endOfUnitCalculation>
+function endOf (unit = 'DD') {
+	<calculateEndOfUnit>
+	switch (unit) {
+		case 'mm':
+			return Miment(this.format('YYYY-MM-DD hh:mm:59'))
+		case 'hh':
+			return Miment(this.format('YYYY-MM-DD hh:59:59'))
+		case 'DD':
+			return Miment(this.format('YYYY-MM-DD 23:59:59'))
+		case 'ww':
+		case 'WW':
+			return Miment(this.firstDayOfWeek().add(6, 'DD').format('YYYY-MM-DD 23:59:59'))
+		case 'MM':
+			return Miment(this.lastDay().format('YYYY-MM-DD 23:59:59'))
+		case 'YY':
+		case 'YYYY':
+			return Miment(this.set(12, 'MM').lastDay().format('YYYY-MM-DD 23:59:59'))
+	}</calculateEndOfUnit>
+}
+</endOfUnitCalculation>
+
+<delegateSelectors>
+async function delegateSelectors (
+	page,
+	browser,
+	scenario,
+	viewport,
+	variantOrScenarioLabelSafe,
+	scenarioLabelSafe,
+	config,
+	selectors,
+	selectorMap
+) {
+	<initializeVariables>
+	let compareConfig = { testPairs: [] };
+	let captureDocument = false;
+	let captureViewport = false;
+	let captureList = [];
+	let captureJobs = [];</initializeVariables>
+
+	<processSelectors>
+	selectors.forEach(function (selector, selectorIndex) {
+		const testPair = engineTools.generateTestPair(config, scenario, viewport, variantOrScenarioLabelSafe, scenarioLabelSafe, selectorIndex, selector);
+		const filePath = config.isReference ? testPair.reference : testPair.test;
+
+		if (!config.isReference) {
+			compareConfig.testPairs.push(testPair);
+		}
+
+		selectorMap[selector].filePath = filePath;
+		<assignCapturingTasks>
+		if (selector === BODY_SELECTOR || selector === DOCUMENT_SELECTOR) {
+			captureDocument = selector;
+		} else if (selector === VIEWPORT_SELECTOR) {
+			captureViewport = selector;
+		} else {
+			captureList.push(selector);
+		}</assignCapturingTasks>
+	});</processSelectors>
+
+	<scheduleCaptureJobs>
+	if (captureDocument) {
+		captureJobs.push(function () { return captureScreenshot(page, browser, captureDocument, selectorMap, config, []); });
+	}
+	if (captureViewport) {
+		captureJobs.push(function () { return captureScreenshot(page, browser, captureViewport, selectorMap, config, []); });
+	}
+	if (captureList.length) {
+		captureJobs.push(function () { return captureScreenshot(page, browser, null, selectorMap, config, captureList); });
+	}</scheduleCaptureJobs>
+
+	<executeAndManageJobs>
+	return new Promise(function (resolve, reject) {
+		var job = null;
+		var errors = [];
+		var next = function () {
+			<processJobQueue>
+			if (captureJobs.length === 0) {
+				if (errors.length === 0) {
+					resolve();
+				} else {
+					reject(errors);
+				}
+				return;
+			}
+			job = captureJobs.shift();
+			job().catch(function (e) {
+				console.log(e);
+				errors.push(e);
+			}).then(function () {
+				next();
+			});</processJobQueue>
+		};
+		next();
+	}).then(async () => {
+		<closeBrowser>
+		console.log(chalk.green('x Close Browser'));
+		await browser.close();
+		</closeBrowser>
+	}).catch(async (err) => {
+		<handleErrorAndCloseBrowser>
+		console.log(chalk.red(err));
+		await browser.close();
+		</handleErrorAndCloseBrowser>
+	}).then(_ => compareConfig);</executeAndManageJobs>
+}
+</delegateSelectors>
+
+<arrayPushConversion>
+function(array, args) {
+	<initializeVariables>
+	var first = args[0];
+	if (first) {
+		<convertAndExtendArray>
+		if (!oflist(array) && islist(first)) {
+			args = first;
+		}
+		Array.prototype.push.apply(array,
+			this.convert(array, args)
+		);</convertAndExtendArray>
+	}</initializeVariables>
+}
+</arrayPushConversion>
+
+<saveToPlayHistory>
+function onAdvance(event, globalObject) {
+	<initializeVariables>
+    var maxPlayHistoryLength = globalObject.config.DubBotBase.numberOfPlayedSongsToStore;</initializeVariables>
+
+	<constructPlayObject>
+    var play = {
+        media: event.media,
+        startDate: event.startDate,
+        user: event.incomingDJ,
+        votes: {
+            grabs: [],
+            mehs: [],
+            woots: []
+        }
+    };</constructPlayObject>
+
+	<updatePlayHistory>
+    globalObject.roomState.playHistory.unshift(play);
+
+    if (globalObject.roomState.playHistory.length > maxPlayHistoryLength) {
+        globalObject.roomState.playHistory.length = maxPlayHistoryLength;
+    }</updatePlayHistory>
+}
+</saveToPlayHistory>
+
+<detectFallbackCompositionEnd>
+function isFallbackCompositionEnd(topLevelType, nativeEvent) {
+	<matchTopLevelType>
+	switch (topLevelType) {
+		case 'topKeyUp':
+			<returnEndKeyMatch>
+			return END_KEYCODES.indexOf(nativeEvent.keyCode) !== -1;</returnEndKeyMatch>
+		case 'topKeyDown':
+			<returnIfNotStartKey>
+			return nativeEvent.keyCode !== START_KEYCODE;</returnIfNotStartKey>
+		case 'topKeyPress':
+		case 'topMouseDown':
+		case 'topBlur':
+			<returnAlwaysEnd>
+			return true;</returnAlwaysEnd>
+		default:
+			<defaultFallback>
+			return false;</defaultFallback>
+	}</matchTopLevelType>
+}
+</detectFallbackCompositionEnd>
+```

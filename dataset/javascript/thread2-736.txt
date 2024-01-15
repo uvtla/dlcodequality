@@ -1,0 +1,301 @@
+1)
+<init>
+function init(_pluginInterface) {
+    <setup_pluginInterface>
+    pi = _pluginInterface;
+    localStorage = pi.localStorage;
+    log = pi.log;
+    </setup_pluginInterface>
+    <setNetCallbackFunctions>
+    ipv4.setNetCallbackFunctions(
+        function(net, newmac, newip) {
+            <onMacFound>
+            for (const callbacks of Object.values(NetCallbacks)) {
+                if (callbacks.onMacFoundCallback != undefined) {
+                    callbacks.onMacFoundCallback(net, newmac, newip);
+                }
+            }
+            </onMacFound>
+        }
+        , function(net, lostmac, lostip) {
+            <onMacLost>
+            for (const callbacks of Object.values(NetCallbacks)) {
+                if (callbacks.onMacLostCallback != undefined) {
+                    callbacks.onMacLostCallback(net, lostmac, lostip);
+                }
+            }
+            </onMacLost>
+        }
+        , function(net, mac, oldip, newip) {
+            <onIPChanged>
+            for (const callbacks of Object.values(NetCallbacks)) {
+                if (callbacks.onIPChangedCallback != undefined) {
+                    callbacks.onIPChangedCallback(net, mac, oldip, newip);
+                }
+            }
+            </onIPChanged>
+        }
+    );
+    </setNetCallbackFunctions>
+}
+</init>
+
+2)
+<getRowById>
+function(gridRow){
+        <extractIdentifier>
+		var rowId =  gridRow['$_#_@_id']
+        </extractIdentifier>
+        <findRow>
+		var row = null
+		var rowIndex = this.dataTable.getIndexByRowId(rowId)
+		if(rowIndex > -1)
+			row = this.dataTable.getRow(rowIndex);
+        </findRow>
+		return row
+}
+</getRowById>
+
+3)
+<storeToken>
+function storeToken(token) {
+  <createDirectoryIfMissing>
+  try {
+    fs.mkdirSync(TOKEN_DIR);
+  } catch (err) {
+    if (err.code != 'EEXIST') {
+      throw err;
+    }
+  }
+  </createDirectoryIfMissing>
+  <writeTokenToFile>
+  fs.writeFile(TOKEN_PATH, JSON.stringify(token), function(err) {
+    if (err) throw err;
+    console.log('Token stored to ' + TOKEN_PATH);
+  });
+  </writeTokenToFile>
+}
+</storeToken>
+
+4)
+<splitHostPort>
+function splitHostPort(hostport) {
+   
+   let host = hostport;
+   let port = 80;
+   <extractParts>
+   const parts = hostport.split(':');
+   if (parts.length > 1) {
+      host = parts[0];
+      port = parts[1];
+   }
+   </extractParts>
+
+   <returnResult>
+   return {'host': host, 'port': port};
+   </returnResult>
+}
+</splitHostPort>
+
+5)
+<queryResponse>
+function queryResponse(rawData) {
+    var entry = rawData.feed.entry || [];
+    <mapEntries>
+    return entry.map(function(item) {
+        return worksheetEntry(item);
+    });
+    </mapEntries>
+}
+</queryResponse>
+
+6)
+<resolveResolutions>
+function resolveResolutions (toResolve, components, messages) {
+  <displaySubHeading>
+  messages.subHeading('Resolving tymlyRefs')
+  </displaySubHeading>
+  <processResolutions>
+  for (const { target, path, ref } of toResolve) {
+    <findComponent>
+    const [ targetName, targetObj ] = findComponent(target, components)
+    </findComponent>
+    <findRefObject>
+    const refObj = findRefObject(ref, components, targetName)
+    </findRefObject>
+
+    <applyResolution>
+    if (!refObj) {
+      throw new Error(`Could not resolve ${ref} in ${target}`)
+    }
+
+    applyToTarget(targetObj, refObj, path)
+    </applyResolution>
+    <logInfo>
+    messages.info(`Resolved ${ref} in ${targetName}`)
+    </logInfo>
+  }
+  </processResolutions>
+}
+</resolveResolutions>
+
+7)
+<setupHooks>
+function setupHooks (InstanceModel, config) {
+  <hookSetup>
+  const ourHookedFnNames = ['save', 'remove', 'index']
+  const schema = InstanceModel.schema
+  const hooks = _.values(schema.hooks)
+  </hookSetup>
+  
+  <configureHooks>
+  _.forEach(hooks, ho => {
+    <determineHookFunction>
+    let addHookFn = 'addDynamicHooks'
+    if (!config.promisify) {
+      addHookFn = 'addFlexibleHooks'
+    }
+    </determineHookFunction>
+    <initializeHook>
+    InstanceModel.prototype[addHookFn](ho.name)
+    </initializeHook>
+    const mwopts = { passParams: true }
+    <applyMiddleware>
+    _.forEach(ho.fns, (fn, index) => {
+      if (ourHookedFnNames.indexOf(ho.name) >= 0) {
+        const mwFn = fn
+        if (ho.hook === 'post') {
+          <createModifiedFunction>
+          ho.fns[index] = function (next) {
+            mwFn.apply(this)
+            next()
+          }
+          </createModifiedFunction>
+        }
+
+        <adjustOptions>
+        mwopts.passParams = false
+        </adjustOptions>
+      }
+    })
+    </applyMiddleware>
+    <addHook>
+    InstanceModel.prototype[ho.hook](ho.name, ho.fns, mwopts)
+    </addHook>
+  })
+  </configureHooks>
+}
+</setupHooks>
+
+8)
+<createNDEFRecord>
+function (ndefRecords, id) {
+        var payload = [];
+
+        if (!id) { <initializeId>id = []; </initializeId>}
+
+        <processNDEFRecords>
+        if (ndefRecords)
+        {
+            <encodeMessage>
+            if (ndefRecords[0] instanceof Object && ndefRecords[0].hasOwnProperty('tnf')) {
+                payload = ndef.encodeMessage(ndefRecords);
+            } else {
+            </encodeMessage>
+                <useRawPayload>
+                payload = ndefRecords;
+                </useRawPayload>
+            }
+        </processNDEFRecords>
+        else {
+            <logWarning>
+            console.log("WARNING: Expecting an array of NDEF records");
+            </logWarning>
+        }
+
+        <returnRecord>
+        return ndef.record(ndef.TNF_WELL_KNOWN, ndef.RTD_SMART_POSTER, id, payload);
+        </returnRecord>
+}
+</createNDEFRecord>
+
+9)
+<manageAttributes>
+function(element, params) {
+            var attrs;
+            <checkParamType>
+            if ('object' == typeof params) {
+                attrs = params;
+            }
+            if ('string' == typeof params) {
+                </checkParamType>
+                <handleArguments>
+                if (arguments.length > 2) {
+                    attrs = {};
+                    attrs[params] = arguments[2];
+                }
+                </handleArguments>
+                <getNumAttributes>
+                else{
+                    return getElAttributes(element,params);
+                }
+                </getNumAttributes>
+            }
+            <setAttribute>
+            if (attrs) {
+                setAttributes(element, attrs);
+            }
+            </setAttribute>
+}
+</manageAttributes>
+
+10)
+<setEventHandler>
+function setEventHandler(name, handler, dom, tag) {
+
+  <defineEventFunction>
+  dom[name] = function(e) {
+
+    <determineContext>
+    var ptag = tag._parent,
+      item = tag._item,
+      el
+
+    if (!item)
+      while (ptag && !item) {
+        item = ptag._item
+        ptag = ptag._parent
+      }
+    </determineContext>
+
+    <normalizeEventObject>
+    e = e || window.event
+
+    if (isWritable(e, 'currentTarget')) e.currentTarget = dom
+    if (isWritable(e, 'target')) e.target = e.srcElement
+    if (isWritable(e, 'which')) e.which = e.charCode || e.keyCode
+    </normalizeEventObject>
+
+    <setItemData>
+    e.item = item
+    </setItemData>
+
+    <handleEvent>
+    if (handler.call(tag, e) !== true && !/radio|check/.test(dom.type)) {
+      if (e.preventDefault) e.preventDefault()
+      e.returnValue = false
+    }
+    </handleEvent>
+
+    <conditionallyUpdate>
+    if (!e.preventUpdate) {
+      el = item ? getImmediateCustomParentTag(ptag) : tag
+      el.update()
+    }
+    </conditionallyUpdate>
+
+  }
+  </defineEventFunction>
+
+}
+</setEventHandler>

@@ -1,0 +1,340 @@
+<bindBtn>
+function bindBtn () {
+  <addEventListenerPreBtn>
+  ele.querySelector('.mip-carousel-preBtn').addEventListener('click', function (event) {
+    
+    if (!btnLock.stop) {
+      return
+    }
+
+    btnLock.stop = 0
+
+    imgIndex = imgIndex - 1
+
+    clearInterval(moveInterval)
+    move(wrapBox, imgIndex + 1, imgIndex)
+    if (isAutoPlay) {
+      autoPlay()
+    }
+  }, false)
+  </addEventListenerPreBtn>
+
+  <addEventListenerNextBtn>
+  ele.querySelector('.mip-carousel-nextBtn').addEventListener('click', function (event) {
+    
+    if (!btnLock.stop) {
+      return
+    }
+
+    btnLock.stop = 0
+
+    imgIndex = imgIndex + 1
+    clearInterval(moveInterval)
+    move(wrapBox, imgIndex - 1, imgIndex)
+    if (isAutoPlay) {
+      autoPlay()
+    }
+  }, false)
+  </addEventListenerNextBtn>
+}
+</bindBtn>
+
+<fetchAll>
+async function fetchAll(connection, query, params){
+
+  <executeQuery>
+  const [result] = await _query(connection, query, params);
+  </executeQuery>
+
+  
+  return result || [];
+}
+</fetchAll>
+
+<anonymousFunction1>
+function (oEvent) {
+  var bShowRuleProperties = true,
+    oSelectedRule = this.model.getProperty("/selectedRule"),
+    bAdditionalRulesetsTab = oEvent.getParameter("selectedKey") === "additionalRulesets";
+
+  <decideVisibility>
+  if (bAdditionalRulesetsTab || !oSelectedRule) {
+    bShowRuleProperties = false;
+  }
+  </decideVisibility>
+
+  
+  
+  <loadAdditionalRulesets>
+  if (!this.bAdditionalRulesetsLoaded && bAdditionalRulesetsTab) {
+    this.rulesViewContainer.setBusyIndicatorDelay(0);
+    this.rulesViewContainer.setBusy(true);
+    CommunicationBus.publish(channelNames.GET_NON_LOADED_RULE_SETS, {
+      loadedRulesets: this._getLoadedRulesets()
+    });
+  }
+  </loadAdditionalRulesets>
+
+  this.getView().getModel().setProperty("/showRuleProperties", bShowRuleProperties);
+}
+</anonymousFunction1>
+
+<_fnAjaxUpdateDraw>
+function _fnAjaxUpdateDraw ( settings, json )
+{
+  
+  
+  <handleCompatibility>
+  var compat = function ( old, modern ) {
+    return json[old] !== undefined ? json[old] : json[modern];
+  };
+  
+  var draw            = compat( 'sEcho',                'draw' );
+  var recordsTotal    = compat( 'iTotalRecords',        'recordsTotal' );
+  var rocordsFiltered = compat( 'iTotalDisplayRecords', 'recordsFiltered' );
+  </handleCompatibility>
+
+  <checkDrawValid>
+  if ( draw ) {
+    
+    if ( draw*1 < settings.iDraw ) {
+      return;
+    }
+    settings.iDraw = draw * 1;
+  }
+  </checkDrawValid>
+
+  <updateTableData>
+  _fnClearTable( settings );
+  settings._iRecordsTotal   = parseInt(recordsTotal, 10);
+  settings._iRecordsDisplay = parseInt(rocordsFiltered, 10);
+  
+  var data = _fnAjaxDataSrc( settings, json );
+  for ( var i=0, ien=data.length ; i<ien ; i++ ) {
+    _fnAddData( settings, data[i] );
+  }
+  settings.aiDisplay = settings.aiDisplayMaster.slice();
+  
+  settings.bAjaxDataGet = false;
+  _fnDraw( settings );
+  
+  if ( ! settings._bInitComplete ) {
+    _fnInitComplete( settings, json );
+  }
+  
+  settings.bAjaxDataGet = true;
+  _fnProcessingDisplay( settings, false );
+  </updateTableData>
+}
+</_fnAjaxUpdateDraw>
+
+<anonymousFunction2>
+function (array) {
+  var self = this,
+    deferred = new Deferred(),
+    fulfilled = false,
+    index, length,
+    <defineSuccessHandler>
+    onSuccess = function (value) {
+      if (!fulfilled) {
+        fulfilled = true;
+        deferred.emitSuccess(value);
+      }
+    },
+    </defineSuccessHandler>
+    <defineErrorHandler>
+    onError = function (error) {
+      if (!fulfilled) {
+        fulfilled = true;
+        deferred.emitSuccess(error);
+      }
+    };
+    </defineErrorHandler>
+
+  <handlePromises>
+  if (!isArray(array)) {
+    array = slice.call(arguments);
+  }
+  for (index = 0, length = array.length; index < length; index += 1) {
+    this.when(array[index], onSuccess, onError);
+  }
+  </handlePromises>
+  
+  return deferred.getPromise();
+}
+</anonymousFunction2>
+
+<getResOutput>
+function getResOutput(res) {
+  if (res.$ && res.$.data && res.$.data.output) {
+    return res.$.data.output;
+  }
+}
+</getResOutput>
+
+<anonymousFunction3>
+function(oEvent) {
+  var oTouch;
+
+  <eventHandling>
+  if (bHandleEvent) {
+    oTouch = oEvent.touches[0];
+
+    
+    if (Math.abs(oTouch.clientX - iStartX) > 10 || Math.abs(oTouch.clientY - iStartY) > 10) {
+      bIsMoved = true;
+    }
+
+    if (bIsMoved) {
+
+      
+      fireMouseEvent("mousemove", oEvent);
+    }
+  }
+  </eventHandling>
+}
+</anonymousFunction3>
+
+<initCasperCli>
+function initCasperCli(casperArgs) {
+  var baseTestsPath = fs.pathJoin(phantom.casperPath, 'tests');
+
+  <handleVersion>
+  if (!!casperArgs.options.version) {
+    return __terminate(phantom.casperVersion.toString())
+  } 
+  </handleVersion>
+  <handleTestArgument>
+  else if (casperArgs.get(0) === "test") {
+    phantom.casperScript = fs.absolute(fs.pathJoin(baseTestsPath, 'run.js'));
+    phantom.casperTest = true;
+    casperArgs.drop("test");
+    phantom.casperScriptBaseDir = fs.dirname(casperArgs.get(0));
+  } 
+  </handleTestArgument>
+  <handleSelftestArgument>
+  else if (casperArgs.get(0) === "selftest") {
+    phantom.casperScript = fs.absolute(fs.pathJoin(baseTestsPath, 'run.js'));
+    phantom.casperSelfTest = phantom.casperTest = true;
+    casperArgs.options.includes = fs.pathJoin(baseTestsPath, 'selftest.js');
+    if (casperArgs.args.length <= 1) {
+        casperArgs.args.push(fs.pathJoin(baseTestsPath, 'suites'));
+    }
+    casperArgs.drop("selftest");
+    phantom.casperScriptBaseDir = fs.dirname(casperArgs.get(1) || fs.dirname(phantom.casperScript));
+  } 
+  </handleSelftestArgument>
+  <handleHelpArgument>
+  else if (casperArgs.args.length === 0 || !!casperArgs.options.help) {
+    return printHelp();
+  }
+  </handleHelpArgument>
+
+  <setScriptPath>
+  if (!phantom.casperScript) {
+    phantom.casperScript = casperArgs.get(0);
+  }
+  </setScriptPath>
+
+  <verifyScriptPath>
+  if (!fs.isFile(phantom.casperScript)) {
+    return __die('Unable to open file: ' + phantom.casperScript);
+  }
+  </verifyScriptPath>
+
+  <setScriptBaseDir>
+  if (!phantom.casperScriptBaseDir) {
+    var scriptDir = fs.dirname(phantom.casperScript);
+    if (scriptDir === phantom.casperScript) {
+      scriptDir = '.';
+    }
+    phantom.casperScriptBaseDir = fs.absolute(scriptDir);
+  }
+  </setScriptBaseDir>
+
+  
+  casperArgs.drop(phantom.casperScript);
+}
+</initCasperCli>
+
+<argFolderFunction>
+function(arg) {
+  <checkArgument>
+  if (!arg) {
+    return this;
+  }
+  </checkArgument>
+
+  <handleRegExp>
+  if (arg instanceof RegExp) {
+    return this.filter(function(relativePath, file) {
+      return file.options.dir && arg.test(relativePath);
+    });
+  }
+  </handleRegExp>
+
+  
+  <resolveName>
+  var name = this.root + arg;
+  var newFolder = folderAdd.call(this, name);
+  </resolveName>
+
+  
+  <returnNewInstance>
+  var ret = this.clone();
+  ret.root = newFolder.name;
+  return ret;
+  </returnNewInstance>
+}
+</argFolderFunction>
+
+<_resolvePackagePathSync>
+function _resolvePackagePathSync(base, relativePath) {
+  var originalBase = base;
+  <checkCache>
+  if (!(base in packagePathCache)) {
+    packagePathCache[base] = {};
+  }
+  </checkCache>
+
+  <useCache>
+  var cache = packagePathCache[base];
+  if (relativePath in cache) {
+    return cache[relativePath];
+  }
+  </useCache>
+
+  <determinePackagePath>
+  var packagePath;
+  if (relativePath[0] === '.' || relativePath[0] === '/') {
+    packagePath = resolve(base, relativePath);
+    if (existsSync(packagePath)) {
+      packagePath = realpathSync(packagePath);
+      cache[relativePath] = packagePath;
+      return packagePath;
+    }
+  } else {
+    var newBase;
+    while (base) {
+      packagePath = resolve(base, 'node_modules', relativePath);
+      if (existsSync(packagePath)) {
+        packagePath = realpathSync(packagePath);
+        cache[relativePath] = packagePath;
+        return packagePath;
+      }
+      newBase = resolve(base, '..');
+      if (base === newBase) {
+        break;
+      }
+      base = newBase;
+    }
+  }
+  </determinePackagePath>
+
+  <handleError>
+  var err = new Error('Can\'t find "' + relativePath + '" relative to "' + originalBase + '"');
+  err.code = 'ENOENT';
+  throw err;
+  </handleError>
+}
+</_resolvePackagePathSync>

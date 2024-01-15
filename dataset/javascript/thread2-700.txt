@@ -1,0 +1,266 @@
+<Controller>
+function Controller (message) {
+  <validateMessage>
+  if (!(message instanceof Message)) throw new Error('message must be an instanceof Message');
+  </validateMessage>
+
+  <ensureInstance>
+  if (!(this instanceof Controller)) return new Controller(message);
+  </ensureInstance>
+
+  <debugActivity>
+  debug('new controller');
+  </debugActivity>
+
+  <initializeEventEmitter>
+  events.EventEmitter.call(this);
+  </initializeEventEmitter>
+
+  <assignMessageAndData>
+  this.message = message;
+  this.data = this.message.data;
+  </assignMessageAndData>
+}
+</Controller>
+
+<createDivWithSettings>
+function (placeholder, _jsPlumb, ipco, ips) {
+  <createElement>
+  var n = jsPlumb.createElement("div", { position : "absolute" });
+  </createElement>
+
+  <appendElement>
+  _jsPlumb.appendElement(n);
+  </appendElement>
+
+  <generateId>
+  var id = _jsPlumb.getId(n);
+  </generateId>
+
+  <setPosition>
+  jsPlumb.setPosition(n, ipco);
+  </setPosition>
+
+  <setDimensions>
+  n.style.width = ips[0] + "px";
+  n.style.height = ips[1] + "px";
+  </setDimensions>
+
+  <manageElement>
+  _jsPlumb.manage(id, n, true);
+  </manageElement>
+  
+  <updatePlaceholder>
+  placeholder.id = id;
+  placeholder.element = n;
+  </updatePlaceholder>
+}
+</createDivWithSettings>
+
+<camelCase>
+function camelCase(str) {
+  <sanitizeString>
+  str = str.replace(/[^a-zA-Z0-9 ]/g, ' ');
+  
+  str = str.replace(/([a-z](?=[A-Z]))/g, '$1 ');
+  
+  str = str.replace(/([^a-zA-Z0-9 ])|^[0-9]+/g, '').trim().toLowerCase();
+  </sanitizeString>
+
+  <convertToCamelCase>
+  str = str.replace(/([ 0-9]+)([a-zA-Z])/g, function (a, b, c) {
+      return b.trim() + c.toUpperCase();
+  });
+  </convertToCamelCase>
+  
+  return str;
+}
+</camelCase>
+
+<WidgetConstructor>
+function (cfg, ctxt) {
+  <constructWidget>
+  this.$Widget.constructor.apply(this, arguments);
+  </constructWidget>
+
+  <configurePrintOptions>
+  this._cssClassNames = ariaCoreTplClassLoader.addPrintOptions(this._cssClassNames, cfg.printOptions);
+  </configurePrintOptions>
+
+  <initializeProperties>
+  this._frame = null;
+  this._sizeConstraints = (!!cfg.minWidth || !!cfg.maxWidth || !!cfg.minHeight || !!cfg.maxHeight);
+  this._directInit = this._directInit || this._sizeConstraints;
+  </initializeProperties>
+}
+</WidgetConstructor>
+
+<stripAnsi>
+function($str, $checkColors)
+{
+    <checkAndStripPattern>
+    var $regex = new RegExp(REGEXP_PLAIN, 'gm');
+    var $match = $str.match($regex);
+
+    if (!!$match)
+    {
+        $str   = $str.substr($match[0].length);
+        $match = true;
+    }
+    else if ($checkColors !== false)
+    {
+        $regex = new RegExp(REGEXP_ANSI, 'gm');
+        $match = $str.match($regex);
+
+        if (!!$match)
+        {
+            $str   = $str.substr($match[0].length);
+            $match = true;
+        }
+    }
+    </checkAndStripPattern>
+    
+    <stripLeadingSpace>
+    if ($match && $str.substr(0, 1) === ' ')
+    {
+        $str = $str.substr(1);
+    }
+    </stripLeadingSpace>
+
+    return $str;
+}
+</stripAnsi>
+
+<put>
+function put(model, uri, data, locals) {
+  <initializeTiming>
+  const startTime = process.hrtime(),
+    timeoutLimit = TIMEOUT_CONSTANT * TIMEOUT_PUT_COEFFICIENT;
+  </initializeTiming>
+
+  <saveData>
+  return bluebird.try(() => {
+    return bluebird.resolve(model.save(uri, data, locals))
+      .then(resolvedData => {
+        if (!_.isObject(resolvedData)) {
+          throw new Error(`Unable to save ${uri}: Data from model.save must be an object!`);
+        }
+
+        return {
+          key: uri,
+          type: 'put',
+          value: JSON.stringify(resolvedData)
+        };
+      });
+  }).tap(() => {
+    const ms = timer.getMillisecondsSince(startTime);
+
+    if (ms > timeoutLimit * 0.5) {
+      log('warn', `slow put ${uri} ${ms}ms`);
+    }
+  }).timeout(timeoutLimit, `Module PUT exceeded ${timeoutLimit}ms: ${uri}`);
+  </saveData>
+}
+</put>
+
+<Fossa>
+function Fossa(options) {
+  <fuseInternalFunctions>
+  this.fuse();
+  </fuseInternalFunctions>
+
+  <initializeWritableProperties>
+  this.writable('queue', []);
+  this.writable('plugins', {});
+  this.writable('connecting', false);
+  </initializeWritableProperties>
+
+  <initializeReadableProperties>
+  this.readable('options', configure(options || {}, this));
+  this.readable('Model', model(this));
+  this.readable('Collection', collection(this));
+  this.readable('mongo', mongo);
+  </initializeReadableProperties>
+
+  <initializeDatabaseConnection>
+  this.init(
+    this.options('hostname', 'localhost'),
+    this.options('port', 27017),
+    this.options
+  );
+  </initializeDatabaseConnection>
+}
+</Fossa>
+
+<reg2bin>
+function reg2bin(beg, end)
+{
+  <computeBin>
+  --end;
+  if (beg>>14 == end>>14) return ((1<<15)-1)/7 + (beg>>14);
+  if (beg>>17 == end>>17) return ((1<<12)-1)/7 + (beg>>17);
+  if (beg>>20 == end>>20) return ((1<<9)-1)/7 + (beg>>20);
+  if (beg>>23 == end>>23) return ((1<<6)-1)/7 + (beg>>23);
+  if (beg>>26 == end>>26) return ((1<<3)-1)/7 + (beg>>26);
+  return 0;
+  </computeBin>
+}
+</reg2bin>
+
+<generateJsonForMustache>
+function generateJsonForMustache(msgObj) {
+  <createJsonMessage>
+  var msgJsonObj = {};
+  if (msgObj.type) {
+      msgJsonObj.type = "'" + msgObj.type + "'";
+  }
+  msgJsonObj.title = msgObj.title;
+  msgJsonObj.description = msgObj.description;
+  if (msgObj.needButtons) {
+      msgJsonObj.buttons = [{
+          "id": "restart",
+          "value": Strings.RESTART_BUTTON,
+          "tIndex": "'0'"
+      }, {
+          "id": "later",
+          "value": Strings.LATER_BUTTON,
+          "tIndex": "'0'"
+      }];
+      msgJsonObj.needButtons = msgObj.needButtons;
+  }
+  </createJsonMessage>
+  return msgJsonObj;
+}
+</generateJsonForMustache>
+
+<setTransform>
+function setTransform() {
+  <assignMatrixValues>
+  var a = this.val;
+
+  if (arguments.length === 9) {
+    a[0] = arguments[0]; 
+    a[1] = arguments[1]; 
+    a[2] = arguments[2]; 
+    a[3] = arguments[3]; 
+    a[4] = arguments[4]; 
+    a[5] = arguments[5]; 
+    a[6] = arguments[6]; 
+    a[7] = arguments[7]; 
+    a[8] = arguments[8]; 
+  } else if (arguments.length === 6) {
+    a[0] = arguments[0]; 
+    a[1] = arguments[2]; 
+    a[2] = arguments[4]; 
+    a[3] = arguments[1]; 
+    a[4] = arguments[3]; 
+    a[5] = arguments[5]; 
+    a[6] = 0; 
+    a[7] = 0; 
+    a[8] = 1; 
+  }
+  </assignMatrixValues>
+
+  return this;
+}
+</setTransform>

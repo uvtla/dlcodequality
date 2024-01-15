@@ -1,0 +1,217 @@
+```javascript
+<constructor>
+function (strategy) {
+        <loggingSetup>
+        this.logger = Logger.getLogger("DecisionTree_js");</loggingSetup>
+        
+        var jvmObject;
+        
+        <constructorLogic>
+        if (strategy instanceof Strategy) {
+            jvmObject = new org.apache.spark.mllib.tree.DecisionTree(Utils.unwrapObject(strategy));
+        } else if (strategy instanceof rg.apache.spark.mllib.tree.DecisionTree) {
+            jvmObject = strategy;
+        } else {
+            throw "DecisionTree invalid constructor parameter";
+        }</constructorLogic>
+
+        <javaWrapperCall>
+        JavaWrapper.call(this, jvmObject);</javaWrapperCall>
+
+    }
+</constructor>
+
+<removeAllKeys>
+function () {
+                <getAllKeys>
+                var keys = getAllKeys();</getAllKeys>
+
+                allKeyMap = {};
+                storage.removeAttribute("kMap");
+
+                <removeKeys>
+                for (var key in keys) {
+                    if (keys.hasOwnProperty(key)) {
+                        storage.removeAttribute(keys[key]);
+                    }
+                }</removeKeys>
+                
+                <saveStorage>
+                storage.save("JSONPersist");</saveStorage>
+            }
+</removeAllKeys>
+
+<logToServer>
+function _send(level, args) {
+  <preparePayload>
+  var payload = (
+    'level=' + encodeURIComponent(level) +
+    '&message=' + encodeURIComponent(args.join(' ')));</preparePayload>
+
+  <createAndSendXhr>
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/log');
+  xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+  xhr.onreadystatechange = function () {
+    
+    if (xhr.readyState === 4 && xhr.status !== 200) {
+      <handleErrorResponse>
+      if (console && console.log) {
+        console.log(xhr.responseText);
+      }</handleErrorResponse>
+    }
+  };
+  xhr.send(payload);</createAndSendXhr>
+}
+</logToServer>
+
+<deactivateAllObjects>
+function () {
+      var allObjects = this.getObjects(),
+          i = 0,
+          len = allObjects.length;
+          
+      <deactivateObjects>
+      for ( ; i < len; i++) {
+        allObjects[i].setActive(false);
+      }</deactivateObjects>
+      
+      <discardActive>
+      this.discardActiveGroup();
+      this.discardActiveObject();</discardActive>
+      
+      return this;
+    }
+</deactivateAllObjects>
+
+<reportRules>
+function enable (context, loc, group, rules) {
+  <reportConstruction>
+  if (rules.length === 0) {
+    context.report({ loc, message: '++ {{group}}', data: { group }})
+  } else {
+    context.report({ loc, message: '+ {{group}} {{rules}}', data: { group, rules: rules.join(' ') }})
+  }</reportConstruction>
+}
+</reportRules>
+
+<calculateVerticalAlignment>
+function verticalAlignment(g, layering, conflicts, neighborFn) {
+  var root = {},
+    align = {},
+    pos = {};
+
+  <initAlignPos>
+  
+  _.forEach(layering, function(layer) {
+    _.forEach(layer, function(v, order) {
+      root[v] = v;
+      align[v] = v;
+      pos[v] = order;
+    });
+  });</initAlignPos>
+
+  <computeVerticalAlignment>
+  _.forEach(layering, function(layer) {
+    var prevIdx = -1;
+    _.forEach(layer, function(v) {
+      var ws = neighborFn(v);
+      if (ws.length) {
+        ws = _.sortBy(ws, function(w) { return pos[w]; });
+        var mp = (ws.length - 1) / 2;
+        for (var i = Math.floor(mp), il = Math.ceil(mp); i <= il; ++i) {
+          var w = ws[i];
+          if (align[v] === v &&
+              prevIdx < pos[w] &&
+              !hasConflict(conflicts, v, w)) {
+            align[w] = v;
+            align[v] = root[v] = root[w];
+            prevIdx = pos[w];
+          }
+        }
+      }
+    });
+  });</computeVerticalAlignment>
+
+  return { root: root, align: align };
+}
+</calculateVerticalAlignment>
+
+<createPaneIfNeeded>
+function _createPaneIfNecessary(paneId) {
+        var newPane;
+
+        <checkPaneExistence>
+        if (!_panes.hasOwnProperty(paneId)) {
+            <createPane>
+            newPane = new Pane(paneId, _$el);
+            _panes[paneId] = newPane;
+
+            <emitPaneCreate>
+            exports.trigger("paneCreate", newPane.id);</emitPaneCreate>
+
+            <paneClickAndDrag>
+            newPane.$el.on("click.mainview dragover.mainview", function () {
+                setActivePaneId(newPane.id);
+            });</paneClickAndDrag>
+
+            <viewListChange>
+            newPane.on("viewListChange.mainview", function () {
+                _updatePaneHeaders();
+                exports.trigger("workingSetUpdate", newPane.id);
+            });</viewListChange>
+
+            <currentViewChange>
+            newPane.on("currentViewChange.mainview", function (e, newView, oldView) {
+                _updatePaneHeaders();
+                if (_activePaneId === newPane.id) {
+                    exports.trigger("currentFileChange",
+                            newView && newView.getFile(),
+                            newPane.id, oldView && oldView.getFile(),
+                            newPane.id);
+                }
+            });</currentViewChange>
+
+            <viewDestroy>
+            newPane.on("viewDestroy.mainView", function (e, view) {
+                _removeFileFromMRU(newPane.id, view.getFile());
+            });</viewDestroy>
+            }</createPane>
+        }</checkPaneExistence>
+
+        return newPane;
+}
+</createPaneIfNeeded>
+
+<calculateNewPx>
+function(px) {
+        <applyOffset>
+        var newPx = OpenLayers.Popup.Anchored.prototype.calculateNewPx.apply(
+            this, arguments
+        );
+
+        newPx = newPx.offset(this.positionBlocks[this.relativePosition].offset);</applyOffset>
+
+        return newPx;
+}
+</calculateNewPx>
+
+<extractContentFromDesc>
+function extractContent(desc) {
+  
+  <getTitle>
+  var title = getTitle(desc.content, '<title') || getTitle(desc.content, '<TITLE');</getTitle>
+
+  return { selector: 'body', content: desc.content, text: 'NOTEXTRACTED', title: title };
+}
+</extractContentFromDesc>
+
+<createObject>
+function create(it, P){                                                                
+  <createWithDefinedProperties>
+  return P === undefined ? _create(it) : $defineProperties(_create(it), P);</createWithDefinedProperties>
+}
+</createObject>
+```
+
+The annotations above show an interpretation of SRP compliance or violations within each function by identifying separate responsibilities. Functions are tagged at the beginning and end, with more detailed tags encapsulating blocks of code representing distinct responsibilities.

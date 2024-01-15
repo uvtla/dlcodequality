@@ -1,0 +1,295 @@
+```javascript
+<createLint>
+function createLint(inPath, opts = {}) {
+    <checkInPathValidity>
+    if (!inPath) {
+        throw new Error('Input path argument is required');
+    }
+    </checkInPathValidity>
+
+    return function lint() {
+        return gulp.src(inPath)
+            .pipe(eslint(opts))
+            .pipe(eslint.format())
+            .pipe(eslint.failAfterError());
+    };
+}
+</createLint>
+
+<addEventListener>
+function addEventListener(node, type, handler, capture) {
+		if (typeof node.addEventListener === "function") { 
+			node.addEventListener(type, handler, capture === true);
+		} else {
+			<backwardCompatibility>
+			node.attachEvent("on" + type, handler); 
+			</backwardCompatibility>
+		}
+}
+</addEventListener>
+
+<buildEcdhParam>
+function buildEcdhParam(public_algo, oid, cipher_algo, hash_algo, fingerprint) {
+  <composeKdfParams>
+  const kdf_params = new type_kdf_params([hash_algo, cipher_algo]);
+  </composeKdfParams>
+  <buildEcdhParamArray>
+  return util.concatUint8Array([
+    oid.write(),
+    new Uint8Array([public_algo]),
+    kdf_params.write(),
+    util.str_to_Uint8Array("Anonymous Sender    "),
+    fingerprint.subarray(0, 20)
+  ]);
+  </buildEcdhParamArray>
+}
+</buildEcdhParam>
+
+<compareObjects>
+function(refObj) {
+        var instance = this,
+            keys = Object.getOwnPropertyNames(instance),
+            l = keys.length,
+            i = -1,
+            same, key;
+        <checkSizeEquality>
+        same = (l===refObj.itsa_size(true));
+        </checkSizeEquality>
+        
+        <compareObjectProperties>
+        while (same && (++i < l)) {
+            key = keys[i];
+            same = refObj.hasOwnProperty(key) ? valuesAreTheSame(instance[key], refObj[key]) : false;
+        }
+        </compareObjectProperties>
+        return same;
+    }
+</compareObjects>
+
+<refreshSession>
+async function refreshSession (ctx, session, originalHash, isNew) {
+
+    <conditionalCheckForSessionSaveStatus>
+    if(ctx._sessionSave === false) {
+      return debug('session save disabled')
+    }
+    </conditionalCheckForSessionSaveStatus>
+
+    <handleNullOrNewSession>
+    if (!session) {
+      if (!isNew) {
+        debug('session set to null, destroy session: %s', ctx.sessionId)
+        sessionIdStore.reset.call(ctx)
+        return store.destroy(ctx.sessionId)
+      }
+      return debug('a new session and set to null, ignore destroy')
+    }
+    </handleNullOrNewSession>
+
+    <forceSaveIfConfigured>
+    if(ctx._sessionSave === true) {
+      debug('session save forced')
+      return saveNow(ctx, ctx.sessionId, session)
+    }
+    </forceSaveIfConfigured>
+
+    <checkForEmptySession>
+    const newHash = hash(session)
+    if (!options.allowEmpty && isNew && newHash === EMPTY_SESSION_HASH) {
+      return debug('new session and do not modified')
+    }
+    </checkForEmptySession>
+
+    <checkForSessionModifications>
+    if (!options.rolling && newHash === originalHash) {
+      return debug('session not modified')
+    }
+
+    debug('session modified')
+    </checkForSessionModifications>
+
+    <saveModifiedSession>
+    await saveNow(ctx, ctx.sessionId, session)
+    </saveModifiedSession>
+
+  }
+</refreshSession>
+
+<handleEvent>
+function(evt) {
+        delete this.startEvt;
+        var features = this.getFeatures(evt);
+        var over = {}, newly = [], feature;
+        <identifyFeatures>
+        for (var i=0, len=features.length; i<len; ++i) {
+            feature = features[i];
+            over[feature.id] = feature;
+            if (!this.cache[feature.id]) {
+                newly.push(feature);
+            }
+        }
+        </identifyFeatures>
+        
+        <prepareFeaturesForRemoval>
+        var out = [];
+        for (var id in this.cache) {
+            feature = this.cache[id];
+            if (feature.layer && feature.layer.map) {
+                if (!over[feature.id]) {
+                    out.push(feature);
+                }
+            } else {
+                
+                delete this.cache[id];
+            }
+        }
+        </prepareFeaturesForRemoval>
+        
+        <triggerEventsForNewFeatures>
+        var more;
+        for (i=0, len=newly.length; i<len; ++i) {
+            feature = newly[i];
+            this.cache[feature.id] = feature;
+            more = this.triggerEvent("featureover", {feature: feature});
+            if (more === false) {
+                break;
+            }
+        }
+        </triggerEventsForNewFeatures>
+        
+        <triggerEventsForRemovedFeatures>
+        for (i=0, len=out.length; i<len; ++i) {
+            feature = out[i];
+            delete this.cache[feature.id];
+            more = this.triggerEvent("featureout", {feature: feature});
+            if (more === false) {
+                break;
+            }
+        }
+        </triggerEventsForRemovedFeatures>
+    }
+</handleEvent>
+
+<initializeStates>
+function() {
+        if (!this.states) return
+        <ensureInitialState>
+        if (!this.states.hasOwnProperty(INIT_STATE))
+          this.state(INIT_STATE, {})
+        </ensureInitialState>
+
+        var name, states = this.states
+        <registerAllStates>
+        for (name in states)
+          this.state(name, states[name])
+        </registerAllStates>
+      }
+</initializeStates>
+
+<downloadRemote>
+function downloadRemote(auth, projectId, dir, method) {
+    return new Promise((resolve, reject) => {
+        <prepareGasDirectory>
+        const gasDir = path.join('.', dir, constants.META_DIR);
+        </prepareGasDirectory>
+
+        <handleCloneMethod>
+        if (method === 'clone' && fs.existsSync(path.join('.', dir))) {
+            reject({
+                message: `Oops, the directory '${dir}' seems to exist already.\nRemove this folder or use 'gas link' to link your project to the correct folder.`,
+                print: true,
+            });
+            return;
+        }
+        </handleCloneMethod>
+
+        <createMetaIdFile>
+        const file = {
+            name: path.join(gasDir, constants.META_ID),
+            source: projectId,
+        };
+        createFile(file);
+        </createMetaIdFile>
+
+        const remote = path.join(gasDir, constants.META_REMOTE);
+        const script = google.script('v1');
+
+        <getProjectContent>
+        script.projects.getContent({
+            auth,
+            scriptId: projectId,
+        }, (err, content) => {
+            if (err) {
+                fs.removeSync(remote);
+                <handleDownloadError>
+                triageGoogleError(err, 'downloadRemote').then((triaged) => {
+                    reject(triaged);
+                }).catch((notTriaged) => {
+                    reject(notTriaged);
+                });
+                </handleDownloadError>
+            } else {
+                <createMetaRemoteFile>
+                createFile({
+                    name: remote,
+                    source: JSON.stringify(content.data),
+                });
+                resolve();
+                </createMetaRemoteFile>
+            }
+            return;
+        });
+        </getProjectContent>
+    });
+}
+</downloadRemote>
+
+<addSourcePackage>
+function addSourcePackage(name, node, type, opts) {
+      <composeSourcePackage>
+      var comments, sourcePackage;
+      sourcePackage = {
+        node: node,
+        name: name,
+        type: type,
+        body: getNodeBody(node, true),
+        module: moduleName,
+        dependencies: getDependencies(node, name)
+      };
+      merge(sourcePackage, opts);
+      </composeSourcePackage>
+
+      <attachCommentsToSourcePackage>
+      comments = getLastCommentForNode(node, 1);
+      if (comments) {
+        sourcePackage.comments = comments;
+        sourcePackage.bodyWithComments = comments + '\n' + sourcePackage.body;
+      } else {
+        sourcePackage.bodyWithComments = sourcePackage.body;
+      }
+      </attachCommentsToSourcePackage>
+
+      <addSourcePackageToArray>
+      sourcePackages.push(sourcePackage);
+      </addSourcePackageToArray>
+
+      return sourcePackage;
+}
+</addSourcePackage>
+
+<createModule>
+function(moduleNames, moduleDefinition){
+    
+    <prepareArguments>
+    var args = slice(arguments);
+    args.unshift(this);
+    </prepareArguments>
+
+    <createAndReturnModule>
+    return Marionette.Module.create.apply(Marionette.Module, args);
+    </createAndReturnModule>
+  }
+</createModule>
+```
+
+In these annotations, I've applied the SRP principle by evaluating distinct responsibilities within each function, using tags to highlight separate blocks of code with distinct purposes. Simple returns, variable assignments, or one-line statements are not tagged separately as they are considered part of the larger responsibility block they are contained in, such as setting up data or callbacks.

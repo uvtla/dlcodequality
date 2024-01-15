@@ -1,0 +1,192 @@
+<subPubArg>
+function subPubArg (topic, data, i) {
+      <subscribeToTopic>
+      var spy = sub(topic);</subscribeToTopic>
+      <publishToTopic>
+      pub(topic, data);</publishToTopic>
+
+      <processSpyCall>
+      var args = spy.calls.first().args;</processSpyCall>
+      return typeof i === 'undefined' ? args : args[i];
+}
+</subPubArg>
+
+<_fireReadFileCallbacks>
+function _fireReadFileCallbacks(filename, data, error=false) {
+  <retrieveCallbacks>
+  const callbacks = readFileCallbacks.get(filename);</retrieveCallbacks>
+  if (callbacks) {
+    <invokeCallbacks>
+    if (callbacks.size) callbacks.forEach(callback=>error?callback(data, null):callback(null, data));</invokeCallbacks>
+    <cleanupCallbacks>
+    callbacks.clear();
+    readFileCallbacks.delete(filename);</cleanupCallbacks>
+  }
+}
+</_fireReadFileCallbacks>
+
+<parseIframeQueryString>
+function(iframe) {
+            <extractInformationFromIframe>
+            var doc = iframe.contentDocument || iframe.contentWindow.document,
+                queryString = doc.location.search,
+                match = /bucket=(.+)&key=(.+)&etag=(.+)/.exec(queryString);</extractInformationFromIframe>
+
+            if (match) {
+                return {
+                    bucket: match[1],
+                    key: match[2],
+                    etag: match[3].replace(/%22/g, "")
+                };
+            }
+}
+</parseIframeQueryString>
+
+<syncNpmrc>
+function syncNpmrc(sourceNpmrcFolder, targetNpmrcFolder) {
+    <establishPaths>
+    const sourceNpmrcPath = path.join(sourceNpmrcFolder, '.npmrc');
+    const targetNpmrcPath = path.join(targetNpmrcFolder, '.npmrc');</establishPaths>
+    try {
+        <readSourceNpmrc>
+        if (fs.existsSync(sourceNpmrcPath)) {
+            let npmrcFileLines = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
+            npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());</readSourceNpmrc>
+            <processNpmrcFile>
+            const resultLines = [];
+            
+            <replaceEnvironmentVariables>
+            for (const line of npmrcFileLines) {
+                <matchEnvironmentVariables>
+                const regex = /\$\{([^\}]+)\}/g;
+                const environmentVariables = line.match(regex);
+                let lineShouldBeTrimmed = false;</matchEnvironmentVariables>
+                if (environmentVariables) {
+                    for (const token of environmentVariables) {
+                        <extractVariableNameAndCheck>
+                        const environmentVariableName = token.substring(2, token.length - 1);
+                        if (!process.env[environmentVariableName]) {
+                            lineShouldBeTrimmed = true;
+                            break;
+                        }</extractVariableNameAndCheck>
+                    }
+                }
+                if (lineShouldBeTrimmed) {
+                    <annotateMissingVariable>
+                    resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);</annotateMissingVariable>
+                }
+                else {
+                    resultLines.push(line);
+                }
+            }</replaceEnvironmentVariables></processNpmrcFile>
+            <writeTargetNpmrc>
+            fs.writeFileSync(targetNpmrcPath, resultLines.join(os.EOL));</writeTargetNpmrc>
+        </readSourceNpmrc>
+        <deleteTargetNpmrc>
+        else if (fs.existsSync(targetNpmrcPath)) {
+            fs.unlinkSync(targetNpmrcPath);
+        }</deleteTargetNpmrc>
+    }
+    catch (e) {
+        throw new Error(`Error syncing .npmrc file: ${e}`);
+    }
+}
+</syncNpmrc>
+
+<makeRequest>
+function makeRequest(target) {
+    <transferRequestHeaders>
+    var headers = Object.keys(req.headers)
+      .reduce(function (all, key) {
+        all[key] = req.headers[key];
+        return all;
+      }, {});</transferRequestHeaders>
+
+    <resetTargetHostHeader>
+    headers.host = target.host;</resetTargetHostHeader>
+
+    <logRequest>
+    self.log.info('[merge] %s - %s %s %s %j', address, req.method, req.url, target.host, req.headers);</logRequest>
+    return hyperquest({
+      url:     url_.resolve(target.href, url),
+      method:  method,
+      headers: headers
+    });
+}
+</makeRequest>
+
+<handle>
+async function handle(sofar) {
+    try {
+        <authenticateUser>
+        if (!sofar.socket.user) {
+            if (sofar.msg.oemInfo.openkey == sofar.facade.options.admin.role[sofar.msg.oemInfo.openid]) {
+                sofar.socket.user = { domain: "system", stype: sofar.msg.stype, sid: sofar.msg.sid, socket: sofar.socket };
+            }
+        }
+        if (!sofar.socket.user) {
+            sofar.fn({ code: facade.const.ReturnCode.userIllegal });
+            sofar.recy = false;
+        }</authenticateUser>
+    }
+    catch (e) {
+        <handleError>
+        sofar.fn({ code: facade.const.ReturnCode.illegalData });
+        sofar.recy = false;</handleError>
+    }
+}
+</handle>
+
+<clearDatabase>
+function clearDatabase(tx, resultSet) {
+    <executeSqlDelete>
+    var sql = "delete from clicks"
+    tx.executeSql(sql, null, null, sqlError);</executeSqlDelete>
+}
+</clearDatabase>
+
+<replaceLambdaVariables>
+function replaceLambdaVariables(sPath, mLambdaVariableToPath) {
+			<modifyPathSegments>
+			var aSegments = sPath.split("/");
+
+			aSegments[0] = mLambdaVariableToPath[aSegments[0]];</modifyPathSegments>
+			return aSegments[0] ? aSegments.join("/") : sPath;
+}
+</replaceLambdaVariables>
+
+<prepareItem>
+function prepareItem ( item, cleanUrls ) {
+	<retrieveUrl>
+	const promise = cleanUrls ? got.head(item.url) : Promise.resolve({ url: item.url });</retrieveUrl>
+	return promise
+		.then(( res ) => {
+			<resolveUrl>
+			return res.url;</resolveUrl>
+		}, () => {
+			<useOriginalUrl>
+			return item.url;</useOriginalUrl>
+		})
+		.then(( url ) => {
+			<formatItem>
+			return {
+				url: cleanUrls ? stripMobileUrl(url) : url,
+				description: item.title,
+				toread: 'yes'
+			};</formatItem>
+		});
+}
+</prepareItem>
+
+<handleFocusLoss>
+function (domEvt) {
+            if (this._hasMouseOver === false && this._hasFocus === true) {
+                <removeFocus>
+                this._hasFocus = false;</removeFocus>
+                if (this._ellipsis) {
+                    <hideFullText>
+                    this._ellipsis._hideFullText(domEvt.relatedTarget);</hideFullText>
+                }
+            }
+}
+</handleFocusLoss>

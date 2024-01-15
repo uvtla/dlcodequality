@@ -1,0 +1,283 @@
+```javascript
+<toPositiveInt>
+function toPositiveInt(num, _default) {
+    <inputValidation>
+    if (isNumeric(num)) {
+        num = parseInt(num, 10);
+    } else {
+        return _default;
+    }
+    </inputValidation>
+    
+    <positiveIntCheck>
+    if (num < 0) {
+        return _default;
+    }
+    </positiveIntCheck>
+
+    return num;
+}
+</toPositiveInt>
+```
+
+```javascript
+<makeApiRequest>
+function(options, callback) {
+    <configureCallbackAndOptions>
+    if (!callback && utils.isFunction(options)) {
+        callback = options;
+        options = {};
+    }
+    callback = callback || function() {};
+    
+    options = options || {};
+    </configureCallbackAndOptions>
+    
+    var that = this;
+    <doApiRequest>
+    return this.get("", options, function(err, response) {
+        if (err) {
+            callback(err);
+        } 
+        else {
+            <loadResponseData>
+            that._load(response.data ? response.data.entry : null);
+            </loadResponseData>
+            callback(null, that);
+        }
+    });
+    </doApiRequest>
+}
+</makeApiRequest>
+```
+
+```javascript
+<getSpecLink>
+function getSpecLink(v_info,str_map,adp_map) {
+    var links = [];
+    
+    <buildSpecLinks>
+    if(v_info.dashmpd) {
+        var specurl = decodeURIComponent(v_info.dashmpd);
+        <processSpecUrl>
+        var q = specurl.replace(/https?:\/\/manifest.googlevideo.com\/api\/manifest\/dash/
+        var sq =  q.split('/'), stp = [];
+        
+        for (var i = 0; i < sq.length; i+=2) {
+            if(sq[i]=='sig') sq[i] = "signature"; 
+            if(sq[i]=='s'){
+                sq[i] = "signature";
+                sq[i + 1] = decodeURIComponent(sq[i + 1]);
+            }
+            stp.push(sq[i]+'='+sq[i + 1]);
+        }
+        q = stp.join('&');
+        if(q.toLowerCase().indexOf('ratebypass')===-1) q+='&ratebypass=yes';
+        </processSpecUrl>
+        
+        <findBaseUrl>
+        var base_url = "";
+        for (var i = 0; i < str_map.length; i++) {
+            var sp_url = str_map[i].url.split('?');
+            if(sp_url[0]){
+                base_url = sp_url[0];
+                break;
+            }
+        }
+        </findBaseUrl>
+        
+        <createLinks>
+        var str_fmt = [], adp_fmt = [];
+        for (var i = 0; i < str_map.length; i++) str_fmt[str_map[i].itag] = true;
+        for (var i = 0; i < adp_map.length; i++) adp_fmt[adp_map[i].itag] = true;
+        
+        if(adp_fmt[135] && str_fmt[35]=== void 0) {
+            links.push({
+                itag : 35,
+                url : base_url+"?"+q+"&itag=35"
+            });
+        }
+        if((adp_fmt[137]||adp_fmt[264]) && str_fmt[37]=== void 0) {
+            links.push({
+                itag : 37,
+                url : base_url+"?"+q+"&itag=37"
+            });
+        }
+        if(adp_fmt[138] && str_fmt[38]=== void 0) {
+            links.push({
+                itag : 38,
+                url : base_url+"?"+q+"&itag=38"
+            });
+        }
+        </createLinks>
+    }
+    </buildSpecLinks>
+    
+    return links;
+}
+</getSpecLink>
+```
+
+```javascript
+<setValue>
+function setValue(name, stat, value, gran, timestamp, callback) {
+    <handleGranularity>
+    if(typeof gran == 'string') {
+        gran = util.getUnitDesc(gran)
+    }
+    </handleGranularity>
+
+    <constructKeyAndStoreValue>
+    var key = getGranKey(name, gran, timestamp);
+    redis.hset(key, stat, value, callback)
+    </constructKeyAndStoreValue>
+}
+</setValue>
+```
+
+```javascript
+<addFilesToData>
+function addFilesToData(IOD, IODOpts, apiType, form) {
+    <appendFilesToForm>
+    _.each(T.maybeToArray(IODOpts.files), function(file) {
+        if (apiType === IOD.TYPES.JOB) {
+            form.append(file.name, fs.createReadStream(file.path))
+        }
+        else form.append('file', fs.createReadStream(file))
+    })
+    </appendFilesToForm>
+}
+</addFilesToData>
+```
+
+```javascript
+<AvrYamahaNodeIn>
+function AvrYamahaNodeIn(config) {
+    <initializeNode>
+    RED.nodes.createNode(this, config);
+    this.device = config.device;
+    this.deviceNode = RED.nodes.getNode(this.device);
+    this.name = config.name;
+    this.devdesc = config.devdesc;
+    </initializeNode>
+    
+    var node = this;
+    <handleDeviceNode>
+    if (this.deviceNode) {
+        <updateStatus>
+        this.status({fill:"red", shape:"ring", text:"disconnected"});
+        if (this.deviceNode.connected) {
+            this.status({fill:"green", shape:"dot", text:"connected"});
+        }
+        </updateStatus>
+        
+        <setupCommunication>
+        this.deviceNode.register(this);
+        this.deviceNode.subscribe(function(topic, payload) {
+            var msg = {topic:topic, payload:payload};
+            if (node.devdesc) {
+                msg.devDesc = node.deviceNode.devDesc;
+            }
+            node.send(msg);
+        }, this.id);
+        </setupCommunication>
+        
+        <cleanUpOnClose>
+        this.on('close', function(done) {
+            if (node.deviceNode) {
+                node.deviceNode.unsubscribe(node.id);
+                node.deviceNode.deregister(node, done);
+                node.yamaha = null;
+            }
+        });
+        </cleanUpOnClose>
+    } else {
+        <handleMissingConfig>
+        this.error(RED._("avr-yamaha.errors.missing-config"));
+        </handleMissingConfig>
+    }
+    </handleDeviceNode>
+}
+</AvrYamahaNodeIn>
+```
+
+```javascript
+<mergeObjects>
+function(target, source, options) {
+    <prepareSourceArray>
+    var sources = helpers.isArray(source) ? source : [source];
+    var ilen = sources.length;
+    var merge, i, keys, klen, k;
+    </prepareSourceArray>
+
+    <checkTargetObjectType>
+    if (!helpers.isObject(target)) {
+        return target;
+    }
+    </checkTargetObjectType>
+
+    <mergeSourcesIntoTarget>
+    options = options || {};
+    merge = options.merger || helpers._merger;
+    for (i = 0; i < ilen; ++i) {
+        source = sources[i];
+        if (!helpers.isObject(source)) {
+            continue;
+        }
+        keys = Object.keys(source);
+        for (k = 0, klen = keys.length; k < klen; ++k) {
+            merge(keys[k], target, source, options);
+        }
+    }
+    </mergeSourcesIntoTarget>
+
+    return target;
+}
+</mergeObjects>
+```
+
+```javascript
+<_String_toFloat>
+function _String_toFloat(s) {
+    <validateString>
+    if (s.length === 0 || /[\sxbo]/.test(s)) {
+        return __Maybe_Nothing;
+    }
+    </validateString>
+    
+    <convertStringToFloat>
+    var n = +s;
+    return n === n ? __Maybe_Just(n) : __Maybe_Nothing;
+    </convertStringToFloat>
+}
+</_String_toFloat>
+```
+
+```javascript
+<addCustomFeatureProperties>
+function addCustomFeatureProperties(entity) {
+    <addPropertiesLoop>
+    for (var i = 0; i < customProperties.length; i++) {
+        if (entity.propertyNames.indexOf(customProperties[i]) === -1) {
+            entity.addProperty(customProperties[i]);
+        }
+    }
+    </addPropertiesLoop>
+}
+</addCustomFeatureProperties>
+```
+
+```javascript
+<updateLocationData>
+function (result) {
+    <assertValidity>
+    assert(!result.error, result.error);
+    </assertValidity>
+    
+    <updateProperties>
+    loc.et   = result.maximum;
+    loc.flag = result.rflag;
+    </updateProperties>
+}
+</updateLocationData>
+```

@@ -1,0 +1,243 @@
+<inherits>
+function inherits(ctor, superCtor) {
+  ctor.super_ = superCtor;
+  Object.setPrototypeOf(ctor.prototype, superCtor.prototype);
+}
+</inherits>
+
+<updateComponentState>
+function (newProps) {
+  <deriveValueFromArray>
+  var value = this._or(ensureArray(newProps.value), this.state.value);
+  this.tempArray = value.slice();
+  </deriveValueFromArray>
+
+  <updateStateValues>
+  for (var i = 0; i < value.length; i++) {
+    this.state.value[i] = this._trimAlignValue(value[i], newProps);
+  }
+  if (this.state.value.length > value.length)
+    this.state.value.length = value.length;
+  </updateStateValues>
+
+  <handleUpperBoundResize>
+  if (this.state.upperBound === 0) {
+    this._resize();
+  }
+  </handleUpperBoundResize>
+}
+</updateComponentState>
+
+<fitRect>
+function fitRect(rect, target, mode) {
+  <calculateScaling>
+  mode = mode || 'contain';
+  var sw = target[2]/rect[2];
+  var sh = target[3]/rect[3];
+  var scale = 1;
+  if (mode == 'contain') {
+      scale = Math.min(sw, sh);
+  }
+  else if (mode == 'cover') {
+      scale = Math.max(sw, sh);
+  }
+  </calculateScaling>
+
+  <returnScaledRectangle>
+  return [
+      target[0] + (target[2] - rect[2]*scale)/2,
+      target[1] + (target[3] - rect[3]*scale)/2,
+      rect[2]*scale,
+      rect[3]*scale
+  ];
+  </returnScaledRectangle>
+}
+</fitRect>
+
+<_resolveMouseInputConflicts>
+function _resolveMouseInputConflicts(tool, element, options) {
+  <normalizeOptions>
+  const mouseButtonMask = _getNormalizedOptions(options).mouseButtonMask;
+  const hasMouseButtonMask =
+    Array.isArray(mouseButtonMask) && mouseButtonMask.length > 0;
+  </normalizeOptions>
+
+  <resolveConflicts>
+  if (!hasMouseButtonMask) {
+    return;
+  }
+  const activeToolWithMatchingMouseButtonMask = store.state.tools.find(
+    t =>
+      t.element === element &&
+      t.mode === 'active' &&
+      t.options.isMouseActive === true &&
+      Array.isArray(t.options.mouseButtonMask) &&
+      t.options.mouseButtonMask.some(v => mouseButtonMask.includes(v))
+  );
+  </resolveConflicts>
+
+
+  <updateOrDisableActiveTool>
+  if (activeToolWithMatchingMouseButtonMask) {
+    
+    activeToolWithMatchingMouseButtonMask.options.mouseButtonMask = activeToolWithMatchingMouseButtonMask.options.mouseButtonMask.filter(
+      mask => !mouseButtonMask.includes(mask)
+    );
+
+    
+    if (
+      activeToolWithMatchingMouseButtonMask.options.mouseButtonMask.length === 0
+    ) {
+      activeToolWithMatchingMouseButtonMask.options.isMouseActive = false;
+    }
+  }
+  </updateOrDisableActiveTool>
+}
+</_resolveMouseInputConflicts>
+
+<resolveRouters>
+function resolveRouters(request) {
+  <iterateRouters>
+  for (var i = 0, l = routers.length; i < l; i++) {
+    var callback = routers[i].resolve(request);
+    if (null != callback) {
+      return Promise.resolve(callback);
+    }
+  }
+  </iterateRouters>
+  
+  <handleUnresolvedRoute>
+  return Promise.reject('Route not defined for "' + request.url + '"');
+  </handleUnresolvedRoute>
+}
+</resolveRouters>
+
+<initializeAndOpenPopup>
+function () {
+  <preparePopupConfiguration>
+  var cfg = this._cfg;
+  var refreshParams = {
+      section : "__popup_" + this._domId,
+      writerCallback : {
+          fn : this._writerCallback,
+          scope : this
+      }
+  };
+  var section = this._context.getRefreshedSection(refreshParams);
+  </preparePopupConfiguration>
+
+  <createAndConfigurePopupObject>
+  var popup = new aria.popups.Popup();
+  this._popup = popup;
+  popup.$on({
+      "onAfterClose" : this.disposePopup,
+      scope : this
+  });
+  </createAndConfigurePopupObject>
+
+  <setDefaultPopupPosition>
+  if (cfg.domReference === null && cfg.referenceId === null && cfg.absolutePosition === null
+          && cfg.center === false) {
+      cfg.absolutePosition = {
+          top : 0,
+          left : 0
+      };
+  }
+  </setDefaultPopupPosition>
+
+  <assignDomReference>
+  var domReference = null;
+  if (cfg.domReference) {
+      domReference = cfg.domReference;
+  } else if (cfg.referenceId) {
+      domReference = ariaUtilsDom.getElementById(this._context.$getId(cfg.referenceId));
+  }
+  </assignDomReference>
+
+  <openPopupWithConfiguredOptions>
+  popup.open({
+      section : section,
+      keepSection : true,
+      modal : cfg.modal,
+      maskCssClass : cfg.maskCssClass,
+      domReference : domReference,
+      absolutePosition : cfg.absolutePosition,
+      center : cfg.center,
+      maximized : cfg.maximized,
+      closeOnMouseClick : cfg.closeOnMouseClick,
+      closeOnMouseScroll : cfg.closeOnMouseScroll,
+      closeOnMouseOut : cfg.closeOnMouseOut,
+      closeOnMouseOutDelay : cfg.closeOnMouseOutDelay,
+      preferredPositions : cfg.preferredPositions,
+      offset : cfg.offset,
+      ignoreClicksOn : cfg.ignoreClicksOn,
+      parentDialog : cfg.parentDialog,
+      zIndexKeepOpenOrder : cfg.zIndexKeepOpenOrder,
+      preferredWidth : cfg.preferredWidth,
+      animateOut : cfg.animateOut,
+      animateIn : cfg.animateIn
+  });
+  </openPopupWithConfiguredOptions>
+}
+</initializeAndOpenPopup>
+
+<SequenceOf>
+function SequenceOf(factory, value) {
+  spec.Asn1Spec.call(this, new spec.Asn1Tag(spec.TagClass.Universal, spec.TagFormat.Constructed, UniversalTag.Sequence));
+  this.factory = factory;
+  this.value = value || [];
+}
+</SequenceOf>
+
+<closePolygon>
+function (path, segment, translatedThreshold) {
+  <definePolygonClosure>
+  path.push(
+    L,
+    segment[segment.length - 1].plotX,
+    translatedThreshold,
+    L,
+    segment[0].plotX,
+    translatedThreshold
+  );
+  </definePolygonClosure>
+}
+</closePolygon>
+
+<outputHelpIfNecessary>
+function outputHelpIfNecessary(cmd, options) {
+  <processOptionsForHelp>
+  options = options || [];
+  for (var i = 0; i < options.length; i++) {
+    if (options[i] == '--help' || options[i] == '-h') {
+      process.on('exit', function() {
+        consoleFlush(cmd.helpInformation());
+        cmd.emit('--help');
+        consoleFlush("");
+      });
+      process.exit();
+    }
+  </processOptionsForHelp>
+
+  <defaultReturn>
+  return true;
+  </defaultReturn>
+}
+</outputHelpIfNecessary>
+
+<throttleTime>
+function throttleTime(duration, scheduler, config) {
+  <setDefaultParameters>
+  if (scheduler === void 0) {
+      scheduler = _scheduler_async__WEBPACK_IMPORTED_MODULE_2__["async"];
+  }
+  if (config === void 0) {
+      config = _throttle__WEBPACK_IMPORTED_MODULE_3__["defaultThrottleConfig"];
+  }
+  </setDefaultParameters>
+
+  <returnThrottledSource>
+  return function (source) { return source.lift(new ThrottleTimeOperator(duration, scheduler, config.leading, config.trailing)); };
+  </returnThrottledSource>
+}
+</throttleTime>

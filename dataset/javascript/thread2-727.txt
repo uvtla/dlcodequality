@@ -1,0 +1,255 @@
+<function stringJSON2YAML>
+function stringJSON2YAML (doc, compact = false) {
+  <validateInput>
+  if (!doc || (typeof doc !== 'string' && typeof doc !== 'object')) {
+    throw new TypeError('Argument must be a string or object, and not empty: ' + doc)
+  }</validateInput>
+
+  let obj = doc
+  <parseJSON>
+  if (typeof doc === 'string') {
+    obj = JSON.parse(doc)
+  }</parseJSON>
+
+  <convertToYAML>
+  return yaml.safeDump(obj, compact ? { 'flowLevel': 0 } : undefined)</convertToYAML>
+}
+</function stringJSON2YAML>
+
+<function setOnSuccess>
+function setOnSuccess (path, transform=getDataFromAction) {
+  <defineSuccessHandler>
+  return handleSuccess((state, action) => set(path, transform(action, state), state))</defineSuccessHandler>
+}
+</function setOnSuccess>
+
+<function anonymousEventPreventDefault>
+function ( e ) {
+  <preventDefaultEvent>
+  e.preventDefault();</preventDefaultEvent>
+
+  <setStyleOnElement>
+  this.s[4].borderColor = this.colors.select;
+  this.s[4].color = this.colors.select;</setStyleOnElement>
+}
+</function anonymousEventPreventDefault>
+
+<function bindMany>
+function bindMany($el, options, events) {
+  <bindMultipleEvents>
+  var name, namespaced;
+  for (name in events) {
+    if (events.hasOwnProperty(name)) {
+      namespaced = name.replace(/ |$/g, options.eventNamespace);
+      $el.bind(namespaced, events[name]);
+    }
+  }</bindMultipleEvents>
+}
+</function bindMany>
+
+<function followLayout>
+function followLayout( layoutRef ) {
+  <resolveAndGetLayoutDescriptor>
+  return resolveRef( join( layoutRef, 'layout.json' ), paths.layouts )
+    .then( descriptorPath => readJson( descriptorPath ).then( layout => {
+      const path = dirname( descriptorPath );
+      const name = layout.name;
+
+      <createLayoutDescriptor>
+      return [ {
+        refs: [ layoutRef ],
+        name,
+        path,
+        descriptor: layout,
+        category: 'layouts',
+        schemas: [ 'layout' ]
+      } ];</createLayoutDescriptor>
+    } ) );
+}</resolveAndGetLayoutDescriptor>
+</function followLayout>
+
+<function paintHeaderGroups>
+function paintHeaderGroups(gc, config) {
+  <declareVariablesAndSetup>
+  var paint = this.super.paint,
+      columnIndex = config.gridCell.x,
+      values = config.value.split(this.delimiter), 
+      groupCount = values.length, 
+      rect = config.bounds,
+      bottom = rect.y + rect.height,
+      bounds = Object.assign({}, rect), 
+      prevVisCol = this.visibleColumns.find(function(visCol) {
+        return visCol.columnIndex === columnIndex - 1;
+      });
+  config.prefillColor = null;
+  rect.height /= groupCount;</declareVariablesAndSetup>
+
+  <paintGroupHeaders>
+  for (var g = 0, y = rect.y, node = this.tree, children; g < groupCount; g++, y += rect.height, children = node.children) {
+    <calculateGroups>
+    var value = values[g];
+    var widen = false;
+    if (g === 0) {
+      <processFirstGroup>
+      if (columnIndex === 0 || groupCount === 1 || this.groupCount !== groupCount || this.tree.value !== value) {
+        if (columnIndex > 0 && this.tree && this.autosizeGroups) {
+          autosizeTree(config.grid.behavior, this.tree)
+        }
+        node = this.tree = {
+          value: value,
+          children: [],
+          left: bounds.x,
+          width: bounds.width
+        };
+        if (prevVisCol && !this.columnHeaderLines && groupCount === 1) {
+          prevVisCol.top = bottom;
+        }
+      </processFirstGroup> else {
+        widen = true;
+      }
+    } else if ( 
+      g < groupCount - 1 && 
+      (node = children[children.length - 1]) && 
+      node.value === value 
+    ) {
+      widen = true; 
+    } else {
+      <createNewNode>
+      node = {
+        value: value,
+        children: [],
+        left: bounds.x,
+        width: bounds.width
+      };
+      children.push(node);</createNewNode>
+    }
+
+    if (widen) {
+      <adjustNodeWidth>
+      node.width += config.gridLinesVWidth + bounds.width;
+      if (prevVisCol) {
+        prevVisCol.top = this.columnHeaderLines || g < groupCount - 2 ? y + rect.height : bottom;
+      }</adjustNodeWidth>
+    }
+
+    if (g < groupCount - 1) {
+      <preFillColorReset>
+      config.prefillColor = null;</preFillColorReset>
+    }
+  </calculateGroups>
+
+  for (g = 0, node = this.tree; g < groupCount; g++, rect.y += rect.height, node = node.children[node.children.length - 1]) {
+    rect.x = node.left;
+    rect.width = node.width;
+    var stash = {
+      isColumnHovered: config.isColumnHovered,
+      isSelected: config.isSelected
+    },
+    <paintGroupLabels>
+    gcfg = this.groupConfig,
+    len = gcfg && gcfg.length,
+    isGroupLabel = g < groupCount - 1;
+    if (isGroupLabel) {
+      config.isColumnHovered = config.isSelected = false;
+      if (len) {
+        gcfg = gcfg[g % len]; 
+        Object.keys(gcfg).forEach(stasher, this);
+      }
+
+      <executePaintBackground>
+      var paintBackground = config.paintBackground || this.paintBackground;
+      if (paintBackground) {
+        if (typeof paintBackground !== 'function') {
+          paintBackground = groupedHeader[paintBackground];
+        }
+        if (typeof paintBackground !== 'function') {
+          throw 'Expected background paint function or name of registered background paint function.';
+        }
+        if (!paintBackground.overlay) {
+          config.prefillColor = config.backgroundColor;
+          paintBackground.call(this, gc, config);
+        }
+      }</executePaintBackground>
+    }</paintGroupLabels>
+
+    <paintCellContent>
+    config.value = node.value;
+    paint.call(this, gc, config);
+    node.minWidth = config.minWidth;
+    node.columnIndex = columnIndex;</paintCellContent>
+
+    if (isGroupLabel) {
+      <paintBackgroundOverlay>
+      if (paintBackground && paintBackground.overlay) {
+        paintBackground.call(this, gc, config);
+      }
+      Object.assign(config, stash);</paintBackgroundOverlay>
+    }
+  }
+  </paintGroupHeaders>
+
+  <afterPaintingGroupHeaders>
+  this.groupCount = groupCount; </afterPaintingGroupHeaders>
+
+  <resetRectBounds>
+  Object.assign(rect, bounds);</resetRectBounds>
+
+  <function stasher>
+  function stasher(key) {
+    stash[key] = config[key];
+    var property = gcfg[key];
+    if (key !== 'paintBackground' && typeof property === 'function') {
+      property = property.call(this, gc, config);
+    }
+    config[key] = property;
+  }</function stasher>
+}
+</function paintHeaderGroups>
+
+<function cacheInitializationAndPackageAudit>
+function(pkgManagerName, pkgName, versionRange, callback) {
+  <initializeCache>
+  if (!myCache) {
+    myCache = cache({
+      base: require('os').homedir() + "/.auditjs",
+      name: 'auditjs3x',
+      duration: 1000 * 3600 * CACHE_DURATION_HOURS 
+    });
+  }</initializeCache>
+  <cleanOldCache>cleanCache();</cleanOldCache>
+  <auditPackage>auditPackagesImpl([{pm: pkgManagerName, name: pkgName, version: versionRange}], callback);</auditPackage>
+}
+</function cacheInitializationAndPackageAudit>
+
+<function addEventListenerToTarget>
+function(event_name, target) {
+  <manageEventListener>
+  if (!(event_name in this._events)) {
+    this._events[event_name] = [target];
+  } else {
+    this._events[event_name].push(target);
+  }</manageEventListener>
+}
+</function addEventListenerToTarget>
+
+<function IRLedInitialization>
+function IRLed(board, encode) {
+  <initializeModule>
+  Module.call(this);</initializeModule>
+  this._board = board;
+  this._encode = encode;
+  <setupIRLed>
+  this._board.send([0xf4, 0x09, 0x03, 0xe9, 0x00, 0x00]);</setupIRLed>
+}
+</function IRLedInitialization>
+
+<function tileToBBOXConversion>
+function tileToBBOX(tile) {
+  <calculateTileBounds>
+  var e = tile2lon(tile[0] + 1, tile[2]);
+  var w = tile2lon(tile[0], tile[2]);
+  var s = tile2lat(tile[1] + 1, tile[2]);
+  var n = tile2lat(tile[1], tile[2]);
+  return [w, s, e, n];</calculateTileBounds>
+}
+</function tileToBBOXConversion>

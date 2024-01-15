@@ -1,0 +1,200 @@
+Here are the annotated JavaScript functions for SRP compliance:
+
+1.
+```
+<_setCollectionFrom>
+function _setCollectionFrom(COLLECTION) {
+  _export(_export.S, COLLECTION, { from: function from(source ) {
+    var mapFn = arguments[1];
+    var mapping, A, n, cb;
+    _aFunction(this);
+    mapping = mapFn !== undefined;
+    if (mapping) _aFunction(mapFn);
+    if (source == undefined) return new this();
+    A = [];
+    if (mapping) {
+      n = 0;
+      cb = _ctx(mapFn, arguments[2], 2);
+      _forOf(source, false, function (nextItem) {
+        A.push(cb(nextItem, n++));
+      });
+    } else {
+      _forOf(source, false, A.push, A);
+    }
+    return new this(A);
+  } });
+}
+</_setCollectionFrom>
+```
+This function does not have SRP violations because the entire function supports the single purpose of creating a collection from a given source using the provided functions.
+
+2.
+```
+<DataProtocol>
+function DataProtocol (id, socket) {
+  this.id = id;
+  this._socket = socket;
+  this._buffer = new Buffer(0);
+  this._debug = utils.debug('protocol:' + id);
+  var me = this;
+
+  <assignDataListener>
+  socket.on('data', function (data) {
+    me._onData(data);
+  });
+  </assignDataListener>
+
+  this._midCounter = 0;
+  this._msgCallback = {};
+
+  this._debug('create');
+}
+</DataProtocol>
+```
+While this function primarily sets up a data protocol object, separate responsibility for assigning a data listener is identified.
+
+3.
+```
+<modifyStyle>
+function(name, value, cancel_sync) {
+  
+  if (value == null) {
+    <removeStyle>
+    this.removeStyle(name, cancel_sync);
+    </removeStyle>
+  } else {
+    this._static_styles[name] = value;
+    if (this._is_inDOM && !cancel_sync) 
+      <setDOMStyle>
+      Firestorm.Element.setStyle(this.getDOMElement(), name, value);
+      </setDOMStyle>
+  }
+}
+</modifyStyle>
+```
+The `modifyStyle` function has distinct responsibilities for removing a style and setting a DOM element's style, which have been annotated appropriately.
+
+4.
+```
+<needMoreData>
+function needMoreData(state) {
+  return !state.ended && (state.needReadable || state.length < state.highWaterMark || state.length === 0);
+}
+</needMoreData>
+```
+This function has a single responsibility: checking whether more data is needed, so it complies with SRP.
+
+5.
+```
+<lookup>
+function lookup(locale, format, obj) {
+  if (!locale) throw new Error('missing required "locale" parameter');
+  locale = locale.toLowerCase().replace('-', '_');
+  format = format || 'cardinal';
+
+  <prepareLocale>
+  var p = obj[format];
+  if (!p) throw new Error('unsupported format "' + format + '"');
+  var fn = p[locale] || p[locale.split('_')[0]];
+  if (fn) return fn;
+  </prepareLocale>
+
+  throw new Error('unsupported locale "' + locale + '"');
+}
+</lookup>
+```
+The `lookup` function is responsible for finding a specific locale and format and thus does not violate SRP.
+
+6.
+```
+<normalizeCaps>
+function normalizeCaps(settings) {
+  var features = settings.required_features, caps = {};
+  
+  <resolveFeatureMapping>
+  function resolve(feature, value, strict) {
+    
+    var map = { ... };
+    
+    if (map[feature]) {
+      caps[map[feature]] = value;
+    } else if (!strict) {
+      caps[feature] = value;
+    }
+  }
+  </resolveFeatureMapping>
+  
+  <handleFeatureSettings>
+  if (typeof(features) === 'string') {
+    plupload.each(features.split(/\s*,\s*/), function(feature) {
+      resolve(feature, true);
+    });
+  } else if (typeof(features) === 'object') {
+    plupload.each(features, function(value, feature) {
+      resolve(feature, value);
+    });
+  } else if (features === true) {
+    // Several statements handling special cases 
+  }
+  
+  return caps;
+}
+</normalizeCaps>
+```
+The `normalizeCaps` function encapsulates the resolution of feature mappings and handles feature settings as a whole, so it is consistent with SRP.
+
+7.
+```
+<mergeMultiSelectEvents>
+function mergeMultiSelectEvents ( queue ) {
+  var multiSelectCollections = {};  
+  _.each( queue, function ( event, index ) {
+    // Code block to process individual events
+  });
+  
+  // Code block to process multiSelectCollections
+}
+</mergeMultiSelectEvents>
+```
+This function primarily handles the merging of multi-select events and could be considered SRP compliant, provided that the internal processing and collection manipulation are part of the same cohesive purpose.
+
+8.
+```
+<resolveDocumentConstraint>
+function resolveDocumentConstraint(constraintDefinition) {
+  if (typeof constraintDefinition === 'function') {
+    var dbName = userContext ? userContext.db : null;
+    return constraintDefinition(newDoc, oldDoc, dbName);
+  } else {
+    return constraintDefinition;
+  }
+}
+</resolveDocumentConstraint>
+```
+No SRP violation is present here; the function resolves a document constraint in two ways, both singular in purpose.
+
+9.
+```
+<toSnakeCase>
+function (s) {
+  return s.replace(strColons, '/')
+          .replace(strWords, '$1_$2')
+          .replace(strLowUp, '$1_$2')
+          .replace(strDash, '_')
+          .toLowerCase();
+}
+</toSnakeCase>
+```
+This function has a single purpose: converting a string to snake case, which is SRP-compliant.
+
+10.
+```
+<adoptChildNodes>
+function() {
+  return SVG.utils.map(SVG.utils.filterSVGElements(this.node.childNodes), function(node) {
+    return SVG.adopt(node)
+  });
+}
+</adoptChildNodes>
+```
+The entire function complies with SRP as it solely performs the adoption of child nodes into the SVG context.

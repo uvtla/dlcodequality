@@ -1,0 +1,332 @@
+```javascript
+<timeSince>
+function timeSince(date) {
+    const seconds = Math.floor((new Date().getTime() / 1000) - (date / 1000));
+    let interval = Math.floor(seconds / 31536000);
+
+    if (interval > 1) {
+        return interval + ' year';
+    }
+
+    interval = Math.floor(seconds / 2592000);
+    if (interval > 1) {
+        return interval + ' month';
+    }
+
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) {
+        return interval + ' day';
+    }
+
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) {
+        return interval + ' hour';
+    }
+
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) {
+        return interval + ' min';
+    }
+
+    return Math.floor(seconds) + ' sec';
+}
+</timeSince>
+```
+
+```javascript
+<cloneSet>
+function cloneSet(source, traversedValues) {
+  let clone = new Set()
+  traversedValues.set(source, clone)
+  
+  cloneStructure(
+    source.values(),
+    entry => undefined,
+    entry => clone.add(entry),
+    traversedValues
+  )
+  
+  return clone
+}
+</cloneSet>
+```
+
+```javascript
+<match>
+function match(test, options, configSetters) {
+  if (!configSetters && Array.isArray(options)) {
+    configSetters = options
+    options = {}
+  }
+
+  assertConfigSetters(configSetters)
+
+  if (options.test) {
+    throw new Error(
+      `match(): Setting 'test' in options is not supported; use the argument instead.`
+    )
+  }
+
+  const { inclusions, exclusions } = splitPatterns(toArray(test))
+  <defineMatchers>
+  const match = Object.assign({}, options, {
+    
+    test: stripArrayConditionally(normalizeMatchers(inclusions))
+  })
+
+  if (exclusions.length > 0) {
+    match.exclude = _.concat(
+      match.exclude ? toArray(match.exclude) : [],
+      normalizeMatchers(exclusions)
+    )
+  }
+  </defineMatchers>
+
+  <groupBlockDefinition>
+  const groupBlock = context => config =>
+    invokeConfigSetters(configSetters, deriveContextWithMatch(context, match), config)
+  </groupBlockDefinition>
+
+  <returnBlock>
+  return Object.assign(groupBlock, {
+    pre: context => invokePreHooks(configSetters, deriveContextWithMatch(context, match)),
+    post: context => config =>
+      invokePostHooks(configSetters, deriveContextWithMatch(context, match), config)
+  })
+  </returnBlock>
+}
+</match>
+```
+
+```javascript
+<checkDocumentState>
+function (tags) {
+    if (tags) {
+        for (var i = 0, ci; ci = tags[i++];) {
+            if (this.document.getElementsByTagName(ci).length > 0) {
+                return true;
+            }
+        }
+    }
+    if (!domUtils.isEmptyBlock(this.body)) {
+        return true
+    }
+    
+    tags = ['div'];
+    for (i = 0; ci = tags[i++];) {
+        var nodes = domUtils.getElementsByTagName(this.document, ci);
+        for (var n = 0, cn; cn = nodes[n++];) {
+            if (domUtils.isCustomeNode(cn)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+</checkDocumentState>
+```
+
+```javascript
+<namespace>
+function namespace(ns) {
+  var names = ns.split('.');
+  var owner = window;
+  for (var i = 0; i < names.length; i++) {
+    var name = names[i];
+    owner[name] = owner[name] || {};
+    owner = owner[name];
+  }
+  return owner;
+}
+</namespace>
+```
+
+```javascript
+<isRelevantRelation>
+function( relation ) {
+    if ( relation.instance instanceof this.relatedModel && this.reverseRelation.key === relation.key
+            &&	this.key === relation.reverseRelation.key ) {
+        return true;
+    }
+    return false;
+}
+</isRelevantRelation>
+```
+
+```javascript
+<deleteLocationWithIdentifier>
+function (identifier)  {
+    var path;
+    <validateIdentifier>
+    if (identifier) {
+      path = this.constructPath(constants.LOCATIONS, identifier);
+      return this.Core.DELETE(path);
+    } else {
+      return this.rejectRequest('Bad Request: A location identifier is required.');
+    }
+    </validateIdentifier>
+}
+</deleteLocationWithIdentifier>
+```
+
+```javascript
+<validateRequestParams>
+function validateRequestParams(req, resource, method, adapter) {
+        req = req || {};
+
+        <initializeParams>
+        var params = resource.params || {};
+        var methodParams = _.extend({}, params[method], params[adapter + '.' + method] );
+        var requiredParams = methodParams.required || [];
+        var eitherorParams = methodParams.eitheror || [];
+        var optional = methodParams.optional || [];
+        var eitherorExists, param;
+        <initializeParams>
+
+        <verifyRequiredParams>
+        for (var i = 0; i < requiredParams.length; i++) {
+            param = requiredParams[i];
+
+            if (req[param] === undefined || req[param] === null) {
+                reqObj = _.extend({}, req);
+                delete reqObj.resource;
+                err = new Error('Invalid request');
+                err.code = 'invalid_request_error';
+                err.message = resource.name + ' ' + method + ' missing ' + param +
+                    '. Required params: ' + JSON.stringify(requiredParams) +
+                    ' req is: ' + JSON.stringify(reqObj);
+                return Q.reject(err);
+            }
+        }
+        </verifyRequiredParams>
+
+        <validateEitherOrParams>
+        if (eitherorParams.length) {
+            eitherorExists = false;
+
+            _.each(eitherorParams, function (eitherorParam) {
+                if (req[eitherorParam]) { eitherorExists = true; }
+            });
+
+            if (!eitherorExists) {
+                delete req.caller;
+                delete req.resource;
+                err = new Error('Invalid request');
+                err.code = 'invalid_request_error';
+                err.message = resource.name + ' ' + method +
+                    ' must have one of the following params: ' + JSON.stringify(eitherorParams) +
+                    ' request is ' + JSON.stringify(req);
+                return Q.reject(err);
+            }
+        }
+        </validateEitherOrParams>
+
+        <checkInvalidParams>
+        var validParams = requiredParams.concat(eitherorParams, optional,
+            ['lang', 'caller', 'resource', 'method', 'auth', 'noemit']);
+        for (var key in req) {
+            if (req.hasOwnProperty(key)) {
+                if (validParams.indexOf(key) < 0) {
+                    delete req.caller;
+                    delete req.resource;
+                    err = new Error('Invalid request');
+                    err.code = 'invalid_request_error';
+                    err.message = 'For ' + resource.name + ' ' + method + ' the key ' +
+                        key + ' is not allowed. Valid params: ' + JSON.stringify(validParams) +
+                        ' request is ' + JSON.stringify(req);
+                    return Q.reject(err);
+                }
+            }
+        }
+        </checkInvalidParams>
+
+        <returnPromise>
+        return new Q();
+        </returnPromise>
+}
+</validateRequestParams>
+```
+
+```javascript
+<GpIAMConstructor>
+function GpIAM(credentials) {
+  this.credentials = credentials;
+  <validateCredentials>
+  if(!this.credentials || !this.credentials.apikey || !this.credentials.iam_endpoint) {
+    throw new Error('GpIAM: params need to be "apikey, iam_endpoint"');
+  }
+  </validateCredentials>
+  this.tokenUrl = new URL('/identity/token', this.credentials.iam_endpoint);
+
+  <apiKeyHandling>
+  if(!this.GP_USE_APIKEY) {
+    const now = new Date();
+    this.ourCacheKey = `${this.credentials.iam_endpoint}#${this.credentials.apikey}`;
+
+    this.updateToken = (async function updateToken(x) {
+      const apikey = this.credentials.apikey;
+      const cacheEntry = GpIAM.prototype.tokenCache[this.ourCacheKey] =
+       GpIAM.prototype.tokenCache[this.ourCacheKey] || {};
+      
+      <tokenCacheValidation>
+      if (!cacheEntry.validUntil ||        
+          (now > cacheEntry.validUntil)) { 
+
+        delete this.access_token; 
+        const tokenResponse = await fetchToken(this.tokenUrl, Buffer.from(querystring.stringify({
+          grant_type,
+          apikey
+        })));
+        
+        cacheEntry.tokenResponse = tokenResponse;
+        
+        const { expires_in } = tokenResponse;
+
+        cacheEntry.validUntil = new Date(now.getTime() + (1000 * expires_in * tokenExpiryThreshold));
+        if(this.VERBOSE) {
+          console.log('Fetched access token ');
+        }
+      }
+      </tokenCacheValidation>
+      <logTokenValidity>
+      if(this.VERBOSE) {
+        console.log(`Token valid until ${cacheEntry.validUntil}`);
+      }
+      </logTokenValidity>
+
+      <setAccessToken>
+      this.access_token = cacheEntry.tokenResponse.access_token;
+      </setAccessToken>
+
+      return x;
+    }).bind(this);
+  }
+  </apiKeyHandling>
+}
+</GpIAMConstructor>
+```
+
+```javascript
+<padString>
+function (string, size, character, begin) {
+    string = "" + string;
+    var length = string.length;
+    <padCalculation>
+    if (length < size) {
+        var padding = [];
+        for (var difference = size - length; difference > 0; difference -= 1) {
+            padding.push(character);
+        }
+    </padCalculation>
+
+    <applyPadding>
+    if (begin === true) {
+        string = padding.join("") + string;
+    } else {
+        string = string + padding.join("");
+    }
+    </applyPadding>
+    return string;
+}
+</padString>
+```

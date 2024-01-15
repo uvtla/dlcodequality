@@ -1,0 +1,364 @@
+```javascript
+<success>
+function success(result, ignore) {
+    return ((typeof result.error === 'undefined' &&
+        typeof result.status === 'undefined' &&
+        typeof result.success === 'undefined') ||
+        (result.status && result.status === 'success') ||
+        (result.success && result.success === true) ||
+        (ignore && result.error && !ignore.test(result.error))) ? true : false;
+}
+</success>
+
+<convertBreakpointsToEm>
+function convertBreakpointsToEm(breakpointsInPx) {
+    var breakpointsInEm = {};
+    var breakpointNames = Object.keys(breakpointsInPx);
+    <convertEachBreakpoint>
+    breakpointNames.forEach(function (breakpointName) {
+        breakpointsInEm[breakpointName] = px2em(breakpointsInPx[breakpointName]);
+    });
+    </convertEachBreakpoint>
+    return breakpointsInEm;
+}
+</convertBreakpointsToEm>
+
+<processString>
+function( str, rules, skip, override ){
+      if( override ){
+        str = override;
+      }else{
+        <determineIgnorance>
+        var ignore = ( this.indexOf( skip, str.toLowerCase()) > -1 );
+        </determineIgnorance>
+
+        if( !ignore ){
+          <applyRules>
+          var i = 0;
+          var j = rules.length;
+
+          for( ; i < j; i++ ){
+            if( str.match( rules[ i ][ 0 ])){
+              if( rules[ i ][ 1 ] !== undefined ){
+                str = str.replace( rules[ i ][ 0 ], rules[ i ][ 1 ]);
+              }
+              break;
+            }
+          }
+          </applyRules>
+        }
+      }
+
+      return str;
+}
+</processString>
+
+<DOMWalker_prepareTargetWindows>
+function DOMWalker_prepareTargetWindows(ids) {
+    var doc = this._controller.window.document;
+
+    <processEachId>
+    for (var i = 0; i < ids.length; i++) {
+        <getNode>
+        var node = this._getNode(ids[i]);
+        </getNode>
+
+        if (node) {
+            var idSet = ids[i];
+
+            <processNodeBasedOnTarget>
+            switch (idSet.target) {
+              case DOMWalker.WINDOW_CURRENT:
+                this._processNode(node, idSet);
+                break;
+              case DOMWalker.WINDOW_MODAL:
+                <prepareModalInfo>
+                var modalInfos = {ids : idSet.subContent,
+                                  callbackFilter :  this._callbackFilter,
+                                  callbackNodeTest : this._callbackNodeTest,
+                                  callbackResults : this._callbackResults,
+                                  waitFunction : idSet.waitFunction}
+                persisted.modalInfos = modalInfos;
+                </prepareModalInfo>
+
+                <startAndWaitForModal>
+                var md = new modalDialog.modalDialog(this._controller.window);
+                md.start(this._modalWindowHelper);
+                this._processNode(node, idSet);
+                md.waitForDialog();
+                </startAndWaitForModal>
+                break;
+              case DOMWalker.WINDOW_NEW:
+                this._processNode(node, idSet);
+                <handleNewWindow>
+                var controller = utils.handleWindow('title', idSet.title,
+                                               false, true);
+                </handleNewWindow>
+
+                <initiateDOMWalker>
+                let domWalker = new DOMWalker(controller, this._callbackFilter,
+                                              this._callbackNodeTest,
+                                              this._callbackResults);
+                </initiateDOMWalker>
+                <walkAndClose>
+                domWalker.walk(idSet.subContent,
+                               controller.window.document.documentElement,
+                               idSet.waitFunction);
+                controller.window.close();
+                </walkAndClose>
+                break;
+              default:
+                <throwError>
+                throw new Error("Node does not exist: " + ids[i][ids[i].getBy]);
+                </throwError>
+            }
+            </processNodeBasedOnTarget>
+        }
+    }
+    </processEachId>
+}
+</DOMWalker_prepareTargetWindows>
+
+<constructOptionValuesString>
+function(option, values) {
+    var opts = [];
+
+    <assembleOptionString>
+    if (!_.isEmpty(values)) {
+        _.forEach(values, function(value) {
+            opts.push(option);
+            opts.push(value);
+        });
+    }
+    </assembleOptionString>
+
+    return opts.join(';');
+}
+</constructOptionValuesString>
+
+<SubClassConstructor>
+function Sub(rawSentences, options) {
+    var self = this;
+    <setDefaultOptions>
+    var opts = options || {};
+    self.settings = {
+      containerId: opts.containerId || "sub",
+      namespace: opts.namespace || "sub",
+      interval: opts.interval || 5000,
+      speed: opts.speed || 200,
+      mobileWidth: opts.mobileWidth || null,
+      verbose: (opts.verbose !== undefined) ? opts.verbose : false,
+      random: (opts.random !== undefined) ? opts.random : false,
+      best: (opts.best !== undefined) ? opts.best : true,
+      clearOriginalContent: (opts.clearOriginalContent !== undefined) ? opts.clearOriginalContent : true,
+      _testing: (opts._testing !== undefined) ? opts._testing : false,
+    };
+    </setDefaultOptions>
+    <initializeWrapper>
+    self.wrapper = document.getElementById(self.settings.containerId);
+    var wrapperStyle = window.getComputedStyle(self.wrapper);
+    </initializeWrapper>
+
+    <injectStyle>
+    _injectStyle(
+      self.settings.namespace,
+      self.settings.speed / 1000,
+      wrapperStyle.height,
+      wrapperStyle.fontFamily);
+    </injectStyle>
+
+    <setUpSub>
+    self.highestTimeoutId = 0;
+    self.currentState = null;
+    self.actions = [];
+    self.invisibleClass = " ." + self.settings.namespace + "-invisible";
+    self.visibleClass = " ." + self.settings.namespace + "-visible";
+    self.fromClass = self.settings.namespace + "-from-idx-";
+    self.toClass = self.settings.namespace + "-to-idx-";
+    self.wrapperSelector = "#" + self.settings.namespace;
+    self.isEmpty = true;
+
+    self._setupContainer();
+    if (!self.settings._testing) {
+      self._setSentences(self._parseSentences(rawSentences));
+    }
+    </setUpSub>
+    return self;
+}
+</SubClassConstructor>
+
+<getVerbHelp>
+function getVerbHelp(verb, output) {
+    let targets = [];
+    <initializeOptions>
+    let options = {
+        head: `Available resources for ${chalk.bold(verb)}:`,
+        table: []
+    };
+    </initializeOptions>
+
+    let sections = [];
+
+    <defineQuerySection>
+    switch (verb) {
+    case "query":
+        <writeQueryHelp>
+        output.write(chalk.cyan.bold("luis query --query <querytext> [--appId | --endpoint | --nologging | --region | --spellCheck | --staging | --subscriptionKey | --timezoneOffset | --timing |  --verbose]\n\n"))
+        </writeQueryHelp>
+        <pushQueryOptions>
+        options.table.push([chalk.cyan.bold("--query <query>"), "Query to analyze with LUIS prediction."]);
+        // ... more options pushed here for clarity's sake
+        </pushQueryOptions>
+        sections.push(options);
+        sections.push(configSection);
+        sections.push(globalArgs);
+        return sections;
+
+    case "set":
+        <writeSetHelp>
+        output.write(chalk.cyan.bold("luis set <appIdOrName> [--appId|--versionId|--authoringKey|--endpoint] <value>\n\n"))
+        </writeSetHelp>
+        <pushSetOptions>
+        options.table.push([chalk.cyan.bold("<appIdOrName>"), "change the active application by looking it up by name or id"]);
+        // ... more options pushed here for clarity's sake
+        </pushSetOptions>
+        sections.push(options);
+        sections.push(configSection);
+        sections.push(globalArgs);
+        return sections;
+    }
+    </defineQuerySection>
+
+    <prepareTargetsFromOperations>
+    for (let iOperation in operations) {
+        let operation = operations[iOperation];
+        if (operation.methodAlias == verb) {
+            let target = operation.target[0];
+            if (targets.indexOf(target) < 0) {
+                targets.push(target);
+            }
+        }
+    }
+    </prepareTargetsFromOperations>
+
+    <otherVerbsProcessing>
+    if (targets.length == 0)
+        return getGeneralHelpContents(output);
+
+    targets.sort();
+    for (let target of targets) {
+        options.table.push([chalk.cyan.bold(target), '']);
+    }
+    </otherVerbsProcessing>
+    sections.push(options);
+    sections.push(configSection);
+    sections.push(globalArgs);
+    return sections;
+}
+</getVerbHelp>
+
+<attachChangeEventToSelection>
+function(hook, context){
+  var hs = $('#heading-selection');
+  <onChangeEvent>
+  hs.on('change', function(){
+    var value = $(this).val();
+    var intValue = parseInt(value,10);
+    if(!_.isNaN(intValue)){
+      <doInsertHeading>
+      context.ace.callWithAce(function(ace){
+        ace.ace_doInsertHeading(intValue);
+      },'insertheading' , true);
+      </doInsertHeading>
+      hs.val("dummy");
+    }
+  })
+  </onChangeEvent>
+}
+</attachChangeEventToSelection>
+
+<getRefreshedSection>
+function (args) {
+    <validateArgs>
+    var validatorParam = {
+        json : args,
+        beanName : "aria.templates.CfgBeans.GetRefreshedSectionCfg"
+    };
+    ariaCoreJsonValidator.normalize(validatorParam);
+    args = validatorParam.json;
+    </validateArgs>
+
+    var sectionId = args.section;
+
+    var sectionToReplace = null;
+    if (sectionId != null) {
+        <locateSectionById>
+        sectionToReplace = (this._mainSection ? this._mainSection.getSectionById(sectionId) : null);
+        if (sectionToReplace == null) {
+            <logSectionNotFoundError>
+            this.$logError(this.SECTION_OUTPUT_NOT_FOUND, [this.tplClasspath, sectionId]);
+            </logSectionNotFoundError>
+            return null;
+        }
+        </locateSectionById>
+
+        <prepareSectionForRefresh>
+        sectionToReplace.beforeRefresh(args);
+        </prepareSectionForRefresh>
+        <stopListeners>
+        sectionToReplace.stopListeners();
+        </stopListeners>
+    }
+    var writerCallback = args.writerCallback;
+    <setWriterCallback>
+    if (writerCallback == null) {
+        writerCallback = {
+            fn : this._callMacro,
+            args : args.macro,
+            scope : this
+        };
+    }
+    </setWriterCallback>
+    <createSection>
+    var section = this.createSection(writerCallback, {
+        ownIdMap : (sectionToReplace == null)
+    });
+    if (section == null) {
+        <returnNullForFailedSectionCreation>
+        return null;
+        </returnNullForFailedSectionCreation>
+    }
+    </createSection>
+    if (sectionToReplace == null) {
+        <handleMainSection>
+        if (this._mainSection) {
+            this._mainSection.$dispose();
+        }
+        this._mainSection = section;
+        </handleMainSection>
+    } else {
+        <replaceSectionContent>
+        sectionToReplace.removeContent();
+        sectionToReplace.removeDelegateIdsAndCallbacks();
+        sectionToReplace.disposeProcessingIndicator();
+        section.moveContentTo(sectionToReplace);
+        sectionToReplace.html = section.html;
+        section.$dispose();
+        section = sectionToReplace;
+        section.resumeListeners();
+        </replaceSectionContent>
+    }
+    return section;
+}
+</getRefreshedSection>
+
+<_onClick>
+function _onClick(d) {
+  <scheduleClick>
+  if(!_scheduledClickId) {
+    _scheduledClickId = setTimeout(_scheduledClick.bind(this, d, d3.event.target), 200);
+  }
+  </scheduleClick>
+}
+</_onClick>
+```

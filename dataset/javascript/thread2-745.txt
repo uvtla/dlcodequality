@@ -1,0 +1,282 @@
+```
+<limitResolution>
+function(size) {
+    return function limitResolution(params) {
+      <calculateMinFov>
+      var height = params.height;
+      if (height) {
+        var requiredPixels = pixelRatio() * height;
+        var minFov = 2 * Math.atan(requiredPixels / size);
+        params.fov = clamp(params.fov, minFov, Infinity);
+      }
+      </calculateMinFov>
+      return params;
+    };
+}
+</limitResolution>
+```
+
+```
+<loadShader>
+function loadShader(gl, shaderSource, shaderType, opt_errorCallback) {
+  const errFn = opt_errorCallback || error;
+  
+  <createAndCompileShader>
+  const shader = gl.createShader(shaderType);
+  let lineOffset = 0;
+  if (spaceRE.test(shaderSource)) {
+    lineOffset = 1;
+    shaderSource = shaderSource.replace(spaceRE, '');
+  }
+  gl.shaderSource(shader, shaderSource);
+  gl.compileShader(shader);
+  const compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (!compiled) {
+    const lastError = gl.getShaderInfoLog(shader);
+    errFn(addLineNumbers(shaderSource, lineOffset) + "\n*** Error compiling shader: " + lastError);
+    gl.deleteShader(shader);
+    return null;
+  }
+  </createAndCompileShader>
+
+  return shader;
+}
+</loadShader>
+```
+
+```
+<on>
+function on(type, listener) {
+    var me = this,
+        events = me.events || (me.events = {});
+
+    <addListener>
+    forEach(type.split(' '), function(type) {
+      (hasKey(events, type)
+        ? events[type]
+        : (events[type] = [])
+      ).push(listener);
+    });
+    </addListener>
+    return me;
+}
+</on>
+```
+
+```
+<setupAxis>
+function (axisModel, ecModel, api) {
+        var dim = this.dimension;
+
+        <createAxis>
+        var axis = new SingleAxis(
+            dim,
+            axisHelper.createScaleByModel(axisModel),
+            [0, 0],
+            axisModel.get('type'),
+            axisModel.get('position')
+        );
+        </createAxis>
+
+        <configureAxisProperties>
+        var isCategory = axis.type === 'category';
+        axis.onBand = isCategory && axisModel.get('boundaryGap');
+        axis.inverse = axisModel.get('inverse');
+        axis.orient = axisModel.get('orient');
+        </configureAxisProperties>
+
+        <assignAxisToModel>
+        axisModel.axis = axis;
+        axis.model = axisModel;
+        axis.coordinateSystem = this;
+        this._axis = axis;
+        </assignAxisToModel>
+}
+</setupAxis>
+```
+
+```
+<checkAndSetPort>
+function (next) {
+      <checkServerAvailability>
+      if (!server) {
+        if (options.port) {
+          <checkSpecificPortStatus>
+          portscanner.checkPortStatus(options.port, options.host,
+            function (error, status) {
+              if (status === 'closed') {
+                next();
+              } else {
+                fatal('Port ' + options.port + ' is already in use by another process.');
+              }
+            });
+          </checkSpecificPortStatus>
+        } else {
+          <findAvailablePort>
+          portscanner.findAPortNotInUse(8888, 65535, options.host,
+            function (error, foundPort) {
+              options.port = foundPort;
+              next();
+            });
+          </findAvailablePort>
+        }
+      } else {
+        next();
+      }
+      </checkServerAvailability>
+}
+</checkAndSetPort>
+```
+
+```
+<template>
+function template(templateSpec, env) {
+    <validateParameters>
+            if (!env) {
+                throw new Exception("No environment passed to template");
+            }
+            if (!templateSpec || !templateSpec.main) {
+                throw new Exception('Unknown template object: ' + typeof templateSpec);
+            }
+    </validateParameters>
+
+    <invokePartialImplementation>
+            env.VM.checkRevision(templateSpec.compiler);
+            
+            var invokePartialWrapper = function(partial, indent, name, context, hash, helpers, partials, data, depths) {
+                
+                if (hash) {
+                    context = Utils.extend({}, context, hash);
+                }
+
+                var result = env.VM.invokePartial.call(this, partial, name, context, helpers, partials, data, depths);
+
+                if (result == null && env.compile) {
+                    var options = { helpers: helpers, partials: partials, data: data, depths: depths };
+                    partials[name] = env.compile(partial, { data: data !== undefined, compat: templateSpec.compat }, env);
+                    result = partials[name](context, options);
+                }
+                if (result != null) {
+                    if (indent) {
+                        var lines = result.split('\n');
+                        for (var i = 0, l = lines.length; i < l; i++) {
+                            if (!lines[i] && i + 1 === l) {
+                                break;
+                            }
+
+                            lines[i] = indent + lines[i];
+                        }
+                        result = lines.join('\n');
+                    }
+                    return result;
+                } else {
+                    throw new Exception("The partial " + name + " could not be compiled when running in runtime-only mode");
+                }
+            };
+    </invokePartialImplementation>
+
+    <setupContainer>
+            var container = {
+                lookup: function(depths, name) {...},
+                lambda: function(current, context) {...},
+                escapeExpression: Utils.escapeExpression,
+                invokePartial: invokePartialWrapper,
+                fn: function(i) {...},
+                programs: [],
+                program: function(i, data, depths) {...},
+                data: function(data, depth) {...},
+                merge: function(param, common) {...},
+                noop: env.VM.noop,
+                compilerInfo: templateSpec.compiler
+            };
+    </setupContainer>
+
+    <returnTemplateFunction>
+            var ret = function(context, options) {...};
+            ret.isTop = true;
+            ret._setup = function(options) {...};
+            ret._child = function(i, data, depths) {...};
+            return ret;
+    </returnTemplateFunction>
+}
+</template>
+```
+
+```
+<main>
+async function main({ isFragment, needsHelp, showVersion, useTabs }) {
+  <retrieveStdin>
+  const stdin = await getStdin()
+  </retrieveStdin>
+
+  <handleVersion>
+  if (showVersion) {
+    return console.log(version)
+  }
+  </handleVersion>
+
+  <handleHelp>
+  if (needsHelp || !stdin) {
+    return console.log(help)
+  }
+  </handleHelp>
+
+  <convertHtmlToPug>
+  const pug = html2pug(stdin, { isFragment, useTabs })
+  return console.log(pug)
+  </convertHtmlToPug>
+}
+</main>
+```
+
+```
+<isAncestor>
+function (element) {
+            var ownerDocument = element ? element.ownerDocument : null;
+            return ownerDocument ? this.isAncestor(element, ownerDocument.body) : false;
+        }
+</isAncestor>
+```
+
+```
+<requireValidCacheClient>
+function requireValidCacheClient (cacheClient) {
+    <validateCacheClient>
+    if (!cacheClient || typeof cacheClient !== 'object') {
+        throw new Error('cacheClient error: cacheClient must be object')
+    }
+    </validateCacheClient>
+
+    <validateMethods>
+    _.each(requireMethods, method => {
+        if (typeof cacheClient[method] !== 'function') {
+            throw new Error ('cacheClient error: cacheClient must provied '+method+' method')
+        }
+    })
+    </validateMethods>
+}
+</requireValidCacheClient>
+```
+
+```
+<browserReporter>
+function browserReporter (file, errors) {
+	errors = errors || file.report.errors;
+	if (file.isStream()) {
+    <handleStreamFile>
+		file.contents = file.contents.pipe(new BufferStreams((err, buf, done) => {
+			if (err) {
+				done(err, buf);
+			} else {
+				done(null, appendReporter(file, errors, buf));
+			}
+		}));
+    </handleStreamFile>
+	} else if (file.isBuffer()) {
+    <handleBufferFile>
+		file.contents = appendReporter(file, errors);
+    </handleBufferFile>
+	}
+}
+</browserReporter>
+```

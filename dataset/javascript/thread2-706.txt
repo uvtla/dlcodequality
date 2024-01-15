@@ -1,0 +1,245 @@
+<function1>
+function () {
+  var self = this;
+  var indexes = self.$indexes || [];
+
+  return Promise.try(function () {
+    assert.arrayOfObject(indexes, '$indexes should be an array of object');
+    _.forEach(indexes, function (indexItem) {
+      assert.object(indexItem.keys, 'Database index keys should be object');
+      if (indexItem.options) {
+        assert.object(indexItem.options, 'Database index options should be object');
+      } else {
+        indexItem.options = {};
+      }
+    });
+
+    return indexes;
+  })
+    .then(function (indexes) {
+      <mongoIndexCreation>
+      if (_.isEmpty(indexes)) {
+        return;
+      }
+      switch (self.connection.toString()) {
+        case 'mongo':
+          return Promise.map(indexes, function (indexItem) {
+            return self.createMongoIndexes([indexItem.keys, indexItem.options]);
+          });
+        default:
+          break;
+      }
+      </mongoIndexCreation>
+    });
+}
+</function1>
+
+<function2>
+function values(data, columns) {
+  if (!data || typeof data !== 'object') {
+    throw new TypeError('Invalid parameter \'data\' specified.');
+  }
+
+  const isArray = Array.isArray(data);
+
+  if (!(columns instanceof npm.ColumnSet)) {
+    if (isArray && npm.utils.isNull(columns)) {
+      throw new TypeError('Parameter \'columns\' is required when generating multi-row values.');
+    }
+    columns = new npm.ColumnSet(columns || data);
+  }
+
+  if (!columns.columns.length) {
+    throw new Error('Cannot generate values without any columns.');
+  }
+
+  const format = npm.formatting.as.format;
+
+  if (isArray) {
+    return data.map((d, index) => {
+      if (!d || typeof d !== 'object') {
+        throw new Error('Invalid object at index ' + index + '.');
+      }
+      return '(' + format(columns.variables, columns.prepare(d)) + ')';
+    }).join();
+  }
+  return '(' + format(columns.variables, columns.prepare(data)) + ')';
+}
+</function2>
+
+<function3>
+function validateAWSConfig(awsConfig) {
+  return validateAccessKeyID(awsConfig.accessKeyId) &&
+    validateSecretAccessKey(awsConfig.secretAccessKey) &&
+    validateAWSRegion(awsConfig.region);
+}
+</function3>
+
+<function4>
+function (e) {
+  var that = this;
+  var startingTd = this.dom.currentTarget;
+
+  this.s.drag.dragging = true;
+
+  that.dom.borderTop.style.display = "block";
+  that.dom.borderRight.style.display = "block";
+  that.dom.borderBottom.style.display = "block";
+  that.dom.borderLeft.style.display = "block";
+
+  var coords = this._fnTargetCoords(startingTd);
+  this.s.drag.startX = coords.x;
+  this.s.drag.startY = coords.y;
+  this.s.drag.startTd = startingTd;
+  this.s.drag.endTd = startingTd;
+
+  this._fnUpdateBorder(startingTd, startingTd);
+
+  $(document).bind('mousemove.AutoFill', function (e) {
+    that._fnFillerDragMove.call(that, e);
+  });
+
+  $(document).bind('mouseup.AutoFill', function (e) {
+    that._fnFillerFinish.call(that, e);
+  });
+
+  this.s.screen.y = e.pageY;
+  this.s.screen.height = $(window).height();
+  this.s.screen.scrollTop = $(document).scrollTop();
+
+  if (this.s.dt.oScroll.sY !== "") {
+    this.s.scroller.top = $(this.s.dt.nTable.parentNode).offset().top;
+    this.s.scroller.bottom = this.s.scroller.top + $(this.s.dt.nTable.parentNode).height();
+  }
+
+  <autoScroll>
+  this.s.screen.interval = setInterval(function () {
+    var iScrollTop = $(document).scrollTop();
+    var iScrollDelta = iScrollTop - that.s.screen.scrollTop;
+    that.s.screen.y += iScrollDelta;
+
+    if (that.s.screen.height - that.s.screen.y + iScrollTop < 50) {
+      $('html, body').animate({
+        "scrollTop": iScrollTop + 50
+      }, 240, 'linear');
+    }
+    else if (that.s.screen.y - iScrollTop < 50) {
+      $('html, body').animate({
+        "scrollTop": iScrollTop - 50
+      }, 240, 'linear');
+    }
+
+    if (that.s.dt.oScroll.sY !== "") {
+      if (that.s.screen.y > that.s.scroller.bottom - 50) {
+        $(that.s.dt.nTable.parentNode).animate({
+          "scrollTop": $(that.s.dt.nTable.parentNode).scrollTop() + 50
+        }, 240, 'linear');
+      }
+      else if (that.s.screen.y < that.s.scroller.top + 50) {
+        $(that.s.dt.nTable.parentNode).animate({
+          "scrollTop": $(that.s.dt.nTable.parentNode).scrollTop() - 50
+        }, 240, 'linear');
+      }
+    }
+  }, 250);
+  </autoScroll>
+}
+</function4>
+
+<function5>
+function (name) {
+  var loader = this._loader;
+  delete loader.importPromises[name];
+  delete loader.moduleRecords[name];
+  return loader.modules[name] ? delete loader.modules[name] : false;
+}
+</function5>
+
+<function6>
+function sampleTime$2(period, scheduler) {
+  if (scheduler === void 0) {
+    scheduler = async.async;
+  }
+  return this.lift(new SampleTimeOperator(period, scheduler));
+}
+</function6>
+
+<function7>
+function templateObjectOrArray(o, context) {
+  deepForEach(o, (value, key, subj, path) => {
+    const newPath = template(path, context, true);
+
+    let newValue;
+    if (value && (value.constructor !== Object && value.constructor !== Array)) {
+      newValue = template(value, context, true);
+    } else {
+      newValue = value;
+    }
+
+    debug(`path = ${path} ; value = ${JSON.stringify(value)} (${typeof value}) ; (subj type: ${subj.length ? 'list' : 'hash'}) ; newValue = ${JSON.stringify(newValue)} ; newPath = ${newPath}`);
+
+    if (path !== newPath) {
+      <unsetAndSet>
+      L.unset(o, path);
+      newValue = template(value, context, true);
+      </unsetAndSet>
+    }
+
+    L.set(o, newPath, newValue);
+  });
+}
+</function7>
+
+<function8>
+function seqActions(actions, seed, onCompleted) {
+  var index = 0;
+
+  <invokeNext>
+  function invokeNext(v) {
+    var action = actions[index];
+    action(v, function (res) {
+      index = index + 1;
+      if (index < actions.length) {
+        invokeNext(res);
+      } else {
+        onCompleted(res);
+      }
+    });
+  }
+  </invokeNext>
+
+  invokeNext(seed);
+}
+</function8>
+
+<function9>
+function (source, format, ctx) {
+  if (inputFormats.hasOwnProperty(format)) {
+    return inputFormats[format](source, ctx);
+  } else {
+    throw new Error('invalid format to make a text block from: ' + source.format);
+  }
+}
+</function9>
+
+<function10>
+function () {
+  this._oComponent = sap.ui.component("sap.uxap");
+  if (!this._oComponent) {
+    this._oComponent = sap.ui.component({
+      name: this.getName(),
+      url: this.getUrl(),
+      componentData: {
+        jsonConfigurationURL: this.getJsonConfigurationURL(),
+        mode: this.getMode()
+      }
+    });
+
+    this.setComponent(this._oComponent, true);
+  }
+
+  if (ComponentContainer.prototype.onBeforeRendering) {
+    ComponentContainer.prototype.onBeforeRendering.call(this);
+  }
+}
+</function10>

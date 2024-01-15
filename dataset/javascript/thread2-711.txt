@@ -1,0 +1,177 @@
+<parseCodeChunkToAST>
+function parseCodeChunkToAST(src, options) {
+    src = src
+    .replace(/@/g, '\uFFDA')
+    .replace(/#/g, '\uFFDB')
+    ;
+    var ast = recast.parse(src);
+    return ast;
+}
+</parseCodeChunkToAST>
+
+<webpack_require_extension>
+function(module, exports, __webpack_require__) {
+	"use strict";
+	var Observable_1 = __webpack_require__(5);
+	var count_1 = __webpack_require__(425);
+	Observable_1.Observable.prototype.count = count_1.count;
+}
+</webpack_require_extension>
+
+<mainViewStateSet>
+function mainViewStateSet(mode, recursive) {
+    mainView.state.mode = mode;
+    mainView.state.recursive = recursive;
+}
+</mainViewStateSet>
+
+<addValidChildren>
+function addValidChildren(validChildren) {
+    var childRuleRegExp = /^([+\-]?)(\w+)\[([^\]]+)\]$/;
+    
+    mapCache[settings.schema] = null;
+    validChildren && each(split(validChildren, ','), function(rule) {
+        var parent, prefix, matches = childRuleRegExp.exec(rule);
+        if (matches) {
+            prefix = matches[1];
+            
+            parent = prefix ? children[matches[2]] : children[matches[2]] = {
+                '#comment': {}
+            };
+            parent = children[matches[2]];
+            each(split(matches[3], '|'), function(child) {
+                '-' === prefix ? delete parent[child] : parent[child] = {};
+            });
+        }
+    });
+}
+</addValidChildren>
+
+<fixUpMediaElement>
+function fixUpMediaElement (mediaEl) {
+  
+  var newMediaEl = setCrossOrigin(mediaEl);
+
+  
+  if (newMediaEl.tagName && newMediaEl.tagName.toLowerCase() === 'video') {
+    newMediaEl.setAttribute('playsinline', '');
+    newMediaEl.setAttribute('webkit-playsinline', '');
+  }
+
+  if (newMediaEl !== mediaEl) {
+    mediaEl.parentNode.appendChild(newMediaEl);
+    mediaEl.parentNode.removeChild(mediaEl);
+  }
+  return newMediaEl;
+}
+</fixUpMediaElement>
+
+<routerMiddlewareExecutor>
+function (routerMiddelware, req, res, next) {
+	var middlewareFilename = routerMiddelware.split('.')[0];
+	var middlewareFunction = routerMiddelware.split('.')[1];
+
+	if (!req.pipa) req.pipa = {};
+
+	this.middlewares[middlewareFilename][middlewareFunction](req, res, function (data) {
+		_.extend(req.pipa, data); next();
+	});
+}
+</routerMiddlewareExecutor>
+
+<Text_constructor>
+function Text(text, style, resolution)
+{
+    this.canvas = document.createElement('canvas');
+    this.context = this.canvas.getContext('2d');
+    this.resolution = resolution || CONST.RESOLUTION;
+    this._text = null;
+    this._style = null;
+
+    var texture = Texture.fromCanvas(this.canvas);
+    texture.trim = new math.Rectangle();
+    
+    <Sprite_call>
+    Sprite.call(this, texture);
+    </Sprite_call>
+    
+    this.text = text;
+    this.style = style;
+}
+</Text_constructor>
+
+<handleUploadEvent>
+function(_event){
+    var _element = _v._$getElement(_event),
+        _id = _element.id,
+        _arr = _id.split('-'),
+        _cch = _cache[_arr[0]];
+    if (!_element.value) return;
+    if (_cch.multiple){
+        <labelUpdate>
+        _e._$get(_cch.lab).htmlFor =
+            _doAppendFile(_arr[0],_cch);
+        </labelUpdate>
+    }
+    if (!_element.name){
+        <nameAssignment>
+        var _sufix = '';
+        _element.name = _cch.name+_sufix;
+        </nameAssignment>
+    }
+    <onchangeTrigger>
+    _cch.onchange({
+        id:_id,
+        form:_element.form,
+        target:_e._$get(_cch.lab)
+    });
+    </onchangeTrigger>
+}
+</handleUploadEvent>
+
+<_shouldCopyAssets>
+function _shouldCopyAssets(assetsDir) {
+  if (!fs.existsSync(assetsDir)) {
+    return true;
+  }
+
+  try {
+    const appCss = loadFile(path.join(assetsDir, 'app.css'));
+    const appCssVersion = /\d+\.\d+\.\d+/.exec(appCss);
+    if (!appCssVersion || appCssVersion[0] !== pkg.version) {
+      return true;
+    }
+  } catch (e) {
+    return true;
+  }
+
+  return false;
+}
+</_shouldCopyAssets>
+
+<extend>
+function extend(obj) {
+  var slice = Array.prototype.slice;
+
+  slice.call(arguments, 1).forEach(function(source) {
+    var getter
+      , setter;
+
+    for (var key in source) {
+      getter = source.__lookupGetter__(key);
+      setter = source.__lookupSetter__(key);
+
+      if (getter || setter) {
+        getter && obj.__defineGetter__(key, getter);
+        setter && obj.__defineSetter__(key, setter);
+      }
+
+      else {
+        obj[key] = source[key];
+      }
+    }
+  });
+
+  return obj;
+}
+</extend>

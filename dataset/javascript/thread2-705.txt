@@ -1,0 +1,295 @@
+```javascript
+<checkVariableLikeDeclaration>
+function checkVariableLikeDeclaration(node) {
+    <checkDecoratorsAndTypes>
+    checkDecorators(node);
+    checkSourceElement(node.type);</checkDecoratorsAndTypes>
+    
+    <checkComputedPropertyNames>
+    if (node.name.kind === 140 ) {
+        checkComputedPropertyName(node.name);
+        if (node.initializer) {
+            checkExpressionCached(node.initializer);
+        }
+    }</checkComputedPropertyNames>
+    
+    <checkBindingPropertyNamesAndAccess>
+    if (node.kind === 169 ) {
+        
+        if (node.propertyName && node.propertyName.kind === 140 ) {
+            checkComputedPropertyName(node.propertyName);
+        }
+        
+        var parent_11 = node.parent.parent;
+        var parentType = getTypeForBindingElementParent(parent_11);
+        var name_18 = node.propertyName || node.name;
+        var property = getPropertyOfType(parentType, getTextOfPropertyName(name_18));
+        if (parent_11.initializer && property && getParentOfSymbol(property)) {
+            checkClassPropertyAccess(parent_11, parent_11.initializer, parentType, property);
+        }
+    }</checkBindingPropertyNamesAndAccess>
+    
+    <checkBindingPatternSourceElements>
+    if (ts.isBindingPattern(node.name)) {
+        ts.forEach(node.name.elements, checkSourceElement);
+    }</checkBindingPatternSourceElements>
+    
+    <checkParameterInitializerImplementation>
+    if (node.initializer && ts.getRootDeclaration(node).kind === 142  && ts.nodeIsMissing(ts.getContainingFunction(node).body)) {
+        error(node, ts.Diagnostics.A_parameter_initializer_is_only_allowed_in_a_function_or_constructor_implementation);
+        return;
+    }</checkParameterInitializerImplementation>
+    
+    <checkBindingPatternAssignabilityAndInitializer>
+    if (ts.isBindingPattern(node.name)) {
+        
+        if (node.initializer && node.parent.parent.kind !== 207 ) {
+            checkTypeAssignableTo(checkExpressionCached(node.initializer), getWidenedTypeForVariableLikeDeclaration(node), node,  undefined);
+            checkParameterInitializer(node);
+        }
+        return;
+    }</checkBindingPatternAssignabilityAndInitializer>
+    
+    <checkVariableOrPropertyType>
+    var symbol = getSymbolOfNode(node);
+    var type = getTypeOfVariableOrParameterOrProperty(symbol);
+    if (node === symbol.valueDeclaration) {
+        
+        if (node.initializer && node.parent.parent.kind !== 207 ) {
+            checkTypeAssignableTo(checkExpressionCached(node.initializer), type, node,  undefined);
+            checkParameterInitializer(node);
+        }
+    }</checkVariableOrPropertyType>
+    
+    <checkDeclarationConsistencyAndModifiers>
+    else {
+        
+        var declarationType = getWidenedTypeForVariableLikeDeclaration(node);
+        if (type !== unknownType && declarationType !== unknownType && !isTypeIdenticalTo(type, declarationType)) {
+            error(node.name, ts.Diagnostics.Subsequent_variable_declarations_must_have_the_same_type_Variable_0_must_be_of_type_1_but_here_has_type_2, ts.declarationNameToString(node.name), typeToString(type), typeToString(declarationType));
+        }
+        if (node.initializer) {
+            checkTypeAssignableTo(checkExpressionCached(node.initializer), declarationType, node,  undefined);
+        }
+        if (!areDeclarationFlagsIdentical(node, symbol.valueDeclaration)) {
+            error(symbol.valueDeclaration.name, ts.Diagnostics.All_declarations_of_0_must_have_identical_modifiers, ts.declarationNameToString(node.name));
+            error(node.name, ts.Diagnostics.All_declarations_of_0_must_have_identical_modifiers, ts.declarationNameToString(node.name));
+        }
+    }</checkDeclarationConsistencyAndModifiers>
+    
+    <checkExportsMergedDeclarationsAndCollisions>
+    if (node.kind !== 145  && node.kind !== 144 ) {
+        
+        checkExportsOnMergedDeclarations(node);
+        if (node.kind === 218  || node.kind === 169 ) {
+            checkVarDeclaredNamesNotShadowed(node);
+        }
+        checkCollisionWithCapturedSuperVariable(node, node.name);
+        checkCollisionWithCapturedThisVariable(node, node.name);
+        checkCollisionWithRequireExportsInGeneratedCode(node, node.name);
+        checkCollisionWithGlobalPromiseInGeneratedCode(node, node.name);
+    }</checkExportsMergedDeclarationsAndCollisions>
+}
+</checkVariableLikeDeclaration>
+
+<parseInt>
+function parseInt (buffer, size) {
+  switch (size) {
+    case 1:
+      return buffer[buffer.read++];
+
+    case 2:
+      return (buffer[buffer.read++] << 8) + buffer[buffer.read++];
+
+    case 4:
+      return (buffer[buffer.read++] << 24) + (buffer[buffer.read++] << 16) +
+             (buffer[buffer.read++] << 8)  + buffer[buffer.read++];
+
+    case 8:
+      return (buffer[buffer.read++] << 56) + (buffer[buffer.read++] << 48) +
+             (buffer[buffer.read++] << 40) + (buffer[buffer.read++] << 32) +
+             (buffer[buffer.read++] << 24) + (buffer[buffer.read++] << 16) +
+             (buffer[buffer.read++] << 8)  + buffer[buffer.read++];
+
+    default:
+      throw new Error("cannot parse ints of that size");
+  }
+}
+</parseInt>
+
+<lookup>
+function lookup(obj, type, name) {
+  while (obj) {
+    if (obj[type] && obj[type].hasOwnProperty(name)) {
+      return obj[type][name];
+    }
+    obj = obj.parent;
+  }
+}
+</lookup>
+
+<ListCollectionIdsRequest>
+function ListCollectionIdsRequest(properties) {
+    <initializeProperties>
+    if (properties)
+        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+    </initializeProperties>
+}
+</ListCollectionIdsRequest>
+
+<unregister>
+function unregister(win, accelerator) {
+    <processArgumentsAndWindow>
+    let wc;
+    if (typeof accelerator === 'undefined') {
+        wc = ANY_WINDOW;
+        accelerator = win;
+    } else {
+        if (win.isDestroyed()) {
+            debug(`Early return because window is destroyed.`);
+            return;
+        }
+        wc = win.webContents;
+    }</processArgumentsAndWindow>
+    
+    <handleArrayOfAccelerators>
+    if (Array.isArray(accelerator) === true) {
+        accelerator.forEach(accelerator => {
+            if (typeof accelerator === 'string') {
+                unregister(win, accelerator);
+            }
+        });
+        return;
+    }</handleArrayOfAccelerators>
+
+    <unregisterShortcutsDebuggingAndRemoval>
+    debug(`Unregistering callback for ${accelerator} on window ${title(win)}`);
+
+    _checkAccelerator(accelerator);
+
+    debug(`${accelerator} seems a valid shortcut sequence.`);
+
+    if (!windowsWithShortcuts.has(wc)) {
+        debug(`Early return because window has never had shortcuts registered.`);
+        return;
+    }
+
+    const shortcutsOfWindow = windowsWithShortcuts.get(wc);
+
+    const eventStamp = toKeyEvent(accelerator);
+    const shortcutIdx = _findShortcut(eventStamp, shortcutsOfWindow);
+    if (shortcutIdx === -1) {
+        return;
+    }
+
+    shortcutsOfWindow.splice(shortcutIdx, 1);
+
+    if (shortcutsOfWindow.length === 0) {
+        shortcutsOfWindow.removeListener();
+        windowsWithShortcuts.delete(wc);
+    }</unregisterShortcutsDebuggingAndRemoval>
+}
+</unregister>
+
+<indexOfPolyfill>
+function(arr, o) {
+    <polyfillImplementation>
+    if (arr.indexOf) return arr.indexOf(o);
+    for (var i = 0; i < this.length; i++) if (arr[i] === o) return i;
+    return -1;
+    </polyfillImplementation>
+}
+</indexOfPolyfill>
+
+<formatLine>
+function formatLine({ rule, message, location }, metrics) {
+    <formattingOutput>
+    const { line, col } = location;
+    const { line: lineW, col: colW, message: msgW } = metrics;
+    const loc = sprintf(`%${lineW}d:%-${colW}d`, line, col);
+    const msg = sprintf(`%-${msgW}s`, message);
+    return `  ${loc}  ${msg}  ${rule}`;
+    </formattingOutput>
+}
+</formatLine>
+
+<off>
+function off(type, listener) {
+    <unbindEventListeners>
+    var me = this,
+        events = me.events;
+
+    events && each(type ? type.split(' ') : events, function(listeners, type) {
+      var index;
+      if (typeof listeners == 'string') {
+        type = listeners;
+        listeners = hasKey(events, type) && events[type];
+      }
+      if (listeners) {
+        if (listener) {
+          index = indexOf(listeners, listener);
+          if (index > -1) {
+            listeners.splice(index, 1);
+          }
+        } else {
+          listeners.length = 0;
+        }
+      }
+    });
+    return me;
+    </unbindEventListeners>
+}
+</off>
+
+<setItem>
+function setItem(key, value) {
+    <setupPersistency>
+    var persistency = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;</setupPersistency>
+
+    <handleSessionStorage>
+    if (!persistency) {
+        session.setItem(key, value);
+        return;
+    }</handleSessionStorage>
+
+    <handleLocalStorageAndFallback>
+    if (!hasLocalStorage()) {
+        cookie$1.setItem(key, value);
+        return;
+    }
+
+    try {
+        localstorage.setItem(key, value);
+    } catch (e) {
+        var code = e.code;
+
+        if (code === 22 || code === 1014) {
+            log('Quota exceeded for "' + key + '"!', 'error', debug);
+
+            cookie$1.setItem(key, value);
+        }
+    }
+    </handleLocalStorageAndFallback>
+}
+</setItem>
+
+<getNextItemRange>
+function getNextItemRange(model, anchor, getItemRanges) {
+    <findNextNodeInRange>
+    let node = nodeForPoint(model, anchor.start, 'next');</findNextNodeInRange>
+    
+    <locateRangeForNode>
+    let range;
+
+    while (node && !range) {
+        range = getNextRange(getItemRanges(node), anchor);
+        node = node.firstChild || nextSibling(node);
+    }
+
+    return range;
+    </locateRangeForNode>
+}
+</getNextItemRange>
+```

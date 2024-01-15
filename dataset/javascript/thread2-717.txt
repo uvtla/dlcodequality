@@ -1,0 +1,233 @@
+```javascript
+<keyOrBlurEventHandling>
+function (event) {
+    this._lastKeyOrBlurEvent = this._currentKeyOrBlurEvent;
+    switch (event.type) {
+        case "keyup":
+            if (event.keyCode === Key.shift) {
+                this._currentKeyOrBlurEvent = null;
+            } else {
+                this._currentKeyOrBlurEvent = "keyboard";
+            }
+            break;
+        case "focusout":
+            this._currentKeyOrBlurEvent = null;
+            break;
+        default:
+            break;
+    }
+}
+</keyOrBlurEventHandling>
+
+<setCustomRetryPolicy>
+function setCustomRetryPolicy() {
+  console.log('Starting Sample 2 - setCustomRetryPolicy.');
+
+  
+  var retryOnContainerBeingDeleted = new RetryPolicyFilter();
+  retryOnContainerBeingDeleted.retryCount = 5;
+  retryOnContainerBeingDeleted.retryInterval = 5000;
+
+  retryOnContainerBeingDeleted.shouldRetry = function (statusCode, retryData) {
+    console.log(' Made the request at ' + new Date().toUTCString() + ', received StatusCode: ' + statusCode);
+
+    var retryInfo = {};
+
+    
+    if (statusCode >= 300 && statusCode !== 409 && statusCode !== 500) {
+      retryInfo.retryable = false;
+    } else {
+      var currentCount = (retryData && retryData.retryCount) ? retryData.retryCount : 0;
+
+      retryInfo = {
+        retryInterval: this.retryInterval + 2000 * currentCount,
+        retryable: currentCount < this.retryCount
+      };
+    }
+
+    return retryInfo;
+  };
+
+  blobService = azure.createBlobService().withFilter(retryOnContainerBeingDeleted);
+
+  
+  createContainer(function () {
+    fetchAttributesContainer(function () {
+      leaseContainer(function () {
+        leaseContainer(function () {
+          deleteContainer(function () {
+            console.log('Ending Sample 2 - setCustomRetryPolicy.');
+          });
+        });
+      });
+    });
+  });
+}
+</setCustomRetryPolicy>
+
+<validateCommandArguments>
+function validate(cmd, args, info) {
+  AbstractCommand.prototype.validate.apply(this, arguments);
+
+  var source = '' + args[0]
+    , destination = '' + args[1];
+
+  if(!info.db.getKey(args[0], info)) {
+    throw NoSuchKey;
+  } else if(source === destination) {
+    throw SourceDestination;
+  }
+  args[0] = source;
+  args[1] = destination;
+}
+</validateCommandArguments>
+
+<binManagement>
+function bin (cb) {
+    if (my.args.length === 0) {
+      binlist(cb)
+    }
+    else {
+      var flag = my.args[0]
+      if (flag === '-d' || my.args[0] === 'delete') {
+        if (my.args[1]) {
+          deletebin(my.args[1],cb)
+        }
+        else {
+          cb( erf('Must pass a bin argument to delete'))
+        }
+      }
+      else return cb( erf('Unknown flag: ' + flag) )
+    }
+    function binlist(cb) {
+      var bin, binlist = []
+      for (bin in my.state.bins) {
+        if (bin === getActiveBin( my.state.bins )) {
+          binlist.push('* ' + path.basename(bin))
+        }
+        else {
+          binlist.push('  ' + path.basename(bin))
+        }
+      }
+      cb( erf('', binlist) )
+    } 
+
+    function deletebin(delbin, cb) {
+      var bin, found = false
+      for (bin in my.state.bins) {
+        if (path.basename(bin) === path.basename(delbin)) {
+          delete my.state.bins[bin]
+          found = true
+        }
+      }
+      if (!found) {
+        return cb( erf( 'Can not remove ' + path.basename(delbin)
+                        +  '. Bin not recognized'))
+      }
+      cb(null, my.state)
+    } 
+}
+</binManagement>
+
+<saveStateWithColReorder>
+function ( oState ) {
+	var i, iLen, aCopy, iOrigColumn;
+	var oSettings = this.s.dt;
+	var columns = oSettings.aoColumns;
+
+	oState.ColReorder = [];
+
+	if ( oState.aaSorting ) {
+		for ( i=0 ; i<oState.aaSorting.length ; i++ ) {
+			oState.aaSorting[i][0] = columns[ oState.aaSorting[i][0] ]._ColReorder_iOrigCol;
+		}
+
+		var aSearchCopy = $.extend( true, [], oState.aoSearchCols );
+
+		for ( i=0, iLen=columns.length ; i<iLen ; i++ ) {
+			iOrigColumn = columns[i]._ColReorder_iOrigCol;
+			oState.aoSearchCols[ iOrigColumn ] = aSearchCopy[i];
+			oState.abVisCols[ iOrigColumn ] = columns[i].bVisible;
+			oState.ColReorder.push( iOrigColumn );
+		}
+	} else if ( oState.order ) {
+		for ( i=0 ; i<oState.order.length ; i++ ) {
+			oState.order[i][0] = columns[ oState.order[i][0] ]._ColReorder_iOrigCol;
+		}
+
+		var stateColumnsCopy = $.extend( true, [], oState.columns );
+
+		for ( i=0, iLen=columns.length ; i<iLen ; i++ ) {
+			iOrigColumn = columns[i]._ColReorder_iOrigCol;
+			oState.columns[ iOrigColumn ] = stateColumnsCopy[i];
+			oState.ColReorder.push( iOrigColumn );
+		}
+	}
+}
+</saveStateWithColReorder>
+
+<getTransformerFromCache>
+function getTransformer(name, clientPlugin, pluginOptions) {
+    if (cache[name]) { return cache[name]; }
+
+    var transformers = clientPlugin.transformers;
+    var templateDir = clientPlugin.templateDir;
+
+    if (!transformers[name]) { throw new Error('No transformer called ' + name); }
+
+    _.each(transformers, function (transformer, transformerName) {
+        cache[transformerName] = generateTransformer(transformerName, transformer, templateDir, pluginOptions);
+    });
+
+    return cache[name];
+}
+</getTransformerFromCache>
+
+<removeDirectory>
+async function removeDir(dirPath) {
+  let isExist = await checkDirExist(dirPath)
+  return new Promise((resolve, reject) => {
+    if (!isExist) {
+      resolve()
+    } else {
+      rimraf(dirPath, err => {
+        if (err) reject(err)
+        else resolve()
+      })
+    }
+  })
+}
+</removeDirectory>
+
+<validateDecimalValue>
+function validateDecimal(sValue, sName) {
+	if (sValue) {
+		if (sValue.match(rDecimal)) {
+			return sValue;
+		}
+		logWarning(sValue, sName);
+	}
+}
+</validateDecimalValue>
+
+<addNodeToDOMSlot>
+function addNodeToSlot (slot, node, insertBefore) {
+  const isInDefaultMode = slot.assignedNodes().length === 0;
+  registerNode(slot, node, insertBefore, eachNode => {
+    if (isInDefaultMode) {
+      slot.__insertBefore(eachNode, insertBefore !== undefined ? insertBefore : null);
+    }
+  });
+}
+</addNodeToDOMSlot>
+
+<loadPageContent>
+function loadPage({page, parent, params = {}}, done) {
+  internal.getPageHTMLAsync(page).then(html => {
+    const pageElement = util.createElement(html);
+    parent.appendChild(pageElement);
+    done(pageElement);
+  });
+}
+</loadPageContent>
+```

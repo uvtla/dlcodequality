@@ -1,0 +1,213 @@
+<clear>
+function clear() {
+  <removeFiles>
+  temps.forEach(function(f) {
+    if (fs.exists(f)) {
+      fs.remove(f)
+    }
+  })
+  </removeFiles>
+  <resetTempList>
+  temps = []
+  </resetTempList>
+}
+</clear>
+
+<initResource>
+function initResource (ravelInstance, koaRouter) {
+  <buildRoutes>
+  buildRoute(ravelInstance, this, Routes.GET, 'getAll');
+  buildRoute(ravelInstance, this, Routes.PUT, 'putAll');
+  buildRoute(ravelInstance, this, Routes.DELETE, 'deleteAll');
+  buildRoute(ravelInstance, this, Routes.GET, 'get');
+  buildRoute(ravelInstance, this, Routes.POST, 'post');
+  buildRoute(ravelInstance, this, Routes.PUT, 'put');
+  buildRoute(ravelInstance, this, Routes.DELETE, 'delete');
+  </buildRoutes>
+  
+  <initializeRoutes>
+  initRoutes.call(this, ravelInstance, koaRouter);
+  </initializeRoutes>
+}
+</initResource>
+
+<attribToHtml>
+function attribToHtml(str) {
+  return str.replace(pr_amp, '&amp;')
+      .replace(pr_lt, '&lt;')
+      .replace(pr_gt, '&gt;')
+      .replace(pr_quot, '&quot;');
+}
+</attribToHtml>
+
+<unknownFunctionName>
+function(width) {
+  <evaluateMediaQuery>
+  var foundBrkpt = false;
+  
+  for (var i = 0; i < mediaBreakpoints.length; i++) {
+    if (width >= mediaBreakpoints[i]['enter'] && width <= mediaBreakpoints[i]['exit']) {
+      foundBrkpt = true;
+      break;
+    }
+  }
+  </evaluateMediaQuery>
+
+  <updateCurrentBreakpoint>
+  if (foundBrkpt && curr !== mediaBreakpoints[i]['label']) {
+    prev = curr;
+    curr = mediaBreakpoints[i]['label'];
+    cycleThrough();
+  } else if (!foundBrkpt && curr !== '') {
+    curr = '';
+    cycleThrough();
+  }
+  </updateCurrentBreakpoint>
+}
+</unknownFunctionName>
+
+<find>
+function find(srcArr, predicate) {
+  return indexOf(srcArr, predicate) > -1 ? srcArr[indexOf(srcArr, predicate)] : UDF;
+}
+</find>
+
+<unknownFunctionName>
+function(pos) {
+    return new Complex(this.x*pos.x - this.y*pos.y, this.y*pos.x + this.x*pos.y);
+}
+</unknownFunctionName>
+
+<toPre>
+function toPre(block, newBlock) {
+  <prepareForTransformation>
+  var bogus = block.getBogus();
+  bogus && bogus.remove();
+  </prepareForTransformation>
+
+  <transformHtmlToPreFormat>
+  var preHtml = block.getHtml();
+  preHtml = replace(preHtml, /(?:^[ \t\n\r]+)|(?:[ \t\n\r]+$)/g, '');
+  preHtml = preHtml.replace(/[ \t\r\n]*(<br[^>]*>)[ \t\r\n]*/gi, '$1');
+  preHtml = preHtml.replace(/([ \t\n\r]+|&nbsp;)/g, ' ');
+  preHtml = preHtml.replace(/<br\b[^>]*>/gi, '\n');
+  </transformHtmlToPreFormat>
+
+  <updateNewBlockWithPreHtml>
+  if (CKEDITOR.env.ie) {
+    var temp = block.getDocument().createElement('div');
+    temp.append(newBlock);
+    newBlock.$.outerHTML = '<pre>' + preHtml + '</pre>';
+    newBlock.copyAttributes(temp.getFirst());
+    newBlock = temp.getFirst().remove();
+  } else {
+    newBlock.setHtml(preHtml);
+  }
+  </updateNewBlockWithPreHtml>
+
+  return newBlock;
+}
+</toPre>
+
+<keyboardWaitForResize>
+function keyboardWaitForResize(callback, isOpening) {
+  <initializeMonitoring>
+  clearInterval(waitForResizeTimer);
+  var count = 0;
+  var maxCount;
+  var initialHeight = getViewportHeight();
+  var viewportHeight = initialHeight;
+  </initializeMonitoring>
+
+  <determineMaximumCount>
+  if (ionic.Platform.isAndroid() && ionic.Platform.version() < 4.4) {
+    maxCount = 30;
+  } else if (ionic.Platform.isAndroid()) {
+    maxCount = 10;
+  } else {
+    maxCount = 1;
+  }
+  </determineMaximumCount>
+
+  <startIntervalMonitor>
+  waitForResizeTimer = setInterval(function(){
+    viewportHeight = getViewportHeight();
+
+    <conditionCheck>
+    if (++count < maxCount &&
+        ((!isPortraitViewportHeight(viewportHeight) &&
+        !isLandscapeViewportHeight(viewportHeight)) ||
+        !ionic.keyboard.height)) {
+      return;
+    }
+    </conditionCheck>
+
+    <adjustKeyboardProperties>
+    if (!keyboardHasPlugin()) {
+      ionic.keyboard.height = Math.abs(initialHeight - window.innerHeight);
+    }
+    ionic.keyboard.isOpen = isOpening;
+    </adjustKeyboardProperties>
+
+    clearInterval(waitForResizeTimer);
+    <invokeCallback>
+    callback();
+    </invokeCallback>
+  }, 50);
+  </startIntervalMonitor>
+  return maxCount; 
+}
+</keyboardWaitForResize>
+
+<gettype>
+function gettype(obj) {
+  <determineSimpleType>
+  var type = typeof obj;
+  if (type !== 'object') {
+    return type;
+  }
+  </determineSimpleType>
+
+  <determineObjectType>
+  return toString.call(obj)
+    .replace(objectRegExp, '$1');
+  </determineObjectType>
+}
+</gettype>
+
+<ElementDataSource>
+function ElementDataSource(config) {
+  <extractHeadings>
+  var headings = config.data.all('tr th');
+  var newColumns = [];
+  headings.each(function(th){
+    newColumns.push(th.getHtml());
+  });
+  </extractHeadings>
+
+  <transformData>
+  var newData = [];
+  config.data.all('tr').each(function(tr){
+    var newRow = {},
+        populated = false;
+    for (var i = 0, numCols = headings.size(); i < numCols; i++) {
+
+      if (!tr.all('td').item(i)) { continue; }
+
+      newRow[headings.item(i).getHtml()] = tr.all('td').item(i).getHtml();
+      populated = true;
+    }
+    if (populated) {
+      newData.push(newRow);
+    }
+  });
+  </transformData>
+
+  <updateConfig>
+  config.columns = newColumns;
+  config.data = newData;
+  </updateConfig>
+
+  return new JSONDataSource(config);
+}
+</ElementDataSource>

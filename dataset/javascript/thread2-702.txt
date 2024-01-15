@@ -1,0 +1,191 @@
+```javascript
+<amf0decArray>
+function amf0decArray(buf) {
+    var obj = amf0decObject(buf.slice(4));
+    return { len: 5 + obj.len, value: obj.value }
+}
+</amf0decArray>
+
+<subscribeToResult>
+function subscribeToResult(outerSubscriber, result, outerValue, outerIndex) {
+    var destination = new _InnerSubscriber__WEBPACK_IMPORTED_MODULE_0__["InnerSubscriber"](outerSubscriber, outerValue, outerIndex);
+    return Object(_subscribeTo__WEBPACK_IMPORTED_MODULE_1__["subscribeTo"])(result)(destination);
+}
+</subscribeToResult>
+
+<_info>
+function _info(stops) {
+    if ( LOG ) {
+      let p = "";
+      <createWhiteSpaceBlock>
+      for ( let i = 0; i < segments.length * 2; i++ ) {
+        p = p + " ";
+      }
+      </createWhiteSpaceBlock>
+
+      <loggingTripInfo>
+      _log(p + "...Trip " + trip.id);
+      _log(p + "   Stop: " + enter.name + " @ " + trip.getStopTime(enter).departure.getTimeReadable());
+      _log(p + "   Segments: " + segments.length);
+      _printSegments(segments, p + "   ");
+      </loggingTripInfo>
+
+      <loggingTransferStops>
+      let stopNames = [];
+      for ( let i = 0; i < stops.length; i++ ) {
+        stopNames.push(stops[i].name);
+      }
+      _log(p + "   Transfer Stops: " + stops.length + " (" + stopNames.join(', ') + ")");
+      </loggingTransferStops>
+    }
+  }
+</_info>
+
+<sort_mx>
+function sort_mx (mx_list) {
+    const sorted = mx_list.sort((a,b) => a.priority - b.priority);
+
+    <randomizeSamePriority>
+    for (let i=0,l=sorted.length-1; i<l; i++) {
+        if (sorted[i].priority === sorted[i+1].priority) {
+            if (Math.round(Math.random())) { 
+                const j = sorted[i];
+                sorted[i] = sorted[i+1];
+                sorted[i+1] = j;
+            }
+        }
+    }
+    </randomizeSamePriority>
+    return sorted;
+}
+</sort_mx>
+
+<createFunction>
+function(name, params, body, context) {
+    var F = context ? context.Function : Function;
+    name = this.safename(name);
+    params = params ? params.join(",") : "";
+    body = body || "";
+    return new F(
+        "return function " + name + " ( " + params + " ) {" + body + "}"
+    )();
+}
+</createFunction>
+
+<setupUploadAndTTFHandling>
+function() {
+    <initializeFileUpload>
+    var upFile = document.getElementById('upload-file');
+    upFile.addEventListener('change', onUpFileChange);
+    </initializeFileUpload>
+
+    <setupAjaxFileAndRender>
+    ajaxFile({
+        type: 'binary',
+        url: './test/baiduHealth.ttf',
+        onSuccess: function(binaryData) {
+            setFont(binaryData);
+
+            var ttfReander = new ttfreader();
+            var ttfData = ttfReander.read(binaryData);
+            showTTFGlyf(ttfData);
+        },
+        onError: function() {
+            console.error('error read file');
+        }
+    });
+    </setupAjaxFileAndRender>
+
+    <delegateFontListClicks>
+    $('#font-list').delegate('li', 'click', function(e) {
+        $('#font-list li').removeClass('selected');
+        $(this).addClass('selected');
+        showGlyf(+$(this).attr('data-code'));
+    });
+    </delegateFontListClicks>
+}
+</setupUploadAndTTFHandling>
+
+<handleTouchEvent>
+function (event, extraData) {
+    if (!this.__validateNbTouches(event)) {
+        return null;
+    }
+    this._disconnectAdditionalTouchEvents();
+    this._connectTouchEvents();
+    <setCurrentData>
+    this.currentData = {
+        positions : ariaTouchEvent.getPositions(event),
+        time : (new Date()).getTime()
+    };
+    </setCurrentData>
+    <handleFakeEvents>
+    if (this._getFakeEventsMap().end) {
+        return this._raiseFakeEvent(event, this._getFakeEventsMap().end, extraData);
+    } else {
+        return (event.returnValue != null) ? event.returnValue : !event.defaultPrevented;
+    }
+    </handleFakeEvents>
+}
+</handleTouchEvent>
+
+<applyStylesAndWaitForCallback>
+function( elem, options, callback ) {
+    var old = {};
+
+    <saveAndApplyNewStyles>
+    for ( var name in options ) {
+        old[ name ] = elem.style[ name ];
+        elem.style[ name ] = options[ name ];
+    }
+    </saveAndApplyNewStyles>
+
+    callback.call( elem );
+
+    <restoreOldStyles>
+    for ( var name in options ) {
+        elem.style[ name ] = old[ name ];
+    }
+    </restoreOldStyles>
+}
+</applyStylesAndWaitForCallback>
+
+<updateGapTracking>
+function update(latest) {
+    if (latest === null || latest === undefined) {
+      isGap = true
+      return
+    }
+
+    <checkAndSetIsGap>
+    if (offset >= latest) {
+      return
+    }
+    </checkAndSetIsGap>
+
+    <recordGapAndReset>
+    if (isGap) {
+      gaps.push({start: offset, end: latest})
+      isGap = false
+    }
+    </recordGapAndReset>
+
+    <updateOffset>
+    offset = latest
+    </updateOffset>
+}
+</updateGapTracking>
+
+<unloadDependencies>
+function (classpath, dependencies) {
+    if (!dependencies) {
+        return;
+    }
+
+    for (var i = 0, len = dependencies.length; i < len; i += 1) {
+        var cssClasspath = Aria.getClasspath(dependencies[i]);
+        this.__unload(classpath, cssClasspath);
+    }
+}
+</unloadDependencies>
+```

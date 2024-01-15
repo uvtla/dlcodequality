@@ -1,0 +1,171 @@
+<incChildrenVersion>
+function incChildrenVersion (pnode) {
+    if (pnode && pnode._childrenVersion) pnode._childrenVersion++
+    else pnode._childrenVersion = 1
+    return pnode
+}
+</incChildrenVersion>
+
+<AnonymousFunctionConstructor>
+function(code, source, target, status, body) {
+    this.code = code || null;
+    this.source = source || null;
+    this.target = target || null;
+    this.http_status = status || null;
+    this.body = body || null;
+}
+</AnonymousFunctionConstructor>
+
+<TimeoutErrorConstructor>
+function TimeoutError(message) {
+  
+  if (!(this instanceof TimeoutError)) { return new TimeoutError(message); }
+  Error.captureStackTrace(this, TimeoutError);
+  if (message !== undefined) {
+    Object.defineProperty(this, 'message', {
+      value: String(message),
+      configurable: true,
+      writable: true
+    });
+  }
+}
+</TimeoutErrorConstructor>
+
+<shouldExclude>
+function shouldExclude(sets) {
+    for (var i = 0; i < sets.length; ++i) {
+        if (!(sets[i] in exclude)) {
+            return false;
+        }
+    }
+    return true;
+}
+</shouldExclude>
+
+<isPartOfDirectivePrologue>
+function isPartOfDirectivePrologue(node) {
+    const block = node.parent.parent;
+
+    if (block.type !== "Program" && (block.type !== "BlockStatement" || !astUtils.isFunction(block.parent))) {
+        return false;
+    }
+    
+    for (let i = 0; i < block.body.length; ++i) {
+        const statement = block.body[i];
+
+        if (statement === node.parent) {
+            return true;
+        }
+        if (!isDirective(statement)) {
+            break;
+        }
+    }
+
+    return false;
+}
+</isPartOfDirectivePrologue>
+
+<isNativeFunction>
+function isNative( value ) {
+	if ( !isFunction( value ) ) {
+		return false;
+	}
+	
+	return re.test( fcn2str.call( value ) );
+}
+</isNativeFunction>
+
+<handleColumnEvent>
+function(e) {
+    <shouldMoveColumn>
+    if(this._shouldMoveColumn(e)){
+        this.moveColumn(null, 1);
+        e.preventDefault();
+        return true;
+    }
+    </shouldMoveColumn>
+    var curModel = this._modelIterator.cursor();
+    if(!curModel){
+        return false;
+    }
+    <handleExpansion>
+    if(this.isExpandable(curModel)){
+        if(!this.isExpanded(curModel)){
+            this.explorer.myTree.expand(curModel);
+            if (this.explorer.postUserExpand) {
+                this.explorer.postUserExpand(this.model.getId(curModel));
+            }
+            e.preventDefault();
+            return false;
+        }
+    }
+    </handleExpansion>
+}
+</handleColumnEvent>
+
+<ConnectionConstructor>
+function Connection(socket, pool) {
+    _classCallCheck(this, Connection);
+
+    this.socket = socket;
+    this.id = socket.id;
+    this.pool = pool;
+    this.incomingFilters = [];
+}
+</ConnectionConstructor>
+
+<DetectLocalIPAddress>
+function DetectLocalIPAddress(callback, stream) {
+    <checkWebRTCSupport>
+    if (!DetectRTC.isWebRTCSupported) {
+        return;
+    }
+    </checkWebRTCSupport>
+
+    var isPublic = true,
+        isIpv4 = true;
+    <getIPsCallback>
+    getIPs(function(ip) {
+        if (!ip) {
+            callback(); 
+        } else if (ip.match(regexIpv4Local)) {
+            isPublic = false;
+            callback('Local: ' + ip, isPublic, isIpv4);
+        } else if (ip.match(regexIpv6)) { 
+            isIpv4 = false;
+            callback('Public: ' + ip, isPublic, isIpv4);
+        } else {
+            callback('Public: ' + ip, isPublic, isIpv4);
+        }
+    }, stream);
+    </getIPsCallback>
+}
+</DetectLocalIPAddress>
+
+<reorderUsingAlgorithm>
+function(less, values, algorithm_name) {
+		
+		<initIndices>
+		var indices = [],
+			i = 0,
+			_less;
+
+		_less = function(a, b) {
+			return less(values[a], values[b]);
+		};
+		
+		for (; i < this._count; i++) {
+			indices.push(i);
+		}
+		</initIndices>
+
+		<sortIndices>
+		indices = Lava.algorithms.sorting[algorithm_name || Lava.schema.DEFAULT_STABLE_SORT_ALGORITHM](indices, _less);
+		</sortIndices>
+
+		<applyReorder>
+		this.reorder(indices);
+		</applyReorder>
+		
+	}
+</reorderUsingAlgorithm>

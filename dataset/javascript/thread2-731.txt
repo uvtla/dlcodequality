@@ -1,0 +1,322 @@
+```javascript
+<WebSocketFrame>
+function WebSocketFrame(maskBytes, frameHeader, config) {
+    this.maskBytes = maskBytes;
+    this.frameHeader = frameHeader;
+    this.config = config;
+    this.maxReceivedFrameSize = config.maxReceivedFrameSize;
+    this.protocolError = false;
+    this.frameTooLarge = false;
+    this.invalidCloseFrameLength = false;
+    this.parseState = DECODE_HEADER;
+    this.closeStatus = -1;
+}
+</WebSocketFrame>
+
+<visitPropertySerialize>
+function visitPropertySerialize (context, parameters, body, fields) {
+    body.forEach(function (node) {
+        
+        if (node.type == 'IfStatement') {
+            
+            var conditional = {
+                type: 'condition',
+                conditions: []
+            }
+            createConditions(context, parameters, conditional.conditions, node)
+            fields.push(conditional)
+            
+        } else {
+            assert(node.type == 'ExpressionStatement')
+            node = node.expression
+            assert(node.type == 'CallExpression')
+            assert(node.callee.name == parameters[0], 'unknown function call')
+
+            var arg = node.arguments[0]
+            if (arg.type == 'ObjectExpression') {
+                assert(arg.type == 'ObjectExpression')
+                var integer = {
+                    type: 'integer',
+                    fields: []
+                }
+                arg.properties.forEach(function (property) {
+                    assert(property.type == 'Property')
+                    integer.fields.push({
+                        type: 'integer',
+                        name: property.key.name,
+                        endianness: 'b',
+                        bits: property.value.value
+                    })
+                })
+                fields.push(integer)
+            } else {
+                assert(arg.type == 'Literal')
+                assert(typeof arg.value == 'string')
+                var name = arg.value
+
+                var arg = node.arguments[1]
+                if (arg.type == 'FunctionExpression') {
+                    var structure = {
+                        name: name,
+                        type: 'structure',
+                        fields: []
+                    }
+                    visitPropertySerialize(name, parameters, arg.body.body, structure.fields)
+                    fields.push(structure)
+                } else if (arg.type == 'ArrayExpression') {
+                    if (
+                        arg.elements.length == 1 &&
+                        arg.elements[0].type == 'Literal' &&
+                        arg.elements[0].value == 8
+                    ) {
+                        var arg = node.arguments[2]
+                        assert(arg.type == 'ArrayExpression')
+                        var terminator = []
+                        for (var i = 0, I = arg.elements.length; i < I; i++) {
+                            assert(arg.elements[i].type == 'Literal')
+                            assert(typeof arg.elements[i].value == 'number')
+                            assert(arg.elements[i].value < 256)
+                            terminator.push(arg.elements[i].value)
+                        }
+                        var arg = node.arguments[3]
+                        var transform = null
+                        if (arg != null) {
+                            assert(arg.type == 'Literal')
+                            assert(typeof arg.value == 'string')
+                            transform = arg.value
+                        }
+                        fields.push({
+                            name: name,
+                            type: 'buffer',
+                            terminator: terminator.slice(),
+                            transform: transform
+                        })
+                    }
+                } else {
+                    var value = arg.value
+
+                    var peek = node.arguments[2]
+                    if (peek != null) {
+                        assert(peek.type == 'ArrayExpression')
+                        assert(peek.elements.length == 1)
+                        var structure = {
+                            name: name,
+                            type: 'structure',
+                            fields: []
+                        }
+                        visitPropertySerialize(name, parameters, peek.elements[0].body.body, structure.fields)
+                        delete structure.name
+                        fields.push({
+                            name: name,
+                            type: 'lengthEncoded',
+                            length: {
+                                name: name,
+                                type: 'integer',
+                                endianness: 'b',
+                                bits: value
+                            },
+                            element: structure
+                        })
+                    } else {
+                        fields.push({
+                            name: name,
+                            type: 'integer',
+                            endianness: 'b',
+                            bits: value
+                        })
+                    }
+                }
+            }
+        }
+    })
+}
+</visitPropertySerialize>
+
+<mergeInto>
+function mergeInto(one, two) {
+  checkMergeObjectArg(one);
+  
+  if (two != null) {
+    checkMergeObjectArg(two);
+    for (var key in two) {
+      if (!two.hasOwnProperty(key)) {
+        continue;
+      }
+      one[key] = two[key];
+    }
+  }
+}
+</mergeInto>
+
+<urlAndDirectorySetup>
+function (urlpath, dir) {
+    var dirarr = dir.split('/');
+    var url = /\/$/.test(urlpath) ? urlpath : urlpath + '/';
+    
+    dirarr.forEach(function (val) {
+        addOneDir(url, val);
+        redirectTo(url + val + '/');
+        url += val;
+    });
+}
+</urlAndDirectorySetup>
+
+<makeBackup>
+function makeBackup(filePath) {
+    var dateString = new Date().toISOString().replace(/:/g, '.').replace('Z', '').replace('T', ' ');
+    
+    try         { fs.mkdirSync(path.join(path.dirname(filePath), 'BACKUP')); }
+    catch(err)  { if (err.code != 'EEXIST') { throw err } }
+    
+    fs.writeFileSync(path.join(path.dirname(filePath), 'BACKUP', dateString + ' ' + path.basename(filePath) ), fs.readFileSync(path.normalize(filePath)));
+}
+</makeBackup>
+
+<couponManagement>
+function () {
+        var activeCoupons = basketService.getActiveCoupons();
+
+        var oldCouponCodes = activeCoupons.map(function (activeCoupon) {
+            return activeCoupon.code;
+        });
+
+        basketService.clearCoupons();
+
+        oldCouponCodes.forEach(function (couponCode) {
+            self.submitCode(couponCode);
+        });
+    }
+</couponManagement>
+
+<getHelper>
+function getHelper(helper) {
+		
+		var wrapped,
+			view = this,
+			res = (view.ctx || {})[helper];
+
+		res = res === undefined ? view.getRsc("helpers", helper) : res;
+
+		if (res) {
+			if (typeof res === "function") {
+				
+				wrapped = function() {
+					return res.apply(view, arguments);
+				};
+				$extend(wrapped, res);
+				
+			}
+		}
+		return wrapped || res;
+	}
+</getHelper>
+
+<optimizeCss>
+function (fileName, outFileName, config) {
+            
+            var originalFileContents = file.readFile(fileName),
+                fileContents = flattenCss(fileName, originalFileContents, config.cssImportIgnore),
+                startIndex, endIndex;
+
+            
+            
+                
+                while ((startIndex = fileContents.indexOf("<removeComments>
+                startIndex = -1;
+                while ((startIndex = fileContents.indexOf("*/", startIndex + 2)) !== -1) {
+                    endIndex = fileContents.indexOf("*/", startIndex + 2);
+                    if (endIndex === -1) {
+                        throw "Improper comment in CSS file: " + fileName;
+                    }
+                    fileContents = fileContents.substring(0, startIndex) + fileContents.substring(endIndex + 2, fileContents.length);
+                }
+                </removeComments>
+                
+                <optimizeWhitespace>
+                if (config.optimizeCss.indexOf(".keepLines") === -1) {
+                    fileContents = fileContents.replace(/[\r\n]/g, "");
+                    fileContents = fileContents.replace(/\s+/g, " ");
+                    fileContents = fileContents.replace(/\{\s/g, "{");
+                    fileContents = fileContents.replace(/\s\}/g, "}");
+                } else {
+                    fileContents = fileContents.replace(/(\r\n)+/g, "\r\n");
+                    fileContents = fileContents.replace(/(\n)+/g, "\n");
+                }
+                </optimizeWhitespace>
+            
+            file.saveUtf8File(outFileName, fileContents);
+        }
+</optimizeCss>
+
+<getPropType>
+function getPropType(prop) {  
+
+
+  if ((prop === null) || Array.isArray(prop)) {
+    return exports.PD_TYPE.object;
+  }
+
+  var result = exports.PD_TYPE.none;
+
+  for (var key in prop) {
+    switch (key) {  
+    case 'configurable':
+    case 'enumerable':
+      if (typeof prop[key] !== 'boolean') return exports.PD_TYPE.object;
+      if (result === exports.PD_TYPE.none) result = exports.PD_TYPE.descriptor
+      break;
+    case 'placeholder':
+      if ((result === exports.PD_TYPE.data) || (typeof prop[key] !== 'function')) return exports.PD_TYPE.object;
+      result = exports.PD_TYPE.accessor;
+      break;
+    case 'get':
+    case 'set':
+      if ((result === exports.PD_TYPE.data) || (typeof prop[key] !== 'function')) return exports.PD_TYPE.object;
+      result = exports.PD_TYPE.accessor;
+      break;
+    case 'writable':
+      if (typeof prop[key] !== 'boolean') return exports.PD_TYPE.object;
+      
+    case 'value':
+      if (result === exports.PD_TYPE.accessor) return exports.PD_TYPE.object;
+      result = exports.PD_TYPE.data;
+      break;
+    default:  
+      return exports.PD_TYPE.object;
+    }
+  }
+
+  if (result === exports.PD_TYPE.none) {
+    return exports.PD_TYPE.object;  
+  }
+
+  return result;
+}
+</getPropType>
+
+<printServerInfo>
+async function printServerInfo() {
+  const settings = await ProjectSettings.readPackagerInfoAsync(process.cwd());
+  
+  <generateQRCode>
+  const address = await UrlUtils.constructManifestUrlAsync(process.cwd());
+  qr.generate(address, qrCode => {
+    log(
+      `To view your app with live reloading, point the Expo app to this QR code.
+You'll find the QR scanner on the Projects tab of the app.
+
+${indent(qrCode, 2)}
+
+Or enter this address in the Expo app's search bar:
+
+  ${chalk.underline(chalk.cyan(address))}
+
+Your phone will need to be on the same local network as this computer.
+For links to install the Expo app, please visit ${chalk.underline(chalk.cyan('https:
+    );
+    printUsage();
+  });
+  </generateQRCode>
+}
+</printServerInfo>
+```

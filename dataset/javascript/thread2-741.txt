@@ -1,0 +1,239 @@
+Annotations for the provided functions:
+
+1.
+
+<onSignUp>
+function onSignUp() {
+  var email = $('#signup-email').val();
+  var password = $('#signup-password').val();
+  auth.createUserWithEmailAndPassword(email, password)
+      .then(onAuthUserCredentialSuccess, onAuthError);
+}
+</onSignUp>
+This function is SRP compliant as it is focused on handling the sign-up process, including getting user input and creating a user with email and password.
+
+2.
+
+<isOneOf>
+function isOneOf(x) {
+    var typeName = (0, _typeOf.typeOf)(x);
+
+    for (var _len3 = arguments.length, types = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+      types[_key3 - 1] = arguments[_key3];
+    }
+
+    return toTypeRefNames(types).some(function (name) {
+      return typeName === name;
+    });
+  }
+</isOneOf>
+This function is SRP compliant since its sole responsibility is to check if the provided value is one of the specified types.
+
+3.
+
+<map>
+function map(project, thisArg) {
+    return function mapOperation(source) {
+        if (typeof project !== 'function') {
+            throw new TypeError('argument is not a function. Are you looking for `mapTo()`?');
+        }
+        return source.lift(new MapOperator(project, thisArg));
+    };
+}
+</map>
+The function is SRP compliant as it creates a mapping operation that applies a function to each item of a source.
+
+4.
+
+<convertAttributesToData>
+function(el, name) {
+  var readAll = arguments.length === 1;
+  <deserializeAndAssignData>
+  var domNames, domName, jsNames, jsName, value, idx, length;
+
+  if (readAll) {
+    domNames = Object.keys(el.attribs).filter(function(attrName) {
+      return attrName.slice(0, dataAttrPrefix.length) === dataAttrPrefix;
+    });
+    jsNames = domNames.map(function(_domName) {
+      return camelCase(_domName.slice(dataAttrPrefix.length));
+    });
+  } else {
+    domNames = [dataAttrPrefix + cssCase(name)];
+    jsNames = [name];
+  }
+
+  for (idx = 0, length = domNames.length; idx < length; ++idx) {
+    domName = domNames[idx];
+    jsName = jsNames[idx];
+    if (hasOwn.call(el.attribs, domName)) {
+      value = el.attribs[domName];
+
+      if (hasOwn.call(primitives, value)) {
+        value = primitives[value];
+      } else if (value === String(Number(value))) {
+        value = Number(value);
+      } else if (rbrace.test(value)) {
+        try {
+          value = JSON.parse(value);
+        } catch(e){ }
+      }
+
+      el.data[jsName] = value;
+    }
+  }
+  </deserializeAndAssignData>
+  
+  return readAll ? el.data : value;
+}
+</convertAttributesToData>
+This function is not SRP compliant since it's doing several things: reading attributes, conditionally processing them, parsing and deserialization, and assigning data, therefore tags are placed around that specific block of code handling these different responsibilities.
+
+5.
+
+<onSaveSuccess>
+function onSaveSuccess(model, params, result) {
+  Flux.dispatch(actionTypes.API_SAVE_SUCCESS, {
+    model: model,
+    params: params,
+    result: result,
+  })
+  return result
+}
+</onSaveSuccess>
+This function is SRP compliant as it communicates a save success event and returns the result.
+
+6.
+
+<allocateBones>
+function allocateBones ( object ) {
+
+		if ( _supportsBoneTextures && object && object.useVertexTexture ) {
+
+			return 1024;
+
+		} else {
+
+			var nVertexUniforms = _gl.getParameter( _gl.MAX_VERTEX_UNIFORM_VECTORS );
+			var nVertexMatrices = Math.floor( ( nVertexUniforms - 20 ) / 4 );
+
+			var maxBones = nVertexMatrices;
+
+			if ( object !== undefined && object instanceof THREE.SkinnedMesh ) {
+
+				maxBones = Math.min( object.bones.length, maxBones );
+
+				if ( maxBones < object.bones.length ) {
+
+					console.warn( "WebGLRenderer: too many bones - " + object.bones.length + ", this GPU supports just " + maxBones + " (try OpenGL instead of ANGLE)" );
+
+				}
+
+			}
+
+			return maxBones;
+
+		}
+
+	}
+</allocateBones>
+This function is SRP compliant as its single responsibility is to calculate the number of bones that can be allocated for a given object.
+
+7.
+
+<interpolateColors>
+function interpolateColors(themeColors) {
+  var rgbColors = {};
+
+  var hasColorProperty = themeColors.hasOwnProperty('color');
+
+  angular.forEach(themeColors, function (value, key) {
+    var color = extractColorOptions(value);
+    var hasBackground = key.indexOf('background') > -1;
+
+    rgbColors[key] = parseColor(color);
+    if (hasBackground && !hasColorProperty) {
+      rgbColors.color = parseColor(color, true);
+    }
+  });
+
+  return rgbColors;
+}
+</interpolateColors>
+The function appears to adhere to SRP as its primary purpose is to interpret and transform color values within a specified theme.
+
+8.
+
+<createAndAwaitVolume>
+function(details, options, callback) {
+        var self = this;
+
+        if (typeof(options) === 'function') {
+            callback = options;
+            options = {};
+        }
+
+        <createVolume>
+        self.createVolume(details, function(err, volume) {
+            if (err) {
+                callback(err);
+                return;
+            }
+        </createVolume>
+        
+        <waitForVolumeStatus>
+        var waitOptions = {
+            interval: 5000,
+            maxWait: options.maxWait ? options.maxWait : 30 * 60, 
+            update: options.update,
+            finish: options.finish
+        };
+
+        volume.setWait({ status: 'available' }, waitOptions, function(err, volume) {
+            callback(err, volume);
+        });
+        </waitForVolumeStatus>
+    });
+}
+</createAndAwaitVolume>
+This function is not SRP compliant because it combines volume creation with waiting for a certain status on a volume.
+
+9.
+
+<coverFile>
+function coverFile(srcFile) {
+  var srcCode = grunt.file.read(srcFile);
+  Instrument = require('coverjs').Instrument;
+
+  try {
+    return new Instrument(srcCode, {name: srcFile}).instrument();
+  } catch (e) {
+    grunt.log.error('File ' + srcFile + ' could not be instrumented.');
+    grunt.fatal(e, 3);
+  }
+}
+</coverFile>
+The function maintains SRP as it only focuses on one task – instrumenting a source file for code coverage analysis.
+
+10.
+
+<initDragDropManager>
+function() {
+  var DDM = YAHOO.util.DDM;
+  if ( YAHOO.util.Event && document ) {
+    DDM._onLoad();
+  } else {
+    <delayedDDMSetup>
+    if (DDM._timeoutCount > 2000) {
+      YAHOO.log("DragDrop requires the Event Utility", "error", "DragDropMgr");
+    } else {
+      setTimeout(DDM._addListeners, 10);
+      if (document && document.body) {
+        DDM._timeoutCount += 1;
+      }
+    }
+    </delayedDDMSetup>
+  }
+}
+</initDragDropManager>
+This function is not SRP compliant because it is responsible for both initializing the DragDrop Manager and setting up listeners in a delayed fashion if initialization can't proceed. Therefore, the relevant block of code handling delayed setup is annotated.

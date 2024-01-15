@@ -1,0 +1,305 @@
+<ErrorLocked>
+function ErrorLocked(message) {
+  Error.call(this);
+  
+  <setErrorProperties>
+  this.name    = 'ErrorLocked';
+  this.type    = 'client';
+  this.status  = 423;
+  if (message) {
+    this.message = message;
+  }
+  </setErrorProperties>
+}
+</ErrorLocked>
+
+<checkKeyframesSelector>
+function checkKeyframesSelector(i) {
+  const start = i;
+  let l;
+
+  <checkTokenLength>
+  if (i >= tokensLength) return 0;
+  </checkTokenLength>
+
+  <identifyKeyframeSelector>
+  if (l = checkIdent(i)) {
+    
+    <getKeyframeSelector>
+    const selector = joinValues2(i, l);
+    </getKeyframeSelector>
+
+    <validateSelector>
+    if (selector !== 'from' && selector !== 'to') return 0;
+    </validateSelector>
+
+    i += l;
+    tokens[start].keyframesSelectorType = 1;
+  } else if (l = checkPercentage(i)) {
+    i += l;
+    tokens[start].keyframesSelectorType = 2;
+  } else if (l = checkInterpolation(i)) {
+    i += l;
+    tokens[start].keyframesSelectorType = 3;
+  } else {
+    return 0;
+  }
+  </identifyKeyframeSelector>
+
+  return i - start;
+}
+</checkKeyframesSelector>
+
+<tvp>
+function tvp(name, tvpParamName, tvpParams, config, done) {
+  <validateParameters>
+  if(!name || (typeof name != 'string')){
+    throw new Error('Node-SQL: stored procedure name was not in the correct format.');
+    return;
+  }
+  if(!tvpParamName || (typeof tvpParamName != 'string')){
+    throw new Error('Node-SQL: stored procedure tvpParamName was not in the correct format.');
+    return;
+  }
+  if(!config || (typeof config != 'object')){
+    throw new Error('Node-SQL: config was not in the correct format.');
+    return;
+  }
+  if(!done || (typeof done != 'function')){
+    done = function(a, b){};
+  }
+  </validateParameters>
+
+  <establishConnection>
+  var connection = new Connection(config);
+  connection.on('connect', function(err) {
+    if(err){
+      done(err, null);
+      return;
+    }
+    <executeStoredProcedure>
+    var request = new Request(name, function(_err) {
+      if (_err) {
+        done(_err, null);
+        return;
+      }
+      connection.close();
+    });
+
+    request.addParameter(tvpParamName, TYPES.TVP, tvpParams);
+    </executeStoredProcedure>
+
+    <processResults>
+    var result = [];
+    request.on('row', function(columns) {
+      var row = {};
+      columns.forEach(function(column) {
+        row[column.metadata.colName] = column.value;
+      });
+      result.push(row);
+    });
+    request.on('doneProc', function(rowCount, more, returnStatus) {
+      if(returnStatus == 0) done(null, result);
+    });
+    </processResults>
+
+    connection.callProcedure(request);
+  });
+  </establishConnection>
+}
+</tvp>
+
+<ClassHelper>
+function ClassHelper(name, properties, template) {
+  
+  <validateProperties>
+  if (!properties) {
+    throw new Error('ヘルパーを作成できません。プロパティの設定が存在しません');
+  }
+  </validateProperties>
+  this.name = name || '';
+  this.props = properties;
+  
+  <processTemplate>
+  this.tpl = null;
+  if (typeof template === 'string') {
+    this.tpl = template.split(EOL);
+  } else if (Array.isArray(template)) {
+    this.tpl = template;
+  }
+  </processTemplate>
+}
+</ClassHelper>
+
+<hwarning>
+function hwarning(){
+        
+  <dispatchWarningOrError>
+  if (firstHeader) {
+    error.apply(this, arguments);
+  } else {
+    warning.apply(this, arguments);
+    mode = MCONTENT;
+  }
+  </dispatchWarningOrError>
+}
+</hwarning>
+
+<getPluginResourcePackInfo>
+function getPluginResourcePackInfo(pluginResources, packedFiles) {
+    <initializeResult>
+    var result = {};
+    var notPackRes = [];
+    </initializeResult>
+
+    <processResources>
+    pluginResources.forEach(function (item) {
+        var packFile = findPackFile(item, packedFiles);
+        <handlePackedResource>
+        if (packFile) {
+            result[item.id] = {
+                file: item,
+                packTo: packFile
+            };
+        }
+        </handlePackedResource>
+        <handleNonPackedResource>
+        else {
+            notPackRes.push(item);
+        }
+        </handleNonPackedResource>
+    });
+    </processResources>
+
+    return {
+        pack: result,
+        notPacks: notPackRes
+    };
+}
+</getPluginResourcePackInfo>
+
+<trigger>
+function trigger(event, a, b) {
+    <invokeEventHandlers>
+    listeners[event].forEach(function(handler) {
+      handler.call(instance, a, b);
+    });
+    </invokeEventHandlers>
+}
+</trigger>
+
+<AnonymousFunction>
+function() {
+        <preparation>
+        var options = this.options;
+
+        this.$main.find('.select-col :checkbox').bizCheckbox('destroy');
+        </preparation>
+
+        <updateDOMElements>
+        this.$tableHead.html(this.createTableHead(options));
+        this.$tableBody.html(this.createTableBody(options));
+        </updateDOMElements>
+
+        <manageTableFoot>
+        if (options.foot && options.data.length > 0) {
+            var tbody = this.$tableBody.find('tbody'),
+                foot = this.createFoot(options);
+            if (options.foot === 'top') {
+                tbody.prepend(foot);
+            }
+            if (options.foot === 'bottom') {
+                tbody.append(foot);
+            }
+        }
+        </manageTableFoot>
+
+        <handleNoDataCase>
+        if (options.data.length === 0) {
+            this.createNoDataContent();
+        }
+        </handleNoDataCase>
+
+        <initializeSelection>
+        if (options.selectable && options.data.length > 0) {
+            this.createSelect(options.data);
+        }
+        </initializeSelection>
+
+        <resetScrollAndSyncWidth>
+        this.$headWrap[0].scrollLeft = this.$bodyWrap[0].scrollLeft = 0;
+
+        this.syncWidth();
+        </resetScrollAndSyncWidth>
+
+        <readyTableContent>
+        this.$tableBody.find('td').prop('tabindex', 1);
+        </readyTableContent>
+    }
+</AnonymousFunction>
+
+<filterWithQueryAndMatcher>
+function filterWithQueryAndMatcher(hints, matcher) {
+    <performMatch>
+    var matchResults = $.map(hints, function (hint) {
+        var searchResult = matcher.match(hint.value, query);
+        if (searchResult) {
+            <populateSearchResult>
+            searchResult.value = hint.value;
+            searchResult.guess = hint.guess;
+            searchResult.type = hint.type;
+
+            if (hint.keyword !== undefined) {
+                searchResult.keyword = hint.keyword;
+            }
+
+            if (hint.literal !== undefined) {
+                searchResult.literal = hint.literal;
+            }
+
+            if (hint.depth !== undefined) {
+                searchResult.depth = hint.depth;
+            }
+
+            if (hint.doc) {
+                searchResult.doc = hint.doc;
+            }
+
+            if (hint.url) {
+                searchResult.url = hint.url;
+            }
+
+            if (!type.property && !type.showFunctionType && hint.origin &&
+                    isBuiltin(hint.origin)) {
+                searchResult.builtin = 1;
+            } else {
+                searchResult.builtin = 0;
+            }
+            </populateSearchResult>
+        }
+
+        return searchResult;
+    });
+    </performMatch>
+
+    return matchResults;
+}
+</filterWithQueryAndMatcher>
+
+<WebStorageSessionStore>
+function WebStorageSessionStore(webStore) {
+  <validateWebStore>
+  this.store = webStore;
+  if (!utils.isFunction(webStore.getItem) ||
+      !utils.isFunction(webStore.setItem) ||
+      !utils.isFunction(webStore.removeItem) ||
+      !utils.isFunction(webStore.key) ||
+      typeof(webStore.length) !== 'number'
+     ) {
+    throw new Error(
+        "Supplied webStore does not meet the WebStorage API interface",
+    );
+  }
+  </validateWebStore>
+}
+</WebStorageSessionStore>

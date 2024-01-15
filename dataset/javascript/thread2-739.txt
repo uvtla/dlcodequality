@@ -1,0 +1,203 @@
+```javascript
+<copyFiles>
+function(paths) {
+    return (
+        gulp
+        .src(paths.src.path)
+        .pipe(gulp.dest(paths.output.baseDir))
+    );
+}
+</copyFiles>
+
+<constructor>
+function (displayName, continuous, projectionLimits) {
+
+            
+            this.displayName = displayName || "Geographic Projection";
+
+            
+            this.continuous = continuous;
+
+            
+            this.projectionLimits = projectionLimits;
+
+            
+            this.is2D = true;
+        }
+</constructor>
+
+<resolveAlias>
+function alias(path, aliases)
+{
+	
+	if (!is_package_path(path))
+	{
+		return
+	}
+
+	
+	const slash_index = path.indexOf('/')
+	const module_name = slash_index >= 0 ? path.substring(0, slash_index) : path
+	const rest = slash_index >= 0 ? path.substring(slash_index) : ''
+
+	
+	const alias = aliases[module_name]
+
+	
+	if (alias)
+	{
+		return alias + rest
+	}
+}
+</resolveAlias>
+
+<encodeToMuLaw>
+function encode$1(samples) {
+  
+  let muLawSamples = new Uint8Array(samples.length);
+  for (let i=0; i<samples.length; i++) {
+    muLawSamples[i] = encodeSample$1(samples[i]);
+  }
+  return muLawSamples;
+}
+</encodeToMuLaw>
+
+<findAndPopulateObjects>
+function findObjects(EntityClass, query, params) {
+  <validateArguments>
+  expect(arguments).to.have.length.within(
+    2,
+    3,
+    'Invalid arguments length when inserting an object in a MongoAdapter ' +
+    '(it has to be passed 2 or 3 arguments)'
+  );
+  </validateArguments>
+
+  <findDocuments>
+  function findDocuments(db) {
+    
+    params = params || {};
+    params.sort = params.sort || {id: 1};
+    params.skip = params.skip || 0;
+    params.limit = params.limit || 0;
+
+    if (params.sort.hasOwnProperty('id')) {
+      params.sort._id = params.sort.id;
+      delete params.sort.id;
+    }
+
+    return _buildCursor(db, EntityClass, query, params)
+        .skip(params.skip)
+        .limit(params.limit)
+        .sort(params.sort)
+        .toArray();
+  }
+  </findDocuments>
+
+  <populateEntities>
+  function populateEntities(docs) {
+    var entities = [];
+    for (var i = 0; i < docs.length; i++) {
+      entities.push(documentToObject(docs[i], EntityClass.adapterName));
+    }
+    return entities;
+  }
+  </populateEntities>
+
+  return this.getDatabase()
+    .then(findDocuments)
+    .then(populateEntities);
+}
+</findAndPopulateObjects>
+
+<flattenArray>
+function flatten(arr) {
+            var result = [],
+                length = arr.length,
+                i;
+            for (i = 0; i < length; i++) {
+                if (arr[i] instanceof Array) {
+                    result = result.concat(utils.flatten(arr[i]));
+                } else {
+                    result.push(arr[i]);
+                }
+            }
+            return result;
+}
+</flattenArray>
+
+<enableCDNonContainer>
+function (cb) {
+			if (!o1.options.useCDN)
+				return cb();
+
+			o1._log('CDN enabling the container');
+
+			container.enableCdn(function (err, _container) {
+				if (err)
+					return cb(err);
+
+				
+				var index = _.findIndex(o1.aContainers, { name : sName });
+
+				container = o1.aContainers[index] = _container;
+
+				cb();
+			});
+}
+</enableCDNonContainer>
+
+<formatBarTitle>
+function barTitleFormatter(action, time) {
+  const parts = ['[COZY-BAR]']
+
+  parts.push(`${String(action.type)}`)
+  if (time) parts.push(`@ ${time}`)
+
+  return parts.join(' ')
+}
+</formatBarTitle>
+
+<formatFeature>
+function formatFeature(feature) {
+  <convertMarkdown>
+	return Object.assign({}, feature, {
+		
+		title: marked.inlineLexer(feature.title, [], {}),
+		
+		description: marked.inlineLexer(feature.description, [], {}),
+	</convertMarkdown>
+	<processExample>
+		example: postcss().process(feature.example, {
+			stringifier: postcssToHTML
+		}).css,
+	</processExample>
+	<caniuseIntegration>
+		caniuse: 'caniuse-compat' in feature
+			? { stats: feature['caniuse-compat'] }
+		: feature.caniuse in caniuse.features
+			? trimCaniuseFeatures(caniuse.feature(caniuse.features[feature.caniuse]))
+		: false,
+		caniuseURL: feature.caniuse
+	});
+  </caniuseIntegration>
+</formatFeature>
+
+<checkPseudoClass6>
+function checkPseudoClass6(i) {
+  const start = i;
+  let l;
+
+  
+  i++;
+
+  if (i >= tokensLength) return 0;
+
+  
+  if (l = checkIdent(i)) i += l;
+  else return 0;
+
+  return i - start;
+}
+</checkPseudoClass6>
+```

@@ -1,0 +1,285 @@
+<updateIndivisibleOutputsThatWereReceivedUnstable>
+function updateIndivisibleOutputsThatWereReceivedUnstable(conn, onDone){
+
+	<updateOutputProps>
+	function updateOutputProps(unit, is_serial, onUpdated){
+		
+		conn.query(
+			"UPDATE outputs SET is_serial=? WHERE unit=?", 
+			[is_serial, unit],
+			function(){
+				is_serial ? updateInputUniqueness(unit, onUpdated) : onUpdated();
+			}
+		);
+	}
+	</updateOutputProps>
+	
+	<updateInputUniqueness>
+	function updateInputUniqueness(unit, onUpdated){
+		
+		conn.query("UPDATE inputs SET is_unique=1 WHERE unit=?", [unit], function(){
+			onUpdated();
+		});
+	}
+	</updateInputUniqueness>
+	
+	console.log("updatePrivateIndivisibleOutputsThatWereReceivedUnstable starting");
+	conn.query(
+		"SELECT unit, message_index, sequence FROM outputs "+
+		(conf.storage === 'sqlite' ? "INDEXED BY outputsIsSerial" : "")+
+		" JOIN units USING(unit) WHERE outputs.is_serial IS NULL AND units.is_stable=1 AND is_spent=0", 
+		function(rows){
+			if (rows.length === 0)
+				return onDone();
+			async.eachSeries(
+				rows,
+				function(row, cb){
+					
+					<updateFinalOutputProps>
+					function updateFinalOutputProps(is_serial){
+						updateOutputProps(row.unit, is_serial, cb);
+					}
+					</updateFinalOutputProps>
+					
+					<goUp>
+					function goUp(unit, message_index){
+						
+						conn.query(
+							"SELECT src_unit, src_message_index, src_output_index "+
+							"FROM inputs WHERE unit=? AND message_index=?", 
+							[unit, message_index],
+							function(src_rows){
+								if (src_rows.length === 0)
+									throw Error("updating unstable: blackbyte input not found");
+								if (src_rows.length > 1)
+									throw Error("updating unstable: more than one input found");
+								var src_row = src_rows[0];
+								if (src_row.src_unit === null) 
+									return cb();
+								conn.query(
+									"SELECT sequence, is_stable, is_serial FROM outputs JOIN units USING(unit) "+
+									"WHERE unit=? AND message_index=? AND output_index=?", 
+									[src_row.src_unit, src_row.src_message_index, src_row.src_output_index],
+									function(prev_rows){
+										if (prev_rows.length === 0)
+											throw Error("src unit not found");
+										var prev_output = prev_rows[0];
+										if (prev_output.is_serial === 0)
+											throw Error("prev is already nonserial");
+										if (prev_output.is_stable === 0)
+											throw Error("prev is not stable");
+										if (prev_output.is_serial === 1 && prev_output.sequence !== 'good')
+											throw Error("prev is_serial=1 but seq!=good");
+										if (prev_output.is_serial === 1) 
+											return cb();
+										var is_serial = (prev_output.sequence === 'good') ? 1 : 0;
+										updateOutputProps(src_row.src_unit, is_serial, function(){
+											if (!is_serial) 
+												return updateFinalOutputProps(0);
+											goUp(src_row.src_unit, src_row.src_message_index);
+										});
+									}
+								);
+							}
+						);
+					}
+					</goUp>
+					
+					var is_serial = (row.sequence === 'good') ? 1 : 0;
+					updateOutputProps(row.unit, is_serial, function(){
+						goUp(row.unit, row.message_index);
+					});
+				},
+				onDone
+			);
+		}
+	);
+}
+</updateIndivisibleOutputsThatWereReceivedUnstable>
+
+<validated>
+function validated(invalid){
+    if (invalid) { return callback(invalid) }
+    <coerceData>
+    if(options.coerce){crudUtils.coerceData(options,coerced())}
+    else{coerced(null,options.data)}
+    </coerceData>
+}
+</validated>
+
+<Eth>
+function Eth(cprovider, options) {
+  if (!(this instanceof Eth)) { 
+  	<throwError>
+  	throw new Error('[ethjs] the Eth object requires you construct it with the "new" flag (i.e. `const eth = new Eth(...);`).');
+  	</throwError>
+  }
+  <setup>
+  const self = this;
+  self.options = options || {};
+  const query = new EthQuery(cprovider, self.options.query);
+  Object.keys(Object.getPrototypeOf(query)).forEach((methodName) => {
+    self[methodName] = (...args) => query[methodName].apply(query, args);
+  });
+  self.filter = new EthFilter(query, self.options.query);
+  self.contract = new EthContract(query, self.options.query);
+  self.currentProvider = query.rpc.currentProvider;
+  self.setProvider = query.setProvider;
+  self.getTransactionSuccess = getTransactionSuccess(self);
+  </setup>
+}
+</Eth>
+
+<validateName>
+function validateName(node) {
+	<nameValidation>
+    const name = node.key.name;
+    const accessibility = node.accessibility || "public";
+    const convention = conventions[accessibility];
+
+    if (!convention || convention.test(name)) return;
+
+    context.report({
+        node: node.key,
+        message:
+            "{{accessibility}} property {{name}} should match {{convention}}.",
+        data: { accessibility, name, convention },
+    });
+    </nameValidation>
+}
+</validateName>
+
+<CronPattern>
+function CronPattern (pattern) {
+	<thisPattern>
+	this.pattern = pattern;
+
+	this.seconds        = fill(Array(60),0); 
+	this.minutes        = fill(Array(60),0); 
+	this.hours          = fill(Array(24),0); 
+	this.days           = fill(Array(31),0); 
+	this.months         = fill(Array(12),0); 
+	this.daysOfWeek     = fill(Array(8),0); 
+	</thisPattern>
+
+	<parse>
+	this.parse();
+	</parse>
+}
+</CronPattern>
+
+<getInitialModel>
+function getInitialModel(routeInfo, page) {
+	<initModelDeps>
+	var initModelDeps = {
+		appName:    routeInfo.appName,
+		tokens:     routeInfo.tokens,
+		routeInfo:  routeInfo,
+		defaults:   page.defaults,
+		activeUser: routeInfo.activeUser || {},
+		currentScope: {}
+	};
+	</initModelDeps>
+
+	
+	<returnModel>
+	if (!page.model) {
+		return Q.when({});
+	}
+    
+	else if (_.isFunction(page.model)) {
+		return Q.when(injector.loadModule(page.model, null, { dependencies: initModelDeps }));
+	}
+	else {
+		throw new Error(routeInfo.name + ' page invalid model() format: ' + page.model);
+	}
+	</returnModel>
+}
+</getInitialModel>
+
+<anonymous-function>
+function( minx, miny, maxx, maxy ) {
+	<BoundingBoxCalculation>
+	var bbox = '';
+	if ( this.version === '1.3.0' ) {
+		bbox = [minx, miny, maxx, maxy].join( ',' );
+	} else {
+		bbox = [miny, minx, maxy, maxx].join( ',' );
+	}
+	return bbox;
+	</BoundingBoxCalculation>
+}
+</anonymous-function>
+
+<torqueDemo_lis>
+function torqueDemo_lis(KMRotState){
+	<torqueDemoUpdate>
+    let stepInterval=Math.PI/4;
+    let diff=torqueDemo_pos_sep-KMRotState.position;
+    if(diff>stepInterval||diff< -stepInterval){
+        torqueDemo_pos_sep=KMRotState.position;
+        torqueDemo_set_torque+=(diff>0?0.005:-0.005);
+        torqueDemo_set_torque=torqueDemo_set_torque>0.2?0.2:torqueDemo_set_torque;
+        if(torqueDemo_revlocksw){
+          KMB.cmdMoveToPosition(torqueDemo_pos_sep);
+        }
+        KMB.cmdMaxTorque(torqueDemo_set_torque);
+        $("#torqueDemoInfo").text("Now Torque: "+torqueDemo_set_torque);
+    }
+    console.log("torqueDemo_set_torque:"+torqueDemo_set_torque);
+    </torqueDemoUpdate>
+}
+</torqueDemo_lis>
+
+<throwError-function>
+function (format) {
+	<throwError>  
+	throw new Error(index$1.red('[indian-ocean] You passed in an object but converting to ' + index$1.bold(format) + ' requires a list of objects.') + index$1.cyan('\nIf you would like to write a one-row csv, put your object in a list like so: `' + index$1.bold('[data]') + '`\n'));
+	</throwError>
+}
+</throwError-function>
+
+<sortByFileFormat>
+function sortByFileFormat(srcDir, format) {
+  <directorySetup>
+  const initialFiles = `${srcDir}/*.${format}`
+  const files = glob.sync(initialFiles);
+  const dest = `${srcDir}/${format}`;
+  let count = 0;
+
+  createDirs([dest]);
+  </directorySetup>
+
+  
+  <fileRenaming>
+  const promises = files.map(f => {
+    return new Promise((resolve, reject) => {
+      const filename = sanitize(path.basename(f));
+      const reg = /[\w-]+-(16|24|32)\.[\w]+/;
+      const match = filename.match(reg);
+      let thisDest = dest;
+
+      if (match) {
+        const size = match[1];
+        thisDest = `${thisDest}/${size}`;
+        createDirs([thisDest]);
+      }
+
+      fs.rename(f, `${thisDest}/${filename}`, err => {
+        if (err) {
+          reject(err);
+        }
+        count++;
+        resolve(`${dest}/${filename}`);
+      });
+    });
+  });
+  </fileRenaming>
+
+  <completionProcess>
+  return Promise.all(promises).then(() => {
+    swlog.logTaskAction('Moved', `${count}/${files.length} ${format.toUpperCase()} files`);
+  });
+  </completionProcess>
+}
+</sortByFileFormat>

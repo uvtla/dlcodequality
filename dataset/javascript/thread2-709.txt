@@ -1,0 +1,381 @@
+```javascript
+<constructContactInfoNode>
+function(contact) {
+  var node = this.createElementDefaultNS("ContactInformation");
+
+  <appendContactPerson>
+  if (contact.personPrimary) {
+      node.appendChild(this.write_wmc_ContactPersonPrimary(contact.personPrimary));
+  }
+  </appendContactPerson>
+
+  <appendContactPosition>
+  if (contact.position) {
+      node.appendChild(this.createElementDefaultNS(
+          "ContactPosition", contact.position
+      ));
+  }
+  </appendContactPosition>
+
+  <appendContactAddress>
+  if (contact.contactAddress) {
+      node.appendChild(this.write_wmc_ContactAddress(contact.contactAddress));
+  }
+  </appendContactAddress>
+
+  <appendContactPhone>
+  if (contact.phone) {
+      node.appendChild(this.createElementDefaultNS(
+          "ContactVoiceTelephone", contact.phone
+      ));
+  }
+  </appendContactPhone>
+
+  <appendContactFax>
+  if (contact.fax) {
+      node.appendChild(this.createElementDefaultNS(
+          "ContactFacsimileTelephone", contact.fax
+      ));
+  }
+  </appendContactFax>
+
+  <appendContactEmail>
+  if (contact.email) {
+      node.appendChild(this.createElementDefaultNS(
+          "ContactElectronicMailAddress", contact.email
+      ));
+  }
+  </appendContactEmail>
+  
+  return node;
+}
+</constructContactInfoNode>
+
+<getListedError>
+function _getListedError (cartoError, errorList) {
+  var errorListkeys = _.keys(errorList);
+  var key;
+
+  <processErrorList>
+  for (var i = 0; i < errorListkeys.length; i++) {
+    key = errorListkeys[i];
+    if (!(errorList[key].messageRegex instanceof RegExp)) {
+      throw new Error('MessageRegex on ' + key + ' is not a RegExp.');
+    }
+    if (errorList[key].messageRegex.test(cartoError.message)) {
+      return {
+        friendlyMessage: _replaceRegex(cartoError, errorList[key]),
+        errorCode: _buildErrorCode(cartoError, key)
+      };
+    }
+  }
+  </processErrorList>
+
+  <handleUnknownError>
+  return {
+    friendlyMessage: cartoError.message || '',
+    errorCode: _buildErrorCode(cartoError, 'unknown-error')
+  };
+  </handleUnknownError>
+}
+</getListedError>
+
+<pipeSemigroupoids>
+function pipeS(...ms) {
+  <validateArguments>
+  if(!arguments.length) {
+    throw new TypeError(err)
+  }
+
+  const head =
+    ms[0]
+
+  if(!isSemigroupoid(head)) {
+    throw new TypeError(err)
+  }
+  </validateArguments>
+
+  <shortCircuitSingleArgument>
+  if(ms.length === 1) {
+    return head
+  }
+  </shortCircuitSingleArgument>
+
+  <composeSemigroupoids>
+  return ms.slice().reduce((comp, m) => {
+    if(!isSameType(comp, m)) {
+      throw new TypeError(err)
+    }
+
+    return comp.compose(m)
+  })
+  </composeSemigroupoids>
+}
+</pipeSemigroupoids>
+
+<configureLoggingSystem>
+function setup(logs) {
+  const streams = [];
+  <configureDefaultLogs>
+  if (logs == null) {
+    logs = [{ type: 'stdout', format: 'pretty', level: 'http' }];
+  }
+  </configureDefaultLogs>
+
+  <createStreamsForTargets>
+  logs.forEach(function(target) {
+    let level = target.level || 35;
+    if (level === 'http') {
+      level = 35;
+    }
+
+    <validateRotatingFile>
+    if (target.type === 'rotating-file') {
+      if (target.format !== 'json') {
+        throw new Error('Rotating file streams only work with JSON!');
+      }
+      if (cluster.isWorker) {
+        throw new Error('Cluster mode is not supported for rotating-file!');
+      }
+      </validateRotatingFile>
+
+      <createRotatingFileStream>
+      const stream = new VerdaccioRotatingFileStream(
+        _.merge(
+          {},
+          target.options || {},
+          { path: target.path, level }
+        )
+      );
+      </createRotatingFileStream>
+
+      streams.push({
+        type: 'raw',
+        level,
+        stream,
+      });
+    }
+    </validateRotatingFile>
+    
+    <configureStandardOrErrorStream>
+    else {
+      const stream = new Stream();
+      stream.writable = true;
+
+      let destination;
+      let destinationIsTTY = false;
+      if (target.type === 'file') {
+        destination = require('fs').createWriteStream(target.path, { flags: 'a', encoding: 'utf8' });
+        destination.on('error', function(err) {
+          stream.emit('error', err);
+        });
+      } else if (target.type === 'stdout' || target.type === 'stderr') {
+        destination = target.type === 'stdout' ? process.stdout : process.stderr;
+        destinationIsTTY = destination.isTTY;
+      } else {
+        throw Error('wrong target type for a log');
+      }
+      </configureStandardOrErrorStream>
+
+      <writeStreamBasedOnFormat>
+      if (target.format === 'pretty') {
+        stream.write = obj => {
+          destination.write(`${print(obj.level, obj.msg, obj, destinationIsTTY)}\n`);
+        };
+      } else if (target.format === 'pretty-timestamped') {
+        stream.write = obj => {
+          destination.write(`[${dayjs(obj.time).format('YYYY-MM-DD HH:mm:ss')}] ${print(obj.level, obj.msg, obj, destinationIsTTY)}\n`);
+        };
+      } else {
+        stream.write = obj => {
+          const msg = fillInMsgTemplate(obj.msg, obj, destinationIsTTY);
+          destination.write(`${JSON.stringify({ ...obj, msg }, Logger.safeCycles())}\n`);
+        };
+      }
+      </writeStreamBasedOnFormat>
+
+      streams.push({
+        type: 'raw',
+        level,
+        stream: stream,
+      });
+    }
+  });
+  </createStreamsForTargets>
+
+  <initializeLogger>
+  const logger = new Logger({
+    name: pkgJSON.name,
+    streams: streams,
+    serializers: {
+      err: Logger.stdSerializers.err,
+      req: Logger.stdSerializers.req,
+      res: Logger.stdSerializers.res,
+    },
+  });
+  </initializeLogger>
+
+  <setupLoggerReopenOnSignal>
+  process.on('SIGUSR2', function() {
+    Logger.reopenFileStreams();
+  });
+  </setupLoggerReopenOnSignal>
+
+  module.exports.logger = logger;
+}
+</configureLoggingSystem>
+
+<toggleTreeViewNode>
+function (ev) {
+        var self = this,
+            td = this._getEventTargetTdEl(ev),
+            node,
+            target,
+            toggle = function (force) {
+                node.focus();
+                if (force || !node.href) {
+                    node.toggle();
+                    try {
+                        Event.preventDefault(ev);
+                    } catch (e) {                       
+                    }
+                }
+            };
+
+        <checkEventTargetAvailability>
+        if (!td) {
+            return; 
+        }
+        </checkEventTargetAvailability>
+
+        <getNodeByEventTarget>
+        node = this.getNodeByElement(td);
+        if (!node) { 
+            return; 
+        }
+        </getNodeByEventTarget>
+
+        <fireLabelClickEventIfApplicable>
+        target = Event.getTarget(ev);
+        if (Dom.hasClass(target, node.labelStyle) || Dom.getAncestorByClassName(target,node.labelStyle)) {
+            this.fireEvent('labelClick',node);
+        }
+        </fireLabelClickEventIfApplicable>
+
+        <handleToggleOnTreeNode>
+        if (/\bygtv[tl][mp]h?h?/.test(td.className)) {
+            toggle(true);
+        } else {
+            if (this._dblClickTimer) {
+                window.clearTimeout(this._dblClickTimer);
+                this._dblClickTimer = null;
+            } else {
+                if (this._hasDblClickSubscriber) {
+                    this._dblClickTimer = window.setTimeout(function () {
+                        self._dblClickTimer = null;
+                        if (self.fireEvent('clickEvent', {event:ev,node:node}) !== false) { 
+                            toggle();
+                        }
+                    }, 200);
+                } else {
+                    if (self.fireEvent('clickEvent', {event:ev,node:node}) !== false) { 
+                        toggle();
+                    }
+                }
+            }
+        }
+        </handleToggleOnTreeNode>
+    }
+</toggleTreeViewNode>
+
+<validateOperatorValue>
+function operator(value) {
+    <unwrapOperator>
+    var raw = this.unwrapRaw(value);
+    if (raw) {
+      return raw;
+    }
+    </unwrapOperator>
+
+    <validateOperator>
+    if (operators[(value || '').toLowerCase()] !== true) {
+      throw new TypeError('The operator "' + value + '" is not permitted');
+    }
+    </validateOperator>
+
+    return value;
+}
+</validateOperatorValue>
+
+<endBatchProcessing>
+function _endBatch() {
+  --_batch;
+  _cometd._debug('Ending batch, depth', _batch);
+  
+  <validateBatchBalance>
+  if (_batch < 0) {
+      throw 'Calls to startBatch() and endBatch() are not paired';
+  }
+  </validateBatchBalance>
+
+  <flushBatchIfConditionsMet>
+  if (_batch === 0 && !_isDisconnected() && !_internalBatch) {
+      _flushBatch();
+  }
+  </flushBatchIfConditionsMet>
+}
+</endBatchProcessing>
+
+<pickPropsFromObject>
+function pick(o, props = []) {
+    <reduceObjectProperties>
+    return props.reduce((acc, k) => {
+        if (o.hasOwnProperty(k)) {
+            acc[k] = o[k];
+        }
+
+        return acc;
+    }, {});
+    </reduceObjectProperties>
+}
+</pickPropsFromObject>
+
+<initializeKeyContainers>
+function () {
+    <incrementObjCount>
+    __objCount++;
+    </incrementObjCount>
+
+    <initializeKeys>
+    this._nextIndex = 0;            
+    this._objectKeys = null;
+    this._stringKeys = null;  
+    this._numberKeys = null;
+    this._otherKeys = null;
+    </initializeKeys>
+    
+    <setMetaDataProperty>
+    this._metaDataName = Aria.FRAMEWORK_PREFIX + "hash::" + __objCount;
+    </setMetaDataProperty>
+}
+</initializeKeyContainers>
+
+<drawTexture>
+function draw(texture, width, height) {
+  <initializeIfNeeded>
+  if (!this._.isInitialized || texture._.width != this.width || texture._.height != this.height) {
+    initialize.call(this, width ? width : texture._.width, height ? height : texture._.height);
+  }
+  </initializeIfNeeded>
+
+  <applyTextureAndDraw>
+  texture._.use();
+  this._.texture.drawTo(function() {
+    Shader.getDefaultShader().drawRect();
+  });
+  </applyTextureAndDraw>
+
+  return this;
+}
+</drawTexture>
+```

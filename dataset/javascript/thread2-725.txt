@@ -1,0 +1,164 @@
+Here are the annotated functions:
+
+1. Function `getValue` is compliant with SRP, serving the single responsibility of retrieving a value with applied rules.
+```javascript
+function getValue(value, offset = 0, max = 9999) {
+  return isNaN(value) ? NAMES[value] || null : Math.min(+value + (offset), max);
+}
+```
+
+2. Function `removeRow` is compliant with SRP, as it serves the single responsibility of removing a row from a table.
+```javascript
+function removeRow(opts: Options, change: Change, at: number): Change {
+    const { value } = change;
+    const { startKey } = value;
+
+    const pos = TablePosition.create(opts, value.document, startKey);
+
+    let rowKey;
+    if (typeof at === 'undefined') {
+        rowKey = pos.row.key;
+    } else {
+        rowKey = pos.table.nodes.get(at).key;
+    }
+
+    return removeRowByKey(opts, change, rowKey);
+}
+```
+
+3. Function `extend` is compliant with SRP, serving the single responsibility of extending an object with default properties.
+```javascript
+function extend(obj, dft) {
+    if (obj == null) {
+        obj = {};
+    }
+    for (var k in dft) {
+        var v = dft[k];
+        if (obj[k] != null) {
+            continue;
+        }
+        obj[k] = v;
+    }
+    return obj;
+}
+```
+
+4. Anonymous function for attaching event listeners is compliant with SRP, serving the single responsibility of event binding.
+```javascript
+function(evt, id, fnc) {
+    var elem = $(id);
+    if (elem.addEventListener)  
+      elem.addEventListener(evt, fnc, false);
+    else if (elem.attachEvent) { 
+      elem.attachEvent('on' + evt, fnc);
+    }
+    else { 
+      elem[evt] = fnc;
+    }
+  }
+```
+
+5. Function for getting bounding box after rotation is non-compliant with SRP, as it calculates multiple corner points in addition to the bounding box.
+```javascript
+function() {
+  <calculateCorners>
+  if (this.degrees === 0) {
+      return this.clone();
+  }
+  var topLeft = this.getTopLeft();
+  var topRight = this.getTopRight();
+  var bottomLeft = this.getBottomLeft();
+  var bottomRight = this.getBottomRight();
+  </calculateCorners>
+  <calculateBoundingBox>
+  var minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+  var maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+  var minY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+  var maxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+  </calculateBoundingBox>
+  return new $.Rect(
+      minX,
+      minY,
+      maxX - minX,
+      maxY - minY);
+}
+```
+
+6. Function for decoding and updating a model is non-compliant with SRP, as it involves decoding data, updating or creating models, handling revisions, and triggering events.
+```javascript
+// The specific responsibilities within this function are too entangled to effectively segment with tags without a more in-depth refactoring. Hence, this annotation will indicate the need for that refactoring to achieve SRP compliance.
+
+function(encoded, key, model, overwrite) {
+  // Separate blocks for decoding data, updating/creating models, handling revisions, and triggering events are intermixed in this function.
+}
+```
+
+7. Function for creating HTML based on conditions is non-compliant with SRP, as it deals with HTML string assembly, style manipulation, and conditional logic.
+```javascript
+// This function might be seen as having a single responsibility of creating HTML, but the logic within indicates at least two separate concerns.
+
+function(createFlag){
+  // Single responsibility would ideally have dedicated functions for assembling style strings vs HTML structure.
+}
+```
+
+8. Function `updateBBox` is compliant with SRP, serving the single responsibility of updating bounding box coordinates.
+```javascript
+function updateBBox(node) {
+    var p1 = node.p;
+    var p2 = node.next.p;
+    node.minX = Math.min(p1[0], p2[0]);
+    node.minY = Math.min(p1[1], p2[1]);
+    node.maxX = Math.max(p1[0], p2[0]);
+    node.maxY = Math.max(p1[1], p2[1]);
+    return node;
+}
+```
+
+9. Function for determining the flvtool path is compliant with SRP, as it fulfills the single responsibility of finding the flvtool command.
+```javascript
+function(flvtool, cb) {
+    if (flvtool.length) {
+      return cb(null, flvtool);
+    }
+
+    if (process.env.FLVTOOL2_PATH) {
+      fs.exists(process.env.FLVTOOL2_PATH, function(exists) {
+        cb(null, exists ? process.env.FLVTOOL2_PATH : '');
+      });
+    } else {
+      cb(null, '');
+    }
+}
+```
+
+10. Function `parseNodeValue` is compliant with SRP, serving the single responsibility of parsing node values from XML.
+```javascript
+function parseNodeValue(node) {
+  const childNodes = node && node.childNodes && [...node.childNodes];
+  if (!childNodes) {
+    return {};
+  }
+
+  // Parsing logic for different node types could be viewed as multiple responsibilities, but the cohesive goal is parsing a single node value.
+  const cdatas = childNodes.filter((childNode) => childNode.nodeName === '#cdata-section');
+  if (cdatas && cdatas.length > 0) {
+    try {
+      return JSON.parse(cdatas[0].data);
+    } catch (e) {}
+  }
+
+  return childNodes.reduce((previousText, childNode) => {
+    let nodeText = '';
+    switch (childNode.nodeName) {
+      case '#text':
+        nodeText = childNode.textContent.trim();
+        break;
+      case '#cdata-section':
+        nodeText = childNode.data;
+        break;
+    }
+    return previousText + nodeText;
+  }, '');
+}
+```

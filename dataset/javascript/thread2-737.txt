@@ -1,0 +1,173 @@
+```javascript
+<toggleUntrustedCertificate>
+function (boolActivateUnsecure) {
+    if (cordova.platformId == 'android')
+        cordova.exec(null, null, 'CertificatesPlugin', 'setUntrusted', [boolActivateUnsecure]);
+    else
+        cordova.exec(null, null, 'CDVCertificate', 'setUntrusted', [boolActivateUnsecure]);
+}
+</toggleUntrustedCertificate>
+
+<compareSpecialCases>
+function specialCases(e1, e2, p1, p2) {
+  
+  <comparePositions>
+  if (e1.left !== e2.left)
+    return e1.left ? 1 : -1;
+  </comparePositions>
+
+  <compareSignedArea>
+  if (signedArea(p1, e1.otherEvent.point, e2.otherEvent.point) !== 0) {
+    return (!e1.isBelow(e2.otherEvent.point)) ? 1 : -1;
+  }
+  </compareSignedArea>
+
+  <compareSubject>
+  return (!e1.isSubject && e2.isSubject) ? 1 : -1;
+  </compareSubject>
+}
+</compareSpecialCases>
+
+<mkdirsRecursive>
+function mkdirs(dirpath, _callback) {
+    <checkDirectoryExists>
+    fs.exists(dirpath, (exists)=> {
+        if (exists) {
+            _callback(dirpath);
+        } else {
+    </checkDirectoryExists>
+
+    <createParentThenCurrent>
+            mkdirs(path.dirname(dirpath), ()=> {
+                fs.mkdir(dirpath, _callback);
+            });
+        }
+    });
+}</createParentThenCurrent>
+</mkdirsRecursive>
+
+<initializeParserInline>
+function ParserInline() {
+  var i;
+  
+  <setupRuler>
+  this.ruler = new Ruler();
+  for (i = 0; i < _rules.length; i++) {
+    this.ruler.push(_rules[i][0], _rules[i][1]);
+  }
+  </setupRuler>
+
+  <setupRuler2>
+  this.ruler2 = new Ruler();
+  for (i = 0; i < _rules2.length; i++) {
+    this.ruler2.push(_rules2[i][0], _rules2[i][1]);
+  }
+  </setupRuler2>
+}
+</initializeParserInline>
+
+<registerCustomEvent>
+function (type, fn, context) {
+    var self = this;
+    <customEventRegistration>
+    Utils.batchForType(function (type, fn, context) {
+        var cfg = Utils.normalizeParam(type, fn, context), customEvent;
+        type = cfg.type;
+        customEvent = self.getCustomEventObservable(type, true);
+        if (customEvent) {
+            customEvent.on(cfg);
+        }
+    }, 0, type, fn, context);
+    return self;   
+    </customEventRegistration> 
+}
+</registerCustomEvent>
+
+<webpackModuleExport>
+function(module, exports, __webpack_require__) {
+  
+  <moduleRenderMethod>
+  module.exports={render:function (){with(this) {
+    return _h('div', {
+      staticClass: "container-fluid m-a-1 foo"
+    }, [_m(0), " ", _h('p', [_s(greeting) + " world!"]), " ", _m(1)])
+  }},staticRenderFns: [function (){with(this) {
+    return _h('h1', ["foo"])
+  }},function (){with(this) {
+    return _h('hr')
+  }}]}
+  </moduleRenderMethod>
+  
+  <moduleHotReload>
+  if (false) {
+    module.hot.accept()
+    if (module.hot.data) {
+       require("vue-hot-reload-api").rerender("data-v-3d9c874b", module.exports)
+    }
+  }
+  </moduleHotReload>
+
+}
+</webpackModuleExport>
+
+<javaWrapperConstructor>
+function (param, value) {
+    var jvmObject;
+    <initializeParam>
+    if (arguments[0] instanceof org.apache.spark.ml.param.ParamPair) {
+        jvmObject = arguments[0];
+    } else {
+        jvmObject = new org.apache.spark.ml.param.ParamPair(param, value);
+    }
+    </initializeParam>
+    
+    <initializeLogger>
+    this.logger = Logger.getLogger("ParamPair_js");
+    JavaWrapper.call(this, jvmObject);
+    </initializeLogger>
+
+}
+</javaWrapperConstructor>
+
+<convertDependencies>
+function dependenciesToArray(dependencies) {
+    <zipDependencies>
+    return zipWith((name, version) => ({ name, version }),
+        keys(dependencies),
+        values(dependencies));
+    </zipDependencies>
+}
+</convertDependencies>
+
+<cookieConstructor>
+function Cookie(name, value, attrs){
+  <cookieValidation>
+  if(!(this instanceof Cookie)) 
+    return new Cookie(name, value, attrs);
+  if(!name)  throw new TypeError('argument name is invalid');
+  </cookieValidation>
+
+  <cookieInitialization>
+  this.name   = name;
+  this.value  = value;
+  </cookieInitialization>
+
+  <setAttributeProperties>
+  for (var key in attrs) {
+    this[key] = attrs[key];
+  }
+  </setAttributeProperties>
+  return this;
+}
+</cookieConstructor>
+
+<generateVariantInfo>
+function(variant){
+    <initializeInfoString>
+    variant = variant ? (' for ' + variant) : '';
+    var info = '\n';
+    return info;
+    </initializeInfoString>
+}
+</generateVariantInfo>
+```

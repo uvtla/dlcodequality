@@ -1,0 +1,290 @@
+```javascript
+<createAotCompiler>
+function createAotCompiler(compilerHost, options) {
+    <initializeCompilerResources>
+    var translations = options.translations || '';
+    var urlResolver = createOfflineCompileUrlResolver();
+    var symbolCache = new StaticSymbolCache();
+    var summaryResolver = new AotSummaryResolver(compilerHost, symbolCache);
+    var symbolResolver = new StaticSymbolResolver(compilerHost, symbolCache, summaryResolver);
+    var staticReflector = new StaticReflector(summaryResolver, symbolResolver);
+    StaticAndDynamicReflectionCapabilities.install(staticReflector);
+    var console = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["_37" ]();
+    var htmlParser = new I18NHtmlParser(new HtmlParser(), translations, options.i18nFormat, __WEBPACK_IMPORTED_MODULE_0__angular_core__["_7" ].Warning, console);
+    var config = new CompilerConfig({
+        defaultEncapsulation: __WEBPACK_IMPORTED_MODULE_0__angular_core__["K" ].Emulated,
+        useJit: false,
+        enableLegacyTemplate: options.enableLegacyTemplate !== false,
+    });
+    var normalizer = new DirectiveNormalizer({ get: function (url) { return compilerHost.loadResource(url); } }, urlResolver, htmlParser, config);
+    var expressionParser = new Parser(new Lexer());
+    var elementSchemaRegistry = new DomElementSchemaRegistry();
+    var tmplParser = new TemplateParser(config, expressionParser, elementSchemaRegistry, htmlParser, console, []);
+    var resolver = new CompileMetadataResolver(config, new NgModuleResolver(staticReflector), new DirectiveResolver(staticReflector), new PipeResolver(staticReflector), summaryResolver, elementSchemaRegistry, normalizer, console, symbolCache, staticReflector);
+    </initializeCompilerResources>
+    
+    <setupImportResolver>
+    var importResolver = {
+        getImportAs: function (symbol) { return symbolResolver.getImportAs(symbol); },
+        fileNameToModuleName: function (fileName, containingFilePath) { return compilerHost.fileNameToModuleName(fileName, containingFilePath); },
+        getTypeArity: function (symbol) { return symbolResolver.getTypeArity(symbol); }
+    };
+    </setupImportResolver>
+    
+    <initializeViewCompiler>
+    var viewCompiler = new ViewCompiler(config, elementSchemaRegistry);
+    </initializeViewCompiler>
+    
+    <assembleCompiler>
+    var compiler = new AotCompiler(config, compilerHost, resolver, tmplParser, new StyleCompiler(urlResolver), viewCompiler, new NgModuleCompiler(), new TypeScriptEmitter(importResolver), summaryResolver, options.locale, options.i18nFormat, options.genFilePreamble, symbolResolver);
+    </assembleCompiler>
+    
+    return { compiler: compiler, reflector: staticReflector };
+}
+</createAotCompiler>
+
+<age>
+function age(time, k, bool) {
+    <initialSetup>
+    let d = bool ? time : Math.abs(Date.now()/1000 - time);
+    let o = '';
+    let r = {};
+    let c = 0;
+    </initialSetup>
+    <defineTimeUnits>
+    const s = {
+      year: 31536000,
+      month: 2592000,
+      week: 604800,
+      day: 86400,
+      hour: 3600,
+      minute: 60,
+      second: 1
+    }
+    </defineTimeUnits>
+
+    <calculateTimeComponents>
+    Object.keys(s).forEach(function(i){
+      r[i] = Math.floor(d / s[i]);
+      d -= r[i] * s[i];
+      if (r[i] && c<k) {
+        c++;
+        o += ` ${r[i]} ${i}${r[i] > 1 ? 's':''}`;
+      }
+    });
+    </calculateTimeComponents>
+    
+    return `${o}${bool ? '':' ago'}`;
+}
+</age>
+
+<generateHtml>
+function generateHtml(node) {
+    <handleReactElements>
+    if (isReactElement(node)) {
+        return _react2.default.renderToString(node);
+    } </handleReactElements>
+    <handleReactFragments>
+    else if (isReactFragment(node)) {
+        var htmlStr = '';
+        node.map(function (child) {
+            htmlStr += generateHtml(child);
+        });
+        return htmlStr;
+    } </handleReactFragments>
+    <handleReactText>
+    else if (isReactText(node)) {
+        return String(node);
+    } </handleReactText>
+    <handleReactEmpty>
+    else if (isReactEmpty(node)) {
+        return '';
+    }
+    </handleReactEmpty>
+
+    <trySerializeNodeToJson>
+    try {
+        return JSON.stringify(node);
+    } catch (err) {
+        console.error('stringify error:', err.message);
+        return node;
+    }
+    </trySerializeNodeToJson>
+}
+</generateHtml>
+
+<handleBreakContext>
+function() {
+    var context = this.breakContext;
+    var forkContext = this.forkContext;
+
+    this.breakContext = context.upper;
+
+    <handleNonBreakableContext>
+    if (!context.breakable) {
+        var brokenForkContext = context.brokenForkContext;
+
+        if (!brokenForkContext.empty) {
+            brokenForkContext.add(forkContext.head);
+            forkContext.replaceHead(brokenForkContext.makeNext(0, -1));
+        }
+    }
+    </handleNonBreakableContext>
+    
+    return context;
+}
+</handleBreakContext>
+
+<options>
+function(options){
+    <setDefaultOptions>
+    if (!arguments.length) {
+        options = scope.options;
+    } else {
+        scope.options = options;
+        if (scope._config.deepWatchOptions && !scope._config.disabled) return;
+    }
+    </setDefaultOptions>
+    
+    <clearElement>
+    scope.api.clearElement();
+    </clearElement>
+    
+    <checkOptionsDefined>
+    if (angular.isDefined(options) === false) return;  
+    </checkOptionsDefined>
+    
+    <verifyConfigVisibility>
+    if (!scope._config.visible) return;
+    </verifyConfigVisibility>
+    
+    <initChartModel>
+    scope.chart = nv.models[options.chart.type]();
+    scope.chart.id = Math.random().toString(36).substr(2, 15);
+    </initChartModel>
+    
+    <configureChartComponents>
+    angular.forEach(scope.chart, function(value, key){/*...*/ /* omitted for brevity */});
+    </configureChartComponents>
+    
+    <updateWithData>
+    scope.api.updateWithData();
+    </updateWithData>
+    
+    <configureChartWrappers>
+    if (options['title'] || scope._config.extended) configureWrapper('title');
+    if (options['subtitle'] || scope._config.extended) configureWrapper('subtitle');
+    if (options['caption'] || scope._config.extended) configureWrapper('caption');
+    </configureChartWrappers>
+    
+    <configureChartStyles>
+    if (options['styles'] || scope._config.extended) configureStyles();
+    </configureChartStyles>
+    
+    <finalizeChartSetup>
+    nv.addGraph(/*...*/ /* omitted for brevity */);
+    </finalizeChartSetup>
+}
+</options>
+
+<formatsToJSON>
+function formatsToJSON(attrs, options) {
+    <filterFormats>
+    var defaultFormats = ['html'],
+        formatsToKeep = options.formats || defaultFormats;
+
+    _.each(Post.allowedFormats, function (format) {
+        if (formatsToKeep.indexOf(format) === -1) {
+            delete attrs[format];
+        }
+    });
+    </filterFormats>
+
+    return attrs;
+}
+</formatsToJSON>
+
+<verifyRelativeDirection>
+function verifyRelativeDirection(direction) {
+    <validateDirection>
+    if (!RELATIVE_DIRECTIONS.includes(direction)) {
+        throw new Error(
+          `Unknown direction: '${direction}'. Should be one of: '${FORWARD}', '${RIGHT}', '${BACKWARD}' or '${LEFT}'.`,
+        );
+    }
+    </validateDirection>
+}
+</verifyRelativeDirection>
+
+<translate>
+function translate(cond, queryObj) {
+    let result = '1 == 1';
+
+    <handleConditionType>
+    if (!Array.isArray(cond)) {
+        if (cond.and) {
+            result = translateAndList(cond.and, queryObj)
+        }
+        else if (cond.or) {
+            result = translateOrList(cond.or, queryObj)
+        }
+        else {
+            throw new Error('Invalid query Object keys. Objects must be either "and" or "or"');
+        }
+    }
+    </handleConditionType>
+    <translateArrayCondition>
+    else {
+        assert(cond.length === 3, 'Invalid condition item. Condition items must be an array of 3 items representing field, comparator, and value')
+        let fieldName = cond[0];
+        // ... rest of the logic omitted for brevity
+    }
+    </translateArrayCondition>
+
+    return result;
+}
+</translate>
+
+<fetchAll>
+function(options) {
+    <logQueryActivity>
+    debug.trace('fetchAll %s', JSON.stringify(options));
+    </logQueryActivity>
+    <prepareOptions>
+    options = _.clone(options) || {};
+    </prepareOptions>
+    options.action = 'read';
+    var self = this;
+    <handleErrorSetup>
+    function handleError(err) {
+      if (options.ignoreFailures) {
+        return when.resolve(self);
+      }
+      return when.reject(err);
+    }
+    </handleErrorSetup>
+    <fetchDataWithRelations>
+    return this
+      .fetch(options)
+      .then(function() {
+        if (!self.relationDefinitions) {
+          return self;
+        }
+        return self
+          .fetchRelations(options)
+          .then(function() {
+            return self;
+          }, handleError);
+      }, handleError);
+    </fetchDataWithRelations>
+}
+</fetchAll>
+
+<timedLog>
+function timedLog(msg) {
+    <logWithTimestamp>
+    console.log(Date.now() + ":" + window.performance.now() + ": " + msg);
+    </logWithTimestamp>
+}
+</timedLog>
+```

@@ -1,0 +1,299 @@
+<collectRules>
+function collectRules(category) {
+    return rules.reduce((obj, rule) => {
+        if (!category || rule.meta.docs.category === category) {
+            obj[rule.meta.docs.ruleId] = "error"
+        }
+        return obj
+    }, {})
+}
+</collectRules>
+
+<anonymousFunction>
+function (column) {
+    if (isString(column.type) && column.type.match(/string/i) && column.text) {
+        delete column["default"];
+    }
+    return this._super(arguments, [column]);
+}
+</anonymousFunction>
+
+<anonymousFunction2>
+function () {
+    
+    this.$raiseEvent("beforeRemoveContent");
+    
+    
+    this._removingContent = true;
+    <removeContentLoop>
+    var content = this._content;
+    var contentLength = content.length;
+    for (var i = 0; i < contentLength; i++) {
+        var elt = content[i];
+        if (elt._type == TYPE_BEHAVIOR) {
+            var bhv = elt.behavior;
+            if (elt.id && this.idMap) {
+                this.idMap[elt.id] = null;
+                delete this.idMap[elt.id];
+            }
+            bhv.$dispose();
+        } else {
+            elt.$dispose();
+        }
+    }
+    </removeContentLoop>
+    this._content = [];
+    this._initWidgetsDone = false;
+    this._removingContent = false;
+    this.$raiseEvent("afterRemoveContent");
+}
+</anonymousFunction2>
+
+<ensureArgsInstanceOf>
+function( arg, instance, defaultValue ) {
+    'use strict';
+    
+    
+    if ( Array.isArray( arg ) ) {
+        for ( var i = arg.length - 1; i >= 0; --i ) {
+            if ( instance !== undefined && arg[ i ] instanceof instance === false ) {
+                return defaultValue;
+            }
+        }
+
+        return arg;
+    }
+    
+    
+    return this.ensureInstanceOf( arg, instance, defaultValue );
+}
+</ensureArgsInstanceOf>
+
+<histogram1D>
+function histogram1D(length, init){
+    var hist1D; 
+    if(length instanceof Array){
+        hist1D = length;
+    }else {
+        init = typeof init !== 'undefined' ? init : 0; 
+        hist1D = [];
+        for(var x = 0; x< length; ++x){ 
+            hist1D[x] = init;   
+        }
+    }
+    hist1D.max = histogram1DFunctions.max;
+    hist1D.min = histogram1DFunctions.min;
+    hist1D.cv = histogram1DFunctions.cv;
+    hist1D.medianSmoothing = histogram1DFunctions.medianSmoothing;
+    hist1D.gaussianSmoothing = histogram1DFunctions.gaussianSmoothing;
+    hist1D.flatten = histogram1DFunctions.flatten;
+    hist1D.findPeaks = histogram1DFunctions.findPeaks;
+    return hist1D;
+}
+</histogram1D>
+
+<Neo4jKB>
+function Neo4jKB(options) {
+  options = options || {};
+  if (!_.has(options, 'NEO4J_AUTH')) {
+    throw new Error("You must at least supply a NEO4J_AUTH: '<username>:<password>' JSON argument.")
+  };
+  this.options = options;
+  
+  this.query = require('./query')(options)
+
+  
+  this.literalize = literalize
+  this.addNode = addNode
+  this.getNode = getNode
+  this.addEdge = addEdge
+  this.getEdge = getEdge
+  this.pull = pull
+  this.get = get
+  this.push = push
+  this.add = add
+
+  
+  this.cons = cons
+
+  
+  _.assign(this, parse)
+
+  return this
+}
+</Neo4jKB>
+
+<equals>
+function equals(value1, value2, traversedValues) {
+  
+  <valueComparison>
+  if (!(value1 instanceof Object)) {
+    return value1 === value2
+  }
+  </valueComparison>
+  
+  <wrappedTypeComparison>
+  for (let wrappedType of WRAPPED_TYPES) {
+    if (value1 instanceof wrappedType) {
+      return (value2 instanceof wrappedType) &&
+          (value1.valueOf() === value2.valueOf())
+    }
+  }
+  </wrappedTypeComparison>
+  
+  <regexComparison>
+  if (value1 instanceof RegExp) {
+    return (value2 instanceof RegExp) &&
+        (value1.source === value2.source) &&
+        (value2.flags === value2.flags)
+  }
+  </regexComparison>
+  
+  <uninspectableTypeComparison>
+  for (let uninspectableType of UNINSPECTABLE_TYPES) {
+    if (value1 instanceof uninspectableType) {
+      return (value2 instanceof uninspectableType) &&
+          (value1 === value2)
+    }
+  }
+  </uninspectableTypeComparison>
+  
+  <arrayBufferComparison>
+  if ((typeof ArrayBuffer === "function") && (value1 instanceof ArrayBuffer)) {
+    return (value2 instanceof ArrayBuffer) &&
+        equals(new Int8Array(value1), new Int8Array(value2), traversedValues)
+  }
+  </arrayBufferComparison>
+
+  <dataViewComparison>
+  if ((typeof DataView === "function") && (value1 instanceof DataView)) {
+    return (value2 instanceof DataView) &&
+        equals(
+          new Int8Array(value1.buffer, value1.byteOffset, value1.byteLength),
+          new Int8Array(value2.buffer, value2.byteOffset, value2.byteLength),
+          traversedValues
+        )
+  }
+  </dataViewComparison>
+  
+  <typedArrayComparison>
+  for (let arrayType of TYPED_ARRAY_TYPES) {
+    if (value1 instanceof arrayType) {
+      return (value2 instanceof arrayType) &&
+          arrayEquals(value1, value2, traversedValues)
+    }
+  }
+  </typedArrayComparison>
+  
+  <imageDataComparison>
+  if ((typeof ImageData === "function") && (value1 instanceof ImageData)) {
+    return (value2 instanceof ImageData) &&
+        (value1.width === value2.width) &&
+        (value1.height === value2.height) &&
+        equals(value1.data, value2.data, traversedValues)
+  }
+  </imageDataComparison>
+  
+  <arrayComparison>
+  if (value1 instanceof Array) {
+    return (value2 instanceof Array) &&
+        arrayEquals(value1, value2, traversedValues)
+  }
+  </arrayComparison>
+  
+  <mapComparison>
+  if (value1 instanceof Map) {
+    return mapEquals(value1, value2, traversedValues)
+  }
+  </mapComparison>
+  
+  <setComparison>
+  if (value1 instanceof Set) {
+    return setEquals(value1, value2, traversedValues)
+  }
+  </setComparison>
+
+  <objectComparison>
+  if (isPlainObjectOrEntity(value1) && isPlainObjectOrEntity(value2)) {
+    return objectEquals(value1, value2, traversedValues)
+  }
+  </objectComparison>
+
+  throw new Error(`Unsupported argument types: ${value1}, ${value2}`)
+}
+</equals>
+
+<processBlock>
+async function processBlock(bn) {
+    
+    let transactions = await golos.golos.api.getOpsInBlockAsync(bn, false);
+    for(let tr of transactions) {
+        let op = tr.op[0];
+        let opBody = tr.op[1];
+        let time = Date.parse(tr.timestamp);
+        switch(op) {
+            
+            case "vote":
+                await processVote(opBody, time);
+                break;
+        }
+    }
+}
+</processBlock>
+
+<_getUi5AppHash>
+function _getUi5AppHash(sResolvedModulePath, sPreloadPath, oOptions) {
+  
+  const oPreloadFileContent = fs.readFileSync(sPreloadPath, 'utf8')
+
+  
+  
+  const sManifestPath = path.resolve(sResolvedModulePath, 'manifest.json')
+  const oManifestFileContent = fs.existsSync(sManifestPath)
+    ? fs.readFileSync(sManifestPath, 'utf8')
+    : null
+  const oManifestJSON = oManifestFileContent
+    ? JSON.parse(oManifestFileContent)
+    : { 'sap.ui5': {} }
+  <manifestResourceExtraction>
+  const aResourceKeys = oManifestJSON['sap.ui5'].resources
+    ? Object.keys(oManifestJSON['sap.ui5'].resources)
+    : []
+  const aDependedResourceContents = aResourceKeys.reduce(
+    (aContentsList, sResourceKey) => {
+      return aContentsList.concat(
+        oManifestJSON['sap.ui5'].resources[sResourceKey].map(oResource =>
+          fs.readFileSync(
+            path.resolve(sResolvedModulePath, oResource.uri),
+            'utf8'
+          )
+        )
+      )
+    },
+    []
+  )
+  </manifestResourceExtraction>
+
+  <bufferListCreationHashing>
+  const aBufferList = aDependedResourceContents
+    .concat(oPreloadFileContent ? oPreloadFileContent : [])
+    .map(oContent => new Buffer(oContent))
+  const sNewHash = _createHash(aBufferList, oOptions)
+  </bufferListCreationHashing>
+
+  return sNewHash
+}
+</_getUi5AppHash>
+
+<decodeString>
+function decodeString (string) {
+    if (string === values.EMPTY) {
+        return "";
+    } else if (string === values.NULL) {
+        return null;
+    } else {
+        return decodeURIComponent(
+            string.replace(/\+/g,"%20"));
+    }
+}
+</decodeString>

@@ -1,0 +1,143 @@
+```javascript
+<padEnd>
+function padEnd(str, length) {
+  if (str.length >= length) return str;
+  return str + ' '.repeat(length - str.length);
+}
+</padEnd>
+
+<validateStreamChannelsOptions>
+function(options) {
+  if (typeof options === 'undefined') {
+    throw new Error('new StreamChannels(options) - options parameter missing');
+  }
+  else if (typeof options.track === 'undefined') {
+    throw new Error('new StreamChannels(options) - options.track parameter missing');
+  }
+  else if (!(typeof options.track === 'object' || typeof options.track === 'string')) {
+    throw new Error('new StreamChannels(options) - options.track must be an Object (representing your channels with there keywords), an Array (of keywords) or a String (with comma separated keywords)');
+  }
+}
+</validateStreamChannelsOptions>
+
+<validateJweDetails>
+function jwe (details) {
+  if (!details.header)
+    throw new Error('No header for JWE token')
+  if (!details.header.alg || details.header.alg != 'dir')
+    throw new Error('Only "dir" algorithm supported for JWE token')
+  if (!details.header.enc)
+    throw new Error('No JWE encryption algorithm specified')
+  if (!encryptAlg[details.header.enc])
+    throw new Error('Unsupported JWE encryption algorithm:"'+details.header.enc+'"')
+  if (!details.payload)
+    throw new Error('No payload for JWE token')
+  if (!details.credentials)
+    throw new Error('No credentials for JWE token')
+  if (!details.credentials.kid)
+    throw new Error('No credentials.kid for JWE token')
+  if (!details.credentials.key)
+    throw new Error('No credentials.key for JWE token')
+  return encryptAlg[details.header.enc](details)
+}
+</validateJweDetails>
+
+<processLine>
+function processLine (context, comment) {
+  const parsed = parse(COMMENT_DIRECTIVE_L, comment.value)
+  if (parsed != null && comment.loc.start.line === comment.loc.end.line) {
+    const line = comment.loc.start.line + (parsed.type === 'eslint-disable-line' ? 0 : 1)
+    const column = -1
+    disable(context, { line, column }, 'line', parsed.rules)
+    enable(context, { line: line + 1, column }, 'line', parsed.rules)
+  }
+}
+</processLine>
+
+<loadAndExecuteBundles>
+function(exports, module, require, __filename) {
+  Promise.resolve(${o}).then(
+    function(o) {
+      return o(function(o) { return o(document); })
+    }
+  ).then(
+    function(require) {
+      ${bundles}.then(
+        function() {
+          require(${main}).then(
+            function(_module) {
+              if (typeof _module === "function") {
+                _module(Promise.resolve(require), exports, module, __filename);
+              }
+            }
+          );
+        }
+      );
+    }
+  );
+}
+</loadAndExecuteBundles>
+
+<initializeCookie>
+function cookiee(secret, opt) {
+  if (!secret) {
+    throw new TypeError('secret required');
+  }
+  var options = opt || Object.create(null);
+  var my = {
+    secret: Buffer.isBuffer(secret) ? secret : new Buffer(secret),
+    cipher: String(options.cipher || 'arc4'),
+    cookie: String(options.cookie || 'vault'),
+    domain: String(options.domain || ''),
+    path: String(options.path || '/'),
+    maxAge: Number(options.maxAge) || 1000 * 3600 * 24 * 365,
+    httpOnly: Boolean(options.httpOnly),
+    secure: Boolean(options.secure),
+    signed: Boolean(options.signed),
+    encoding: String(options.encoding || 'hex'),
+    extra: Array.isArray(options.extra) === true ? options.extra : []
+  };
+
+  return Boolean(options.signed) ? new Signed(my) : new Normal(my);
+}
+</initializeCookie>
+
+<getColor>
+function(valStr) {
+  var rgbValue;
+  if (Utils.isString(valStr)) {
+    rgbValue = ColorUtils.parseToValue(valStr);
+  }
+  if (Utils.isObject(valStr) && 'r' in valStr) {
+    rgbValue = valStr;
+  }
+  if (rgbValue === null) {
+    return new Color();
+  }
+  return new Color(rgbValue.r, rgbValue.g, rgbValue.b, rgbValue.a);
+}
+</getColor>
+
+<modifySeries>
+function (options, redraw, shift, animation) {
+  // ... (content of the function)
+}
+</modifySeries>
+
+<handleTouchStart>
+function touchstart(e) {
+  var i = -1,
+      n = e.touches.length,
+      t = Date.now();
+  // ... (content of the function)
+}
+</handleTouchStart>
+
+<replaceInDocument>
+function _doReplaceInDocument(doc, matchInfo, replaceText, isRegexp) {
+  // ... (content of the function)
+}
+</replaceInDocument>
+```
+
+In these annotations, each function is enclosed in tags that signify its overall responsibility. Given the context of the code, it is clear that each of these functions has a single distinct responsibility, thus they are compliant with the Single Responsibility Principle (SRP). The functions that seem multi-step within their logic (like `<modifySeries>` and `<replaceInDocument>`) still collectively perform a single responsibility by updating a series or replacing text in a document, respectively.

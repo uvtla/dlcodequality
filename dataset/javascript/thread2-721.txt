@@ -1,0 +1,312 @@
+<function polygonCanSee>
+function polygonCanSee(polygon, a,b) {
+    var p, dist, l1=tmpLine1, l2=tmpLine2;
+
+    <checkEdgeVisibility>
+    if (isLeftOn(polygonAt(polygon, a + 1), polygonAt(polygon, a), polygonAt(polygon, b)) && isRightOn(polygonAt(polygon, a - 1), polygonAt(polygon, a), polygonAt(polygon, b))) {
+        return false;
+    }
+    </checkEdgeVisibility>
+    
+    <calculateDistance>
+    dist = sqdist(polygonAt(polygon, a), polygonAt(polygon, b));
+    </calculateDistance>
+    
+    <checkVisibilityWithinPolygon>
+    for (var i = 0; i !== polygon.length; ++i) { 
+        if ((i + 1) % polygon.length === a || i === a){ 
+            continue;
+        }
+        if (isLeftOn(polygonAt(polygon, a), polygonAt(polygon, b), polygonAt(polygon, i + 1)) && isRightOn(polygonAt(polygon, a), polygonAt(polygon, b), polygonAt(polygon, i))) { 
+            l1[0] = polygonAt(polygon, a);
+            l1[1] = polygonAt(polygon, b);
+            l2[0] = polygonAt(polygon, i);
+            l2[1] = polygonAt(polygon, i + 1);
+            p = lineInt(l1,l2);
+            if (sqdist(polygonAt(polygon, a), p) < dist) { 
+                return false;
+            }
+        }
+    }
+    </checkVisibilityWithinPolygon>
+
+    return true;
+}
+</function polygonCanSee>
+
+<createDirs>
+function createDirs(next) {
+      <checkOptions>
+      if (!options.files || !options.files.length) {
+        return next();
+      }
+      </checkOptions>
+
+      <executeSSHCommands>
+      self.ssh({
+        keys: options.keys,
+        server: options.server,
+        tunnel: options.tunnel,
+        remoteUser: options.remoteUser,
+        commands: ['mkdir -p ' + options.files.map(function (file) {
+          return path.dirname(file.target);
+        }).join(' ')]
+      }).on('error', function (err) {
+        if (!hasErr) {
+          hasErr = true;
+          next(err);
+        }
+      }).on('complete', function () {
+        if (!hasErr) {
+          next();
+        }
+      });
+      </executeSSHCommands>
+    }
+</createDirs>
+
+<anonymousRowCreationFunction>
+function (oRecord, index) {
+    
+    <checkExistingTemplate>
+    if(this._elTrTemplate) {
+        return this._elTrTemplate;
+    }
+    </checkExistingTemplate>
+    
+    else {
+        <createElementStructure>
+        var d   = document,
+            tr  = d.createElement('tr'),
+            td  = d.createElement('td'),
+            div = d.createElement('div');
+    
+        td.appendChild(div);
+        </createElementStructure>
+
+        <populateWithCells>
+        var df = document.createDocumentFragment(),
+            allKeys = this._oColumnSet.keys,
+            elTd;
+
+        var aAddClasses;
+        for(var i=0, keysLen=allKeys.length; i<keysLen; i++) {
+            elTd = td.cloneNode(true);
+            elTd = this._formatTdEl(allKeys[i], elTd, i, (i===keysLen-1));
+            df.appendChild(elTd);
+        }
+        tr.appendChild(df);
+        </populateWithCells>
+        
+        <cacheTemplate>
+        this._elTrTemplate = tr;
+        </cacheTemplate>
+        
+        return tr;
+    }   
+}
+</anonymousRowCreationFunction>
+
+<ImpromptuConstructor>
+function Impromptu() {
+  <initializeState>
+  this.state = new Impromptu.State()
+  </initializeState>
+
+  <setRootPath>
+  this._setRootPath(Impromptu.DEFAULT_CONFIG_DIR)
+  </setRootPath>
+
+  <initializeInstances>
+  this.log = new Impromptu.Log(this.state)
+  this.exec = Impromptu.Exec(this.log)
+  this.color = new Impromptu.Color(this.state)
+  this.repository = new Impromptu.RepositoryFactory()
+  this.db = new Impromptu.DB()
+  </initializeInstances>
+
+  <initializeCache>
+  this.cache = new Impromptu.CacheFactory(this.state)
+  this._addCacheProviders()
+  </initializeCache>
+
+  <initializeModuleAndPlugins>
+  this.module = new Impromptu.ModuleFactory(this)
+  this.plugin = new Impromptu.PluginFactory(this.cache)
+  this._loadPlugins = this.plugin.claimPluginLoader()
+  </initializeModuleAndPlugins>
+
+  <initializePrompt>
+  this.prompt = new Impromptu.Prompt(this.color)
+  </initializePrompt>
+}
+</ImpromptuConstructor>
+
+<fileExists>
+function fileExists(file) {
+    try {
+        <statFile>
+        var targetStat = fs.statSync(file);
+        </statFile>
+        
+        <checkNotDirectory>
+        if (targetStat.isDirectory() ) {
+            throw new Error("File exists but it's a directory: " + file);
+        }
+        </checkNotDirectory>
+    }
+    catch(err) {
+        <handleErrors>
+        if (err.code == 'ENOENT') {         
+            return false;
+        }
+        else {
+            throw err;
+        }
+        </handleErrors>
+    }
+    return true;
+}
+</fileExists>
+
+<quantile_sorted>
+function quantile_sorted(sample, p) {
+        var idx = (sample.length) * p;
+
+        <validatePercentile>
+        if (p < 0 || p > 1) {
+            return null;
+        }
+        </validatePercentile>
+        
+        else if (p === 1) {
+            <handleMax>
+            return sample[sample.length - 1];
+            </handleMax>
+        } else if (p === 0) {
+            <handleMin>
+            return sample[0];
+            </handleMin>
+        } else if (idx % 1 !== 0) {
+            <returnInterpolated>
+            return sample[Math.ceil(idx) - 1];
+            </returnInterpolated>
+        } else if (sample.length % 2 === 0) {
+            <handleEvenSample>
+            return (sample[idx - 1] + sample[idx]) / 2;
+            </handleEvenSample>
+        } else {
+            <handleOddSample>
+            return sample[idx];
+            </handleOddSample>
+        }
+    }
+</quantile_sorted>
+
+<postJSONData>
+function () {
+            return gpf.http.post("/fs/src/sources.json", this.toString())
+                <handleHTTPResponse>
+                .then(function (answer) {
+                    var HTTP_ERROR = 500;
+                    if (answer.status === HTTP_ERROR) {
+                        return dialogs.error(answer.responseText);
+                    }
+                });
+                </handleHTTPResponse>
+        }
+</postJSONData>
+
+<handleInputChange>
+function(event) {
+		var date,
+			inst = $.datepicker._getInst(event.target);
+
+		<checkInputValue>
+		if (inst.input.val() !== inst.lastVal) {
+			try {
+				<parseAndSetDate>
+				date = $.datepicker.parseDate($.datepicker._get(inst, "dateFormat"),
+					(inst.input ? inst.input.val() : null),
+					$.datepicker._getFormatConfig(inst));
+
+				if (date) { 
+					$.datepicker._setDateFromField(inst);
+					$.datepicker._updateAlternate(inst);
+					$.datepicker._updateDatepicker(inst);
+				}
+				</parseAndSetDate>
+			}
+			catch (err) {
+			}
+		}
+		</checkInputValue>
+		return true;
+	}
+</handleInputChange>
+
+<adjustTextareaHeight>
+function() {
+                    
+    <prepareCloneForMeasurement>
+    clone.height(0).val($(this).val()).scrollTop(10000);
+	</prepareCloneForMeasurement>
+                    
+    <calculateScrollTop>
+    var scrollTop = Math.max(clone.scrollTop(), origHeight) + settings.extraSpace,
+        toChange = $(this).add(clone);
+	</calculateScrollTop>
+						
+    <updateHeight>
+    if (lastScrollTop === scrollTop) { return; }
+    lastScrollTop = scrollTop;
+					
+    if ( scrollTop >= settings.limit ) {
+        $(this).css('overflow-y','');
+        return;
+    }
+    </updateHeight>
+    
+    <triggerResize>
+    settings.onResize.call(this);
+	</triggerResize>
+					
+    <applyHeight>
+    settings.animate && textarea.css('display') === 'block' ?
+        toChange.stop().animate({height:scrollTop}, settings.animateDuration, settings.animateCallback)
+        : toChange.height(scrollTop);
+    </applyHeight>
+}
+</adjustTextareaHeight>
+
+<analyseEntry>
+function analyseEntry(p, count, tests) {
+		
+    <checkModifiers>
+		var optional = false,
+			inversed = false;
+		if (p[count] == "?") {
+			optional = true;
+			count++;
+		} else if (p[count] == '!') {
+			inversed = true;
+			count++;
+		}
+    </checkModifiers>
+    
+    <analysePattern>
+		if (p[count] == '(') 
+			return analyseBlock(p, count, tests, optional, inversed);
+		else if (p[count] == '$') 
+		{
+			tests.push(createEndTest(optional, inversed));
+			return ++count;
+		} else if (p[count] == '[') 
+			return analyseDisjonction(p, count, tests, optional, inversed);
+		else if (p[count + 1] == ":") 
+			return analyseVar(p, count, tests, optional, inversed);
+		else 
+			return analyseKey(p, count, tests, optional, inversed);
+    </analysePattern>
+}
+</analyseEntry>

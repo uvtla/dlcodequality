@@ -1,0 +1,393 @@
+<safeToArray>
+function safeToArray(args) {
+        const seen = [];
+        const argsArray = [];
+
+        let res;
+
+        <processArgs>
+        if (args.length) {
+            for (let i = 0; i < args.length; i++) {
+
+                <handleUndefined>
+                if (typeof args[i] === 'undefined') {
+                    args[i] = 'undefined';
+                }
+                </handleUndefined>
+
+                <handleError>
+                else if (args[i] instanceof Error) {
+                    const errorObj = args[i];
+                    if (errorObj.stack) {
+                        args[i] = errorObj.stack;
+                    } else {
+                        args[i] = errorObj.toString();
+                    }
+                }
+                </handleError>
+
+                argsArray.push(args[i]);
+            }
+        }
+        </processArgs>
+
+        <addStackTrace>
+        if (process.env.VSCODE_LOG_STACK === 'true') {
+            const stack = new Error().stack;
+            argsArray.push({ __$stack: stack.split('\n').slice(3).join('\n') });
+        }
+        </addStackTrace>
+
+        <transformToJsonString>
+        try {
+            res = JSON.stringify(argsArray, function (key, value) {
+
+                <detectCircularReference>
+                if (isObject(value) || Array.isArray(value)) {
+                    if (seen.indexOf(value) !== -1) {
+                        return '[Circular]';
+                    }
+
+                    seen.push(value);
+                }
+                </detectCircularReference>
+
+                return value;
+            });
+        } catch (error) {
+            return 'Output omitted for an object that cannot be inspected (' + error.toString() + ')';
+        }
+        </transformToJsonString>
+
+        <truncateLongOutput>
+        if (res && res.length > MAX_LENGTH) {
+            return 'Output omitted for a large object that exceeds the limits';
+        }
+        </truncateLongOutput>
+
+        return res;
+}
+</safeToArray>
+
+<OnvifManager>
+function OnvifManager() {
+    this.ws = null;
+    this.el = {
+        'frm_con' : $('#connect-form'),
+        'sel_dev' : $('#connect-form select[name="device"]'),
+        'inp_usr' : $('#connect-form input[name="user"]'),
+        'inp_pas' : $('#connect-form input[name="pass"]'),
+        'btn_con' : $('#connect-form button[name="connect"]'),
+        'div_pnl' : $('#connected-device'),
+        'img_snp' : $('#connected-device img.snapshot'),
+        'btn_dcn' : $('#connected-device button[name="disconnect"]'),
+        'mdl_msg' : $('#message-modal'),
+        'ptz_spd' : $('input[name="ptz-speed"]'),
+        'btn_hme' : $('#connected-device div.ptz-pad-box button.ptz-goto-home'),
+        'ptz_pad' : $('#connected-device div.ptz-pad-box'),
+        'zom_in'  : $('#connected-device div.ptz-zom-ctl-box button.ptz-zom-in'),
+        'zom_out' : $('#connected-device div.ptz-zom-ctl-box button.ptz-zom-ot'),
+    };
+    this.selected_address = '';
+    this.device_connected = false;
+    this.ptz_moving = false;
+    this.snapshot_w = 400;
+    this.snapshot_h = 300;
+}
+</OnvifManager>
+
+<sendClientAlertMessage>
+function sendClientAlertMessage(ws, alert) {
+  var msg = JSON.stringify({
+    custom: {
+      alert: alert
+    }
+  });
+  ws.write(msg);
+}
+</sendClientAlertMessage>
+
+<map>
+function map(obj, iteratee, context) {
+    var resultArray = [];
+
+    context = context || null;
+
+    <applyIteratee>
+    forEach(obj, function() {
+        resultArray.push(iteratee.apply(context, arguments));
+    });
+    </applyIteratee>
+
+    return resultArray;
+}
+</map>
+
+<HostEntry>
+function HostEntry(addr, src) {
+  if (!(this instanceof HostEntry))
+    return new HostEntry(addr, src);
+
+  this.addr = addr || new NetAddress();
+  this.src = src || new NetAddress();
+  this.prev = null;
+  this.next = null;
+  this.used = false;
+  this.refCount = 0;
+  this.attempts = 0;
+  this.lastSuccess = 0;
+  this.lastAttempt = 0;
+
+  <fromOptions>
+  if (addr)
+    this.fromOptions(addr, src);
+  </fromOptions>
+}
+</HostEntry>
+
+<doormen>
+function doormen( ... args ) {
+	var options , data , schema , context , sanitized ;
+
+	if ( args.length < 2 || args.length > 3 ) {
+		throw new Error( 'doormen() needs at least 2 and at most 3 arguments' ) ;
+	}
+
+	if ( args.length === 2 ) { schema = args[ 0 ] ; data = args[ 1 ] ; }
+	else { options = args[ 0 ] ; schema = args[ 1 ] ; data = args[ 2 ] ; }
+
+	
+	if ( typeof schema === 'string' ) { schema = doormen.sentence( schema ) ; }
+
+	if ( ! schema || typeof schema !== 'object' ) {
+		throw new doormen.SchemaError( 'Bad schema, it should be an object or an array of object!' ) ;
+	}
+
+	if ( ! options || typeof options !== 'object' ) { options = {} ; }
+
+	if ( ! options.patch || typeof options.patch !== 'object' || Array.isArray( options.patch ) ) { options.patch = false ; }
+
+
+	context = {
+		userContext: options.userContext ,
+		validate: true ,
+		errors: [] ,
+		patch: options.patch ,
+		check: check ,
+		validatorError: validatorError ,
+		report: !! options.report ,
+		export: !! options.export
+	} ;
+
+	<sanitizeData>
+	sanitized = context.check( schema , data , {
+		path: '' ,
+		displayPath: data === null ? 'null' : ( Array.isArray( data ) ? 'array' : typeof data ) ,	
+		key: ''
+	} , false ) ;
+	</sanitizeData>
+
+	if ( context.report ) {
+		return {
+			validate: context.validate ,
+			sanitized: sanitized ,
+			errors: context.errors
+		} ;
+	}
+
+	return sanitized ;
+
+}
+</doormen>
+
+<createLookupList>
+function createLookupList(font) {
+  var ligatures = font.ligatures;
+
+  var groupedLigatures = {};
+
+  
+  <groupLigatures>
+  _.forEach(ligatures, function (ligature) {
+    var first = ligature.unicode[0];
+
+    if (!_.has(groupedLigatures, first)) {
+      groupedLigatures[first] = [];
+    }
+    groupedLigatures[first].push(ligature);
+  });
+  </groupLigatures>
+
+  var ligatureGroups = [];
+
+  <sortLigatureGroups>
+  _.forEach(groupedLigatures, function (ligatures, codePoint) {
+    codePoint = parseInt(codePoint, 10);
+    
+    
+    
+    ligatures.sort(function (ligA, ligB) {
+      return ligB.unicode.length - ligA.unicode.length;
+    });
+    ligatureGroups.push({
+      codePoint: codePoint,
+      ligatures: ligatures,
+      startGlyph: font.codePoints[codePoint]
+    });
+  });
+  </sortLigatureGroups>
+
+  <sortLigatureGroupsFinal>
+  ligatureGroups.sort(function (a, b) {
+    return a.startGlyph.id - b.startGlyph.id;
+  });
+  </sortLigatureGroupsFinal>
+
+  var offset = (0
+    + 2 
+    + 2 
+  );
+
+  var set = createLigatureList(font, ligatureGroups);
+
+  var length = (0
+    + offset
+    + set.length
+  );
+
+  var buffer = new ByteBuffer(length);
+
+  
+  <writeLookupList>
+  buffer.writeUint16(1);
+
+  
+  buffer.writeUint16(offset);
+
+  
+  buffer.writeBytes(set.buffer);
+  </writeLookupList>
+
+  return buffer;
+}
+</createLookupList>
+
+<convolve5x5Sharp>
+function (inData, outData, width, height) {
+        convolve5x5(inData, outData, width, height,
+            [
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, 24, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1]
+            ],
+            false, true, true);
+}
+</convolve5x5Sharp>
+
+<BlurClassConstructor>
+function (element, options) {
+  this.internalID = randomID()
+  this.element = element
+  this.width = element.offsetWidth
+  this.height = element.offsetHeight
+  this.element = element
+  this.parent = this.element.parentNode
+  <setDefaultOptions>
+  this.options = Object.assign({}, Blur.DEFAULTS, options)
+  </setDefaultOptions>
+  <createOverlay>
+  this.overlayEl = this.createOverlay()
+  </createOverlay>
+  <attachListeners>
+  this.attachListeners()
+  </attachListeners>
+  <generateBlurredImage>
+  this.generateBlurredImage(this.options.url)
+  </generateBlurredImage>
+}
+</BlurClassConstructor>
+
+<generatePassword>
+function password (n, special) {
+	n = n || 3;
+	special = special === true;
+	var result = "",
+		i = -1,
+		used = {},
+		hasSub = false,
+		hasExtra = false,
+		flip, lth, pos, rnd, word;
+
+	<substituteCharacters>
+	function sub (x, idx) {
+		if (!hasSub && word.indexOf(x) > -1) {
+			word = word.replace(x, subs[idx]);
+			hasSub = true;
+			flip = false;
+		}
+	}
+	</substituteCharacters>
+
+	<passwordComposition>
+	if (!special) {
+		while (++i < n) {
+			result += words[random(nth, used)];
+		}
+	} else {
+		rnd = Math.floor(Math.random() * n);
+
+		while (++i < n) {
+			word = words[random(nth, used)];
+
+			<randomCaps>
+			if (i === rnd) {
+			  lth = word.length;
+			  pos = Math.floor(Math.random() * lth);
+
+			  if (pos === 0) {
+				word = word.charAt(0).toUpperCase() + word.slice(1);
+			  } else if (pos < lth - 1) {
+				word = word.slice(0, pos) + word.charAt(pos).toUpperCase() + word.slice(pos + 1, lth);
+			  } else {
+				word = word.slice(0, pos) + word.charAt(pos).toUpperCase();
+			  }
+			}
+			</randomCaps>
+
+			<addSpecialChars>
+			else if (i >= ( n / 2 )) {
+
+				
+				flip = Math.random() >= 0.5 ? 1 : 0;
+
+				
+				if (flip && !hasSub) {
+					replace.forEach(sub);
+				}
+
+				
+				if (flip && !hasExtra) {
+					word += extra[Math.floor(Math.random() * eth)];
+					hasExtra = true;
+				}
+			}
+			</addSpecialChars>
+
+			result += word;
+		}
+
+		if (!hasSub) {
+			result += subs[Math.floor(Math.random() * rth)];
+		}
+
+		if (!hasExtra) {
+			result += extra[Math.floor(Math.random() * eth)];
+		}
+	}
+	</passwordComposition>
+
+	return result;
+}
+</generatePassword>

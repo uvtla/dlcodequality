@@ -1,0 +1,319 @@
+```javascript
+<createError>
+function createError(code, error, original) {
+  var e = new Error(error);
+  e.code = code; 
+  if (original)
+    e.original = original;
+  return e;
+}
+</createError>
+
+<functionManipulateHtml>
+function(location, html) {
+  <cleanHtml>
+  clean(this);
+  </cleanHtml>
+
+  <argumentHandling>
+  if (arguments.length == 0) {
+    var i = [];
+    this.each(function(el) {
+      i.push(el.innerHTML);
+    });
+    return i;
+  }
+  if (arguments.length == 1 && arguments[0] != 'remove') {
+    html = location;
+    location = 'inner';
+  }
+  </argumentHandling>
+
+  <htmlManipulation>
+  if (location != 'remove' && html && html.each !== undefined) {
+    if (location == 'inner') {
+      var d = document.createElement('p');
+      html.each(function(el) {
+        d.appendChild(el);
+      });
+      this.each(function(el) {
+        el.innerHTML = d.innerHTML;
+      });
+    } else {
+      var that = this;
+      html.each(function(el) {
+        that.html(location, el);
+      });
+    }
+    return this;
+  }
+  </htmlManipulation>
+
+  <domElementHandling>
+  return this.each(function(el) {
+    if (location == "inner") {
+      if (typeof html == string || typeof html == "number") {
+        el.innerHTML = html;
+        var list = el.getElementsByTagName('SCRIPT');
+        var len = list.length;
+        for (var i = 0; i < len; i++) {
+          eval(list[i].text);
+        }
+      } else {
+        el.innerHTML = '';
+        el.appendChild(html);
+      }
+    } else {
+      <removeElement>
+      if (location == 'remove') {
+        el.parentNode.removeChild(el);
+      }
+      </removeElement>
+      <insertElement>
+      else {
+        var elArray = ['outer', 'top', 'bottom'],
+            wrappedE = wrapHelper(html, (elArray.indexOf(location) > -1 ? el : el.parentNode )),
+            children = wrappedE.childNodes;
+
+        if (location == "outer") {
+          el.parentNode.replaceChild(wrappedE, el);
+        } else if (location == "top") {
+          el.insertBefore(wrappedE, el.firstChild);
+        } else if (location == "bottom") {
+          el.insertBefore(wrappedE, null);
+        } else if (location == "before") {
+          el.parentNode.insertBefore(wrappedE, el);
+        } else if (location == "after") {
+          el.parentNode.insertBefore(wrappedE, el.nextSibling);
+        }
+        
+        var parent = wrappedE.parentNode;
+        while(children.length) {
+          parent.insertBefore(children[0], wrappedE);
+        }
+        parent.removeChild(wrappedE);
+      }
+      </insertElement>
+    }
+  });
+  </domElementHandling>
+}
+</functionManipulateHtml>
+
+<MaxRetryExceededError>
+function MaxRetryExceededError(missingOptimizedPaths) {
+  var instance = new Error("The allowed number of retries have been exceeded.");
+
+  instance.name = "MaxRetryExceededError";
+  instance.missingOptimizedPaths = missingOptimizedPaths || [];
+
+  <setPrototype>
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(instance, Object.getPrototypeOf(this));
+  }
+  </setPrototype>
+
+  <captureStackTrace>
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(instance, MaxRetryExceededError);
+  }
+  </captureStackTrace>
+
+  return instance;
+}
+</MaxRetryExceededError>
+
+<_cleanResults>
+function _cleanResults(results, stringify) {
+  var clean = _.map(results, function (res) {
+    return _.reduce(res, _cleanObject, {});
+  });
+
+  <convertToJson>
+  if (stringify) return JSON.stringify(clean, '', '  ');
+  </convertToJson>
+  
+  return clean;
+}
+</_cleanResults>
+
+<processModelData>
+function(snap) {
+
+  <checkAndAssignId>
+  var newModel = Backbone.Firebase._checkId(snap);
+  </checkAndAssignId>
+
+  <unsetAttributes>
+  if (typeof newModel === 'object' && newModel !== null) {
+    var diff = _.difference(_.keys(this.attributes), _.keys(newModel));
+    _.each(diff, _.bind(function(key) {
+      this.unset(key);
+    }, this));
+  }
+  </unsetAttributes>
+
+  <setId>
+  this._setId(snap);
+  </setId>
+
+  return newModel;
+}
+</processModelData>
+
+<buildWebpackProject>
+function build(previousSizeMap) {
+  <logStart>
+  console.log('Creating an optimized production build...');
+  </logStart>
+
+  <webpackCompile>
+  webpack(config).run((err, stats) => {
+    if (err) {
+      printErrors('Failed to compile.', [err]);
+      process.exit(1);
+    }
+    
+    if (stats.compilation.errors.length) {
+      printErrors('Failed to compile.', stats.compilation.errors);
+      process.exit(1);
+    }
+
+    <treatWarningsAsErrors>
+    if (process.env.CI && stats.compilation.warnings.length) {
+      printErrors('Failed to compile. When process.env.CI = true, warnings are treated as failures. Most CI servers set this automatically.', stats.compilation.warnings);
+      process.exit(1);
+    }
+    </treatWarningsAsErrors>
+  });
+  </webpackCompile>
+
+  console.log(chalk.green('Compiled successfully.'));
+  console.log();
+
+  <printFileSizesAfterGzip>
+  console.log('File sizes after gzip:');
+  console.log();
+  printFileSizes(stats, previousSizeMap);
+  console.log();
+  </printFileSizesAfterGzip>
+
+  <deploymentInstructions>
+  // ... (omitted for brevity, but each console.log statement relating to instructions would be enclosed)
+  </deploymentInstructions>
+}
+</buildWebpackProject>
+
+<transformJsonValue>
+function (key) {
+
+  <checkForNull>
+  if ($scope.json[key] === null);
+  </checkForNull>
+
+  <handleUndefinedOrEmpty>
+  else if ($scope.json[key] === undefined || $scope.json[key] === '') $scope.json[key] = null;
+  </handleUndefinedOrEmpty>
+
+  <convertToNumber>
+  else if (!isNaN(+$scope.json[key]) && isFinite($scope.json[key]))
+    $scope.json[key] = +$scope.json[key];
+  </convertToNumber>
+
+  <replaceWithFunction>
+  else if ($scope.utils.tryGetFunction($scope.json[key])) {
+    $scope.json[key] = $scope.utils.tryGetFunction($scope.json[key]);
+    $scope.utils.textarea.init(key);
+  }
+  </replaceWithFunction>
+
+  <parseJsonOrBoolean>
+  else {
+    if ($scope.node.isHighEditLevel) { 
+      try {
+        var json = JSON.parse($scope.json[key]);
+        $scope.json[key] = json;
+        $scope.refresh();
+      } catch (e) {}
+    } else { 
+      if ($scope.json[key] === "true" || $scope.json[key] === "false") {
+        $scope.json[key] = JSON.parse($scope.json[key]);
+        $scope.refresh();
+      }
+    }
+  }
+  </parseJsonOrBoolean>
+}
+</transformJsonValue>
+
+<shuffleArray>
+function shuffle(o) {
+  for (var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+  return o;
+}
+</shuffleArray>
+
+<closeDropdown>
+function (target) {
+  <getInstance>
+  var inst = this._getInst(target);
+  </getInstance>
+
+  if (!inst || !inst.isOpen) {
+    return;
+  }
+
+  <invokeOnClose>
+  var onClose = this._get(inst, 'onClose');
+  </invokeOnClose>
+  
+  <hideOptions>
+  inst.settings.effect === "fade" ? $("#sbOptions_" + inst.uid).fadeOut(inst.settings.speed) : $("#sbOptions_" + inst.uid).slideUp(inst.settings.speed);
+  </hideOptions>
+  
+  <updateToggle>
+  $("#sbToggle_" + inst.uid).removeClass(inst.settings.classToggleOpen);
+  </updateToggle>
+  
+  <changeHolderState>
+  var holder = $("#sbHolder_" + inst.uid);
+  holder.removeClass('open');
+  holder.addClass('closed');
+  </changeHolderState>
+    
+  <updateState>
+  this._state[inst.uid] = FALSE;
+  inst.isOpen = FALSE;
+  </updateState>
+  
+  <applyCloseCallback>
+  if (onClose) {
+    onClose.apply((inst.input ? inst.input[0] : null), [inst]);
+  }
+  </applyCloseCallback>
+  
+  <storeInstanceData>
+  $.data(target, PROP_NAME, inst);
+  </storeInstanceData>
+}
+</closeDropdown>
+
+<trackPointers>
+function (type, pointerEvent) {
+  <endEventReset>
+  if (type == ionic.Gestures.EVENT_END) {
+    this.pointers = {};
+  }
+  </endEventReset>
+  
+  <updatePointers>
+  else {
+    pointerEvent.identifier = pointerEvent.pointerId;
+    this.pointers[pointerEvent.pointerId] = pointerEvent;
+  }
+  </updatePointers>
+
+  return Object.keys(this.pointers).length;
+}
+</trackPointers>
+```

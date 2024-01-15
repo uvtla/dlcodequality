@@ -1,0 +1,304 @@
+Here are the annotated functions for SRP compliance:
+
+1.
+```javascript
+function() {
+  if (!Texture.FORCE_POT) {
+    <validateTexture>
+    var wrongFilter = (this.minFilter !== Texture.Filter.LINEAR && this.minFilter !== Texture.Filter.NEAREST);
+    var wrongWrap = (this.wrapS !== Texture.Wrap.CLAMP_TO_EDGE || this.wrapT !== Texture.Wrap.CLAMP_TO_EDGE);
+
+    if (wrongFilter || wrongWrap) {
+      if (!isPowerOfTwo(this.width) || !isPowerOfTwo(this.height))
+        throw new Error(wrongFilter 
+          ? "Non-power-of-two textures cannot use mipmapping as filter"
+          : "Non-power-of-two textures must use CLAMP_TO_EDGE as wrap");
+    }
+    </validateTexture>
+  }
+}
+```
+
+2.
+```javascript
+function(path) {
+  var t = this;
+
+  <parsePath>
+  var parts = Array.isArray(path) ? path : path.split('/').filter(function(item){return item;});
+  </parsePath>
+
+  <handleSinglePart>
+  if (parts.length === 1) {
+    return t.get('leaves').get(parts[0]);
+  }
+  </handleSinglePart>
+
+  <handleMultipleParts>
+  var sub = t.get('branches').get(parts[0]);
+  if (sub) {
+    return sub.getByPath(parts.slice(1));
+  }
+  </handleMultipleParts>
+
+  <returnNull>
+  return null;
+  </returnNull>
+}
+```
+
+3.
+```javascript
+function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
+  <bindPipeFunction>
+  var pipeInstance = load(index);
+  return isPure(index) ?
+    pureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+    pipeInstance.transform(v1, v2, v3, v4);
+  </bindPipeFunction>
+}
+```
+
+4.
+```javascript
+function() {
+  <removeEventListeners>
+  if (this._model) {
+    this._model.removeEventListener("postChanged", this._listener.onChanged);
+    this._model.removeEventListener("preChanging", this._listener.onChanging);
+    this._model = null;
+  }
+  </removeEventListeners>
+}
+```
+
+5.
+```javascript
+function wrap(genFn) {
+  <convertGeneratorFunction>
+  const fn = genFnToPromise(genFn);
+  </convertGeneratorFunction>
+
+  <extractFunctionSignature>
+  let info;
+  if (genFn.length > 0) {
+    info = genFn.toString().match(/\*((.*?)\(\s*([^)]+?)\s*\))/);
+  } else {
+    info = genFn.toString().match(/\*((.*?)\(\s*(\s*)\s*\))/);
+  }
+  const sign = info && info[1] ? info[1] : '()';
+  </extractFunctionSignature>
+
+  <generateWrappedFunction>
+  const code =
+    `(function ${ sign } {
+      return fn.apply(this, arguments);
+    })`;
+  const ret = eval(code);
+  </generateWrappedFunction>
+
+  <attachMetadata>
+  ret.__generatorFunction__ = genFn;
+  ret.__sourceLocation__ = getSourceLocation(3);
+  </attachMetadata>
+
+  <returnWrappedFunction>
+  return ret;
+  </returnWrappedFunction>
+}
+```
+
+6.
+```javascript
+function() {
+  <getActiveElement>
+  try {
+    var activeElement = document.activeElement;
+    var contentDocument = activeElement.contentDocument;
+    var elem = contentDocument && contentDocument.activeElement || activeElement;
+    return elem;
+  } catch (e) {}
+  </getActiveElement>
+}
+```
+
+7.
+```javascript
+function inlineJSToJS(content, options, file) {
+  <initializePattern>
+  var reg = /(__cmdinline|__inline)\s*\(\s*([^\)]+)\s*\)\s*[;]*/ig;
+  </initializePattern>
+  
+  <increaseInlineDepth>
+  options.inlineDeep = (options.inlineDeep||0) + 1;
+  </increaseInlineDepth>
+
+  <logReplacementStart>
+  console.log('start inlineJSToJS replace __cmdinline/__inline');
+  </logReplacementStart>
+  
+  <performReplacement>
+  content = content.replace(reg, function(s, p, i){
+    console.log(i)
+    var ps = i.split(',');
+    var inlinecontent = '';
+    if(ps && ps.length) {
+      for(var j=0;j<ps.length;j++) {
+        var jp = ps[j];
+        if(!jp) continue;
+        jp = jp.trim().replace(/(^['"]*)|(['"]*$)/g, '');
+        var p = path.resolve(path.join(options.destPath, jp));
+        if(!fs.existsSync(p)) {
+          p = path.resolve(path.join(options.root, jp));
+        }
+        if(!fs.existsSync(p)) {
+          p = path.resolve(path.join(path.dirname(file.path), jp));
+        }
+        console.log(p);
+        inlinecontent += parseJS({path:p}, options);
+      }
+    }
+    return inlinecontent;
+  });
+  </performReplacement>
+
+  <returnInlinedContent>
+  return content;
+  </returnInlinedContent>
+}
+```
+
+8.
+```javascript
+function (opt) {
+  <initializeVariables>
+  var dataExtent = this._dataExtent;
+  var axisModel = this.getAxisModel();
+  var scale = axisModel.axis.scale;
+  var rangePropMode = this._dataZoomModel.getRangePropMode();
+  var percentExtent = [0, 100];
+  var percentWindow = [];
+  var valueWindow = [];
+  var hasPropModeValue;
+  </initializeVariables>
+
+  <calculateWindowValues>
+  each(['start', 'end'], function (prop, idx) {
+    var boundPercent = opt[prop];
+    var boundValue = opt[prop + 'Value'];
+    
+    if (rangePropMode[idx] === 'percent') {
+      boundPercent == null && (boundPercent = percentExtent[idx]);
+      boundValue = scale.parse(numberUtil.linearMap(
+        boundPercent, percentExtent, dataExtent
+      ));
+    }
+    else {
+      hasPropModeValue = true;
+      boundValue = boundValue == null ? dataExtent[idx] : scale.parse(boundValue);
+      boundPercent = numberUtil.linearMap(
+        boundValue, dataExtent, percentExtent
+      );
+    }
+
+    valueWindow[idx] = boundValue;
+    percentWindow[idx] = boundPercent;
+  });
+  </calculateWindowValues>
+
+  <sortAndRestrictWindows>
+  asc(valueWindow);
+  asc(percentWindow);
+  var spans = this._minMaxSpan;
+  hasPropModeValue
+    ? restrictSet(valueWindow, percentWindow, dataExtent, percentExtent, false)
+    : restrictSet(percentWindow, valueWindow, percentExtent, dataExtent, true);
+  </sortAndRestrictWindows>
+
+  <returnWindowValues>
+  return {
+    valueWindow: valueWindow,
+    percentWindow: percentWindow
+  };
+  </returnWindowValues>
+}
+```
+
+9.
+```javascript
+function readCmapTable(cmap, font, isSymbolicFont) {
+  <initializeVariables>
+  var segment;
+  var start = (font.start ? font.start : 0) + cmap.offset;
+  font.pos = start;
+  var version = font.getUint16();
+  var numTables = font.getUint16();
+  var potentialTable;
+  var canBreak = false;
+  </initializeVariables>
+
+  <findPreferredCmapTable>
+  for (var i = 0; i < numTables; i++) {
+    // Omitted for brevity: logic to select the preferred cmap table.
+  }
+  </findPreferredCmapTable>
+
+  <handlePotentialCmapTable>
+  if (potentialTable) {
+    font.pos = start + potentialTable.offset;
+  }
+  if (!potentialTable || font.peekByte() === -1) {
+    warn('Could not find a preferred cmap table.');
+    return defaultCmapReturnValue;
+  }
+  </handlePotentialCmapTable>
+
+  <parseCmapEntries>
+  var format = font.getUint16();
+  // Omitted for brevity: logic to parse the cmap entries depending on the format.
+  </parseCmapEntries>
+
+  <finalizeMappings>
+  mappings.sort(function (a, b) {
+    return a.charCode - b.charCode;
+  });
+  for (i = 1; i < mappings.length; i++) {
+    if (mappings[i - 1].charCode === mappings[i].charCode) {
+      mappings.splice(i, 1);
+      i--;
+    }
+  }
+  </finalizeMappings>
+
+  <returnCmapInformation>
+  return {
+    platformId: potentialTable.platformId,
+    encodingId: potentialTable.encodingId,
+    mappings: mappings,
+    hasShortCmap: hasShortCmap
+  };
+  </returnCmapInformation>
+}
+```
+
+10.
+```javascript
+function parse_date_strings(root) {
+  <traverseAndParseDates>
+  for (key in root) {
+    if (!root.hasOwnProperty(key)) continue;
+    var value = root[key];
+    if (typeof(value) === 'object') { 
+      parse_date_strings(value);
+    } else if (typeof(value) === 'string' && datePattern.test(value)) {
+      var timestamp = Date.parse(value);
+      if (!isNaN(timestamp)) {
+        root[key] = new Date(timestamp);
+      }
+    }
+  }
+  </traverseAndParseDates>
+}
+```
+
+Note: `<defaultCmapReturnValue>` and `<datePattern>` are placeholders for the structure returned and the regex used to match date strings, which have been omitted for brevity. Also, `each`, `asc`, `sliderMove`, and `numberUtil` are presumed to be part of the given context and are not broken down to their own responsibilities as they are not included in the code sample.

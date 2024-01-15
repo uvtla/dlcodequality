@@ -1,0 +1,221 @@
+```
+<as>
+function as() {
+    var _context, _ref2;
+
+    <optionsSetup>
+    var options = arguments.length <= 0 || arguments[0] === undefined ? { alias: {}, excludes: [] } : arguments[0];</optionsSetup>
+    <descriptorCreation>
+    var descriptor = _asDescriptor.call(this);</descriptorCreation>
+    <aliasAndExcludesSetup>
+    var _alias = options.alias;
+    var _excludesList = options.excludes;</aliasAndExcludesSetup>
+
+    <applyAliasesAndExcludes>
+    (_ref2 = (_context = alias.call(descriptor, _alias), excludes)).call.apply(_ref2, [_context].concat((0, _toConsumableArray3.default)(_excludesList)));
+    </applyAliasesAndExcludes>
+
+    return descriptor;
+}
+</as>
+
+<grouped>
+function grouped(array, groups, order) {
+  <defaultGroupingSetup>
+  if (!groups) { groups = [returnFalse]; }</defaultGroupingSetup>
+  <groupingInitialization>
+  var sorted = [];
+  var ordered = [];
+  var remaining = array.slice();
+  </groupingInitialization>
+  <groupingLogic>
+  var unmatchedPosition = groups.indexOf('unmatched');
+  groups.forEach(function(criteria, index) {
+    if (index === unmatchedPosition) { return; }
+    var tieBreakers = [];
+    if (index !== groups.length - 1) {
+      tieBreakers = groups.slice(index + 1);
+      if (index < unmatchedPosition) {
+        tieBreakers.splice(unmatchedPosition - index - 1, 1);
+      }
+    }
+    var spliced = splice(remaining, criteria, tieBreakers);
+    var matched = spliced.matched;
+    var unmatched = spliced.unmatched;
+    sorted[index] = matched;
+    remaining = unmatched;
+  });
+  if (unmatchedPosition === -1) { unmatchedPosition = sorted.length; }
+  sorted[unmatchedPosition] = remaining;
+  </groupingLogic>
+  <orderingLogic>
+  if (Array.isArray(order)) {
+    order.forEach(function(position, index) {
+      ordered[index] = sorted[position];
+    });
+  } else {
+    ordered = sorted;
+  }
+  </orderingLogic>
+  <flatteningResult>
+  return ordered.reduce(function(flat, group) {
+    return flat.concat(group);
+  }, []);
+  </flatteningResult>
+}
+</grouped>
+
+<log>
+function log() {
+  <logDetermination>
+  if (typeof print === 'function') {
+    print.apply(this, arguments)
+  } else {
+    console.log.apply(console, arguments)
+  }
+  </logDetermination>
+}
+</log>
+
+<abort>
+function abort() {
+    var event,
+        me = this,
+        resetting = calledBy.reset;
+    <abortRunningCheck>
+    if (me.running) {
+      event = Event('abort');
+      me.emit(event);
+      if (!event.cancelled || resetting) {
+        <initiatingAbort>
+        calledBy.abort = true;
+        me.reset();
+        delete calledBy.abort;
+        </initiatingAbort>
+        <timeoutManagement>
+        if (support.timeout) {
+          clearTimeout(me._timerId);
+          delete me._timerId;
+        }
+        </timeoutManagement>
+        <abortFlagging>
+        if (!resetting) {
+          me.aborted = true;
+          me.running = false;
+        }
+        </abortFlagging>
+      }
+    }
+    </abortRunningCheck>
+    return me;
+  }
+</abort>
+
+<unnamedFunction>
+function(headers) {
+    <cookieExtraction>
+    var cookies = headers['set-cookie']
+    if (cookies) {
+      cookies.forEach(function(c) {
+        var cookiesParams = c.split(';')
+        var cookiePair = cookiesParams.shift().split('=')
+        var options = {}
+        cookiesParams.forEach(function(param) {
+          param = param.trim()
+          <cookieParamParsing>
+          if (param.toLowerCase().indexOf('expires') == 0) {
+            var date = param.split('=')[1].trim()
+            options.expires = new Date(date)
+          }
+          </cookieParamParsing>
+        })
+        this.set(cookiePair[0].trim(), cookiePair[1].trim(), options)
+      }.bind(this))
+    }
+    </cookieExtraction>
+  }
+</unnamedFunction>
+
+<GetSlope>
+function GetSlope(aT, aA1, aA2) {
+			return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+		}
+</GetSlope>
+
+<laterFunction>
+function(d) {
+    <yearExtraction>
+    var year = later.Y.val(d);</yearExtraction>
+
+    <dayExtentCalculation>
+    return d.dyExtent || (d.dyExtent = [1, year % 4 ? 365 : 366]);
+    </dayExtentCalculation>
+  }
+</laterFunction>
+
+<unnamedSettingFunction>
+function($input, settings_element) {
+			<dataParsing>
+			var data_raw = $input.attr(attr_data);
+	
+			if (!data_raw) {
+				var value = $.trim($input.val() || '');
+				if (!settings.allowEmptyOption && !value.length) return;
+				values = value.split(settings.delimiter);
+				for (i = 0, n = values.length; i < n; i++) {
+					option = {};
+					option[field_label] = values[i];
+					option[field_value] = values[i];
+					settings_element.options.push(option);
+				}
+				settings_element.items = values;
+			} else {
+				settings_element.options = JSON.parse(data_raw);
+				for (i = 0, n = settings_element.options.length; i < n; i++) {
+					settings_element.items.push(settings_element.options[i][field_value]);
+				}
+			}
+			</dataParsing>
+		}
+</unnamedSettingFunction>
+
+<triangleArea>
+function triangleArea(a,b,c){
+    return (((b[0] - a[0])*(c[1] - a[1]))-((c[0] - a[0])*(b[1] - a[1])));
+}
+</triangleArea>
+
+<userRemoval>
+function(member) {
+            <userListRetrieval>
+            users = $module.data('users');</userListRetrieval>
+            <userRemovalCheck>
+            if(member !== undefined && member.id !== 'anonymous') {
+                <removingUser>
+              delete users[ member.id ];
+              $module
+                .data('users', users)
+              ;
+              $userList
+                .find('[data-id='+ member.id + ']')
+                  .remove()
+              ;
+              </removingUser>
+              <logMemberDeparture>
+              if(settings.partingMessages) {
+                $log
+                  .append( settings.templates.left(member.info) )
+                ;
+                module.message.scroll.test();
+              }
+              </logMemberDeparture>
+              <updateUserCount>
+              module.user.updateCount();
+              </updateUserCount>
+            }
+            </userRemovalCheck>
+          }
+</userRemoval>
+```
+
+The annotations capture different responsibilities within each function, signaling either SRP compliance or violations as per the instruction criteria. The tags describe actions and decisions made within the functions that represent distinct responsibilities.

@@ -1,0 +1,279 @@
+```javascript
+<initialization>
+function(size) {
+  this.data = [];
+  if(typeof size === 'undefined'){
+    return; 
+  }
+  if(typeof size !== 'number'){
+    size = shred(size);
+  }
+  for(var i=0; i<Math.ceil(size/INTEGER_SIZE); ++i){
+    this.data.push(0);
+  }
+}
+</initialization>
+
+<configurationSetting>
+function ContractRunner(config, data) {
+<constructorResponsibilities>
+  events.EventEmitter.call(this);
+
+  var self = this;
+
+  self.config = config;
+</constructorResponsibilities>
+
+<validationResponsibility>
+  if (typeof data !== 'object' || typeof data.manifest !== 'object') {
+    throw new Error('ApiHandler must be instantiated with the manifest');
+  }
+</validationResponsibility>
+
+<propertyInitialization>
+  self._manifest = data.manifest;
+  self._apis = {};
+  self._manifest_hash = data.manifest_hash;
+  self._instance_id = data.instance_id;
+  self._additional_libs = data.additional_libs || '';
+  self._env = data.env;
+  self._nextFreeFileDescriptor = 4;
+</propertyInitialization>
+
+<manifestSetting>
+  self._manifest.manifest_hash = data.manifest_hash;
+</manifestSetting>
+
+<sandboxSetup>
+  self._sandbox  = new Sandbox({
+    enableGdb: self.config.enableGdb,
+    enableValgrind: self.config.enableValgrind,
+    disableNacl: self.config.disableNacl
+  });
+</sandboxSetup>
+
+<eventsBinding>
+  self._sandbox.on('exit', self.handleExit.bind(self));
+</eventsBinding>
+}
+</configurationSetting>
+
+<darySortFunction>
+function dary(arity) {
+  var sort = function sort(compare, a, i, j) {
+    var k = i + 1;
+    for (; k < j; ++k) {
+      var current = k - i;
+      while (current !== 0) {
+        var parent = i + ((current - 1) / arity | 0);
+        current += i;
+        if (compare(a[current], a[parent]) <= 0) {
+          break;
+        }
+        var tmp = a[current];
+        a[current] = a[parent];
+        a[parent] = tmp;
+        current = parent - i;
+      }
+    }
+    for (--k; k > i; --k) {
+      var _tmp = a[k];
+      a[k] = a[i];
+      a[i] = _tmp;
+      var _current = 0;
+      while (true) {
+        var candidate = i + arity * _current + 1;
+        if (candidate >= k) {
+          break;
+        }
+        var t = Math.min(candidate + arity, k);
+        var y = candidate;
+        for (++y; y < t; ++y) {
+          if (compare(a[y], a[candidate]) > 0) {
+            candidate = y;
+          }
+        }
+        _current += i;
+        if (compare(a[_current], a[candidate]) >= 0) {
+          break;
+        }
+        var _tmp2 = a[_current];
+        a[_current] = a[candidate];
+        a[candidate] = _tmp2;
+        _current = candidate - i;
+      }
+    }
+  };
+  return sort;
+}
+</darySortFunction>
+
+<mockCreationWorkflow>
+function createWithMockFetch(dir, id, name, cfg, events) {
+<settingDirectories>
+    const mockFetchDest = path.join(tmpDir, 'mockFetchDest');
+    const templateDir = path.dirname(require.resolve('cordova-app-hello-world'));
+</settingDirectories>
+
+<fetchSpySetup>
+    const fetchSpy = jasmine.createSpy('fetchSpy').and.callFake(() => Promise.resolve(mockFetchDest));
+</fetchSpySetup>
+
+<templateCopy>
+    fs.copySync(templateDir, mockFetchDest);
+</templateCopy>
+
+<createWorkflowExecution>
+    return createWith({fetch: fetchSpy})(dir, id, name, cfg, events).then(() => fetchSpy);
+</createWorkflowExecution>
+}
+</mockCreationWorkflow>
+
+<materialTabComponentInitialization>
+function MaterialTab(tab, ctx) {
+  if (tab) {
+<rippleEffectSetup>
+    if (ctx.element_.classList.contains(ctx.CssClasses_.MDL_JS_RIPPLE_EFFECT)) {
+      var rippleContainer = document.createElement('span');
+      rippleContainer.classList.add(ctx.CssClasses_.MDL_RIPPLE_CONTAINER);
+      rippleContainer.classList.add(ctx.CssClasses_.MDL_JS_RIPPLE_EFFECT);
+      var ripple = document.createElement('span');
+      ripple.classList.add(ctx.CssClasses_.MDL_RIPPLE);
+      rippleContainer.appendChild(ripple);
+      tab.appendChild(rippleContainer);
+    }
+</rippleEffectSetup>
+
+<clickEventListener>
+    tab.addEventListener('click', function (e) {
+        e.preventDefault();
+        ctx.resetTabState_();
+        tab.classList.add(ctx.CssClasses_.ACTIVE_CLASS);
+    });
+</clickEventListener>
+  }
+}
+</materialTabComponentInitialization>
+
+<sectionStructureCreation>
+function createSectionStructure() {
+  return {
+    init: null,
+    comments: [],
+    attribs: {
+        define: [],
+        init: []
+    },
+    elements: {
+        define: [],
+        init: []
+    },
+    events: [],
+    links: [],
+    ons: [],
+    statics: []
+  };
+}
+</sectionStructureCreation>
+
+<resourceExpanding>
+function expandResource(expandedFields, resource, query, dataStore) {
+<collectionExpansion>
+  if (resource instanceof CollectionResource) {
+    resource.items.forEach(function (instance) {
+      expandResource(expandedFields, instance, query, dataStore);
+    });
+    return resource;
+  }
+</collectionExpansion>
+
+<fieldInclusion>
+  expandedFields.forEach(function(fieldName) {
+    var path = getPathForResourceName(fieldName);
+    if (typeof resource[fieldName] !== 'undefined' && fs.existsSync(path)) {
+      resource[fieldName] = instantiate(require(path), resource[fieldName], query, dataStore);
+    }
+  });
+</fieldInclusion>
+
+  return resource;
+}
+</resourceExpanding>
+
+<reportExecution>
+function runReports(err) {
+<errorLogging>
+    if (err) { console.log(chalk.red('Error running reports: %s'), err); }
+</errorLogging>
+
+<platoExclusionSetting>
+    var excludes = filesets.platoExcludes();
+    if (excludes) {
+        platoOptions.exclude = excludes;
+    }
+</platoExclusionSetting>
+
+<jsHintOptionsSetting>
+    jsHintOptions.ignore = filesets.jshintExcludes();
+    jsHintOptions.reporter = reporter.reporter;
+</jsHintOptionsSetting>
+
+<platoReportBuilding>
+    console.log(chalk.blue('Building plato reports...'));
+    console.log(chalk.gray('(Ignore any output about being unable to parse JSON files)'));
+    plato.inspect(filesets.platoIncludes(), outputDir, platoOptions, function() {
+        console.log(chalk.blue('\nPlato reports have been built to: ') + chalk.magenta(outputDir));
+</platoReportBuilding>
+
+<jsHintReportBuilding>
+        console.log(chalk.blue('\nJSHint Report\n=============\n'));
+        buildJSHint(filesets.jshintIncludes(), jsHintOptions, reporter.callback);
+</jsHintReportBuilding>
+    );
+}
+</reportExecution>
+
+<directorySort>
+function(file1, file2) {
+    var self  = this,
+        type  = self.sortType,
+        asc   = self.sortOrder == 'asc',
+        stick = self.sortStickFolders,
+        rules = self.sortRules,
+        sort  = rules[type],
+        d1    = file1.mime == 'directory',
+        d2    = file2.mime == 'directory',
+        res;
+<stickySorting>
+    if (stick) {
+        if (d1 && !d2) {
+            return -1;
+        } else if (!d1 && d2) {
+            return 1;
+        }
+    }
+</stickySorting>
+
+<finalSorting>
+    res = asc ? sort(file1, file2) : sort(file2, file1);
+    return type !== 'name' && res === 0
+        ? res = asc ? rules.name(file1, file2) : rules.name(file2, file1)
+        : res;
+}
+</finalSorting>
+
+<arrayShuffling>
+function getRandomArray(n) {
+  var res = [],
+      i, j, temp;
+  for (i = 0; i < n; i += 1) { res[i] = i; }
+  for (i = n - 1; i >= 1; i -= 1) {
+    j = Math.floor((i + 1) * Math.random());
+    temp = res[i];
+    res[i] = res[j];
+    res[j] = temp;
+  }
+  return res;
+}
+</arrayShuffling>
+```

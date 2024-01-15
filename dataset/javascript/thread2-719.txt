@@ -1,0 +1,227 @@
+Here are the annotated functions as per Single Responsibility Principle:
+
+Function 1:
+```
+<localizationLookup>
+function(key, args, fallbackString) {
+    <parseKey>
+    var index = key.lastIndexOf(".");
+    var prop = gTextProp;
+    if (index > 0) {
+        prop = key.substr(index + 1);
+        key = key.substring(0, index);
+    }
+    </parseKey>
+
+    <prepareFallback>
+    var fallback;
+    if (fallbackString) {
+        fallback = {};
+        fallback[prop] = fallbackString;
+    }
+    </prepareFallback>
+
+    <retrieveLocalizedData>
+    var data = getL10nData(key, args, fallback);
+    if (data && prop in data) {
+        return data[prop];
+    }
+    </retrieveLocalizedData>
+
+    return "{{" + key + "}}";
+}
+</localizationLookup>
+```
+
+Function 2:
+```
+<extractDigits>
+function(str) {
+    var data = [];
+    str = str.toString();
+    for(var x = 0; x < str.length; x++) {
+        if(str[x].match(/^\d*$/g)) {
+            data.push(str[x]);    
+        }
+    }
+    return data;
+}
+</extractDigits>
+```
+
+Function 3:
+```
+<selectNearestOption>
+function getNearest($select, value) {
+    var delta = {};
+    <calculateOptionDistances>
+    angular.forEach($select.children('option'), function(opt, i){
+      var optValue = angular.element(opt).attr('value');
+      if(optValue === '') return;
+      var distance = Math.abs(optValue - value); 
+      if(typeof delta.distance === 'undefined' || distance < delta.distance) {
+        delta = {value: optValue, distance: distance};
+      } 
+    });
+    </calculateOptionDistances>
+    return delta.value;
+}
+</selectNearestOption>
+```
+
+Function 4:
+```
+<decodeBase64>
+function decode_base64(salt) {
+    <initDecodedArray>
+    var decoded = new Array(16);
+    var i = 0, j = 0, c1, c2;
+    </initDecodedArray>
+    <decodeLoop>
+    while(true) {
+        <decodeBlock>
+        c1 = index_64[salt.charCodeAt(i++)-46];
+        c2 = index_64[salt.charCodeAt(i++)-46];
+        decoded[j++] = (c1 << 2 | c2 >> 4) & 0xff;
+        if (i === 22) break;
+        
+        c1 = c2 << 4;
+        c2 = index_64[salt.charCodeAt(i++)-46];
+        decoded[j++] = (c1 | c2 >> 2) & 0xff;
+
+        c1 = c2 << 6;
+        c2 = index_64[salt.charCodeAt(i++)-46];
+        decoded[j++] = (c1 | c2) & 0xff;
+        </decodeBlock>
+    }
+    </decodeLoop>
+    return decoded;
+}
+</decodeBase64>
+```
+
+Function 5:
+```
+<loadCredentials>
+function loadFromPath(path) {
+    this.clear();
+    <parseOptions>
+    var options = JSON.parse(AWS.util.readFileSync(path));
+    var fileSystemCreds = new AWS.FileSystemCredentials(path);
+    </parseOptions>
+    <setupCredentialsChain>
+    var chain = new AWS.CredentialProviderChain();
+    chain.providers.unshift(fileSystemCreds);
+    chain.resolve(function (err, creds) {
+      if (err) throw err;
+      else options.credentials = creds;
+    });
+    </setupCredentialsChain>
+    this.constructor(options);
+    return this;
+}
+</loadCredentials>
+```
+
+Function 6:
+```
+<initializeServer>
+function Server(server){
+  <setupEmitter>
+  Emitter.Target.call(this,emitter);
+  </setupEmitter>
+
+  <storeServerReference>
+  this[srv] = server;
+  </storeServerReference>
+  
+  <executePlugins>
+  plugins.give('server',this);
+  </executePlugins>
+}
+</initializeServer>
+```
+
+Function 7:
+```
+<wrappedOperation>
+function operation(cm1, f) {
+    return function() {
+      var cm = cm1 || this, withOp = !cm.curOp;
+      if (withOp) <startOperation>startOperation(cm);</startOperation>
+      try { var result = f.apply(cm, arguments); }
+      finally { if (withOp) <endOperation>endOperation(cm);</endOperation> }
+      return result;
+    };
+}
+</wrappedOperation>
+```
+
+Function 8:
+```
+<serializeNode>
+function stringifyNode(node){
+    var result = "<"+node.nodeName;
+    <accumulateAttributes>
+    var numAttrs = node.attrs.length;
+    for (var i=0; i<numAttrs; i++){
+        result += " "+ node.attrs[i].name +'="'+ node.attrs[i].value +'"';
+    }
+    </accumulateAttributes>
+    result += ">";
+    return result;
+}
+</serializeNode>
+```
+
+Function 9:
+```
+<setAttribute>
+function elementAttribute(index, name, value, sanitizer) {
+    <attributeChangeLogic>
+    if (value !== NO_CHANGE) {
+        <loadElement>
+        var element_1 = loadElement(index);
+        </loadElement>
+
+        <applyAttributeUpdate>
+        if (value == null) {
+            ngDevMode && ngDevMode.rendererRemoveAttribute++;
+            isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1.native, name) :
+                element_1.native.removeAttribute(name);
+        }
+        else {
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            var strValue = sanitizer == null ? stringify$1(value) : sanitizer(value);
+            isProceduralRenderer(renderer) ? renderer.setAttribute(element_1.native, name, strValue) :
+                element_1.native.setAttribute(name, strValue);
+        }
+        </applyAttributeUpdate>
+
+    }
+    </attributeChangeLogic>
+}
+</setAttribute>
+```
+
+Function 10:
+```
+<copyImageData>
+function copyImageDataWithCanvas(imageData) {
+    <createCanvas>
+    const canvas = new Canvas(imageData.width, imageData.height);
+    </createCanvas>
+
+    <getContextAndPutImageData>
+    const ctx = canvas.getContext('2d');
+    ctx.putImageData(imageData, 0, 0);
+    </getContextAndPutImageData>
+
+    <getImageDataFromCanvas>
+    return ctx.getImageData(0, 0, imageData.width, imageData.height);
+    </getImageDataFromCanvas>
+}
+</copyImageData>
+```
+
+Each function is annotated with tags that represent distinct responsibilities. These tags are applied to coherent blocks of code that serve specific tasks or purposes within the functions.
