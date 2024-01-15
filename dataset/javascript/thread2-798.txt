@@ -1,0 +1,236 @@
+Function 1:
+```javascript
+function enabled(name) {
+	<checkNameEndsWithAsterisk>
+	if (name[name.length - 1] === '*') {
+		return true;
+	}
+	</checkNameEndsWithAsterisk>
+
+	<iterateSkips>
+	let i;
+	let len;
+
+	for (i = 0, len = createDebug.skips.length; i < len; i++) {
+		if (createDebug.skips[i].test(name)) {
+			return false;
+		}
+	}
+	</iterateSkips>
+
+	<iterateNames>
+	for (i = 0, len = createDebug.names.length; i < len; i++) {
+		if (createDebug.names[i].test(name)) {
+			return true;
+		}
+	}
+	</iterateNames>
+
+	return false;
+}
+```
+
+Function 2:
+```javascript
+function defineApp(app) {
+	<defineRouteFoo>
+	app.use('/foo', function appFoo(req, res) {
+		if (req.xhr) {
+			var body = {
+				foo: 'bar'
+			};
+			responseSender.sendJSON(res, body);
+		} else {
+			responseSender.sendPage(res, 'Foo', '<h1>Bar!</h1>', 200);
+		}
+	});
+	</defineRouteFoo>
+
+	<defineRouteFail>
+	app.use('/fail', function appFail(req, res) {
+		throw new Error("Don't worry, the error handler will take care of this");
+	});
+	</defineRouteFail>
+
+	<defineRouteFailAsync>
+	app.use('/fail-async', function appFailAsync(req, res) {
+		setTimeout(function() {
+			throw new Error("I may be async, but the error handler will still catch me!");
+		}, 100);
+	});
+	</defineRouteFailAsync>
+
+	<setStaticMiddleware>
+	app.use('/', express.static(__dirname));
+	</setStaticMiddleware>
+}
+```
+
+Function 3:
+```javascript
+function(src, dest){
+    <cloneSourceToDest>
+	var i, v, result = dest || {};
+
+	for (i in src) {
+		v = src[i];
+		if (v && typeof(v) === 'object') {
+			if (v.constructor === Array) {
+				result[i] = this._.clone(v);
+			} else if (v.constructor !== RegExp && !this._.isElement(v)) {
+				result[i] = Flotr.merge(v, (dest ? dest[i] : undefined));
+			} else {
+				result[i] = v;
+			}
+		} else {
+			result[i] = v;
+		}
+	}
+	</cloneSourceToDest>
+
+	return result;
+}
+```
+
+Function 4:
+```javascript
+function returns(func, validator, message) {
+	<functionValidationWrapper>
+	message = messageBuilder(message || 'vet/utils/returns error!');
+
+	return function _returnsInstance() {
+		var args = arguments;
+		var result = func.apply(this, arguments);
+
+		if (validator(result)) {
+			return result;
+		} else {
+			throw new Error(message.call(this, result));
+		}
+	};
+	</functionValidationWrapper>
+}
+```
+
+Function 5:
+```javascript
+function (rows) {
+	<clearAndAppendRows>
+	this.display.list.innerHTML = "";
+	this.display.list.appendChild(this.display.listHeadRow);
+
+	for (var rI in rows) {
+	    this.display.list.appendChild(rows[rI]);
+	}
+	</clearAndAppendRows>
+}
+```
+
+Function 6:
+```javascript
+function encodeEntities(value) {
+	<encodeHtmlEntities>
+	return value
+		.replace(/&/g, '&amp;')
+		.replace(NON_ALPHANUMERIC_REGEXP, function(value){
+			return '&#' + value.charCodeAt(0) + ';';
+		})
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;');
+	</encodeHtmlEntities>
+}
+```
+
+Function 7:
+```javascript
+function _sanitizeDimensions(dimensions) {
+	<initializeDefaultDimensions>
+	if (dimensions == undefined) {
+		dimensions = {};
+	}
+	for (let property in Utils.DEFAULT_ROOM_DIMENSIONS) {
+		if (!(dimensions.hasOwnProperty(property))) {
+			dimensions[property] = Utils.DEFAULT_ROOM_DIMENSIONS[property];
+		}
+	}
+	</initializeDefaultDimensions>
+	return dimensions;
+}
+```
+
+Function 8:
+```javascript
+function prettyPrintVisitor(pp, spaces) {
+	<initializeVisitor>
+	var visitor = {}
+	visitor.pre = function (state) {
+		state.result = ''
+		state.depth = 0
+	}
+	</initializeVisitor>
+
+	<defineVisitor>
+	visitor.visitor = {
+		arrayEnter: function (val, state) {
+			// logic here...
+		},
+		arrayExit: function (val, state) {
+			// logic here...
+		},
+		objectEnter: function (val, state) {
+			// logic here...
+		},
+		objectExit: function (val, state) {
+			// logic here...
+		},
+		stringEnter: function (val, state) {
+			// logic here...
+		},
+		otherEnter: function (val, state) {
+			// logic here...
+		}
+	}
+	</defineVisitor>
+	
+	<finalizeVisitorState>
+	visitor.post = function (state) {
+		visitor.result = state.result.trim()
+	}
+	</finalizeVisitorState>
+
+	return visitor
+}
+```
+
+Function 9:
+```javascript
+function (Class , Container, InnerHtml) {
+	<createAndReturnDiv>
+	var Div = L.DomUtil.create('div', Class, Container);
+	Div.innerHTML = InnerHtml;
+	</createAndReturnDiv>
+	
+	return Div;
+}
+```
+
+Function 10:
+```javascript
+function() {
+	<cleanUpPeerConnection>
+	if (_iceProcessor) _iceProcessor.setPeerConnection(null);
+	if (_stateLogger) _stateLogger.stop();
+
+	qos.stopCollecting();
+
+	if (_peerConnection !== null) {
+		if (_peerConnection.destroy) {
+			_peerConnection.destroy();
+		}
+
+		_peerConnection = null;
+		api.trigger('close');
+	}
+	</cleanUpPeerConnection>
+}
+```

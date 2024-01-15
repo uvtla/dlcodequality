@@ -1,0 +1,253 @@
+```javascript
+<formatSymbolExport>
+function formatSymbolExport(symbol, namespaces, imports) {
+  const name = symbol.name;
+  const parts = name.split('~');
+  const isNamed = parts[0].indexOf('.') !== -1;
+  const nsParts = parts[0].replace(/^module\:/, '').split(/[\/\.]/);
+  const last = nsParts.length - 1;
+  <importNaming>
+  const importName = isNamed ?
+    '_' + nsParts.slice(0, last).join('_') + '$' + nsParts[last] :
+    '$' + nsParts.join('$');
+  </importNaming>  
+  let line = nsParts[0];
+  <namespaceRegistration>
+  for (let i = 1, ii = nsParts.length; i < ii; ++i) {
+    line += `.${nsParts[i]}`;
+    namespaces[line] = (line in namespaces ? namespaces[line] : true) && i < ii - 1;
+  }
+  </namespaceRegistration>
+  line += ` = ${importName};`;
+  <registerImport>
+  imports[getImport(symbol, nsParts.pop())] = true;
+  </registerImport>
+  return line;
+}
+</formatSymbolExport>
+
+<anonymousFunction1>
+function () {
+  var heights = this.s.heights;
+  var max = 1000000;
+  <calculateHeight>
+  heights.virtual = heights.row * this.s.dt.fnRecordsDisplay();
+  heights.scroll = heights.virtual;
+
+  if (heights.scroll > max) {
+    heights.scroll = max;
+  }
+  </calculateHeight>
+  
+  <updateStyle>
+  this.dom.force.style.height = heights.scroll + "px";
+  </updateStyle>
+}
+</anonymousFunction1>
+
+<anonymousFunction2>
+function (soundfont, instrumentId, index, key) {
+  var url = soundfont[key]
+  if (url) {
+    <incrementBufferPending>
+    bufferPending[instrumentId]++
+    </incrementBufferPending>
+    <loadAudioBuffer>
+    loadAudio(url, function (buffer) {
+      buffer.id = key
+      var noteId = root.keyToNote[key]
+      <storeBuffer>
+      audioBuffers[instrumentId + '' + noteId] = buffer
+      </storeBuffer>
+      
+      if (--bufferPending[instrumentId] === 0) {
+        <onAllBuffersLoaded>
+        soundfont.isLoaded = true
+        waitForEnd(instrument)
+        </onAllBuffersLoaded>
+      }
+    }, function (err) {
+      console.error(err)
+    })
+    </loadAudioBuffer>
+  }
+}
+</anonymousFunction2>
+
+<trackObjectChange>
+function (object, name, oldval, newval) {
+  var type = edb.ObjectChange.TYPE_UPDATE;
+  var all = this._changes, id = object.$instanceid;
+  <recordObjectChange>
+  var set = all[id] = all[id] || (all[id] = Object.create(null));
+  set[name] = new edb.ObjectChange(object, name, type, oldval, newval);
+  </recordObjectChange>
+  <dispatchTick>
+  gui.Tick.dispatch(edb.TICK_PUBLISH_CHANGES);
+  </dispatchTick>
+}
+</trackObjectChange>
+
+<initializeJadeCompilerWithLanguageFile>
+function (node, options) {
+  <initializeCompiler>
+  jadeCompiler.call(this, node, options);
+  </initializeCompiler>
+  
+  <loadLanguageFile>
+  if (options.languageFile)
+    this.jsonData = po2json.parseFileSync(options.languageFile);
+  </loadLanguageFile>
+}
+</initializeJadeCompilerWithLanguageFile>
+
+<parseAtKeyframes>
+function atkeyframes() {
+  <parsePosition>
+  var pos = position();
+  </parsePosition>
+  
+  <matchKeyframes>
+  var m = match(/^@([-\w]+)?keyframes\s*/);
+  if (!m) return;
+  var vendor = m[1];
+  </matchKeyframes>
+  
+  <matchName>
+  var m = match(/^([-\w]+)\s*/);
+  if (!m) return error("@keyframes missing name");
+  var name = m[1];
+  </matchName>
+  
+  <checkOpeningBracket>
+  if (!open()) return error("@keyframes missing '{'");
+  </checkOpeningBracket>
+  
+  <keyframeSequence>
+  var frame;
+  var frames = comments();
+  while (frame = keyframe()) {
+    frames.push(frame);
+    frames = frames.concat(comments());
+  }
+  </keyframeSequence>
+  
+  <checkClosingBracket>
+  if (!close()) return error("@keyframes missing '}'");
+  </checkClosingBracket>
+  
+  <constructKeyframeBlock>
+  return pos({
+    type: 'keyframes',
+    name: name,
+    vendor: vendor,
+    keyframes: frames
+  });
+  </constructKeyframeBlock>
+}
+</parseAtKeyframes>
+
+<writeTextToOutput>
+function writeText(wasmModule, format, output, callback) {
+  <determineWabtRequirement>
+  if (format === "linear" || format === "stack") {
+    if (!assemblyscript.util.wabt) {
+      process.stderr.write("\nwabt.js not found\n");
+      return callback(EFAILURE);
+    }
+    var binary = wasmModule.ascCurrentBinary || (wasmModule.ascCurrentBinary = wasmModule.emitBinary());
+    </determineWabtRequirement>
+  
+    <writeTextWithLinearOrStackFormat>
+    output.write(assemblyscript.util.wasmToWast(binary, { readDebugNames: true }), "utf8", end);
+    </writeTextWithLinearOrStackFormat>
+  } else
+    <writeTextDefaultFormat>
+    output.write(wasmModule.emitText(), "utf8", end);
+    </writeTextDefaultFormat>
+  
+  <endOutput>
+  function end(err) {
+    if (err || output === process.stdout) return callback(err);
+    output.end(callback);
+  }
+  </endOutput>
+}
+</writeTextToOutput>
+
+<parseComponentData>
+function (rawData) {
+  var schema = this.schema;
+  if (!Object.keys(schema).length) { return; }
+  rawData = rawData || window.HTMLElement.prototype.getAttribute.call(this.sceneEl, this.name);
+  <parseDataBasedOnSchema>
+  if (isSingleProp(schema)) {
+    this.data = parseProperty(rawData, schema);
+  } else {
+    this.data = parseProperties(styleParser.parse(rawData) || {}, schema);
+  }
+  </parseDataBasedOnSchema>
+}
+</parseComponentData>
+
+<createQualifiedNameAttribute>
+function (namespaceURI, qualifiedName) {
+  <createElementToManipulateAttributes>
+  var dummy = document.createElement('dummy');
+  </createElementToManipulateAttributes>
+  
+  <setAttributeOnDummy>
+  dummy.setAttributeNS(namespaceURI, qualifiedName, '');
+  var attr = dummy.attributes[0];
+  </setAttributeOnDummy>
+  
+  <removeAttributeFromDummy>
+  dummy.removeAttributeNode(attr);
+  </removeAttributeFromDummy>
+  
+  <returnStrippedAttribute>
+  return attr;
+  </returnStrippedAttribute>
+}
+</createQualifiedNameAttribute>
+
+<formatOAuthUrl>
+function formatUrl(p, callback) {
+  <signUrlIfOAuth>
+  var sign;
+  if (p.authResponse && p.authResponse.oauth && parseInt(p.authResponse.oauth.version, 10) === 1) {
+    sign = p.query.access_token;
+    delete p.query.access_token;
+    p.proxy = true;
+  }
+  </signUrlIfOAuth>
+  
+  <serializeDataIntoQuery>
+  if (p.data && (p.method === 'get' || p.method === 'delete')) {
+    _this.extend(p.query, p.data);
+    p.data = null;
+  }
+  </serializeDataIntoQuery>
+  
+  <buildBasePath>
+  var path = _this.qs(p.url, p.query);
+  </buildBasePath>
+  
+  <constructProxyPath>
+  if (p.proxy) {
+    path = _this.qs(p.oauth_proxy, {
+      path: path,
+      access_token: sign || '',
+      then: p.proxy_response_type || (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+      method: p.method.toLowerCase(),
+      suppress_response_codes: true
+    });
+  }
+  </constructProxyPath>
+  
+  <invokeCallbackWithFormattedPath>
+  callback(path);
+  </invokeCallbackWithFormattedPath>
+}
+</formatOAuthUrl>
+```

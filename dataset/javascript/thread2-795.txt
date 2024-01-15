@@ -1,0 +1,170 @@
+```javascript
+<compareSetter>
+function(yOrdering) {
+    this.compare = yOrdering ?
+        OpenLayers.ElementsIndexer.IndexingMethods.Z_ORDER_Y_ORDER :
+        OpenLayers.ElementsIndexer.IndexingMethods.Z_ORDER_DRAWING_ORDER;
+    this.clear();
+}
+</compareSetter>
+
+<generateBootstrapContent>
+function generateBootstrapContent(partialsArray, lineDelimiter) {
+    var _bootstrapContent = '',
+        _folderGroup = '';
+    partialsArray.forEach(function (partialName) {
+        var _sassPath = mainPartialList[partialName].removedRoot,
+            _currentRoot = _sassPath.parseRootFolder();
+        if (options.useRelativePaths) {
+            _sassPath = Path.relative(Path.dirname(options.bootstrapFile),
+                                      mainPartialList[partialName].fileName.toSassFormat());
+            _sassPath = _sassPath.replace(Path.extname(_sassPath), '');
+            _sassPath = _sassPath.replace(/\\/g, "/");
+        } else {
+            _sassPath = _sassPath.toSassFormat();
+        }
+        if (_folderGroup != _currentRoot) {
+            _bootstrapContent += NEW_LINE + '
+            _folderGroup = _currentRoot;
+        }
+        _bootstrapContent += options.importKeyword + ' "' + _sassPath + '"' + lineDelimiter + NEW_LINE;
+    });
+    return _bootstrapContent;
+}
+</generateBootstrapContent>
+
+<performAjaxDELETE>
+function(id, callback) {
+    var attrAjax = {
+        'type': 'DELETE',
+        'dataType': 'text',
+        'url': Utils.getUrl(config.urls.subscriptions, id)
+    };
+    this.service.ajax(attrAjax, function(err, res){
+        if (err) {
+            callback(err, null);
+        } else {
+            callback(null, true);
+        }
+    });
+}
+</performAjaxDELETE>
+
+<isMatchRule>
+function isMatchRule(req, pathname, rule) {
+    if (typeof rule === 'string') {
+        return pathname.indexOf(rule) > -1;
+    } else if (rule instanceof RegExp) {
+        return rule.test(pathname);
+    } else if (typeof rule === 'function') {
+        return rule(pathname, req);
+    }
+}
+</isMatchRule>
+
+<performDatabaseQuery>
+function doQuery(options) {
+    return models.Subscriber.findPage(options)
+        .then(({data, meta}) => {
+            return {
+                subscribers: data.map(model => model.toJSON(options)),
+                meta: meta
+            };
+        });
+}
+</performDatabaseQuery>
+
+<parseTemplate>
+function maxstache (str, ctx) {
+    ctx = ctx || {}
+    assert.equal(typeof str, 'string')
+    assert.equal(typeof ctx, 'object')
+    const tokens = str.split(/\{\{|\}\}/)
+    const res = tokens.map(parse(ctx))
+    return res.join('')
+}
+</parseTemplate>
+
+<createSVGGradient>
+function buildGradient() {
+    if (!chartGradientEl) {
+        chartGradientEl = svg.select('.metadata-group')
+            .append('linearGradient')
+                .attr('id', gradientId)
+                .attr('gradientUnits', 'userSpaceOnUse')
+                .attr('x1', 0)
+                .attr('x2', xScale(data[data.length - 1].date))
+                .attr('y1', 0)
+                .attr('y2', 0)
+            .selectAll('stop')
+                .data([
+                    {offset: '0%', color: gradient[0]},
+                    {offset: '100%', color: gradient[1]}
+                ])
+            .enter().append('stop')
+                .attr('offset', ({offset}) => offset)
+                .attr('stop-color', ({color}) => color);
+    }
+}
+</createSVGGradient>
+
+<mergeBatchResults>
+function mergeBatchResults(batches) {
+    let files = [];
+    let unformattedFiles = [];
+    let formattedFiles = [];
+    let errors = [];
+    batches.forEach(batch => {
+        files.push(...batch.files);
+        unformattedFiles.push(...batch.unformattedFiles);
+        formattedFiles.push(...batch.formattedFiles);
+        errors.push(...batch.errors);
+    });
+    return { files, formattedFiles, unformattedFiles, errors };
+}
+</mergeBatchResults>
+
+<initializeConverter>
+function _constructor () {
+    converterOptions = converterOptions || {};
+    for (var gOpt in globalOptions) {
+        if (globalOptions.hasOwnProperty(gOpt)) {
+            options[gOpt] = globalOptions[gOpt];
+        }
+    }
+    if (typeof converterOptions === 'object') {
+        for (var opt in converterOptions) {
+            if (converterOptions.hasOwnProperty(opt)) {
+                options[opt] = converterOptions[opt];
+            }
+        }
+    } else {
+        throw Error('Converter expects the passed parameter to be an object, but ' + typeof converterOptions +
+        ' was passed instead.');
+    }
+    if (options.extensions) {
+        showdown.helper.forEach(options.extensions, _parseExtension);
+    }
+}
+</initializeConverter>
+
+<validateSpec>
+function validateSpec (spec) {
+    if (spec === undefined) {
+        return new Error('spec cannot be undefined')
+    }
+    const isSimpleSpec = isString(spec) || isString(spec.files)
+    const isArraySpec = (Array.isArray(spec.files) && spec.files.every(isString))
+    if (isArraySpec) {
+        if (spec.base === undefined) {
+            return new Error('spec.base cannot be undefined if spec.files is an array')
+        }
+    } else {
+        if (!isSimpleSpec) {
+            return new Error('spec.files cannot be undefined property')
+        }
+    }
+    return undefined
+}
+</validateSpec>
+```

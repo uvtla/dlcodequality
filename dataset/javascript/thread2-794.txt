@@ -1,0 +1,338 @@
+```javascript
+<getParamType>
+function getParamType(tag) {
+  var expression = tag.expression,
+      result = '',
+      type = tag.type;
+
+  switch (type) {
+    case 'AllLiteral':
+      result = '*';
+      break;
+
+    case 'NameExpression':
+      result = _.toString(tag.name);
+      break;
+
+    case 'RestType':
+      result = '...' + result;
+      break;
+
+    case 'TypeApplication':
+      <handleTypeApplication>
+      expression = undefined;
+      result = _(tag)
+        .chain()
+        .get('applications')
+        .map(_.flow(getParamType, fp.add(fp, '[]')))
+        .sort(util.compareNatural)
+        .join('|')
+        .value();
+      </handleTypeApplication>
+      break;
+
+    case 'UnionType':
+      <handleUnionType>
+      result = _(tag)
+        .chain()
+        .get('elements')
+        .map(getParamType)
+        .sort(util.compareNatural)
+        .join('|')
+        .value();
+      </handleUnionType>
+  }
+  if (expression) {
+    <expressionHandling>
+    result += getParamType(expression);
+    </expressionHandling>
+  }
+  return type == 'UnionType'
+    ? ('(' + result + ')')
+    : result;
+}
+</getParamType>
+
+<flagFunction>
+function(flag, argv) {
+  argv = argv || process.argv;
+
+  var terminatorPos = argv.indexOf('--');
+  var prefix = /^-{1,2}/.test(flag) ? '' : '--';
+  var pos = argv.indexOf(prefix + flag);
+
+  return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
+}
+</flagFunction>
+
+<DeviceClient>
+function DeviceClient(options) {
+   
+   
+   
+   
+   if (!(this instanceof DeviceClient)) {
+      return new DeviceClient(options);
+   }
+   
+   
+   
+   var that = this;
+   // ... (Omitted redundant empty lines)
+
+   
+
+   
+   
+   
+   var offlinePublishQueue = [];
+   var offlineQueueing = true;
+   var offlineQueueMaxSize = 0;
+   var offlineQueueDropBehavior = 'oldest'; 
+   offlinePublishQueue.length = 0;
+
+   
+   
+   
+   var offlineSubscriptionQueue = [];
+   var offlineSubscriptionQueueMaxSize = 50;
+   offlineSubscriptionQueue.length = 0;
+
+   
+   
+   
+   var activeSubscriptions = [];
+   var autoResubscribe = true;
+   activeSubscriptions.length = 0;
+
+   
+   
+   
+   var clonedSubscriptions = [];
+   clonedSubscriptions.length = 0;
+
+   
+   
+   
+   var connectionState = 'inactive';
+
+   
+   
+   
+   var drainingTimer = null;
+   var drainTimeMs = 250;
+
+   
+   var defaultKeepalive = 300;
+   // ... (Omitted redundant empty lines)
+
+   
+   
+   
+   var baseReconnectTimeMs = 1000;
+   var minimumConnectionTimeMs = 20000;
+   var maximumReconnectTimeMs = 128000;
+   var currentReconnectTimeMs;
+
+   
+   
+   
+   var connectionTimer = null;
+
+   
+   
+   
+   var awsAccessId;
+   var awsSecretKey;
+   var awsSTSToken;
+   
+   
+   
+   var metricPrefix = "?SDK=JavaScript&Version=";
+   var pjson = require('../package.json');
+   var sdkVersion = pjson.version;
+   var defaultUsername = metricPrefix + sdkVersion;
+
+   <initializationAndOptionsChecks>
+   if (isUndefined(options) ||
+      Object.keys(options).length === 0) {
+      throw new Error(exceptions.INVALID_CONNECT_OPTIONS);
+   }
+   
+   // Processing 'options' and setting default values
+   // Including checks and error throws if invalid options are provided
+   </initializationAndOptionsChecks>
+
+   // Protocol handling including MQTT and WebSockets
+   // Including error handling and client instantiation
+
+   <deviceEventHandling>
+   // Handling 'connect', 'close', 'reconnect', 'offline', 'error', 'packetsend', 'packetreceive', 'message' events
+   </deviceEventHandling>
+
+   <devicePublish>
+   this.publish = function(topic, message, options, callback) {
+      // Handling the publish operation with queuing and actual publishing
+   };
+   </devicePublish>
+
+   <deviceSubscribe>
+   this.subscribe = function(topics, options, callback) {
+      // Handling the subscribe operation with queuing and actual subscription
+   };
+   </deviceSubscribe>
+
+   <deviceUnsubscribe>
+   this.unsubscribe = function(topics, callback) {
+      // Handling the unsubscribe operation with queuing and actual unsubscription
+   };
+   </deviceUnsubscribe>
+
+   <deviceEnd>
+   this.end = function(force, callback) {
+      device.end(force, callback);
+   };
+   </deviceEnd>
+
+   <handleMessage>
+   this.handleMessage = device.handleMessage.bind(device);
+   </handleMessage>
+
+   // Additional methods related to WebSocket credentials and custom authentication headers
+
+   <simulateNetworkFailure>
+   this.simulateNetworkFailure = function() {
+      device.stream.emit('error', new Error('simulated connection error'));
+      device.stream.end();
+   };
+   </simulateNetworkFailure>
+}
+</DeviceClient>
+
+<counterFunction>
+function() {
+  // This is a simple counter function counting nodes
+  for (var i = 0, count = 0;i< this.children.length;i++) {
+      count += this.children[i].getNodeCount();
+  }
+  return count + 1;
+}
+</counterFunction>
+
+<getTempFile>
+function getTempFile (file) {
+  // Getting a temporal file path
+  return path.join(path.dirname(file), '.~' + path.basename(file))
+}
+</getTempFile>
+
+<checkKeyCodes>
+function checkKeyCodes(
+  vm,
+  eventKeyCode,
+  key,
+  builtInAlias
+) {
+  // Checking key codes
+  var configKeyCodes = vm.$options._base.config.keyCodes;
+  var keyCodes = configKeyCodes[key] || builtInAlias;
+  if (Array.isArray(keyCodes)) {
+    return keyCodes.indexOf(eventKeyCode) === -1
+  } else {
+    return keyCodes !== eventKeyCode
+  }
+}
+</checkKeyCodes>
+
+<moduleLoadingFunction>
+function(moduleDir, packageJson) {
+  // Loading modules, templates, styles, and images for a web application
+
+  <loadModule>
+  // The code for loading the module and handling errors
+  </loadModule>
+
+  var views = {}, 
+      css = [],
+      images = {}, 
+      appPath = '/app/' + appName + '/';
+
+  <staticAssetsProcessing>
+  // Processing and reading static assets from directories.
+  // Static assets include JavaScript, CSS, HTML templates, and images.
+  </staticAssetsProcessing>
+
+  <postLoadAdjustments>
+  // Further adjustments including setting applications properties such as views, css, etc.
+  </postLoadAdjustments>
+
+  return appName;
+}
+</moduleLoadingFunction>
+
+<checkStylesheet>
+function checkStylesheet(i) {
+  // This function checks stylesheet format
+  const start = i;
+  
+  while (i < tokensLength) {
+    if (l = checkSC(i) ||
+        checkRuleset(i) ||
+        checkDeclaration(i) ||
+        checkDeclDelim(i) ||
+        checkAtrule(i) ||
+        checkMixin(i)) i += l;
+    else throwError(i);
+  }
+
+  return i - start;
+}
+</checkStylesheet>
+
+<factoryFunction>
+function() {
+  // This is a factory function creating an object with data manipulation methods
+  return {
+    uids: [],
+    values: [],
+    names: [],
+    push: function(uid, value, name) {
+      this.uids.push(uid);
+      this.values.push(value);
+      this.names.push(name);
+    },
+    getObject: function() {
+      return {
+        uids: this.uids,
+        values: this.values,
+        names: this.names
+      }
+    }
+  }
+}
+</factoryFunction>
+
+<ternOutlineRequest>
+function (args, callback) {
+  // Requesting outline information using tern server
+  ternserver.request({
+      query: {
+        type: "outline", 
+        file: args.meta.location,
+        ast: args.ast
+      },
+      files: args.files
+    },
+    function (error, outline) {
+      if (error) {
+        callback({request: 'outline', error: error.message, message: Messages['failedToComputeOutline']}); 
+      } else if (outline && Array.isArray(outline)) {
+        callback({request: 'outline', outline: outline}); 
+      } else {
+        callback({request: 'outline', outline: []}); 
+      }
+    }
+  );
+}
+</ternOutlineRequest>
+```

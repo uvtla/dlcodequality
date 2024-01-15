@@ -1,0 +1,381 @@
+```javascript
+<removeListeners>
+function (name, fn) {
+    this._listeners = !name
+        ? []
+        : filter(this._listeners, function (listener) {
+            <compareListenerName>
+            if (listener.name !== name) {
+                return true;
+            } else {
+            </compareListenerName>
+                <compareListenerFunction>
+                if (isFunction(fn)) {
+                    return listener.fn !== fn;
+                } else {
+                    return false;
+                }
+                </compareListenerFunction>
+            }
+        });
+
+    return this;
+}
+</removeListeners>
+
+<tapFunctionCall>
+function tap(fn, x) {
+    <ensureFunction>
+    if(!isFunction(fn)) {
+        throw new TypeError(
+          'tap: Function required for first argument'
+        )
+    }
+    </ensureFunction>
+  
+    return compose(constant(x), fn)(x)
+}
+</tapFunctionCall>
+
+<parseArguments>
+function parseArguments (args, state, babel) {
+  <initializeVariables>
+  const {file: {opts: {filename, plugins}}} = state
+  const {types: t} = babel
+  </initializeVariables>
+
+  let chunkName, source
+  const promises = {}
+  <handleOptions>
+  const options =
+    args.length > 1
+    && args[args.length - 1].type !== 'StringLiteral'
+    && args[args.length - 1].type !== 'TemplateLiteral'
+      ? args[args.length - 1].node
+      : void 0
+  args = options === void 0 ? args : args.slice(0, -1)
+  </handleOptions>
+
+  for (let arg of args) {
+    let value = ''
+
+    <processArguments>
+    switch (arg.type) {
+      case 'StringLiteral':
+
+        value = arg.node.value
+
+        source =
+          value.match(relativePkg) === null
+            ? value
+            : path.join(path.dirname(filename), value)
+        chunkName = chunkNameCache.get(source)
+
+        if (promises[chunkName] !== void 0) {
+          throw new Error(`[Broker Error] duplicate import: ${source}`)
+        }
+
+        promises[chunkName] = t.arrowFunctionExpression(
+          [],
+          t.callExpression(
+            t.identifier('import'),
+            [t.stringLiteral(source)]
+          )
+        )
+      break;
+      default:
+        throw new Error(`[Broker Error] Unrecognized argument type: ${arg.type}`)
+    }
+    </processArguments>
+  }
+
+  return {promises, options}
+}
+</parseArguments>
+
+<copyCoordinates>
+function(c) {
+    c = c.getc(true);
+    this.x = c.x;
+    this.y = c.y;
+}
+</copyCoordinates>
+
+<wrapObject>
+function _wrapper(originalObject, wrappedObject, provide, injects, isTransientScope) {
+    <copyProperties>
+    wrappedObject.$provide = originalObject.$provide;
+    wrappedObject.$inject = originalObject.$inject;
+    wrappedObject.$transientScope = originalObject.$transientScope;
+    </copyProperties>
+
+    <resolveDependencies>
+    resolveProvide(wrappedObject, provide);
+    resolveInjects(wrappedObject, injects);
+    resolveTransientScope(wrappedObject, isTransientScope);
+    </resolveDependencies>
+
+    return wrappedObject;
+}
+</wrapObject>
+
+<makeNetworkRequest>
+function make_request(params, url_composer = compose_url) {
+    return new Promise(_make_request);
+
+    <networkRequestImplementation>
+    function _make_request(resolve_promise) {
+        const { headers, http_verb, payload } = params;
+        const settings = {
+            headers,
+            method: http_verb,
+            url: url_composer(params),
+        };
+        undefined !== payload && (settings.data = payload);
+        axios.request(settings)
+            .then(process_axios_response)
+            .catch(process_axios_rejection);
+
+        <processResponse>
+        function process_axios_response(axios_response) {
+            const response = {
+                status: {
+                    code: axios_response.status,
+                    text: axios_response.statusText,
+                },
+                headers: axios_response.headers,
+                data: axios_response.data,
+            };
+            if (params.preparer) {
+                const request_metadata = Object.assign({}, params);
+                delete request_metadata.preparer;
+                response.data = params.preparer(request_metadata, response);
+            }
+            return resolve_promise(response);
+        }
+        </processResponse>
+        <handleRejection>
+        function process_axios_rejection(axios_rejection) {
+            return axios_rejection.response
+                ? process_axios_response(axios_rejection.response)
+                : throw_error(axios_rejection);
+        }
+        </handleRejection>
+    }
+    </networkRequestImplementation>
+}
+</makeNetworkRequest>
+
+<camelizeString>
+function camelize(str) {
+    return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => {
+        return index === 0 ? letter.toLowerCase() : letter.toUpperCase()
+    }).replace(/[\s\-_]+/g, '')
+}
+</camelizeString>
+
+<searchAndSortPackages>
+function () {
+    var matchedItems = packages;
+    <prepareSearchCriteria>
+    var parsed = this.parseQuery(this.query);
+    var query = parsed.query;
+    var fields = parsed.field ? [parsed.field] :
+      _.filter(Object.keys(config.searchField), function (key) {
+        return config.searchField[key];
+      });
+    var exact = !!parsed.field;
+    </prepareSearchCriteria>
+
+    <applySearchFilters>
+    matchedItems = this.filter(matchedItems);
+    matchedItems = this.find(matchedItems, query, fields, exact);
+    matchedItems = this.dedupe(matchedItems);
+    matchedItems = this.sort(matchedItems, this.sorting, this.order);
+    matchedItems = !exact ? this.prioritize(matchedItems, query) : matchedItems;
+    </applySearchFilters>
+
+    <paginateResults>
+    this.count = matchedItems.length;
+    this.pageCount = Math.ceil(this.count / this.limit);
+    this.from = (this.page - 1) * this.limit + 1;
+    this.to =  this.from + this.limit - 1 > this.count ? this.count : this.from + this.limit - 1;
+    this.results = matchedItems.slice(this.from - 1, this.to);
+    </paginateResults>
+}
+</searchAndSortPackages>
+
+<saveDataToFile>
+function saveAsFile(editor, data, range) {
+    return new Promise((resolve, reject) => {
+        <showFileSaveDialog>
+        const fileName = atom.getCurrentWindow().showSaveDialog();
+        if (!fileName) {
+            return reject(new Error('User cancelled file dialog'));
+        }
+        </showFileSaveDialog>
+
+        <writeFileToDisk>
+        fs.writeFile(fileName, Buffer.from(data, 'base64'), err => {
+            if (err) {
+                return reject(err);
+            }
+            </writeFileToDisk>
+
+            <updateEditorContent>
+            const editorPath = editor.getPath();
+            let displayPath = editorPath
+                ? path.relative(editorPath, fileName)
+                : `file:
+
+            editor.transact(() => {
+                
+                editor.setTextInBufferRange(range, displayPath.replace(/\\+/g, '/'));
+            });
+            </updateEditorContent>
+
+            resolve(fileName);
+        });
+    });
+}
+</saveDataToFile>
+
+<loadLevelFromFile>
+function load(file, options = {}) {
+    return new Promise((resolve, reject) => {
+
+        <validateInput>
+        var fileName = options.file || file;
+        if (!fileName) {
+            return reject('Must give a file');
+        }
+
+        if (!fs.existsSync(fileName)) {
+            return reject(`No such file, ${fileName}`);
+        }
+        </validateInput>
+
+        <initializeLevelParsing>
+        var level     = new Level();
+        var firstLine = false;
+        var reading   = '';
+        var contents  = '';
+        var bCount    = 0;
+        var bInfo     = [];
+        var rl        = readline.createInterface({
+            input: fs.createReadStream(fileName)
+        });
+        </initializeLevelParsing>
+
+        <parseLevelFile>
+        rl.on('line', line => {
+
+            <processFirstLine>
+            if (!firstLine) {
+                if (line === 'GRMAP001') return reject(`GMAPs aren't supported at the moment`);
+                if (line !== 'GLEVNW01') return reject(`This isn't a level file`);
+                firstLine = true;
+            }
+            </processFirstLine>
+
+            <processReadingSections>
+            else if (reading) {
+                if (line.startsWith(reading)) {
+                    if (reading === 'SIGNEND') {
+                        level.signs.last().text = contents.trim();
+                    } else if (reading === 'NPCEND') {
+                        level.npcs.last().text = contents.trim();
+                    } else if (reading === 'BADDYEND') {
+                        let baddy         = level.baddies.last();
+                        baddy.attackVerse = bInfo[0];
+                        baddy.hurtVerse   = bInfo[1];
+                        baddy.winVerse    = bInfo[2];
+
+                        bCount = 0;
+                        bInfo  = [];
+                    }
+
+                    contents = '';
+                    reading  = false;
+                } else {
+                    if (reading === 'BADDYEND') {
+                        bInfo.push(line);
+                        bCount++;
+                    } else {
+                        contents += `${line}\n`;
+                    }
+                }
+            }
+            </processReadingSections>
+
+            <processBoard>
+            else if (line.startsWith('BOARD')) {
+                let [dataType, startX, startY, width, layerIndex, tilesData] = line.split(' ');
+
+                for (let i = 0; i < width * 2; i += 2) {
+                    let tileX = startX + i / 2;
+                    level.tiles.push(new Tile(tileX, startY, layerIndex, tilesData.substr(i, 2)));
+                }
+            }
+            </processBoard>
+
+            <processLink>
+            else if (line.startsWith('LINK')) {
+                let [dataType, targetLevel, sourceX, sourceY, width, height, targetX, targetY] = line.split(' ');
+
+                level.links.push(new Link(sourceX, sourceY, width, height, targetX, targetY, targetLevel));
+            }
+            </processLink>
+
+            <processChest>
+            else if (line.startsWith('CHEST')) {
+                let [dataType, x, y, item, signIndex] = line.split(' ');
+
+                level.chest.push(new Chest(x, y, item, signIndex));
+            }
+            </processChest>
+
+            <processSign>
+            else if (line.startsWith('SIGN')) {
+                let [dataType, x, y] = line.split(' ');
+
+                level.signs.push(new Sign(x, y));
+                reading = 'SIGNEND';
+            }
+            </processSign>
+
+            <processNPC>
+            else if (line.startsWith('NPC')) {
+                let [dataType, imageName, x, y] = line.split(' ');
+
+                level.npcs.push(new Npc(x, y, imageName, ''));
+                reading = 'NPCEND';
+            }
+            </processNPC>
+
+            <processBaddy>
+            else if (line.startsWith('BADDY')) {
+                let [dataType, x, y, type] = line.split(' ');
+
+                level.baddies.push(new Baddy(x, y, type));
+                reading = 'BADDYEND';
+            }
+            </processBaddy>
+
+            <handleUnknownLine>
+            else {
+                throw new Error(`Can't read line, ${line}`);
+            }
+            </handleUnknownLine>
+        });
+        </parseLevelFile>
+
+        <finaliseLevelParsing>
+        rl.on('close', () => {
+            resolve(level);
+        });
+        </finaliseLevelParsing>
+    });
+}
+</loadLevelFromFile>
+```
