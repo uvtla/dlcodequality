@@ -1,0 +1,274 @@
+```javascript
+<function>
+function( bundleJSON, bundlePath, tempName ) {
+  
+  <setDefaultConfigPath>
+  if (!config['path']) 
+    config['path'] = path.dirname(bundlePath);
+  </setDefaultConfigPath>
+  
+  <compileBundle>
+  JBBCompiler.compile(
+    bundleJSON,
+    tempName,
+    config,
+    function() {
+  
+      <handleCompilationResult>
+      if (config['sparse']) {
+        resultCallback( null, {
+          'basename': tempName,
+          'suffix': [
+            '.jbbp', '_b16.jbbp', 
+            '_b32.jbbp', '_b64.jbbp' 
+          ]
+        }); 
+      } else {
+        resultCallback( null, {
+          'basename': tempName,
+          'suffix': [ '.jbb' ]
+        });
+      }
+      </handleCompilationResult>
+
+    }
+  );
+  </compileBundle>
+  
+}
+</function>
+
+<function joinPath>
+function joinPath(path, ...allname) {
+  <pathNormalization>
+  let name = allname.shift();
+  path = path.replace(/([/\\]+)/g, '/').split('/');
+  name = name.replace(/([/\\]+)/g, '/').split('/');
+  if (!name[0]) {
+    path = [];
+  }
+  </pathNormalization>
+  <pathTraversal>
+  while (name.length) {
+    let p = name.shift();
+    if (p === '..') {
+      path.pop();
+    } else if (p !== '.') {
+      path.push(p);
+    }
+  }
+  path = path.join("/");
+  </pathTraversal>
+  <recursivePathJoin>
+  return allname.length ? joinPath(path, ...allname) : path;
+  </recursivePathJoin>
+}
+</function>
+
+<function>
+function (nextText, transaction) {
+  <updateCurrentElement>
+  if (nextText !== this._currentElement) {
+    this._currentElement = nextText;
+    var nextStringText = '' + nextText;
+    </updateCurrentElement>
+    <replaceDelimitedText>
+    if (nextStringText !== this._stringText) {
+      this._stringText = nextStringText;
+      var commentNodes = this.getHostNode();
+      DOMChildrenOperations.replaceDelimitedText(commentNodes[0], commentNodes[1], nextStringText);
+    }
+    </replaceDelimitedText>
+  }
+}
+</function>
+
+<function>
+function(newnode, oldnode, lastnode, id, ids) {
+  <initialChecksAndUpdate>
+  var result = true,
+    oldid = this._assistant.id(oldnode);
+  if ((result = this._check(newnode, oldnode, lastnode, id, ids))) {
+    if (oldid) {
+      ids = gui.Object.copy(ids);
+      lastnode = newnode;
+      ids[oldid] = true;
+      id = oldid;
+    }
+  }
+  </initialChecksAndUpdate>
+  <recursiveCrawl>
+  result = this._crawl(newnode.firstChild, oldnode.firstChild, lastnode, id, ids);
+  </recursiveCrawl>
+  return result;
+}
+</function>
+
+<function isRevalidatingCacheKey>
+function isRevalidatingCacheKey (ctx, currentEntryKey) {
+  <checkCacheKey>
+  const revalidatingCache = ctx.locals.revalidatingCache
+  return (revalidatingCache && revalidatingCache.entryKey) === currentEntryKey
+  </checkCacheKey>
+}
+</function>
+
+<function>
+function () {
+  var differed = [];
+  
+  <checkInitWidgetsDone>
+  if (this._initWidgetsDone) {
+    return differed;
+  }
+  </checkInitWidgetsDone>
+  <flagInitWidgetsDone>
+  this._initWidgetsDone = true;
+  this.html = null; 
+  </flagInitWidgetsDone>
+  <initializeWidgets>
+  var content = this._content;
+  var contentSize = content.length;
+  for (var i = 0; i < contentSize; i++) {
+    var elt = content[i];
+    if (elt._type == TYPE_BEHAVIOR) {
+      var bhv = elt.behavior;
+      if (bhv.initWidget) {
+        try {
+          bhv.initWidget();
+          if (bhv.isDiffered) {
+            differed.push(bhv);
+          }
+        } catch (e) {
+          this.$logError(this.WIDGETCALL_ERROR, [bhv.$classpath, "initWidget"], e);
+        }
+      }
+    } else { 
+      differed = differed.concat(elt.initWidgets());
+    }
+  }
+  </initializeWidgets>
+  <refreshIndicator>
+  this.refreshProcessingIndicator();
+  </refreshIndicator>
+  return differed;
+}
+</function>
+
+<function upgradeElementInternal>
+function upgradeElementInternal(element, optJsClass) {
+  
+  <validateArgument>
+  if (!(typeof element === 'object' && element instanceof Element)) {
+    throw new Error('Invalid argument provided to upgrade MDL element.');
+  }
+  </validateArgument>
+  
+  <dispatchUpgradingEvent>
+  var upgradingEv = createEvent_('mdl-componentupgrading', true, true);
+  element.dispatchEvent(upgradingEv);
+  if (upgradingEv.defaultPrevented) {
+    return;
+  }
+  </dispatchUpgradingEvent>
+  
+  <initializeUpgradingProcess>
+  var upgradedList = getUpgradedListOfElement_(element);
+  var classesToUpgrade = [];
+  </initializeUpgradingProcess>
+  
+  <determineClassesToUpgrade>
+  if (!optJsClass) {
+    var classList = element.classList;
+    registeredComponents_.forEach(function(component) {
+      if (classList.contains(component.cssClass) &&
+          classesToUpgrade.indexOf(component) === -1 &&
+          !isElementUpgraded_(element, component.className)) {
+        classesToUpgrade.push(component);
+      }
+    });
+  } else if (!isElementUpgraded_(element, optJsClass)) {
+    classesToUpgrade.push(findRegisteredClass_(optJsClass));
+  }
+  </determineClassesToUpgrade>
+
+  <upgradeClasses>
+  for (var i = 0, n = classesToUpgrade.length, registeredClass; i < n; i++) {
+    registeredClass = classesToUpgrade[i];
+    if (registeredClass) {
+      <updateElementData>
+      upgradedList.push(registeredClass.className);
+      element.setAttribute('data-upgraded', upgradedList.join(','));
+      </updateElementData>
+      <instantiateClass>
+      var instance = new registeredClass.classConstructor(element);
+      instance[componentConfigProperty_] = registeredClass;
+      createdComponents_.push(instance);
+      </instantiateClass>
+      <performCallbacks>
+      for (var j = 0, m = registeredClass.callbacks.length; j < m; j++) {
+        registeredClass.callbacks[j](element);
+      }
+      </performCallbacks>
+      <assignInstance>
+      if (registeredClass.widget) {
+        element[registeredClass.className] = instance;
+      }
+      </assignInstance>
+    } else {
+      <reportError>
+      throw new Error(
+        'Unable to find a registered component for the given class.');
+      </reportError>
+    }
+    <dispatchUpgradedEvent>
+    var upgradedEv = createEvent_('mdl-componentupgraded', true, false);
+    element.dispatchEvent(upgradedEv);
+    </dispatchUpgradedEvent>
+  }
+  </upgradeClasses>
+}
+</function>
+
+<function renderCustomTab>
+function renderCustomTab({ key, label, active, handleClick }) {
+  <renderButton>
+  return (
+    <Button
+      key={key}
+      title={label}
+      type={active ? types.PRIMARY : types.SECONDARY}
+      onClick={handleClick}
+    />
+  );
+  </renderButton>
+}
+</function>
+
+<function newTracker>
+function newTracker() 
+{
+  <createTracker>
+  var trk = $('<div></div>').addClass(cssClass('tracker'));
+  if (is_msie) {
+    trk.css({
+      opacity: 0,
+      backgroundColor: 'white'
+    });
+  }
+  </createTracker>
+  return trk;
+}
+</function>
+
+<function getDeviceTagAlias>
+async function getDeviceTagAlias (registrationId) {
+  <buildRequestURL>
+  var url = HOST_NAME_SSL + DEVICE_PATH + '/' + registrationId
+  </buildRequestURL>
+  <performRequest>
+  return _request(this, url, null, 'GET')
+  </performRequest>
+}
+</function>
+```

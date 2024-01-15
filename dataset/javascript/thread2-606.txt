@@ -1,0 +1,211 @@
+<Aggregation>
+function Aggregation(oClass, name, info) {
+    info = typeof info !== 'object' ? { type: info } : info;
+
+    this.name = name;
+    this.type = info.type || 'sap.ui.core.Control';
+    this.altTypes = Array.isArray(info.altTypes) ? info.altTypes : undefined;
+    this.multiple = typeof info.multiple === 'boolean' ? info.multiple : true;
+    this.singularName = this.multiple ? info.singularName || guessSingularName(name) : undefined;
+    this.bindable = !!info.bindable;
+    this.deprecated = info.deprecated || false;
+    this.visibility = info.visibility || 'public';
+    this.selector = info.selector || null;
+    this.forwarding = info.forwarding;
+    this._doesNotRequireFactory = !!info._doesNotRequireFactory; 
+    this.appData = remainder(this, info);
+    this._oParent = oClass;
+    this._sUID = 'aggregation:' + name;
+    this._iKind = this.multiple ? Kind.MULTIPLE_AGGREGATION : Kind.SINGLE_AGGREGATION;
+    this._oForwarder = this.forwarding ? new AggregationForwarder(this) : undefined;
+
+    var N = capitalize(name);
+    this._sGetter = 'get' + N;
+
+    if ( this.multiple ) {
+        var N1 = capitalize(this.singularName);
+        this._sMutator = 'add' + N1;
+        this._sInsertMutator = 'insert' + N1;
+        this._sRemoveMutator = 'remove' + N1;
+        this._sRemoveAllMutator = 'removeAll' + N;
+        this._sIndexGetter = 'indexOf' + N1;
+        this._sUpdater = 'update' + N;
+        this._sRefresher = 'refresh' + N;
+    } else {
+        this._sMutator = 'set' + N;
+        this._sInsertMutator =
+        this._sRemoveMutator =
+        this._sRemoveAllMutator =
+        this._sIndexGetter =
+        this._sUpdater =
+        this._sRefresher = undefined;
+    }
+
+    this._sDestructor = 'destroy' + N;
+
+    if ( this.bindable ) {
+        this._sBind = 'bind' + N;
+        this._sUnbind = 'unbind' + N;
+    } else {
+        this._sBind =
+        this._sUnbind = undefined;
+    }
+}
+</Aggregation>
+
+<template>
+function template (file, locals) {
+    let fullpath = resolve('views', file);
+    <resolveEngine>
+    const [engine, target] = ex2engine(fullpath);
+    </resolveEngine>
+    <conditionalRendering>
+    if (engine !== 'html') {
+        return render[engine](target, Object.assign({}, locals, {
+            liveReloadHost: process.env.liveReloadHost,
+            isDevelopment: configuration.env !== 'production'
+        }));
+    } else {
+        return new Promise(function (resolve, reject) {
+            try {
+                fs.accessSync(target, fs.constants.R_OK);
+                <readFileSync>
+                resolve(fs.readFileSync(target, 'utf-8'));
+                </readFileSync>
+            } catch (err) {
+                
+                reject(err);
+            }
+        });
+    }
+    </conditionalRendering>
+}
+</template>
+
+<resetRepository>
+function(cb) {
+    log.log('git reset --hard ' + repoDir);
+    git(repoDir, ['reset', '--hard'], function(err, stdout, stderr) {
+        if (err) {
+            <handleError>
+            log.warn('Unable to reset at ' + repoDir + ":", err.msg);
+            </handleError>
+        }
+        cb(null, {reset: {stdout: stdout, stderr: stderr}});
+    });
+}
+</resetRepository>
+
+<onVolumeChange>
+function onVolumeChange() {
+    const volumePercentage = media.muted ? 0 : media.volume;
+    const isMuted = !volumePercentage;
+
+    $(self.volume, { 'aria-valuenow': volumePercentage, 'aria-valuemin': 0, 'aria-valuemax': 1 });
+
+    const dirIsInline = /^(ltr|rtl)$/i.test(volumeDir);
+    const axisProp = dirIsInline ? 'width' : 'height';
+
+    self.volumeMeter.style[axisProp] = `${volumePercentage * 100}%`;
+
+    $(self.mute, { 'aria-label': isMuted ? lang.unmute || 'unmute' : lang.mute || 'mute' });
+    $(self.muteSymbol, { 'aria-hidden': isMuted });
+    $(self.unmuteSymbol, { 'aria-hidden': !isMuted });
+}
+</onVolumeChange>
+
+<isClassMember>
+function isClassMember (options) {
+  var parent = arrayify(options.data.root).find(where({ id: this.memberof }))
+  if (parent) {
+    return parent.kind === 'class'
+  }
+}
+</isClassMember>
+
+<setValueIfNotUseViewMode>
+function(address, value) {
+    var columnModel = this.columnModel.getColumnModel(address.columnName);
+
+    if (!snippet.pick(columnModel, 'editOptions', 'useViewMode')) {
+        <setValue>
+        this.setValue(address, value);
+        </setValue>
+    }
+}
+</setValueIfNotUseViewMode>
+
+<parseRes>
+function parseRes (res, cb) {
+    var body = '';
+    if ('setEncoding' in res) <setDataEncoding>res.setEncoding('utf-8');</setDataEncoding>
+
+    res.on('data', function (data) {
+        body += data;
+        if (body.length > 1e10) {
+            <handleBodyOverflow>
+            res.connection.destroy();
+            res.writeHead(413, {'Content-Type': 'text/plain'});
+            res.end('req body too large');
+            </handleBodyOverflow>
+            return cb(new Error('body overflow'));
+        }
+    });
+
+    res.on('end', function () {
+        <completeResponse>
+        cb(null, body);
+        </completeResponse>
+    });
+}
+</parseRes>
+
+<newVector>
+function newVector(array, dtype) {
+  <validateDtypeInput>
+  validateDtype(dtype);
+  </validateDtypeInput>
+  <createVector>
+  var proto = PROTO_MAP[dtype];
+  var vector = Object.create(proto);
+  vector._init(array);
+  </createVector>
+  return vector;
+}
+</newVector>
+
+<Pot>
+function Pot(filename) {
+  if (! (this instanceof Pot)) {
+    <createInstance>
+    return new Pot(filename);
+    </createInstance>
+  }
+
+  this.isOpen = false;
+  this.filename = filename;
+  this.contents = '';
+  this.initialDate = '';
+  this.fingerprint = '';
+}
+</Pot>
+
+<readFileAndParse>
+function(file, options, callback) {
+    fs.readFile(file, options, function(err, data) {
+        if (err) {
+            <handleReadError>
+            return callback(err);
+            </handleReadError>
+        }
+        <parseData>
+        module.exports.parse(data.toString(), function(parseErr, lines) {
+            if (parseErr) {
+                return callback(parseErr);
+            }
+            callback(undefined, lines);
+        });
+        </parseData>
+    });
+}
+</readFileAndParse>

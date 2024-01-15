@@ -1,0 +1,328 @@
+```javascript
+<normalizeConfiguration>
+function normalizeConfiguration(oObject, oConfiguration) {
+    <metadataExtraction>
+    var oMetadata = oObject.getMetadata(),
+        aProperties = Object.keys(oMetadata.getAllProperties()),
+        aAggregations = Object.keys(oMetadata.getAllAggregations()),
+        aAssociations = Object.keys(oMetadata.getAllAssociations()),
+        aBindings = uniqueSort(aProperties.concat(aAggregations)),
+        aEvents = Object.keys(oMetadata.getAllEvents());
+    </metadataExtraction>
+
+    <configurationAssignment>
+    oConfiguration.properties = oConfiguration.properties === true ? aProperties : oConfiguration.properties;
+    oConfiguration.aggregations = oConfiguration.aggregations === true ? aAggregations : oConfiguration.aggregations;
+    oConfiguration.associations = oConfiguration.associations === true ? aAssociations : oConfiguration.associations;
+    oConfiguration.bindings = oConfiguration.bindings === true ? aBindings : oConfiguration.bindings;
+    oConfiguration.events = oConfiguration.events === true ? aEvents : oConfiguration.events;
+    oConfiguration.destroy = (oConfiguration.destroy == null) ? false : oConfiguration.destroy;
+    oConfiguration.parent = (oConfiguration.parent == null) ? false : oConfiguration.parent;
+    </configurationAssignment>
+}
+</normalizeConfiguration>
+
+<runningMap>
+function runningMap(a, fn, init) {
+  return a.map(v => init = fn(v, init));
+}
+</runningMap>
+
+<functionForAttributes>
+function (moreattrs) {
+    <attributeAssignmentLoop>
+    for (var k in moreattrs) {
+        if (moreattrs.hasOwnProperty(k)) {
+            this.node.setAttribute(k, moreattrs[k]);
+        }
+    }
+    </attributeAssignmentLoop>
+    return this;
+}
+</functionForAttributes>
+
+<reflowText>
+function reflowText (text, width, gfm) {
+  <splitText>
+  var splitRe = gfm ? HARD_RETURN_GFM_RE : HARD_RETURN_RE,
+      sections = text.split(splitRe),
+      reflowed = [];
+  </splitText>
+
+  <sectionIteration>
+  sections.forEach(function (section) {
+    <reflowSection>
+    var fragments = section.split(/(\u001b\[(?:\d{1,3})(?:;\d{1,3})*m)/g);
+    var column = 0;
+    var currentLine = '';
+    var lastWasEscapeChar = false;
+
+    <fragmentProcessing>
+    while (fragments.length) {
+      var fragment = fragments[0];
+
+      <fragmentCleaning>
+      if (fragment === '') {
+        fragments.splice(0, 1);
+        lastWasEscapeChar = false;
+        continue;
+      }
+      </fragmentCleaning>
+
+      <nonTextFragmentHandling>
+      if (!textLength(fragment)) {
+        currentLine += fragment;
+        fragments.splice(0, 1);
+        lastWasEscapeChar = true;
+        continue;
+      }
+      </nonTextFragmentHandling>
+
+      <wordProcessing>
+      var words = fragment.split(/[ \t\n]+/);
+      for (var i = 0; i < words.length; i++) {
+        <handleWordWrapping>
+        var word = words[i];
+        var addSpace = column != 0;
+        if (lastWasEscapeChar) addSpace = false;
+        if (column + word.length + addSpace > width) {
+          <performWordWrapping>
+          if (word.length <= width) {
+            
+            reflowed.push(currentLine);
+            currentLine = word;
+            column = word.length;
+          } else {
+            
+            
+            var w = word.substr(0, width - column - addSpace);
+            if (addSpace) currentLine += ' ';
+            currentLine += w;
+            reflowed.push(currentLine);
+            currentLine = '';
+            column = 0;
+            </performWordWrapping>
+
+            <breakLongWord>
+            word = word.substr(w.length);
+            while (word.length) {
+              var w = word.substr(0, width);
+              if (!w.length) break;
+              if (w.length < width) {
+                currentLine = w;
+                column = w.length;
+                break;
+              } else {
+                reflowed.push(w);
+                word = word.substr(width);
+              }
+            }
+            </breakLongWord>
+          }
+        } else {
+          <appendWord>
+          if (addSpace) {
+            currentLine += ' ';
+            column++;
+          }
+          currentLine += word;
+          column += word.length;
+          </appendWord>
+        }
+        </handleWordWrapping>
+        lastWasEscapeChar = false;
+      }
+      </wordProcessing>
+
+      fragments.splice(0, 1);
+    }
+    </fragmentProcessing>
+    if (textLength(currentLine)) reflowed.push(currentLine);
+    </reflowSection>
+  });
+  </sectionIteration>
+  return reflowed.join('\n');
+}
+</reflowText>
+
+<functionProcessingParserStream>
+function(done) {
+    <initialSetup>
+    var p, parser, stream, _i, _len;
+    parser = this.parser();
+    stream = highland(this.source());
+    </initialSetup>
+    
+    <parserApplication>
+    if (_.isArray(parser)) {
+      for (_i = 0, _len = parser.length; _i < _len; _i++) {
+        p = parser[_i];
+        stream = this._mapWith(p)(stream).flatten().compact();
+      }
+    } else {
+      stream = this._mapWith(parser)(stream).flatten().compact();
+    }
+    </parserApplication>
+
+    <streamReduction>
+    stream = stream.reduce({}, _.merge);
+    </streamReduction>
+
+    <eventTriggerCallback>
+    if (done == null) {
+      return stream;
+    }
+    stream.pull(done);
+    </eventTriggerCallback>
+
+    return this;
+}
+</functionProcessingParserStream>
+
+<getInstalledNPMVersion>
+function getInstalledNPMVersion () {
+  return new Promise((resolve, reject) => {
+    <execNpmVersion>
+    exec('npm -v', (err, stdout) => {
+      if (err) {
+        reject(new Error('Could not determine npm version.'));
+      } else {
+        var nodeVersion = stdout.replace(/\n/, '');
+        resolve(nodeVersion);
+      }
+    });
+    </execNpmVersion>
+  })
+}
+</getInstalledNPMVersion>
+
+<groupBy>
+function groupBy(expression) {
+    <expressionValidation>
+    if (!expression)
+        throw new Error("Expression is invalid");
+    </expressionValidation>
+
+    <initialization>
+    var maps = [];
+    </initialization>
+
+    <groupingLoop>
+    for (var i = 0; i < this.items.length; i++) {
+        <groupRetrieval>
+        var groupKey = expression(this.items[i]);
+        </groupRetrieval>
+
+        <existingMapSearch>
+        var existingMap = null;
+        for (var n = 0; n < maps.length; n++) {
+            if (equals(maps[n].key, groupKey)){
+                existingMap = maps[n];
+                break;
+            }
+        }
+        </existingMapSearch>
+
+        <mapCreation>
+        if (!existingMap) {
+            existingMap = {
+                key: groupKey,
+                count: 0, 
+                elements: []
+            };
+            maps.push(existingMap);
+        }
+        </mapCreation>
+
+        <aggregation>
+        existingMap.count++;
+        existingMap.elements.push(this.items[i]);
+        </aggregation>
+    }
+    </groupingLoop>
+
+    <returnNewInstance>
+    return new jslinq(maps);
+    </returnNewInstance>
+}
+</groupBy>
+
+<normalizePage>
+function normalizePage(content) {
+    <dataInitialization>
+    var data = {
+        "head-start": [],
+        "head": [],
+        "head-end": [],
+        body: []
+    };
+    </dataInitialization>
+
+    <contentProcessing>
+    if (typeof content === "string") {
+        data.body.push(content);
+    } else {
+        <sectionAssignment>
+        ["head-start", "head", "head-end", "body"].forEach(function (section) {
+            var sectionContent = content[section];
+            if (!sectionContent) {
+                return;
+            }
+            if (!_.isArray(sectionContent)) {
+                data[section].push(sectionContent);
+            } else {
+                data[section] = sectionContent;
+            }
+        });
+        </sectionAssignment>
+    }
+    </contentProcessing>
+
+    return data;
+}
+</normalizePage>
+
+<forEach>
+function forEach(parameters, dIt = global.it, dDescribe = global.describe) {
+    <testCaseDefiners>
+    const it = makeTestCaseDefiner(parameters, dIt);
+    it.skip = makeParameterizedSkip(parameters, dIt);
+    it.only = makeParameterizedOnly(parameters, dIt);
+    const describe = makeTestCaseDefiner(parameters, dDescribe);
+    describe.skip = makeParameterizedSkip(parameters, dDescribe);
+    describe.only = makeParameterizedOnly(parameters, dDescribe);
+    </testCaseDefiners>
+    return { it, describe };
+}
+</forEach>
+
+<functionPublicKeyAlgo>
+function(algo) {
+    <switchPublicKeyAlgo>
+    switch (algo) {
+        
+        <rsaEncryptCases>
+        case enums.publicKey.rsa_encrypt:
+        case enums.publicKey.rsa_encrypt_sign:
+            return [type_mpi];
+        </rsaEncryptCases>
+
+        <elgamalCase>
+        case enums.publicKey.elgamal:
+            return [type_mpi, type_mpi];
+        </elgamalCase>
+
+        <ecdhCase>
+        case enums.publicKey.ecdh:
+            return [type_mpi, type_ecdh_symkey];
+        </ecdhCase>
+        
+        <defaultError>
+        default:
+            throw new Error('Invalid public key encryption algorithm.');
+        </defaultError>
+    }
+    </switchPublicKeyAlgo>
+}
+</functionPublicKeyAlgo>
+```
