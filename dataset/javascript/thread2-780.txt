@@ -1,0 +1,221 @@
+<authorizeApp>
+function authorizeApp(user, tokenName, scope) {
+  return new Promise((resolve, reject) => {
+    <createAuthorizationRequest>
+    request.post('https://api.authorizationendpoint.com', {
+      auth: {
+        user: user.username,
+        pass: user.password,
+        sendImmediately: true
+      },
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        'User-Agent': tokenName
+      },
+      body: JSON.stringify({
+        scopes: scope,
+        note: tokenName
+      })
+    }, </createAuthorizationRequest>
+    (err, response, body) => {
+      if (err) {
+        <handleAuthorizationError>reject(err);</handleAuthorizationError>
+      } else {
+        const returnBody = <parseAuthorizationResponse>JSON.parse(body);</parseAuthorizationResponse>
+        if (returnBody.token) {
+          <resolveWithToken>resolve(returnBody.token);</resolveWithToken>
+        }
+        else if (returnBody.errors) {
+          <handleAuthorizationErrors>
+          console.log(returnBody.errors);
+          reject(returnBody.errors);
+          </handleAuthorizationErrors>
+        }
+      }
+    });
+  });
+}
+</authorizeApp>
+
+<arrayIntersection>
+function arrayIntersection(arr1, arr2) {
+  if (_.isEqual(arr1, arr2)) {
+    return arr1;
+  }
+  <filterArray>
+  return arr1.filter(v => arrayIncludes(arr2, v));
+  </filterArray>
+}
+</arrayIntersection>
+
+<trim>
+function trim(x, k) {
+  <prepareArrayForTrimming>
+  var i, y;
+  for (i = x.length; i > 0 && !x[i - 1]; i--);
+  y = new Array(i + k);
+  </prepareArrayForTrimming>
+  <copyArray>
+  copy_(y, x);
+  </copyArray>
+  return y;
+}
+</trim>
+
+<deepGet>
+function deepGet(obj, deepKey, defaultVal) {
+  let parts = <splitDeepKey>deepKey.split('.')</splitDeepKey>
+  let t = obj
+  for (let k of parts) {
+    if (<checkPropertyAvailability>typeof t !== 'object' || t === null || !(k in t)</checkPropertyAvailability>)
+      return defaultVal
+    <assignValueToT>t = t[k]</assignValueToT>
+  }
+  return t
+}
+</deepGet>
+
+<getRequestHref>
+function (req) {
+  var location = <getLocationFromRequest>getLocation(req)</getLocationFromRequest>,
+      href = location.origin + location.search;
+  return href;
+}
+</getRequestHref>
+
+<lint>
+function lint(options) {
+  if (!<validateOptionsLanguage>options.language</validateOptionsLanguage>) {
+    throw new Error('options.language missing')
+  }
+
+  if (!<validateOptionsArgumentsArray>Array.isArray(options.arguments)</validateOptionsArgumentsArray>) {
+    throw new TypeError('options.arguments has to be an array')
+  }
+
+  <setDevelopmentEnvironmentVariable>
+  process.env.NODE_ENV = 'development'
+  </setDevelopmentEnvironmentVariable>
+
+  if (<lintCSSFlow>options.language === 'css'</lintCSSFlow>) {
+    process.env.PANGOLIN_ENV = 'lint:css'
+
+    <executeLinting>
+    lintCSS(options.arguments)
+      ? process.exit(0)
+      : process.exit(1)
+    </executeLinting>
+  }
+
+  if (<lintJSFlow>options.language === 'js'</lintJSFlow>) {
+    process.env.PANGOLIN_ENV = 'lint:js'
+
+    <executeLinting>
+    lintJS(options.arguments)
+      ? process.exit(0)
+      : process.exit(1)
+    </executeLinting>
+  }
+}
+</lint>
+
+<openPage>
+function (openUrl, callbackFn) {
+  var self = this,
+      url = self.options.hostAndPort + '/page/functions/open';
+
+  <logDebugInfo>self.options.debug && console.log('calling url: %s', url);</logDebugInfo>
+  <sendOpenPageRequest>
+  request.post(url, {
+    form: {
+      args: JSON.stringify([openUrl], null, 4)
+    }
+  },
+    function (error, response, body) {
+      <logDebugInfo>self.options.debug && console.log(body);</logDebugInfo>
+      if (<checkResponseSuccess>response && response.statusCode === 200</checkResponseSuccess>) {
+        body === 'success' ?
+          callbackFn && callbackFn.call(self, true) : <invokeCallbackOnFailure>callbackFn && callbackFn.call(self, false);</invokeCallbackOnFailure>
+      }
+      else {
+        <invokeCallbackOnError>callbackFn && callbackFn.call(self, false, body);</invokeCallbackOnError>
+      }
+    }
+  );
+  </sendOpenPageRequest>
+}
+</openPage>
+
+<transitionGroupWeb>
+function transitionGroupWeb(Component, createElement) {
+  return (function (Component) {
+    <extendComponentToTransitionGroup>
+    function TransitionGroup() {
+      Component.apply(this, arguments);
+    }
+
+    if (Component) TransitionGroup.__proto__ = Component;
+    TransitionGroup.prototype = Object.create(Component && Component.prototype);
+    TransitionGroup.prototype.constructor = TransitionGroup;
+    </extendComponentToTransitionGroup>
+
+    <renderTransitionGroup>
+    TransitionGroup.prototype.render = function render() {
+      var tag = this.props.tag || 'span';
+      return createElement(tag, null)
+    };
+    </renderTransitionGroup>
+
+    return TransitionGroup;
+  }(Component))
+}
+</transitionGroupWeb>
+
+<splitPagesPromise>
+function splitPagesPromise(content) {
+  var pages = <splitContentIntoPages>content.split(/\f/)</splitContentIntoPages>
+  if (!pages) {
+    var ex = {
+      message: 'pdf-text-extract failed',
+      error: 'no text returned from the pdftotext command',
+      filePath: this.filePath,
+      stack: new Error().stack
+    }
+    <throwExceptionForSplitFailure>throw ex</throwExceptionForSplitFailure>
+  }
+  
+  var lastPage = pages[pages.length - 1]
+  if (!lastPage) {
+    <removeLastEmptyPage>pages.pop()</removeLastEmptyPage>
+  }
+  <resolvePromiseWithPages>resolve(pages)</resolvePromiseWithPages>
+}
+</splitPagesPromise>
+
+<setAxisExtremes>
+function (newMin, newMax, redraw, animation, eventArguments) {
+  var axis = this,
+    chart = axis.chart;
+
+  redraw = <assignRedrawDefault>pick(redraw, true);</assignRedrawDefault>
+
+  eventArguments = <extendEventArguments>extend(eventArguments, {
+    min: newMin,
+    max: newMax
+  });</extendEventArguments>
+
+  <triggerSetExtremesEvent>
+  fireEvent(axis, 'setExtremes', eventArguments, function () {
+    axis.userMin = newMin;
+    axis.userMax = newMax;
+    axis.eventArgs = eventArguments;
+
+    axis.isDirtyExtremes = true;
+
+    if (redraw) {
+      chart.redraw(animation);
+    }
+  });
+  </triggerSetExtremesEvent>
+}
+</setAxisExtremes>

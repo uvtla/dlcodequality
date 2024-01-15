@@ -1,0 +1,481 @@
+```javascript
+<getVisibleTodos>
+function getVisibleTodos(model) {
+    switch (model.visible) {
+        case 'All':
+            return model.todos;
+        case 'Complete':
+            return model.todos.filter(x => x.completed);
+        case 'Incomplete':
+        default:
+            return model.todos.filter(x => !x.completed);
+    }
+}
+</getVisibleTodos>
+
+<set>
+function set(r) {
+    <findHtmlElement>
+    if (isString(r)) {
+        r = document.querySelector(r);
+    }
+    </findHtmlElement>
+
+    <checkElementAndSet>
+    if (exist(r)) {
+        Html._r = r;
+    } else {
+        warn('Root element must be a existing Html node');
+    }
+    </checkElementAndSet>
+}
+</set>
+
+<validateOptions>
+async function validateOptions(options) {
+    <checkPaths>
+    if (!options.paths.length) {
+        throw new ValidationError('No paths specified')
+    }
+    </checkPaths>
+
+    <checkOutputDir>
+    if (!options.outputDir) {
+        throw new ValidationError('Please specify an output directory with -o or --output')
+    }
+
+    if (!await fsAsync.exists(options.outputDir)) {
+        throw new ValidationError('Output directory doesn\'t exist')
+    }
+
+    const outStat = await fsAsync.stat(options.outputDir)
+    if (!outStat.isDirectory()) {
+        throw new ValidationError('Output path must be a directory')
+    }
+    </checkOutputDir>
+
+    <checkCssTemplate>
+    if (options.cssTemplate && !await fsAsync.exists(options.cssTemplate)) {
+        throw new ValidationError('CSS template not found')
+    }
+    </checkCssTemplate>
+
+    <checkHtmlTemplate>
+    if (options.htmlTemplate && !await fsAsync.exists(options.htmlTemplate)) {
+        throw new ValidationError('HTML template not found')
+    }
+    </checkHtmlTemplate>
+
+    <checkCodepoints>
+    if (options.codepoints) {
+        if (!await fsAsync.exists(options.codepoints)) {
+            throw new ValidationError(`Cannot find json file @ ${options.codepoints}!`)
+        }
+
+        const codepointsStat = await fsAsync.stat(options.codepoints)
+        if (!codepointsStat.isFile() || path.extname(options.codepoints) !== '.json') {
+            throw new ValidationError([
+                'Codepoints file must be JSON',
+                `${options.codepoints} is not a valid file.`
+            ].join(' '))
+        }
+    }
+    </checkCodepoints>
+}
+</validateOptions>
+
+<constructor>
+function(host, port, options) {
+    EventEmitter.call(this);
+
+    <parseArguments>
+    if(typeof host === "object") {
+        options = host;
+        host = port = undefined;
+    }
+    </parseArguments>
+
+    <setDefaultOptions>
+    options = options || {};
+    </setDefaultOptions>
+
+    <configureZookeeperOptions>
+    if(options.zookeeper) {
+        host = port = undefined;
+
+        this.zookeeperOptions = options.zookeeper || {};
+        this.zookeeperOptions.connectString = this.zookeeperOptions.connectString || "127.0.0.1:2181";
+        this.zookeeperOptions.root = this.zookeeperOptions.root || "/illyria";
+        this.zookeeperOptions.prefix = this.zookeeperOptions.prefix || "/HB_";
+
+        if(this.zookeeperOptions.connectString instanceof Array) {
+            this.zookeeperOptions.connectString = this.zookeeperOptions.connectString.join(",");
+        }
+
+        if(!this.zookeeperOptions.root.startsWith("/")) {
+            this.zookeeperOptions.root = "/" + this.zookeeperOptions.root;
+        }
+
+        if(!this.zookeeperOptions.prefix.startsWith("/")) {
+            this.zookeeperOptions.prefix = "/" + this.zookeeperOptions.prefix;
+        }
+    }
+    </configureZookeeperOptions>
+
+    <initializeConnection>
+    this.options = options;
+    this.socket = new ISocket(options);
+    this.status = "NOT_CONNECTED";
+
+    this.port = port;
+    this.host = host;
+
+    this.runTimeout = options.runTimeout || 10000;
+    this.msgId = 0;
+
+    this.socket.addListener("error", this.emit.bind(this, "error"));
+    this.socket.addListener("close", this.emit.bind(this, "close"));
+    this.socket.addListener("tryReconnect", this.emit.bind(this, "tryReconnect"));
+    this.socket.addListener("connected", this.emit.bind(this, "connected"));
+    </initializeConnection>
+    
+    <setupEventHandlers>
+    var self = this;
+    this.on("connected", function() {
+        self.status = "CONNECTED";
+    });
+    this.on("tryReconnect", function() {
+        self.status = "RECONNECTING";
+    });
+    this.on("close", function(hadError) {
+        if(hadError) {
+            if(!process.env.ZK_NO_WARN) console.warn("Illyria client closed with an error.");
+        }
+
+        self.status = "DISCONNECTED";
+    });
+
+    this.on("error", function() {});
+    </setupEventHandlers>
+}
+</constructor>
+
+<drawSeriesGraph>
+function () {
+    var series = this,
+        options = series.options,
+        chart = series.chart,
+        graph = series.graph,
+        graphPath = [],
+        fillColor,
+        area = series.area,
+        group = series.group,
+        color = options.lineColor || series.color,
+        lineWidth = options.lineWidth,
+        dashStyle =  options.dashStyle,
+        segmentPath,
+        renderer = chart.renderer,
+        translatedThreshold = series.yAxis.getThreshold(options.threshold || 0),
+        useArea = /^area/.test(series.type),
+        singlePoints = [],
+        areaPath = [],
+        attribs;
+
+    <segmentProcessing>
+    each(series.segments, function (segment) {
+        segmentPath = [];
+
+        each(segment, function (point, i) {
+            if (series.getPointSpline) {
+                segmentPath.push.apply(segmentPath, series.getPointSpline(segment, point, i));
+            } else {
+                segmentPath.push(i ? L : M);
+                if (i && options.step) {
+                    var lastPoint = segment[i - 1];
+                    segmentPath.push(
+                        point.plotX,
+                        lastPoint.plotY
+                    );
+                }
+                segmentPath.push(
+                    point.plotX,
+                    point.plotY
+                );
+            }
+        });
+
+        if (segment.length > 1) {
+            graphPath = graphPath.concat(segmentPath);
+        } else {
+            singlePoints.push(segment[0]);
+        }
+
+        if (useArea) {
+            var areaSegmentPath = [],
+                i,
+                segLength = segmentPath.length;
+            for (i = 0; i < segLength; i++) {
+                areaSegmentPath.push(segmentPath[i]);
+            }
+            if (segLength === 3) {
+                areaSegmentPath.push(L, segmentPath[1], segmentPath[2]);
+            }
+            if (options.stacking && series.type !== 'areaspline') {
+                for (i = segment.length - 1; i >= 0; i--) {
+                    areaSegmentPath.push(segment[i].plotX, segment[i].yBottom);
+                }
+            } else {
+                areaSegmentPath.push(
+                    L,
+                    segment[segment.length - 1].plotX,
+                    translatedThreshold,
+                    L,
+                    segment[0].plotX,
+                    translatedThreshold
+                );
+            }
+            areaPath = areaPath.concat(areaSegmentPath);
+        }
+    });
+    </segmentProcessing>
+
+    <updateGraphAndArea>
+    series.graphPath = graphPath;
+    series.singlePoints = singlePoints;
+
+    if (useArea) {
+        fillColor = pick(
+            options.fillColor,
+            Color(series.color).setOpacity(options.fillOpacity || 0.75).get()
+        );
+        if (area) {
+            area.animate({ d: areaPath });
+
+        } else {
+            series.area = series.chart.renderer.path(areaPath)
+                .attr({
+                    fill: fillColor
+                }).add(group);
+        }
+    }
+
+    if (graph) {
+        stop(graph);
+        graph.animate({ d: graphPath });
+
+    } else {
+        if (lineWidth) {
+            attribs = {
+                'stroke': color,
+                'stroke-width': lineWidth
+            };
+            if (dashStyle) {
+                attribs.dashstyle = dashStyle;
+            }
+
+            series.graph = renderer.path(graphPath)
+                .attr(attribs).add(group).shadow(options.shadow);
+        }
+    }
+    </updateGraphAndArea>
+}
+</drawSeriesGraph>
+
+<Quad>
+function Quad(gl) {
+    <initializeQuadProperties>
+    this.gl = gl;
+    </initializeQuadProperties>
+
+    <defineVertices>
+    this.vertices = new Float32Array([
+        0,0,
+        200,0,
+        200,200,
+        0,200
+    ]);
+    </defineVertices>
+
+    <defineUvs>
+    this.uvs = new Float32Array([
+        0,0,
+        1,0,
+        1,1,
+        0,1
+    ]);
+    </defineUvs>
+
+    <defineColors>
+    this.colors = new Float32Array([
+        1,1,1,1,
+        1,1,1,1,
+        1,1,1,1,
+        1,1,1,1
+    ]);
+    </defineColors>
+
+    <defineIndices>
+    this.indices = new Uint16Array([
+        0, 1, 2, 0, 3, 2
+    ]);
+    </defineIndices>
+
+    <createAndSetBuffers>
+    this.vertexBuffer = gl.createBuffer();
+    this.indexBuffer = gl.createBuffer();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, (8 + 8 + 16) * 4, gl.DYNAMIC_DRAW);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
+
+    this.upload();
+    </createAndSetBuffers>
+}
+</Quad>
+
+<OAuth2Strategy>
+function OAuth2Strategy(options, verify) {
+    <validateAndInitializeOptions>
+    if (typeof options == 'function') {
+        verify = options;
+        options = undefined;
+    }
+    options = options || {};
+
+    if (!verify) { throw new TypeError('OAuth2Strategy requires a verify callback'); }
+    if (!options.authorizationURL) { throw new TypeError('OAuth2Strategy requires a authorizationURL option'); }
+    if (!options.tokenURL) { throw new TypeError('OAuth2Strategy requires a tokenURL option'); }
+    if (!options.clientID) { throw new TypeError('OAuth2Strategy requires a clientID option'); }
+    </validateAndInitializeOptions>
+
+    <inheritPassportStrategy>
+    passport.Strategy.call(this);
+    this.name = 'oauth2';
+    this._verify = verify;
+
+    this._oauth2 = new OAuth2(options.clientID,  options.clientSecret,
+                              '', options.authorizationURL, options.tokenURL, options.customHeaders);
+    </inheritPassportStrategy>
+
+    <configureStrategy>
+    this._callbackURL = options.callbackURL;
+    this._scope = options.scope;
+    this._scopeSeparator = options.scopeSeparator || ' ';
+    this._pkceMethod = (options.pkce === true) ? 'S256' : options.pkce;
+    this._key = options.sessionKey || ('oauth2:' + url.parse(options.authorizationURL).hostname);
+    </configureStrategy>
+
+    <setupStateStore>
+    if (options.store) {
+        this._stateStore = options.store;
+    } else {
+        if (options.state) {
+            this._stateStore = options.pkce ? new PKCESessionStateStore({ key: this._key }) : new SessionStateStore({ key: this._key });
+        } else {
+            if (options.pkce) { throw new TypeError('OAuth2Strategy requires `state: true` option when PKCE is enabled'); }
+            this._stateStore = new NullStateStore();
+        }
+    }
+    this._trustProxy = options.proxy;
+    this._passReqToCallback = options.passReqToCallback;
+    this._skipUserProfile = (options.skipUserProfile === undefined) ? false : options.skipUserProfile;
+    </setupStateStore>
+}
+</OAuth2Strategy>
+
+<Scheme>
+function Scheme(title) {
+    <initializeScheme>
+    this.title = utils.isUndefined(title) ? "" : title;
+    </initializeScheme>
+
+    <setSchemeDefaults>
+    this.description = null;
+    this.useExternalValidation = true;
+    this.useSingleInstance = false;
+    this.streamingMode = Scheme.streamingModeXML;
+    </setSchemeDefaults>
+
+    <initializeArguments>
+    this.args = [];
+    </initializeArguments>
+}
+</Scheme>
+
+<Requisition>
+function Requisition(system, options) {
+    options = options || {};
+
+    <initializeEnvironmentAndDocument>
+    this.environment = options.environment || {};
+    this.document = options.document;
+    if (this.document == null) {
+        try {
+            this.document = document;
+        }
+        catch (ex) {
+        }
+    }
+    </initializeEnvironmentAndDocument>
+
+    <createOutputManager>
+    this.commandOutputManager = options.commandOutputManager || new CommandOutputManager();
+    </createOutputManager>
+
+    <initializeSystemAndShell>
+    this.system = system;
+    this.shell = {
+        cwd: '/',
+        env: {}
+    };
+    </initializeSystemAndShell>
+    
+    <initializeCommand>
+    this.commandAssignment = new CommandAssignment(this);
+    </initializeCommand>
+
+    <prepareAssignments>
+    this._assignments = {};
+    this.assignmentCount = 0;
+    this._args = [];
+    this._unassigned = [];
+    this._nextUpdateId = 0;
+    this.prefix = '';
+    </prepareAssignments>
+
+    <setupRequisitionEvent>
+    addMapping(this);
+    this._setBlankAssignment(this.commandAssignment);
+    this.onExternalUpdate = util.createEvent('Requisition.onExternalUpdate');
+    </setupRequisitionEvent>
+}
+</Requisition>
+
+<getUriRaw>
+function getUriRaw() {
+    <extractRawUri>
+    const startPos = pos;
+    const type = NodeType.RawType;
+    const token = tokens[startPos];
+    const line = token.ln;
+    const column = token.col;
+    let content = [];
+    let l;
+
+    while (pos < tokens[startPos].uri_raw_end) {
+        if (checkInterpolation(pos) || checkVariable(pos)) break;
+        else if (l = checkUriRawCharacters(pos)) pos += l;
+        else break;
+    }
+
+    content = joinValues(startPos, pos - 1);
+    </extractRawUri>
+    
+    <createUriRawNode>
+    return newNode(type, content, line, column);
+    </createUriRawNode>
+}
+</getUriRaw>
+```

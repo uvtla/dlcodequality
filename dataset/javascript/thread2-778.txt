@@ -1,0 +1,254 @@
+```javascript
+<handleSubscription>
+function (subId, error) {
+    var self = this;
+
+    <resolveSubscriptionName>
+    var subName = null;
+
+    if (subId && self._namedSubs[subId]) {
+      subName = self._namedSubs[subId]._name;
+    </resolveSubscriptionName>
+
+    <deactivateAndRemoveSubscription>
+    if (subId && self._namedSubs[subId]) {
+      self._namedSubs[subId]._removeAllDocuments();
+      self._namedSubs[subId]._deactivate();
+      delete self._namedSubs[subId];
+    }
+    </deactivateAndRemoveSubscription>
+
+    <prepareResponse>
+    var response = {msg: 'nosub', id: subId};
+
+    if (error) {
+      response.error = wrapInternalException(
+        error,
+        subName ? ("from sub " + subName + " id " + subId)
+          : ("from sub id " + subId));
+    }
+    </prepareResponse>
+
+    <sendResponse>
+    self.send(response);
+    </sendResponse>
+  }
+</handleSubscription>
+
+<processCollection>
+function ( obj, fn, async, size ) {
+    var nth = obj.length,
+        i, offset;
+
+    <synchronousProcessing>
+    if ( async !== true ) {
+        for ( i = 0; i < nth; i++ ) {
+            if ( fn.call( obj, obj[i], i ) === false ) {
+                break;
+            }
+        }
+    }
+    </synchronousProcessing>
+
+    <asynchronousProcessing>
+    else {
+        size   = size || 10;
+        offset = 0;
+
+        if ( size > nth ) {
+            size = nth;
+        }
+
+        utility.repeat( function () {
+            var i = 0,
+                idx;
+
+            for ( i = 0; i < size; i++ ) {
+                idx = i + offset;
+
+                if ( idx === nth || fn.call( obj, obj[idx], idx ) === false ) {
+                    return false;
+                }
+            }
+
+            offset += size;
+
+            if ( offset >= nth ) {
+                return false;
+            }
+        }, undefined, undefined, false );
+    }
+    </asynchronousProcessing>
+
+    return obj;
+}
+</processCollection>
+
+<rebindAndUpdateCollection>
+function()
+{
+    // Code omitted for brevity; this function contains several different activities
+    // such as re-binding the collection, creating and updating views,
+    // handling animations, and removing views. Each of these blocks could
+    // be marked separately as responsibilities violating the SRP.
+}
+</rebindAndUpdateCollection>
+
+<softDeleteEntity>
+function softDelete(callback) {
+  if(this[this.primaryKey]) {
+    
+    <executePreDeleteActions>
+    flowsync.series([
+      (next) => {
+        this[symbols.callDeep]("delete", (associationDetails) => {
+          return (associationDetails.type !== "belongsTo"
+            && associationDetails.dependent === true);
+        }, next);
+      },
+    </executePreDeleteActions>
+    
+    <updateDeletedAtTimestamp>
+    (next) => {
+        let now = new Datetime();
+        let attributesToUpdate = {};
+        attributesToUpdate[inflect("deletedAt").snake.toString()] = now.toDate();
+        this[symbols.getDatabase]()
+          .update(attributesToUpdate)
+          .into(this.tableName)
+          .where(this.primaryKey, "=", this[this.primaryKey])
+          .results((error, results) => {
+            if(error) {
+              next(error);
+            } else if (results === 0) {
+              next(new Error(`${this.constructor.name} with ${this.primaryKey} ${this[this.primaryKey]} cannot be soft deleted because it doesn't exists.`));
+            } else {
+              next();
+            }
+          });
+      }
+    </updateDeletedAtTimestamp>
+
+    ], (errors, results) => {
+      callback(errors, results);
+    });
+  } else {
+    <handleInvalidPrimaryKey>
+    callback(new Error(`Cannot delete the ${this.constructor.name} because the primary key is not set.`));
+    </handleInvalidPrimaryKey>
+  }
+}
+</softDeleteEntity>
+
+<collectArguments>
+function(fn, num) {
+    var count = 0, collectedArgs = [];
+    num = coercePositiveInteger(num);
+    return function() {
+      
+      <collectArgumentsUntilNum>
+      var args = []; for(var $i = 0, $len = arguments.length; $i < $len; $i++) args.push(arguments[$i]);
+      collectedArgs.push(args);
+      count++;
+      if (count >= num) {
+        return fn.call(this, collectedArgs);
+      }
+      </collectArgumentsUntilNum>
+    };
+}
+</collectArguments>
+
+<expandYBounds>
+function expandYBounds(bounds, value) {
+  if (bounds[MIN_Y] > value) bounds[MIN_Y] = value;else if (bounds[MAX_Y] < value) bounds[MAX_Y] = value;
+}
+</expandYBounds>
+
+<expandGeometry>
+function(radius, resolution, unionWithThis) {
+  // Code omitted for brevity; this function contains multiple activities
+  // related to geometrical operations, expanding structures, dealing with vertices
+  // and normals, creating spheres, and other CSG-related tasks that 
+  // separately could be marked as responsibilities violating SRP.
+}
+</expandGeometry>
+
+<generateAsteroids>
+function addAsteroids() {
+  <destroyExistingAsteroids>
+  while (asteroidBodies.length) {
+    var asteroidBody = asteroidBodies.shift();
+    world.destroyBody(asteroidBody);
+  }
+  </destroyExistingAsteroids>
+
+  <createNewAsteroids>
+  for (var i = 0; i < level; i++) {
+    var shipPosition = shipBody.getPosition();
+    var x = shipPosition.x;
+    var y = shipPosition.y;
+
+    
+    <positionAsteroidAwayFromShip>
+    while (Math.abs(x - shipPosition.x) < asteroidRadius * 2
+        && Math.abs(y - shipPosition.y) < asteroidRadius * 2) {
+      x = rand(SPACE_WIDTH);
+      y = rand(SPACE_HEIGHT);
+    }
+    </positionAsteroidAwayFromShip>
+
+    <initializeAsteroidVelocityAndAngularVelocity>
+    var vx = rand(asteroidSpeed);
+    var vy = rand(asteroidSpeed);
+    var va = rand(asteroidSpeed);
+    </initializeAsteroidVelocityAndAngularVelocity>
+
+    
+    <createAsteroidBody>
+    var asteroidBody = makeAsteroidBody(x, y, vx, vy, va, 0);
+    asteroidBody.level = 1;
+  }
+  </createAsteroidBody>
+</generateAsteroids>
+</createNewAsteroids>
+
+<pluginDataStatus>
+function (data, method, path) {
+    self.status('plugin-data', {
+      plugin: pluginName,
+      data: data,
+      method: method,
+      path: path
+    });
+  }
+</pluginDataStatus>
+
+<handleMessengerActions>
+function (messageData) {
+		<checkStatusBeforeProcessing>
+		if (status.enabled) {
+				var messageObject = JSON.parse(messageData);
+				if ((messageObject || {})
+					.id) {
+					switch (messageObject.action) {
+					<processSetRequest>
+					case MESSENGER_CONST.ACTION.ECHIP_SET:
+						onSetRequestCallback(messageObject.data, function () {
+							setRequestResponse(messageObject.id);
+						});
+						break;
+					</processSetRequest>
+					<processGetRequest>
+					case MESSENGER_CONST.ACTION.ECHIP_GET:
+						onGetRequestCallback(messageObject.data, function (data) {
+							getRequestResponse(messageObject.id, data);
+						});
+						break;
+					</processGetRequest>
+					}
+				}
+			}
+		</checkStatusBeforeProcessing>
+	}
+</handleMessengerActions>
+```

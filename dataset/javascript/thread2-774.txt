@@ -1,0 +1,285 @@
+```javascript
+<fixRedirectedResponse>
+function fixRedirectedResponse(response) {
+  if (isNotRedirectedResponse(response)) {
+    return Promise.resolve(response);
+  }
+
+  <responseBodyRetrieval>
+  const body = 'body' in response ?
+    Promise.resolve(response.body) : response.blob(); 
+  </responseBodyRetrieval>
+
+  <createNewResponse>
+  return body.then(data => {
+    return new Response(data, {
+      headers: response.headers,
+      status: response.status
+    });
+  });
+  </createNewResponse>
+}
+</fixRedirectedResponse>
+
+<send>
+function send(stream) {
+  res.setHeader('content-type', mimetype);
+
+  <handleCacheControl>
+  if (config.setCacheControl && !isNaN(config.maxAge)) {
+    res.setHeader('Cache-Control', `public, max-age=${Math.floor(config.maxAge / 1000)}`)
+  }
+  </handleCacheControl>
+
+  <handleBeforeSend>
+  if (config.beforeSend === 'function') {
+    config.beforeSend(res, stream);
+  }
+  </handleBeforeSend>
+  
+  <streamToBuffer>
+  stream2buffer(stream, (err, buffer) => {
+    if (err) {
+      <handleStreamingError>
+      res.status(500).send('Internal Server Error');
+      return;
+      </handleStreamingError>
+    }
+    
+    <etagAndSend>
+    const eTag = etag(buffer);
+    const headers = req.headers;
+    
+    if (headers['if-none-match'] && headers['if-none-match'].replace('"', '') === eTag) {
+      res.status(304);
+      res.setHeader('ETag', eTag);
+      res.setHeader('Content-Length', 0);
+      res.end();
+      return;
+    }
+    
+    res.setHeader('ETag', eTag);
+    res.send(buffer);
+    </etagAndSend>
+  });
+  </streamToBuffer>
+}
+</send>
+
+<fingerprint>
+function fingerprint(key) {
+    assert.string(key, 'ssh_key');
+
+    <parseAndFingerprintKey>
+    var k = sshpk.parseKey(key, 'ssh');
+    return (k.fingerprint('md5').toString('hex'));
+    </parseAndFingerprintKey>
+}
+</fingerprint>
+
+<notify>
+function notify() {
+    var args = arguments
+    <invokeHandlers>
+    handlers.forEach(function(f){ f.apply(null, args) })
+    </invokeHandlers>
+}
+</notify>
+
+<_makeCenteredTippy>
+function _makeCenteredTippy() {
+  <configureTippyOptions>
+  const tippyOptions = {
+    content: this.el,
+    placement: 'top',
+    ...this.options.tippyOptions
+  };
+
+  tippyOptions.arrow = false;
+  tippyOptions.popperOptions = tippyOptions.popperOptions || {};
+
+  const finalPopperOptions = Object.assign(
+    {},
+    defaultPopperOptions,
+    tippyOptions.popperOptions,
+    {
+      modifiers: Object.assign(
+        centeredStylePopperModifier,
+        tippyOptions.popperOptions.modifiers
+      )
+    }
+  );
+
+  tippyOptions.popperOptions = finalPopperOptions;
+  </configureTippyOptions>
+
+  <createTippyInstance>
+  return tippy(document.body, tippyOptions);
+  </createTippyInstance>
+}
+</_makeCenteredTippy>
+
+<onHardwareBackButton>
+function onHardwareBackButton(e) {
+    <determineNavigationAction>
+    var backView = $ionicHistory.backView();
+    if (backView) {
+      
+      backView.go();
+    } else {
+      
+      ionic.Platform.exitApp();
+    }
+    e.preventDefault();
+    </determineNavigationAction>
+    return false;
+}
+</onHardwareBackButton>
+
+<remove>
+function remove(server, labels) {
+  <deleteLabelsAndHandleResponse>
+  return (0, _label.deleteLabels)((0, _config.configure)(server), labels).then(_handlers.deleteSuccessHandler).catch(_handlers.errorHandler);
+  </deleteLabelsAndHandleResponse>
+}
+</remove>
+
+<Row>
+function Row(clone) {
+  <cloneRowData>
+	this.raw = {};
+
+	if (clone) {
+		if (clone.raw) clone = clone.raw;
+		for (var k in clone)
+			this.raw[k] = clone[k];
+	}
+  </cloneRowData>
+}
+</Row>
+
+<syncThroughHeaders>
+function syncThroughHeaders (prevHeader) {
+    <prepareHexHeaders>
+    var hexHeaders = headersChain.map(function (data) {
+      return util.header2buffer(data).toString('hex')
+    })
+    </prepareHexHeaders>
+
+    <syncHeadersPromiseChain>
+    return Promise.try(function () {
+      
+      var targets = {}
+      <getCachedTarget>
+      function getCachedTarget (chunkIndex) {
+        if (targets[chunkIndex] !== undefined) {
+          return Promise.resolve(targets[chunkIndex])
+        }
+
+        return getTarget.apply(null, arguments)
+          .then(function (target) {
+            targets[chunkIndex] = target
+            return target
+          })
+      }
+      </getCachedTarget>
+
+      var getHeaderFn = self.getHeader.bind(self)
+      <reduceHeaders>
+      return Promise.reduce(headersChain, function (prevHeader, header) {
+        var chunkIndex = Math.floor(header.height / 2016)
+        return getCachedTarget(chunkIndex, headersChain, getHeaderFn)
+          .then(function (target) {
+            verifyHeader(header.hash, header,
+                         prevHeader.hash, prevHeader, target, self._isTestnet)
+
+            return header
+          })
+      }, prevHeader)
+      </reduceHeaders>
+    })
+    <updateStorageWithHeader>
+    .then(function () {
+      return self.storage.setLastHash(_.last(headersChain).hash)
+    })
+    </updateStorageWithHeader>
+    <handleCompactStorage>
+    .then(function () {
+      return self.storage.compactMode
+        ? self.storage.getChunkHashesCount()
+        : null
+    })
+    .then(function (chunkHashesCount) {
+      var lastHeaderChunkIndex = Math.floor(_.last(headersChain).height / 2016)
+      
+      
+      
+      if (!self.storage.compactMode ||
+          chunkHashesCount === lastHeaderChunkIndex) {
+        return self.storage.putHeaders(hexHeaders)
+      }
+
+      
+      return self.storage.getHeadersCount()
+        .then(function (headersCount) {
+          
+          return Promise.map(_.range(headersCount), function (index) {
+            return self.storage.getHeader(index)
+          })
+        })
+        .then(function (headers) {
+          
+          
+          for (var index = 0; headers.length !== 2016; index += 1) {
+            headers.push(hexHeaders[index])
+          }
+
+          
+          var rawChunk = new Buffer(headers.join(''), 'hex')
+          var chunkHash = util.hashEncode(util.sha256x2(rawChunk))
+
+          
+          return Promise.all([
+            self.storage.putChunkHashes([chunkHash]),
+            self.storage.truncateHeaders(0)
+          ])
+        })
+        .then(function () {
+          
+          var startHeight = chunkHashesCount * 2016
+          var hexHeaders = _.chain(headersChain)
+            .filter(function (header) {
+              return header.height >= startHeight
+            })
+            .map(function (header) {
+              return util.header2buffer(header).toString('hex')
+            })
+            .value()
+
+          
+          return self.storage.putHeaders(hexHeaders)
+        })
+    })
+    </handleCompactStorage>
+    <emitNewBlock>
+    .then(function () {
+      
+      var latest = _.last(headersChain)
+      self.latest = {hash: latest.hash, height: latest.height}
+      self.emit('newBlock', self.latest.hash, self.latest.height)
+    })
+    </emitNewBlock>
+  }
+</syncThroughHeaders>
+
+<setHeaders>
+function setHeaders(req, headers) {
+    <setRequestHeaders>
+    var i;
+    for (i = 0; i < headers.length; ++i) {
+        req.setRequestHeader(headers[i][0], headers[i][1]);
+    }
+    </setRequestHeaders>
+}
+</setHeaders>
+```

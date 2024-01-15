@@ -1,0 +1,179 @@
+```javascript
+<updateNode>
+function updateNode(node, callback) {
+  syncDb.update(node._id, node, (err, result) => {
+    if(err) return callback(err);
+
+    callback(null, node);
+  });
+}
+</updateNode>
+
+<fullEncodeURIComponent>
+function fullEncodeURIComponent (str) {
+    var rv = encodeURIComponent(str).replace(/[!'()*~]/g, function(c) {
+      return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+    });
+    return rv.replace(/\%20/g,'+');
+}
+</fullEncodeURIComponent>
+
+<createConnection>
+function createConnection(connectionOptions, config) {
+    var connectionConfig =
+        new ConnectionConfig(connectionOptions, !config, qaMode, clientInfo);
+    
+    var httpClient = options.httpClient ||
+            new options.httpClientClass(connectionConfig);
+    
+    return new connectionClass(
+        new ConnectionContext(connectionConfig, httpClient, config));
+}
+</createConnection>
+
+<getAssetInfo>
+function getAssetInfo (queryOptions, { assetId }) {
+  return sendQuery(
+    queryOptions,
+    queryHelper.addQuery(
+      queryHelper.emptyQuery(),
+      'getAssetInfo',
+      {
+        assetId
+      }
+    ),
+    (resolve, reject, responseName, response) => {
+      if (responseName !== 'ASSET_RESPONSE') {
+        const error = JSON.stringify(response.toObject().errorResponse)
+        return reject(new Error(`Query response error: expected=ASSET_RESPONSE, actual=${responseName}\nReason: ${error}`))
+      }
+
+      const info = response.getAssetResponse().toObject().asset
+      resolve(info)
+    }
+  )
+}
+</getAssetInfo>
+
+<initProfiler>
+function initProfiler(name) {
+        checkInit();
+        var profiler = profilerInstances[name];
+        if (profiler === void 0) {
+            profilerInstances[name] = profiler = new Profiler(name, "ms");
+            container.appendChild(profiler.widget.element);
+        }
+    }
+</initProfiler>
+
+<generateExpression>
+function (oInterface, oPathValue) {
+    var i,
+        sName,
+        aParts = [],
+        sPrefix = "",
+        oParameter,
+        aParameters = oPathValue.value,
+        oResult,
+        oTemplate = Expression.parameter(oInterface, oPathValue, 0, "Edm.String");
+
+    aParts.push('odata.fillUriTemplate(', Basics.resultToString(oTemplate, true), ',{');
+    for (i = 1; i < aParameters.length; i += 1) {
+        oParameter = Basics.descend(oPathValue, i, "object");
+        sName = Basics.property(oParameter, "Name", "string");
+        oResult = Expression.expression(oInterface, Basics.descend(oParameter, "Value"),
+            true);
+        aParts.push(sPrefix, Basics.toJSON(sName), ":",
+            Basics.resultToString(oResult, true));
+        sPrefix = ",";
+    }
+    aParts.push("})");
+    return {
+        result : "expression",
+        value : aParts.join(""),
+        type : "Edm.String"
+    };
+}
+</generateExpression>
+
+<addVectors>
+function add(out, a, b) {
+  out[0] = a[0] + b[0];
+  out[1] = a[1] + b[1];
+  out[2] = a[2] + b[2];
+  out[3] = a[3] + b[3];
+  out[4] = a[4] + b[4];
+  out[5] = a[5] + b[5];
+  out[6] = a[6] + b[6];
+  out[7] = a[7] + b[7];
+  out[8] = a[8] + b[8];
+  return out;
+}
+</addVectors>
+
+<generateKey>
+function(keyname, extension) {
+    var keynameToUse = keyname;
+
+    if (extension !== undefined) {
+        keynameToUse += "." + extension;
+    }
+
+    promise.success(keynameToUse);
+}
+</generateKey>
+
+<postRequest>
+function post(url, data, successCallback, errorCallback) {
+    const request = new XMLHttpRequest();
+
+    request.open('POST', url, true);
+    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+
+    request.onreadystatechange = () => {
+        if (request.readyState === 4) {
+            
+            if ((request.status >= 200) && (request.status < 300)) {
+                successCallback(request.responseText);
+            } else {
+                console.error(`POST (${url}): error ${request.status} ${request.statusText}`);
+                errorCallback(request.status, request.statusText);
+            }
+        }
+    };
+
+    request.send(data);
+}
+</postRequest>
+
+<execTask>
+function execTask(proc, taskObj) {
+  const { tasks, logger, model, sharedModel, config, logic } = proc;
+  const { task, executor, notifyCmd, successCmd, failCmd,
+    customArgs, execEvery, customExecId, id: taskId } = taskObj;
+
+  
+  <handleCancellation>
+  if (taskObj.cancelTask || !execEvery) {
+    cancelTask(proc, taskId);
+    if (taskObj.cancelTask) return;
+  }
+  </handleCancellation>
+
+  <taskExecution>
+  const execId = customExecId || nextId();
+  const executions = tasks[taskId] = tasks[taskId] || {};
+  const cleanup = () => delete executions[execId];
+
+  
+  if (executions[execId]) {
+    executions[execId].exec(taskObj);
+  } else {
+    const taskCall = executor(proc, taskObj);
+    executions[execId] = taskCall;
+    taskCall.exec(taskObj).then(cleanup, cleanup);
+  }
+  </taskExecution>
+}
+</execTask>
+```

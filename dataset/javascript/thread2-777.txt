@@ -1,0 +1,162 @@
+<customNormalizeUrl>
+function customNormalizeUrl (url) {
+  const [urlWithoutFragment, fragment] = url.split('#')
+  return [normalizeUrl(urlWithoutFragment) + '/', fragment].filter(Boolean).join('#')
+}
+</customNormalizeUrl>
+
+<calculateWeekNumber>
+function () {
+  var a = new Date(f.Y(), f.n() - 1, f.j() - f.N() + 3)
+  var b = new Date(a.getFullYear(), 0, 4)
+  return _pad(1 + Math.round((a - b) / 864e5 / 7), 2)
+}
+</calculateWeekNumber>
+
+<CallApiMethodWithSlug>
+function (callback, slug) {
+  var host = apiStorefront
+  var endpoint = '/' + storeId + '@' + slug.replace(/\//g, '@')
+
+  <CreateCallbackFunction>
+  var Callback = function (err, body) {
+    if (!err) {
+      var val = body.GET
+      if (val) {
+        val = val.split('@')
+        body = {
+          'resource': val[0],
+          '_id': val[1]
+        }
+        callback(null, body)
+      } else {
+        body = {
+          'status': 404,
+          'error_code': -44,
+          'message': 'Page not found, invalid slug or store ID'
+        }
+        var msg = body.message
+        errorHandling(callback, msg, body)
+      }
+    } else {
+      callback(err, body)
+    }
+  }
+  </CreateCallbackFunction>
+
+  runMethod(Callback, endpoint, host)
+}
+</CallApiMethodWithSlug>
+
+<extendObservablePrototype>
+function(module, exports, __webpack_require__) {
+  "use strict";
+  var Observable_1 = __webpack_require__(5);
+  var debounce_1 = __webpack_require__(429);
+  Observable_1.Observable.prototype.debounce = debounce_1.debounce;
+}
+</extendObservablePrototype>
+
+<getColumnValue>
+function getColumnValue(columnIdentifier) {
+  var column = resolveColumnIdentifierToColumn(
+    columns, columnIdentifier, mapColumnNameToIndices);
+  return column ? column.getRowValue(this) : undefined;
+}
+</getColumnValue>
+
+<convertFromAlphabetToNumber>
+function fromAlphabet(str, alphabet) {
+  var base = alphabet.length;
+  var pos = 0;
+  var num = 0;
+
+  for (let chr of str) {
+    let at = alphabet.indexOf(chr);
+    if (at === -1) return NaN;
+    num += Math.pow(base, pos) * at;
+    pos++;
+  }
+
+  return num;
+}
+</convertFromAlphabetToNumber>
+
+<resolveSuperClass>
+function(cls,superName) {
+  var superClass = factory.resolve(superName);
+  return factory.superOf(cls,superClass);
+}
+</resolveSuperClass>
+
+<deployEncodedContract>
+function (contract, params, funAbi, linkLibraries, linkReferences, callback) {
+  this.encodeParams(params, funAbi, (error, encodedParam) => {
+    if (error) return callback(error)
+    var bytecodeToDeploy = contract.evm.bytecode.object
+    <handleLibrariesLinking>
+    if (bytecodeToDeploy.indexOf('_') >= 0) {
+      if (linkLibraries && linkReferences) {
+        for (var libFile in linkLibraries) {
+          for (var lib in linkLibraries[libFile]) {
+            var address = linkLibraries[libFile][lib]
+            if (!ethJSUtil.isValidAddress(address)) return callback(address + ' is not a valid address. Please check the provided address is valid.')
+            bytecodeToDeploy = this.linkLibraryStandardFromlinkReferences(lib, address.replace('0x', ''), bytecodeToDeploy, linkReferences)
+          }
+        }
+      }
+    }
+    </handleLibrariesLinking>
+    <checkRemainingUnlinkedCode>
+    if (bytecodeToDeploy.indexOf('_') >= 0) {
+      return callback('Failed to link some libraries')
+    }
+    </checkRemainingUnlinkedCode>
+    return callback(null, { dataHex: bytecodeToDeploy + encodedParam.dataHex, funAbi, funArgs: encodedParam.funArgs, contractBytecode: contract.evm.bytecode.object })
+  })
+}
+</deployEncodedContract>
+
+<applyGdpr>
+function applyGdpr(bidderRequest, ortbRequest) {
+  if (bidderRequest && bidderRequest.gdprConsent) {
+    ortbRequest.regs = { ext: { gdpr: bidderRequest.gdprConsent.gdprApplies ? 1 : 0 } };
+    ortbRequest.user = { ext: { consent: bidderRequest.gdprConsent.consentString } };
+  }
+}
+</applyGdpr>
+
+<destroyComponent>
+function() {
+  if (this.__rendered) {
+    this.purgeListeners();
+    <nullifyReferences>
+    this.yearEl = null;
+    this.monthEl = null;
+    this.errorEl = null;
+    this.submitEl = null;
+    this.cancelEl = null;
+    this.firstCtrl = null;
+    this.lastCtrl = null;
+    if (this.navEl) {
+      this.navEl.innerHTML = "";
+    }
+    </nullifyReferences>
+    <removeNavElement>
+    var p = this.navEl.parentNode;
+    if (p) {
+      p.removeChild(this.navEl);
+    }
+    this.navEl = null;
+    </removeNavElement>
+    <removeMaskElement>
+    var pm = this.maskEl.parentNode;
+    if (pm) {
+      pm.removeChild(this.maskEl);
+    }
+    this.maskEl = null;
+    </removeMaskElement>
+    this.__rendered = false;
+  }
+}
+</destroyComponent>

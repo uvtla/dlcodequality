@@ -1,0 +1,147 @@
+<function _Debugger_scroll>
+function _Debugger_scroll(popout) {
+    return _Scheduler_binding(function(callback) {
+      if (popout.b) {
+        var msgs = popout.b.getElementById("elm-debugger-sidebar");
+        if (msgs) {
+          msgs.scrollTop = msgs.scrollHeight;
+        }
+      }
+      callback(_Scheduler_succeed(_Utils_Tuple0));
+    });
+}
+</function _Debugger_scroll>
+
+<function FlipView_initializeFlipView>
+function FlipView_initializeFlipView(element, isHorizontal, dataSource, itemRenderer, initialIndex, itemSpacing) {
+    // ... omitted large section for brevity ...
+}
+</function FlipView_initializeFlipView>
+
+<function createExpressoEntity>
+function createExpressoEntity(html) {
+    let $ = parser.load(html)
+
+    let data = []
+    $('table span').each(function (i, elem) {
+        if(i >= 10 )
+            data.push($(this).text().trim().replace(/\s\s+/g, ' '))
+    })
+
+    return new ExpressoInfo({
+        'guide': data[0],
+        'origin': data[1],
+        'date': moment.tz(data[2], "YYYY-MM-DD", zone).format(),
+        'status': data[3],
+        'weight': data[4],
+        'parcels': data[5],
+        'receiver_name': data[6],
+        'address': parseAddress(data[7]),
+        'refund': data[8],
+        'ref': data[9],
+    })
+}
+</function createExpressoEntity>
+
+<function handleForceWriteAcknowledgement>
+function handleForceWriteAcknowledgement (
+  socketWrapper, message, cacheResponse, storageResponse, error
+) {
+  if (storageResponse && cacheResponse) {
+    socketWrapper.sendMessage(RECORD, C.ACTIONS.WRITE_ACKNOWLEDGEMENT, [
+      message.data[0],
+      [message.data[1]],
+      messageBuilder.typed(error)
+    ], true)
+  }
+}
+</function handleForceWriteAcknowledgement>
+
+<function glb>
+function glb(tree, node, key, comp, low) {
+    if (node === tree.z) {
+        return low;
+    }
+    else if (comp(key, node.key) >= 0) {
+        return maxNode(node, glb(tree, node.r, key, comp, low), comp);
+    }
+    else {
+        return glb(tree, node.l, key, comp, low);
+    }
+}
+</function glb>
+
+<function whereHandler>
+function whereHandler (obj) {
+  let result = {}
+
+  Object.keys(obj).forEach(k => {
+    if (this.attributes.some(field => k.startsWith(field))) {
+      _queryField2where.call(this, result, k, obj[k])
+    }
+    if (k === 'limit' || k === 'offset') {
+      return
+    }
+    if (k.match(/\.\w+/)) {
+      includeHandler.call(this, k, obj[k])
+    }
+  })
+
+  return result
+}
+</function whereHandler>
+
+<function hasAttr>
+function hasAttr(fs, path, attr, callback) {
+  fs.getxattr(path, attr, function(err, attrVal) {
+    
+    if(err && err.code === 'ENOENT') {
+      return callback(null, false);
+    }
+
+    
+    if(err && err.code !== 'ENOATTR') {
+      return callback(err);
+    }
+
+    callback(null, !!attrVal);
+  });
+}
+</function hasAttr>
+
+<function(attr)>
+function(attr) {
+    var selector = this._obj,
+        attrs = casper.getElementsAttribute(selector, attr)
+    if (utils.flag(this, 'element')) {
+      this.assert(attrs.some(function(a) {
+        return a
+      }), ('Expected some elements matching selector ' + selector + ' to have attribute') + ('' + attr + ' set, but none did'), ('Expected no elements matching selector ' + selector + ' to have attribute') + ('' + attr + ' set, but at least one did'))
+    } else {
+      this.assert(attrs.every(function(a) {
+        return a
+      }), ('Expected all elements matching selector ' + selector + ' to have attribute ') + ('' + attr + ' set, but some did not have it'), ('Expected no elements matching selector ' + selector + ' to have attribute ') + ('' + attr + ' set, but some had it'))
+    }
+    return utils.flag(this, 'object', attrs)
+  }
+</function(attr)>
+
+<function()>
+function() {
+    // ... omitted large section for brevity ...
+}
+</function()>
+
+<function (direction)>
+function ( direction ) {
+			var current = F.current;
+
+			if (current) {
+				if (!isString(direction)) {
+					direction = current.direction.next;
+				}
+
+				F.jumpto(current.index + 1, direction, 'next');
+			}
+		}
+</function (direction)>

@@ -1,0 +1,269 @@
+Here are the annotations for the given JavaScript functions:
+
+Function 1:
+```javascript
+<getBootSwatchComponent>
+function getBootSwatchComponent( url, done ) {
+	var body = "";
+	<makeHttpRequest>
+	var req = http.request( url, function ( res ) {
+		res.setEncoding( 'utf8' );
+		res.on( 'data', function ( chunk ) {
+			body += chunk;
+		} );
+
+		<handleResponseEnd>
+		res.on( 'end', function () {
+			done( null, body );
+		} );
+		</handleResponseEnd>
+
+		<handleResponseError>
+		res.on( 'error', function ( e ) {
+			done( 'problem with response: ' + e.message );
+		} );
+		</handleResponseError>
+	} );
+
+	<handleRequestError>
+	req.on( 'error', function ( e ) {
+		done( 'problem with request: ' + e.message );
+	} );
+	</handleRequestError>
+
+	req.end();
+}
+</getBootSwatchComponent>
+```
+
+Function 2:
+```javascript
+<createMarkerImage>
+function (markerUrl, markerWidth, markerHeight) {
+	this.writeDebug('markerImage',arguments);
+	<initializeMarkerImage>
+	var markerImg;
+	
+	if (typeof markerWidth !== 'undefined' && typeof markerHeight !== 'undefined') {
+		markerImg = {
+			url: markerUrl,
+			size: new google.maps.Size(markerWidth, markerHeight),
+			scaledSize: new google.maps.Size(markerWidth, markerHeight)
+		};
+	}
+	
+	else {
+		markerImg = {
+			url: markerUrl,
+			size: new google.maps.Size(32, 32),
+			scaledSize: new google.maps.Size(32, 32)
+		};
+	}
+	</initializeMarkerImage>
+
+	return markerImg;
+}
+</createMarkerImage>
+```
+
+Function 3:
+```javascript
+<nativeKeysIn>
+function nativeKeysIn$1(object) {
+	<getKeyArray>
+	var result = [];
+	if (object != null) {
+		for (var key in Object(object)) {
+			result.push(key);
+		}
+	}
+	</getKeyArray>
+	return result;
+}
+</nativeKeysIn>
+```
+
+Function 4:
+```javascript
+<writeFileWithLogging>
+function writeFile(dest, buffer) {
+	<writeAndLogSuccess>
+	if (write(dest, buffer)) {
+		g.log.ok(dest + ':' + opt.prefix.green +  '前缀注入完成！');
+	}
+	</writeAndLogSuccess>
+	
+	<handleWriteError>
+	else {
+		writeError(dest + ':' + opt.prefix.red +  '前缀注入失败！');
+		result = false;
+	}
+	</handleWriteError>
+}
+</writeFileWithLogging>
+```
+
+Function 5:
+```javascript
+<cacheHandling>
+function() {
+	<initializeResult>
+	var result = Array.isArray(self.input.instance) ? output : (output[0] || null)
+	</initializeResult>
+
+	<cacheSaveAndViewHandling>
+	if (self.method === 'view') {
+	  self.cache.saveView(result)
+	  result = Array.isArray(result)
+		? result.map(self.cache.save.bind(self.cache))
+		: self.cache.save(result)
+	} else {
+	  result = self.cache.save(result)
+	}
+	</cacheSaveAndViewHandling>
+
+	<endRequest>
+	self.end(result)
+	</endRequest>
+}
+</cacheHandling>
+```
+
+Function 6:
+```javascript
+<getCollectionByName>
+function(ferret, collection_name, callback) {
+	<ensureReadyAndProceed>
+	_ready(ferret, function(err) {
+		if (err) {
+			<handleReadyError>
+			process.nextTick(function() {
+				callback(err)  
+			})
+			</handleReadyError>
+		} else {
+			<retrieveOrInitializeCollection>
+			if (ferret._collections[collection_name]) {
+				<returnExistingCollection>
+				process.nextTick(function() {
+					callback(null, ferret._collections[collection_name])
+				})
+				</returnExistingCollection>
+			} else {
+				<createCollection>
+				ferret._db.collection(collection_name, function(err, collection){
+					if (!err) { ferret._collections[collection_name] = collection }
+					callback(err, collection)
+				})
+				</createCollection>
+			}
+			</retrieveOrInitializeCollection>
+		}
+	})
+	</ensureReadyAndProceed>
+}
+</getCollectionByName>
+```
+
+Function 7:
+```javascript
+<findRelatedCollectionIDsByCriteria>
+function findRelatedCollectionIDsByCriteria(models, junctionTable, subQueryCriteria) {
+	<performSubQuery>
+	const subQueryTable = models[junctionTable.tables[1]]
+
+	return subQueryTable
+		.find({
+			select: ["id"],
+			where: subQueryCriteria
+		})
+		.then(idObjects => idObjects.map(idObject => idObject.id))
+		.then(ids => {
+			const junctionTableQuery = {}
+
+			junctionTableQuery[junctionTable.columns[0]] = ids
+
+			return junctionTable.collection.find({
+				select: [junctionTable.columns[1]],
+				where: junctionTableQuery
+			})
+			.then(idObjects => idObjects.map(idObject => idObject[junctionTable.columns[1]]))
+		})
+		</performSubQuery>
+}
+</findRelatedCollectionIDsByCriteria>
+```
+
+Function 8:
+```javascript
+<mergeAnnotationsInSchema>
+function mergeAnnotations(oSchema, mAnnotations, bPrivileged) {
+	<processSchemaAnnotations>
+	var sTarget;
+
+	function extend(oTarget, oSource) {
+		<extendTargetWithSource>
+		var sName;
+
+		for (sName in oSource) {
+			if (bPrivileged || !(sName in oTarget)) {
+				oTarget[sName] = oSource[sName];
+			}
+		}
+		</extendTargetWithSource>
+	}
+
+	for (sTarget in oSchema.$Annotations) {
+		<createOrExtendAnnotations>
+		if (!(sTarget in mAnnotations)) {
+			mAnnotations[sTarget] = {};
+		}
+		extend(mAnnotations[sTarget], oSchema.$Annotations[sTarget]);
+		</createOrExtendAnnotations>
+	}
+	delete oSchema.$Annotations;
+	</processSchemaAnnotations>
+}
+</mergeAnnotationsInSchema>
+```
+
+Function 9:
+```javascript
+<removeEventListenerForElements>
+function (elements) {
+	<validateArgumentsAndProcess>
+	if (!validateArguments(elements, function () {})) return
+
+	if (!Array.isArray(elements)) {
+		elements = [ elements ]
+	}
+	</validateArgumentsAndProcess>
+
+	<deregisterEventHandlers>
+	liveElements.filter(function (e) {
+		return elements.indexOf(e.element) !== -1
+	}).forEach(function (e) {
+		e.element.removeEventListener('input', e.handler)
+	})
+
+	liveElements = liveElements.filter(function (e) {
+		return elements.indexOf(e.element) === -1
+	})
+	</deregisterEventHandlers>
+
+	return this
+}
+</removeEventListenerForElements>
+```
+
+Function 10:
+```javascript
+<assertNotEqualWithMessage>
+function (value1, value2, optMsg, optAssertId) {
+	<assertValuesNotEqual>
+	var msg = optMsg || ("First and second value shouldn't be equal but they are both equal to: " + value1);
+	this.assertTrue((value1 !== value2), msg);
+	</assertValuesNotEqual>
+}
+</assertNotEqualWithMessage>
+```

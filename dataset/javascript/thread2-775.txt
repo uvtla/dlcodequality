@@ -1,0 +1,246 @@
+```javascript
+<serveFileResponse>
+function serveFileResponse(cfg, fileResponse, res) {
+    <checkStandardResponse>
+    if (cfg.standardResponses && cfg.standardResponses[fileResponse.statusCode]) {
+        return cfg.standardResponses[fileResponse.statusCode](fileResponse);
+    }
+    </checkStandardResponse>
+
+    <writeResponseHeaders>
+    res.writeHead(fileResponse.statusCode, fileResponse.headers);
+    </writeResponseHeaders>
+
+    <sendResponseBody>
+    if (fileResponse.body && fileResponse.body.pipe) {
+        fileResponse.body.pipe(res);
+    }
+    else {
+        res.end(fileResponse.body);
+    }
+    </sendResponseBody>
+}
+</serveFileResponse>
+
+<isObjectASpecialForm>
+function (obj) {
+    return _.has(obj, '$type') && _.has(obj, '$value') && _.size(obj) === 2;
+}
+</isObjectASpecialForm>
+
+<authorize>
+function authorize(newDoc, oldDoc, userContext, securityInfo, docDefinition) {
+    <checkUserContext>
+    if (utils.isValueNullOrUndefined(userContext)) {
+        throw unauthorizedResult();
+    }
+    </checkUserContext>
+
+    <resolveAuthorizations>
+    var authorizedRoles = resolveRequiredAuthorizations(newDoc, oldDoc, docDefinition.authorizedRoles);
+    var authorizedUsers = resolveRequiredAuthorizations(newDoc, oldDoc, docDefinition.authorizedUsers);
+    var grantAllMembersWriteAccess = utils.resolveDocumentConstraint(docDefinition.grantAllMembersWriteAccess);
+    </resolveAuthorizations>
+
+    <authorizeAccessChecks>
+    if (grantAllMembersWriteAccess) {
+        return authorizationSuccessResult(authorizedRoles, authorizedUsers);
+    } else if (isAdminUser(userContext, securityInfo)) {
+        return authorizationSuccessResult(authorizedRoles, authorizedUsers);
+    } else if (!authorizedRoles && !authorizedUsers) {
+        throw forbiddenResult();
+    }
+    </authorizeAccessChecks>
+
+    <matchRolesAndUsernames>
+    var roleMatch = hasAuthorizedRole(authorizedRoles, userContext.roles);
+    var usernameMatch = hasAuthorizedUsername(authorizedUsers, userContext.name);
+    if (!roleMatch && !usernameMatch) {
+        throw forbiddenResult();
+    } else {
+        return authorizationSuccessResult(authorizedRoles, authorizedUsers);
+    }
+    </matchRolesAndUsernames>
+}
+</authorize>
+
+<getBuild>
+function getBuild(data, builder) {
+    <retrieveOrBuildData>
+    if (data.build !== undefined) return data.build;
+    data.build = builder(data);
+    return data.build;
+    </retrieveOrBuildData>
+}
+</getBuild>
+
+<copy>
+function copy(obj, map) {
+    <checkMapForCopy>
+    if (map.has(obj)) {
+        return map.get(obj);
+    }
+    </checkMapForCopy>
+
+    <copyArray>
+    else if (Array.isArray(obj)) {
+        const result = [];
+        map.set(obj, result);
+        obj.forEach(item => {
+            result.push(copy(item, map));
+        });
+        return result;
+    }
+    </copyArray>
+
+    <copyObject>
+    else if (typeof obj === 'object' && obj) {
+        const result = {};
+        map.set(obj, result);
+        Object.keys(obj).forEach(key => {
+            result[key] = copy(obj[key], map);
+        });
+        return result;
+    }
+    </copyObject>
+
+    <copyPrimitive>
+    else {
+        return obj;
+    }
+    </copyPrimitive>
+}
+</copy>
+
+<resolveConfig>
+function resolveConfig(fileName, options) {
+    options = options || {}
+    <configureSchemaAndFileNames>
+    var schema = options.schema
+    var resolvePackageJson = options.resolvePackageJson || false
+    var fileNames = [fileName, resolvePackageJson ? 'package.json' : null].filter(
+      item => !!item
+    )
+    </configureSchemaAndFileNames>
+
+    <readAndParseConfigs>
+    const results = upResolve(fileNames)
+    return Promise.all(results.map(readFileAsync))
+      .then(parseFiles(options))
+      .then(validateSchema(schema))
+      .then(reduceConfigs)
+    </readAndParseConfigs>
+}
+</resolveConfig>
+
+<updateTexture2D>
+function updateTexture2D(ctx, texture, opts) {
+    <setupTextureParameters>
+    const gl = ctx.gl
+    // A series of variable assignments relating to texture options and WebGL states...
+    var anisoExt = gl.getExtension('EXT_texture_filter_anisotropic')
+    const textureUnit = 0
+    gl.activeTexture(gl.TEXTURE0 + textureUnit)
+    gl.bindTexture(texture.target, texture.handle)
+    ctx.state.activeTextures[textureUnit] = texture
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplayAlpha)
+    // gl.texParameteri code block
+    if (anisoExt && aniso > 0) {
+        gl.texParameterf(target, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, aniso)
+    }
+    </setupTextureParameters>
+
+    <updateTextureFromSource>
+    const img = opts.data ? opts.data : opts
+    // Code block that checks types of img and sets texture with texImage2D...
+    </updateTextureFromSource>
+
+    <generateMipmap>
+    if (opts.mipmap) {
+        gl.generateMipmap(texture.target)
+    }
+    </generateMipmap>
+
+    <updateTextureProperties>
+    texture.target = target
+    texture.pixelFormat = pixelFormat
+    texture.encoding = encoding
+    texture.min = min
+    texture.mag = mag
+    texture.wrapS = wrapS
+    texture.wrapT = wrapT
+    texture.format = format
+    texture.flipY = flipY
+    texture.internalFormat = internalFormat
+    texture.type = type
+    texture.info = ''
+    texture.info += Object.keys(ctx.PixelFormat).find(
+      (key) => ctx.PixelFormat[key] === pixelFormat
+    )
+    texture.info += '_'
+    texture.info += Object.keys(ctx.Encoding).find(
+      (key) => ctx.Encoding[key] === encoding
+    )
+    </updateTextureProperties>
+}
+</updateTexture2D>
+
+<Tick>
+function Tick(pos, minor) {
+	var tick = this;
+    <initializeTick>
+	tick.pos = pos;
+	tick.minor = minor;
+	tick.isNew = true;
+    </initializeTick>
+
+    <addLabelToTick>
+	if (!minor) {
+		tick.addLabel();
+	}
+    </addLabelToTick>
+}
+</Tick>
+
+<getMixin1>
+function getMixin1() {
+    const type = NodeType.MixinType;
+    const token = tokens[pos];
+    const line = token.ln;
+    const column = token.col;
+    <getMixinContent>
+    let content = [];
+    content.push(checkClass(pos) ? getClass() : getShash());
+    content = content.concat(getSC());
+    if (checkArguments(pos)) content.push(getArguments());
+    content = content.concat(getSC());
+    if (checkBlock(pos)) content.push(getBlock());
+    </getMixinContent>
+
+    <createMixinNode>
+    return newNode(type, content, line, column);
+    </createMixinNode>
+}
+</getMixin1>
+
+<newDestroy>
+function newDestroy(sid, cb) {
+      <retrieveSession>
+      db.get(sid, function(err, session) {
+        if (err) return cb(err);
+        if (!session) return cb();
+        </retrieveSession>
+        <markSessionForDeletion>
+        db.set(sid + '_d', session, function(err) {
+          if (err) return cb(err);
+          </markSessionForDeletion>
+          
+          <performOldDestroy>
+          oldDestroy.call(db, sid, cb);
+          </performOldDestroy>
+        });
+      });
+}
+</newDestroy>
+```
