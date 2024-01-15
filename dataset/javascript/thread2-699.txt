@@ -1,0 +1,163 @@
+Here are the annotations for the provided functions:
+
+1. Function 1: Data Storage Selection
+```javascript
+function (rawData) { 
+  var data = stringify(rawData);  // Single responsibility: convert raw data to a string format
+  if (useSS) {
+    sessionStorage.spike = data;  // Single responsibility: store data in sessionStorage
+  } else {
+    window.name = data;            // Single responsibility: store data in the window object
+  }
+  return data;                    // Single responsibility: return the processed string data
+}
+```
+
+2. Function 2: Plugin Execution
+```javascript
+async function executePlugin([plugin, options]: PluginCall): Promise<string> {
+  return (await resolvePlugin(plugin))(await executeNested(options));  // Single responsibility: execute a plugin with nested options
+}
+```
+
+3. Function 3: String Formatter
+```javascript
+function __format(formatString, args) {
+  if (formatString === null || formatString === undefined) return [""];  // Single responsibility: handle null or undefined format strings
+  if (arguments.length == 1) return [formatString.toString()];           // Single responsibility: return formatString as an array if no additional args
+
+  if (typeof formatString != "string")
+    formatString = formatString.toString();                              // Single responsibility: ensure formatString is a string
+
+  // Single responsibility: perform string formatting with placeholders
+  var pattern = /(.*?)%(.)(.*)/;
+  var rest    = formatString;
+  var result  = [];
+
+  while (args.length) {
+    var match = pattern.exec(rest);
+    if (!match) break;
+
+    var arg   = args.shift();
+    rest = match[3];
+    result.push(match[1]);
+
+    if (match[2] == '%') {
+        result.push('%');
+        args.unshift(arg);
+        continue;
+    }
+
+    result.push(__formatted(arg, match[2]));                             // Nested responsibility: specific formatting per placeholder
+  }
+
+  result.push(rest);
+
+  var remainingArgs = [].slice.call(args);
+  remainingArgs.unshift(result.join(''));
+  return remainingArgs;                                                  // Single responsibility: return the formatted string with remaining arguments
+}
+```
+
+4. Function 4: Application Environment Customizations Handler
+```javascript
+function (cfg, cb) {
+  var appE = Aria.getClassRef("aria.core.environment.Customizations");
+  if (appE && appE.isCustomized() && !appE.descriptorLoaded()) {
+    
+    appE.$onOnce({                                                       // Single responsibility: Set up an event listener for descriptor loading
+      'descriptorLoaded' : {
+          fn : this._startLoad,
+          scope : this,
+          args : {
+              cfg : cfg,
+              cb : cb
+          }
+      }
+    });
+  } else {
+    
+    this._startLoad(null, {                                              // Single responsibility: Directly start loading without waiting for descriptor
+      cfg : cfg,
+      cb : cb
+    });
+  }
+}
+```
+
+5. Function 5: Update WWW Directory for Cordova Project
+```javascript
+function updateWww (cordovaProject, destinations) {
+  shell.rm('-rf', destinations.www);                                     // Single responsibility: remove the existing www directory
+  shell.mkdir('-p', destinations.www);                                   // Single responsibility: create a fresh www directory
+
+  // Single responsibility: copy over common resources to the www directory
+  shell.cp('-rf', path.join(cordovaProject.locations.www, '*'), destinations.www);
+  shell.cp('-rf', path.join(destinations.platformWww, '*'), destinations.www);
+
+  // Single responsibility: handle osx platform-specific merging into the www directory
+  var merges_path = path.join(cordovaProject.root, 'merges', 'osx');
+  if (fs.existsSync(merges_path)) {
+    events.emit('verbose', 'Found "merges" for osx platform. Copying over existing "www" files.');
+    var overrides = path.join(merges_path, '*');
+    shell.cp('-rf', overrides, destinations.www);
+  }
+}
+```
+
+6. Function 6: Retrieval of Last Token on a Line
+```javascript
+function getLastTokenOnLine(node) {
+  const lastToken = sourceCode.getLastToken(node);                       // Single responsibility: get the last token in the node
+  const secondToLastToken = sourceCode.getTokenBefore(lastToken);       // Single responsibility: get the token before the last token
+
+  return astUtils.isSemicolonToken(lastToken) && lastToken.loc.start.line > secondToLastToken.loc.end.line
+    ? secondToLastToken                                                  // Single responsibility: determine if a semi-colon token should be ignored
+    : lastToken;
+}
+```
+
+7. Function 7: Block Element Checker
+```javascript
+function (dom, node) {
+  return node &&
+    dom.isBlock(node) &&                                                 // Single responsibility: check if the node is a block element
+    !/^(TD|TH|CAPTION|FORM)$/.test(node.nodeName) &&                    // Single responsibility: node should not be in the exclusion list
+    !/^(fixed|absolute)/i.test(node.style.position) &&                  // Single responsibility: node should not have position fixed or absolute
+    dom.getContentEditable(node) !== "true";                            // Single responsibility: node should not be content editable
+}
+```
+
+8. Function 8: Script Handler for HTML Pages
+```javascript
+function (htmlpath, projectRoot, pageName, scriptmain, baseurl, publishroot) {
+  // Handling multiple responsibilities: file path manipulations, reading from a config, building scripts, filesystem operations
+  // This function is not compliant with SRP because it performs a series of complex and diverse operations that could be separated into distinct functions.
+}
+```
+
+9. Function 9: String Prepend Function
+```javascript
+function prepend (value, string) {
+  if (
+    value === null || value === undefined || value === '' ||            // Single responsibility: check for null, undefined, or empty values
+    string === null || string === undefined
+  ) {
+    return value
+  }
+  return string + value                                                // Single responsibility: prepend a string to the value
+}
+```
+
+10. Function 10: CSRF Token Inclusion
+```javascript
+function includeCSRFToken ({ method, csrf=true, headers }) {
+  if (!csrf || !CSRF_METHODS.includes(method)) return                  // Single responsibility: validate if CSRF should be used for the method and whether it is enabled
+  const token = getTokenFromDocument(csrf)                             // Single responsibility: acquire CSRF token from the document
+  
+  if (!token) return                                                   // Single responsibility: validate if token exists
+  
+  return {
+    headers: { ...headers, 'X-CSRF-Token': token }                     // Single responsibility: include CSRF token in the headers
+  }
+}

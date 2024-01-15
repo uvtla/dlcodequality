@@ -1,0 +1,189 @@
+```javascript
+<_getFee>
+function _getFee (gas, gasPrice) {
+  gas = new BigNumber(gas);
+  gasPrice = new BigNumber(gasPrice);
+  return gasPrice.times(gas);
+}
+</_getFee>
+
+<compileShader>
+function compileShader (gl, shaderSource, shaderType) {
+  const shader = gl.createShader(shaderType);
+  gl.shaderSource(shader, shaderSource);
+  gl.compileShader(shader);
+  const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (!success && !gl.isContextLost()) {
+    <handleShaderError>
+    const infoLog = gl.getShaderInfoLog(shader);
+    console.error(`Could not compile shader:\n${infoLog}`);
+    </handleShaderError>
+  }
+  return shader;
+}
+</compileShader>
+
+<MatrixCreate>
+function(fn) {
+  var els = [], ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+  do { i = ki - ni;
+    nj = kj;
+    els[i] = [];
+    do { j = kj - nj;
+      els[i][j] = fn(this.elements[i][j], i + 1, j + 1);
+    } while (--nj);
+  } while (--ni);
+  return Matrix.create(els);
+}
+</MatrixCreate>
+
+<UnorderedList>
+function UnorderedList(items) {
+  if (typeof items == 'string') {
+    items = items.split(' ');
+  }
+  this._items = items || [];
+  this.__defineGetter__('length', this._length);
+}
+</UnorderedList>
+
+<isJson>
+function isJson(was){
+  try{
+    return _.isString(was) && _.isObject(JSON.parse(was));
+  } catch(e){
+    return false;
+  }
+}
+</isJson>
+
+<setupFieldEventHandlers>
+function( field, prefix ) {
+  var self = this;
+  if ( 'onpropertychange' in field ) {
+    field.get(0).onpropertychange = function() {
+      self.saveToBrowserStorage( prefix, field.val() );
+    };
+  } else {
+    field.get(0).oninput = function() {
+      self.saveToBrowserStorage( prefix, field.val() );
+    };
+  }
+  if ( this.isCKEditorExists() ) {
+    var editor = CKEDITOR.instances[ field.attr("name") ] || CKEDITOR.instances[ field.attr("id") ];
+    if ( editor ) {
+      editor.document.on( 'keyup', function() {
+        editor.updateElement();
+        self.saveToBrowserStorage( prefix, field.val() );
+      } );
+    }
+  }
+}
+</setupFieldEventHandlers>
+
+<processImageArgument>
+function(arg, callback) {
+  var imageObj, canvas;
+  if(!arg) {
+    callback(null);
+  }
+  else if(this._isElement(arg)) {
+    callback(arg);
+  }
+  else if(this._isString(arg)) {
+    imageObj = new Kinetic.window.Image();
+    imageObj.onload = function() {
+      callback(imageObj);
+    };
+    imageObj.src = arg;
+  }
+  else if(arg.data) {
+    canvas = Kinetic.Util.createCanvasElement();
+    canvas.width = arg.width;
+    canvas.height = arg.height;
+    var _context = canvas.getContext(CONTEXT_2D);
+    _context.putImageData(arg, 0, 0);
+    this._getImage(canvas.toDataURL(), callback);
+  }
+  else {
+    callback(null);
+  }
+}
+</processImageArgument>
+
+<loadUncached>
+function loadUncached () {
+  return this.query.executeQuery()
+  .then(results => {
+    if (results.length > 0) {
+      <cacheResults>
+      this.cacheResults(results)
+      </cacheResults>
+    }
+    return results
+  })
+}
+</loadUncached>
+
+<submitTestResults>
+function(results){
+  if (!this._form){
+    <setupFormAndIframe>
+    this._form = document.createElement("form");
+    this._form.method = "post";
+    this._form.style.visibility = "hidden";
+    this._form.style.position = "absolute";
+    this._form.style.top = 0;
+    document.body.appendChild(this._form);
+    try {
+      this._iframe = document.createElement("<iframe name=\"yuiTestTarget\" />");
+    } catch (ex){
+      this._iframe = document.createElement("iframe");
+      this._iframe.name = "yuiTestTarget";
+    }
+    this._iframe.src = "javascript:false";
+    this._iframe.style.visibility = "hidden";
+    this._iframe.style.position = "absolute";
+    this._iframe.style.top = 0;
+    document.body.appendChild(this._iframe);
+    this._form.target = "yuiTestTarget";
+    </setupFormAndIframe>
+  }
+  <configureFormForSubmission>
+  this._form.action = this.url;
+  while(this._form.hasChildNodes()){
+    this._form.removeChild(this._form.lastChild);
+  }
+  this._fields.results = this.format(results);
+  this._fields.useragent = navigator.userAgent;
+  this._fields.timestamp = (new Date()).toLocaleString();
+  for (var prop in this._fields){
+    var value = this._fields[prop];
+    if (this._fields.hasOwnProperty(prop) && (typeof value != "function")){
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = prop;
+      input.value = value;
+      this._form.appendChild(input);
+    }
+  }
+  delete this._fields.results;
+  delete this._fields.useragent;
+  delete this._fields.timestamp;
+  if (arguments[1] !== false){
+    this._form.submit();
+  }
+  </configureFormForSubmission>
+}
+</submitTestResults>
+
+<initComponents>
+function initComponents( editor ) {
+  editor.dataProcessor = new CKEDITOR.htmlDataProcessor( editor );
+  editor.filter = editor.activeFilter = new CKEDITOR.filter( editor );
+  <loadSkin>
+  loadSkin( editor );
+  </loadSkin>
+}
+</initComponents>
+```

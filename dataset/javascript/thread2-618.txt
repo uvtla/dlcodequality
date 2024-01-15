@@ -1,0 +1,238 @@
+1. Compliant Function
+
+<isWithinArea>
+function(point, area) {
+    var epsilon = 1e-6; 
+
+    return point.x > area.left - epsilon && point.x < area.right + epsilon &&
+        point.y > area.top - epsilon && point.y < area.bottom + epsilon;
+}
+</isWithinArea>
+Annotation: This function adheres to the SRP, as it has a single responsibility of checking if a point is within a specific area with a tolerance.
+
+---
+
+2. Non-Compliant Function
+
+<valve>
+function valve(pw, iv, evt) {
+    if (!evt) return;
+    
+    <createDrip>
+    var drip = new Drip(pw, iv, evt, pw.options.endEvent);
+    drip.callback = function callback(artery) {
+        if (artery !== iv.artery) return; 
+        iv.drain(drip);
+    };
+    </createDrip>
+    
+    <processDrip>
+    if (drip.pulse.event !== pw.options.endEvent) {
+        iv.push(drip);
+        iv.meds.push(evt);
+    }
+    </processDrip>
+    
+    <listenDrip>
+    iv.listen(drip.pulse.event, drip.callback);
+    iv.dripCount += drip.pulse.event === pw.options.endEvent ? 0 : drip.pulse.repeat;
+    </listenDrip>
+    
+    return drip;
+}
+</valve>
+Annotation: This function violates the SRP as it has several responsibilities: creating a drip instance, processing the drip, and setting up listeners for the drip.
+
+---
+
+3. Non-Compliant Function
+
+<dropdownNavigation>
+function () {
+    <destroyNavigation>
+    this.navigationInterceptor.destroyElements();
+    this.navigationInterceptor = null;
+    </destroyNavigation>
+
+    <updateAria>
+    if (this._cfg.waiAria) {
+        var dropDownIcon = this._getDropdownIcon();
+        if (dropDownIcon) {
+            dropDownIcon.setAttribute("aria-expanded", "false");
+        }
+    }
+    </updateAria>
+
+    <toggleDropdown>
+    this._setPopupOpenProperty(false);
+    this.controller.setListWidget(null);
+    var report = null;
+    if (!this._hasFocus) {
+        report = this.controller.toggleDropdown(this.getTextInputField().value, this._dropdownPopup != null);
+        report.displayDropDown = false;
+    }
+    this.$DropDownTextInput._afterDropdownClose.call(this);
+    </toggleDropdown>
+
+    <processReport>
+    if (report) {
+        this._reactToControllerReport(report, {
+            hasFocus : false
+        });
+    }
+    </processReport>
+
+    <updateState>
+    this._dropDownOpen = false;
+    this.refreshPopup = false;
+    this._keepFocus = false;
+    </updateState>
+}
+</dropdownNavigation>
+Annotation: This function violates the SRP as it involves navigating a dropdown, updating ARIA attributes, toggling the dropdown, processing reports, and updating state.
+
+---
+
+4. Compliant Function
+
+<initGoogleAnalytics>
+function initGA() {
+  if (analyticsTrackingId) {
+    ReactGA.initialize(analyticsTrackingId)
+    ReactGA.set({
+      appName: environment || 'Production',
+      appVersion: version
+    })
+  }
+}
+</initGoogleAnalytics>
+Annotation: This function adheres to the SRP, as it has a single responsibility of initializing Google Analytics.
+
+---
+
+5. Non-Compliant Function
+
+<lrangeCommand>
+function lrange(key, start, stop, req) {
+  <getKey>
+  var val = this.getKey(key, req);
+  if(val === undefined) return null;
+  </getKey>
+  <retrieveRange>
+  return val.lrange(start, stop);
+  </retrieveRange>
+}
+</lrangeCommand>
+Annotation: This function violates the SRP because it comprises two responsibilities: retrieving a value for a key and then returning a specific range from that value.
+
+---
+
+6. Non-Compliant Function
+
+< printResults>
+function printResults(engine, results, format, outputFile) {
+    <setupFormatter>
+    let formatter;
+    let rules;
+    try {
+        formatter = engine.getFormatter(format);
+        rules = engine.getRules();
+    } catch (e) {
+        log.error(e.message);
+        return false;
+    }
+    </setupFormatter>
+
+    <prepareRulesMeta>
+    const rulesMeta = {};
+    rules.forEach((rule, ruleId) => {
+        rulesMeta[ruleId] = rule.meta;
+    });
+    </prepareRulesMeta>
+
+    <generateOutput>
+    const output = formatter(results, { rulesMeta });
+    </generateOutput>
+
+    <handleOutput>
+    if (output) {
+        if (outputFile) {
+            const filePath = path.resolve(process.cwd(), outputFile);
+            try {
+                mkdirp.sync(path.dirname(filePath));
+                fs.writeFileSync(filePath, output);
+            } catch (ex) {
+                log.error("There was a problem writing the output file:\n%s", ex);
+                return false;
+            }
+        } else {
+            log.info(output);
+        }
+    }
+    </handleOutput>
+
+    return true;
+}
+</printResults>
+Annotation: This function violates the SRP as it handles setting up a formatter, preparing rules metadata, generating an output, and handling the output (either logging or writing to a file).
+
+---
+
+7. Compliant Function
+
+<checkExitProcess>
+function() {
+  if (_.keys(children).length == 0) {
+    that.stop(process.exit);
+  }
+  else {
+    setImmediate(checkExit);   
+  }
+}
+</checkExitProcess>
+Annotation: This function adheres to the SRP as it encapsulates the logic for determining whether to stop or proceed with an exit process check.
+
+---
+
+8. Compliant Function
+
+<highlightOneS> 
+function(hljs){
+  // The code is omitted for brevity as it defines a highlight configuration object.
+}
+</highlightOneS>
+Annotation: This configuration function is SRP compliant as all code contributes to the singular task of setting up the highlighting rules for the OneS language.
+
+---
+
+9. Compliant Function
+
+<setupBackboneViewElement>
+function() {
+  if (!this.el) {
+    var attrs = _.extend({}, _.result(this, 'attributes'));
+    if (this.id) attrs.id = _.result(this, 'id');
+    if (this.className) attrs['class'] = _.result(this, 'className');
+    this.setElement(this._createElement(_.result(this, 'tagName')));
+    this._setAttributes(attrs);
+  } else {
+    this.setElement(_.result(this, 'el'));
+  }
+}
+</setupBackboneViewElement>
+Annotation: This function is SRP compliant because it has the single responsibility of setting up the Element in a Backbone View.
+
+---
+
+10. Compliant Function
+
+<validateIsFloat>
+function isFloat(value, message, id) {
+    if (message === void 0) { message = ''; }
+    if (id === void 0) { id = ''; }
+    if (this.enabled && (typeof value !== 'number' || value % 1 !== 0)) {
+        throw TypeException.unexpectedType(assertionTypes.IS_FLOAT, value, '<float>', message, id);
+    }
+}
+</validateIsFloat>
+Annotation: This function is SRP compliant because it's exclusively responsible for asserting that a given value is a floating-point number.

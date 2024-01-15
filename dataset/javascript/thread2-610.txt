@@ -1,0 +1,377 @@
+1.
+```
+function ( ) {
+  for ( var Counter = 0; Counter < _Pins.length; Counter++) {
+    _Pins [ Counter ].getElement ( ).style.visibility = 'visible';
+  }
+}
+```
+This function is compliant with SRP as its sole responsibility is to set the visibility of all elements in `_Pins` to visible.
+
+2.
+```
+<initializePaginationConfiguration>
+function pagination (schema, options) {
+  options = options || {};
+
+  var defaultLimit = options.defaultLimit || 10
+    , defaultQuery = options.defaultQuery || {}
+    , defaultFields = options.defaultFields || {}
+    , remember = options.remember || false
+    , defaultPage = 1
+    , currentLimit = defaultLimit
+    , currentQuery = defaultQuery
+    , currentFields = defaultFields
+</initializePaginationConfiguration>
+
+<definePaginateMethod>
+  schema.static('paginate', function (opt, fn) {
+    if (!fn) { fn = opt; opt = {} }
+    var self = this
+      , query = opt.query || currentQuery
+      , page = opt.page || defaultPage
+      , limit = opt.limit || currentLimit
+      , fields = opt.fields || currentFields
+
+    if (remember) {
+      opt.query && (currentQuery = opt.query)
+      opt.limit && (currentLimit = opt.limit)
+      opt.fields && (currentFields = opt.fields)
+    }
+
+    this.find(query, fields, {
+      skip: (limit * (page - 1))
+    , limit: limit
+    }, function(err, docs) {
+      if (err) return (fn && fn(err))
+      self.count(query, function (err, count) {
+        if (err) return (fn && fn(err))
+        fn && fn(err, docs, count, Math.ceil(count / limit), page)
+      })
+    })
+    return this
+  })
+</definePaginateMethod>
+
+<defineFirstPageMethod>
+  schema.static('firstPage', function (opt, fn) {
+    if (!fn) { fn = opt; opt = {} }
+    var query = opt.query || currentQuery
+      , limit = opt.limit || currentLimit
+      , fields = opt.fields || currentFields
+    
+    this.paginate({
+      query: query
+    , page: 1
+    , limit: limit
+    , fields: fields
+    }, fn)
+    return this
+  })
+</defineFirstPageMethod>
+
+<defineLastPageMethod>
+  schema.static('lastPage', function (opt, fn) {
+    if (!fn) { fn = opt; opt = {} }
+    var self = this
+      , query = opt.query || currentQuery
+      , limit = opt.limit || currentLimit
+      , fields = opt.fields || currentFields
+
+    this.count(query, function (err, count) {
+      if (err) return (fn && fn(err))
+      self.paginate({
+        query: query
+      , page: Math.ceil(count / limit)
+      , limit: limit
+      , fields: fields
+      }, fn)
+    })
+    return this
+  })
+</defineLastPageMethod>
+}
+```
+This function has distinct responsibilities: initializing pagination configuration, defining pagination methods (`paginate`, `firstPage`, `lastPage`). Each section of code that establishes these functionalities is wrapped in appropriate SRP tags.
+
+3.
+```
+function handleDocumentMousemove(e) {
+  let svg = overlay.parentNode.querySelector('svg.annotationLayer');
+  let rect = svg.getBoundingClientRect();
+
+<adjustOverlayWidth>
+  if (originX + (e.clientX - originX) < rect.right) {
+    overlay.style.width = `${e.clientX - originX}px`;
+  }
+</adjustOverlayWidth>
+
+<adjustOverlayHeight>
+  if (originY + (e.clientY - originY) < rect.bottom) {
+    overlay.style.height = `${e.clientY - originY}px`;
+  }
+</adjustOverlayHeight>
+}
+```
+This function is responsible for handling mouse movement events and adjusting the overlay's width and height. Within this context, it conforms to SRP, despite having distinct operations for width and height adjustments, because they collectively serve the singular purpose of resizing the overlay.
+
+4.
+```
+function JSONFilter(contractProperties = ['address', 'interface', 'bytecode', 'transactionObject', 'inputs']) {
+<initializeJSONFilter>
+  const self = this;
+  self.process = ({ output }) => {
+<parseOriginalOutput>
+    const jsonObject = JSON.parse(output);
+</parseOriginalOutput>
+<createFromOriginalOutput>
+    const outputObject = Object.assign({});
+
+    Object.keys(jsonObject).forEach((environmentName) => {
+      outputObject[environmentName] = Object.assign({});
+
+      Object.keys(jsonObject[environmentName]).forEach((contractName) => {
+        outputObject[environmentName][contractName] = Object.assign({});
+
+        Object.keys(jsonObject[environmentName][contractName]).forEach((contactProperty) => {
+          if (contractProperties.indexOf(contactProperty) !== -1) {
+            outputObject[environmentName][contractName][contactProperty] = jsonObject[environmentName][contractName][contactProperty];
+          }
+        });
+      });
+    });
+</createFromOriginalOutput>
+
+<returnFilteredResult>
+    return JSON.stringify(outputObject);
+</returnFilteredResult>
+  };
+</initializeJSONFilter>
+}
+```
+The `JSONFilter` function is compliant with SRP, as its single responsibility is to filter JSON output based on specified properties.
+
+5.
+```
+function parsePorts(arg) {
+<validatePortInput>
+  var ports = ('' + arg).split(':');
+  if (ports.length !== 2) {
+    panic('Error parsing ports.');
+  }
+</validatePortInput>
+
+<extractPorts>
+  var devicePort = Number((ports[0] === '') ? NaN : ports[0])
+    , relayPort = Number((ports[1] === '') ? NaN : ports[1]);
+</extractPorts>
+
+<validateParsedPorts>
+  if (devicePort !== devicePort || relayPort !== relayPort) {
+    panic('Error parsing ports.');
+  }
+</validateParsedPorts>
+
+<returnPortValues>
+  return [devicePort, relayPort];
+</returnPortValues>
+}
+```
+This function has multiple responsibilities related to parsing and validating ports, which are tagged accordingly. Since each block serves a distinct purpose, SRP annotations are provided even though they are part of the broader task of parsing ports.
+
+6.
+```
+function difference(template, override) {
+<findDifferences>
+    var ret = {};
+    for (var name in template) {
+        if (name in override) {
+            if (isObject(override[name])) {
+                var diff = difference(template[name], override[name]);
+                if (!_.isEmpty(diff)) {
+                    ret[name] = diff;
+                }
+            } else if (!_.isEqual(template[name], override[name])) {
+                ret[name] = override[name];
+            }
+        }
+    }
+</findDifferences>
+<returnDifferences>
+    return ret;
+</returnDifferences>
+}
+```
+The `difference` function is SRP compliant; its single responsibility is to compute and return the difference between the `template` and `override` objects.
+
+7.
+```
+<resolveOptionsAndCallback>
+function( url, wc, options, callback ) {
+	if ( typeof options === 'function' ) {
+		callback = options;
+		options = null;
+	}
+	options = options || {};
+</resolveOptionsAndCallback>
+<executeRelocate>
+	executeSvn( [ 'relocate', url, wc ], options, callback );
+</executeRelocate>
+}
+```
+This function is SRP compliant as it prepares options then executes a single SVN relocate command.
+
+8.
+```
+function create() {
+<validateInputParameters>
+		if(!$("#privateKey").val() || !$("#recipient").val()) return alert('Missing parameter !');
+		if(undefined === $("#amount").val() || !nem.utils.helpers.isTextAmountValid($("#amount").val())) return alert('Invalid amount !');
+		if (!nem.model.address.isValid(nem.model.address.clean($("#recipient").val()))) return alert('Invalid recipent address !');
+</validateInputParameters>
+<storePrivateKey>
+		
+		common.privateKey = $("#privateKey").val();
+</storePrivateKey>
+
+<validatePrivateKey>
+		
+		if (common.privateKey.length !== 64 && common.privateKey.length !== 66) return alert('Invalid private key, length must be 64 or 66 characters !');
+    	if (!nem.utils.helpers.isHexadecimal(common.privateKey)) return alert('Private key must be hexadecimal only !');
+</validatePrivateKey>
+
+<setTransactionParameters>
+		
+		transferTransaction.amount = nem.utils.helpers.cleanTextAmount($("#amount").val());
+
+		
+		transferTransaction.recipient = nem.model.address.clean($("#recipient").val());
+
+		
+		transferTransaction.message = $("#message").val();
+</setTransactionParameters>
+
+<prepareTransaction>
+		
+		var transactionEntity = nem.model.transactions.prepare("transferTransaction")(common, transferTransaction, nem.model.network.data.testnet.id);
+</prepareTransaction>
+
+<signTransaction>
+		
+		var kp = nem.crypto.keyPair.create(nem.utils.helpers.fixPrivateKey(common.privateKey));
+
+		
+		var serialized = nem.utils.serialization.serializeTransaction(transactionEntity);
+
+		
+	    var signature = kp.sign(serialized);
+</signTransaction>
+
+<constructResultObject>
+	    
+	    var result = {
+	        'data': nem.utils.convert.ua2hex(serialized),
+	        'signature': signature.toString()
+	    };
+</constructResultObject>
+
+<outputResult>
+	    
+	    $("#result").val(JSON.stringify(result));
+</outputResult>
+	}
+```
+The `create` function violates SRP as it has multiple responsibilities: input validation, key storage, private key validation, transaction preparation, signature creation, and result construction.
+
+9.
+```
+function releaseArray(array) {
+<resetArrayLength>
+    array.length = 0;
+</resetArrayLength>
+<recycleArrayObject>
+    if (arrayPool.length < maxPoolSize) {
+      arrayPool.push(array);
+    }
+</recycleArrayObject>
+  }
+```
+The `releaseArray` function manages releasing and recycling arrays, but it adheres to SRP within the context of array memory management.
+
+10.
+```
+function wrappedFunc(...args) {
+<handleNoArguments>
+    if (!args.length) {
+      throw new Error(
+        `Function "${fnName}" invoked without arguments, callback required.`);
+    }
+</handleNoArguments>
+
+<verifyCallbackFunction>
+    
+    let originalCb = _.last(args);
+    assert(
+      _.isFunction(originalCb),
+      `Function "${fnName}" requires a callback function as its last argument.`);
+    args.splice(args.length - 1, 1);
+    originalCb = _.once(originalCb);
+</verifyCallbackFunction>
+
+<validateArguments>
+    
+    const schemaArgs = {
+      type: 'array',
+      elements: targetFunction.$schema.arguments,
+    };
+    try {
+      construct(schemaArgs, args);
+    } catch (e) {
+      return originalCb(new Error(
+        `Function "${fnName}" called with invalid arguments: ${e.message}`));
+    }
+</validateArguments>
+
+<setupCallback>
+    
+    args.push((...resultArray) => {
+      const err = resultArray.length ? resultArray[0] : undefined;
+      const results = resultArray.slice(1);
+
+      if (err) {
+        
+        return originalCb(err);
+      }
+
+      
+      
+      const schemaCbResult = {
+        type: 'array',
+        elements: targetFunction.$schema.callbackResult,
+      };
+      try {
+        construct(schemaCbResult, results);
+      } catch (e) {
+        return originalCb(new Error(
+          `Function "${fnName}" invoked its callback with invalid arguments: ` +
+          `${e.message}`));
+      }
+
+      
+      return originalCb(...resultArray);
+    });
+</setupCallback>
+
+<invokeTargetFunction>
+    
+    let rv;
+    try {
+      rv = targetFunction.call(this, ...args);
+    } catch (e) {
+      return originalCb(e);
+    }
+    return rv;
+</invokeTargetFunction>
+  }
+```
+This function handles multiple responsibilities associated with argument preparation and validation, callback setup and invocation, and exception handling, as indicated by the annotations.

@@ -1,0 +1,262 @@
+```javascript
+<runLint>
+function runLint(files, config, reporter, bin) {
+  <setDefaultReporter>
+  reporter = reporter || DEFAULT_REPORTER;
+  </setDefaultReporter>
+
+  <configureEslint>
+  const eslintConfig = config ? { configFile: config } : {};
+  const CLIEngine = bin
+    ? require(bin).CLIEngine
+    : runtimeRequire('eslint', __filename).CLIEngine;
+  </configureEslint>
+
+  <runEslintAnalysis>
+  const eslintCLI = new CLIEngine(eslintConfig);
+  const report = eslintCLI.executeOnFiles(files);
+  </runEslintAnalysis>
+
+  <reportAnalysisResults>
+  if (report.errorCount > 0 || report.warningCount > 0) {
+    printLintReportResults(report, reporter);
+    return false;
+  }
+  </reportAnalysisResults>
+
+  return true;
+}
+</runLint>
+
+<polyfillSymbol>
+function polyfillSymbol(name) {
+  <polyfillLogic>
+  if (!Symbol[name])
+    Object.defineProperty(Symbol, name, { value: Symbol(name) });
+  </polyfillLogic>
+}
+</polyfillSymbol>
+
+<processRouteSampleData>
+function processRouteSampleData(o) {
+  <processBasedOnPacketId>
+  if (parseInt(o.rawDataPacket[0]) === k.OBCIGanglionByteIdUncompressed) {
+    return processUncompressedData(o);
+  } else {
+    return processCompressedData(o);
+  }
+  </processBasedOnPacketId>
+}
+</processRouteSampleData>
+
+<doaction>
+function doaction(type, data) {
+  <conditionalAscendGlobal>
+  if (gui.hosted) {
+    gui.Action.ascendGlobal(document, type, data);
+  }
+  </conditionalAscendGlobal>
+}
+</doaction>
+
+<createOtpReducer>
+function createOtpReducer(config, initialQuery) {
+  <createQueryWithDefaults>
+  const currentQuery = Object.assign(defaultQuery, initialQuery)
+  let queryModes = currentQuery.mode.split(',')
+  </createQueryWithDefaults>
+
+  <adjustQueryModes>
+  if (queryModes.includes('TRANSIT')) {
+    queryModes = queryModes.filter(m => !isTransit(m))
+    config.modeGroups.forEach(group => {
+      group.modes.forEach(m => {
+        const modeStr = m.mode || m
+        if (transitModes.includes(modeStr)) queryModes.push(modeStr)
+      })
+    })
+    currentQuery.mode = queryModes.join(',')
+  }
+  </adjustQueryModes>
+
+  <handleSingleAccessMode>
+  if (currentQuery.routingType === 'ITINERARY') {
+    queryModes = ensureSingleAccessMode(queryModes)
+  }
+  </handleSingleAccessMode>
+
+  <defineInitialState>
+  const initialState = {
+    config: Object.assign(defaultConfig, config),
+    currentQuery,
+    location: {
+      currentPosition: {
+        error: null,
+        coords: null,
+        fetching: false
+      },
+      sessionSearches: [],
+      nearbyStops: []
+    },
+    searches: {},
+    transitIndex: {
+      stops: {},
+      trips: {}
+    },
+    useRealtime: true,
+    activeSearchId: 0,
+    overlay: {
+      bikeRental: {
+        stations: []
+      },
+      transit: {
+        stops: []
+      }
+    },
+    ui: {
+      mobileScreen: MobileScreens.WELCOME_SCREEN
+    }
+  }
+  </defineInitialState>
+
+  return (state = initialState, action) => { ... }
+}
+</createOtpReducer>
+
+<transformFunction>
+function transformFunction(node) {
+  <handleNodeProperties>
+  var nameNode = node.nodes[0];
+  var paramsNodes = node.nodes[1] ? node.nodes[1].nodes : [];
+  node.name = nameNode.value;
+  if (node.name) {
+    node.item('functions')[node.name] = node;
+  }
+  node.params = [];
+  node.paramIndex = {};
+  </handleNodeProperties>
+
+  <manageParamTags>
+  var paramTags = node.paramTags;
+  if (node.paramTags === undefined && node.parent &&
+      node.parent.type === 'assign' && node.parent.paramTags) {
+    paramTags = node.parent.paramTags;
+  }
+  node.item('paramTags', paramTags);
+  </manageParamTags>
+
+  <copyTags>
+  if (node.copyTags) {
+    var tagSource = node.item('functions')[node.copyTags];
+    if (tagSource) {
+      if (!node.description && tagSource.description) {
+        node.description = tagSource.description;
+      }
+      if (!paramTags && tagSource.item('paramTags')) {
+        paramTags = tagSource.item('paramTags');
+      }
+    }
+  }
+  </copyTags>
+
+  <processParams>
+  paramsNodes.forEach(function (paramNode, i) {
+    var param = {
+      name: paramNode.value
+    };
+    node.paramIndex[param.name] = i;
+    if (paramTags) {
+      if (paramTags[param.name]) {
+        var tagValue = paramTags[param.name];
+        Object.keys(tagValue).forEach(function (key, i) {
+          if (key !== 'name') {
+            param[key] = tagValue[key];
+          }
+        });
+      }
+    }
+    node.params.push(param);
+  });
+  </processParams>
+}
+</transformFunction>
+
+<extract>
+function extract(pattern, part) {
+  <validateArguments>
+  if (!pattern) throw new Error('missing pattern');
+  if (!part) return STOP;
+  </validateArguments>
+
+  <handleTermMatching>
+  let term = matchTerm(pattern);
+  if (term) {
+    ... // Omitted for brevity
+  }
+  </handleTermMatching>
+
+  <processArrayPatterns>
+  if (Array.isArray(pattern)) {
+    ... // Omitted for brevity
+  }
+  </processArrayPatterns>
+
+  <mergeResults>
+  let allResult = {};
+  ... // Omitted for brevity
+  return allResult;
+  </mergeResults>
+}
+</extract>
+
+<autoboot>
+function autoboot(containerElement) {
+  <validateElement>
+  check(containerElement, 'containerElement').is.anInstanceOf(Element)();
+  </validateElement>
+
+  <bootIfAutoboot>
+  if (containerElement.classList.contains(Common.AUTOBOOT)) {
+    boot(containerElement);
+  }
+  </bootIfAutoboot>
+}
+</autoboot>
+
+<functionUnnamed-1>
+function(obj) {
+  <clearSingletons>
+  for (var a in this.__singletons) {
+    if (a in obj) {
+      Object.defineProperty(obj, a, {
+        configurable: true,
+        value: undefined
+      });
+    }
+  }
+  </clearSingletons>
+
+  return this;
+}
+</functionUnnamed-1>
+
+<functionUnnamed-2>
+function(sId, sTitle, sDescription, aSelections) {
+  <createRulesToExport>
+  var oRulesToExport = {
+    id: sId,
+    title: sTitle,
+    description: sDescription,
+    dateExported: (new Date()).toISOString(),
+    version: "1.0",
+    selections: aSelections
+  };
+  </createRulesToExport>
+
+  <exportRules>
+  var oExportObject = JSON.stringify(oRulesToExport);
+  File.save(oExportObject, constants.RULE_SELECTION_EXPORT_FILE_NAME, 'json', 'text/plain');
+  </exportRules>
+}
+</functionUnnamed-2>
+```

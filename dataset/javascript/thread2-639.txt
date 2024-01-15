@@ -1,0 +1,184 @@
+Here are the annotations for the given JavaScript functions:
+
+1. Function `quoteName` is SRP compliant:
+```javascript
+<quoteName>
+function quoteName (name) {
+    assert.equal(typeof name, 'string', 'name must be string')
+    assert.ok(!name.match(/`/), 'invalid name')
+    return '`'+name+'`'
+}
+</quoteName>
+```
+
+2. Function `anonymous` related to promise handling seems to have a single responsibility but could potentially violate SRP if it mixed promise state manipulation with unrelated tasks:
+```javascript
+<anonymous>
+function(key) {
+    var self = this;
+    return this.done(function(s) {
+        if (!key)
+            return self._state;
+        var out = self._state[key];
+        return (typeof out === 'undefined') ? deep.Undefined : out;
+    });
+}
+</anonymous>
+```
+
+3. Function `propChange` is SRP non-compliant:
+```javascript
+<propChange>
+function propChange( originalEvent, boundElement, namespace ) {
+    <variableInitialization>
+    var lastEventInfo = document.documentElement[ originalEvent.propertyName ],
+        triggeredElement = lastEventInfo.el;
+
+    var boundCheckElement = boundElement;
+    </variableInitialization>
+
+    if( boundElement === document && triggeredElement !== document ) {
+        <adjustBoundCheckElement>
+        boundCheckElement = document.documentElement;
+        </adjustBoundCheckElement>
+    }
+
+    <eventDispatching>
+    if( triggeredElement !== undefined &&
+        shoestring( triggeredElement ).closest( boundCheckElement ).length ) {
+
+        originalEvent._namespace = lastEventInfo._namespace;
+        originalEvent._args = lastEventInfo._args;
+        encasedCallback.call( boundElement, originalEvent, namespace, triggeredElement );
+    }
+    </eventDispatching>
+}
+</propChange>
+```
+
+4. Function `anonymous` related to array comparison is SRP compliant:
+```javascript
+<anonymous>
+function(list, checks) {
+    var result = !checks || false;
+    if (!result) {
+        list.every(function(a) {
+            if (a.every(function(b, i) {
+                return b === checks[i];
+            })) {
+                result = true;
+            }
+            return !result;
+        });
+    }
+    return result;
+}
+</anonymous>
+```
+
+5. Function `anonymous` related to promise chaining is SRP compliant:
+```javascript
+<anonymous>
+function(callback) {
+    this.promises.push(function then(done, utils) {
+        done(null, callback(utils.lastReturn, utils));
+    });
+    return this;
+}
+</anonymous>
+```
+
+6. Function `anonymous` related to GUI shutdown is SRP compliant:
+```javascript
+<anonymous>
+function() {
+    this._unloaded = true;
+    gui.$shutdown();
+    dobroadcast(gui.BROADCAST_TOUNLOAD, gui.BROADCAST_ONUNLOAD);
+    doaction(gui.ACTION_DOC_UNLOAD, location.href);
+}
+</anonymous>
+```
+
+7. Function `getType` is SRP compliant:
+```javascript
+<getType>
+function getType(obj) {
+    if (obj === null) return 'null';
+    if (typeof obj === undefined) return 'undefined';
+
+    return Object.prototype.toString.call(obj)
+            .match(/\s([a-zA-Z]+)/)[1]
+            .toLowerCase();
+}
+</getType>
+```
+
+8. Function `anonymous` related to setting dimensions is SRP compliant:
+```javascript
+<anonymous>
+function () {
+    var oUnderlay = this.underlay,
+        oElement;
+
+    if (oUnderlay) {
+        oElement = this.element;
+        oUnderlay.style.width = oElement.offsetWidth + "px";
+        oUnderlay.style.height = oElement.offsetHeight + "px";
+    }
+}
+</anonymous>
+```
+
+9. Function `anonymous` related to expression parsing is SRP compliant:
+```javascript
+<anonymous>
+function(expression, combinator){
+    if (!expression) return combinator;
+
+    expression = Slick.parse(expression);
+
+    var expressions = expression.expressions;
+    for (var i = expressions.length; i--;)
+        expressions[i][0].combinator = combinator;
+
+    return expression;
+}
+</anonymous>
+```
+
+10. Function `wrap` is SRP non-compliant:
+```javascript
+<wrap>
+function wrap(inner, Wrap) {
+    <wrapInitialization>
+    function M(i) {
+        this.inner = i;
+    }
+    if (Wrap === true)
+        Wrap = M;
+    var coerce, unpack, res = {}, ipure = inner.pure, ibind = inner.bind,
+        imap = inner.map, ihandle = inner.handle, iraise = inner.raise,
+        ifin = inner["finally"], ipair = inner.pair, iarr = inner.arr,
+        iplus = inner.plus, ireflect = inner.reflect, ireify = inner.reify,
+        irun = inner.run, ialt = inner.alt, iempty = inner.empty,
+        irepeat = inner.repeat, iforPar = inner.forPar, iblock = inner.block,
+        iscope = inner.scope, icoerce = inner.coerce;
+    </wrapInitialization>
+
+    <wrapImplementation>
+    if (icoerce) {
+        // Implementation of coercion and unpacking methods
+    } else {
+        // Unpacking method without coercion
+    }
+    
+    // Various monadic operations
+    </wrapImplementation>
+
+    return completeMonad(res).cloneDefs();
+}
+</wrap>
+```
+
+- The `wrap` function is attempting to define a monadic interface using the methods provided by `inner`, which could be broken down into smaller, more focused responsibilities. This is a complex example, and the breakdown of responsibilities would depend on the principles behind the library or framework this code is part of.

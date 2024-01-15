@@ -1,0 +1,244 @@
+```javascript
+<parsePathParams>
+function parsePathParams(req, res, next) {
+  <validateSwaggerRequest>
+  if (util.isSwaggerRequest(req)) {
+    req.pathParams = {};
+
+    <constructPathPattern>
+    if (req.swagger.pathName.indexOf("{") >= 0) {
+      let paramNames = [];
+      let pathPattern = req.swagger.pathName.replace(util.swaggerParamRegExp, (match, paramName) => {
+        paramNames.push(paramName);
+        return "([^\/]+)";
+      });
+    </constructPathPattern>
+
+    <extractPathValues>
+    let values = new RegExp(pathPattern + "\/?$", "i").exec(req.path);
+    </extractPathValues>
+
+    <parsePathParameters>
+    for (let i = 1; i < values.length; i++) {
+      let paramName = paramNames[i - 1];
+      let paramValue = decodeURIComponent(values[i]);
+      let param = _.find(req.swagger.params, { in: "path", name: paramName });
+
+      util.debug('    Parsing the "%s" path parameter', paramName);
+      req.pathParams[paramName] = paramParser.parseParameter(param, paramValue, param);
+    }
+    </parsePathParameters>
+  }
+  </validateSwaggerRequest>
+
+  next();
+}
+</parsePathParams>
+
+<sanitizeOptions>
+function sanitizeOptions(userOptions) {
+  <setDefaultOptions>
+  userOptions = userOptions || {};
+
+  let options = {
+    index: getIndexValue(userOptions)
+  }
+  </setDefaultOptions>
+
+  <handleOptions>
+  if (userOptions.index) {
+    delete userOptions.index;
+  }
+
+  if (typeof (userOptions.enableBrotli) !== "undefined") {
+    options.enableBrotli = !!userOptions.enableBrotli;
+  }
+
+  if (typeof (userOptions.customCompressions) === "object") {
+    options.customCompressions = userOptions.customCompressions;
+  }
+
+  if (typeof (userOptions.orderPreference) === "object") {
+    options.orderPreference = userOptions.orderPreference;
+  }
+  </handleOptions>
+
+  return options;
+}
+</sanitizeOptions>
+
+<setDefaultFields>
+function(options) {
+  options.usernameField || (options.usernameField = 'username');
+  options.passwordField || (options.passwordField = 'password');
+  return options;
+}
+</setDefaultFields>
+
+<addOutProperty>
+function addOutProperty(out, directory, extensions) {
+  <initializeProperty>
+  out[directory] = {
+    extensions: extensions
+  };
+  </initializeProperty>
+  
+  <defineProperty>
+  Object.defineProperty(
+    out[directory],
+    'directory',
+    {
+      get: function () {
+        return Config.fileLoaderDirs[directory];
+      },
+      set: function (value) {
+        Config.fileLoaderDirs[directory] = value;
+      },
+      enumerable: true,
+      configurable: false
+    }
+  );
+  </defineProperty>
+  
+  <setDefaultDirectory>
+  out[directory].directory = out[directory].directory || directory;
+  </setDefaultDirectory>
+}
+</addOutProperty>
+
+<elementStyleProp>
+function elementStyleProp(index, styleIndex, value, suffix) {
+  <prepareValue>
+  var valueToAdd = null;
+  if (value) {
+    if (suffix) {
+      valueToAdd = stringify$1(value) + suffix;
+    } else {
+      valueToAdd = value;
+    }
+  }
+  </prepareValue>
+  
+  <updateStyle>
+  updateStyleProp(getStylingContext(index), styleIndex, valueToAdd);
+  </updateStyle>
+}
+</elementStyleProp>
+
+<addDirective>
+function addDirective(tDirectives, name, location, maxPriority, ignoreDirective, startAttrName,
+  endAttrName) {
+  <directiveIgnoredCheck>
+  if (name === ignoreDirective) return null;
+  </directiveIgnoredCheck>
+  
+  <findMatchDirective>
+  var match = null;
+  if (hasDirectives.hasOwnProperty(name)) {
+    for (var directive, directives = $injector.get(name + Suffix),
+      i = 0, ii = directives.length; i < ii; i++) {
+      try {
+        directive = directives[i];
+        if ((maxPriority === undefined || maxPriority > directive.priority) &&
+          directive.restrict.indexOf(location) != -1) {
+          if (startAttrName) {
+            directive = inherit(directive, { $$start: startAttrName, $$end: endAttrName });
+          }
+          tDirectives.push(directive);
+          match = directive;
+        }
+      } catch (e) { $exceptionHandler(e); }
+    }
+  }
+  </findMatchDirective>
+  
+  return match;
+}
+</addDirective>
+
+<reduce>
+function reduce(f, seed, arr) {
+  <performReduction>
+  var result = seed, i, n;
+  for (i = 0, n = arr.length; i < n; i++) {
+    result = f(result, arr[i]);
+  }
+  </performReduction>
+  return result;
+}
+</reduce>
+
+<TcpStreamError>
+function TcpStreamError(err) {
+  <handleError>
+  this.simulator.Debug(3, "TcpStream [%s:%s] connection err=%s", this.simulator.opts.host, this.simulator.opts.port, err);
+  delete ActiveClients[this];
+  </handleError>
+  
+  <retryConnection>
+  setTimeout(function () {
+    simulator.TcpClient();
+  }, this.timeout);
+  </retryConnection>
+}
+</TcpStreamError>
+
+<defaultAddElementRev>
+function defaultAddElementRev(segment, addSrcRev, elementSetting) {
+  <replaceSourceWithRevision>
+  elementSetting.pathReg.lastIndex = 0;
+  var match = elementSetting.pathReg.exec(segment);
+  if (match) {
+    var src = match[2];
+    var revSrc = addSrcRev(src);
+    return segment.replace(elementSetting.pathReg, '$1' + revSrc + '$3');
+  } else {
+    return segment;
+  }
+  </replaceSourceWithRevision>
+}
+</defaultAddElementRev>
+
+<toMap>
+function toMap(val, id, def) {
+  <handleIdAndDefaultParameters>
+  if (is_1.isValue(id) && !is_1.isString(id)) {
+    def = id;
+    id = undefined;
+  }
+  if (is_1.isPlainObject(val))
+    return val;
+  if (!is_1.isValue(val) || (!is_1.isString(val) && !is_1.isArray(val)))
+    return toDefault(null, def);
+  </handleIdAndDefaultParameters>
+
+  <convertStringOrArrayToMap>
+  id = id || '$id';
+  var exp = /(\/|\.|,|;|\|)/g;
+  var i = 0;
+  var obj = {};
+  if (is_1.isString(val)) {
+    if (!exp.test(val))
+      return { 0: val };
+    val = string_1.split(val);
+    val.forEach(function (v, i) { return obj[i] = v; });
+    return obj;
+  }
+  
+  while (i < val.length) {
+    if (is_1.isString(val[i])) {
+      obj[i] = val[i];
+    }
+    else if (is_1.isPlainObject(val[i])) {
+      var itm = Object.assign({}, val[i]);
+      var key = itm[id] ? itm[id] : i;
+      obj[key] = itm[id] ? object_1.del(itm, id) : itm;
+    }
+    i++;
+  }
+  </convertStringOrArrayToMap>
+  
+  return obj;
+}
+</toMap>
+```

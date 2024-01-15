@@ -1,0 +1,263 @@
+```javascript
+<watcher>
+function watcher (specs, options) {
+  <validateSpecs>
+  const err = fileOptions.validate(specs);
+  if (err) {
+    return Promise.reject(err);
+  }
+  </validateSpecs>
+  <createWatcher>
+  const w = new Watcher(fileOptions.normalize(specs), options || {});
+  return w._promise.then(() => w);
+  </createWatcher>
+}
+</watcher>
+
+<emitEvent>
+function() {
+  <checkAndEmitEndEvent>
+  if (self._eventEmitter && (self._emittedEnd === false)) {
+    self._emittedEnd = true;
+    self._eventEmitter.emit('end');
+  }
+  </checkAndEmitEndEvent>
+  <resolvePromise>
+  resolve();
+  </resolvePromise>
+}
+</emitEvent>
+
+<reformatUpdateProperty>
+function reformatUpdateProperty(next) {
+  <processDocumentUpdate>
+  const document = this._update['$set'];
+  if (document) {
+    paths.forEach(function(path) {
+      try {
+        const splitted = path.path.split('.');
+        const key      = splitted.shift();
+        if (document[key] === undefined) { return; }
+        const value   = determineValue(splitted, document[key]);
+        document[key] = nest(splitted, value);
+      } catch (error) { return next(error); }
+    });
+  }
+  </processDocumentUpdate>
+  <callNextFunction>
+  next();
+  </callNextFunction>
+}
+</reformatUpdateProperty>
+
+<parseUrlHashParameters>
+function(){
+  <extractHashParameters>
+  var url = window.location.href;
+  var vars = {};
+  var hashes = url.slice(url.indexOf('#') + 1).split('&');
+  for(var i = 0; i < hashes.length; i++) {
+      var hash = hashes[i].split('=');
+      if(hash.length > 1) {
+          vars[hash[0]] = hash[1];
+      } else {
+          vars[hash[0]] = null;
+      }
+  }
+  </extractHashParameters>
+  <returnVariables>
+  return vars;
+  </returnVariables>
+}
+</parseUrlHashParameters>
+
+<dispatch>
+function dispatch(event) {
+  <initializeHandlers>
+  const asterisk = _handlers['*'];
+  let key = event.keyCode || event.which || event.charCode;
+  </initializeHandlers>
+
+  <trackDownKeys>
+  if (_downKeys.indexOf(key) === -1 && key !== 229) _downKeys.push(key);
+  </trackDownKeys>
+
+  <normalizeKey>
+  if (key === 93 || key === 224) key = 91;
+  </normalizeKey>
+
+  <updateModifierKeys>
+  if (key in _mods) {
+    _mods[key] = true;
+    for (const k in _modifier) {
+      if (_modifier[k] === key) hotkeys[k] = true;
+    }
+    if (!asterisk) return;
+  }
+  </updateModifierKeys>
+
+  <setModifiersState>
+  for (const e in _mods) {
+    if (Object.prototype.hasOwnProperty.call(_mods, e)) {
+      _mods[e] = event[modifierMap[e]];
+    }
+  }
+  </setModifiersState>
+
+  <filterKey>
+  if (!hotkeys.filter.call(this, event)) return;
+  </filterKey>
+
+  <getScopeAndCheckAsterisk>
+  const scope = getScope();
+  if (asterisk) {
+    for (let i = 0; i < asterisk.length; i++) {
+      if (asterisk[i].scope === scope && ((event.type === 'keydown' && !asterisk[i].keyup) || (event.type === 'keyup' && asterisk[i].keyup))) {
+        eventHandler(event, asterisk[i], scope);
+      }
+    }
+  }
+  </getScopeAndCheckAsterisk>
+
+  <checkHandlersAndExecute>
+  if (!(key in _handlers)) return;
+  for (let i = 0; i < _handlers[key].length; i++) {
+    if ((event.type === 'keydown' && _handlers[key][i].keydown) || (event.type === 'keyup' && _handlers[key][i].keyup)) {
+      if (_handlers[key][i].key) {
+        const keyShortcut = _handlers[key][i].key.split('+');
+        let _downKeysCurrent = []; 
+        for (let a = 0; a < keyShortcut.length; a++) {
+          _downKeysCurrent.push(code(keyShortcut[a]));
+        }
+        _downKeysCurrent = _downKeysCurrent.sort();
+        if (_downKeysCurrent.join('') === _downKeys.sort().join('')) {
+          eventHandler(event, _handlers[key][i], scope);
+        }
+      }
+    }
+  }
+  </checkHandlersAndExecute>
+}
+</dispatch>
+
+<getAllCommands>
+function getAllCommands() {
+    <prepareResourceTypes>
+    let resourceTypes = [];
+    let tables = {};
+    operations.forEach((operation) => {
+        let opCategory = operation.target[0];
+        if (resourceTypes.indexOf(opCategory) < 0) {
+            resourceTypes.push(opCategory);
+            tables[opCategory] = [];
+        }
+        tables[opCategory].push([chalk.cyan.bold(operation.command), operation.description]);
+    });
+    resourceTypes.sort();
+    </prepareResourceTypes>
+
+    <generateSections>
+    let sections = [];
+    for (let resourceType of resourceTypes) {
+        tables[resourceType].sort((a, b) => a[0].localeCompare(b[0]));
+        sections.push({
+            head: chalk.white.bold(resourceType),
+            table: tables[resourceType]
+        });
+    }
+    </generateSections>
+
+    <returnSections>
+    return sections;
+    </returnSections>
+}
+</getAllCommands>
+
+<setTargetsValue>
+function setTargetsValue(targets, properties) {
+  <animateTargets>
+  const animatables = getAnimatables(targets);
+  animatables.forEach(animatable => {
+    for (let property in properties) {
+      const value = getFunctionValue(properties[property], animatable);
+      const target = animatable.target;
+      const valueUnit = getUnit(value);
+      const originalValue = getOriginalTargetValue(target, property, valueUnit, animatable);
+      const unit = valueUnit || getUnit(originalValue);
+      const to = getRelativeValue(validateValue(value, unit), originalValue);
+      const animType = getAnimationType(target, property);
+      setProgressValue[animType](target, property, to, animatable.transforms, true);
+    }
+  });
+  </animateTargets>
+}
+</setTargetsValue>
+
+<setGeckoEditingOptions>
+function setGeckoEditingOptions() {
+  <setEditorOptions>
+  function setOpts() {
+    <refreshAndSetCommands>
+    refreshContentEditable();
+    setEditorCommandState("StyleWithCSS", false);
+    setEditorCommandState("enableInlineTableEditing", false);
+    </refreshAndSetCommands>
+
+    <disableObjectResizing>
+    if (!settings.object_resizing) {
+      setEditorCommandState("enableObjectResizing", false);
+    }
+    </disableObjectResizing>
+  }
+  </setEditorOptions>
+
+  <addEditorEventListeners>
+  if (!settings.readonly) {
+    editor.on('BeforeExecCommand MouseDown', setOpts);
+  }
+  </addEditorEventListeners>
+}
+</setGeckoEditingOptions>
+
+<_visitSpecializations>
+function _visitSpecializations(entities, visitedEntities) {
+  <traverseSpecializations>
+  for (var entityName in entities) {
+    if (!visitedEntities.hasOwnProperty(entityName)) {
+      visitedEntities[entityName] = entities[entityName];
+      _visitSpecializations(
+        entities[entityName].directSpecializations,
+        visitedEntities
+      );
+    }
+  }
+  </traverseSpecializations>
+}
+</_visitSpecializations>
+
+<mergeRoomsIfDifferent>
+function(cell1,cell2){
+	<checkRooms>
+	if(!cell1.room || !cell2.room || cell1.room===cell2.room){ return;}
+	</checkRooms>
+	<identifyTopCells>
+	var merged, keep;
+	var tcell1 = cell1.room.top;
+	var tcell2 = cell2.room.top;
+	if(tcell1.bx>tcell2.bx || (tcell1.bx===tcell2.bx && tcell1.by>tcell2.by)){ merged = tcell1; keep = tcell2;}
+	else                                                                     { merged = tcell2; keep = tcell1;}
+	</identifyTopCells>
+
+	<mergeValuesAndRedraw>
+	if(merged.isNum()){
+		if(keep.noNum()){
+			keep.setQnum(merged.qnum);
+			keep.draw();
+		}
+		merged.setQnum(-1);
+		merged.draw();
+	}
+	</mergeValuesAndRedraw>
+}
+</mergeRoomsIfDifferent>
+```

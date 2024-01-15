@@ -1,0 +1,233 @@
+<forEach>
+function forEach(children, func) {
+  let index = 0;
+  <iterateOverChildren>
+  React.Children.forEach(children, child => {
+    if (React.isValidElement(child)) func(child, index++);
+  });
+  </iterateOverChildren>
+}
+</forEach>
+
+<tag>
+function tag(name, attrs, close, content) {
+  var end = close ? '/>' : '>';
+  var pairs = [];
+  var tag;
+
+  <constructTagAttributes>
+  for (var key in attrs) {
+    if (Object.prototype.hasOwnProperty.call(attrs, key)) {
+      pairs.push(key + '="' + escape(attrs[key]) + '"');
+    }
+  }
+  </constructTagAttributes>
+
+  <createTagString>
+  tag = '<' + name + (pairs.length ? ' ' + pairs.join(' ') : '') + end;
+  if (content) {
+    tag += content + '</' + name + end;
+  }
+  </createTagString>
+  
+  return tag;
+}
+</tag>
+
+<createRegex>
+function(str, flags) {
+        flags = flags || '';
+        Y.DOM._regexCache = Y.DOM._regexCache || {};
+        
+        <cacheRegex>
+        if (!Y.DOM._regexCache[str + flags]) {
+            Y.DOM._regexCache[str + flags] = new RegExp(str, flags);
+        }
+        </cacheRegex>
+        
+        return Y.DOM._regexCache[str + flags];
+    }
+</createRegex>
+
+<makeEntry>
+function makeEntry (entry: any, entries: Array<string> = []): Object {
+  <normalizeEntry>
+  if (typeof entry === 'string') {
+    entry = [entry]
+  }
+  if (Array.isArray(entry)) {
+    entry = { main: entry }
+  }
+  </normalizeEntry>
+
+  <assembleEntries>
+  return Object.keys(entry)
+    .reduce((acc, x) => {
+      const v = entry[x]
+      return {
+        ...acc,
+        [x]: [
+          ...entries,
+          ...(Array.isArray(v) ? v : [v])
+        ]
+      }
+    }, {})
+  </assembleEntries>
+}
+</makeEntry>
+
+<_loadEntityAttribute>
+function _loadEntityAttribute(attribute) {
+    <validateAttribute>
+    expect(_methods).to.not.have.ownProperty(
+      attribute.name,
+      'failed to load entity attribute "' + attribute.name + '" because ' +
+      'there is a method with same name in the current Entity and it cannot ' +
+      'be overloaded'
+    );
+
+    if (_Entity.General) {
+      expect(_Entity.General.attributes).to.not.have.ownProperty(
+        attribute.name,
+        'failed to load entity attribute "' + attribute.name + '" because ' +
+        'there is an attribute with same name in a parent of current Entity ' +
+        'and it cannot be overriden'
+      );
+
+      expect(_Entity.General.methods).to.not.respondTo(
+        attribute.name,
+        'failed to load entity attribute "' + attribute.name + '" because ' +
+        'there is a method with same name in a parent of current Entity ' +
+        'and it cannot be overriden'
+      );
+    }
+
+    var entitySpecializations = _Entity.specializations;
+    for (var specialization in entitySpecializations) {
+      expect(entitySpecializations[specialization].specification.attributes)
+        .to.not.have.ownProperty(
+        attribute.name,
+        'failed to load entity attribute "' + attribute.name + '" because ' +
+        'there is an attribute with same name in a child of current Entity'
+      );
+
+      expect(entitySpecializations[specialization].specification.methods)
+        .to.not.have.ownProperty(
+        attribute.name,
+        'failed to load entity attribute "' + attribute.name + '" because ' +
+        'there is a method with same name in a child of current Entity'
+      );
+    }
+    </validateAttribute>
+
+    <loadAttribute>
+    _Entity.adapter.loadEntityAttribute(_Entity, attribute);
+    </loadAttribute>
+  }
+</_loadEntityAttribute>
+
+<initializeField>
+function(builder, message, rule, keytype, type, name, id, options, oneof, syntax) {
+            T.call(this, builder, message, name);
+
+            <setProperties>
+            this.className = "Message.Field";
+            this.required = rule === "required";
+            this.repeated = rule === "repeated";
+            this.map = rule === "map";
+            this.keyType = keytype || null;
+            this.type = type;
+            this.resolvedType = null;
+            this.id = id;
+            this.options = options || {};
+            this.defaultValue = null;
+            this.oneof = oneof || null;
+            this.syntax = syntax || 'proto2';
+            this.originalName = this.name; 
+            this.element = null;
+            this.keyElement = null;
+            </setProperties>
+
+            <convertFieldName>
+            if (this.builder.options['convertFieldsToCamelCase'] && !(this instanceof Message.ExtensionField)) {
+                this.name = ProtoBuf.Util.toCamelCase(this.name);
+            }
+            </convertFieldName>
+        }
+</initializeField>
+
+<highlightText>
+function (str, highlight) {
+                if (ariaUtilsType.isString(str) && ariaUtilsType.isString(highlight)) {
+                    var toBeMatched = str.split(" ");
+                    
+                    <splitAndSortHighlights>
+                    var toBeHighlighted = highlight.split(" ").sort(function (first, second) {
+                        var aLen = first.length, bLen = second.length;
+                        return aLen === bLen ? 0 : (aLen < bLen ? 1 : -1);
+                    });
+                    </splitAndSortHighlights>
+
+                    <applyHighlighting>
+                    ariaUtilsArray.forEach(toBeMatched, function (value, index, array) {
+                        for (var i = 0, len = toBeHighlighted.length; value && i <= len; i += 1) {
+                            if (toBeHighlighted[i] == null || toBeHighlighted[i] === "") {
+                                continue;
+                            }
+                            var frmtdHighlightStr = toBeHighlighted[i].replace(regExSpecials, "\\$1");
+                            var highlightStr = new RegExp('\\b' + frmtdHighlightStr, 'gim');
+                            if (!!frmtdHighlightStr.match(/\(/)) {
+                                highlightStr = new RegExp('[\\b\\(]' + frmtdHighlightStr.replace('\\(', ''), 'gim');
+                            }
+                            var replaceArr = highlightStr.exec(value);
+                            if (replaceArr != null && replaceArr.length > 0) {
+                                var replaceStr = "<strong>" + replaceArr[0] + "</strong>";
+                                array[index] = value.replace(highlightStr, replaceStr);
+                                if (!!value.match(highlightStr)) {
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    </applyHighlighting>
+
+                    return toBeMatched.join(" ");
+                }
+
+                <returnOriginal>
+                return str;
+                </returnOriginal>
+            }
+</highlightText>
+
+<observeObject>
+function observeObject(o, observer) {
+  return o && typeof o === 'object' && <invokeObserve>observe(o, observer, observer.keys)</invokeObserve>;
+}
+</observeObject>
+
+<multimixOperation>
+function() {
+            var self = this,
+                args = self.parseRemoveArgs(arguments);
+
+            return self.multimix({
+                remove: args.command
+            }, args.animate, args.callback);
+        }
+</multimixOperation>
+
+<commonDir>
+function commonDir (files) {
+  <processPaths>
+  return files
+    .map(path.dirname)
+    </processPaths>
+    .map(function (dir) {
+      return dir.split(path.sep)
+    })
+    .reduce(commonSequence)
+    .concat([''])
+    .join(path.sep)
+}
+</commonDir>

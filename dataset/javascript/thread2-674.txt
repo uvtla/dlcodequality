@@ -1,0 +1,369 @@
+Below are the annotations for the provided JavaScript functions:
+
+1. Function to check URL match patterns:
+```javascript
+<checkUrlMatchPatterns>
+function (urlStr) {
+  var url,
+      matchAllUrlsPattern,
+      matchedSpecificPattern;
+
+  <matchAllUrls>
+  matchAllUrlsPattern = this.find(function (urlMatchPattern) {
+      return urlMatchPattern.pattern === MATCH_ALL_URLS;
+  });
+
+  if (_.isObject(matchAllUrlsPattern)) {
+      return true;
+  }
+  </matchAllUrls>
+
+  <parseUrl>
+  try {
+      url = new Url(urlStr);
+  }
+  catch (e) {
+      return false;
+  }
+  </parseUrl>
+
+  <matchSpecificPattern>
+  matchedSpecificPattern = this.find(function (urlMatchPattern) {
+      var matchRegexObject = urlMatchPattern._matchPatternObject;
+      
+      if (_.isEmpty(matchRegexObject)) {
+          return false;
+      }
+
+      return (urlMatchPattern.testProtocol(url.protocol) &&
+          urlMatchPattern.testHost(url.getHost()) &&
+          urlMatchPattern.testPort(url.port, url.protocol) &&
+          urlMatchPattern.testPath(url.getPath()));
+  });
+
+  return Boolean(matchedSpecificPattern);
+  </matchSpecificPattern>
+}
+</checkUrlMatchPatterns>
+```
+
+2. Function to create a vector:
+```javascript
+<createVector>
+function() {
+    var A = this.start.elements, B = this.end.elements;
+    return vector.create([B[0] - A[0], B[1] - A[1], B[2] - A[2]]);
+}
+</createVector>
+```
+
+3. Function to create a namespace and class structure:
+```javascript
+<createClassStructure>
+function create(s, p, root) {
+  var self = this, sp, ns, cn, scn, c, de = 0;
+
+  <parseClassString>
+  s = /^((static) )?([\w.]+)(:([\w.]+))?/.exec(s);
+  cn = s[3].match(/(^|\.)(\w+)$/i)[2]; 
+  </parseClassString>
+
+  <createNamespace>
+  ns = self.createNS(s[3].replace(/\.\w+$/, ''), root);
+  </createNamespace>
+
+  <preventRedefinition>
+  if (ns[cn]) {
+    return;
+  }
+  </preventRedefinition>
+
+  <handleStatic>
+  if (s[2] == 'static') {
+    ns[cn] = p;
+
+    <onCreateStatic>
+    if (this.onCreate) {
+      this.onCreate(s[2], s[3], ns[cn]);
+    }
+    </onCreateStatic>
+
+    return;
+  }
+  </handleStatic>
+
+  <createConstructor>
+  if (!p[cn]) {
+    p[cn] = function () { };
+    de = 1;
+  }
+  </createConstructor>
+
+  <assignPrototype>
+  ns[cn] = p[cn];
+  self.extend(ns[cn].prototype, p);
+  </assignPrototype>
+
+  <setupInheritance>
+  if (s[5]) {
+    sp = self.resolve(s[5]).prototype;
+    scn = s[5].match(/\.(\w+)$/i)[1];
+
+    c = ns[cn];
+    if (de) {
+      ns[cn] = function () {
+        return sp[scn].apply(this, arguments);
+      };
+    } else {
+      ns[cn] = function () {
+        this.parent = sp[scn];
+        return c.apply(this, arguments);
+      };
+    }
+    ns[cn].prototype[cn] = ns[cn];
+
+    <copySuperclassMethods>
+    self.each(sp, function (f, n) {
+      ns[cn].prototype[n] = sp[n];
+    });
+    </copySuperclassMethods>
+
+    <overrideSuperclassMethods>
+    self.each(p, function (f, n) {
+      if (sp[n]) {
+        ns[cn].prototype[n] = function () {
+          this.parent = sp[n];
+          return f.apply(this, arguments);
+        };
+      } else {
+        if (n != cn) {
+          ns[cn].prototype[n] = f;
+        }
+      }
+    });
+    </overrideSuperclassMethods>
+  }
+  </setupInheritance>
+
+  <assignStaticProperties>
+  self.each(p['static'], function (f, n) {
+    ns[cn][n] = f;
+  });
+  </assignStaticProperties>
+}
+</createClassStructure>
+```
+
+4. Function to append an arc to a path:
+```javascript
+<appendArcToPath>
+function(endpoint, options) {
+  <initializeVariables>
+  var decimals = 100000;
+  if (arguments.length < 2) {
+      options = {};
+  }
+  if (this.closed) {
+      throw new Error("Path must not be closed");
+  }
+  if (this.points.length < 1) {
+      throw new Error("appendArc: path must already contain a point (the endpoint of the path is used as the starting point for the arc)");
+  }
+  var resolution = CSG.parseOptionAsInt(options, "resolution", CSG.defaultResolution2D);
+  if (resolution < 4) resolution = 4;
+  var xradius, yradius;
+  if (('xradius' in options) || ('yradius' in options)) {
+      if ('radius' in options) {
+          throw new Error("Should either give an xradius and yradius parameter, or a radius parameter");
+      }
+      xradius = CSG.parseOptionAsFloat(options, "xradius", 0);
+      yradius = CSG.parseOptionAsFloat(options, "yradius", 0);
+  } else {
+      xradius = CSG.parseOptionAsFloat(options, "radius", 0);
+      yradius = xradius;
+  }
+  var xaxisrotation = CSG.parseOptionAsFloat(options, "xaxisrotation", 0);
+  var clockwise = CSG.parseOptionAsBool(options, "clockwise", false);
+  var largearc = CSG.parseOptionAsBool(options, "large", false);
+  var startpoint = this.points[this.points.length - 1];
+  endpoint = new CSG.Vector2D(endpoint);
+  </initializeVariables>
+  
+  <roundValues>
+  xradius = Math.round(xradius*decimals)/decimals;
+  yradius = Math.round(yradius*decimals)/decimals;
+  endpoint = new CSG.Vector2D(Math.round(endpoint.x*decimals)/decimals,Math.round(endpoint.y*decimals)/decimals);
+  </roundValues>
+
+  <calculateArc>
+  var sweep_flag = !clockwise;
+  var newpoints = [];
+  if ((xradius == 0) || (yradius == 0)) {
+      newpoints.push(endpoint);
+  } else {
+      <performArcCalculations>
+      // ... The entire block within the else statement is dedicated 
+      // to performing the arc calculations. Omitted for brevity...
+      </performArcCalculations>
+  }
+  </calculateArc>
+
+  <finalizePath>
+  newpoints = this.points.concat(newpoints);
+  var result = new CSG.Path2D(newpoints);
+  return result;
+  </finalizePath>
+}
+</appendArcToPath>
+```
+
+5. Function to create a VAO from buffer info:
+```javascript
+<createVAOFromBufferInfo>
+function createVAOFromBufferInfo(gl, programInfo, bufferInfo) {
+  return createVAOAndSetAttributes(gl, programInfo.attribSetters || programInfo, bufferInfo.attribs, bufferInfo.indices);
+}
+</createVAOFromBufferInfo>
+```
+
+6. Function to get all keys from an array of objects:
+```javascript
+<getAllKeysFromObjectArray>
+function getAllKeys (objArray) {
+  <collectKeys>
+  let keys = []
+  _.forEach(objArray, function (row) {
+    if (!row || typeof row === 'string') return
+    keys = keys.concat(Object.keys(row))
+  })
+  </collectKeys>
+  
+  <getUniqueKeys>
+  return _.union(keys)
+  </getUniqueKeys>
+}
+</getAllKeysFromObjectArray>
+```
+
+7. Function to initialize a session:
+```javascript
+<initializeSession>
+function Session(editor) {
+  this.editor = editor;
+  this.path = editor.document.file.fullPath;
+  this.ternHints = [];
+  this.ternGuesses = null;
+  this.fnType = null;
+  this.builtins = null;
+}
+</initializeSession>
+```
+
+8. Function to calculate the error function (erf):
+```javascript
+<calculateErrorFunction>
+function erf( x ) {
+  <initializeVariables>
+  var sign;
+  var ax;
+  var z;
+  var r;
+  var s;
+  var y;
+  var p;
+  var q;
+  </initializeVariables>
+
+  <handleSpecialCases>
+  if ( x !== x ) {
+      return NaN;
+  }
+
+  if ( x === PINF ) {
+      return 1;
+  }
+
+  if ( x === NINF ) {
+      return -1;
+  }
+
+  if ( x === 0 ) {
+      return x;
+  }
+  </handleSpecialCases>
+
+  <normalizeSign>
+  if ( x < 0 ) {
+      sign = true;
+      ax = -x;
+  } else {
+      sign = false;
+      ax = x;
+  }
+  </normalizeSign>
+
+  <calculateForDifferentDomains>
+  if ( ax < 0.84375 ) {
+    // ...
+  } else if ( ax < 1.25 ) {
+    // ...
+  } else if ( ax >= 6 ) {
+    // ...
+  } else {
+    <calculateUsingContinuedFraction>
+    // ...
+    </calculateUsingContinuedFraction>
+  }
+  </calculateForDifferentDomains>
+
+  <finalizeComputation>
+  if ( sign ) {
+      return r/ax - 1;
+  }
+  return 1 - r/ax;
+  </finalizeComputation>
+}
+</calculateErrorFunction>
+```
+
+9. Function to handle double-click on a table:
+```javascript
+<tableDoubleClickHandler>
+function tableDbclickHandler(evt) {
+  <initializeClickState>
+  singleClickState = 0;
+  evt = evt || me.window.event;
+  var target = getParentTdOrTh(evt.target || evt.srcElement);
+  </initializeClickState>
+
+  if (target) {
+      <handleTableResize>
+      var h;
+      if (h = getRelation(target, mouseCoords(evt))) {
+          hideDragLine( me );
+
+          if (h == 'h1') {
+              // ...
+          }
+          if (h == 'h') {
+              // ...
+          }
+      }
+      </handleTableResize>
+  }
+}
+</tableDoubleClickHandler>
+```
+
+10. Function to insert a node to the right in a data structure:
+```javascript
+<insertNodeToRight>
+function insertRight(parent, node) {
+  var index = parent.length - 1;
+  <updateParent>
+  parent[index] = node;
+  parent.sizes[index] = (0, _util.length)(node) + (index > 0 ? parent.sizes[index - 1] : 0);
+  </updateParent>
+}
+</insertNodeToRight>
+```

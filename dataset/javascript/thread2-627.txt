@@ -1,0 +1,300 @@
+<compareNumericField>
+function compareNumericField(field, a, b) {
+  var nodeA = (a[1]);
+  var nodeB = (b[1]);
+  return nodeA[field] - nodeB[field];
+}
+</compareNumericField>
+
+<setButter>
+function setButter(message, error, traceback, asHtml) {
+  var butter = $('#butter');
+  
+  butter.css('display', 'none');
+  <changeButterClass>
+  if (error) {
+    butter.removeClass('info').addClass('error');
+  } else {
+    butter.removeClass('error').addClass('info');
+  }
+  </changeButterClass>
+  <clearButter>
+  butter.children().remove();
+  </clearButter>
+  <appendMessage>
+  if (asHtml) {
+    butter.append($('<div>').html(message));
+  } else {
+    butter.append($('<div>').text(message));
+  }
+  </appendMessage>
+
+  <centerButter>
+  function centerButter() {
+    butter.css('left', ($(window).width() - $(butter).outerWidth()) / 2);
+  }
+  </centerButter>
+
+  <handleTraceback>
+  if (traceback) {
+    <createShowDetailLink>
+    var showDetail = $('<a href="">').text('Detail');
+    showDetail.click(function(event) {
+      $('#butter-detail').toggle();
+      centerButter();
+      event.preventDefault();
+    });
+    var butterDetail = $('<pre id="butter-detail">').text(traceback);
+    butterDetail.css('display', 'none');
+    </createShowDetailLink>
+
+    <appendShowDetailAndDetail>
+    butter.append(showDetail);
+    butter.append(butterDetail);
+    </appendShowDetailAndDetail>
+  }
+  </handleTraceback>
+  centerButter();
+  butter.css('display', null);
+}
+</setButter>
+
+<checkAvailable>
+function checkAvailable(host, port) {
+  return new Promise(function(resolve, reject) {
+    const socket = new net.Socket();
+    
+    <socketConnectionBehavior>
+    socket.on('connect', () => {
+      <cleanupSocketOnConnect>
+      cleanupSocket(socket);
+      resolve(true);
+      </cleanupSocketOnConnect>
+    });
+
+    socket.on('error', err => {
+      <cleanupSocketOnError>
+      cleanupSocket(socket);
+      if (err.code !== 'ECONNREFUSED') {
+        <socketErrorHandling>
+        return reject(err);
+        </socketErrorHandling>
+      }
+      </cleanupSocketOnError>
+
+      <socketConnectFailure>
+      resolve(false);
+      </socketConnectFailure>
+    });
+    </socketConnectionBehavior>
+
+    <socketInitiateConnection>
+    socket.connect({ port: port, host: host });
+    </socketInitiateConnection>
+  });
+}
+</checkAvailable>
+
+<sign>
+function sign(private_key, data) {
+  <createKeyFromPrivateKey>
+  var key = new bitcoinjs.ECKey(new BigInteger(private_key, 16), false);
+  </createKeyFromPrivateKey>
+  
+  <hashData>
+  var hash = bitcoinjs.crypto.hash256(new Buffer(data, 'hex'));
+  </hashData>
+  
+  <signHash>
+  return key.sign(hash).toDER().toString('hex');
+  </signHash>
+}
+</sign>
+
+<Extractor>
+function Extractor(ac , options) {
+  EventEmitter.call(this);
+  var self = this;
+  <initializeExtractorProperties>
+  self.matchers = [];
+  self.vars = ac || {};
+  self.options = options || {};
+  self.watchers = [];
+  </initializeExtractorProperties>
+  <setupListenMethod>
+  self._listen = function (car, file) {
+    car.once('end', function () {
+      <emitEndEvent>
+      self.emit('end', self.vars);
+      </emitEndEvent>
+    });
+    car.on('line', function (line) {
+      <processLineWithMatchers>
+      var i;
+      var firstMatch = true;
+      for (i = 0; i < self.matchers.length; i++) {
+        var matcher = self.matchers[i];
+        var m;
+        while(matcher.handler && (m = matcher.re.exec(line)) !== null){
+          matcher.handler(m, self.vars, file , firstMatch);
+          firstMatch = false;
+          if(!self.options.successive){
+            i = self.matchers.length;
+            break;
+          }
+        }
+      }
+      </processLineWithMatchers>
+    });
+    return self;
+  };
+  </setupListenMethod>
+}
+</Extractor>
+
+<stepsMatch>
+function stepsMatch(str, lax) {
+  var match;
+
+  <matchStrictValidSteps>
+  
+  match = str.match(STEPS_VALID_REGEX);
+  if (match && _validateStepsParams(match)) { 
+    return _tagMatch(match, STEP);
+  }
+  </matchStrictValidSteps>
+
+  <matchGeneralSteps>
+  match = str.match(STEPS_GENERAL_REGEX);
+  if (match) {
+    match = _getValidStepsParams(match);
+    if (match && _validateStepsParams(match)) {
+      return _tagMatch(match, STEP);
+    } else { 
+      <logInvalidCode>
+      window.console.log("brackets-steps: TimingFunctionUtils._getValidStepsParams created invalid code");
+      </logInvalidCode>
+    }
+  }
+  </matchGeneralSteps>
+
+  <laxMatching>
+  
+  if (lax) {
+    
+    <matchLaxSteps>
+    match = str.match(STEP_LAX_REGEX);
+    if (match) {
+      return _tagMatch(match, STEP);
+    }
+    </matchLaxSteps>
+  } else {
+    
+    <matchStrictSteps>
+    match = str.match(STEP_STRICT_REGEX);
+    if (match) {
+      
+      return _tagMatch(str.match(STEP_LAX_REGEX), STEP);
+    }
+    </matchStrictSteps>
+  }
+  </laxMatching>
+
+  return null;
+}
+</stepsMatch>
+
+<findFiles>
+function(files, opts) {
+  var self    = this,
+    cwd     = this.getUI('cwd'),
+    cwdHash = this.cwd().hash,
+    newItem = $();
+  
+  opts = opts || {};
+  
+  <iterateOverFiles>
+  $.each(files, function(i, f) {
+    <matchFilesWithCwd>
+    if (f.phash === cwdHash || self.searchStatus.state > 1) {
+      <addToNewItemCollection>
+      newItem = newItem.add(cwd.find('#'+self.cwdHash2Id(f.hash)));
+      </addToNewItemCollection>
+      <checkFirstOnlyOption>
+      if (opts.firstOnly) {
+        return false;
+      }
+      </checkFirstOnlyOption>
+    }
+    </matchFilesWithCwd>
+  });
+  </iterateOverFiles>
+  
+  return newItem;
+}
+</findFiles>
+
+<V1>
+function V1(domain) {
+  Version.prototype.constructor.call(this, domain, 'v1');
+
+  <initializeV1Properties>
+  this._compositionHooks = undefined;
+  this._compositionSettings = undefined;
+  this._recordings = undefined;
+  this._recordingSettings = undefined;
+  this._compositions = undefined;
+  this._rooms = undefined;
+  </initializeV1Properties>
+}
+</V1>
+
+<resolveWhen>
+function resolveWhen() {
+  var dfd = pendings[handle];
+  <resolveDeferred>
+  if (dfd) {
+    dfd.forEach(function (promise) {
+      promise.resolve(instance);
+    });
+    delete pendings[handle];
+  }
+  </resolveDeferred>
+}
+</resolveWhen>
+
+<_fnRowAttributes>
+function _fnRowAttributes( row )
+{
+  var tr = row.nTr;
+  var data = row._aData;
+
+  if ( tr ) {
+    <setIdFromRowData>
+    if ( data.DT_RowId ) {
+      tr.id = data.DT_RowId;
+    }
+    </setIdFromRowData>
+
+    <setClassFromRowData>
+    if ( data.DT_RowClass ) {
+      
+      var a = data.DT_RowClass.split(' ');
+      row.__rowc = row.__rowc ?
+        _unique( row.__rowc.concat( a ) ) :
+        a;
+
+      $(tr)
+        .removeClass( row.__rowc.join(' ') )
+        .addClass( data.DT_RowClass );
+    }
+    </setClassFromRowData>
+
+    <setDataFromRowData>
+    if ( data.DT_RowData ) {
+      $(tr).data( data.DT_RowData );
+    }
+    </setDataFromRowData>
+  }
+}
+</_fnRowAttributes>

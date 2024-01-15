@@ -1,0 +1,228 @@
+```javascript
+<init>
+function init(userOpts = {}) {
+    <mergeOptions>
+    const opts = Object.assign(
+        {
+            template: '[hash].[ext][query]',
+            preservePath: false,
+            hashFunction(contents) {
+                return crypto
+                    .createHash('sha1')
+                    .update(contents)
+                    .digest('hex')
+                    .substr(0, 16);
+            },
+            transform(fileMeta) {
+                return fileMeta;
+            },
+            ignore: []
+        },
+        userOpts
+    ); </mergeOptions>
+
+    return (style, result) => {
+        <resolveBasePath>
+        if (opts.basePath) {
+            if (typeof opts.basePath === 'string') {
+                opts.basePath = [path.resolve(opts.basePath)];
+            } else {
+                opts.basePath = opts.basePath.map(elem => path.resolve(elem));
+            }
+        } else {
+            opts.basePath = [process.cwd()];
+        } </resolveBasePath>
+
+        <validateDestOption>
+        if (opts.dest) {
+            opts.dest = path.resolve(opts.dest);
+        } else {
+            throw new Error('Option `dest` is required in postcss-copy');
+        } </validateDestOption>
+
+        <processStyleDeclarations>
+        const promises = [];
+        style.walkDecls(decl => {
+            if (decl.value && decl.value.indexOf('url(') > -1) {
+                promises.push(processDecl(result, decl, opts));
+            }
+        });
+        return Promise.all(promises).then(decls =>
+            decls.forEach(decl => {
+                decl.value = String(decl.value);
+            })
+        ); </processStyleDeclarations>
+    };
+}
+</init>
+
+<UPNP>
+function UPNP(host, port, gateway) {
+  <initializeValues>
+  if (!(this instanceof UPNP))
+    return new UPNP(host, port, gateway);
+
+  this.host = host || '239.255.255.250';
+  this.port = port || 1900;
+  this.gateway = gateway || UPNP.INTERNET_GATEWAY;
+  </initializeValues>
+
+  <initializeMethods>
+  this.locker = new Lock();
+  this.timeout = null;
+  this.job = null;
+  </initializeMethods>
+}
+</UPNP>
+
+<oRequest_oFullResponse>
+function(oRequest, oFullResponse) {
+    <processResponse>
+    if(lang.isValue(oFullResponse)) {
+        var oParsedResponse = {results:oFullResponse,meta:{}};
+        YAHOO.log("Parsed generic data is " +
+                lang.dump(oParsedResponse), "info", this.toString());
+        return oParsedResponse;
+    }
+    </processResponse>
+
+    <logFailure>
+    YAHOO.log("Generic data could not be parsed: " + lang.dump(oFullResponse), 
+            "error", this.toString());
+    </logFailure>
+    return null;
+}
+</oRequest_oFullResponse>
+
+<template_refNode>
+function(template, refNode) {
+    <createInstanceTemplate>
+      if (template) {
+        this.eventController = this;
+        
+        var dom = this.instanceTemplate(template);
+    </createInstanceTemplate>
+        
+    <appendToParent>
+        if (refNode) {
+          this.insertBefore(dom, refNode);
+        } else {
+          this.appendChild(dom);
+        }
+    </appendToParent>
+        
+    <finalizeShadowRoot>
+        this.shadowRootReady(this);
+    </finalizeShadowRoot>
+
+    return dom;
+}
+</template_refNode>
+
+<removeAssociatedObjects>
+function(instance) {
+    var args = _.rest(arguments);
+    var objects = _.flatten(args);
+    this.beforeRemovingObjects(instance, objects);
+    this.disassociateObjects(instance, objects);
+    </removeAssociatedObjects>
+
+    <createActionable>
+    return Actionable.create(instance.save.bind(instance));
+    </createActionable>
+}
+</removeAssociatedObjects>
+
+<comment>
+function (text) {
+  <processComment>
+  if (isConditionalComment(text)) {
+      text = cleanConditionalComment(text);
+      MinifyWriter.superclass.comment.call(this, text);
+  }
+  </processComment>
+}
+</comment>
+
+<handleStrs>
+function handleStrs(strs, opts) {
+  <calculateLengthAndTransform>
+  const len = longest(strs)
+  const text = strs
+    .map(pad(len, opts.justify))
+    .map(wrap(opts))
+    .join('')
+  </calculateLengthAndTransform>
+  return {len, text}
+}
+</handleStrs>
+
+<startsWithPrefix>
+function (value, prefix) {
+  <checkPrefix>
+    return angular.isString(value)  &&
+      angular.isString(prefix) &&
+      value.lastIndexOf(prefix, 0) === 0;
+  </checkPrefix>
+}
+</startsWithPrefix>
+
+<updateRelation>
+function( model, attr, options ) {
+	<sanitizeOptions>
+	options = this.sanitizeOptions( options );
+	</sanitizeOptions>
+	<manageKey>
+	this.keyContents = attr;
+	</manageKey>
+	
+	
+	<removeReverseRelations>
+	_.each( this.getReverseRelations(), function( relation ) {
+			relation.removeRelated( this.instance, options );
+		}, this );
+	</removeReverseRelations>
+	
+	
+	<setRelated>
+	if ( attr instanceof Backbone.Collection ) {
+		this.prepareCollection( attr );
+		this.related = attr;
+	}
+	</setRelated>
+	
+	<processCollectionElseCase>
+	else {
+		var coll = this.related instanceof Backbone.Collection ? this.related : new this.collectionType();
+		this.setRelated( this.prepareCollection( coll ) );
+		this.findRelated();
+	}
+	</processCollectionElseCase>
+	
+	<addReverseRelations>
+	_.each( this.getReverseRelations(), function( relation ) {
+			relation.addRelated( this.instance, options );
+		}, this );
+	</addReverseRelations>
+	
+	<queueEvents>
+	var dit = this;
+	Backbone.Relational.eventQueue.add( function() {
+		!options.silentChange && dit.instance.trigger( 'update:' + dit.key, dit.instance, dit.related, options );
+	});
+	</queueEvents>
+}
+</updateRelation>
+
+<removeCallable>
+function(name) {
+  <updateCallables>
+    if (JOII.Config.callables.indexOf(name) === -1) {
+        return;
+    }
+
+    JOII.Config.callables.splice(JOII.Config.callables.indexOf(name), 1);
+  </updateCallables>
+}
+</removeCallable>
+```

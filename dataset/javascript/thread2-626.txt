@@ -1,0 +1,186 @@
+<isEscapeingAt>
+function isEscapeingAt(string, index) {
+	if (index === 0) { return false; }
+	let i = index - 1;
+	while (
+		i >= 0 && string[i] === '\\'
+	) { --i; }
+	return (index - i) % 2 === 0;
+}
+</isEscapeingAt>
+
+<partitionValueToIndex>
+function partitionValueToIndex (partition, value) {
+  var group;
+
+  if (!partition) {
+    return 0;
+  }
+  
+  group = partition.groups.get(value, 'value');
+
+  if (group) {
+    return group.groupIndex;
+  } else {
+    return -1;
+  }
+}
+</partitionValueToIndex>
+
+<tick>
+function tick (a) {
+			if (isStopped) return
+
+			let playedTime = context.currentTime - initTime;
+			let playedCount = playedTime * sampleRate;
+
+			
+			if (lastCount - playedCount < samplesPerFrame) {
+				let buf = fetch(samplesPerFrame)
+
+				
+				util.copy(buf, buffer, lastCount % buffer.length)
+
+				
+				lastCount += samplesPerFrame;
+
+				
+				consume(samplesPerFrame)
+
+				
+				tick()
+			}
+			
+			else {
+				let starvingTime = (lastCount - samplesPerFrame) / sampleRate;
+				let remainingTime = starvingTime - playedTime;
+				setTimeout(tick, remainingTime * 1000)
+			}
+		}
+</tick>
+
+<getLayout>
+function getLayout(layout) {
+    if (!layoutCache.hasOwnProperty(layout)) {
+      var layoutContents = false,
+          layoutPath = path.join(
+        path.isAbsolute(options.layoutPath) ?
+          options.layoutPath : path.join(process.cwd(), options.layoutPath),
+        layout
+      );
+      try {
+        <readLayoutFile>
+        layoutContents = fs.readFileSync(layoutPath, 'utf8');
+        </readLayoutFile>
+      } catch (err) {
+        throw new PluginError(logFlag, 'Could not read layout: \'' + layoutPath + '\'\n');
+      }
+      layoutCache[layout] = {
+        contents: layoutContents,
+        path: layoutPath
+      };
+    }
+    return layoutCache[layout];
+  }
+</getLayout>
+
+<getPixel>
+function (x, y) {
+        var i = (y * this.size.w + x) * this.bytes;
+        var res = [this.image[i], this.image[i + 1], this.image[i + 2], this.image[i + 3]];
+        return res;
+    }
+</getPixel>
+
+<warn>
+function () {
+        var prefix = 'WARN';
+        this.output(prefix, prefix.yellow, Array.prototype.slice.call(arguments));
+    }
+</warn>
+
+<pushNode>
+function pushNode(result, nodes) {
+	'use strict';
+
+	var temp;
+
+	if (result.length === 0) {
+		return nodes;
+	}
+	if (result.length < nodes.length) {
+		
+		temp = result;
+		result = nodes;
+		nodes = temp;
+	}
+	for (var i = 0, l = nodes.length; i < l; i++) {
+		if (!result.includes(nodes[i])) {
+			result.push(nodes[i]);
+		}
+	}
+	return result;
+}
+</pushNode>
+
+<_stringsByCharOrder>
+function _stringsByCharOrder(magicWord, givenMagicWord) {
+  let charNumber = 0
+
+  function _findMatchingCharacter(matchChar, string) {
+    let found = false
+    for (let j = charNumber; j < string.length; j++) {
+      const stringChar = string[j]
+      if (stringChar === matchChar) {
+        found = true
+        charNumber = j + 1
+        break
+      }
+    }
+    return found
+  }
+
+  for (let i = 0; i < givenMagicWord.length; i++) {
+    const matchChar = givenMagicWord[i]
+    const found = _findMatchingCharacter(matchChar, magicWord)
+    if (!found) {
+      return _matchRankMap.noMatch
+    }
+  }
+  return _matchRankMap.matches
+}
+</_stringsByCharOrder>
+
+<_createMaskConsumer>
+function _createMaskConsumer() {
+  const element = document.createElementNS(svgNS, 'rect');
+
+  _setAttributes(element, {
+    height: '100%',
+    width: '100%',
+    x: '0',
+    y: '0'
+  });
+  element.setAttribute('mask', `url(#${elementIds.modalOverlayMask})`);
+
+  return element;
+}
+</_createMaskConsumer>
+
+<TypeVector>
+function TypeVector(options) {
+    var opts = util._extend({type: 'int'}, options);
+    this.constructor.super_.call(this, opts.buffer, opts.offset);
+    this._typeId = TypeVector.id;
+    this._typeName = TypeVector.typeName;
+    this.module = opts.module;
+    <manageType>
+    manageType.call(this, opts.type);
+    </manageType>
+    this.list = !opts.list ? [] : opts.list;
+    this._byId = {};
+    if (TypeVector.logger.isDebugEnabled()) {
+        TypeVector.logger.debug('Vector init: module = %s , type = %s, list = %s', opts.module, opts.type, this.list);
+    }
+}
+</TypeVector>

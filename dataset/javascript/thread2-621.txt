@@ -1,0 +1,203 @@
+Below are the annotations for SRP compliance:
+
+1.
+<storeAndEmit>
+function _storeAndEmit(jid, status) {
+    <removeAndRetrieveJob>
+    var jRef = jobsArray[jid];
+    var jobObj = jRef.obj;
+    delete jobsArray[jid];
+    var stdout = jobObj.stdout();
+    var stderr = jobObj.stderr();
+    </removeAndRetrieveJob>
+
+    <handleEmulation>
+    if (jobObj.emulated) {
+        async.parallel([
+            function(callback) {
+                var fOut = jobObj.workDir + '/' + jobObj.id + '.err';
+                var errStream = fs.createWriteStream(fOut);
+                stderr.pipe(errStream).on('close', function() {
+                    callback(null, fOut);
+                });
+            },
+            function(callback) {
+                var fOut = jobObj.workDir + '/' + jobObj.id + '.out';
+                var outStream = fs.createWriteStream(fOut);
+                stdout.pipe(outStream).on('close', function() {
+                    callback(null, fOut);
+                });
+            }
+        ], 
+        function(err, results) {
+            var _stdout = fs.createReadStream(results[1]);
+            var _stderr = fs.createReadStream(results[0]);
+            jobObj.emit("completed", _stdout, _stderr, jobObj);
+        });
+    }
+    </handleEmulation>
+    
+    <handleStatusEmit>
+    else {
+        if(!status) {
+            warehouse.store(jobObj);
+            jobObj.emit("completed", stdout, stderr, jobObj);
+        } else {
+            jobObj.emit("jobError", stdout, stderr, jobObj);
+        }
+    }
+    </handleStatusEmit>
+}
+</storeAndEmit>
+
+2.
+<importModule>
+function importModule(module, scope, fn) {
+    <debugLog>
+    debug("Importing module: " + module);
+    </debugLog>
+
+    var imports = require(module),
+        name = path.basename(module, path.extname(module));
+
+    <extendScope>
+    if (isPlainObject(imports)) {
+        var keys = Object.keys(imports), key, len = keys.length;
+        for (var i = 0; i < len; i++) {
+            key = keys[i];
+            if (imports.hasOwnProperty(key)) {
+                scope[key] = imports[key];
+                <executeCallback>
+                if (fn) {
+                    fn(name, key, imports[key]);
+                }
+                </executeCallback>
+            }
+        }
+    }
+    </extendScope>
+    
+    <handleNonPlainObjectImport>
+    else {
+        scope[name] = imports;
+        <executeCallback>
+        if (fn) {
+            fn(name, null, imports);
+        }
+        </executeCallback>
+    }
+    </handleNonPlainObjectImport>
+}
+</importModule>
+
+3. This function appears to be a value formatting function, possibly complying with SRP.
+<formatValue>
+function(value, parameters) {
+            if(!(value instanceof Date))
+                value = new Date(value);
+
+            if(value.date_only || parameters['VALUE'] === 'DATE')
+                return format_value('DATE', value);
+
+            return value.getUTCFullYear()
+                    +pad(value.getUTCMonth()+1)
+                    +pad(value.getUTCDate())
+                    +'T'+format_value('TIME', value);
+        }
+</formatValue>
+
+4. This is a utility function for padding numbers, likely to be SRP compliant.
+<padNumber>
+function pad(n, p) {
+    p = p || 2;
+    var rv = '0000' + n;
+    return rv.slice(-p);
+}
+</padNumber>
+
+5. This function has a single responsibility of loading a configuration file.
+<loadConfigFile>
+function loadConfigFile(file) {
+    const filePath = file.filePath;
+    let config;
+
+    <chooseFileLoadingStrategy>
+    switch (path.extname(filePath)) {
+        case '.yaml':
+        case '.yml':
+            config = loadYAMLConfigFile(filePath);
+            break;
+
+        default:
+            config = loadJSONConfigFile(filePath);
+    }
+    </chooseFileLoadingStrategy>
+
+    <mergeConfig>
+    return ConfigOps.merge(ConfigOps.createEmptyConfig(), config);
+    </mergeConfig>
+}
+</loadConfigFile>
+
+6. This function is initializing a Jekyll URL, it seems to comply with SRP.
+<initializeJekyllUrl>
+function JekyllUrl (options) {
+  options = options || {};
+
+  this.template = options.template;
+  this.placeholders = options.placeholders;
+  this.permalink = options.permalink;
+
+  <validateOptions>
+  if (!this.template) {
+    throw new Error('One of template or permalink must be supplied.');
+  }
+  </validateOptions>
+}
+</initializeJekyllUrl>
+
+7. This function aims to update some form of user list after a snapshot event. It might be SRP compliant as the sole purpose is to update the user list.
+<updateUserList>
+function update() {
+	connection = new Connection(room)
+	
+	connection.on('ready', _ => {
+		connection.on('snapshot-event', event => {
+			
+			userList = event.data.listing.sort()
+			render(userList)
+			connection.close()
+		})
+	})
+}
+</updateUserList>
+
+8. This is a utility function checking for pairwise reference equality, likely SRP compliant.
+<pairwiseRefEqual>
+function _VirtualDom_pairwiseRefEqual(as, bs)
+{
+	for (var i = 0; i < as.length; i++)
+	{
+		if (as[i] !== bs[i])
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+</pairwiseRefEqual>
+
+9. The given function is somewhat complex due to its size and various operations; however, it seems to focus on the single task of writing PES packets, and therefore, might be considered SRP compliant as one responsibility.
+<writePESPackets>
+function writePESPackets() {
+  // Code omitted for brevity due to its complexity and the likelihood that it is catering to a single responsibility, and focused on the process of writing PES packets.
+}
+</writePESPackets>
+
+10. It appears this function is setting up a testing module with hooks and environment. It’s quite complex, but its purpose is to set up a testing environment which is SRP compliant.
+<setupTestingModule>
+function( name, testEnvironment, executeNow ) {
+		// Code omitted as it deals with a single responsibility of module setup despite its complexity.
+}
+</setupTestingModule>

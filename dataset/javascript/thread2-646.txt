@@ -1,0 +1,260 @@
+```
+<objectToQueryString>
+function objectToQueryString(obj) {
+  var str = [];
+  for (var p in obj) {
+    if (obj.hasOwnProperty(p)) {
+      str.push(p + '=' + obj[p]);
+    }
+  }
+  return str.join('&');
+}
+</objectToQueryString>
+```
+
+The `objectToQueryString` function complies with SRP. It exclusively converts an object to a query string.
+
+```
+<toBoolean>
+function toBoolean(input) {
+  if (_.isString(input) && ["false", "f", "n", "no"].indexOf(input.toLowerCase()) !== -1) {
+    return false;
+  }
+  return (input === null) ? null : !!input;
+}
+</toBoolean>
+```
+
+The `toBoolean` function is SRP compliant. It converts an input to a boolean value.
+
+```
+<RangeTreeNode>
+function RangeTreeNode(parent) {
+  this.parent = parent;
+  this.start = undefined;
+  this.end = undefined;
+  this.children = [];
+
+  
+  <setStart>
+  this.setStart = function (node, index) {
+    this.start = { node: node, index: index };
+  };
+  </setStart>
+
+  
+  <setEnd>
+  this.setEnd = function (node, index) {
+    this.end = { node: node, index: index };
+  };
+  </setEnd>
+
+  
+  <getParent>
+  this.getParent = function () {
+    if (!this.parent) {
+      this.parent = new RangeTreeNode();
+      this.parent.children.push(this);
+    }
+    return this.parent;
+  };
+  </getParent>
+
+  
+  <createNewChild>
+  this.createNewChild = function () {
+    var child = new RangeTreeNode(this);
+    this.children.push(child);
+    return child;
+  };
+  </createNewChild>
+
+  
+  <getNextSibling>
+  this.getNextSibling = function () {
+    return this.getParent().createNewChild();
+  };
+  </getNextSibling>
+
+  
+  <toRanges>
+  this.toRanges = function () {
+    var top = this;
+    while (top.parent) {
+      top = top.parent;
+    }
+    return _toRangesRecursive(top, []);
+  };
+  </toRanges>
+
+  
+  <_toRangesRecursive>
+  function _toRangesRecursive(node, list) {
+    if (node.start && node.end) {
+      var range = $window.document.createRange();
+      range.setStart(node.start.node, node.start.index);
+      range.setEnd(node.end.node, node.end.index);
+      list.push(range);
+    }
+    for (var c in node.children) {
+      _toRangesRecursive(node.children[c], list);
+    }
+    return list;
+  }
+  </_toRangesRecursive>
+}
+</RangeTreeNode>
+```
+
+The `RangeTreeNode` function violates SRP. It contains multiple methods with different responsibilities within a class constructor.
+
+```
+<randProbPrime>
+function randProbPrime(k) {
+  if (k >= 600) return randProbPrimeRounds(k, 2);
+  if (k >= 550) return randProbPrimeRounds(k, 4);
+  if (k >= 500) return randProbPrimeRounds(k, 5);
+  if (k >= 400) return randProbPrimeRounds(k, 6);
+  if (k >= 350) return randProbPrimeRounds(k, 7);
+  if (k >= 300) return randProbPrimeRounds(k, 9);
+  if (k >= 250) return randProbPrimeRounds(k, 12);
+  if (k >= 200) return randProbPrimeRounds(k, 15);
+  if (k >= 150) return randProbPrimeRounds(k, 18);
+  if (k >= 100) return randProbPrimeRounds(k, 27);
+  return randProbPrimeRounds(k, 40);
+}
+</randProbPrime>
+```
+
+The `randProbPrime` function is SRP compliant. It selects and returns the value based on the input according to a single criterion: the number of rounds for the prime probability test.
+
+```
+<serverRestart>
+function () {
+  this.tries = 1;
+  
+  <handleMaxTries>
+  if (this.tries++ >= 10) {
+    console.error('尝试新端口过多，请手动切换到其他端口');
+    return process.exit(0);
+  }
+  </handleMaxTries>
+  
+  this.server.listen(this.options.port);
+  this.__reseting = false;
+}
+</serverRestart>
+```
+
+The anonymous function is not SRP compliant as it handles both retry logic and server restart within the same function block.
+
+```
+<androidEnvironmentCheck>
+function (context) {
+  const androidHome = process.env['ANDROID_HOME']
+  const hasAndroidEnv = !context.strings.isBlank(androidHome)
+  
+  <checkAndroidDirectoryExistence>
+  const hasAndroid = hasAndroidEnv && context.filesystem.exists(`${androidHome}/tools`) === 'dir'
+  </checkAndroidDirectoryExistence>
+
+  return Boolean(hasAndroid)
+}
+</androidEnvironmentCheck>
+```
+
+The function checks for the presence of the Android environment and is SRP compliant, as it performs a single check and relies on a single cohesive responsibility – checking the Android environment.
+
+```
+<getPixelValues>
+function getPixelValues(pixelData) {
+  let minPixelValue = Number.MAX_VALUE;
+  let maxPixelValue = Number.MIN_VALUE;
+  const len = pixelData.length;
+  let pixel;
+  for (let i = 0; i < len; i++) {
+    pixel = pixelData[i];
+    minPixelValue = minPixelValue < pixel ? minPixelValue : pixel;
+    maxPixelValue = maxPixelValue > pixel ? maxPixelValue : pixel;
+  }
+  return {
+    minPixelValue,
+    maxPixelValue
+  };
+}
+</getPixelValues>
+```
+
+The `getPixelValues` function complies with SRP as it calculates and returns the min and max pixel values from the provided data array.
+
+```
+<storedPixelDataToImageData>
+function storedPixelDataToImageData(image) {
+  const pixelData = image.getPixelData();
+  const numberOfChannels = 2;
+  const data = new Uint8Array(image.width * image.height * numberOfChannels);
+  let offset = 0;
+  for (let i = 0; i < pixelData.length; i++) {
+    data[offset++] = pixelData[i];
+    data[offset++] = pixelData[i] < 0 ? 0 : 1;
+  }
+  return data;
+}
+</storedPixelDataToImageData>
+```
+
+The `storedPixelDataToImageData` function violates SRP, as it is both retrieving pixel data and creating a new Uint8Array with complex business logic.
+
+```
+<rearrangeArrayIndices>
+function (arr, ct, key) {
+  if (arr[ct] !== undefined) {
+    var tmp = ct;
+    ct += 1;
+    if (ct === key) {
+      ct += 1;
+    }
+    ct = _checkToUpIndices(arr, ct, key)
+    arr[ct] = arr[tmp];
+    delete arr[tmp];
+  }
+  return ct;
+}
+</rearrangeArrayIndices>
+```
+
+The function rearranges array indices and calls a recursive internal function, which arguably should be considered a single responsibility focused on array index management.
+
+```
+<makeMapForInstanceTearDown>
+function (obj, instance) {
+  var teardown;
+
+  <initializeTeardown>
+  if (!madeMap) {
+    teardown = teardownMap;
+    madeMap = {};
+  }
+  </initializeTeardown>
+
+  <generateUniqueIdForObj>
+  var hasCid = obj._cid;
+  var cid = can.cid(obj);
+  </generateUniqueIdForObj>
+
+  <populateMadeMap>
+  if (!madeMap[cid]) {
+    madeMap[cid] = {
+      obj: obj,
+      instance: instance,
+      added: !hasCid
+    };
+  }
+  </populateMadeMap>
+
+  return teardown;
+}
+</makeMapForInstanceTearDown>
+```
+
+The function appears to have multiple responsibilities: initializing data structures, ensuring unique Ids, and populating map structures, thereby violating SRP.

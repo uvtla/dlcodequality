@@ -1,0 +1,152 @@
+<setOptions>
+function(options) {
+      inputEx.CombineField.superclass.setOptions.call(this, options);
+
+      <classNameOption>
+      this.options.className = options.className ? options.className : 'inputEx-CombineField';
+      </classNameOption>
+
+      <separatorsOption>
+      this.options.separators = options.separators;
+      </separatorsOption>
+   }
+</setOptions>
+
+<constructor>
+function Activity(activityDate, activityType, affectingFund, affectingActor, balancePrimary) {
+  this.activityDate = activityDate;
+  this.activityType = activityType;
+  this.affectingFund = affectingFund;
+  this.affectingActor = affectingActor;
+  this.renderedBalancePrimary = balancePrimary;
+  this.renderedBalanceSecondary = null;
+}
+</constructor>
+
+<compareFunction>
+function (a, b) {
+  if (!b.pos || !a.pos) {
+      return (a.pos ? -Infinity : Infinity);
+  }
+  <positionComparison>
+  var result = b.pos.z - a.pos.z;
+  return (result ? result : (b.pos.y - a.pos.y));
+  </positionComparison>
+}
+</compareFunction>
+
+<flatten>
+function flatten (options) {
+  <setFlattenOption>
+  this.options.flatten = is.bool(options) ? options : true;
+  </setFlattenOption>
+  
+  <setColourOption>
+  if (is.object(options)) {
+    this._setColourOption('flattenBackground', options.background);
+  }
+  </setColourOption>
+  
+  return this;
+}
+</flatten>
+
+<zoomFunction>
+function (zoomLevel, redraw) {
+  this._zoomLevel = zoomLevel / 100;
+
+  <centeringImage>
+  if (this._keepCenter) {
+      this.centerImage(false);
+  }
+  </centeringImage>
+
+  <redrawingImage>
+  if (redraw === true) {
+      this.redraw();
+  }
+  </redrawingImage>
+}
+</zoomFunction>
+
+<constructor>
+function Notification(name, object, info) {
+  this.name = name;
+  this.object = object;
+  this.info = info;
+}
+</constructor>
+
+<maybeProxy>
+function maybeProxy(jolokiaUrl, url) {
+  <applyProxyToJolokiaURL>
+  if (jolokiaUrl && _.startsWith(jolokiaUrl, 'proxy/')) {
+      log.debug("Jolokia URL is proxied, applying proxy to: ", url);
+      return join('proxy', url);
+  }
+  </applyProxyToJolokiaURL>
+
+  var origin = window.location['origin'];
+
+  <applyProxyToExternalURL>
+  if (url && (_.startsWith(url, 'http') && !_.startsWith(url, origin))) {
+      log.debug("Url doesn't match page origin: ", origin, " applying proxy to: ", url);
+      return join('proxy', url);
+  }
+  </applyProxyToExternalURL>
+
+  <noProxyNeeded>
+  log.debug("No need to proxy: ", url);
+  return url;
+  </noProxyNeeded>
+}
+</maybeProxy>
+
+<smembersFunction>
+function smembers(key, req) {
+  var val = this.getKey(key, req);
+  if(val === undefined) return [];
+  
+  <returnData>
+  return val.data;
+  </returnData>
+}
+</smembersFunction>
+
+<cleanup>
+function () {
+  <unlinkDebugFile>
+  this._fsUnlink(path.join(this.base, DEBUG_File));
+  </unlinkDebugFile>
+
+  <removeCacheDirectory>
+  if (!this.options.combo) {
+      this._fsRmdir(path.join(this.output, CACHE_DIR));
+  }
+  </removeCacheDirectory>
+}
+</cleanup>
+
+<createRunner>
+function createRunner(builderInstance) {
+    var runnerInstance={
+        name:builderInstance.name,
+        builder:builderInstance,
+        
+        <runnerRunMethod>
+        run: function (input,callback) {
+            var context =
+                createContext(null, (input==null) ? {} : input);
+
+            exec(builderInstance.root, context, function(err,result){
+                if (callback){
+                    callback(err,result);
+                }
+            });
+        },
+        </runnerRunMethod>
+    };
+    
+    return runnerInstance;
+}
+</createRunner>

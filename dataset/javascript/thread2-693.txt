@@ -1,0 +1,503 @@
+Below are the annotations for the provided JavaScript functions:
+
+1.
+
+```javascript
+function( el, duration, reason, origEvent ) {
+            <initializationChecks>
+            if ( !initialized ) {
+                return false;
+            }
+            </initializationChecks>
+
+            <prepareEnvironment>
+            initAllSteps();
+            </prepareEnvironment>
+
+            <validateElement>
+            if ( !( el = getStep( el ) ) ) {
+                return false;
+            }
+            </validateElement>
+
+            <scrollToTop>
+            window.scrollTo( 0, 0 );
+            </scrollToTop>
+
+            <stepDataAndDurationSetup>
+            var step = stepsData[ "impress-" + el.id ];
+            duration = ( duration !== undefined ? duration : step.transitionDuration );
+            </stepDataAndDurationSetup>
+
+            <activeStepProcessing>
+            if ( activeStep && activeStep !== el ) {
+                
+                <createAndDispatchEvent>
+                var event = { target: activeStep, detail: {} };
+                event.detail.next = el;
+                event.detail.transitionDuration = duration;
+                event.detail.reason = reason;
+                if ( origEvent ) {
+                    event.origEvent = origEvent;
+                }
+                </createAndDispatchEvent>
+
+                <executePluginsAndConditionallyReturn>
+                if ( execPreStepLeavePlugins( event ) === false ) {
+                    return false;
+                }
+                </executePluginsAndConditionallyReturn>
+
+                
+                el = event.detail.next;
+                step = stepsData[ "impress-" + el.id ];
+                duration = event.detail.transitionDuration;
+            }
+            </activeStepProcessing>
+
+            <updateStepClasses>
+            if ( activeStep ) {
+                activeStep.classList.remove( "active" );
+                body.classList.remove( "impress-on-" + activeStep.id );
+            }
+            el.classList.add( "active" );
+
+            body.classList.add( "impress-on-" + el.id );
+            </updateStepClasses>
+
+            <setupTransformationTarget>
+            var target = {
+                rotate: {
+                    x: -step.rotate.x,
+                    y: -step.rotate.y,
+                    z: -step.rotate.z,
+                    order: step.rotate.order
+                },
+                translate: {
+                    x: -step.translate.x,
+                    y: -step.translate.y,
+                    z: -step.translate.z
+                },
+                scale: 1 / step.scale
+            };
+            </setupTransformationTarget>
+
+            <scaleAndTransitionSetup>
+            var zoomin = target.scale >= currentState.scale;
+
+            duration = lib.util.toNumber( duration, config.transitionDuration );
+            var delay = ( duration / 2 );
+
+            if ( el === activeStep ) {
+                windowScale = computeWindowScale( config );
+            }
+
+            var targetScale = target.scale * windowScale;
+            </scaleAndTransitionSetup>
+
+            <stepLeaveHook>
+            if ( activeStep && activeStep !== el ) {
+                onStepLeave( activeStep, el );
+            }
+            </stepLeaveHook>
+
+            <applyCssTransformations>
+            css( root, {
+                perspective: ( config.perspective / targetScale ) + "px",
+                transform: scale( targetScale ),
+                transitionDuration: duration + "ms",
+                transitionDelay: ( zoomin ? delay : 0 ) + "ms"
+            } );
+
+            css( canvas, {
+                transform: rotate( target.rotate, true ) + translate( target.translate ),
+                transitionDuration: duration + "ms",
+                transitionDelay: ( zoomin ? 0 : delay ) + "ms"
+            } );
+            </applyCssTransformations>
+
+            <updateCurrentStateAndActiveStep>
+            if ( currentState.scale === target.scale ||
+                ( currentState.rotate.x === target.rotate.x &&
+                  currentState.rotate.y === target.rotate.y &&
+                  currentState.rotate.z === target.rotate.z &&
+                  currentState.translate.x === target.translate.x &&
+                  currentState.translate.y === target.translate.y &&
+                  currentState.translate.z === target.translate.z ) ) {
+                delay = 0;
+            }
+
+            currentState = target;
+            activeStep = el;
+            </updateCurrentStateAndActiveStep>
+
+            <setEnterTimeout>
+            window.clearTimeout( stepEnterTimeout );
+            stepEnterTimeout = window.setTimeout( function() {
+                onStepEnter( activeStep );
+            }, duration + delay );
+            </setEnterTimeout>
+
+            return el;
+        }
+```
+
+This function seems to manage the transition between steps in a presentation or similar interactive navigation. It sets up the environment, transforms, and CSS, potentially violating SRP by handling multiple aspects of the navigation process (initial validation, element transformation, event dispatching, UI updates).
+
+2.
+
+```javascript
+function getAuthMod () {
+    
+    let authMod = null;
+    <moduleLookup>
+    for (const m of Object.keys(ravelInstance[coreSymbols.modules])) {
+      const mod = ravelInstance[coreSymbols.modules][m];
+      if (Metadata.getClassMetaValue(Object.getPrototypeOf(mod), '@authconfig', 'enabled', false)) {
+        authMod = mod;
+        break;
+      }
+    }
+    </moduleLookup>
+    
+    <moduleValidation>
+    if (authMod === null) {
+      throw new $err.NotFound('Module annotated with @authconfig is required and was not found.');
+    }
+    </moduleValidation>
+
+    return authMod;
+  }
+```
+
+This function appears to be responsible for looking up and validating an authorization module in an application. It adheres to the SRP by focusing on the single task of finding an enabled module with a specific annotation, though it includes error handling for when such a module cannot be found.
+
+3.
+
+```javascript
+function RPCify (obj, opts) {
+  if (!obj) return null
+  if (!(this instanceof RPCify)) return new RPCify(obj, opts)
+  opts = opts || {}
+
+  <optionsSetup>
+  var defaults = {
+    skipPrivate: true,
+    include: null,
+    exclude: [],
+    override: {},
+    factory: null,
+    name: null,
+    access: function () { return true }
+  }
+
+  this.opts = <resolveOptions>
+              obj.__hyperpc ? Object.assign(defaults, obj.__hyperpc, opts) :
+              (obj.prototype && obj.prototype.__hyperpc) ? Object.assign(defaults, obj.prototype.__hyperpc, opts) :
+              (!obj.prototype && Object.getPrototypeOf(obj) && Object.getPrototypeOf(obj).__hyperpc) ? Object.assign(defaults, Object.getPrototypeOf(obj).__hyperpc, opts) :
+              Object.assign(defaults, opts)
+              </resolveOptions>
+  </optionsSetup>
+
+  this.access = this.opts.access
+  this.override = this.opts.override
+  this.cache = {}
+
+  <setupBasedOnObject>
+  if (obj.prototype) {
+    
+    <constructorLogic>
+    if (opts.factory) this.factory = opts.factory
+    else this.factory = makeDefaultFactory(obj)
+
+    this.instance = null
+    this.name = obj.name
+    this.funcs = getAllFuncs(obj.prototype)
+    </constructorLogic>
+  } else {
+    
+    <instanceLogic>
+    this.factory = null
+    this.instance = obj
+    this.name = Object.getPrototypeOf(obj).name
+    this.funcs = getAllFuncs(obj)
+    </instanceLogic>
+  }
+  </setupBasedOnObject>
+
+  <functionFiltering>
+  var out = ['constructor']
+  if (this.opts.exclude) out = out.concat(this.opts.exclude)
+
+  this.filteredFuncs = this.funcs.filter(f => {
+    if (this.opts.include && this.opts.include.indexOf(f) === -1) return false
+    if (out.indexOf(f) !== -1) return false
+    if (this.opts.skipPrivate && f.substr(0, 1) === '_') return false
+    return true
+  })
+  </functionFiltering>
+}
+```
+
+This function sets up an RPC (remote procedure call) interface for a given object. It handles various aspects, including option defaults, instance creation, method filtering, and cache setup. However, it could be argued that these are all parts of the overarching responsibility of creating an RPC interface, making it SRP compliant.
+
+4.
+
+```javascript
+function ex2engine (fullpath) {
+    let extension = extname(fullpath).slice(1);
+    let file = fullpath.replace(extname(fullpath), '');
+    let engine;
+
+    <findExtension>
+    if (!extension && !cacher[fullpath] && !exists(fullpath)) {
+        for (const engineExt of testedEngines) {
+            
+            if (exists(`${file}.${engineExt}`)) {
+                extension = engineExt;
+                break;
+            }
+        }
+    }
+    </findExtension>
+
+    <setupEngineAndCache>
+    if (!cacher[fullpath]) {
+        engine = extMapper[extension] || extension;
+        let path = `${file}.${extension}`;
+        if (testedEngines.indexOf(engine) === -1 && avaliableEngines.indexOf(engine) > -1 && engine !== 'html') {
+            console.warn(`${engine} engine is avaliable but not tested`);
+        } else if (avaliableEngines.indexOf(engine) === -1 && engine !== 'html') {
+            throw Error(`${engine} engine is not supported`);
+        }
+        cacher[fullpath] = [engine, path];
+    }
+    </setupEngineAndCache>
+
+    return cacher[fullpath];
+}
+```
+
+This function solves two responsibilities: it finds an appropriate file extension if one is not part of `fullpath`, and it sets up or caches the corresponding template engine. This could be seen as a violation of SRP as these are two separate actions within the template engine resolution process.
+
+5.
+
+```javascript
+function(path, size, callback) {
+    var params = this._parseParams(arguments);
+    this._read(params, function(err, buf) {
+        params.callback(err, err ? '' : bts(buf));
+    });
+}
+```
+
+This function reads data from a given path and processes the result. It parses parameters and then executes a read operation with a callback that handles errors and transforms the buffer of data if successful. It could be considered SRP compliant as it encapsulates the file reading process including error handling.
+
+6.
+
+```javascript
+function(options) {
+    var conversionEvent = {
+      httpVerb: HTTP_VERB,
+    };
+
+    var commonParams = <getCommonParameters>
+                       getCommonEventParams(options);
+                       </getCommonParameters>
+    conversionEvent.url = ENDPOINT;
+
+    var snapshot = <getVisitorSnapshot>
+                   getVisitorSnapshot(options.configObj,
+                                            options.eventKey,
+                                            options.eventTags,
+                                            options.logger);
+                   </getVisitorSnapshot>
+
+    <setupRequestPayload>
+    commonParams.visitors[0].snapshots = [snapshot];
+    conversionEvent.params = commonParams;
+    </setupRequestPayload>
+
+    return conversionEvent;
+  }
+```
+
+This function constructs a conversion event for tracking purposes. It generates common parameters and a snapshot, and then assembles these into the event's structure. Since the entire process is focused on creating a single conversion event, it follows the SRP.
+
+7.
+
+```javascript
+function ngLinkDirective($router, $location, $parse) {
+  var rootRouter = $router;
+
+  <provideDirectiveDefinition>
+  return {
+    require: '?^^ngOutlet',
+    restrict: 'A',
+    link: ngLinkDirectiveLinkFn
+  };
+  </provideDirectiveDefinition>
+
+  <directiveLinkFunction>
+  function ngLinkDirectiveLinkFn(scope, elt, attrs, ctrl) {
+    var router = (ctrl && ctrl.$$router) || rootRouter;
+    if (!router) {
+      return;
+    }
+
+    var link = attrs.ngLink || '';
+    var parts = <matchLinkMicrosyntax>
+                link.match(LINK_MICROSYNTAX_RE);
+                </matchLinkMicrosyntax>
+    var routeName = parts[1];
+    var routeParams = parts[2];
+    var url;
+
+    <resolveUrlAndUpdateHref>
+    if (routeParams) {
+      var routeParamsGetter = $parse(routeParams);
+      
+      if (routeParamsGetter.constant) {
+        var params = routeParamsGetter();
+        url = '.' + router.generate(routeName, params);
+        elt.attr('href', url);
+      } else {
+        scope.$watch(function() {
+          return routeParamsGetter(scope);
+        }, function(params) {
+          url = '.' + router.generate(routeName, params);
+          elt.attr('href', url);
+        }, true);
+      }
+    } else {
+      url = '.' + router.generate(routeName);
+      elt.attr('href', url);
+    }
+    </resolveUrlAndUpdateHref>
+  }
+  </directiveLinkFunction>
+}
+```
+
+This is a directive definition in Angular. It provides a directive definition object and a link function as part of the directive's behavior. The definition object is SRP compliant, but the link function handles both parsing of the `ngLink` attribute and dynamically updating the `href` attribute of elements, which could be considered separate responsibilities.
+
+8.
+
+```javascript
+function toSrc(obj, depth) {
+    <initializeKnownObjects>
+    var result;
+    knownObjs = []; 
+    </initializeKnownObjects>
+
+    <convertObjectToSource>
+    result = toSrcRecursive(obj, depth);
+    </convertObjectToSource>
+
+    return result;
+}
+```
+
+The function initiates a variable to store known objects and then uses a recursive function to convert the provided object to its source representation. This function is SRP compliant as the two actions are parts of the main task of converting an object to its source code representation.
+
+9.
+
+```javascript
+function IkoReporter(baseReporterDecorator, config, loggerFactory, formatError) {
+  
+  <decoratorAndLoggerSetup>
+  baseReporterDecorator(this);
+  const logger = loggerFactory.create("reporter.iko");
+  </decoratorAndLoggerSetup>
+
+  <variableInitialization>
+  const divider = "=".repeat(process.stdout.columns || 80);
+  let slow = 0;
+  let totalTime = 0;
+  let netTime = 0;
+  let failedTests = [];
+  let firstRun = true;
+  let isRunCompleted = false;
+  chalk.enabled = config.colors !== false;
+  </variableInitialization>
+
+  <setWriteFunction>
+  const self = this;
+  const write = function () {
+    for (let i = 0; i < arguments.length; i++) {
+      self.write(arguments[i]);
+    }
+  }
+  </setWriteFunction>
+
+  <reportingHooks>
+  this.onSpecComplete = (browser, result) => { ... };
+  this.onRunStart = () => { ... };
+  this.onBrowserStart = () => { ... };
+  this.onRunComplete = (browsers, results) => { ... };
+  </reportingHooks>
+}
+```
+
+This function, defined mostly as a constructor, sets up a custom reporter for a testing framework, initializing variables and defining event handlers for reporting test runs. The multiple actions within the reporting hooks are related to reporting the lifecycle of test execution. However, due to the various tasks involved (writing output, formatting results, handling different events), it does straddle the line of SRP compliance. A case might be made it's on the verge of SRP violation since the various hooks handle distinctly different aspects of reporting.
+
+10.
+
+```javascript
+function configureSauceLabs (config) {
+  <verifyEnvironmentVariables>
+  let username = process.env.SAUCE_USERNAME;
+  let accessKey = process.env.SAUCE_ACCESS_KEY;
+  if (!username || !accessKey) {
+    throw new Error(`SAUCE_USERNAME and/or SAUCE_ACCESS_KEY is not set`);
+  }
+  </verifyEnvironmentVariables>
+
+  <projectInformation>
+  var project = require("./package.json");
+  </projectInformation>
+
+  <setupSauceLabsConfiguration>
+  config.sauceLabs = {
+    build: `${project.name} v${project.version} Build #${process.env.TRAVIS_JOB_NUMBER}`,
+    testName: `${project.name} v${project.version}`,
+    tags: [project.name],
+  };
+  </setupSauceLabsConfiguration>
+
+  <defineCustomLaunchers>
+  config.customLaunchers = {
+    IE_11: {
+      base: "SauceLabs",
+      platform: "Windows 7",
+      browserName: "internet explorer"
+    },
+    Edge: {
+      base: "SauceLabs",
+      platform: "Windows 10",
+      browserName: "microsoftedge"
+    },
+  };
+  </defineCustomLaunchers>
+
+  <configureTestRun>
+  config.reporters.push("saucelabs");
+  config.browsers = Object.keys(config.customLaunchers);
+  config.captureTimeout = 60000;
+  config.browserDisconnectTolerance = 5,
+  config.browserDisconnectTimeout = 60000;
+  config.browserNoActivityTimeout = 60000;
+  </configureTestRun>
+
+  <setupExclusions>
+  config.exclude = [
+    "test/specs/invalid/*",
+    "test/specs/unknown/*",
+    "test/specs/validate-schema/*",
+    "test/specs/real-world/*",
+  ];
+  </setupExclusions>
+}
+```
+
+This function configures a test environment to work with Sauce Labs. It checks environment variables, sets up custom launchers, test run parameters, and excludes patterns. Since this function is focused on the specific task of setting up Sauce Labs configuration for test runs, it can be seen as adhering to SRP.

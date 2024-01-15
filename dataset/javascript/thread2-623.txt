@@ -1,0 +1,216 @@
+```javascript
+<createTriggerEvents>
+function(){
+    if (!this.triggers) { return; }
+
+    var triggerEvents = {};
+
+    
+    var triggers = _.result(this, "triggers");
+
+    
+    
+    _.each(triggers, function(value, key){
+
+      
+      <createSingleTriggerEvent>
+      triggerEvents[key] = function(e){
+
+        
+        if (e && e.preventDefault){ e.preventDefault(); }
+        if (e && e.stopPropagation){ e.stopPropagation(); }
+
+        
+        var args = {
+          view: this,
+          model: this.model,
+          collection: this.collection
+        };
+
+        
+        this.triggerMethod(value, args);
+      };
+      </createSingleTriggerEvent>
+
+    }, this);
+
+    return triggerEvents;
+}
+</createTriggerEvents>
+
+<parseRegExp>
+function parseRegExp (str) {
+  if (str instanceof RegExp) return str
+  let arg = String(str).match(/^\/(.*)\/(g|i|)$|.*/)
+  return new RegExp(arg[1] || arg[0], arg[2])
+}
+</parseRegExp>
+
+<renderOpenGLScene>
+function() {
+    var gl = this._canvas.gl();
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);
+    gl.disable(gl.BLEND);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.clearColor(this._options.background[0], this._options.background[1], 
+                  this._options.background[2], 1.0);
+    gl.cullFace(gl.FRONT);
+    gl.enable(gl.CULL_FACE);
+    this._drawWithPass('select');
+}
+</renderOpenGLScene>
+
+<getPersistantFacebookToken>
+function _getPersistantFacebookToken(){
+    return facebook.query()
+            .get('/oauth/access_token?' +
+                'grant_type=fb_exchange_token&' +
+                'client_id=' + appId + '&' +
+                'client_secret=' + secret + '&' +
+                'fb_exchange_token=' + this.options.code)
+            .request()
+           .then(function (res) {
+                
+                <handleTokenResponse>
+                if (res[1].error) {
+                    throw new Error(res[1].error.message);
+                }
+
+                this.creds = querystring.parse(res[1]);
+                </handleTokenResponse>
+            }.bind(this));
+}
+</getPersistantFacebookToken>
+
+<modifiedGramSchmidt>
+function modifiedGramSchmidt (m) {
+  const n = m.dimension;
+
+  const v0 = m.getColumn(0);
+  const u0 = v0;
+  const v1 = m.getColumn(1);
+  const u1 = v1.clone().sub(proj(u0, v1));
+  if (n === 2) {
+    m.setColumns(v0, v1);
+    return;
+  }
+  const v2 = m.getColumn(2);
+  const u2t = v2.clone().sub(proj(u0, v2));
+  const u2 = u2t.sub(proj(u1, u2t));
+  if (n === 3) {
+    m.setColumns(u0, u1, u2);
+    
+  }
+}
+</modifiedGramSchmidt>
+
+<subscribeAndNotify>
+function(s, args, ef) {
+
+        this.log(this.type + "->" + "sub: " +  s.id);
+
+        var ret;
+
+        ret = s.notify(args, this);
+
+        if (false === ret || this.stopped > 1) {
+            this.log(this.type + " cancelled by subscriber");
+            return false;
+        }
+
+        return true;
+}
+</subscribeAndNotify>
+
+<constructProps>
+function constructProps (fieldNames, feature) {
+  const properties = _.reduce(fieldNames, (tempProps, fieldName, key) => {
+    tempProps[fieldName] = (!isNaN(feature[key])) ? parseFloat(feature[key]) : feature[key]
+    return tempProps
+  }, {})
+  return properties
+}
+</constructProps>
+
+<processForEach>
+function processForEach(state, node, data) {
+  state.stack.push('foreach');
+  try {
+    var originalValue = node.getAttribute('foreach');
+    var value = originalValue;
+
+    <parseForEachAttribute>
+    var paramName = 'param';
+    if (value.charAt(0) === '$') {
+      
+      value = stripBraces(state, value);
+    }
+    else {
+      
+      var nameArr = value.split(' in ');
+      paramName = nameArr[0].trim();
+      value = stripBraces(state, nameArr[1].trim());
+    }
+    </parseForEachAttribute>
+    node.removeAttribute('foreach');
+    try {
+      var evaled = envEval(state, value, data, originalValue);
+      var cState = cloneState(state);
+      <handleForEachLoop>
+      handleAsync(evaled, node, function(reply, siblingNode) {
+        processForEachLoop(cState, reply, node, siblingNode, data, paramName);
+      });
+      </handleForEachLoop>
+      node.parentNode.removeChild(node);
+    }
+    catch (ex) {
+      handleError(state, 'Error with \'' + value + '\'', ex);
+    }
+  }
+  finally {
+    state.stack.pop();
+  }
+}
+</processForEach>
+
+<crawl>
+function crawl (obj, path, $refs, options) {
+  var promises = [];
+
+  if (obj && typeof obj === "object") {
+    if ($Ref.isExternal$Ref(obj)) {
+      <resolveRef>
+      promises.push(resolve$Ref(obj, path, $refs, options));
+      </resolveRef>
+    }
+    else {
+      <crawlNested>
+      Object.keys(obj).forEach(function (key) {
+        var keyPath = Pointer.join(path, key);
+        var value = obj[key];
+
+        if ($Ref.isExternal$Ref(value)) {
+          promises.push(resolve$Ref(value, keyPath, $refs, options));
+        }
+        else {
+          promises = promises.concat(crawl(value, keyPath, $refs, options));
+        }
+      });
+      </crawlNested>
+    }
+  }
+
+  return promises;
+}
+</crawl>
+
+<removeFocusListener>
+function(p_sType, p_aArgs) {
+            Event.removeFocusListener(document.documentElement, this._onElementFocus, this);
+
+            if (_currentModal == this) {
+                _currentModal = null;
+            }
+}
+</removeFocusListener>
+```

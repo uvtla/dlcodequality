@@ -1,0 +1,297 @@
+```javascript
+<function(app)>
+function(app) {
+  <initializeFilePath>
+  var filePath = path.join(app.getBase(), Constants.FILEPATH.SERVER_DIR, app.serverType, Constants.FILEPATH.LIFECYCLE);
+  if(!fs.existsSync(filePath)) {
+    return;
+  }
+  </initializeFilePath>
+
+  <loadLifecycle>
+  var lifecycle = require(filePath);
+  for(var key in lifecycle) {
+    if(typeof lifecycle[key] === 'function') {
+      app.lifecycleCbs[key] = lifecycle[key];
+    } else {
+      logger.warn('lifecycle.js in %s is error format.', filePath);
+    }
+  }
+  </loadLifecycle>
+}
+</function(app)>
+
+<anonymous>
+function (revertOriginal, keepEditor) {
+  <destructionLogic>
+  if (!keepEditor) {
+    editproxy.destroy(revertOriginal);
+  }
+  </destructionLogic>
+
+  <selectionLogic>
+  if (!selection.isSelected()) {
+    return;
+  }
+  selection.refreshBorderDimensions();
+  </selectionLogic>
+
+  <prepareEditproxy>
+  if (!keepEditor) {
+    editproxy.prepare();
+  }
+  </prepareEditproxy>
+}
+</anonymous>
+
+<anonymous>
+function(data) {
+  <formatAndTargetData>
+  var leftData = this.formatInput(data),
+      rightData = this.getTargets(leftData),
+      me = this;
+  </formatAndTargetData>
+
+  <populateLeftList>
+  $.each(leftData, function(index, value) {
+      me.$leftListBody.append([
+          '<li class="biz-transfer-list-content-item">',
+          '<input type="checkbox" data-id="' + value.id + '" title="' + value.title + '" ' + (value.chosen ? 'disabled' : '') + '/></li>'
+      ].join(''));
+  });
+  </populateLeftList>
+
+  <populateRightList>
+  $.each(rightData, function(index, value) {
+      me.$rightListBody.append(['<li class="biz-transfer-list-content-item">',
+          '<input type="checkbox" data-id="' + value.id + '" title="' + value.title + '" /></li>'
+      ].join(''));
+  });
+  </populateRightList>
+
+  <initializeCheckboxes>
+  this.$main.find(':checkbox').bizCheckbox({
+      theme: this.options.theme
+  });
+  </initializeCheckboxes>
+}
+</anonymous>
+
+<cleanLinks>
+function cleanLinks( el ) {
+  <cleanHtmlContent>
+  var i;
+  for ( i = 0; i < el.length; i++ ) {
+    el[ i ].innerHTML = cleanPath( el[ i ].innerHTML );
+  }
+  </cleanHtmlContent>
+}
+</cleanLinks>
+
+<jxh>
+function jxh(obj, indentStr = '  ', indentLevel = 0) {
+  <generateHtmlFromObject>
+  let html = '';
+  switch (getType(obj)) {
+      case 'array':
+          for (let item of obj) {
+              html += jxh(item, indentStr, indentLevel);
+          }
+          break;
+      case 'object':
+          for (let tag in obj) {
+              let content = obj[tag];
+              html += routeTags(tag, content, indentStr, indentLevel);
+          }
+          break;
+      default:
+          objTypeError(obj);
+          break;
+  }
+  return html;
+  </generateHtmlFromObject>
+}
+</jxh>
+
+<mapScaling>
+function(scale, centerX, centerY){
+  <calculateBoundingBox>
+  var bbox,
+      itemBbox,
+      newBbox,
+      codes,
+      i;
+
+  if (jvm.$.isArray(scale) || this.regions[scale]) {
+    if (jvm.$.isArray(scale)) {
+      codes = scale;
+    } else {
+      codes = [scale]
+    }
+    for (i = 0; i < codes.length; i++) {
+      if (this.regions[codes[i]]) {
+        itemBbox = this.regions[codes[i]].element.getBBox();
+        if (itemBbox) {
+          if (typeof bbox == 'undefined') {
+            bbox = itemBbox;
+          } else {
+            newBbox = {
+              x: Math.min(bbox.x, itemBbox.x),
+              y: Math.min(bbox.y, itemBbox.y),
+              width: Math.max(bbox.x + bbox.width, itemBbox.x + itemBbox.width) - Math.min(bbox.x, itemBbox.x),
+              height: Math.max(bbox.y + bbox.height, itemBbox.y + itemBbox.height) - Math.min(bbox.y, itemBbox.y)
+            }
+            bbox = newBbox;
+          }
+        }
+      }
+    }
+    </calculateBoundingBox>
+
+    <setMapScale>
+    this.setScale(
+      Math.min(this.width / bbox.width, this.height / bbox.height),
+      - (bbox.x + bbox.width / 2),
+      - (bbox.y + bbox.height / 2),
+      true
+    );
+    </setMapScale>
+  } else {
+    <setScaleDirectly>
+    scale = scale * this.baseScale;
+    this.setScale(scale, - centerX * this.defaultWidth, - centerY * this.defaultHeight, true);
+    </setScaleDirectly>
+  }
+}
+</mapScaling>
+
+<measureCleanup>
+function() {
+  <prepareModel>
+  const model = L.extend({}, this._resultsModel, { points: this._latlngs });
+  </prepareModel>
+
+  <unlockAndDetachEvents>
+  this._locked = false;
+  L.DomEvent.off(this._container, 'mouseover', this._handleMapMouseOut, this);
+  </unlockAndDetachEvents>
+
+  <clearMeasureAndEventHandlers>
+  this._clearMeasure();
+
+  this._captureMarker
+    .off('mouseout', this._handleMapMouseOut, this)
+    .off('dblclick', this._handleMeasureDoubleClick, this)
+    .off('click', this._handleMeasureClick, this);
+
+  this._map
+    .off('mousemove', this._handleMeasureMove, this)
+    .off('mouseout', this._handleMapMouseOut, this)
+    .off('move', this._centerCaptureMarker, this)
+    .off('resize', this._setCaptureMarkerIcon, this);
+  </clearMeasureAndEventHandlers>
+
+  <removeLayersAndResetState>
+  this._layer.removeLayer(this._measureVertexes).removeLayer(this._captureMarker);
+  this._measureVertexes = null;
+
+  this._updateMeasureNotStarted();
+  this._collapse();
+  </removeLayersAndResetState>
+
+  <fireMeasureFinish>
+  this._map.fire('measurefinish', model, false);
+  </fireMeasureFinish>
+}
+</measureCleanup>
+
+<versionGreaterThan>
+function versionGreaterThan (version1, version2) {
+  <handleEqualOrSpecialCases>
+  if (version1 === version2) return false;
+  if (version1 === -1) return version2;
+  if (version2 === -1) return version1;
+  </handleEqualOrSpecialCases>
+
+  <checkSimpleCase>
+  if (version1.indexOf('.') === -1 && version2.indexOf('.') === -1) {
+    return version1 > version2;
+  }
+  </checkSimpleCase>
+
+  <versionComparisonLogic>
+  var v1 = version1.split('.'),
+      v2 = version2.split('.'),
+      versionLength = (v1.length > v2.length ? v2 : v1).length;
+
+  for (var i = 0; i < versionLength; ++i) {
+    if (parseInt(v1[i], 10) > parseInt(v2[i], 10)) {
+      return true;
+    }
+  }
+  </versionComparisonLogic>
+
+  <handleTrailingVersions>
+  if (i < v1.length) {
+    return true;
+  }
+  </handleTrailingVersions>
+
+  return false;
+}
+</versionGreaterThan>
+
+<unindent>
+function unindent(string, skipFirstLine) {
+  <setupLineSplitting>
+  var lines     = string.split('\n'),
+      skipFirst = typeof skipFirstLine !== 'undefined' ? skipFirstLine : true,
+      start     = skipFirst ? 1 : 0;
+  </setupLineSplitting>
+
+  <findSmallestIndentation>
+  var indentation, smallestIndentation = Infinity;
+  for (var i = start, len = lines.length; i < len; ++i) {
+    if (isBlank(lines[i])) {
+      continue;
+    }
+    indentation = getIndentation(lines[i]);
+    if (indentation < smallestIndentation) {
+      smallestIndentation = indentation;
+    }
+  }
+  </findSmallestIndentation>
+
+  <reduceIndentation>
+  var result = [lines[0]]
+    .concat(
+      lines
+        .slice(1)
+        .map(function(line) { return decreaseIndent(line, smallestIndentation); })
+    )
+    .join('\n');
+  </reduceIndentation>
+
+  return result;
+}
+</unindent>
+
+<customLog>
+function customLog(message) {
+  <prepareMessage>
+  const trimmed = message.trim()
+  const limit = trimmed.indexOf('\n')
+  </prepareMessage>
+
+  <logOutput>
+  if (limit === -1) {
+    fancyLog(trimmed)
+  } else {
+    const title = trimmed.slice(0, limit).trim()
+    const details = trimmed.slice(limit).trim()
+    fancyLog(`${title}${('\n' + details).replace(/\n/g, '\n  ')}`)
+  }
+  </logOutput>
+}
+</customLog>
+```

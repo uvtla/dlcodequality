@@ -1,0 +1,197 @@
+Below are the annotations for the given JavaScript functions based on the Single Responsibility Principle (SRP):
+
+1st Function:
+```javascript
+<executeFunction>
+function(func, args){
+    var object;
+    <checkForMoreRows>
+    if (this.hasMoreRows()){</checkForMoreRows>
+        object = func.call(this, args);
+        this.nextRow();
+    }
+    else object = false;
+    return object;
+}
+</executeFunction>
+```
+
+2nd Function:
+```javascript
+<calculatePolarCoordinates>
+function(simple) {
+    var rho = this.norm();
+    var atan = Math.atan2(this.y, this.x);
+    if(atan < 0) atan += Math.PI * 2;
+    if(simple) return { 'theta': atan, 'rho': rho };
+    return new Polar(atan, rho);
+}
+</calculatePolarCoordinates>
+```
+
+3rd Function:
+```javascript
+<registerQuickAction>
+function(type, callback) {
+    var deferred = $q.defer();
+
+    <checkAvailability>
+    this.isAvailable().then(function() {</checkAvailability>
+        quickActionHandler[type] = callback;
+        window.ThreeDeeTouch.onHomeIconPressed = createQuickActionHandler(quickActionHandler);
+        deferred.resolve(true);
+    },
+    function(err) {
+        deferred.reject(err);
+    });
+
+    return deferred.promise;
+}
+</registerQuickAction>
+```
+
+4th Function:
+```javascript
+<compareAscending>
+function compareAscending(a, b) {
+    return baseCompareAscending(a.criteria, b.criteria) || a.index - b.index;
+}
+</compareAscending>
+```
+
+5th Function:
+```javascript
+<constructPutRolePolicyParam>
+function constructPutRolePolicyParamForDDB(dataSource){
+    let result = {
+        RoleName: dataSource.serviceRoleDetails.Role.RoleName,
+        PolicyName: dataSource.serviceRoleDetails.Role.RoleName,
+        <constructPolicyDocument>
+        PolicyDocument: constructPolicyDocumentForDDB(dataSource)
+        </constructPolicyDocument>
+    }
+    return result
+}
+</constructPutRolePolicyParam>
+```
+
+6th Function:
+```javascript
+<parseAndFormatBrokerConfig>
+function brokerConfigLines (brokerListResponse) {
+  var brokers = JSON.parse(brokerListResponse).brokers
+  return brokers.map(function (broker) {
+    return broker.guid + '=' + [broker.guid, broker.port,
+      broker.hostName, broker.ipAddress].join(';')
+  })
+}
+</parseAndFormatBrokerConfig>
+```
+
+7th Function:
+```javascript
+<addClassWithDelay>
+function setLoaderClass(c, t) {
+    timeouts.push(
+        setTimeout(() => {
+            loadbar.classList.add(c);
+        }, t)
+    );
+}
+</addClassWithDelay>
+```
+
+8th Function:
+```javascript
+<appendStatusToOutput>
+function reportStatus(status, outputFile) {
+  let log = [''];
+  <formatLog>
+  log.push('Suites passed:');
+  status.passed.forEach(function (val) {
+    log.push('  ' + val);
+  });
+
+  if (status.failed.length == 0) {
+    log.push('All tests passed');
+  } else {
+    log.push('Suites failed:');
+    status.failed.forEach(function (val) {
+      log.push('  ' + val);
+    });
+  }
+  log.push('\nElapsed time: ' + status.elapsedTime + ' seconds');
+  log = log.join('\n');
+  </formatLog>
+  console.log(log);
+  fs.appendFileSync(outputFile, log);
+}
+</appendStatusToOutput>
+```
+
+9th Function:
+```javascript
+<initializeYouTubeModal>
+function YouTubeModal(config) {
+  this.config = config;
+  this.parentElement = document.querySelector(this.config.parentSelector);
+  this.closeEventListener_ = this.setActive_.bind(this, false);
+  this.popstateListener_ = this.onHistoryChange_.bind(this);
+  this.el_ = null;
+  this.closeEl_ = null;
+  this.attributionEl_ = null;
+  <initializeDOMSetup>
+  this.initDom_();
+  </initializeDOMSetup>
+  this.lastActiveVideoId_ = null;
+  this.scrollY = 0;
+
+  <setupDelegationListener>
+  this.delegatedListener_ = function(targetEl) {
+    var data = 'data-' + this.config.className + '-video-id';
+    var videoId = targetEl.getAttribute(data);
+    var startDataAttribute = 'data-' + this.config.className + '-video-start-seconds';
+    var startTime = +targetEl.getAttribute(startDataAttribute);
+    var attributionAttribute = 'data-' + this.config.className + '-attribution';
+    var attribution = targetEl.getAttribute(attributionAttribute);
+    if (videoId) {
+      this.play(videoId, true , startTime, attribution);
+    }
+  }.bind(this);
+  </setupDelegationListener>
+
+  <addDelegatedClickListener>
+  events.addDelegatedListener(document, 'click', this.delegatedListener_);
+  </addDelegatedClickListener>
+
+  <integrateYouTubeScript>
+  var scriptTag =
+    document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+  if (!scriptTag) {
+    var tag = document.createElement('script');
+    tag.setAttribute('src', 'https://www.youtube.com/iframe_api');
+    this.parentElement.appendChild(tag);
+  }
+  </integrateYouTubeScript>
+}
+</initializeYouTubeModal>
+```
+
+10th Function:
+```javascript
+<generateAccessorFunctions>
+function() {
+    var attrNames;
+    attrNames = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    <createAccessors>
+    return attrNames.each(function(attrName) {
+        return self[attrName] = function() {
+            return I[attrName];
+        };
+    });
+    </createAccessors>
+}
+</generateAccessorFunctions>
+```
+
+Each function has been annotated based on the blocks of code that represent cohesive responsibilities within the functions.

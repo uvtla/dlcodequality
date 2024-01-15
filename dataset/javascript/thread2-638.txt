@@ -1,0 +1,339 @@
+<function>
+function(line, isInComment) {
+  while (true || line.length > 0) {
+    
+    <findCommentIndicies>
+    var startIndex = line.indexOf('{-');
+    var endIndex = line.indexOf('-}');
+    var singleLineComment = line.indexOf('--');
+    </findCommentIndicies>
+
+    
+    <handleSingleLineComment>
+    if (singleLineComment > -1 && !isInComment) {
+      line = line.substr(0, singleLineComment);
+      continue;
+    }
+    </handleSingleLineComment>
+
+    
+    <checkForAbsenceOfComments>
+    if (startIndex === -1 && endIndex === -1) {
+      return {
+        line: isInComment ? '' : line,
+        isInComment: isInComment,
+      };
+    }
+    </checkForAbsenceOfComments>
+
+    
+    <handleMultiLineComment>
+    if (startIndex > -1 && endIndex > -1) {
+      line = line.substr(0, startIndex) + line.substr(endIndex + 2);
+      continue;
+    }
+    </handleMultiLineComment>
+
+    
+    <openMultiLineComment>
+    if (startIndex > -1)
+      return { line: line.substr(0, startIndex), isInComment: true };
+    </openMultiLineComment>
+
+    
+    <closeMultiLineComment>
+    if (endIndex > -1 && isInComment)
+      return { line: line.substr(endIndex + 2), isInComment: false };
+    </closeMultiLineComment>
+  }
+
+  return { line: '', isInComment: isInComment };
+}
+</function>
+
+<function>
+function(content){
+  <hashContent>
+  var crypto = require('crypto');
+  var sha1 = crypto.createHash('sha1');
+  sha1.update(content);
+  return sha1.digest();
+  </hashContent>
+}
+</function>
+
+<function>
+function () {
+  <calculateAcceleration>
+  var acc = 0;
+  for (var i = 0; i < this.diffs_x.length; i++) {
+      acc += (this.diffs_x[i] / this.times_x[i]) * 1000 / 3;
+  }
+  return acc;
+  </calculateAcceleration>
+}
+</function>
+
+<function>
+function (type) {
+  var log = jQuery.sap.log.getLogEntries(),
+      loggedObjects = [], elemIds;
+
+  
+  log.forEach(function (logEntry) {
+    <filterLogEntries>
+    if (!logEntry.supportInfo) {
+      return;
+    }
+
+    if (!elemIds){
+      elemIds = elements.map(function (element) {
+        return element.getId();
+      });
+    }
+
+    var hasElemId = !!logEntry.supportInfo.elementId,
+        typeMatch =
+          logEntry.supportInfo.type === type || type === undefined,
+        scopeMatch =
+          !hasElemId ||
+          jQuery.inArray(logEntry.supportInfo.elementId, elemIds) > -1;
+
+    
+    if (typeof type === "function" && type(logEntry) && scopeMatch) {
+      loggedObjects.push(logEntry);
+      return;
+    }
+
+    if (typeMatch && scopeMatch) {
+      loggedObjects.push(logEntry);
+    }
+    </filterLogEntries>
+  });
+
+  return loggedObjects;
+}
+</function>
+
+<initialise>
+function initialise (config, log, defaults) {
+  const { interval, redis: redisConfig } = config;
+
+  <checkValidInterval>
+  if (! (interval > 0 && interval < Infinity)) {
+    throw new TypeError('Invalid interval');
+  }
+  </checkValidInterval>
+
+  <checkValidLogArgument>
+  if (! log) {
+    throw new TypeError('Missing log argument');
+  }
+  </checkValidLogArgument>
+
+  <setupRedisConfig>
+  const redis = require('../redis')({
+    ...redisConfig,
+    enabled: true,
+    prefix: FLAGS_PREFIX,
+  }, log);
+  </setupRedisConfig>
+
+  let cache, timeout;
+
+  <initializeRefresh>
+  refresh();
+  </initializeRefresh>
+
+  <returnPublicAPI>
+  return { get, terminate };
+  </returnPublicAPI>
+
+  async function refresh () {
+    try {
+      <refreshCache>
+      if (cache) {
+        const result = await redis.get(FLAGS_KEY);
+        cache = Promise.resolve(JSON.parse(result));
+      } else {
+        cache = redis.get(FLAGS_KEY).then(result => JSON.parse(result));
+        await cache;
+      }
+      </refreshCache>
+    } catch (error) {
+    }
+
+    <resetTimeout>
+    timeout = setTimeout(refresh, interval);
+    </resetTimeout>
+  }
+
+  <getCache>
+  async function get () {
+    try {
+      return await cache || defaults || {};
+    } catch (error) {
+      if (defaults) {
+        return defaults;
+      }
+
+      throw error;
+    }
+  }
+  </getCache>
+
+  <terminateRefresh>
+  function terminate () {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+
+    return redis.close();
+  }
+  </terminateRefresh>
+}
+</initialise>
+
+<getObjectByGroup>
+function(group,bx,by){
+	<retrieveObject>
+	var obj = this.nullobj;
+	if     (group==='cell')  { obj = this.getc(bx,by);}
+	else if(group==='cross') { obj = this.getx(bx,by);}
+	else if(group==='border'){ obj = this.getb(bx,by);}
+	else if(group==='excell'){ obj = this.getex(bx,by);}
+	else if(group==='obj')   { obj = this.getobj(bx,by);}
+	</retrieveObject>
+	return obj;
+}
+</getObjectByGroup>
+
+<putMeta>
+function putMeta(key, value) {
+  <findSchemaAndMapColumn>
+  const { schema, table } = findSchemaAndTable(key),
+    map = columnToValueMap('id', key);
+  </findSchemaAndMapColumn>
+
+  <updateColumnValue>
+  columnToValueMap('meta', parseOrNot(value), map);
+  </updateColumnValue>
+
+  <onConflictResolution>
+  return onConflictPut(map, schema, table).then(() => map.meta);
+  </onConflictResolution>
+}
+</putMeta>
+
+<function>
+function(connect) {
+  var t = this,
+      triggeredBy = t.get('triggeredBy'),
+      onTrigger = t.onTrigger.bind(t);
+
+  
+  <toggleMonitorListeners>
+  if (!triggeredBy) {
+    for (var monitorName in t.monitors) {
+      t.monitors[monitorName][connect ? 'on' : 'off']('change', t.onTrigger, t);
+    }
+    return;
+  }
+  </toggleMonitorListeners>
+
+  
+  <processTriggeredBy>
+  for (var name in triggeredBy) {
+    var value = triggeredBy[name];
+
+    
+    <handleCronTriggers>
+    if (name === 'cron') {
+      if (connect) {
+        t.cronJob = new Cron.CronJob(value, onTrigger);
+      }
+      else {
+        if (t.cronJob.initiated) {
+          clearInterval(t.CronJob.timer);
+        }
+        else {
+          setTimeout(function(){clearInterval(t.cronJob.timer);}, 1000);
+        }
+      }
+    }
+    </handleCronTriggers>
+
+    
+    <handleIntervalTriggers>
+    else if (name === 'interval') {
+      if (connect) {
+        t.interval = setInterval(onTrigger, value);
+      }
+      else {
+        clearInterval(t.interval);
+        t.interval = null;
+      }
+    }
+    </handleIntervalTriggers>
+
+    
+    <handleOtherTriggers>
+    else {
+      t.monitors[name][connect ? 'on' : 'off'](value, onTrigger);
+    }
+    </handleOtherTriggers>
+  }
+  </processTriggeredBy>
+}
+</function>
+
+<createInterpolatedTag>
+function() {
+  <createTagObject>
+  var tok = this.advance();
+  var tag = {
+    type: 'InterpolatedTag',
+    expr: tok.val,
+    selfClosing: false,
+    block: this.emptyBlock(tok.line),
+    attrs: [],
+    attributeBlocks: [],
+    isInline: false,
+    line: tok.line,
+    filename: this.filename
+  };
+  </createTagObject>
+
+  <finalizeTag>
+  return this.tag(tag, {selfClosingAllowed: true});
+  </finalizeTag>
+}
+</createInterpolatedTag>
+
+<startThaliMobile>
+function start (router, pskIdToSecret, networkType) {
+  <checkIfAlreadyStarted>
+  if (thaliMobileStates.started === true) {
+    return Promise.reject(new Error('Call Stop!'));
+  }
+  </checkIfAlreadyStarted>
+  
+  <setNetworkType>
+  thaliMobileStates.started = true;
+  thaliMobileStates.networkType =
+    networkType || global.NETWORK_TYPE || thaliMobileStates.networkType;
+  </setNetworkType>
+
+  <startNetwork>
+  return getWifiOrNativeMethodByNetworkType('start',
+    thaliMobileStates.networkType)(router, pskIdToSecret)
+    .then(function (result) {
+      if (result.wifiResult === null && result.nativeResult === null) {
+        return result;
+      }
+      return Promise.reject(result);
+    });
+  </startNetwork>
+}
+</startThaliMobile>

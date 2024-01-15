@@ -1,0 +1,244 @@
+```javascript
+<f_eposta_to_db_kullanici_id>
+function f_eposta_to_db_kullanici_id(_eposta) {
+    return result.dbQ.hget(result.kp.kullanici.hsetLocalKullanicilari, _eposta);
+}
+</f_eposta_to_db_kullanici_id>
+
+<anonymous>
+function() {
+    var canApply = true;
+    <check_layers_cache>
+    for (var i=0, len=this.layers.length; i<len; i++) {
+        if(!this.wfsCache[this.layers[i].id]) {
+            canApply = false;
+            break;
+        }
+    }
+    </check_layers_cache>
+    <execute_queue>
+    canApply && this._queue.call(this);
+    </execute_queue>
+}
+</anonymous>
+
+<anonymous>
+function(e) {
+    var E = YAHOO.util.Event,
+        KEYS = YAHOO.util.KeyListener.KEY;
+    <handle_tab_navigation>
+    if (E.getCharCode(e) == KEYS.TAB && !e.shiftKey) {
+        try {
+            E.preventDefault(e);
+            this.firstCtrl.focus();
+        } catch (err) {
+            
+        }
+    }
+    </handle_tab_navigation>
+}
+</anonymous>
+
+<getNativeScrollbarWidth>
+function getNativeScrollbarWidth() {
+    var container = document.body;
+    var box = document.createElement("div");
+    var cev = document.createElement("div");
+
+    <create_measure_elements>
+    box.className = HideNativeBarClass;
+    box.style.position = "absolute";
+    box.style.pointerEvents = "none";
+    box.style.bottom = "0";
+    box.style.right = "0";
+    box.style.width = "100px";
+    box.style.height = "100px";
+    box.style.overflow = "hidden";
+
+    cev.style.width = "100%";
+    cev.style.height = "100%";
+    </create_measure_elements>
+
+    <append_measure_elements>
+    box.appendChild(cev);
+    container.appendChild(box);
+    </append_measure_elements>
+
+    var fullWidth = cev.offsetWidth;
+    var fullHeight = cev.offsetHeight;
+
+    <measure_scrollbar>
+    box.style.overflow = "scroll";
+
+    var v = fullWidth - cev.offsetWidth;
+    var h = fullHeight - cev.offsetHeight;
+    </measure_scrollbar>
+
+    <cleanup>
+    container.removeChild(box);
+    </cleanup>
+
+    return {
+        v: v,
+        h: h
+    };
+}
+</getNativeScrollbarWidth>
+
+<handleRefresh>
+function handleRefresh (refresh, e) {
+    refresh.node.style.height = refresh.clamp + 'px'
+    refresh.dispatchEvent('refresh')
+    refresh.isRefreshing = true
+}
+</handleRefresh>
+
+<readPreferences>
+function readPreferences(cordovaContext) {
+  
+  <read_config_xml>
+  var configXml = new ConfigXmlHelper(cordovaContext).read();
+  if (configXml == null) {
+    console.warn('config.xml not found! Please, check that it exist\'s in your project\'s root directory.');
+    return null;
+  }
+  </read_config_xml>
+
+  
+  <check_universal_links_settings>
+  var ulXmlPreferences = configXml.widget['universal-links'];
+  if (ulXmlPreferences == null || ulXmlPreferences.length == 0) {
+    console.warn('<universal-links> tag is not set in the config.xml. Universal Links plugin is not going to work.');
+    return null;
+  }
+  </check_universal_links_settings>
+
+  var xmlPreferences = ulXmlPreferences[0];
+
+  
+  <construct_hosts_from_preferences>
+  var hosts = constructHostsList(xmlPreferences);
+  </construct_hosts_from_preferences>
+
+  
+  <retrieve_ios_team_id>
+  var iosTeamId = getTeamIdPreference(xmlPreferences);
+  </retrieve_ios_team_id>
+
+  return {
+    'hosts': hosts,
+    'iosTeamId': iosTeamId
+  };
+}
+</readPreferences>
+
+<anonymous>
+function (data) {
+    var zoomMode = this.state.zoomState.zoomMode;
+    this.state.viewportDimensions = data;
+    <update_zoom>
+    this.updateZoomLevels();
+    this.setZoom(zoomMode);
+    </update_zoom>
+}
+</anonymous>
+
+<filename_resolution>
+function(filename){
+    
+    <resolve_symlinks>
+    for (var from in this.symlinks)
+      if (filename.indexOf(from) === 0 && (filename === from || filename[from.length] === '/'))
+        return this.symlinks[from] + filename.substr(from.length);
+    </resolve_symlinks>
+
+    <resolve_path>
+    return path.resolve(this.fsBaseURI, filename.replace(/^[\\\/]/, ''));
+    </resolve_path>
+}
+</filename_resolution>
+
+<deploy_code>
+function(site, env) {
+
+    <log_status>
+    app.status('Pulling code.');
+    </log_status>
+
+    
+    if (firstTime()) {
+
+      
+      <initialize_repository>
+      return terminus.connectionInfo(site, env)
+      </initialize_repository>
+
+      
+      
+      .then(function(bindings) {
+
+        
+        return commands.git(['clone', bindings.git_url, './'])
+
+        
+        .then(function() {
+          if (env !== 'dev') {
+            return commands.git(['fetch', 'origin']);
+          }
+        })
+
+        
+        .then(function() {
+          if (env !== 'dev') {
+            return commands.git(['checkout', env]);
+          }
+        });
+
+      });
+    }
+
+    
+    else {
+      var branch = (env === 'dev') ? 'master' : env;
+      <update_repository>
+      return commands.git(['pull', '-Xtheirs', '--no-edit', 'origin', branch]);
+      </update_repository>
+    }
+
+  }
+</deploy_code>
+
+<challengeCreateFn>
+async function challengeCreateFn(authz, challenge, keyAuthorization) {
+    <log_entry>
+    log('Triggered challengeCreateFn()');
+    </log_entry>
+
+    
+    if (challenge.type === 'http-01') {
+        <handle_http_challenge>
+        const filePath = `/var/www/html/.well-known/acme-challenge/${challenge.token}`;
+        const fileContents = keyAuthorization;
+
+        log(`Creating challenge response for ${authz.identifier.value} at path: ${filePath}`);
+
+        
+        log(`Would write "${fileContents}" to path "${filePath}"`);
+        </handle_http_challenge>
+    }
+
+    
+    else if (challenge.type === 'dns-01') {
+        <handle_dns_challenge>
+        const dnsRecord = `_acme-challenge.${authz.identifier.value}`;
+        const recordValue = keyAuthorization;
+
+        log(`Creating TXT record for ${authz.identifier.value}: ${dnsRecord}`);
+
+        
+        log(`Would create TXT record "${dnsRecord}" with value "${recordValue}"`);
+        </handle_dns_challenge>
+    }
+}
+</challengeCreateFn>
+```

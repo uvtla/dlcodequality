@@ -1,0 +1,256 @@
+```javascript
+<setValue>
+function setValue(descriptor,key,set,update)
+{
+  var _descriptor = descriptor,
+      _key = key,
+      _set = set,
+      _update = update,
+      _oldValue;
+  return function valueSet(v)
+  {
+    _oldValue = _descriptor.value;
+    if(_set(this,_key,v,_oldValue,arguments,this._stopChange))
+    {
+      _descriptor.value = v;
+    }
+    if(!this._stopChange)
+    {
+      _update(this,_key,v,_oldValue,arguments);
+    }
+    this._stopChange = undefined;
+  }
+}
+</setValue>
+
+<compileDebugAppLib>
+function compileDebugAppLib(options) {
+    if (!(options.all || options.app)) {
+        return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+        const filePath = setupConfig('tsconfig.debug.app-lib');
+        <execCompilation>
+        command.exec('tsc', '-p ./tsconfig.debug.app-lib.json')
+        .then(() => {
+            fs.removeSync(filePath);
+            resolve();
+        })
+        </execCompilation>
+        .catch((reason) => {
+            reject(reason);
+        });
+    });
+}
+</compileDebugAppLib>
+
+<numberToDate>
+function numberToDate(value, startMonth) {
+  return getValidDate(
+    +value.slice( 0,  4),
+    +value.slice( 4,  6) || startMonth,
+    +value.slice( 6,  8) || 1,
+    +value.slice( 8, 10),
+    +value.slice(10, 12),
+    +value.slice(12, 14),
+    0);
+}
+</numberToDate>
+
+<Connection>
+function Connection(conn) {
+	if(!(this instanceof Connection)) {
+		return new Connection(conn);
+	}
+	var self = this;
+	if(!conn) { throw new TypeError("no connection set"); }
+	self._connection = conn;
+}
+</Connection>
+
+<getIfChildren>
+function getIfChildren(oIfElement) {
+    var oChild,
+        aChildren = Array.prototype.filter.call(oIfElement.childNodes, isElementNode),
+        i, n,
+        bFoundElse = false;
+
+    <isElementNode>
+    function isElementNode(oNode) {
+        return oNode.nodeType === 1;
+    }
+    </isElementNode>
+
+    <isTemplateElement>
+    function isTemplateElement(oElement, sLocalName) {
+        return oElement.namespaceURI === sNAMESPACE
+            && oElement.localName === sLocalName;
+    }
+    </isTemplateElement>
+
+    if (!aChildren.length || !isTemplateElement(aChildren[0], "then")) {
+        return null;
+    }
+    <processChildren>
+    for (i = 1, n = aChildren.length; i < n; i += 1) {
+        oChild = aChildren[i];
+        if (bFoundElse) {
+            error("Expected </" + oIfElement.prefix + ":if>, but instead saw ", oChild);
+        }
+        if (isTemplateElement(oChild, "else")) {
+            bFoundElse = true;
+        } else if (!isTemplateElement(oChild, "elseif")) {
+            error("Expected <" + oIfElement.prefix + ":elseif> or <"
+                + oIfElement.prefix + ":else>, but instead saw ", aChildren[i]);
+        }
+    }
+    </processChildren>
+    return aChildren;
+}
+</getIfChildren>
+
+<_subclassObject>
+function _subclassObject(tree, base, extension, extName) {
+   <overrideMethods>
+    for (var attrName in extension) {
+        if (typeof extension[attrName] === "function") {
+            if (typeof tree[attrName] === "function") {
+                tree[attrName] = _makeVirtualFunction(
+                    attrName,
+                    tree,
+                    base,
+                    extension,
+                    extName
+                );
+            } else if (attrName.charAt(0) === "_") {
+                tree.ext[extName][attrName] = _makeVirtualFunction(
+                    attrName,
+                    tree,
+                    base,
+                    extension,
+                    extName
+                );
+            } else {
+                $.error(
+                    "Could not override tree." +
+                    attrName +
+                    ". Use prefix '_' to create tree." +
+                    extName +
+                    "._" +
+                    attrName
+                );
+            }
+        } else {
+           <handleAttributes>
+            if (attrName !== "options") {
+                tree.ext[extName][attrName] = extension[attrName];
+            }
+           </handleAttributes>
+        }
+    }
+   </overrideMethods>
+}
+</_subclassObject>
+
+<suggest>
+function suggest (opts) {
+  return new Promise(function (resolve) {
+    <checkOpts>
+    if (!opts && !opts.term) {
+      throw Error('term missing');
+    }
+    </checkOpts>
+
+    return resolve(BASE_URL + encodeURIComponent(opts.term));
+  })
+    .then(url => common.request(url, {}, opts.requestOptions))
+    .then(parseXML)
+    .then(extractSuggestions);
+}
+</suggest>
+
+<requireExtensionJs>
+function requireExtensionJs(sessionId) {
+    var src = 'scripts/user-extensions.js[' + sessionId + ']';
+    if (document.getElementById(src) == null) {
+        <createElement>
+        var scriptTag = document.createElement('script');
+        scriptTag.language = 'JavaScript';
+        scriptTag.type = 'text/javascript';
+        scriptTag.src = src;
+        scriptTag.id = src;
+        scriptTag.charset = 'UTF-8';
+        var headTag = document.getElementsByTagName('head')[0];
+        headTag.appendChild(scriptTag);
+        </createElement>
+    }
+}
+</requireExtensionJs>
+
+<setup_account_integration>
+function setup_account_integration(api_key, callback) {
+  var keyname = "/tmp/heroku-key-" + Math.floor(Math.random() * 1024 * 1024);
+
+  <systemCall>
+  Step(
+    function() {
+      console.log("Generating Heroku SSH keypair");
+      ssh.generate_keypair(keyname, this);
+    },
+    function(code) {
+      console.log("Reading Heroku SSH keypair");
+      fs.readFile(keyname, 'utf8', this.parallel());
+      fs.readFile(keyname + ".pub", 'utf8', this.parallel());
+    },
+    function(err, privkey, pubkey) {
+      if (err) throw err;
+      this.pubkey = pubkey;
+      this.privkey = privkey;
+      this.user_host_field = pubkey.split(' ')[2].trim();
+      console.log("Adding Heroku SSH keypair via API");
+      add_ssh_key(api_key, pubkey, this);
+    },
+    function(err, r, b) {
+      if (err) throw err;
+      try {
+        fs.unlink(keyname, this.parallel());
+        fs.unlink(keyname + ".pub", this.parallel());
+      } catch(e) {
+      };
+      console.log("Heroku SSH keypair deleted from local FS");
+      callback(err, this.privkey, this.pubkey, this.user_host_field);
+    }
+  );
+  </systemCall>
+}
+</setup_account_integration>
+
+<publishToS3>
+function publishToS3(bucket, simulate, force) {
+
+  if (force) {
+    rimraf.sync('./.awspublish-*');
+  }
+
+  <createPublisher>
+  var publisher = createPublisher(bucket);
+  </createPublisher>
+
+  console.log(`Publishing to ${bucket}`)
+
+  <publishing>
+  var first = publisher.publish({}, {
+    force: force,
+    simulate: simulate === true ? true : false
+  })
+  var cache = null
+  if (!force) {
+    cache = first.pipe(publisher.cache())
+  }
+  var last = (cache || first).pipe(awspublish.reporter())
+  </publishing>
+  return [first, last]
+
+}
+</publishToS3>
+```

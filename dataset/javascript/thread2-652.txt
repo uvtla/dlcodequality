@@ -1,0 +1,262 @@
+```javascript
+<resolveRungFolder>
+function resolveRungFolder() {
+    const folder = path.join(os.homedir(), '.rung');
+    const createIfNotExists = tryCatch(
+        ~(fs.lstatSync(folder).isDirectory()
+            ? resolve()
+            : reject(new Error('~/.rung is not a directory'))),
+        ~createFolder(folder)
+    );
+
+    return createIfNotExists();
+}
+</resolveRungFolder>
+
+<createErrorFromErr>
+function (err) {
+  "use strict";
+
+  var message = '';
+
+  <determineErrorType>
+  if (typeof err === 'string') {
+    return new Error(err);
+  } else </determineErrorType> if (typeof err === 'object') {
+
+    if (err.cause) {
+      <processCauseError>
+      try {
+        message = JSON.parse(err.cause.value.message).errorMessage;
+      } catch ($) {
+        message = err.cause.value.message;
+      }
+      </processCauseError>
+    } else {
+      <defaultErrorMessage>
+      message = err.message || err.toString();
+      </defaultErrorMessage>
+    }
+    return new Error(message);
+  }
+  return new Error(err.toString());
+}
+</createErrorFromErr>
+
+<filterValues>
+function(object, callback) {
+  return inject(object, [], function(selected, key, value){
+    <applyCallback>
+    if (callIterator(callback, key, value))
+      selected.push(value)
+    </applyCallback>
+  })
+}
+</filterValues>
+
+<setCalendarSelectedDate>
+function() {
+  var value = this.value;
+  var selectedValue = (value.getMonth()+1)+"/"+value.getDate()+"/"+value.getFullYear();
+  this.calendar.cfg.setProperty("selected",selectedValue,false);
+  <renderCalendar>
+  this.calendar.render();
+  </renderCalendar>
+}
+</setCalendarSelectedDate>
+
+<compileAndCacheLayouts>
+function(layouts) {
+  var currentLayout;
+  <prepareLayouts>
+  layouts = layouts.slice(0);
+  currentLayout = self.compile(str, layoutFile);
+  layouts.push(currentLayout);
+  </prepareLayouts>
+  if (useCache) {
+    <cacheLayouts>
+    self.cache[layoutFile] = layouts.slice(0);
+    </cacheLayouts>
+  }
+  <returnCompiledLayouts>
+  cb(null, layouts);
+  </returnCompiledLayouts>
+}
+</compileAndCacheLayouts>
+
+<manageHelpText>
+function (enable) {
+  var cfg = this._cfg;
+  
+  <earlyReturns>
+  if (!cfg) {
+      return;
+  }
+  var helpText = cfg.helptext, helpTextConfig = this._skinObj.helpText;
+  
+  if (!helpText || !this._helpTextSet && !enable || (this._hasFocus || this._keepFocus) && enable) {
+      return;
+  }
+  </earlyReturns>
+
+  var field = this.getTextInputField();
+  
+  <fieldConditions>
+  if (field.value && enable) {
+      return;
+  }
+  </fieldConditions>
+
+  this._helpTextSet = enable;
+
+  if (!field) {
+      return;
+  }
+
+  <setStyling>
+  var color = enable ? helpTextConfig.color : this._getTextFieldColor();
+  var value = enable ? helpText : "";
+  var helpTextClass = "x" + this._skinnableClass + "_" + cfg.sclass + "_helpText";
+  var classNames = field.className.split(/\s+/);
+  ariaUtilsArray.remove(classNames, helpTextClass);
+  if (enable) {
+      classNames.push(helpTextClass);
+  }
+  field.className = classNames.join(' ');
+  </setStyling>
+
+  <applyStyleAndValue>
+  var style = field.style;
+  style.color = color;
+  field.value = value;
+  </applyStyleAndValue>
+}
+</manageHelpText>
+
+<zoomed>
+function zoomed () {
+  <calculateDimensions>
+  height = el.clientHeight
+  width = el.clientWidth
+  </calculateDimensions>
+
+  <resetTileSize>
+  tile.size([width, height])
+  </resetTileSize>
+
+  <calculateMapBounds>
+  var bounds = display.llBounds()
+  var psw = projection(bounds[0])
+  var pne = projection(bounds[1])
+  </calculateMapBounds>
+
+  <computeScale>
+  var scale = projection.scale() * 2 * Math.PI
+  var translate = projection.translate()
+  var dx = pne[0] - psw[0]
+  var dy = pne[1] - psw[1]
+  scale = scale * (1 / Math.max(dx / width, dy / height))
+  projection
+    .translate([width / 2, height / 2])
+    .scale(scale / 2 / Math.PI)
+  </computeScale>
+
+  <recalculateProjection>
+  psw = projection(bounds[0])
+  pne = projection(bounds[1])
+  var x = (psw[0] + pne[0]) / 2
+  var y = (psw[1] + pne[1]) / 2
+  translate = [width - x, height - y]
+  </recalculateProjection>
+
+  <updateTileTransform>
+  tile
+    .scale(scale)
+    .translate(translate)
+  </updateTileTransform>
+
+  <renderMap>
+  renderTiles(tile())
+  </renderMap>
+}
+</zoomed>
+
+<logVuexError>
+function error (error) {
+  var conf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var path = arguments.length > 2 ? arguments[2] : undefined;
+  var props = arguments.length > 3 ? arguments[3] : undefined;
+  <configureDefaults>
+  conf = Object.assign({}, defaultConfig, conf);
+  </configureDefaults>
+  var errorMessages = getErrors(conf, path, props);
+  <logError>
+  console.error('[vuex-easy-access] Error!', errorMessages[error]);
+  </logError>
+  return error;
+}
+</logVuexError>
+
+<validateNumber>
+function validateNumber(context, name, def) {
+  var value = context[name]
+
+  <assignDefault>
+  if (value == null) {
+    value = def
+  }
+  </assignDefault>
+
+  <checkIsNaN>
+  if (isNaN(value)) {
+    raise(value, 'options.' + name)
+  }
+  </checkIsNaN>
+
+  <assignContextValue>
+  context[name] = value
+  </assignContextValue>
+}
+</validateNumber>
+
+<isNamespaceFocused>
+function( nspath ) {
+  var found = true,
+    nsparts = nspath.split( rpathsplit ),
+    focus = render.options.focus;
+
+  <initializeFocusCheck>
+  if ( munit.isString( focus ) ) {
+    focus = [ focus ];
+  }
+  </initializeFocusCheck>
+
+  <evaluateFocusArray>
+  if ( munit.isArray( focus ) && focus.length ) {
+    found = false;
+
+    focus.forEach(function( fpath ) {
+      var fparts = fpath.split( rpathsplit ),
+        i = -1, l = Math.min( fparts.length, nsparts.length );
+
+      <pathComparison>
+      for ( ; ++i < l; ) {
+        if ( fparts[ i ] !== nsparts[ i ] ) {
+          return;
+        }
+      }
+      </pathComparison>
+
+      <setFocusFound>
+      found = true;
+      </setFocusFound>
+    });
+  }
+  </evaluateFocusArray>
+
+  <returnFocusStatus>
+  return found;
+  </returnFocusStatus>
+}
+</isNamespaceFocused>
+```

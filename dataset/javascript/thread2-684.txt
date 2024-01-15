@@ -1,0 +1,262 @@
+```javascript
+<mxSwimlaneModel>
+function mxSwimlaneModel(layout, vertices, roots, parent, tightenToSource) {
+    <initialSetup>
+    var graph = layout.getGraph();
+    this.tightenToSource = tightenToSource;
+    this.roots = roots;
+    this.parent = parent;
+
+    this.vertexMapper = new mxDictionary();
+    this.edgeMapper = new mxDictionary();
+    this.maxRank = 0;
+    var internalVertices = [];
+
+    if (vertices == null) {
+        vertices = this.graph.getChildVertices(parent);
+    }
+
+    this.maxRank = this.SOURCESCANSTARTRANK;
+    </initialSetup>
+    
+    <createInternalCells>
+    this.createInternalCells(layout, vertices, internalVertices);
+    </createInternalCells>
+
+    <processVerticesAndEdges>
+    for (var i = 0; i < vertices.length; i++) {
+        var edges = internalVertices[i].connectsAsSource;
+
+        for (var j = 0; j < edges.length; j++) {
+            var internalEdge = edges[j];
+            var realEdges = internalEdge.edges;
+
+            <assignTargetToEdges>
+            if (realEdges != null && realEdges.length > 0) {
+                var realEdge = realEdges[0];
+                var targetCell = layout.getVisibleTerminal(realEdge, false);
+                var internalTargetCell = this.vertexMapper.get(targetCell);
+
+                if (internalVertices[i] == internalTargetCell) {
+                    targetCell = layout.getVisibleTerminal(realEdge, true);
+                    internalTargetCell = this.vertexMapper.get(targetCell);
+                }
+
+                if (internalTargetCell != null && internalVertices[i] != internalTargetCell) {
+                    internalEdge.target = internalTargetCell;
+
+                    if (internalTargetCell.connectsAsTarget.length == 0) {
+                        internalTargetCell.connectsAsTarget = [];
+                    }
+
+                    if (mxUtils.indexOf(internalTargetCell.connectsAsTarget, internalEdge) < 0) {
+                        internalTargetCell.connectsAsTarget.push(internalEdge);
+                    }
+                }
+            }
+            </assignTargetToEdges>
+        }
+
+        <setInitialTemp>
+        internalVertices[i].temp[0] = 1;
+        </setInitialTemp>
+    }
+    </processVerticesAndEdges>
+}
+</mxSwimlaneModel>
+
+<getLayer>
+function getLayer(index) {
+    <retrieveLayer>
+    var layer = layers[index];
+    if (!layer) {
+
+        <createLayer>
+        if (index === 0) {
+            layer = display.getDefaultLayer(); 
+        } else if (index > 0) {
+            layer = display.createLayer();
+        } else {
+            layer = display.createBuffer();
+        }
+        </createLayer>
+        
+        <assignLayer>
+        layers[index] = layer;
+        </assignLayer>
+    }
+    </retrieveLayer>
+
+    return layer;
+}
+</getLayer>
+
+<srcEnv>
+function srcEnv(documentize, stream) {
+    return function (...args) {
+        <findArguments>
+        let src = Array.find(args, a => is.string(a) || is.array(a));
+        let env = Array.find(args, is.plainObject);
+        </findArguments>
+
+        <setupEnvironment>
+        env = ensureEnvironment(env);
+        </setupEnvironment>
+
+        <logEnvironmentInformation>
+        // A series of logging statements, showing debug information
+        </logEnvironmentInformation>
+
+        <determineAndExecuteTask>
+        let task = env.src ? documentize : stream;
+        return task(env);
+        </determineAndExecuteTask>
+    }
+}
+</srcEnv>
+
+<unnamedFunction>
+function(value) {
+    <retrieveOrSetInnerHTML>
+    var elem = this[0] || {}, i = 0, l = this.length;
+
+    if (value === undefined && elem.nodeType === 1) {
+        return elem.innerHTML;
+    }
+
+    if (typeof value === 'string' && !rnoInnerhtml.test(value)) {
+        try {
+            value = vQ.htmlPrefilter(value);
+            for (; i < l; i++) {
+                elem = this[i] || {};
+                
+                if (elem.nodeType === 1) {
+                    elem.innerHTML = value;
+                }
+            }
+            elem = 0;
+        } catch (e) {
+        }
+    }
+    </retrieveOrSetInnerHTML>
+
+    return this[0].innerHTML;
+}
+</unnamedFunction>
+
+<GreyList>
+function GreyList(options) {
+    <initialSetup>
+    this.white = getFlatArrayOfRegexAndOrString(options && options.white);
+    this.black = getFlatArrayOfRegexAndOrString(options && options.black);
+    </initialSetup>
+}
+</GreyList>
+
+<next_word_is_cap>
+function next_word_is_cap(sentence, i, parameter) {
+    if (i < sentence.taggedWords.length - 1) {
+        var next_word = sentence.taggedWords[i+1].token;
+        return(next_word[0] === next_word[0].toUpperCase());
+    }
+    return(false);
+}
+</next_word_is_cap>
+
+<unnamedAuthFunction>
+function(req, localAuth, cb) {
+    <determineLocalOrRemoteAuth>
+    if (process.env.FH_USE_LOCAL_DB) {
+        if (_.isFunction(localAuth)) {
+            return localAuth(req, cb);
+        } else if (_.isObject(localAuth)) {
+            return cb(undefined, localAuth);
+        } else {
+            return cb(undefined, { status: 200, body: {} });
+        }
+    } else {
+        return call("admin/authpolicy/auth", req.body, cb);
+    }
+    </determineLocalOrRemoteAuth>
+}
+</unnamedAuthFunction>
+
+<executeCommandDelegation>
+function(delegate) {
+    this.execute = function(command, callback) {
+        delegate.then(function(executor) {
+            <executeCommand>
+            executor.execute(command, callback);
+            </executeCommand>
+        }, callback);
+    };
+}
+</executeCommandDelegation>
+
+<buildArrayFromFunction>
+function(n, indexMapFn) {
+    var arr, result;
+    for (var i = 0; i < n; i++) {
+        <mapIndexToValue>
+        result = indexMapFn.call(n, i);
+        if (isDefined(result)) {
+            if (!arr) {
+                arr = [];
+            }
+            arr.push(result);
+        }
+        </mapIndexToValue>
+    }
+    return arr;
+}
+</buildArrayFromFunction>
+
+<handleErrorResponse>
+function(error, request, response) {
+    <prepareResponse>
+    if (!response) {
+        response = {};
+    }
+
+    if (!request && error) {
+        request = this.pendingRequests[error.reqId];
+    }
+    </prepareResponse>
+
+    <processResponse>
+    this.clearTimeout(request.id);
+    this._normalizeResponse(error, request, response);
+
+    request.res = response;
+    request.endDownload = (new Date()).getTime();
+    request.downloadTime = request.endDownload - request.beginDownload;
+    request.responseSize = response.responseText.length;
+    </processResponse>
+
+    <accumulateTraffic>
+    this.trafficDown += request.responseSize;
+    </accumulateTraffic>
+
+    <raiseResponseEvent>
+    this.$raiseEvent({
+        name: "response",
+        req: request
+    });
+    </raiseResponseEvent>
+
+    <finalizeRequest>
+    delete this.pendingRequests[request.id];
+
+    if (aria.core.IOFiltersMgr) {
+        aria.core.IOFiltersMgr.callFiltersOnResponse(request, {
+            fn: this._afterResponseFilters,
+            scope: this,
+            args: request
+        });
+    } else {
+        this._afterResponseFilters(null, request);
+    }
+    </finalizeRequest>
+}
+</handleErrorResponse>
+```

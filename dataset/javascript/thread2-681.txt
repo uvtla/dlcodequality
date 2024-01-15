@@ -1,0 +1,265 @@
+```javascript
+<getRemoteBranches>
+function getRemoteBranches(options) {
+    <prepareArguments>
+    options = options || {};
+    var args = [
+      'ls-remote',
+      '--heads',
+      options.remote || 'origin'
+    ];
+    </prepareArguments>
+
+    return git(args)
+        .then(parseRemoteBranches);
+}
+</getRemoteBranches>
+
+<httpOk>
+function httpOk(req, res, content, fileExt) {
+    <writeResponse>
+    res.writeHead(200, {
+        'Content-Type': Mine.getType(fileExt),
+    });
+    res.write(content, 'binary');
+    res.end();
+    </writeResponse>
+}
+</httpOk>
+
+<Path_constructor>
+function Path(type, contours, closed) {
+      var cnt, self, _i, _len;
+
+      <initializePath>
+      if (closed == null) {
+        closed = true;
+      }
+      self = this;
+      self.type = type;
+      self.contours = [];
+      for (_i = 0, _len = contours.length; _i < _len; _i++) {
+        cnt = contours[_i];
+        if (!__is_clockwise(cnt)) {
+          cnt.reverse();
+        }
+        self.contours.push(cnt);
+      }
+      self.closed = closed;
+      </initializePath>
+}
+</Path_constructor>
+
+<parseFeatureFromNode>
+function(node) {
+        
+        var order = ["MultiPolygon", "Polygon",
+                     "MultiLineString", "LineString",
+                     "MultiPoint", "Point", "Envelope"];
+        
+        var type, nodeList, geometry, parser;
+        for(var i=0; i<order.length; ++i) {
+            type = order[i];
+            nodeList = this.getElementsByTagNameNS(node, this.gmlns, type);
+            if(nodeList.length > 0) {
+                <parseGeometry>
+                parser = this.parseGeometry[type.toLowerCase()];
+                if(parser) {
+                    geometry = parser.apply(this, [nodeList[0]]);
+                    if (this.internalProjection && this.externalProjection) {
+                        geometry.transform(this.externalProjection, 
+                                           this.internalProjection); 
+                    }                       
+                } else {
+                    throw new TypeError("Unsupported geometry type: " + type);
+                }
+                </parseGeometry>
+                
+                break;
+            }
+        }
+
+        var bounds;
+        var boxNodes = this.getElementsByTagNameNS(node, this.gmlns, "Box");
+        for(i=0; i<boxNodes.length; ++i) {
+            <parseBoundingBox>
+            var boxNode = boxNodes[i];
+            var box = this.parseGeometry["box"].apply(this, [boxNode]);
+            var parentNode = boxNode.parentNode;
+            var parentName = parentNode.localName ||
+                             parentNode.nodeName.split(":").pop();
+            if(parentName === "boundedBy") {
+                bounds = box;
+            } else {
+                geometry = box.toGeometry();
+            }
+            </parseBoundingBox>
+        }
+        
+        
+        var attributes;
+        if(this.extractAttributes) {
+            attributes = this.parseAttributes(node);
+        }
+        var feature = new OpenLayers.Feature.Vector(geometry, attributes);
+        feature.bounds = bounds;
+        
+        <setGMLProperties>
+        feature.gml = {
+            featureType: node.firstChild.nodeName.split(":")[1],
+            featureNS: node.firstChild.namespaceURI,
+            featureNSPrefix: node.firstChild.prefix
+        };
+        </setGMLProperties>        
+                
+        <extractFID>
+        var childNode = node.firstChild;
+        var fid;
+        while(childNode) {
+            if(childNode.nodeType == 1) {
+                fid = childNode.getAttribute("fid") ||
+                      childNode.getAttribute("id");
+                if(fid) {
+                    break;
+                }
+            }
+            childNode = childNode.nextSibling;
+        }
+        feature.fid = fid;
+        return feature;
+        </extractFID>
+    }
+</parseFeatureFromNode>
+
+<binarySearch>
+function(object, comparator, left, right)
+    {
+        function defaultComparator(a, b)
+        {
+            return a < b ? -1 : (a > b ? 1 : 0);
+        }
+        <prepareComparatorAndIndices>
+        comparator = comparator || defaultComparator;
+        var l = left || 0;
+        var r = right !== undefined ? right : this.length;
+        </prepareComparatorAndIndices>
+        <searchAlgorithm>
+        while (l < r) {
+            var m = (l + r) >> 1;
+            if (comparator(object, this[m]) > 0)
+                l = m + 1;
+            else
+                r = m;
+        }
+        </searchAlgorithm>
+        return r;
+    }
+</binarySearch>
+
+<compareAndClassifyFiles>
+function compare (checkDictionary, path, pathContent) {
+        var subPromises = [];
+        <classifyFiles>
+        pathContent.forEach(function (name) {
+            var JS_EXT = ".js",
+                JS_EXT_LENGTH = JS_EXT.length,
+                contentFullName = path + name,
+                contentFullNameLength = contentFullName.length;
+            if (contentFullNameLength > JS_EXT_LENGTH
+                && contentFullName.indexOf(JS_EXT) === contentFullNameLength - JS_EXT_LENGTH) {
+                contentFullName = contentFullName.substring(START, contentFullNameLength - JS_EXT_LENGTH);
+                if (checkDictionary[contentFullName] === "obsolete") {
+                    checkDictionary[contentFullName] = "exists";
+                } else {
+                    checkDictionary[contentFullName] = "new";
+                }
+            } else if (name.indexOf(".") === NOT_FOUND) {
+                </classifyFiles>
+                <processSubdirectories>
+                subPromises.push(gpf.http.get("/fs/src/" + contentFullName)
+                    .then(function (response) {
+                        return JSON.parse(response.responseText);
+                    })
+                    .then(function (subPathContent) {
+                        return compare(checkDictionary, contentFullName + "/", subPathContent);
+                    }));
+                </processSubdirectories>
+            }
+        });
+        </classifyFiles> <!-- Closing tag for general classification section -->
+        if (!subPromises.length) {
+            return Promise.resolve();
+        }
+        return Promise.all(subPromises);
+    }
+</compareAndClassifyFiles>
+
+<renderArrData>
+function renderArrData(data) {
+            <renderHTML>
+            var i = 0,
+                html = '';
+            for (i = 0; i < data.length; i++) {
+                html += Mustache.render(classifyItemTpl, data[i]);
+            }
+            </renderHTML>
+            return html;
+        }
+</renderArrData>
+
+<NDDBIndex_constructor>
+function NDDBIndex(idx, nddb) {
+        
+        <initializeNDDBIndex>
+        this.idx = idx;
+        
+        this.nddb = nddb;
+        
+        this.resolve = {};
+        
+        this.keys = [];
+        
+        this.resolveKeys = {};
+        </initializeNDDBIndex>
+    }
+</NDDBIndex_constructor>
+
+<maybeCall>
+function maybeCall ( thing, ctx, args ) {
+     <conditionalInvocation>
+     return typeof thing == 'function' ? thing.apply(ctx, args) : thing
+     </conditionalInvocation>
+   }
+</maybeCall>
+
+<updatePolygonMarkers>
+function() {
+    var polygon = this._shape;
+    for (var i = 0, len = polygon._latlngs.length; i < len; i++) {
+      <updateResizeMarkers>
+      var marker = this._resizeMarkers[i];
+      marker.setLatLng(polygon._latlngs[i]);
+
+      
+      marker._origLatLng = polygon._latlngs[i];
+      if (marker._middleLeft) {
+        marker._middleLeft.setLatLng(this._getMiddleLatLng(marker._prev, marker));
+      }
+      if (marker._middleRight) {
+        marker._middleRight.setLatLng(this._getMiddleLatLng(marker, marker._next));
+      }
+      </updateResizeMarkers>
+    }
+    
+
+    <updateEditingUI>
+    
+    this._shape._map.addLayer(this._markerGroup);
+    this._updateMoveMarker();
+
+    this._repositionCornerMarkers();
+    this._fireEdit();
+    </updateEditingUI>
+  }
+</updatePolygonMarkers>
+```

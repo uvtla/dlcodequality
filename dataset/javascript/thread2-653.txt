@@ -1,0 +1,166 @@
+```javascript
+<function f_tahta_ihale_indeksli_tahta_anahtarKelimelerineGore>
+function f_tahta_ihale_indeksli_tahta_anahtarKelimelerineGore(_tahta_id, _opts) {
+        var db_ihale = require("./db_ihale");
+
+        return f_tahta_ihale_indeksli_idler(_tahta_id)
+            .then(function (_lstIhaleIdler) {
+                return _lstIhaleIdler.length == 0
+                    ? _lstIhaleIdler
+                    : db_ihale.f_db_ihale_id(_lstIhaleIdler, _tahta_id, _opts);
+            });
+}
+</function f_tahta_ihale_indeksli_tahta_anahtarKelimelerineGore>
+
+<getClassWeight>
+function getClassWeight(e) {
+  var weight = 0;
+
+  // Calculate weight based on the element's class
+  <calculateWeightBasedOnClass>
+  if (e.className !== '') {
+    if (e.className.search(regexps.negativeRe) !== -1) weight -= 25;
+    if (e.className.search(regexps.positiveRe) !== -1) weight += 25;
+  }
+  </calculateWeightBasedOnClass>
+
+  // Calculate weight based on the element's id
+  <calculateWeightBasedOnId>
+  if (typeof(e.id) == 'string' && e.id != "") {
+    if (e.id.search(regexps.negativeRe) !== -1) weight -= 25;
+    if (e.id.search(regexps.positiveRe) !== -1) weight += 25;
+  }
+  </calculateWeightBasedOnId>
+
+  return weight;
+}
+</getClassWeight>
+
+<weekOfYear>
+function weekOfYear(mom, firstDayOfWeek, firstDayOfWeekOfYear) {
+        // Calculate the week of the year
+        var end = firstDayOfWeekOfYear - firstDayOfWeek,
+            daysToDayOfWeek = firstDayOfWeekOfYear - mom.day();
+
+        if (daysToDayOfWeek > end) {
+            daysToDayOfWeek -= 7;
+        }
+        if (daysToDayOfWeek < end - 7) {
+            daysToDayOfWeek += 7;
+        }
+
+        return Math.ceil(moment(mom).add('d', daysToDayOfWeek).dayOfYear() / 7);
+}
+</weekOfYear>
+
+<function unnamed>
+function(joint){
+        // Remove joint from its connected structure
+        var remove=joint;
+        var prev=remove.prev;
+        var next=remove.next;
+        if(prev!==null)prev.next=next;
+        if(next!==null)next.prev=prev;
+        if(this.joints==remove)this.joints=next;
+        remove.prev=null;
+        remove.next=null;
+        this.numJoints--;
+        
+        // Clean up and finalize removal
+        remove.awake();
+        remove.detach();
+        remove.parent=null;
+}
+</function unnamed>
+
+<storage.removeItemWrapper>
+function(key) {
+            // Attempt to remove data from storage
+            var ret = this._storage.removeItem(key);
+            this._storage.removeItem(this._expiration_key_prefix + key);
+
+            return ret;
+}
+</storage.removeItemWrapper>
+
+<deliverImage>
+function deliverImage(path, res) {
+  var stream = lib.fs.createReadStream(path);
+
+  // Stream the image to the response object
+  lib.util.pump(stream, res, function (err) {
+    if (err) {
+      // Handle any streaming errors
+      console.log('errors', err);
+    }
+  });
+}
+</deliverImage>
+
+<cdProjectRoot>
+function cdProjectRoot(dir) {
+    // Check if given directory is a Cordova project directory and navigate to it
+    var projectRoot = this.isCordova(dir);
+    if (!projectRoot) {
+        throw new CordovaError('Current working directory is not a judpack project.');
+    }
+    if (!origCwd) {
+        origCwd = process.env.PWD || process.cwd();
+    }
+    process.env.PWD = projectRoot;
+    process.chdir(projectRoot);
+    return projectRoot;
+}
+</cdProjectRoot>
+
+<sfuse>
+function sfuse(hash){
+    // Convert a hash to a string with location details
+	var retval = '';
+
+	var cache = [];
+	us.each(hash, function(loc_list, str){
+        // Deduplicate location list
+	    var locs = dedupe(loc_list);
+        // Combine string with locations
+	    cache.push( str + ' <small>[' + locs.join(', ') + ']</small>');
+	});
+    // Join cached strings to form the final value
+	if( cache.length > 0 ){
+	    retval = cache.join('<br />');	    
+	}
+	
+	return retval;
+}
+</sfuse>
+
+<getPath>
+function getPath(image, s, wantsRetina) {
+  // Compose the path for an image, potentially including retina version
+  if (s === 0) { return image.src; }
+
+  var parts = image.src.split('.');
+  var ext = parts.pop();
+
+  return parts.join('.') + '-' + s + (wantsRetina ? '@2x' : '') + '.' + ext;
+}
+</getPath>
+
+<postForm>
+function postForm(url, formData, cb, multipart) {
+		cb = cb || noop;
+
+		// Log API call details
+		botkit.debug('** API CALL: ' + url);
+
+		if (Array.isArray(api.logByKey[url])) {
+			api.logByKey[url].push(formData);
+		} else {
+			api.logByKey[url] = [formData];
+		}
+
+		// Process the form data for storage or further action
+		storage.process(url, formData, cb);
+}
+</postForm>
+```

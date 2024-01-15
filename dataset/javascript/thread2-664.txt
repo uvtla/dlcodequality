@@ -1,0 +1,392 @@
+<function_1>
+function( event, type, dd, x, elem ){
+                
+                if ( !dd )
+                    return;
+                
+                
+                <define_variables>
+                var orig = { event:event.originalEvent, type:event.type },
+                    
+                    mode = type.indexOf("drop") ? "drag" : "drop",
+                    
+                    result, i = x || 0, ia, $elems, callback,
+                    len = !isNaN( x ) ? x : dd.interactions.length;
+                </define_variables>
+                
+                <modify_event>
+                event.type = type;
+                
+                var noop = function(){};
+                event.originalEvent = new jQuery.Event(orig.event, {
+                    preventDefault: noop,
+                    stopPropagation: noop,
+                    stopImmediatePropagation: noop
+                });
+                </modify_event>
+                
+                <initialize_results>
+                dd.results = [];
+                </initialize_results>
+                
+                <interaction_loop>
+                do if ( ia = dd.interactions[ i ] ){
+                    
+                    if ( type !== "dragend" && ia.cancelled )
+                        continue;
+                    
+                    callback = drag.properties( event, dd, ia );
+                    
+                    ia.results = [];
+                    
+                    $( elem || ia[ mode ] || dd.droppable ).each(function( p, subject ){
+                        
+                        <modify_callback_target>
+                        callback.target = subject;
+                        </modify_callback_target>
+                        
+                        <define_isPropagationStopped>
+                        event.isPropagationStopped = function(){ return false; };
+                        </define_isPropagationStopped>
+                        
+                        <dispatch_event>
+                        result = subject ? $event.dispatch.call( subject, event, callback ) : null;
+                        </dispatch_event>
+                        
+                        <process_result>
+                        if ( result === false ){
+                            if ( mode == "drag" ){
+                                ia.cancelled = true;
+                                dd.propagates -= 1;
+                            }
+                            if ( type == "drop" ){
+                                ia[ mode ][p] = null;
+                            }
+                        }
+                        
+                        else if ( type == "dropinit" )
+                            ia.droppable.push( drag.element( result ) || subject );
+                        
+                        if ( type == "dragstart" )
+                            ia.proxy = $( drag.element( result ) || ia.drag )[0];
+                        
+                        ia.results.push( result );
+                        
+                        delete event.result;
+                        
+                        if ( type !== "dropinit" )
+                            return result;
+                        </process_result>
+                    });
+                    
+                    <process_interaction_results>
+                    dd.results[ i ] = drag.flatten( ia.results );
+                    
+                    if ( type == "dropinit" )
+                        ia.droppable = drag.flatten( ia.droppable );
+                    
+                    if ( type == "dragstart" && !ia.cancelled )
+                        callback.update();
+                    </process_interaction_results>
+                }
+                while ( ++i < len )
+                </interaction_loop>
+                    
+                <reset_event>
+                event.type = orig.type;
+                event.originalEvent = orig.event;
+                </reset_event>
+                
+                <return_flattened_results>
+                return drag.flatten( dd.results );
+                </return_flattened_results>
+            }
+</function_1>
+
+<validateQuery>
+function validateQuery(query) {
+		<verify_query_object>
+		Assert.ok(((query) && ((typeof query) === 'object')),
+			'The Query object was not set?');
+		</verify_query_object>
+		<verify_query_string>
+		Assert.ok(((query.QueryString) && ((typeof query.QueryString) === 'string')),
+			'The query string was not set?');
+		</verify_query_string>
+		<verify_result_configuration>
+		Assert.ok(((query.ResultConfiguration) && ((typeof query.ResultConfiguration) === 'object')),
+			'The result configuration in the query object was not set?');
+		</verify_result_configuration>
+		<verify_output_location>
+		Assert.ok(((query.ResultConfiguration.OutputLocation) && ((typeof query.ResultConfiguration.OutputLocation) === 'string')),
+			'The output location of the result configuration in the query object was not set?');
+		</verify_output_location>
+		<return_validated_query>
+		return query;
+		</return_validated_query>
+}
+</validateQuery>
+
+<function_3>
+function(a, b) {
+         return {
+            <uniform_distribution_functions>
+            d: function(x, logp) { return dunif(a, b, logp)(x); },
+            p: function(q, lowerTail, logp) {
+               return punif(a, b, lowerTail, logp)(q);
+            },
+            q: function(p, lowerTail, logp) {
+               return qunif(a, b, lowerTail, logp)(p);
+            },
+            r: function() { return runif(a, b)(); }
+            </uniform_distribution_functions>
+         };
+      }
+</function_3>
+
+<request>
+function request(url, options, callback) {
+	<initialize_debug>
+	var debug = require('debug')('wayback:http');
+	debug('req', url);
+	</initialize_debug>
+
+	<define_callback>
+	callback = typeof callback === 'undefined' ? options : callback;
+	</define_callback>
+
+	<perform_request>
+	var stream = new fetch(url, typeof options === 'object' ? options : undefined);
+
+	stream.on('error', function(err) {
+		<debug_error>
+		debug('error', err);
+		</debug_error>
+		<error_callback>
+		callback(err, null);
+		</error_callback>
+	});
+
+	stream.on('meta', function(meta) {
+		<debug_response>
+		debug('resp', 'HTTP ' + meta.status);
+		debug('resp', meta.responseHeaders);
+		</debug_response>
+		<success_callback>
+		callback(null, stream);
+		</success_callback>
+	});
+	</perform_request>
+}
+</request>
+
+<CordovaAudioPlugin>
+function CordovaAudioPlugin() {
+		<AbstractPlugin_constructor_call>
+		this.AbstractPlugin_constructor();
+		</AbstractPlugin_constructor_call>
+
+		<set_capabilities>
+		this._capabilities = s._capabilities;
+		</set_capabilities>
+
+		<set_loader_and_instance_classes>
+		this._loaderClass = createjs.CordovaAudioLoader;
+		this._soundInstanceClass = createjs.CordovaAudioSoundInstance;
+		</set_loader_and_instance_classes>
+
+		<initialize_srcDurationHash>
+		this._srcDurationHash = {};
+		</initialize_srcDurationHash>
+	}
+</CordovaAudioPlugin>
+
+<powMod_>
+function powMod_(x, y, n) {
+  <initialize_variables>
+  var k1, k2, kn, np;
+  if (s7.length!=n.length)
+    s7=dup(n);
+  </initialize_variables>
+
+  <handle_even_n>
+  if ((n[0]&1)==0) {
+    <Calculate_power_mod>
+    copy_(s7, x);
+    copyInt_(x, 1);
+    while (!equalsInt(y, 0)) {
+      if (y[0]&1)
+        multMod_(x, s7, n);
+      divInt_(y, 2);
+      squareMod_(s7, n);
+    }
+    </Calculate_power_mod>
+    return;
+  }
+  </handle_even_n>
+
+  <preprocess_for_odd_n>
+  copyInt_(s7, 0);
+  for (kn=n.length; kn>0 && !n[kn-1]; kn--);
+  np=radix-inverseModInt(modInt(n, radix), radix);
+  s7[kn]=1;
+  multMod_(x, s7, n);
+  </preprocess_for_odd_n>
+
+  <prepare_s3_array>
+  if (s3.length!=x.length)
+    s3=dup(x);
+  else
+    copy_(s3, x);
+  </prepare_s3_array>
+
+  <find_nonzero_y_digits>
+  for (k1=y.length-1; k1>0 & !y[k1]; k1--);
+  if (y[k1]==0) {
+    copyInt_(x, 1);
+    return;
+  }
+  for (k2=1<<(bpe-1); k2 && !(y[k1] & k2); k2>>=1);
+  </find_nonzero_y_digits>
+
+  <perform_montgomery_multiplication>
+  for (;;) {
+    if (!(k2>>=1)) {
+      k1--;
+      if (k1<0) {
+        mont_(x, one, n, np);
+        return;
+      }
+      k2=1<<(bpe-1);
+    }
+    mont_(x, x, n, np);
+
+    if (k2 & y[k1]) 
+      mont_(x, s3, n, np);
+  }
+  </perform_montgomery_multiplication>
+}
+</powMod_>
+
+<tabView_closeGroup>
+function tabView_closeGroup(aSpec) {
+    <verify_spec_and_group>
+    var spec = aSpec || {};
+    var group = spec.group;
+
+    if (!group) {
+      throw new Error(arguments.callee.name + ": Group not specified.");
+    }
+    </verify_spec_and_group>
+
+    <locate_and_click_close_button>
+    var button = this.getElement({
+      type: "group_closeButton",
+      value: group
+    });
+    this._controller.click(button);
+    </locate_and_click_close_button>
+
+    <wait_for_group_close>
+    this.waitForGroupClosed({group: group});
+    </wait_for_group_close>
+  }
+</tabView_closeGroup>
+
+<once>
+function once(f) {
+    <wrap_function>
+    function g() {
+      <apply_and_remove>
+      f.apply(this, arguments)
+      remove(g)
+      </apply_and_remove>
+    }
+    <add_listener>
+    add(g)
+    </add_listener>
+    <return_notify>
+    return notify
+    </return_notify>
+    </wrap_function>
+}
+</once>
+
+<_doReplaceInOneFile>
+function _doReplaceInOneFile(fullPath, matchInfo, replaceText, options) {
+        <get_open_document_or_prepare_new>
+        var doc = DocumentManager.getOpenDocumentForPath(fullPath);
+        options = options || {};
+        
+        if (!doc && (options.forceFilesOpen || MainViewManager.findInWorkingSet(MainViewManager.ALL_PANES, fullPath) !== -1)) {
+            return DocumentManager.getDocumentForPath(fullPath).then(function (newDoc) {
+                <do_replace_in_document>
+                return _doReplaceInDocument(newDoc, matchInfo, replaceText, options.isRegexp);
+                </do_replace_in_document>
+            });
+        } else if (doc) {
+            <do_replace_in_document>
+            return _doReplaceInDocument(doc, matchInfo, replaceText, options.isRegexp);
+            </do_replace_in_document>
+        } else {
+            <do_replace_on_disk>
+            return _doReplaceOnDisk(fullPath, matchInfo, replaceText, options.isRegexp);
+            </do_replace_on_disk>
+        }
+        </get_open_document_or_prepare_new>
+    }
+</_doReplaceInOneFile>
+
+<getSelectValue>
+function getSelectValue (elem) {
+  <initialize_variables>
+  var value, option, i
+  var options = elem.options
+  var index = elem.selectedIndex
+  var one = elem.type === 'select-one'
+  var values = one ? null : []
+  var max = one ? index + 1 : options.length
+  </initialize_variables>
+
+  <set_starting_index>
+  if (index < 0) {
+    i = max
+  } else {
+    i = one ? index : 0
+  }
+  </set_starting_index>
+
+  
+  <iterate_options>
+  for (; i < max; i++) {
+    option = options[i]
+
+    <validate_option>
+    if ((option.selected || i === index) &&
+
+        <check_disabled>
+        !option.disabled &&
+        (!option.parentNode.disabled ||
+          option.parentNode.tagName.toLowerCase() === 'optgroup')) {
+          </check_disabled>
+
+      <get_option_value>
+      value = option.value
+      </get_option_value>
+
+      <handle_selection_type>
+      if (one) {
+        return value
+      }
+      values.push(value)
+      </handle_selection_type>
+    }
+    </validate_option>
+  }
+  </iterate_options>
+
+  <return_values>
+  return values
+  </return_values>
+}
+</getSelectValue>

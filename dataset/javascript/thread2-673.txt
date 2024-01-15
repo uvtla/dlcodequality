@@ -1,0 +1,298 @@
+Here are the annotations for the given functions:
+
+```javascript
+<tryPlugin>
+function tryPlugin(mId, space) {
+  <parseModuleId>
+  const parsed = parse(mId); // parse the module id
+  const pluginId = parsed.prefix.slice(0, -1); 
+  </parseModuleId>
+  
+  <handleNonTextPluginLoading>
+  if (pluginId) {
+    if (pluginId !== 'text' && pluginId !== 'raw') {
+      return new Promise((resolve, reject) => {
+        const req = (deps, callback, errback) => {
+          const errback2 = e => {
+            if (errback) {
+              try {
+                errback(e);
+              } catch (err) { }
+            }
+            reject(e);
+          };
+          return requirejs(deps, callback, errback2);
+        };
+        try {
+          const onload = loaded => {
+            space.define(mId, [], () => loaded);
+            resolve(space.req(mId));
+          };
+          onload.error = err => reject(err);
+          requirejs([pluginId], plugin => {
+            plugin.load(parsed.bareId, req, onload, {});
+          });
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+  }
+  </handleNonTextPluginLoading>
+  
+  <handleExtensionPluginLoading>
+  else if (parsed.ext && parsed.ext !== '.js') {
+    const extPluginName = 'ext:' + parsed.ext.slice(1);
+    if (userSpace.has(extPluginName) || packageSpace.has(extPluginName)) {
+      return new Promise((resolve, reject) => {
+        const req = (deps, callback, errback) => {
+          const errback2 = e => {
+            if (errback) {
+              try {
+                errback(e);
+              } catch (err) { }
+            }
+            reject(e);
+          };
+          return requirejs(deps, callback, errback2);
+        };
+        try {
+          const onload = loaded => {
+            space.define(mId, [], () => loaded);
+            resolve(space.req(mId));
+          };
+          onload.error = err => reject(err);
+          requirejs([extPluginName], plugin => {
+            plugin.load(parsed.cleanId, req, onload, {});
+          });
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+    return new Promise(resolve => {
+      space.define(parsed.cleanId,['text!' + parsed.cleanId], m => m);
+      resolve(space.req(mId));
+    });
+  }
+  </handleExtensionPluginLoading>
+}
+</tryPlugin>
+
+<setTextareaAccessibility>
+function (disable) {
+  var t = this,
+      prefix = t.o.prefix;
+  
+  t.disabled = disable;
+  
+  if (disable) {
+    t.$ta.attr('disabled', true);
+  } else {
+    t.$ta.removeAttr('disabled');
+  }
+  t.$box.toggleClass(prefix + 'disabled', disable);
+  t.$ed.attr('contenteditable', !disable);
+}
+</setTextareaAccessibility>
+
+<pubsubDeleteNode>
+function(node, call_back) {
+  var that = this._connection;
+  var iqid = that.getUniqueId("pubsubdeletenode");
+  
+  <generateIQ>
+  var iq = $iq({from:this.jid, to:this.service, type:'set', id:iqid})
+    .c('pubsub', {xmlns:Strophe.NS.PUBSUB_OWNER})
+    .c('delete', {node:node});
+  </generateIQ>
+
+  <setupCallback>
+  that.addHandler(call_back, null, 'iq', null, iqid, null);
+  </setupCallback>
+  
+  <sendIQ>
+  that.send(iq.tree());
+  </sendIQ>
+
+  return iqid;
+}
+</pubsubDeleteNode>
+
+<processSourceFile>
+function processSourceFile(work_directory, file_path) {
+  <pathSetup>
+  var path = create('fs.path', work_directory).combine(file_path),
+      source = create('fs.filereader(utf8)', path).readSync();
+  </pathSetup>
+
+  <replaceIncludes>
+  var result = source.replace(/\/\*#include \S+\*\
+  var include_file_path = /\/\*#include (\S+)\*\
+  
+  watch_list.push(include_file_path);
+  
+  return processSourceFile(path.getParentPath().path, include_file_path);
+  });
+  </replaceIncludes>
+
+  return result;
+}
+</processSourceFile>
+
+<getOPF>
+function getOPF(document) {
+  <getAndReplaceContent>
+  var content = structuralFiles.getOPF(document);
+  return replacements(document, replacements(document, content));
+  </getAndReplaceContent>
+}
+</getOPF>
+
+<initializePlugin>
+function plugin(Vue) {
+  <checkAlreadyInstalled>
+  if (plugin.installed) {
+    return;
+  }
+  </checkAlreadyInstalled>
+
+  <setupUtilities>
+  Util(Vue);
+  </setupUtilities>
+
+  <attachProperties>
+  Vue.url = Url;
+  Vue.http = Http;
+  Vue.resource = Resource;
+  Vue.Promise = PromiseObj;
+  
+  Object.defineProperties(Vue.prototype, {
+    $url: {
+      get: function get() {
+        return options(Vue.url, this, this.$options.url);
+      }
+    },
+    $http: {
+      get: function get() {
+        return options(Vue.http, this, this.$options.http);
+      }
+    },
+    $resource: {
+      get: function get() {
+        return Vue.resource.bind(this);
+      }
+    },
+    $promise: {
+      get: function get() {
+        var this$1 = this;
+        return function (executor) { return new Vue.Promise(executor, this$1); };
+      }
+    }
+  });
+  </attachProperties>
+}
+</initializePlugin>
+
+<createFunctionStruct>
+function func(schema, defaults, options) {
+  <validateSchema>
+  if (kindOf(schema) !== 'function') {
+    <schemaErrorHandling>
+    if (process.env.NODE_ENV !== 'production') {
+      throw new Error(
+        `Function structs must be defined as a function, but you passed: ${schema}`
+      )
+    } else {
+      throw new Error(`Invalid schema: ${schema}`)
+    }
+    </schemaErrorHandling>
+  }
+  </validateSchema>
+
+  <setupValidationFunction>
+  const name = 'function'
+  const type = '<function>'
+  const validate = (value = resolveDefaults(defaults), data) => {
+    const result = schema(value, data)
+    let failure = { path: [], reason: null }
+    let isValid
+    
+    <handleValidationResult>
+    switch (kindOf(result)) {
+      case 'boolean': {
+        isValid = result
+        break
+      }
+      case 'string': {
+        isValid = false
+        failure.reason = result
+        break
+      }
+      case 'object': {
+        isValid = false
+        failure = { ...failure, ...result }
+        break
+      }
+      default: {
+        <resultErrorHandling>
+        if (process.env.NODE_ENV !== 'production') {
+          throw new Error(
+            `Validator functions must return a boolean, an error reason string or an error reason object, but you passed: ${schema}`
+          )
+        } else {
+          throw new Error(`Invalid result: ${result}`)
+        }
+        </resultErrorHandling>
+      }
+    }
+    </handleValidationResult>
+
+    return isValid
+      ? [undefined, value]
+      : [{ type, value, data: value, ...failure }]
+  }
+  </setupValidationFunction>
+
+  <createStructInstance>
+  return new Kind(name, type, validate)
+  </createStructInstance>
+}
+</createFunctionStruct>
+
+<resetParserState>
+function reset(html) {
+  this.html = html || this.html;
+  this.root = new VNode('div');
+  this.node = this.root; 
+  this.path = []; 
+  this.blocks = []; 
+}
+</resetParserState>
+
+<expandAbbreviation>
+function(abbr, syntax, profile, contextNode) {
+	return parser.expand(abbr, {
+		syntax: syntax,
+		profile: profile,
+		contextNode: contextNode
+	});
+}
+</expandAbbreviation>
+
+<adjustDateRange>
+function(date, inst) {
+	var minDate = inst.get('minDate');
+	var maxDate = inst.get('maxDate');
+	<minDateAdjustment>
+	date = (minDate && date.compareTo(minDate) === -1 ? minDate.newDate() : date);
+	</minDateAdjustment>
+	<maxDateAdjustment>
+	date = (maxDate && date.compareTo(maxDate) === +1 ? maxDate.newDate() : date);
+	</maxDateAdjustment>
+	return date;
+}
+</adjustDateRange>
+```
+
+Please note that these annotations identify cohesive blocks of code that represent a specific responsibility. Responsibilities are marked according to their logic and purpose, not merely on syntactical lines.

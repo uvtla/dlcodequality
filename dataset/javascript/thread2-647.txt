@@ -1,0 +1,297 @@
+```javascript
+<createTemplate>
+function createTemplate (appname, filename, data) {
+  var content, ext;
+  if (data) {
+    <manipulateTemplateData>
+    data.appname = appname
+    </manipulateTemplateData>
+  }
+  <chooseTemplateProcessingMethod>
+  if(ignoreFileTypes.test(filename)){
+    console.log('Don\'t FUTZ binary files', filename);
+    content = getUnrenderedTemplateContents(filename);
+  } else  {
+    content = getTemplateContents(filename, data) 
+  }
+  </chooseTemplateProcessingMethod>
+  <writeContentToFile>
+  fs.writeFileSync(path.join(appname, filename), content)
+  </writeContentToFile>
+}
+</createTemplate>
+
+<readSonarMeasurements>
+function (cb) {
+        var sServoReadings = [];
+        <readIntervalSetup>
+        var read = setInterval(function () {
+          sServoReadings.push(sonar.cm);
+          if (sServoReadings.length === 10) {
+            clearInterval(read);
+            console.log(array.avg(sServoReadings));
+            cb(null, array.avg(sServoReadings));
+          }
+        }, 100);
+        </readIntervalSetup>
+      }
+</readSonarMeasurements>
+
+<setCookie>
+function set(key, value, encoder = encodeURIComponent, options) {
+  <normalizeArguments>
+  if (typeof encoder === 'object' && encoder !== null) {
+    
+    options = encoder;
+    encoder = encodeURIComponent;
+    
+  }
+  </normalizeArguments>
+  <constructCookieString>
+  const attrsStr = convert(options || {});
+  const valueStr = typeof encoder === 'function' ? encoder(value) : value;
+  const newCookie = `${key}=${valueStr}${attrsStr}`;
+  </constructCookieString>
+  <setDocumentCookie>
+  document.cookie = newCookie;
+  </setDocumentCookie>
+}
+</setCookie>
+
+<phase_hunt>
+function phase_hunt (sdate) {
+  <setDefaultDate>
+  if (!sdate) {
+    sdate = new Date()
+  }
+  </setDefaultDate>
+
+  <calculateMoonPhases>
+  let adate = new Date(sdate.getTime() - (45 * 86400000)) 
+  let k1 = Math.floor(12.3685 * (adate.getFullYear() + (1.0 / 12.0) * adate.getMonth() - 1900))
+  let nt1 = meanphase(adate.getTime(), k1)
+
+  sdate = julian.fromDate(sdate)
+  adate = nt1 + SYNODIC_MONTH
+  let k2 = k1 + 1
+  let nt2 = meanphase(adate, k2)
+  while (nt1 > sdate || sdate >= nt2) {
+    adate += SYNODIC_MONTH
+    k1++
+    k2++
+    nt1 = nt2
+    nt2 = meanphase(adate, k2)
+  }
+  </calculateMoonPhases>
+
+  <returnPhaseDates>
+  return {
+    new_date: truephase(k1, NEW),
+    q1_date: truephase(k1, FIRST),
+    full_date: truephase(k1, FULL),
+    q3_date: truephase(k1, LAST),
+    nextnew_date: truephase(k2, NEW)
+  }
+  </returnPhaseDates>
+}
+</phase_hunt>
+
+<_traverse>
+function _traverse(props, obj, notification) {
+    <initializeVariables>
+    var length = props.length;
+    var refobj = shared;
+    var refmeta = meta;
+    var handler = {};
+
+    var fns = [];
+    </initializeVariables>
+
+    <traverseProperties>
+    for (var i = 0; i < length; i++) {
+
+      var prop = props[i];
+
+      <initializePropertyMetaData>
+      if (!refmeta[prop]) {
+        refmeta[prop] = {};
+        refmeta[prop][nfs] = {};
+      }
+      var currentmeta = refmeta[prop];
+      </initializePropertyMetaData>
+
+      <initializePropertyObject>
+      if (!refobj[prop]) {
+        refobj[prop] = {};
+      }
+      var currentobj = refobj[prop];
+      </initializePropertyObject>
+
+      <handleLastProperty>
+      if (i === (length - 1)) {
+        
+        <updateRefObject>
+        if (obj) {
+          
+          refobj[prop] = obj;
+          
+          _traverseSubtree(currentmeta, obj, fns);
+        }
+        </updateRefObject>
+
+        <addNotification>
+        if (notification) {
+          
+          var id = freeId++;
+          currentmeta[nfs][id] = notification;
+          
+          handler = { id: id, close: closeNotification };
+          handler[nfs] = currentmeta[nfs];
+          
+          <notifyAsynchronously>
+          process.nextTick(function () {
+            notification(currentobj);
+          });
+          </notifyAsynchronously>
+        }
+        </addNotification>
+      }
+      </handleLastProperty>
+      <handleNonLastProperty>
+      else if (obj) {
+        
+        _pushNotifications(currentmeta, currentobj, fns);
+      }
+      </handleNonLastProperty>
+
+      
+      refobj = currentobj;
+      refmeta = currentmeta;
+    }
+    </traverseProperties>
+
+    <finalizeNotifications>
+    if (obj) {
+      
+      async.parallel(fns);
+    }
+    </finalizeNotifications>
+
+    return handler;
+  }
+  </_traverse>
+
+<inPatchRoot>
+function inPatchRoot(path, plugin) {
+  <getOptions>
+  const { opts } = plugin;
+  </getOptions>
+  <fastRootCheck>
+  if (useFastRoot(path, opts)) {
+    return true;
+  }
+  </fastRootCheck>
+
+  <matchRoots>
+  const roots = patchRoots(plugin)
+  return !roots.length || path.findParent((parent) => {
+    return roots.indexOf(parent) > -1;
+  });
+  </matchRoots>
+}
+</inPatchRoot>
+
+<class_data function is anonymized, cannot provide tags due to lack of context>
+
+<determineIfIncludesMeAndRewriteDeviceAddress>
+function determineIfIncludesMeAndRewriteDeviceAddress(assocSignersByPath, handleResult){
+  <initializeAddressMappings>
+	var assocMemberAddresses = {};
+	var bHasMyDeviceAddress = false;
+	for (var signing_path in assocSignersByPath){
+		var signerInfo = assocSignersByPath[signing_path];
+		if (signerInfo.device_address === device.getMyDeviceAddress())
+			bHasMyDeviceAddress = true;
+		if (signerInfo.address)
+			assocMemberAddresses[signerInfo.address] = true;
+	}
+	var arrMemberAddresses = Object.keys(assocMemberAddresses);
+	if (arrMemberAddresses.length === 0)
+		return handleResult("no member addresses?");
+  </initializeAddressMappings>
+  <checkMemberships>
+	db.query(
+		"SELECT address, 'my' AS type FROM my_addresses WHERE address IN(?) \n\
+		UNION \n\
+		SELECT shared_address AS address, 'shared' AS type FROM shared_addresses WHERE shared_address IN(?)", 
+		[arrMemberAddresses, arrMemberAddresses],
+		function(rows){
+		
+			<handleQueryResult>
+			if (rows.length === 0)
+				return handleResult("I am not a member of this shared address");
+			var arrMyMemberAddresses = rows.filter(function(row){ return (row.type === 'my'); }).map(function(row){ return row.address; });
+			</handleQueryResult>
+			
+			<rewriteDeviceAddressIfNeeded>
+			if (!bHasMyDeviceAddress){
+				for (var signing_path in assocSignersByPath){
+					var signerInfo = assocSignersByPath[signing_path];
+					if (signerInfo.address && arrMyMemberAddresses.indexOf(signerInfo.address) >= 0)
+						signerInfo.device_address = device.getMyDeviceAddress();
+				}
+			}
+			</rewriteDeviceAddressIfNeeded>
+			handleResult();
+		}
+	);
+	</checkMemberships>
+}
+</determineIfIncludesMeAndRewriteDeviceAddress>
+
+<setOptions>
+function setOptions(object, options) {
+  <mergeOptions>
+      options = object.options = _.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
+  </mergeOptions>
+
+      <applyOptions>
+      _.forOwn(options, function(value, key) {
+        if (value != null) {
+          
+          if (/^on[A-Z]/.test(key)) {
+            _.each(key.split(' '), function(key) {
+              object.on(key.slice(2).toLowerCase(), value);
+            });
+          } else if (!_.has(object, key)) {
+            object[key] = cloneDeep(value);
+          }
+        }
+      });
+      </applyOptions>
+    }
+</setOptions>
+
+<setOrientationHTML>
+function setOrientationHTML(desiredOrientation) {
+    desiredOrientation = desiredOrientation || "";
+    <initializeOrientationDiv>
+    if (!orientationDiv) {
+      orientationDiv = document.createElement("div");
+      
+      var h = document.getElementById("hft-menu");
+      h.parentNode.insertBefore(orientationDiv, h);
+    }
+    </initializeOrientationDiv>
+    <setOrientationContent>
+    if (desiredOrientation.indexOf("portrait") >= 0) {
+      orientationDiv.innerHTML = requirePortraitHTML;
+    } else if (desiredOrientation.indexOf("landscape") >= 0) {
+      orientationDiv.innerHTML = requireLandscapeHTML;
+    } else {
+      orientationDiv.innerHTML = "";
+    }
+    </setOrientationContent>
+  }
+</setOrientationHTML>
+```

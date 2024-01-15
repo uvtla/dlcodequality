@@ -1,0 +1,375 @@
+```javascript
+<setEnumerable>
+function setEnumerable(ctx, props, state) {
+    if (state === void 0) { state = false; }
+    props = chek_1.split(props);
+    var obj = {};
+    props.forEach(function (p) {
+        obj[p] = {
+            writable: true,
+            enumerable: state
+        };
+    });
+    Object.defineProperties(ctx, obj);
+}
+</setEnumerable>
+
+<writeEntities>
+function writeEntities(subFolder) {
+  for (let i = 0, entityNames = Object.keys(configuration.entities); i < entityNames.length; i++) {
+    <createFilePath>
+    const filePath = path.join(subFolder, toFilePath(entityNames[i]));
+    </createFilePath>
+    <updateAndWriteEntity>
+    const entity = updateChangelogDate(filePath, configuration.entities[entityNames[i]]);
+    fs.writeFileSync(filePath, JSON.stringify(entity, null, 4));
+    </updateAndWriteEntity>
+  }
+}
+</writeEntities>
+
+<getRelationship>
+function getRelationship(payload, resource, key) {
+  var relationships = resource.relationships && resource.relationships[key];
+  if (!relationships || !relationships.data) {
+    return;
+  }
+  return !Array.isArray(relationships.data)
+    ? <getSingleRelationship>getIncluded(payload, relationships.data.type, relationships.data.id)</getSingleRelationship>
+    : <getMultipleRelationships>relationships.data.map(function (relationship) {
+        return getIncluded(payload, relationship.type, relationship.id);
+      }).filter(function(entity) { return entity; })</getMultipleRelationships>
+}
+</getRelationship>
+
+<processData>
+function (tree, data) {
+      
+      <processOutput>
+      var output = this.process(tree, data)
+      </processOutput>
+      <debuggingBlock>
+      if (this.debugging) {
+        this.plugins.debug.process([], {
+          includedTemplates: this.includedTemplates,
+          assignedVars: data
+        })
+      }
+      </debuggingBlock>
+      <clearData>
+      this.clear()
+      </clearData>
+
+      return {
+        output: output.tpl,
+        smarty: output.smarty
+      }
+}
+</processData>
+
+<retrieveSource>
+function (len) {
+            var result = '';
+            if (len) {
+                result = this.source.substr(this.position, len);
+            } else {
+                result = this.source.substr(this.position);
+            }
+            return result;
+}
+</retrieveSource>
+
+<webSQLStorage>
+function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	exports.__esModule = true;
+	(function () {
+	    'use strict';
+
+	    
+	    var globalObject = this;
+	    var openDatabase = this.openDatabase;
+
+	    <initializeStorage>
+	    
+	    if (!openDatabase) {
+	        return;
+	    }
+	    </initializeStorage>
+
+	    
+	    
+	    <_initStorage>
+	    function _initStorage(options) {
+	        var self = this;
+	        var dbInfo = {
+	            db: null
+	        };
+
+	        
+	        if (options) {
+	            <copyOptions>
+	            for (var i in options) {
+	                dbInfo[i] = typeof options[i] !== 'string' ? options[i].toString() : options[i];
+	            }
+	            </copyOptions>
+	        }
+
+	        <createDBInfoPromise>
+	        var dbInfoPromise = new Promise(function (resolve, reject) {
+	            
+	            
+	            <openDatabaseConnection>
+	            try {
+	                dbInfo.db = openDatabase(dbInfo.name, String(dbInfo.version), dbInfo.description, dbInfo.size);
+	            } catch (e) {
+	                return self.setDriver(self.LOCALSTORAGE).then(function () {
+	                    return self._initStorage(options);
+	                }).then(resolve)['catch'](reject);
+	            }
+	            </openDatabaseConnection>
+
+	            
+	            <initializeStore>
+	            dbInfo.db.transaction(function (t) {
+	                t.executeSql('CREATE TABLE IF NOT EXISTS ' + dbInfo.storeName + ' (id INTEGER PRIMARY KEY, key unique, value)', [], function () {
+	                    self._dbInfo = dbInfo;
+	                    resolve();
+	                }, function (t, error) {
+	                    reject(error);
+	                });
+	            });
+	            </initializeStore>
+	        });
+	        </createDBInfoPromise>
+
+	        <loadSerializer>
+	        return new Promise(function (resolve, reject) {
+	            resolve(__webpack_require__(3));
+	        }).then(function (lib) {
+	            dbInfo.serializer = lib;
+	            return dbInfoPromise;
+	        });
+	        </loadSerializer>
+	    }
+	    </_initStorage>
+
+	    
+	    <getItem_function>
+	    function getItem(key, callback) {
+	        
+	    }
+	    </getItem_function>
+	    
+	    <iterate_function>
+	    function iterate(iterator, callback) {
+	        
+	    }
+	    </iterate_function>
+
+	    
+	    <setItem_function>
+	    function setItem(key, value, callback) {
+	        
+	    }
+	    </setItem_function>
+
+	    
+	    <removeItem_function>
+	    function removeItem(key, callback) {
+	        
+	    }
+	    </removeItem_function>
+
+	    
+	    
+	    <clear_function>
+	    function clear(callback) {
+	        
+	    }
+	    </clear_function>
+
+	    
+	    
+	    <length_function>
+	    function length(callback) {
+	        
+	    }
+	    </length_function>
+
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    <key_function>
+	    function key(n, callback) {
+	        
+	    }
+	    </key_function>
+
+	    <keys_function>
+	    function keys(callback) {
+	        
+	    }
+	    </keys_function>
+
+	    <executeCallback_function>
+	    function executeCallback(promise, callback) {
+	        
+	    }
+	    </executeCallback_function>
+
+	    <webSQLStorage_definition>
+	    var webSQLStorage = {
+	        _driver: 'webSQLStorage',
+	        _initStorage: _initStorage,
+	        iterate: iterate,
+	        getItem: getItem,
+	        setItem: setItem,
+	        removeItem: removeItem,
+	        clear: clear,
+	        length: length,
+	        key: key,
+	        keys: keys
+	    };
+	    </webSQLStorage_definition>
+
+	    exports['default'] = webSQLStorage;
+	}).call(typeof window !== 'undefined' ? window : self);
+	module.exports = exports['default'];
+ }
+</webSQLStorage>
+
+<parseBiop>
+function() {
+    gobbleSpaces();
+    var biop, to_check = expr.substr(index, max_binop_len), tc_len = to_check.length;
+    while(tc_len > 0) {
+        
+        
+        
+        
+        if(binary_ops.hasOwnProperty(to_check) && (
+            !isIdentifierStart(exprICode(index)) ||
+            (index+to_check.length< expr.length && !isIdentifierPart(exprICode(index+to_check.length)))
+        )) {
+            index += tc_len;
+            return to_check;
+        }
+        to_check = to_check.substr(0, --tc_len);
+    }
+    return false;
+}
+</parseBiop>
+
+<validDateTime>
+function validDateTime(data)
+{
+    
+    
+    
+    <getDom_function>
+    var getDom = function(month, year) {
+        var domTable = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+
+        if(month == 2) {
+            if((year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0))) {
+                domTable[month-1] = 29;
+            }
+        }
+
+        return(domTable[month-1]);
+    };
+    </getDom_function>
+
+    <validateDateTime>
+    var matchDateRegEx = /^([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-4][0-9]|5[0-9]):([0-5][0-9]|60)(\.[0-9]+)?(Z|([+-][01][0-9]|2[0-3]):([0-4][0-9]|5[0-9]))$/;
+
+    try {
+        var m = matchDateRegEx.exec(data);
+        if(!m) { throw 'failed to match regex'; }
+        var year   = +m[1];     
+        var month  = +m[2];     
+        var day    = +m[3];     
+        if(day > getDom(month, year)) { throw 'invalid number of days for month'; }
+        var hour   = +m[4];     
+        var minute = +m[5];     
+        var second = +m[6];     
+        var msec   = +m[7];     
+        var tzHour = +m[8];     
+        var tzMin  = +m[9];     
+
+        return true;
+    }
+    catch(e) {
+        return false;
+    }
+    </validateDateTime>
+}
+</validDateTime>
+
+<initSASS>
+function initSASS() {
+  <buildSassMap>
+  var sassMap = build.engine.sass.map;
+  </buildSassMap>
+  <sassOptions>
+  var opt = {
+    src: build.sourceDir,
+    
+    force: true,
+    
+    response: false,
+    
+    sourceMap: sassMap.enabled,
+    sourceMapEmbed: sassMap.inline
+  };
+  </sassOptions>
+  
+  <configureSassMiddleware>
+  var sassOpt = lodash.assign({ indentedSyntax: true }, opt);
+  app.use(sassMw(sassOpt));
+  </configureSassMiddleware>
+  
+  <configureScssMiddleware>
+  var scssOpt = lodash.assign({ indentedSyntax: false }, opt);
+  app.use(sassMw(scssOpt));
+  </configureScssMiddleware>
+}
+</initSASS>
+
+<updatePermission>
+async function updatePermission (permissionModel, roleId, resourceType, resourceName, updateFn) {
+  <resourceTypeCheck>
+  stateMachinesOnlyForNow(resourceType)
+  </resourceTypeCheck>
+
+  <retrieveGrants>
+  const grants = await getGrantsFor(
+    permissionModel,
+    roleId,
+    resourceName
+  )
+  </retrieveGrants>
+
+  <reviseGrants>
+  const revisedGrants = updateFn(grants)
+  if (revisedGrants === false) return
+  </reviseGrants>
+
+  <setGrants>
+  await setGrantsFor(
+    permissionModel,
+    roleId,
+    resourceName,
+    revisedGrants
+  )
+  </setGrants>
+}
+</updatePermission>
+```

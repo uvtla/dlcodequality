@@ -1,0 +1,332 @@
+```javascript
+<checkQuery>
+function checkQuery(expected, actual){
+    if(!expected){
+        return;
+    }
+
+    <parseQueries>
+    var actualObj = actual ? queryString.parse(actual.replace(/\&$/, '')) : {};
+    var expectedObj = queryString.parse(expected);
+    </parseQueries>
+
+    <compareQueries>
+    if(! _.isEqual(actualObj, expectedObj)){
+        return {
+            error: "Query parameters do not match",
+            expected: expectedObj,
+            actual: actualObj
+        };
+    }
+    </compareQueries>
+}
+</checkQuery>
+
+<getOrdinalNumberString>
+function(n) {
+    <convertToOrdinal>
+    var num = abs(n), last = +num.toString().slice(-2);
+    return n + getOrdinalSuffix(last);
+    </convertToOrdinal>
+}
+</getOrdinalNumberString>
+
+<getOptionOrDefault>
+function(opt, field_name, default_value) {
+    if(typeof field_name === 'string') {
+      
+      return (typeof opt[field_name] !== 'undefined') ? opt[field_name] : default_value;
+    } else {
+      
+      <extractMultipleFieldsOrDefault>
+      var ret = default_value;
+      for(var i=0;i<field_name.length;i++) {
+        var f = field_name[i];
+        if (typeof opt[f] !== 'undefined') {
+          ret = opt[f]; 
+        }
+      }
+      return ret;
+      </extractMultipleFieldsOrDefault>
+    }
+}
+</getOptionOrDefault>
+
+<initializeConnection>
+function Connection (options, clientOptions, label) {
+        <setConnectionProperties>
+        this.options = options;
+        this.clientOptions = clientOptions;
+        this.label = label;
+        this.initialConnection = false;
+        this.initialConnectionRetries = 0;
+        this.maxConnectionRetries = 60;
+        </setConnectionProperties>
+
+        <defineConnectionExchanges>
+        Object.defineProperty(this, 'exchanges', {
+            get: function () {
+                if (this.connection) {
+                    return this.connection.exchanges;
+                }
+            }
+        });
+        </defineConnectionExchanges>
+
+        <defineConnectionStatus>
+        Object.defineProperty(this, 'connected', {
+            get: function () {
+                return this.connection !== undefined;
+            }
+        });
+        </defineConnectionStatus>
+}
+</initializeConnection>
+
+<replaceGlobalExpression>
+function(nodePath, state) {
+        var replacements = [];
+        <computeExpressionAssignment>
+        var expr = getGlobalExpression(state, getFilenameNoExt(state.file.opts.filename), true);
+        createGlobal(expr, replacements, true);
+        var originalGlobal = getGlobalExpression(state, nodePath.node.source.value, true);
+        replacements.push(t.expressionStatement(t.callExpression(
+          t.memberExpression(
+            t.callExpression(
+              t.memberExpression(t.identifier('Object'), t.identifier('keys')),
+              [originalGlobal]
+            ),
+            t.identifier('forEach')
+          ),
+          [t.functionExpression(
+            null,
+            [t.identifier('key')],
+            t.blockStatement(
+              [t.expressionStatement(t.assignmentExpression(
+                '=',
+                t.memberExpression(expr, t.identifier('key'), true),
+                t.memberExpression(originalGlobal, t.identifier('key'), true)
+              ))]
+            )
+          )]
+        )));
+        </computeExpressionAssignment>
+        <nodeReplacement>
+        nodePath.replaceWithMultiple(replacements);
+        </nodeReplacement>
+}
+</replaceGlobalExpression>
+
+<processServerResponse>
+function (serverResponse, request) {
+    <parseServerResponseBody>
+    serverResponse = serverResponse.body;
+    const bids = [];
+    if (!serverResponse || serverResponse.error) {
+      let errorMessage = `in response for ${request.bidderCode} adapter`;
+      if (serverResponse && serverResponse.error) { errorMessage += `: ${serverResponse.error}`; }
+      utils.logError(errorMessage);
+      return bids;
+    }
+    </parseServerResponseBody>
+
+    <createBidsFromResponse>
+    if (serverResponse.ad) {
+      serverResponse.ad.forEach(ad => {
+        const creativeBid = getCreative(ad);
+        if (creativeBid) {
+          if (parseInt(creativeBid.cpm) !== 0) {
+            const bid = newBid(ad, creativeBid, request);
+            bid.mediaType = parseMediaType(creativeBid);
+            bids.push(bid);
+          }
+        }
+      });
+    }
+    </createBidsFromResponse>
+
+    return bids;
+}
+</processServerResponse>
+
+<annotationAtParameter>
+function annotationAtParameter(sSegment, sWholeSegment) {
+				var mAnnotationsXAllOverloads,
+					sIndividualOverloadTarget,
+					aOverloads,
+					sSignature = "",
+					sTerm = sWholeSegment.slice(sSegment.length);
+
+				if (sTerm && maybeParameter(sSegment, vResult)) {
+					
+					sName = sSegment;
+					if (vBindingParameterType) {
+						aOverloads = vResult.filter(isRightOverload);
+						if (aOverloads.length !== 1) {
+							return log(WARNING, "Expected a single overload, but found "
+								+ aOverloads.length);
+						}
+						if (vBindingParameterType !== UNBOUND) {
+							sSignature = aOverloads[0].$Parameter[0].$isCollection
+								? "Collection(" + vBindingParameterType + ")"
+								: vBindingParameterType;
+						}
+						sIndividualOverloadTarget = sTarget + "(" + sSignature + ")/" + sSegment;
+						if (mScope.$Annotations[sIndividualOverloadTarget]) {
+							if (sTerm === "@") {
+								vResult = mScope.$Annotations[sIndividualOverloadTarget];
+								mAnnotationsXAllOverloads
+									= mScope.$Annotations[sTarget + "/" + sSegment];
+								if (mAnnotationsXAllOverloads) {
+									vResult = Object.assign({}, mAnnotationsXAllOverloads, vResult);
+								}
+								
+								return false; 
+							}
+							if (mScope.$Annotations[sIndividualOverloadTarget][sTerm]) {
+								
+								sTarget = sIndividualOverloadTarget;
+								return true;
+							}
+						}
+					}
+
+					
+					
+					sTarget += "/" + sSegment;
+					return true;
+				}
+}
+</annotationAtParameter>
+
+<gitUrlParse>
+function gitUrlParse(url) {
+    <validateInput>
+    if (typeof url !== "string") {
+        throw new Error("The url must be a string.");
+    }
+    </validateInput>
+
+    let urlInfo = gitUp(url)
+    <processUrlParts>
+      , sourceParts = urlInfo.resource.split(".")
+      , splits = null
+      ;
+    </processUrlParts>
+
+    <urlToStringMethod>
+    urlInfo.toString = function (type) {
+        return gitUrlParse.stringify(this, type);
+    };
+    </urlToStringMethod>
+
+    <setUrlInfoSource>
+    urlInfo.source = sourceParts.length > 2
+                   ? sourceParts.slice(1 - sourceParts.length).join(".")
+                   : urlInfo.source = urlInfo.resource
+                   ;
+    </setUrlInfoSource>
+
+    <parseUrlComponents>
+    
+    urlInfo.git_suffix = /\.git$/.test(urlInfo.pathname);
+    urlInfo.name = decodeURIComponent(urlInfo.pathname.replace(/^\
+    urlInfo.owner = decodeURIComponent(urlInfo.user);
+    </parseUrlComponents>
+
+    <urlInfoCases>
+    switch (urlInfo.source) {
+        
+        default:
+            splits = urlInfo.name.split("/");
+            let nameIndex = splits.length - 1;
+            if (splits.length >= 2) {
+                const blobIndex = splits.indexOf("blob", 2);
+                const treeIndex = splits.indexOf("tree", 2);
+                const commitIndex = splits.indexOf("commit", 2);
+                nameIndex = blobIndex > 0 ? blobIndex - 1
+                          : treeIndex > 0 ? treeIndex - 1
+                          : commitIndex > 0 ? commitIndex - 1
+                          : nameIndex;
+
+                urlInfo.owner = splits.slice(0, nameIndex).join('/');
+                urlInfo.name = splits[nameIndex];
+                if (commitIndex) {
+                    urlInfo.commit = splits[nameIndex + 2]
+                }
+            }
+
+            urlInfo.ref = "";
+            urlInfo.filepathtype = "";
+            urlInfo.filepath = "";
+            if ((splits.length > nameIndex + 2) && (["blob", "tree"].indexOf(splits[nameIndex + 1]) >= 0)) {
+                urlInfo.filepathtype = splits[nameIndex + 1];
+                urlInfo.ref = splits[nameIndex + 2];
+                if (splits.length > nameIndex + 3) {
+                    urlInfo.filepath = splits.slice(nameIndex + 3).join('/');
+                }
+            }
+            urlInfo.organization = urlInfo.owner;
+            break;
+    }
+    </urlInfoCases>
+
+    <finalizeFullName>
+    if (!urlInfo.full_name) {
+        urlInfo.full_name = urlInfo.owner;
+        if (urlInfo.name) {
+            urlInfo.full_name && (urlInfo.full_name += "/");
+            urlInfo.full_name += urlInfo.name;
+        }
+    }
+    </finalizeFullName>
+
+    return urlInfo;
+}
+</gitUrlParse>
+
+<initCaches>
+function init(){
+    self.caches = [];
+    <checkConfiguration>
+    if(isEmpty(cacheModules)){
+      log(false, 'No cacheModules array provided--using the default configuration.');
+      getDefaultConfiguration();
+    }
+    </checkConfiguration>
+    else{
+      <useCustomConfiguration>
+      log(false, 'cacheModules array provided--using a custom configuration.');
+      getCustomConfiguration();
+      </useCustomConfiguration>
+      <validateCaches>
+      if(self.caches.length < 1){
+        throw new Exception('NoCacheException', 'No caches were succesfully initialized.');
+      }
+      </validateCaches>
+    }
+}
+</initCaches>
+
+<executeFunctions>
+function(fnStr, options) {
+    options = options || {};
+    <invokeTargetFunction>
+    var fns = [
+      this[fnStr].apply(this, [options])
+    ];
+    </invokeTargetFunction>
+    <invokeRelatedFunctions>
+    _.each(this.relationDefinitions, function(relationAttributes, relationKey) {
+      var relation = this.get(relationKey);
+      if (relation) {
+        fns.push(relation[fnStr](options));
+      }
+    }, this);
+    </invokeRelatedFunctions>
+    <aggregatePromises>
+    return Promises.when.all(fns);
+    </aggregatePromises>
+}
+</executeFunctions>
+```

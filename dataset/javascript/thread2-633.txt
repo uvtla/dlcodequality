@@ -1,0 +1,166 @@
+```
+<setLocationHash>
+function setLocationHash(location, fragment, replace) {
+  if (replace) {
+    var href = location.href.replace(/(javascript:|#).*$/, '');
+    location.replace(href + '#' + fragment);
+  } else {
+    location.hash = '#' + fragment;
+  }
+}
+</setLocationHash>
+
+<logRouteAndSetCurrentPage>
+function routeInit(req) {
+  console.log('route matched: ('+req.route.method.toUpperCase()+') ' + req.route.path);  
+  var chunks = req.route.path.split("/");
+  req.session.currentPage = chunks[1];
+}
+</logRouteAndSetCurrentPage>
+
+<getContainerTypes>
+function getContainerTypes() {
+  var _this4 = this;
+  var containerDebugAdapter = this.get('containerDebugAdapter');
+  var types;
+
+  if (containerDebugAdapter.canCatalogEntriesByType('model')) {
+    types = containerDebugAdapter.catalogEntriesByType('model');
+  } else {
+    types = this._getObjectsOnNamespaces();
+  }
+
+  
+  types = _emberRuntimeSystemNative_array.A(types).map(function (name) {
+    return {
+      klass: _this4._nameToClass(name),
+      name: name
+    };
+  });
+  types = _emberRuntimeSystemNative_array.A(types).filter(function (type) {
+    return _this4.detect(type.klass);
+  });
+
+  return _emberRuntimeSystemNative_array.A(types);
+}
+</getContainerTypes>
+
+<toCORMOType>
+function toCORMOType(type) {
+  if (typeof type === 'string') { ... }
+  else if (type === String) { ... }
+  else if (type === Number) { ... }
+  else if (type === Boolean) { ... }
+  else if (type === Date) { ... }
+  else if (type === Object) { ... }
+  if (typeof type === 'function') { ... }
+  return type;
+}
+</toCORMOType>
+
+<calculateAABB>
+function calculateAABB() {
+  var aabb = { min: new Vector(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE) };
+  aabb.max = aabb.min.negative();
+  for (var i = 0; i < this.vertices.length; i++) {
+    var v = Vector.fromArray(this.vertices[i]);
+    aabb.min = Vector.min(aabb.min, v);
+    aabb.max = Vector.max(aabb.max, v);
+  }
+  return aabb;
+}
+</calculateAABB>
+
+<triggerEventListeners>
+function triggerListeners(listeners, event, args) {
+  if (listeners && event in listeners) {
+    var eventListeners = listeners[event];
+    var triggerGroup = ++triggerId;
+    var next, node = eventListeners.next;
+
+    while (node !== eventListeners) {
+      next = node.next;
+      node.trigger(triggerGroup, args, false);
+      node = next;
+    }
+
+    node = eventListeners.next;
+
+    while (node !== eventListeners) {
+      next = node.next;
+      node.trigger(triggerGroup, args, true);
+      node = next;
+    }
+  }
+}
+</triggerEventListeners>
+
+<performLintReport>
+function reportReducer(linter, summary, filePath) {
+  const fileContents = fs.readFileSync(filePath, {encoding: 'utf8'})
+  const file = linter.process(fileContents)
+
+  if (file.messages.length !== 0) {
+    this.printFilePath(filePath)
+
+    file.messages.forEach((message) => {
+      const severity = message.fatal ? 'error' : 'warning'
+      this.printLintItem(message.line, message.column, severity, message.message, message.ruleId)
+
+      if (message.fatal) {
+        summary.errors += 1
+      } else {
+        summary.warnings += 1
+      }
+    })
+
+    console.log('') 
+  }
+
+  return summary
+}
+</performLintReport>
+
+<setGetClearOptions>
+function setGetClearOptions(config) {
+  this.setOption = config.setOption.bind(config);
+  this.isOption = function (name) { return name in config.options; };
+  this.clear();
+}
+</setGetClearOptions>
+
+<checkSymbolAccessibility>
+function isSymbolAccessible(symbol, enclosingDeclaration, meaning, shouldComputeAliasesToMakeVisible) {
+  if (symbol && enclosingDeclaration && !(symbol.flags & 262144 )) {
+    var initialSymbol = symbol;
+    var meaningToLook = meaning;
+    while (symbol) {
+      var accessibleSymbolChain = getAccessibleSymbolChain(symbol, enclosingDeclaration, meaningToLook, false);
+      if (accessibleSymbolChain) { ... }
+      meaningToLook = getQualifiedLeftMeaning(meaning);
+      symbol = getParentOfSymbol(symbol);
+    }
+    var symbolExternalModule = ts.forEach(initialSymbol.declarations, getExternalModuleContainer);
+    if (symbolExternalModule) {
+      var enclosingExternalModule = getExternalModuleContainer(enclosingDeclaration);
+      if (symbolExternalModule !== enclosingExternalModule) { ... }
+    }
+    return { accessibility: 0 };
+  }
+  function getExternalModuleContainer(declaration) { ... }
+}
+</checkSymbolAccessibility>
+
+<performDivision>
+function divide() {
+  var set;
+  var scale = -1;
+  if (divide.arguments.length == 2) { ... } 
+  else if (divide.arguments.length == 3) { ... }
+  else if (divide.arguments.length == 1) { ... }
+  else { ... }
+  var rhs = divide.arguments[0];
+  return this.dodivide('D',rhs,set,scale);
+}
+</performDivision>
+```

@@ -1,0 +1,226 @@
+1.
+```
+<contextMenuActivation>
+function(e) {
+  var $this = $(this),
+      $related = $(e.relatedTarget),
+      $document = $(document);
+
+  <checkIfTargetRelated>
+  if ($related.is('.context-menu-list') || $related.closest('.context-menu-list').length) {
+    return;
+  }
+  </checkIfTargetRelated>
+
+  <checkIfCurrentlyTriggered>
+  if ($currentTrigger && $currentTrigger.length) {
+    return;
+  }
+  </checkIfCurrentlyTriggered>
+
+  <prepareHoverData>
+  hoveract.pageX = e.pageX;
+  hoveract.pageY = e.pageY;
+  hoveract.data = e.data;
+  </prepareHoverData>
+
+  <mousemoveHandlerSetup>
+  $document.on('mousemove.contextMenuShow', handle.mousemove);
+  </mousemoveHandlerSetup>
+
+  <delayedContextMenuDisplay>
+  hoveract.timer = setTimeout(function() {
+    hoveract.timer = null;
+    $document.off('mousemove.contextMenuShow');
+    $currentTrigger = $this;
+    $this.trigger($.Event("contextmenu", { data: hoveract.data, pageX: hoveract.pageX, pageY: hoveract.pageY }));
+  }, e.data.delay );
+}
+</contextMenuActivation>
+</delayedContextMenuDisplay>
+```
+
+2.
+```
+<webpackClientCompilation>
+function client(req, res) {
+  <setupCompiler>
+  const compiler = webpack(config);
+  compiler.outputFileSystem = fsys;
+  </setupCompiler>
+
+  <runCompilationAndRespond>
+  compiler.run((err, stats) => {
+    <readCompiledFile>
+    const file = fsys.readFileSync(path.join(__dirname, 'dist', 'client.js'));
+    </readCompiledFile>
+
+    <setHeadersAndSendResponse>
+    res.setHeader('Content-Length', file.length);
+    res.writeHead(200, { 'Content-Type': 'text/javascript' });
+    res.end(file);
+    </setHeadersAndSendResponse>
+  });
+}
+</webpackClientCompilation>
+```
+
+3.
+```
+<fetchJSON>
+function getJSON(url){
+  <prepareURL>
+  url = encodeURI(url);
+  </prepareURL>
+
+  <initializeRequest>
+  var xhr = typeof XMLHttpRequest !== 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+  </initializeRequest>
+
+  <setupResponseType>
+  var responseTypeAware = 'responseType' in xhr;
+  xhr.open('GET', url, true);
+  if (responseTypeAware) {
+      xhr.responseType = 'json';
+  }
+  </setupResponseType>
+
+  <makeRequest>
+  var daRequest = new Promise(function(resolve, reject){
+    xhr.onreadystatechange = function(){
+      var result;
+      if (xhr.readyState === 4) {
+        try {
+          result = responseTypeAware ? xhr.response : JSON.parse(xhr.responseText);
+          resolve(result);
+        } catch (e){
+          reject(e);
+        }
+      }
+    };
+  });
+
+  xhr.setRequestHeader('Content-type', 'application/json; charset=UTF-8');
+  xhr.send();
+  </makeRequest>
+
+  return daRequest;
+}
+</fetchJSON>
+```
+
+4.
+```
+<vcfHeaderParser>
+function parseHeader(headers) {
+  <checkForEmptyHeaders>
+  if (headers.length === 0) {
+    throw new Error('Invalid VCF File: missing header.');
+  }
+  </checkForEmptyHeaders>
+
+  <initializeHeaderObject>
+  var header = {};
+  header.__RAW__ = headers;
+  </initializeHeaderObject>
+
+  <parseColumnsAndSampleNames>
+  headers = U.map(headers, function(h) { return h.replace(/^##?/, ""); });
+  header.columns = headers[headers.length-1].split('\t');
+  header.sampleNames = header.columns.slice(NUM_STANDARD_HEADER_COLUMNS);
+  </parseColumnsAndSampleNames>
+
+  <parseVCFMetadata>
+  header.VERSION = parseVCFVersion(headers);
+  header.ALT = parseHeadersOf('ALT', headers);
+  header.INFO = parseHeadersOf('INFO', headers);
+  header.FORMAT = parseHeadersOf('FORMAT', headers);
+  header.SAMPL = parseHeadersOf('SAMPLE', headers);
+  header.PEDIGREE = parseHeadersOf('PEDIGREE', headers);
+  header.contig = parseHeadersOf('contig', headers);
+  </parseVCFMetadata>
+
+  return header;
+}
+</vcfHeaderParser>
+```
+
+5.
+```
+<setObjectName>
+function(name, object) {
+  <splitQualifiedName>
+  var names = name.split(/\./);
+  </splitQualifiedName>
+
+  <recursiveSetter>
+  function set(container, names, object) {
+    var name;
+    for (var i = 0; i < names.length - 1; i++) {
+      name = names[i];
+      if (container[name] === undefined || container[name] === null) {
+        container[name] = {};
+      }
+      container = container[name];
+    }
+
+    container[names[names.length - 1]] = object;
+
+    if (container[names[names.length - 1]] !== object) {
+      throw new Error('Cannot set var="' + object._attrs.var + '" because it will overwrite a read-only variable.');
+    }
+  }
+  </recursiveSetter>
+
+  <assignmentLogic>
+  if (ons.componentBase) {
+    set(ons.componentBase, names, object);
+  }
+  </assignmentLogic>
+
+  <setScopeElement>
+  var getScope = function(el) {
+    return angular.element(el).data('_scope');
+  };
+
+  var element = object._element[0];
+
+  
+  if (element.hasAttribute('ons-scope')) {
+    set(getScope(element) || object._scope, names, object);
+    element = null;
+    return;
+  }
+  </setScopeElement>
+
+  <setElementParentScope>
+  
+  while (element.parentElement) {
+    element = element.parentElement;
+    if (element.hasAttribute('ons-scope')) {
+      set(getScope(element), names, object);
+      element = null;
+      return;
+    }
+  }
+  </setElementParentScope>
+
+  <setDefaultScope>
+  element = null;
+
+  
+  set($rootScope, names, object);
+  </setDefaultScope>
+}
+</setObjectName>
+```
+
+6. The structure and purpose of this function are cohesive and single-focused on creating a slide instance and setting up its elements, thus it seems to comply with SRP.
+
+7. The `createRangeFromNode` function appears to have a single responsibility of creating a range from a given node, complying with SRP.
+
+8. The `calculateNewBorderRadius` function is responsible for processing and flipping border radius values, which is a single cohesive responsibility, indicating SRP compliance.
+
+9. The `keyboardGetHeight` function handles multiple scenarios to determine the keyboard height, but all within the single context of getting keyboard height based on different platforms. This function complies with SRP.
+
+10. The anonymous function appears to have a single responsibility of getting the display text from a value, given the context of an associated controller. This function adheres to SRP.

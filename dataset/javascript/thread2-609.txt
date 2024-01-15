@@ -1,0 +1,150 @@
+```javascript
+function (toZoom) {
+  var crs = this.options.crs;
+  return crs.scale(toZoom) / crs.scale(this._zoom);
+}
+```
+This function conforms to SRP.
+
+```javascript
+function customDefaultsAssignIn(objValue, srcValue, key, object) {
+  if (objValue === undefined ||
+      (eq(objValue, objectProto[key]) && !hasOwnProperty.call(object, key))) {
+    return srcValue;
+  }
+  return objValue;
+}
+```
+This function conforms to SRP.
+
+```javascript
+function getLibraryPromise(oChainObject) {
+  return new Promise(function(oResolve) {
+    fs.readFile(oChainObject.libraryFile, 'utf8', (oError, oData) => {
+      oChainObject.libraryFileData = oData;
+      oResolve(oChainObject);
+    });
+  });
+}
+```
+This function conforms to SRP.
+
+```javascript
+function writeFile(file, css) {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(file, css, err => {
+      if (err) {
+        return reject(err);
+      }
+      resolve();
+    })
+  });
+}
+```
+This function conforms to SRP.
+
+```javascript
+function addCallback (t, data) {
+  var result = data.result || data.error;
+  cbid = data.id;
+  if (t.callbacks[cbid]) {
+    if (data.result) {
+      t.callbacks[cbid](result);
+    } else {
+      t.callbacks[cbid](result, 'error');
+    }
+  }
+}
+```
+This function conforms to SRP.
+
+```javascript
+function( index ) {
+  var cloneChildren = this.children.splice( index, this.children.length - index ),
+    clone = this.clone();
+
+  for ( var i = 0; i < cloneChildren.length; ++i )
+    cloneChildren[ i ].parent = clone;
+
+  clone.children = cloneChildren;
+
+  if ( cloneChildren[ 0 ] )
+    cloneChildren[ 0 ].previous = null;
+
+  if ( index > 0 )
+    this.children[ index - 1 ].next = null;
+
+  this.parent.add( clone, this.getIndex() + 1 );
+
+  return clone;
+}
+```
+This function may not conform to SRP if the different mutations and operations on `cloneChildren` are considered separate responsibilities.
+
+```javascript
+function execSeries(cmds, done) {
+  var out = [];
+  async.forEachSeries(cmds, function(cmd, next) {
+    exec(cmd, function(err, stdout, stderr) {
+      out.push({
+        stdout: stdout,
+        stderr: stderr,
+        err: err
+      });
+      next();
+    });
+  }, function() {
+    done(null, out);
+  });
+}
+```
+This function may not conform to SRP if the process of executing commands and collecting their outputs is considered separate from iterating through `cmds`.
+
+```javascript
+function getEarthquakes(callback, params) {
+  
+  const reqParams = !params ? {
+    url: 'http:
+    headers: { 'User-Agent': browser() },
+    
+    encoding: 'binary',
+  } : params
+
+  request(reqParams, (error, res, body) => {
+    if (error || res.statusCode !== 200) {
+      return callback(new Error('Could not retrieve the data from the data source'))
+    }
+
+    return callback(error, body)
+  })
+}
+```
+This function conforms to SRP.
+
+```javascript
+function data(buf) {
+  if(this._tcp) {
+    if(this._paused) {
+      this.client._qbuf = Buffer.concat(
+        [this.client._qbuf, buf], this.client._qbuf.length + buf.length);
+      return false;
+    }
+    this.emit('input', buf.length);
+    this._process(buf);
+  } else {
+    this.decoded(null, buf);
+  }
+}
+```
+This function conforms to SRP but has aspects that could potentially violate SRP if context suggests that buffering, emitting, processing, and decoding are separate responsibilities.
+
+```javascript
+function makeMap(str) {
+  var obj = {}, items = str.split(",");
+  items.forEach(function(name){
+    obj[name] = true;
+  });
+  return obj;
+}
+```
+This function conforms to SRP.

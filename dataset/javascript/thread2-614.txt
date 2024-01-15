@@ -1,0 +1,230 @@
+```javascript
+<filterArrayBasedOnCallback>
+function(array, callback, caller) {
+    <declareVariables>
+    var selected = []; 
+    </declareVariables>
+    <checkNativeFilterSupport>
+    if (Array.prototype.filter) {
+        selected = array.filter(callback, caller);
+    } else {
+    </checkNativeFilterSupport>
+        <validateInputs>
+        var len = array.length;
+        if (typeof callback != "function") {
+            throw new TypeError();
+        }
+        </validateInputs>
+        <filterArrayManually>
+        for(var i=0; i<len; i++) {
+            if (i in array) {
+                var val = array[i];
+                if (callback.call(caller, val, i, array)) {
+                    selected.push(val);
+                }
+            }
+        }
+        </filterArrayManually>        
+    <returnSelected>
+    }
+    return selected;
+}
+</returnSelected>
+</filterArrayBasedOnCallback>
+
+<addSound>
+function add(config) {
+    <createSoundObject>
+    const src = file.getSupportedFile(config.src || config.url || config.data || config);
+    const sound = new Sound(Object.assign({}, config || {}, {
+        src,
+        context,
+        destination: bus.gain
+    }));
+    </createSoundObject>
+    <configureSound>
+    sound.isTouchLocked = isTouchLocked;
+    if (config) {
+        sound.id = config.id || config.name || '';
+        sound.loop = !!config.loop;
+        sound.volume = config.volume;
+        sound.effects = config.effects || [];
+    }
+    </configureSound>
+    <addSoundToBus>
+    bus.add(sound);
+    </addSoundToBus>
+    <returnSound>
+    return sound;
+    </returnSound>
+}
+</addSound>
+
+<mkdirpSync>
+function _mkdirpSync (directory, mode) {
+    <validateArguments>
+    if ("undefined" === typeof directory) {
+        throw new ReferenceError("missing \"directory\" argument");
+    }
+    else if ("string" !== typeof directory) {
+        throw new TypeError("\"directory\" argument is not a string");
+    }
+    else if ("" === directory.trim()) {
+        throw new Error("\"directory\" argument is empty");
+    }
+    else if ("undefined" !== typeof mode && "number" !== typeof mode) {
+        throw new TypeError("\"mode\" argument is not a number");
+    }
+    </validateArguments>
+    <createDirectoryIfNotExists>
+    else if (!isDirectorySync(directory)) {
+        const SUB_DIRECTORY = dirname(directory);
+        if (!isDirectorySync(SUB_DIRECTORY)) {
+            _mkdirpSync(SUB_DIRECTORY);
+        }
+        mkdirSync(directory, mode ? mode : DEFAULT_OPTION);
+    }
+    </createDirectoryIfNotExists>
+}
+</mkdirpSync>
+
+<appendChildToNode>
+function (node) {
+    <createElement>
+    var element = this._createElement(node);
+    </createElement>
+    <setAttributesAndAppendChildren>
+    this._setAttributesTo(element);
+    this._appendChildrenTo(element);
+    </setAttributesAndAppendChildren>
+    <returnNodeWithNewChild>
+    return node.appendChild(element);
+    </returnNodeWithNewChild>
+}
+</appendChildToNode>
+
+<enableDatepicker>
+function (target) {
+    <getInstanceAndCheck>
+    var inst = this._getInst(target);
+    if (!inst || !inst.isDisabled) {
+        return FALSE;
+    }
+    </getInstanceAndCheck>
+    <removeClassAndReset>
+    $("#sbHolder_" + inst.uid).removeClass(inst.settings.classHolderDisabled);
+    inst.isDisabled = FALSE;
+    $.data(target, PROP_NAME, inst);
+    </removeClassAndReset>
+}
+</enableDatepicker>
+
+<initializeStemmer>
+function() {
+    var stemmer = this;
+    <setStemMethod>
+    stemmer.stem = function(token) {
+        return token;
+    };
+    </setStemMethod>
+    <setTokenizeAndStemMethod>
+    stemmer.tokenizeAndStem = function(text, keepStops) {
+        var stemmedTokens = [];
+        new aggressive_tokenizer_fa().tokenize(text).forEach(function(token) {
+            if(keepStops || stopwords_fa.words.indexOf(token) == -1)
+                stemmedTokens.push(stemmer.stem(token));
+        });
+        return stemmedTokens;
+    };
+    </setTokenizeAndStemMethod>
+    <attachStringPrototypes>
+    stemmer.attach = function() {
+        String.prototype.stem = function() {
+            return stemmer.stem(this);
+        };
+        String.prototype.tokenizeAndStem = function(keepStops) {
+            return stemmer.tokenizeAndStem(this, keepStops);
+        };
+    };
+    </attachStringPrototypes>
+}
+</initializeStemmer>
+
+<mergeAssetsWithResolution>
+function mergeAssets (
+  parentVal,
+  childVal,
+  vm,
+  key
+) {
+    <createResObject>
+    var res = Object.create(parentVal || null);
+    </createResObject>
+    <extendWithChildVal>
+    if (childVal) {
+        assertObjectType(key, childVal, vm);
+        return extend(res, childVal)
+    } else {
+        return res
+    }
+    </extendWithChildVal>
+}
+</mergeAssetsWithResolution>
+
+<createParticles>
+function _createParticles(node, count) {
+    <initializeParticlesArray>
+    this._particles = [];
+    </initializeParticlesArray>
+    <createParticleOptions>
+    var options = {
+        size: [this.options.particleSize, this.options.particleSize],
+        properties: {
+            backgroundColor: this.options.color,
+            borderRadius: '50%'
+        }
+    };
+    </createParticleOptions>
+    <addParticlesToNode>
+    for (var i = 0; i < count; i++) {
+        var particle = {
+            surface: new Surface(options),
+            mod: new Modifier({})
+        };
+        this._particles.push(particle);
+        node.add(particle.mod).add(particle.surface);
+    }
+    </addParticlesToNode>
+}
+</createParticles>
+
+<initializePromise>
+function Promise(cb, ctx) {
+    <setProperties>
+    this.context = ctx;
+    this.thenChain = [];
+    this.errCb = null;
+    this.noErrorCb = null;
+    </setProperties>
+    <setupCallbackExecution>
+    process.nextTick(function() {
+        cb();
+    });
+    </setupCallbackExecution>
+}
+</initializePromise>
+
+<getElementNameForTransformation>
+function getElementNameForTransformation( rule, check ) {
+    <determineElementName>
+    if (rule.element)
+        return rule.element;
+    if (check)
+        return check.match(/^([a-z0-9]+)/i)[0];
+    return rule.left.getDefinition().element;
+    </determineElementName>
+}
+</getElementNameForTransformation>
+```
+
+Each function was annotated within the designated tags for SRP compliance. Tags denote separate distinct responsibilities where they exist.

@@ -1,0 +1,329 @@
+```javascript
+<Insert>
+function Insert(dst, src) {
+  for (var id in src) {
+    if (src.hasOwnProperty(id)) {
+      <deepCopyQualifier>
+      if (typeof src[id] === 'object' && !(src[id] instanceof Array) &&
+        (typeof dst[id] === 'object' || typeof dst[id] === 'function'))
+      {
+        Insert(dst[id], src[id])
+      } else {
+        dst[id] = src[id]
+      }
+      </deepCopyQualifier>
+    }
+  }
+  return dst;
+}
+</Insert>
+
+<baseUniq>
+function baseUniq(array, iteratee, comparator) {
+  var index = -1,
+    includes = _arrayIncludes,
+    length = array.length,
+    isCommon = true,
+    result = [],
+    seen = result;
+
+  <initializeComparator>
+  if (comparator) {
+    isCommon = false;
+    includes = _arrayIncludesWith;
+  }
+  </initializeComparator>
+  <initializeSet>
+  else if (length >= LARGE_ARRAY_SIZE$1) {
+    var set = iteratee ? null : _createSet(array);
+    if (set) {
+      return _setToArray(set);
+    }
+    isCommon = false;
+    includes = _cacheHas;
+    seen = new _SetCache;
+  }
+  </initializeSet>
+  else {
+    seen = iteratee ? [] : result;
+  }
+
+  <mainLoop>
+  outer:
+  while (++index < length) {
+    var value = array[index],
+      computed = iteratee ? iteratee(value) : value;
+
+    value = (comparator || value !== 0) ? value : 0;
+    if (isCommon && computed === computed) {
+      var seenIndex = seen.length;
+      while (seenIndex--) {
+        if (seen[seenIndex] === computed) {
+          continue outer;
+        }
+      }
+      if (iteratee) {
+        seen.push(computed);
+      }
+      result.push(value);
+    }
+    else if (!includes(seen, computed, comparator)) {
+      if (seen !== result) {
+        seen.push(computed);
+      }
+      result.push(value);
+    }
+  }
+  </mainLoop>
+  return result;
+}
+</baseUniq>
+
+<optimize>
+function optimize(svg, prefix, params) {
+  var nodeColorIndex = {},
+    edgeColorIndex = {},
+    count = 0,
+    color,
+    style,
+    styleText = '',
+    f,
+    i,
+    l;
+
+  <initStyle>
+  if (params.classes) {
+    style = document.createElementNS(XMLNS, 'style');
+    style.setAttribute('type', 'text/css')
+    svg.insertBefore(style, svg.firstChild);
+  }
+  </initStyle>
+
+  <processNodes>
+  var nodes = svg.querySelectorAll('[id="' + prefix + '-group-nodes"] > [class="' + prefix + '-node"]');
+  for (i = 0, l = nodes.length, f = true; i < l; i++) {
+    color = nodes[i].getAttribute('fill');
+    if (!params.data)
+      nodes[i].removeAttribute('data-node-id');
+    if (params.classes) {
+      if (!(color in nodeColorIndex)) {
+        nodeColorIndex[color] = (f ? prefix + '-node' : 'c-' + (count++));
+        styleText += '.' + nodeColorIndex[color] + '{fill: ' + color + '}';
+      }
+      if (nodeColorIndex[color] !== prefix + '-node')
+        nodes[i].setAttribute('class', nodes[i].getAttribute('class') + ' ' + nodeColorIndex[color]);
+      nodes[i].removeAttribute('fill');
+    }
+    f = false;
+  }
+  </processNodes>
+
+  <processEdges>
+  var edges = svg.querySelectorAll('[id="' + prefix + '-group-edges"] > [class="' + prefix + '-edge"]');
+  for (i = 0, l = edges.length, f = true; i < l; i++) {
+    color = edges[i].getAttribute('stroke');
+    if (!params.data)
+      edges[i].removeAttribute('data-edge-id');
+    if (params.classes) {
+      if (!(color in edgeColorIndex)) {
+        edgeColorIndex[color] = (f ? prefix + '-edge' : 'c-' + (count++));
+        styleText += '.' + edgeColorIndex[color] + '{stroke: ' + color + '}';
+      }
+      if (edgeColorIndex[color] !== prefix + '-edge')
+        edges[i].setAttribute('class', edges[i].getAttribute('class') + ' ' + edgeColorIndex[color]);
+      edges[i].removeAttribute('stroke');
+    }
+    f = false;
+  }
+  </processEdges>
+
+  <appendStyles>
+  if (params.classes)
+    style.appendChild(document.createTextNode(styleText));
+  </appendStyles>
+}
+</optimize>
+
+<getNullLogger>
+function getNullLogger() {
+  return new Proxy(
+    {},
+    {
+      <proxyGet>
+      get: function(target, propKey) {
+        if (propKey === 'Timer') {
+          return _.bind(InnerTimer, {}, undefined)
+        }
+        return function() {}
+      },
+      </proxyGet>
+      <proxyApply>
+      apply: function(target, object, args) {}
+      </proxyApply>
+    }
+  )
+}
+</getNullLogger>
+
+<convertToIcns>
+function convertToIcns(pngSrc, icnsDest, callback) {
+  <checkOSX>
+  if (!isOSX()) {
+    callback('OSX is required to convert .png to .icns icon', pngSrc);
+    return;
+  }
+  </checkOSX>
+  <shellExecConvert>
+  shell.exec(
+    `"${PNG_TO_ICNS_BIN_PATH}" "${pngSrc}" "${icnsDest}"`,
+    { silent: true },
+    (exitCode, stdOut, stdError) => {
+      if (stdOut.includes('icon.iconset:error') || exitCode) {
+        if (exitCode) {
+          callback(
+            {
+              stdOut,
+              stdError,
+            },
+            pngSrc,
+          );
+          return;
+        }
+        callback(stdOut, pngSrc);
+        return;
+      }
+      callback(null, icnsDest);
+    },
+  );
+  </shellExecConvert>
+}
+</convertToIcns>
+
+<push>
+function(base, extra, protect) {
+  if (base) {
+    Object.keys(extra || {}).forEach(function(key) {
+      if (base[key] && protect) {
+        throw new Error('utils.push attempted to overwrite "' + key + '" while running in protected mode');
+      }
+      <mergeObjects>
+      if (typeof base[key] == 'object' && typeof extra[key] == 'object') {
+        this.push(base[key], extra[key]);
+      } else {
+        base[key] = extra[key];
+      }
+      </mergeObjects>
+    }, this);
+  }
+  return base;
+}
+</push>
+
+<toggleChoice>
+function toggleChoice(choice, evt) {
+  <preventEventPropagation>
+  if (lxSelect.multiple && !lxSelect.autocomplete && angular.isDefined(evt)) {
+    evt.stopPropagation();
+  }
+  </preventEventPropagation>
+  <manageChoices>
+  if (lxSelect.areChoicesOpened() && lxSelect.multiple) {
+    var dropdownElement = angular.element(angular.element(evt.target).closest('.dropdown-menu--is-open')[0]);
+    
+    <adjustDropdown>
+    if (dropdownElement.scrollTop() > 0) {
+      var dropdownContentElement = angular.element(dropdownElement.find('.dropdown-menu__content')[0]);
+      var dropdownFilterElement = angular.element(dropdownContentElement.find('.lx-select-choices__filter')[0]);
+      var newHeight = dropdownContentElement.height();
+      newHeight -= (dropdownFilterElement.length) ? dropdownFilterElement.outerHeight() : 0;
+      var dropdownListElement = angular.element(dropdownContentElement.find('ul > div')[0]);
+      dropdownListElement.css('height', newHeight + 'px');
+      
+      lxSelect.resetDropdownSize = function() {
+        dropdownListElement.css('height', 'auto');
+        lxSelect.resetDropdownSize = undefined;
+      }
+    }
+    </adjustDropdown>
+  }
+  </manageChoices>
+  <selectChoice>
+  if (lxSelect.multiple && isSelected(choice)) {
+    lxSelect.unselect(choice);
+  } else {
+    lxSelect.select(choice);
+  }
+  </selectChoice>
+  <autocompleteActions>
+  if (lxSelect.autocomplete) {
+    lxSelect.activeChoiceIndex = -1;
+    lxSelect.filterModel = undefined;
+  }
+  <closeDropdown>
+  if (lxSelect.autocomplete || (lxSelect.choicesViewMode === 'panes' && !lxSelect.multiple)) {
+    LxDropdownService.close('dropdown-' + lxSelect.uuid);
+  }
+  </closeDropdown>
+  </autocompleteActions>
+}
+</toggleChoice>
+
+<buildImdbApiUrl>
+function(params) {
+  var baseUrl = 'http://www.omdbapi.com/';
+  var query = '?';
+  
+  <appendSearchParams>
+  query += 's='.concat(encodeURIComponent(params.query));
+  
+  if (params.year) {
+    query += '&y='.concat(params.year);
+  }
+  if (params.type) {
+    query += '&type='.concat(params.type);
+  }
+  if (params.apiKey) {
+    query += '&apikey='.concat(params.apiKey);
+  }
+  </appendSearchParams>
+  
+  return baseUrl.concat(query, '&r=json&v=1');
+}
+</buildImdbApiUrl>
+
+<getPushRules>
+async function getPushRules() {
+  try {
+    debuglog("Getting push rules...");
+    const result = await client.getPushRules();
+    debuglog("Got push rules");
+    <storePushRules>
+    client.pushRules = result;
+    </storePushRules>
+  } catch (err) {
+    console.error("Getting push rules failed", err);
+    if (self._shouldAbortSync(err)) return;
+    <handleSyncError>
+    debuglog("Waiting for saved sync before retrying push rules...");
+    await self.recoverFromSyncStartupError(savedSyncPromise, err);
+    getPushRules();
+    </handleSyncError>
+    return;
+  }
+  <checkLazyLoadStatus>
+  checkLazyLoadStatus(); 
+  </checkLazyLoadStatus>
+}
+</getPushRules>
+
+<transact>
+function transact(transaction, api, secret, options, converter, callback) {
+  if (options.submit === false) {
+    prepareAndOptionallySign.apply(this, arguments);
+  } else {
+    prepareAndSignAndSubmit.apply(this, arguments);
+  }
+}
+</transact>
+```
+These annotations seek to identify distinct blocks of responsibility while avoiding over-segmentation. Each tagged section outlines coherent sets of instructions towards a particular purpose within the functions.

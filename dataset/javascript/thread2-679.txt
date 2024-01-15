@@ -1,0 +1,130 @@
+Here are the annotations for the provided JavaScript functions:
+
+**Compliant Functions**
+
+For the following functions, they appear to adhere to the Single Responsibility Principle (SRP) and have been annotated as such:
+
+<userRegistration>
+function userRegistration(username, password) {
+  createUser(username, password);
+  logActivity("User registration");
+}
+</userRegistration>
+
+<emailActiveClients>
+function emailClients(clients) {
+  clients.forEach(client => {
+    <isActiveClient>
+    const clientRecord = database.lookup(client);
+    if (clientRecord.isActive()) </isActiveClient> {
+      email(client);
+    }
+  });
+}
+</emailActiveClients>
+
+These functions have a single cohesive responsibility. For the `userRegistration` function, the responsibility is to create and register a user, while the `emailActiveClients` function is responsible for emailing active clients.
+
+**Non-Compliant Functions**
+
+These functions contain blocks of code that serve distinct responsibilities and hence are non-compliant with SRP:
+
+<animationUpdate>
+function(v) {
+  var pt = this._firstPT, val;
+  <updatePropertyValue>
+  while (pt) {
+    val = pt.c * v + pt.s;
+    if (pt.r) {
+      val = Math.round(val);
+    }
+    if (!pt.type) {
+      pt.t[pt.p] = val;
+    } else if (pt.type === 1) {
+      pt.t[pt.p] = "rgb(" + (val >> 0) + ", " + ((pt.gs + (v * pt.gc)) >> 0) + ", " + ((pt.bs + (v * pt.bc)) >> 0) + ")";
+    } else if (pt.type === 2) {
+      pt.t[pt.p] = "rgba(" + (val >> 0) + ", " + ((pt.gs + (v * pt.gc)) >> 0) + ", " + ((pt.bs + (v * pt.bc)) >> 0) + ", " + (pt.as + (v * pt.ac)) + ")";
+    } else if (pt.type === -1) {
+      pt.t[pt.p] = pt.i;
+    }
+    pt = pt._next;
+  }
+  </updatePropertyValue>
+  <applyTransformation>
+  if (this._transform) {
+    // Transformation application code...
+  }
+  </applyTransformation>
+}
+</animationUpdate>
+
+This function is updating property values and applying a transformation. Each of these blocks represents a separate, identifiable purpose.
+
+---
+
+Other functions do not require SRP annotations as they are either too simple (only performing one task within the function's scope) or are constructors/setups that inherently handle multiple configurations as their primary responsibility.
+
+**No Violation & Too Simple to Annotate**
+
+```javascript
+// No distinct responsibilities that warrant separate annotations.
+function readFile(pathToFile) {
+  return new Promise((resolve, reject) =>
+    fs.readFile(pathToFile, (err, data) =>
+      err ? reject(err) : resolve(data)
+    )
+  );
+}
+
+function getPathDepth(p) {
+  var parts = p.split(path.sep);
+  
+  if(!parts[0]) {
+    parts.unshift();
+  }
+  
+  return p.split(path.sep).length;
+}
+
+function combineErrors(errPrev, errNew) {
+  if (!errPrev) {
+    return errNew;
+  }
+  
+  let errCombined;
+  // Code for combining errors...
+  
+  return errCombined;
+}
+
+function useRequest() {
+  var request = Module['memoryInitializerRequest'];
+  // Core logic for handling the request...
+  
+  applyMemoryInitializer(response);
+}
+
+function (type) {
+  var namespace = _emberMetalProperty_get.get(this, 'namespace');
+  // Logic for handling the type...
+  
+  return known;
+}
+
+function Hook(fn, options) {
+  if (!this) return new Hook(fn, options);
+  // Constructor setup...
+  
+  this.initialize();
+}
+
+function prototypeMethodOrNull(className, method) {
+  // A simple function returning a method or null...
+}
+
+function inResult(event, operation) {
+  // Logic for determining the result of an event...
+}
+```
+
+These functions are best not segmented further since splitting their tasks would not align with SRP; they are designed to handle a single task or comprise a cohesive process related to their primary responsibility.

@@ -1,0 +1,200 @@
+```javascript
+<updateStateWithEvent>
+function (state, ev) {
+    if(state.dirtyTs + 200 < ev.ts && state.queue) {
+      state.cleanTs = ev.ts
+      state.writing = true
+      state.dirty = false
+      return {state: state, effects: {type: 'write'}}
+    }
+    return state
+}
+</updateStateWithEvent>
+
+<parseUrlAndUpdateWithLinks>
+function parseUrl (text) {
+  
+  var urls = url_regex; 
+
+  text = text ? String(text).replace(/<[^>]+>/gm, '') : '';  
+  
+  if (text.match(urls)) {
+    text = text.replace(urls, "<a href=\"$1\" target=\"_blank\">$1</a>")  
+  }
+
+  return text.replace(/\n\r?/g, '<br />');
+
+}
+</parseUrlAndUpdateWithLinks>
+
+<generateStylesXML>
+function write_sty_xlml(wb, opts) {
+  var styles = ['<Style ss:ID="Default" ss:Name="Normal"><NumberFormat/></Style>'];
+  opts.cellXfs.forEach(function(xf, id) {
+    var payload = [];
+    payload.push(writextag('NumberFormat', null, {"ss:Format": escapexml(SSF._table[xf.numFmtId])}));
+    styles.push(writextag('Style', payload.join(""), {"ss:ID": "s" + (21+id)}));
+  });
+  return writextag("Styles", styles.join(""));
+}
+</generateStylesXML>
+
+<checkAndFireCallback>
+function maybeFireCallback() {
+  
+  if (callbackFired) return;
+  
+  if (stdoutReady && stderrReady && wantCallback && !callbackFired) {
+    callbackFired = true;
+    callback(callbackErr, stdout);
+  }
+}
+</checkAndFireCallback>
+
+<persistData>
+function(newData) {
+  
+  var def = $wilddogUtils.defer();
+  this.$ref().set($wilddogUtils.toJSON(newData), $wilddogUtils.makeNodeResolver(def));
+  return def.promise;
+}
+</persistData>
+
+<filterCommands>
+function filter(unparsed) {
+  var cmds = this.commands()
+    , alias = this.finder.getCommandByName;
+  var i, l = unparsed.length;
+  for(i = 0;i < l;i++) {
+    
+    if(alias(unparsed[i], cmds)) {
+      unparsed.splice(i, 1);
+      i--;
+      l--;
+    }
+  }
+  
+  return unparsed;
+}
+</filterCommands>
+
+<takeScreenshotAndRestart>
+function() {
+  var that = this;
+  
+  if ($$logging.get('screenshots').enabled) {
+    
+    <captureScreenshot>
+    var filename = $$logging.get('screenshots').filename.replace('{date}', moment().format('YYYYMMDDhhmmss'));
+    logger.info('Saving screenshot to ' + filename);
+
+    var winCmd = path.join(__dirname, '../tools', 'nircmd.exe');
+    var winArgs = ['savescreenshotfull', filename];
+    
+    var macCmd = '/usr/sbin/screencapture';
+    var macArgs = ['-x', '-t', 'jpg', '-C', filename];
+
+    var cmd = process.platform === 'win32' ? winCmd : macCmd;
+    var args = process.platform === 'win32' ? winArgs : macArgs;
+
+    var screenshot = child_process.spawn(cmd, args);
+    screenshot.on('close', function(code, signal) {
+      logger.info('Screenshot saved, restarting.');
+      restart();
+    });
+    </captureScreenshot>
+
+  } else {
+    restart();
+  }
+
+  <restartProcess>
+  function restart() {
+    var restartCount = that.get('restartCount');
+    restartCount++;
+    
+    var logList = 'App went away: ' + restartCount + ' times\n\n';
+    _.each($$logging.get('logCache'), function(log) {
+      logList += log.time + ' ' + log.level + ': ' + log.msg + '\n';
+    });
+    logger.error(logList);
+
+    that.trigger('crash');
+
+    if (restartCount >= that.get('restartMachineAfter')) {
+      logger.info('Already restarted app ' + that.get('restartMachineAfter') + ' times, rebooting machine.');
+      that.restartMachine();
+      return;
+    }
+
+    that.set('restartCount', restartCount);
+    that._isStartingUp = false;
+    that._isShuttingDown = false;
+    that.restartApp();
+  }
+  </restartProcess>
+}
+</takeScreenshotAndRestart>
+
+<transpileAndSave>
+function transpile (opts) {
+  const babelOptions = Object.assign({}, BABEL_CONFIG, opts.babelOptions);
+  return new Promise((resolve, reject) => {
+    babel.transformFile(opts.file, babelOptions, (err, result) => {
+      if (err) return reject(err);
+
+      <writeTransformedFile>
+      const destFile = opts.file.replace(opts.src, opts.dest);
+      const destDir = path.dirname(destFile);
+
+      fs.ensureDir(destDir, (err) => {
+        if (err) return reject(err);
+        fs.writeFile(destFile, result.code, (err) => {
+          if (err) return reject(err)
+          resolve(destFile);
+        });
+      });
+      </writeTransformedFile>
+    });
+  });
+}
+</transpileAndSave>
+
+<convertColorToLab>
+function getLab(color) {
+  var xyz = getXYZ(color);
+
+  var white = [ 95.047, 100.000, 108.883 ]; 
+
+  var x = fromXYZValueToLabValue(xyz[0], white[0]);
+  var y = fromXYZValueToLabValue(xyz[1], white[1]);
+  var z = fromXYZValueToLabValue(xyz[2], white[2]);
+
+  return [
+      116 * y - 16,
+      500 * (x - y),
+      200 * (y - z)
+  ]
+}
+</convertColorToLab>
+
+<removeResourceAndDependencies>
+function destroy (req, res, next) {
+  var resource = db.get(name).removeById(utils.toNative(req.params.id)).value()
+
+  <removeDependentData>
+  var removable = db._.getRemovable(db.getState())
+
+  _.each(removable, function (item) {
+    db.get(item.name).removeById(item.id).value()
+  })
+  </removeDependentData>
+
+  if (resource) {
+    res.locals.data = {}
+  }
+
+  next()
+}
+</removeResourceAndDependencies>
+```

@@ -1,0 +1,348 @@
+```javascript
+<getStacktraceElements>
+function getStacktraceElements(props, preview) {
+  <initializeStack>
+  const stack = [];
+  if (!preview.stack) {
+    return stack;
+  }
+  </initializeStack>
+
+  <processStack>
+  parseStackString(preview.stack).forEach((frame, index, frames) => {
+    let onLocationClick;
+    const {
+      filename,
+      lineNumber,
+      columnNumber,
+      functionName,
+      location
+    } = frame;
+
+    <setupLocationClick>
+    if (
+      props.onViewSourceInDebugger &&
+      !IGNORED_SOURCE_URLS.includes(filename)
+    ) {
+      onLocationClick = e => {
+        e.stopPropagation();
+        props.onViewSourceInDebugger({
+          url: filename,
+          line: lineNumber,
+          column: columnNumber
+        });
+      };
+    }
+    </setupLocationClick>
+
+    <pushFrame>
+    stack.push(
+      "\t",
+      span(
+        {
+          key: `fn${index}`,
+          className: "objectBox-stackTrace-fn"
+        },
+        cleanFunctionName(functionName)
+      ),
+      " ",
+      span(
+        {
+          key: `location${index}`,
+          className: "objectBox-stackTrace-location",
+          onClick: onLocationClick,
+          title: onLocationClick
+            ? `View source in debugger → ${location}`
+            : undefined
+        },
+        location
+      ),
+      "\n"
+    );
+    </pushFrame>
+  });
+  </processStack>
+
+  <returnResult>
+  return span(
+    {
+      key: "stack",
+      className: "objectBox-stackTrace-grid"
+    },
+    stack
+  );
+  </returnResult>
+}
+</getStacktraceElements>
+
+<filterParameters>
+function filterParameters(request) {
+  <extendData>
+  const data = Object.assign({}, config);
+  Object.keys(request).forEach((key) => {
+    data[key] = request[key];
+  });
+  </extendData>
+
+  <returnData>
+  return data;
+  </returnData>
+}
+</filterParameters>
+
+<getRequestHeaderField>
+function getRequestHeaderField(field){
+  <initialize>
+  var req = this.req;
+  field = field.toLowerCase();
+  </initialize>
+
+  <switchHeaderField>
+  switch (field) {
+    case 'referer':
+    case 'referrer':
+    return req.headers.referrer || req.headers.referer || '';
+    default:
+    return req.headers[field] || '';
+  }
+  </switchHeaderField>
+}
+</getRequestHeaderField>
+
+<logBlacklistError>
+function logBlacklistError(err) {
+  <logDetails>
+  log.error(ansi.red('Error: failed to retrieve plugins black-list'));
+  log.error(err.message); 
+  </logDetails>
+  <exitProcess>
+  exit(1);
+  </exitProcess>
+}
+</logBlacklistError>
+
+<funBuffer>
+function funBuffer(size) {
+  <bufferCreation>
+  var buffer = new Buffer(size)
+  for (var i=0; i<size; i++) {
+    if (i%1000 == 0) buffer[i++] = 13
+    buffer[i] = 97 + (i%26)
+  }
+  </bufferCreation>
+  <returnBuffer>
+  return buffer
+  </returnBuffer>
+}
+</funBuffer>
+
+<exportToPDF>
+function exportToPDF(diagrams, fullPath, options) {
+  <initializePDF>
+  var doc = new PDFDocument(options);
+  _.each(mdjson.Font.files, function (path, name) {
+    doc.registerFont(name, path);
+  });
+  doc.pipe(fs.createWriteStream(fullPath));
+  var canvas = new mdjson.PDFGraphics.Canvas(doc);
+  </initializePDF>
+
+  <drawDiagrams>
+  var i, len;
+  for (i = 0, len = diagrams.length; i < len; i++) {
+    if (i > 0) {
+      doc.addPage(options);
+    }
+    var diagram = diagrams[i],
+        box     = diagram.getBoundingBox(canvas),
+        w       = doc.page.width - PDF_MARGIN * 2,
+        h       = doc.page.height - PDF_MARGIN * 2,
+        zoom    = Math.min(w / box.x2, h / box.y2);
+
+    canvas.zoomFactor.numer = Math.min(zoom, PDF_DEFAULT_ZOOM);
+    canvas.origin.x = PDF_MARGIN;
+    canvas.origin.y = PDF_MARGIN;
+
+    _.each(diagram.ownedViews, function (v) {
+      v.setup(canvas);
+      v.update(canvas);
+      v.size(canvas);
+      v.arrange(canvas);
+    });
+
+    diagram.drawDiagram(canvas, false);
+
+    if (options.showName) {
+      doc.fontSize(10);
+      doc.font("Helvetica");
+      doc.text(diagram.getPathname(), PDF_MARGIN, PDF_MARGIN-10);
+    }
+  }
+  </drawDiagrams>
+
+  <finalizePDF>
+  doc.end();
+  </finalizePDF>
+}
+</exportToPDF>
+
+<runCheckTask>
+function runCheckTask(logger, checkTask) {
+  <promiseHandling>
+  return new Promise((resolve, reject) => {
+    <validateCheckTask>
+    checkTask.validate(logger)
+    </validateCheckTask>
+    <afterValidation>
+    .then((checkTask) => {
+      checkTask.queued();
+      return checkApi.prepare(checkTask);
+    })
+    </afterValidation>
+    <prepareExecution>
+    .then((execData) => {
+      execData.id = uuid();
+      checkTask.execTaskId = execData.id;
+      var execTask = new ExecTask(execData);
+      return execTask.validate();
+    })
+    </prepareExecution>
+    <startExecution>
+    .then((execTask) => {
+      checkTask.started();
+      return exec(logger, execTask);
+    })
+    </startExecution>
+    <parseResults>
+    .then((execTask) => {
+      return checkApi.parse(checkTask, execTask);
+    })
+    </parseResults>
+    <analyzeResults>
+    .then((parsedResult) => {
+      checkTask.rawResult = parsedResult;
+      return checkApi.analyze(checkTask);
+    })
+    </analyzeResults>
+    <finalizeCheckTask>
+    .then((result) => {
+      checkTask.result = result;
+      checkTask.finished();
+      return checkTask.validate();
+    })
+    .then((task) => {
+      resolve(task);
+    })
+    </finalizeCheckTask>
+    <handleError>
+    .catch((error) => {
+      checkTask.result = {
+        status: 'fail',
+        message: error.message
+      };
+      error.checkTask = checkTask;
+      reject(error);
+    });
+    </handleError>
+  });
+  </promiseHandling>
+}
+</runCheckTask>
+
+<eltCompare>
+function eltCompare(elt1, elt2) {
+  <compareElements>
+  return (elt1.c == elt2.c && elt1.r == elt2.r);
+  </compareElements>
+}
+</eltCompare>
+
+<ImmutableAccessControl>
+function ImmutableAccessControl(args) {
+  <initializeImmutableAccessControl>
+  args = requireValidOptionalObject(args)
+  if (args.global !== false && global.__immutable_access_control__) {
+    return global.__immutable_access_control__
+  }
+  else {
+    if (args.global !== false) {
+      global.__immutable_access_control__ = this
+    }
+    this.id = undefined
+    this.accessIdNames = {}
+    this.defaultRules = []
+    this.rules = {}
+    this.strict = args.strict === undefined ? true : !!args.strict
+    this.audit = undefined
+    this.auditEnabled = args.audit === false ? false : true
+  }
+  </initializeImmutableAccessControl>
+}
+</ImmutableAccessControl>
+
+<findFilesToPackage>
+function findFilesToPackage(dir, callback) {
+  <changeWorkingDirectory>
+  var cwd = process.cwd();
+  process.chdir(dir);
+  </changeWorkingDirectory>
+
+  <runCommands>
+  var gitls = spawn('git', ['ls-files']),
+      subls = spawn('git', ['submodule', 'foreach', 'for file in `git ls-files`; do echo "$path/$file"; done']),
+      modls = spawn('find', ['node_modules']);
+  </runCommands>
+
+  <collectFileList>
+  var mainFileList = '';
+  gitls.stdout.on('data', function (data) {
+    mainFileList += data;
+  });
+  gitls.on('exit', returnFileList);
+
+  var subFileList = '';
+  subls.stdout.on('data', function (data) {
+    subFileList += data;
+  });
+  subls.on('exit', returnFileList);
+  
+  var modFileList = '';
+  modls.stdout.on('data', function (data) {
+    modFileList += data;
+  });
+  modls.on('exit', returnFileList);
+  </collectFileList>
+
+  <generateFileList>
+  var lsCount = 0;
+  function returnFileList(code) {
+    lsCount++;
+    if (lsCount < 3) {
+      return;
+    }
+    process.chdir(cwd);
+    var fileList = (mainFileList.trim() + '\n' + subFileList.trim() + '\n' + modFileList.trim()).split('\n').filter(function(file) {
+      <filterFiles>
+      if (file.indexOf('Entering ') === 0) {
+        return;
+      }
+      if (file.split('/').pop()[0] == '.' || file[file.length - 1] == '~') {
+        return;
+      }
+      if (fs.statSync(path.join(dir, file)).isDirectory()) {
+        return;
+      }
+      </filterFiles>
+      <returnValidFiles>
+      return file;
+      </returnValidFiles>
+    }).sort();
+    </generateFileList>
+
+    <callbackResult>
+    callback(fileList);
+    </callbackResult>
+  }
+}
+</findFilesToPackage>
+```

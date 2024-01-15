@@ -1,0 +1,405 @@
+```javascript
+<downloadProjectCompilations>
+function downloadProjectCompilations(project, outputDir) {
+	<const promises = [];>
+	const promises = [];
+	<for (const platform in project.compilations) {>
+	for (const platform in project.compilations) {
+		<if (!project.compilations.hasOwnProperty(platform)) {>
+		if (!project.compilations.hasOwnProperty(platform)) {
+			continue;
+		}
+		</if (!project.compilations.hasOwnProperty(platform)) {>
+		<promises.push(downloadProjectCompilation(project, platform, outputDir).catch(() => {>
+		promises.push(downloadProjectCompilation(project, platform, outputDir).catch(() => {
+			return undefined;
+		}));
+		</promises.push(downloadProjectCompilation(project, platform, outputDir).catch(() => {>
+	}
+	</for (const platform in project.compilations) {>
+	<return Promise.all(promises);>
+	return Promise.all(promises);
+	</return Promise.all(promises);>
+}
+</downloadProjectCompilations>
+
+<anonymous_function_1>
+function (modelName, typesUpdated) {
+      <var _this3 = this;>
+      var _this3 = this;
+      <var klass = this._nameToClass(modelName);
+      var records = this.getRecords(klass, modelName);
+
+      var onChange = function () {
+        typesUpdated([_this3.wrapModelType(klass, modelName)]);
+      };
+      var observer = {
+        didChange: function () {
+          _emberMetalRun_loop.default.scheduleOnce('actions', this, onChange);
+        },
+        willChange: function () {
+          return this;
+        }
+      };
+
+      _emberRuntimeMixinsArray.addArrayObserver(records, this, observer);
+
+      var release = function () {
+        _emberRuntimeMixinsArray.removeArrayObserver(records, _this3, observer);
+      };
+
+      return release;>
+      var klass = this._nameToClass(modelName);
+      var records = this.getRecords(klass, modelName);
+
+      var onChange = function () {
+        typesUpdated([_this3.wrapModelType(klass, modelName)]);
+      };
+      var observer = {
+        didChange: function () {
+          _emberMetalRun_loop.default.scheduleOnce('actions', this, onChange);
+        },
+        willChange: function () {
+          return this;
+        }
+      };
+
+      _emberRuntimeMixinsArray.addArrayObserver(records, this, observer);
+
+      var release = function () {
+        _emberRuntimeMixinsArray.removeArrayObserver(records, _this3, observer);
+      };
+
+      return release;
+}
+</anonymous_function_1>
+
+<anonymous_function_2>
+function(content, idx, removedCnt, addedCnt) {
+    <var keys = this._keys, key, lim;
+
+    lim = removedCnt>0 ? idx+removedCnt : -1;
+    Ember.beginPropertyChanges(this);
+
+    for(key in keys) {
+      if (!keys.hasOwnProperty(key)) { continue; }
+
+      if (lim>0) removeObserverForContentKey(content, key, this, idx, lim);
+
+      Ember.propertyWillChange(this, key);
+    }
+
+    Ember.propertyWillChange(this._content, '@each');
+    Ember.endPropertyChanges(this);>
+    var keys = this._keys, key, lim;
+
+    lim = removedCnt>0 ? idx+removedCnt : -1;
+    Ember.beginPropertyChanges(this);
+
+    for(key in keys) {
+      if (!keys.hasOwnProperty(key)) { continue; }
+
+      if (lim>0) removeObserverForContentKey(content, key, this, idx, lim);
+
+      Ember.propertyWillChange(this, key);
+    }
+
+    Ember.propertyWillChange(this._content, '@each');
+    Ember.endPropertyChanges(this);
+}
+</anonymous_function_2>
+
+<truncateNearestSibling>
+function truncateNearestSibling($element, $rootNode, $clipNode, options) {
+    <$element.remove();>
+    $element.remove();
+    </$element.remove();>
+    
+    <var clipLength = $clipNode ? $clipNode.length : 0;
+
+    if ($parent.contents().length > clipLength) {
+      $prevSibling = $parent.contents().eq(-1 - clipLength);
+      return truncateTextContent($prevSibling, $rootNode, $clipNode, options);
+  
+    } else {
+      var $parentSibling = $parent.prev();
+      $prevSibling = $parentSibling.contents().eq(-1);
+
+      if ($prevSibling.length) {
+        setText($prevSibling[0], $prevSibling.text() + options.ellipsis);
+        $parent.remove();
+
+        if ($clipNode.length) {
+          $parentSibling.append($clipNode);
+        }
+        return true;
+      }
+    }
+
+    return false;>
+    var clipLength = $clipNode ? $clipNode.length : 0;
+
+    if ($parent.contents().length > clipLength) {
+      $prevSibling = $parent.contents().eq(-1 - clipLength);
+      return truncateTextContent($prevSibling, $rootNode, $clipNode, options);
+
+    } else {
+      var $parentSibling = $parent.prev();
+      $prevSibling = $parentSibling.contents().eq(-1);
+
+      if ($prevSibling.length) {
+        setText($prevSibling[0], $prevSibling.text() + options.ellipsis);
+        $parent.remove();
+
+        if ($clipNode.length) {
+          $parentSibling.append($clipNode);
+        }
+        return true;
+      }
+    }
+
+    return false;
+}
+</truncateNearestSibling>
+
+<npmDependencyHandling>
+function(loader, packageJSON, isRoot){
+		<const config = utils.pkg.config(packageJSON);
+		var hasConfig = !!config;
+
+		var npmIgnore = hasConfig && config.npmIgnore;
+		var npmDependencies = hasConfig && config.npmDependencies;
+		npmIgnore = npmIgnore || {};>
+		var config = utils.pkg.config(packageJSON);
+		var hasConfig = !!config;
+		var npmIgnore = hasConfig && config.npmIgnore;
+		var npmDependencies = hasConfig && config.npmDependencies;
+		npmIgnore = npmIgnore || {};
+		
+		<function convertToMap(arr) {
+			var npmMap = {};
+			for(var i = 0; i < arr.length; i++) {
+				npmMap[arr[i]] = true;
+			}
+			return npmMap;
+		}
+		if(npmIgnore && typeof npmIgnore.length === 'number') {
+			npmIgnore = config.npmIgnore = convertToMap(npmIgnore);
+		}
+		if(npmDependencies && typeof npmDependencies.length === "number") {
+			config.npmDependencies = convertToMap(npmDependencies);
+		}>
+		function convertToMap(arr) {
+			var npmMap = {};
+			for(var i = 0; i < arr.length; i++) {
+				npmMap[arr[i]] = true;
+			}
+			return npmMap;
+		}
+		if(npmIgnore && typeof npmIgnore.length === 'number') {
+			npmIgnore = config.npmIgnore = convertToMap(npmIgnore);
+		}
+		if(npmDependencies && typeof npmDependencies.length === "number") {
+			config.npmDependencies = convertToMap(npmDependencies);
+		}
+		
+		<var deps = {};
+
+		addDeps(packageJSON, packageJSON.peerDependencies || {}, deps,
+				"peerDependencies", {_isPeerDependency: true});
+
+		addDeps(packageJSON, packageJSON.dependencies || {}, deps, "dependencies");
+
+		if(isRoot) {
+			addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
+				   "devDependencies");
+		}
+
+		return deps;>
+		var deps = {};
+
+		addDeps(packageJSON, packageJSON.peerDependencies || {}, deps,
+				"peerDependencies", {_isPeerDependency: true});
+
+		addDeps(packageJSON, packageJSON.dependencies || {}, deps, "dependencies");
+
+		if(isRoot) {
+			addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
+				   "devDependencies");
+		}
+
+		return deps;
+}
+</npmDependencyHandling>
+
+<getBrowserInformation>
+function getBrowserInformation(userAgent) {
+  <var browserInfo = _bowser2.default._detect(userAgent);
+
+  for (var browser in prefixByBrowser) {
+    if (browserInfo.hasOwnProperty(browser)) {
+      var prefix = prefixByBrowser[browser];
+
+      browserInfo.jsPrefix = prefix;
+      browserInfo.cssPrefix = '-' + prefix.toLowerCase() + '-';
+      break;
+    }
+  }
+
+  browserInfo.browserName = getBrowserName(browserInfo);
+
+  if (browserInfo.version) {
+    browserInfo.browserVersion = parseFloat(browserInfo.version);
+  } else {
+    browserInfo.browserVersion = parseInt(parseFloat(browserInfo.osversion), 10);
+  }
+
+  browserInfo.osVersion = parseFloat(browserInfo.osversion);
+
+  if (browserInfo.browserName === 'ios_saf' && browserInfo.browserVersion > browserInfo.osVersion) {
+    browserInfo.browserVersion = browserInfo.osVersion;
+  }
+
+  if (browserInfo.browserName === 'android' && browserInfo.chrome && browserInfo.browserVersion > 37) {
+    browserInfo.browserName = 'and_chr';
+  }
+
+  if (browserInfo.browserName === 'android' && browserInfo.osVersion < 5) {
+    browserInfo.browserVersion = browserInfo.osVersion;
+  }
+
+  if (browserInfo.browserName === 'android' && browserInfo.samsungBrowser) {
+    browserInfo.browserName = 'and_chr';
+    browserInfo.browserVersion = 44;
+  }>
+
+  var browserInfo = _bowser2.default._detect(userAgent);
+
+  for (var browser in prefixByBrowser) {
+    if (browserInfo.hasOwnProperty(browser)) {
+      var prefix = prefixByBrowser[browser];
+
+      browserInfo.jsPrefix = prefix;
+      browserInfo.cssPrefix = '-' + prefix.toLowerCase() + '-';
+      break;
+    }
+  }
+
+  browserInfo.browserName = getBrowserName(browserInfo);
+
+  if (browserInfo.version) {
+    browserInfo.browserVersion = parseFloat(browserInfo.version);
+  } else {
+    browserInfo.browserVersion = parseInt(parseFloat(browserInfo.osversion), 10);
+  }
+
+  browserInfo.osVersion = parseFloat(browserInfo.osversion);
+
+  if (browserInfo.browserName === 'ios_saf' && browserInfo.browserVersion > browserInfo.osVersion) {
+    browserInfo.browserVersion = browserInfo.osVersion;
+  }
+
+  if (browserInfo.browserName === 'android' && browserInfo.chrome && browserInfo.browserVersion > 37) {
+    browserInfo.browserName = 'and_chr';
+  }
+
+  if (browserInfo.browserName === 'android' && browserInfo.osVersion < 5) {
+    browserInfo.browserVersion = browserInfo.osVersion;
+  }
+
+  if (browserInfo.browserName === 'android' && browserInfo.samsungBrowser) {
+    browserInfo.browserName = 'and_chr';
+    browserInfo.browserVersion = 44;
+  }
+
+  return browserInfo;
+}
+</getBrowserInformation>
+
+<cleanUpElement>
+function cleanUpElement(element) {
+	<const childNodes = element.childNodes;
+    	for (let i = 0; i < childNodes.length; i++) {
+		const node = childNodes[i];
+
+		let isVisible = node.nodeType === 1 ? window.getComputedStyle(node).display !== 'none' : true;
+		if (isVisible && ['input', 'textarea', 'script', 'noscript', 'style', 'select', 'option', 'button'].indexOf(node.nodeName.toLowerCase()) >= 0) isVisible = false;
+
+		if (!isVisible) {
+			element.removeChild(node);
+		} else {
+			cleanUpElement(node);
+		}
+	}>
+		const childNodes = element.childNodes;
+
+		for (let i = 0; i < childNodes.length; i++) {
+			const node = childNodes[i];
+
+			let isVisible = node.nodeType === 1 ? window.getComputedStyle(node).display !== 'none' : true;
+			if (isVisible && ['input', 'textarea', 'script', 'noscript', 'style', 'select', 'option', 'button'].indexOf(node.nodeName.toLowerCase()) >= 0) isVisible = false;
+
+			if (!isVisible) {
+				element.removeChild(node);
+			} else {
+				cleanUpElement(node);
+			}
+		}
+}
+</cleanUpElement>
+
+<loadFile>
+function (classpath, cb) {
+            <var logicalPath = Aria.getLogicalPath(classpath, ".tpl", true);
+            this.loadFile(logicalPath, {
+                fn : this._onTplFileContentReceive,
+                scope : this,
+                args : {
+                    origCb : cb
+                }
+            }, null);>
+            var logicalPath = Aria.getLogicalPath(classpath, ".tpl", true);
+            this.loadFile(logicalPath, {
+                fn : this._onTplFileContentReceive,
+                scope : this,
+                args : {
+                    origCb : cb
+                }
+            }, null);
+}
+</loadFile>
+
+<getReferenceIndexedByCSS>
+function getReferenceIndexedByCSS(ref) {
+    <var newRef = {};
+    for (var symb in ref.symbolizers) {
+        for (var property in ref.symbolizers[symb]) {
+            newRef[ref.symbolizers[symb][property].css] = ref.symbolizers[symb][property];
+        }
+    }>
+    var newRef = {};
+    for (var symb in ref.symbolizers) {
+        for (var property in ref.symbolizers[symb]) {
+            newRef[ref.symbolizers[symb][property].css] = ref.symbolizers[symb][property];
+        }
+    }
+    return newRef;
+}
+</getReferenceIndexedByCSS>
+
+<onload>
+function onload() {
+		
+		<pattern = ctx.createPattern(img, params.repeat);
+		
+		if (params.load) {
+			params.load.call($canvases[0], pattern);
+		}>
+		pattern = ctx.createPattern(img, params.repeat);
+		
+		if (params.load) {
+			params.load.call($canvases[0], pattern);
+		}
+	}
+</onload>
+```

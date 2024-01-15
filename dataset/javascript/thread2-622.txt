@@ -1,0 +1,199 @@
+Function 1:
+```javascript
+function() {
+    var obj = {};
+    for (var type in this.prefs_) {
+      if (this.prefs_.hasOwnProperty(type)) {
+        obj[type] = this.prefs_[type].name;
+      }
+    }
+    return obj;
+}
+```
+This function appears to be a method to transform `prefs_` properties into a simpler object with names. It performs a single task; thus, no SRP violation is detected.
+
+Function 2:
+```javascript
+function isOption(option) {
+  if (!option || typeof option !== 'object') {
+    return false;
+  }
+
+  let allOptions = Object.keys(defaultRouteOptions);
+  let optionKeys = Object.keys(option);
+  for (let i = 0; i < optionKeys.length; i++) {
+    let key = optionKeys[i];
+    if (allOptions.indexOf(key) > -1) {
+      return true;
+    }
+  }
+  return false;
+}
+```
+This function checks if an object is an option by comparing its keys to those in `defaultRouteOptions`. It performs a single check, so no SRP violation is detected.
+
+Function 3:
+```javascript
+function processFrame(imageBitmap) {
+  canvas.width = imageBitmap.width;
+  canvas.height = imageBitmap.height;
+  canvas.getContext('2d').drawImage(imageBitmap, 0, 0);
+}
+```
+The function processes an image bitmap by drawing it on a canvas; single responsibility, no SRP violation detected.
+
+Function 4:
+```javascript
+function Client(globalConf, SubClientType, topicConf) {
+  <instanceCheck>
+  if (!(this instanceof Client)) {
+    return new Client(globalConf, SubClientType, topicConf);
+  }
+  </instanceCheck>
+
+  Emitter.call(this);
+
+  <eventConfiguration>
+  var no_event_cb = globalConf.event_cb === false;
+  topicConf = topicConf || {};
+  delete globalConf.event_cb;
+  </eventConfiguration>
+
+  <clientInitialization>
+  this._client = new SubClientType(globalConf, topicConf);
+  </clientInitialization>
+
+  <eventBinding>
+  if (!no_event_cb) {
+    this._client.onEvent(function eventHandler(eventType, eventData) {
+      switch (eventType) {
+        case 'error':
+          self.emit('event.error', LibrdKafkaError.create(eventData));
+          break;
+        case 'stats':
+          self.emit('event.stats', eventData);
+          break;
+        case 'log':
+          self.emit('event.log', eventData);
+          break;
+        default:
+          self.emit('event.event', eventData);
+          self.emit('event.' + eventType, eventData);
+      }
+    });
+  }
+  </eventBinding>
+
+  <stateInitialization>
+  this.metrics = {};
+  this._isConnected = false;
+  this.errorCounter = 0;
+  this._metadata = {};
+  </stateInitialization>
+
+  <selfReferenceSetup>
+  var self = this;
+  </selfReferenceSetup>
+
+  <eventListenerSetup>
+  this.on('ready', function(info) {
+    self.metrics.connectionOpened = Date.now();
+    self.name = info.name;
+  })
+  .on('disconnected', function() {
+    <metricsReset>
+    self.metrics = {};
+    self._isConnected = false;
+    </metricsReset>
+  })
+  .on('event.error', function(err) {
+    <errorHandling>
+    self.lastError = err;
+    ++self.errorCounter;
+    </errorHandling>
+  });
+  </eventListenerSetup>
+}
+```
+Multiple responsibilities are present in this constructor function, reflected by nested tags. It performs instance checks, event configurations, client initialization, event binding, state initialization, and event listener setup.
+
+Function 5:
+```javascript
+function create(context) {
+    return {
+        <ruleVerification>
+        CallExpression(node) {
+            if (isDefineCall(node) && !isValidDefine(node)) {
+                context.report(node, message);
+            }
+        }
+        </ruleVerification>
+    };
+}
+```
+The `create` function is responsible for returning an object with a single method (`CallExpression`) that verifies code rules. There is no violation of the SRP.
+
+Function 6:
+```javascript
+function all(array, pred) {
+  for (let idx = 0, len = array.length; idx < len; idx++) {
+    if (!pred(array[idx])) {
+      return false;
+    }
+  }
+  return true;
+}
+```
+This function's responsibility is to determine if all elements in an array satisfy a predicate. No SRP violation is detected.
+
+Function 7:
+```javascript
+function deepmerge(target, src, combine, isRule) {
+        <mergeLogic>
+        // ... (the entire content of the function represents the merge logic)
+        </mergeLogic>
+}
+```
+The function performs a deep merge between two objects with specific rules about array and object merging. The entire content is part of the merging logic and thus considers a single responsibility.
+
+Function 8:
+```javascript
+function getPageRule (stylesheet) {
+  var i, l = stylesheet.cssRules.length;
+
+  for (i = 0; i < l; ++i) {
+    if (stylesheet.cssRules[i] instanceof window.CSSPageRule) {
+      return stylesheet.cssRules[i];
+    }
+  }
+}
+```
+The function searches for a CSSPageRule within a stylesheet. It has a single responsibility, so no SRP violation is detected.
+
+Function 9:
+```javascript
+function requireModel(filePath, cb) {
+        <modelCheck>
+        fs.exists(filePath, function (exists) {
+            if (!exists) {
+                soajs.log.error('Requested Model Not Found!');
+                return cb(601);
+            }
+
+            driver.model = require(filePath);
+            return cb();
+        });
+        </modelCheck>
+}
+```
+The function checks if a model exists and then requires it, invoking a callback either with an error or success. This is considered a single responsibility, with no SRP violation.
+
+Function 10:
+```javascript
+function(x, y, z, w) {
+		<noiseCalculation>
+		// ... (the entire content of the function is part of the noise calculation logic)
+		</noiseCalculation>
+}
+```
+This function calculates simplex noise based on the number of arguments provided (2D, 3D, or 4D). Its entire content is the noise calculation logic; thus, no SRP violation is present.

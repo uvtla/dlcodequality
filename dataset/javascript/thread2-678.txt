@@ -1,0 +1,273 @@
+Here are the annotated functions:
+
+Function 1:
+```javascript
+<setOptions>
+function(options, inheritFrom) {
+    <inheritSettings>
+    if (inheritFrom) {
+        var group = this.readOption(inheritFrom, 'group');
+        if (group && options.groups[group]) {
+            $.extend(options, options.groups[group]);
+        }
+    }
+    </inheritSettings>
+
+    var opts = Base.prototype.setOptions.call(this, options);
+
+    <inheritAdditionalOptions>
+    if (inheritFrom) {
+        opts = this.inheritOptions(opts, inheritFrom);
+    }
+    </inheritAdditionalOptions>
+
+    <adjustMode>
+    if (opts.mode && opts.mode === 'hover') {
+        opts.mode = Toolkit.isTouch ? 'click' : 'mouseenter';
+    }
+    </adjustMode>
+
+    this.options = opts;
+
+    return opts;
+}
+</setOptions>
+```
+
+Function 2:
+```javascript
+<_normalizeValidate>
+function _normalizeValidate (field) {
+  if (field.validate) {
+    Object.keys(field.validate).forEach(key => {
+      let validateItem = field.validate[key]
+      if (typeof validateItem === 'function') { return }
+      
+      <standardizeValidationObject>
+      if ((typeof validateItem !== 'object') || (typeof validateItem.args === 'undefined')) {
+        field.validate[key] = { args: validateItem }
+      }
+      </standardizeValidationObject>
+
+      <removeArgsIfBoolean>
+      if (typeof field.validate[key].args === 'boolean') {
+        delete field.validate[key].args
+        if (typeof field.validate[key].msg === 'undefined') {
+          field.validate[key] = true
+        }
+      }
+      </removeArgsIfBoolean>
+
+      <normalizeArgsArray>
+      if ((typeof field.validate[key].args !== 'undefined') && ((field.validate[key].args === 0) || (field.validate[key].args === 1))) {
+        field.validate[key].args = [field.validate[key].args]
+      }
+      </normalizeArgsArray>
+    })
+  }
+}
+</_normalizeValidate>
+```
+
+Function 3:
+```javascript
+<spawnNodes>
+function spawnNodes (n, factory, callback) {
+  timesSeries(n, (_, cb) => factory.spawnNode(cb), callback)
+}
+</spawnNodes>
+```
+
+Function 4:
+```javascript
+<parseVCF>
+function parseVCF(text) {
+    var lines = U.reject(text.split('\n'), function(line) {
+      return line === '';
+    });
+
+    <partitionLines>
+    var partitions = U.partition(lines, function(line) {
+      return line[0] === '#';
+    });
+    </partitionLines>
+
+    <processHeaderAndRecords>
+    var header = parseHeader(partitions[0]),
+        records = U.map(partitions[1], function(line) {
+          return new Record(line, header);
+        });
+    </processHeaderAndRecords>
+
+    return {header: header, records: records};
+}
+</parseVCF>
+```
+
+Function 5:
+```javascript
+<calculateAngleInSinLUT>
+function(theta) {
+    while (theta < 0) {
+        theta += mathUtils.TWO_PI;
+    }
+    return this.sinLUT[((theta * this.rad2deg) + this.quadrant) % this.period];
+}
+</calculateAngleInSinLUT>
+```
+
+Function 6:
+```javascript
+<verifier>
+function verifier (req, identifier, userInfo, done) {
+  <prepareAuthInfo>
+  var auth = {
+    id: req.query['openid.identity'],
+    req_query: req.query
+  }
+
+  userInfo.id = req.query['openid.identity']
+  userInfo.name = req.query['openid.ext2.value.fullname']
+  userInfo.givenName = req.query['openid.ext2.value.firstname']
+  userInfo.familyName = req.query['openid.ext2.value.lastname']
+  userInfo.email = req.query['openid.ext2.value.email']
+  </prepareAuthInfo>
+
+  <connectUser>
+  User.connect(req, auth, userInfo, function (err, user) {
+    if (err) { return done(err) }
+    done(null, user)
+  })
+  </connectUser>
+}
+</verifier>
+```
+
+Function 7:
+```javascript
+<processScript>
+function(script, filename) {
+    if(!filename) filename = "openjscad.jscad";
+    this.abort();
+    this.paramDefinitions = [];
+    this.paramControls = [];
+    this.script = null;
+    this.setError("");
+    var scripthaserrors = false;
+
+    <parseParameters>
+    try
+    {
+      this.paramDefinitions = OpenJsCad.getParamDefinitions(script);
+      this.createParamControls();
+    }
+    catch(e)
+    {
+      this.setError(e.toString());
+      this.setStatus("Error.");
+      scripthaserrors = true;
+    }
+    </parseParameters>
+
+    <loadAndBuildScript>
+    if(!scripthaserrors)
+    {
+      this.script = script;
+      this.filename = filename;
+      this.rebuildSolid();
+    }
+    else
+    {
+      this.enableItems();
+    }
+    </loadAndBuildScript>
+}
+</processScript>
+```
+
+Function 8:
+```javascript
+<attachPolygon>
+function (poly) {
+    var area = this._mbr || this;
+
+    if (!poly) {
+        poly = new Crafty.polygon([0, 0], [area._w, 0], [area._w, area._h], [0, area._h]);
+    }
+
+    <handleMultipleArguments>
+    if (arguments.length > 1) {
+        var args = Array.prototype.slice.call(arguments, 0);
+        poly = new Crafty.polygon(args);
+    }
+    </handleMultipleArguments>
+
+    this.map = poly;
+    this.attach(this.map);
+    this.map.shift(area._x, area._y);
+
+    return this;
+}
+</attachPolygon>
+```
+
+Function 9:
+```javascript
+<buildNav>
+function buildNav(members) {
+    <initializeNavigation>
+    var nav = '<h2><a href="index.html">Index</a></h2>',
+        seen = {},
+        hasClassList = false,
+        classNav = '',
+        globalNav = '',
+		diagramNav = '';
+    </initializeNavigation>
+
+    <populateModules>
+    if (members.modules.length) {
+        //... (Code omitted for brevity)
+    }
+    </populateModules>
+    
+    //... (Additional sections omitted for brevity, similar to <populateModules>)
+	
+	<finalizeNavigation>
+	if (members.globals.length) {
+        //... (Code omitted for brevity)
+    }
+	</finalizeNavigation>
+
+    return nav;
+}
+</buildNav>
+```
+
+Function 10:
+```javascript
+<initializeWithEmpty>
+function(schema, global) {
+  var {
+    required
+  , properties
+  } = schema;
+
+  if ( !required ) {
+    return {};
+  } else {
+    <populateRequiredProperties>
+    return required.reduce(function(prev, next) {
+      var s = properties[next];
+      if ( !s ) {
+        throw new Error(`property \`${next}\` not defined on object`);
+      }
+      prev[next] = empty(s, global);
+      return prev;
+    }, {});
+    </populateRequiredProperties>
+  }
+}
+</initializeWithEmpty>
+```
+
+Each function has been annotated with tags that describe the distinct responsibilities they contain. Note that simple functions or single-purpose functions are enclosed in a single tag, while more complex functions with additional responsibilities are further broken down into nested segments.

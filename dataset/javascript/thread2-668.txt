@@ -1,0 +1,179 @@
+```javascript
+<handlePathObj>
+function handlePathObj(path, event, EventObject, newIndex) {
+  if (typeof path === 'function') {
+    return path(event, newIndex);
+  } else if ((typeof path === 'undefined' ? 'undefined' : _typeof(path)) === 'object' && !Array.isArray(path) && path) {
+    return EventObject.reduce((0, _helpers.matchAndAddition)(path, event), {});
+  } else if ((typeof path === 'undefined' ? 'undefined' : _typeof(path)) === 'object' && Array.isArray(path) && path) {
+    return EventObject.reduce((0, _helpers.matchAndAddition)(path[newIndex], event), {});
+  }
+  return {};
+}
+</handlePathObj>
+
+<oTreeFunction>
+function (oTree) {
+  var sDebugString = this.toDebugInfo(oTree);
+
+  if (sDebugString === true) {
+    return 1;
+  } else if (sDebugString) {
+    return sDebugString.split(",").length;
+  }
+  return 0;
+}
+</oTreeFunction>
+
+<hostElement>
+function hostElement(tag, rNode, def, sanitizer) {
+  resetApplicationState();
+  var node = createLNode(0, 3 , rNode, null, null, createLViewData(renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4  : 2 , sanitizer));
+  if (firstTemplatePass) {
+    node.tNode.flags = 4096 ;
+    if (def.diPublic)
+      def.diPublic(def);
+    tView.directives = [def];
+  }
+  return node;
+}
+</hostElement>
+
+<fileFormatter>
+function(file) {
+  return {
+    name: file.name,
+    size: file.size,
+    lastModifiedDate: file.lastModifiedDate
+  };
+}
+</fileFormatter>
+
+<xmlParserFunction>
+function (bodyStr) {
+  var d = {};
+  xmlParser.parseString(bodyStr, function (err, result) {
+    d = result;
+  });
+  return d;
+}
+</xmlParserFunction>
+
+<formatTo>
+function formatTo(decimals, [...]) {
+  [...]
+}
+</formatTo>
+
+<highestFrequencySite>
+function highestFrequencySite(objs, noIdentities, logger) {
+  logger.info('finding highest frequency site');
+  <findFrequency>
+  var highest = 0, 
+      out ='';
+  </findFrequency>
+  <processIdentities>
+  if(!noIdentities)    
+    findHighest(objs.identities);   
+  </processIdentities>
+  <processDomains>
+  findHighest(objs.domainsNotMapped);  
+  </processDomains>
+  <findHighest>
+  function findHighest(arr) {
+    if(arr) {
+      var i = arr.length,
+          x = 0;
+      while (x < i) {
+        if(arr[x].frequency > highest) {
+          highest = arr[x].frequency;
+          out = (arr[x].matchedUrl) ? arr[x].matchedUrl : arr[x].url;
+        }
+        x++;
+      }
+    }
+  }
+  </findHighest>    
+  return out;
+}
+</highestFrequencySite>
+
+<setExtremes>
+function setExtremes(newMin, newMax, redraw, animation) {
+  <redrawCheck>
+  redraw = pick(redraw, true); 
+  </redrawCheck>
+  <setExtremesEvent>
+  fireEvent(axis, 'setExtremes', { 
+    min: newMin,
+    max: newMax
+  }, function () {
+    <minMaxUpdate>
+    userMin = newMin;
+    userMax = newMax;
+    </minMaxUpdate>
+    <redrawChart>
+    if (redraw) {
+      chart.redraw(animation);
+    }
+    </redrawChart>
+  });
+  </setExtremesEvent>
+}
+</setExtremes>
+
+<ProcessingInstruction>
+function ProcessingInstruction(doc, name, content) {
+  <argumentValidation>
+  if (!doc) {
+      throw new Error('document argument required');
+  } else if (!(doc instanceof bindings.Document)) {
+      throw new Error('document argument must be an ' +
+                      'instance of Document');
+  } else if (!name) {
+      throw new Error('name argument required');
+  }
+  </argumentValidation>
+  return new bindings.ProcessingInstruction(doc, name, content);
+}
+</ProcessingInstruction>
+
+<parseDateTime>
+function (value, withOffset, nullOnError) {
+  <dateParsing>
+  var parts = parseDateTimeRE.exec(value);
+  var offset = (parts) ? getCanonicalTimezone(parts[8]) : null;
+  <validationCheck>
+  if (!parts || (!withOffset && offset !== "Z")) {
+    if (nullOnError) {
+      return null;
+    }
+    throw { message: "Invalid date/time value" };
+  }
+  </validationCheck>
+  </dateParsing>
+  <parseComponents>
+  var year = parseInt10(parts[1]);
+  [...]
+  if (isNaN(result.valueOf())) {
+    if (nullOnError) {
+      return null;
+    }
+    throw { message: "Invalid date/time value" };
+  }
+  </parseComponents>
+  <returnResult>
+  if (withOffset) {
+    result.__edmType = "Edm.DateTimeOffset";
+    result.__offset = offset;
+  }
+  if (ns) {
+    result.__ns = ns;
+  }
+  return result;
+  </returnResult>
+}
+</parseDateTime>
+```
+
+Each function has been enclosed in tags that identify the major responsibility of the function. Within some functions, nested tags highlight distinct sequences of operations that correspond to separate sub-tasks while still being a part of the overall responsibility of the function.

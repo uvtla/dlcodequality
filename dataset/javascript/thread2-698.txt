@@ -1,0 +1,193 @@
+<makeCo>
+function makeCo(Sequelize) {
+	const co = Sequelize.Promise.coroutine;
+	
+	function coAll(obj) {
+		_.forIn(obj, (value, key) => {
+			if (isGeneratorFunction(value)) obj[key] = co(value);
+		});
+		return obj;
+	}
+	
+	return {co, coAll};
+}
+</makeCo>
+
+<drawLines>
+function drawLines(){
+	let lines,
+		topicLine;
+
+	topicLine = d3Shape.line()
+		.curve(curveMap[lineCurve])
+		.x(({date}) => xScale(date))
+		.y(({value}) => yScale(value));
+
+	lines = svg.select('.chart-group').selectAll('.line')
+		.data(dataByTopic, getTopic);
+
+	paths = lines.enter()
+	  .append('g')
+		.attr('class', 'topic')
+	  .append('path')
+		.attr('class', 'line')
+		.merge(lines)
+		.attr('id', ({topic}) => topic)
+		.attr('d', ({dates}) => topicLine(dates))
+		.style('stroke', (d) => (
+			dataByTopic.length === 1 ? `url(#${lineGradientId})` : getLineColor(d)
+		));
+
+	lines
+		.exit()
+		.remove();
+}
+</drawLines>
+
+<createTask>
+function createTask() {
+	var taskRunner = util.require('grunt');
+
+	taskRunner.registerTask('picky', function () {
+		var done = this.async();
+		var suite = Picky.createSuite(this.options());
+
+		suite.run(function (err) {
+			if (err) {
+				taskRunner.log.error('error', err);
+			}
+			done();
+		});
+	});
+}
+</createTask>
+
+<count>
+function count(req, res) {
+  req.session.count = (req.session.count || 0) + 1
+  res.send('viewed ' + req.session.count + ' times\n')
+}
+</count>
+
+<findLastMatch>
+function (match) {
+	assertType(match, Function);
+
+	var len = this.length;
+	while (len-- > 0) {
+		if (match(this[len]) === true) {
+			return this[len];
+		}
+	}
+
+	return undefined;
+}
+</findLastMatch>
+
+<getInversionOf>
+function getInversionOf(comparator) {
+	function inversion(a, b) {
+		return -comparator(a, b);
+	}
+
+	inversion.original = comparator;
+
+	return inversion;
+}
+</getInversionOf>
+
+<getUrl>
+function getUrl (url) {
+  var opt = {
+    url: url
+  , timeout: 10000 
+  }
+  return new Promise(function(resolve, reject){
+    request(opt, function(err, res, body){
+      if (err) { return reject(err); }
+      resolve(body)
+    });
+  });
+}
+</getUrl>
+
+<configureLogger>
+function(options)
+{
+	var localIncludeTimestamp;
+	var localBufferMaxLength;
+	var localMessageMaxLength;
+	var localLevel;
+
+	if (Util.exists(options))
+	{
+		Errors.assertInternal(Util.isObject(options));
+
+		localIncludeTimestamp = options.includeTimestamp;
+		localBufferMaxLength = options.bufferMaxLength;
+		localMessageMaxLength = options.messageMaxLength;
+		localLevel = options.level;
+	}
+
+	if (Util.exists(localIncludeTimestamp))
+	{
+		includeTimestamp = !!localIncludeTimestamp;
+	}
+	else if (!Util.exists(includeTimestamp))
+	{
+		includeTimestamp = true;
+	}
+
+	if (Util.exists(localBufferMaxLength))
+	{
+		Errors.assertInternal(
+			Util.number.isPositiveInteger(localBufferMaxLength));
+		bufferMaxLength = localBufferMaxLength;
+	}
+	else if (!Util.exists(bufferMaxLength))
+	{
+		bufferMaxLength = DEFAULT_BUFFER_MAX_LENGTH;
+	}
+
+	if (Util.exists(localMessageMaxLength))
+	{
+		Errors.assertInternal(
+			Util.number.isPositiveInteger(localMessageMaxLength));
+		messageMaxLength = localMessageMaxLength;
+	}
+	else if (!Util.exists(messageMaxLength))
+	{
+		messageMaxLength = DEFAULT_MESSAGE_MAX_LENGTH;
+	}
+
+	if (Util.exists(localLevel))
+	{
+		Errors.assertInternal(
+			MAP_LOG_LEVEL_TO_OBJECT.hasOwnProperty(localLevel));
+		currlevelObject = MAP_LOG_LEVEL_TO_OBJECT[localLevel];
+	}
+	else if (!Util.exists(currlevelObject))
+	{
+		currlevelObject = DEFAULT_LEVEL;
+	}
+}
+</configureLogger>
+
+<makeWorker>
+function makeWorker(content, contentType) {
+	if ((typeof(content) === 'string') && content.match(/^blob:/)) {
+	  return new Worker(content);
+	} else {
+	  return new Worker(makeURL(content, contentType));
+	}
+}
+</makeWorker>
+
+<configureDeepDirRedirection>
+function (urlpath, dirs) {
+	dirs.forEach(function (val, idx) {
+		redirectTo(urlpath, false);
+		addDeepDir(urlpath, val);
+	});
+}
+</configureDeepDirRedirection>

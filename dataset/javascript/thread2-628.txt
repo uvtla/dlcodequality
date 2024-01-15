@@ -1,0 +1,186 @@
+1.
+<executeEventListener>
+function (name) {
+    for (var i = 0; i < ModalDialog.events.length; ++i) {
+        if (typeof (ModalDialog.events[i][0]) == 'string' && ModalDialog.events[i][0] == name && typeof (ModalDialog.events[i][1]) == 'function') {
+            ModalDialog.events[i][1]();
+        }
+    }
+}
+</executeEventListener>
+
+2.
+<createItemSortable>
+function (item) {
+
+    return {
+        // Data properties setup
+        index: item.index(),
+        parent: item.sortableScope,
+        source: item,
+        // ... (other property definitions) 
+
+        // Method definitions
+        canMove: function (itemPosition, targetElement, targetElementOffset) {
+            // ... (implementation)
+        },
+        moveTo: function (parent, index) {
+            // ... (implementation)
+        },
+        isSameParent: function () {
+            // ... (implementation)
+        },
+        isOrderChanged: function () {
+            // ... (implementation)
+        },
+        eventArgs: function () {
+            // ... (implementation)
+        },
+        apply: function () {
+            // ... (implementation)
+        }
+    };
+}
+</createItemSortable>
+
+3.
+<createNotificationFromEvent>
+function (evt, vm) {
+    var notification = {};
+
+    // Meta data extraction and setting
+    if (!!this.definitions.notification.meta && !!this.definitions.event.meta) {
+        // ... (excerpt for brevity)
+    }
+    
+    // Main event data setting
+    dotty.put(notification, this.definitions.notification.payload, vm.toJSON());
+    dotty.put(notification, this.definitions.notification.collection, this.collection.name);
+    dotty.put(notification, this.definitions.notification.action, vm.actionOnCommit);
+
+    return notification;
+}
+</createNotificationFromEvent>
+
+4.
+<dispatchCustomEvent>
+function (name, event) {
+    event = event || {};
+    _u._$forEach(
+        config[name + '-' + seed], function (func) {
+            func.call(this, event);
+            if (event.stopped) {
+                return !0;
+            }
+        }, this
+    );
+}
+</dispatchCustomEvent>
+
+5.
+<mapArray>
+function (array, block) {
+    var i, il = array.length, result = [];
+
+    for (i = 0; i < il; i++)
+        result.push(block(array[i]));
+
+    return result;
+}
+</mapArray>
+
+6.
+<andNotQuery>
+function andNot() {
+    var args = mlutil.asArray.apply(null, arguments);
+
+    switch (args.length) {
+        // Error handling
+        case 0:
+        case 1:
+        case 2:
+            // Query building (actual usage of the function)
+            return new AndNotDef(new PositiveNegativeDef(args[0], args[1]));
+        default:
+            throw new Error('more than two arguments for andNot(): ' + args.length);
+    }
+}
+</andNotQuery>
+
+7.
+<findMatchingFunctionsInFiles>
+function findMatchingFunctions(functionName, fileInfos, keepAllFiles) {
+    var result = new $.Deferred(),
+        jsFiles = [];
+
+    if (!keepAllFiles) {
+        <filterJSFiles>
+        jsFiles = fileInfos.filter(function (fileInfo) {
+            return FileUtils.getFileExtension(fileInfo.fullPath).toLowerCase() === "js";
+        });
+        </filterJSFiles>
+    } else {
+        jsFiles = fileInfos;
+    }
+
+    <getFunctionDefinitions>
+    _getFunctionsInFiles(jsFiles).done(function (docEntries) {
+        </getFunctionDefinitions>
+
+        <getFunctionOffsets>
+        _getOffsetsForFunction(docEntries, functionName).done(function (rangeResults) {
+            result.resolve(rangeResults);
+        });
+        </getFunctionOffsets>
+    });
+
+    return result.promise();
+}
+</findMatchingFunctionsInFiles>
+
+8.
+<compilePropsToObjectString>
+function compileProps(props) {
+    const transformKey = when(equals('className'), ~'class');
+    const transformValue = ifElse(type & equals('Object'), compileCSS, unary(JSON.stringify));
+
+    const result = props
+        | toPairs
+        | map(([key, value]) => `${transformKey(key)}=${transformValue(value)}`)
+        | join(' ');
+
+    return result.length === 0 ? '' : ` ${result}`;
+}
+</compilePropsToObjectString>
+
+9.
+<validateRulesConfig>
+function validateRules(rulesConfig, ruleMapper, source = null) {
+    if (!rulesConfig) {
+        return;
+    }
+
+    <validateEachRule>
+    Object.keys(rulesConfig).forEach(id => {
+        validateRuleOptions(ruleMapper(id), id, rulesConfig[id], source);
+    });
+    </validateEachRule>
+}
+</validateRulesConfig>
+
+10.
+<initializeBitmapText>
+function BitmapText(text, spriteSheet) {
+    this.Container_constructor();
+    
+    // Setting initial properties
+    this.text = text || "";
+    this.spriteSheet = spriteSheet;
+    this.lineHeight = 0;
+    this.letterSpacing = 0;
+    this.spaceWidth = 0;
+
+    // Internal properties for tracking old values
+    this._oldProps = { text: 0, spriteSheet: 0, lineHeight: 0, letterSpacing: 0, spaceWidth: 0 };
+}
+</initializeBitmapText>

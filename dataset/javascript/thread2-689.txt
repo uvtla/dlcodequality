@@ -1,0 +1,316 @@
+```javascript
+<copycontext>
+function copycontext(context) {
+    var t = {};
+    var keys =  context.keys();
+    var i = keys.length;
+    var k, v, j;
+    while (i--) {
+      k = keys[i];
+      <ignorePrivateAndFunctions>
+      if (k[0] == '_')
+        continue;
+      v = context.get(k);
+      if (v && {}.toString.call(v) === '[object Function]')
+        continue;
+      </ignorePrivateAndFunctions>
+
+      <serializeAndDeserialize>
+      try {
+        j = JSON.stringify(v);
+        t[k] = JSON.parse(j);
+      } catch(err) {
+        t[k] = "Exception: " + err;
+      }
+      </serializeAndDeserialize>
+    }
+    
+    return t;
+}
+</copycontext>
+
+<resolve>
+function resolve(root, args) {
+  args = root.concat(Array.prototype.slice.call(args));
+  return path.resolve.apply(path, args);
+}
+</resolve>
+
+<unnamed>
+function(b)
+{
+   var rval = '';
+   <structureRDF>
+   var first = true;
+   for(var p in b)
+   {
+      if(p !== '@id')
+      {
+         if(first)
+         {
+            first = false;
+         }
+         else
+         {
+            rval += '|';
+         }
+         rval += '<' + p + '>';
+         var objs = (b[p].constructor === Array) ? b[p] : [b[p]];
+         for(var oi in objs)
+         {
+            var o = objs[oi];
+            if(o.constructor === Object)
+            {
+               <expandIRI>
+               if('@id' in o)
+               {
+                  if(_isBlankNodeIri(o['@id']))
+                  {
+                     rval += '_:';
+                  }
+                  else
+                  {
+                     rval += '<' + o['@id'] + '>';
+                  }
+               }
+               </expandIRI>
+               <expandLiteral>
+               else
+               {
+                  rval += '"' + o['@literal'] + '"';
+                  if('@type' in o)
+                  {
+                     rval += '^^<' + o['@type'] + '>';
+                  }
+                  else if('@language' in o)
+                  {
+                     rval += '@' + o['@language'];
+                  }
+               }
+               </expandLiteral>
+            }
+            <handleSimpleTypes>
+            else
+            {
+               rval += '"' + o + '"';
+            }
+            </handleSimpleTypes>
+         }
+      }
+   }
+   </structureRDF>
+   return rval;
+}
+</unnamed>
+
+<detectObject>
+function detectObject({ imageName, sensitivity, tolerance }) {
+
+    <validateParams>
+    if (!imageName || !sensitivity || !tolerance) {
+        alert("Must mention imageName, sensitivity and tolerance in passed configuration.");
+        throw new Error("Must mention imageName, sensitivity and tolerance in passed configuration.");
+    }
+    
+    if (sensitivity < 1 || sensitivity > 100 || tolerance < 1 || tolerance > 100) {
+        alert("Sensitivity and Tolerance ranges between 1 and 100");
+        throw new Error("Sensitivity and Tolerance ranges between 1 and 100");
+    }
+    </validateParams>
+    
+    var white = {
+        r: 255,
+        g: 255,
+        b: 255
+    };
+
+    <processDetection>
+    var base64Img = createRGBPixels(imageName)
+        .then(function(img) {
+            var detectedObject = img.detectObject(sensitivity, tolerance, white);
+            return detectedObject;
+        })
+        .then(function(detectedObject) {
+            var base64ImgResponse = detectedObject.save();
+            return base64ImgResponse;
+        });
+    </processDetection>
+
+    return base64Img;
+}
+</detectObject>
+
+<grid>
+function grid (data, callback) {
+    <renderTemplate>
+    linz.app.render(linz.api.views.viewPath('modelIndex/grid.jade'), data, (err, html) => {
+        if (err) {
+            return callback(err);
+        }
+        return callback(null, html);
+    });
+    </renderTemplate>
+}
+</grid>
+
+<setMember>
+function setMember(name, value, options) {
+			var member = members[name];
+			<checkMember>
+			if (!member) {
+				throw new Error("Error setting state. Member not registered : " + name);
+			} else {
+				var stateType = stateTypes[member.type];
+				<updateState>
+				if (stateType) {
+					stateType.set(member, value, options);
+				} else {
+					throw new Error("Error setting state. Type '"+ member.type +"' not recognised for member : " + name);
+				}
+				</updateState>
+			}
+			</checkMember>
+}
+</setMember>
+
+<inputEx.PasswordField.setOptions>
+function(options) {
+	   inputEx.PasswordField.superclass.setOptions.call(this, options);
+	   
+   	<setClassAndRegexp>
+   	this.options.className = options.className ? options.className : "inputEx-Field inputEx-PasswordField";
+   	this.options.regexp = options.regexp || inputEx.regexps.password;
+   	</setClassAndRegexp>
+	   
+	<setIndicators>
+		this.options.strengthIndicator = YAHOO.lang.isUndefined(options.strengthIndicator) ? false : options.strengthIndicator;
+		this.options.capsLockWarning = YAHOO.lang.isUndefined(options.capsLockWarning) ? false : options.capsLockWarning;
+	</setIndicators>
+
+	<registerPasswordField>
+		inputEx.PasswordField.byId[options.id] = this;
+		var passwordField;
+		if(options.confirm && (passwordField = inputEx.PasswordField.byId[options.confirm]) ) {
+			this.setConfirmationField(passwordField);
+		}
+	</registerPasswordField>
+}
+</inputEx.PasswordField.setOptions>
+
+<removeRecognizer>
+function (recognizer) {
+    <processRemoval>
+    if (invokeArrayArg(recognizer, 'remove', this)) {
+      return this;
+    }
+    </processRemoval>
+    <updateRecognizers>
+    var recognizers = this.recognizers;
+    recognizer = this.get(recognizer);
+    recognizers.splice(recognizers.indexOf(recognizer), 1);
+    this.touchAction.update();
+    </updateRecognizers>
+    return this;
+}
+</removeRecognizer>
+
+<createDefaultMiddleware>
+function createDefaultMiddleware(connect, options) {
+    <initializeMiddlewareArray>
+    var middlewares = [];
+    </initializeMiddlewareArray>
+    <processBaseOptions>
+    if (!Array.isArray(options.base)) {
+      options.base = [options.base];
+    }
+    var defaultStaticOptions = {};
+    var directory = options.directory || options.base[options.base.length - 1];
+    options.base.forEach(function(base) {
+      var path = base.path || base;
+      var staticOptions = base.options || defaultStaticOptions;
+      middlewares.push(serveStatic(path, staticOptions));
+    });
+    </processBaseOptions>
+    <appendIndexMiddleware>
+    middlewares.push(serveIndex(directory.path || directory, directory.options));
+    </appendIndexMiddleware>
+    return middlewares;
+}
+</createDefaultMiddleware>
+
+<plugin>
+function plugin(opts){
+  <validateAndInitializeOptions>
+  opts = opts || {};
+  if (!_.isObject(opts)) throw new Error('option should be an Object');
+  var params = omit(opts, settings) || {};
+  var options = pick(opts, settings) || {};
+  </validateAndInitializeOptions>
+  
+  <setDefaultOptions>
+  var pattern = opts.pattern || '**';
+  options.templatesDir = options.templatesDir || templates;
+  options.layoutsDir = options.layoutsDir || options.templatesDir; 
+  options.partialsDir = options.partialsDir || (options.templatesDir + '/partials'); 
+  options.defaultTemplate = options.defaultTemplate || 'default';
+  options.extname = options.extname || ext;
+  </setDefaultOptions>
+
+  return function(files, metalsmith, done){
+    var metadata = metalsmith.metadata();
+    var render;
+    <prepareMatches>
+    var matches = {};
+    var ext = options.extname;
+    var reg = new RegExp(ext + '$', 'i');
+    var concurrency = options.concurrency || Infinity;
+    </prepareMatches>
+    
+    <defineRender>
+    if(options.defaultLayout) {
+      options.defaultLayout = metalsmith.path(options.layoutsDir, options.defaultLayout);
+      if(!reg.test(options.defaultLayout)) options.defaultLayout += ext;
+    }
+    options.templatesDir = metalsmith.path(options.templatesDir);
+    options.layoutsDir = metalsmith.path(options.layoutsDir);
+    options.partialsDir = metalsmith.path(options.partialsDir);
+    render = hbs.express4(options);
+    </defineRender>
+
+    <buildFileList>
+    function check(file){
+      var data = files[file];
+      if (pattern && !match(file, pattern)[0]) return false;
+      return true;
+    }
+    Object.keys(files).forEach(function(file){
+      if (!check(file)) return;
+      debug('stringifying file: %s', file);
+      var data = files[file];
+      data.contents = data.contents.toString();
+      matches[file] = data;
+    });
+    </buildFileList>
+
+    <convertFiles>
+    eachLimit(Object.keys(matches), concurrency, convert, done);
+    function convert(file, done){
+      debug('converting file: %s', file);
+      var data = files[file];
+      var clonedParams = extend(true, {}, params);
+      var clone = extend({settings:{}}, clonedParams, metadata, data);
+      var templatePath = data.template || options.defaultTemplate;
+      templatePath = metalsmith.path(options.templatesDir, templatePath);
+      if(!reg.test(templatePath)) templatePath += ext;
+      render(templatePath, clone, function(err, str){
+        if (err) return done(err);
+        data.contents = new Buffer(str);
+        debug('converted file: %s', file);
+        done();
+      });
+    }
+    </convertFiles>
+  };
+}
+</plugin>
+```

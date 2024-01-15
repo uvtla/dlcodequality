@@ -1,0 +1,210 @@
+```javascript
+<createEventWrapper>
+function (event, delegateId, wrapTarget, container) {
+<checkAncestor>
+    if (aria.utils.Dom.isAncestor(event.relatedTarget, container) === false) </checkAncestor> {
+<wrapAndDirectCall>
+        var eventWrapper = this.__wrapEvent(event, wrapTarget);
+        eventWrapper.type = event.type == "mouseover" ? "mouseenter" : "mouseleave";
+        eventWrapper.setTarget(container);
+        return this.directCall(eventWrapper, delegateId, wrapTarget, container); </wrapAndDirectCall>
+    }
+}
+</createEventWrapper>
+
+<parseUrlAndBuildState>
+function (url) {
+<matchState>
+    var result;
+    LIST.some(function (state) {
+        var params = state.pattern.match(url);
+        if (params) {
+            result       = state;
+            state.params = params;
+            return true;
+        }
+    });
+</matchState>
+
+<buildParentHierarchy>
+    if (result) {
+        var state        = result,
+            parent_index = state.name.lastIndexOf('.'), parent_name;
+        while (parent_index !== -1) {
+            parent_name  = state.name.substring(0, parent_index);
+            state.parent = STATES[parent_name];
+            state        = state.parent;
+            parent_index = state.name.lastIndexOf('.');
+        }
+        return result;
+    }
+</buildParentHierarchy>
+}
+</parseUrlAndBuildState>
+
+<initializeFeatureHashing>
+function FeatureHashing(k) {
+<validateInput>
+    if (k > MAX_SAFE_INTEGER_HEX_LENGTH*4 || k < 1 || k !== (k|0)) { throw new Error("Feature vector bit length must be an integer between 1 and " + (MAX_SAFE_INTEGER_HEX_LENGTH*4) + "inclusive."); }
+</validateInput>
+    length = Math.pow(2, k||18); 
+    valueCount = 0;
+
+<addFeatureValue>
+    this.add = add;
+    function add(value) {
+        var hashHex, hashInt, featureNumber;
+        hashHex = crypto.createHash('md5').update(value).digest('hex');
+        hashInt = parseInt(hashHex.slice(hashHex.length - MAX_SAFE_INTEGER_HEX_LENGTH), 16); 
+        featureNumber = hashInt % length;
+        if (featureVector[featureNumber] === undefined) { featureVector[featureNumber] = 1; }
+        else { featureVector[featureNumber] += 1; }
+        valueCount += 1;
+    }
+</addFeatureValue>
+
+<featureVectorOperations>
+    this.sparseFeatureVector = function() { return featureVector; }
+    this.sparseLength = function() { return Object.keys(featureVector).length; }
+    this.length = function() { return length; }
+    this.fillRatio = function() { return (length / Object.keys(featureVector).length) || 0; }
+    this.collisions = function() { return valueCount - Object.keys(featureVector).length; }
+    this.collisionRatio = function() { return (valueCount / Object.keys(featureVector).length - 1) || 0; }
+    this.valueCount = function() { return valueCount; }
+</featureVectorOperations>
+}
+</initializeFeatureHashing>
+
+<recursiveFlattenArray>
+function flattenArray(array, filter, map, result) {
+<processArrayElements>
+  let index = -1;
+  while (++index < array.length) {
+    const value = array[index];
+    if (Array.isArray(value)) {
+      flattenArray(value, filter, map, result);
+    } else if (filter(value)) {
+      result.push(map(value));
+    }
+  }
+</processArrayElements>
+  return result;
+}
+</recursiveFlattenArray>
+
+<stripElementTabIndex>
+function stripElement(element) {
+<updateTabIndex>
+  const tabIndexElementPosition = elementsWithMissingTabIndex.indexOf(element);
+  if (tabIndexElementPosition !== -1) {
+    element.tabIndex = -1;
+    elementsWithMissingTabIndex.splice(tabIndexElementPosition, 1);
+  }
+</updateTabIndex>
+}
+</stripElementTabIndex>
+
+<setupRoutePrefix>
+function(routePrefix)
+{
+<normalizeRoutePrefix>
+	if(routePrefix==='/')routePrefix='';
+    this.appUrl = routePrefix;
+</normalizeRoutePrefix>
+<bindRouteHandlers>
+	var pattern = /^(.*?)\s(.*?)$/
+	for(var routePath in this.routes)
+	{
+		var routePathArray = routePath.match(pattern);
+		this.openbiz.context[routePathArray[1]](routePrefix+routePathArray[2],this.routes[routePath]);
+	}
+</bindRouteHandlers>
+    return this;
+}
+</setupRoutePrefix>
+
+<verifyConnectionState>
+function checkConnectionState(key, value)
+{
+<throwTypeError>
+  if(typeof value != 'string') {
+    throw SyntaxError(key+' param should be a String, not '+typeof value);
+  }
+</throwTypeError>
+<throwValueError>
+  if(!value.match('DISCONNECTED|CONNECTED')) {
+    throw SyntaxError(key+' param is not one of [DISCONNECTED|CONNECTED] ('+value+')');
+  }
+</throwValueError>
+}
+</verifyConnectionState>
+
+<setupObservationProxy>
+function(array, options) {
+<defaultOption>
+		if(options.shouldRecordObservation === undefined) {
+			options.shouldRecordObservation = makeObject.shouldRecordObservationOnOwnAndMissingKeys;
+		}
+</defaultOption>
+<initializeMeta>
+		var meta = {
+			target: array,
+			proxyKeys: options.proxyKeys !== undefined ? options.proxyKeys : Object.create(makeArray.proxyKeys()),
+			computedKeys: Object.create(null),
+			options: options,
+			preventSideEffects: 0
+		};
+		meta.proxyKeys[symbols.metaSymbol] = meta;
+</initializeMeta>
+<createProxy>
+		meta.proxy = new Proxy(array, {
+			get: makeObject.get.bind(meta),
+			set: makeArray.set.bind(meta),
+			ownKeys: makeObject.ownKeys.bind(meta),
+			deleteProperty: makeObject.deleteProperty.bind(meta),
+			meta: meta
+		});
+</createProxy>
+<bindProxyHandlers>
+		mapBindings.addHandlers(meta.proxy, meta);
+</bindProxyHandlers>
+		return meta.proxy;
+}
+</setupObservationProxy>
+
+<registerPlugins>
+function(plugins, pluginBase){
+<handlePluginBase>
+        var _this = this;
+        if (typeof pluginBase === 'string') {
+            _pluginBase = pluginBase;
+        }
+</handlePluginBase>
+<registerEachPlugin>
+        plugins.forEach(function(plugin, index){
+            var name;
+            var path;
+            if (typeof plugin === 'string'){
+                name = plugin;
+            } else {
+                name = plugin.name;
+                path = plugin.path;
+            }
+            _this.register(name, plugin);
+        });
+</registerEachPlugin>
+}
+</registerPlugins>
+
+<generateFrameIconMarkup>
+function (cfg, cssPrefix, position) {
+<checkFrameIconPosition>
+    var stateObject = cfg.stateObject;
+    var frameIconVPos = stateObject.frameIconVPos;
+    if (stateObject.frameIcon && frameIconVPos == position) </checkFrameIconPosition> {
+        return '<span class="' + cssPrefix + 'frameIcon"></span>';
+    }
+    return "";
+}
+</generateFrameIconMarkup>
+```

@@ -1,0 +1,215 @@
+```javascript
+<defaultOptions>
+function defaultOptions() {
+    return {
+        optimistic: false,
+        directive: false,
+        nodejsScope: false,
+        impliedStrict: false,
+        sourceType: "script",  
+        ecmaVersion: 5,
+        childVisitorKeys: null,
+        fallback: "iteration"
+    };
+}
+</defaultOptions>
+
+<generateRandomString>
+function (min, max) {
+    <calculateStringLength>
+    var len = range(3, 10, min, max)
+    </calculateStringLength>
+    var result = ''
+    for (var i = 0; i < len; i++) {
+      result += Basic.character('lower')
+    }
+    return result
+}
+</generateRandomString>
+
+<punif>
+function punif(a, b, lowerTail, logp) {
+      logp = logp === true;
+      lowerTail = lowerTail !== false;
+
+      <validateInput>
+      if (b < a || !utils.isFinite(a) || !utils.isFinite(b)) {
+         return function(x) { return NaN; };
+      }
+      </validateInput>
+
+      <returnProbFunction>
+      return function(x) {
+         if (utils.hasNaN(x)) { return NaN; }
+         if (x >= b) { return utils.adjustLower(1, lowerTail, logp); }
+         if (x <= a) { return utils.adjustLower(0, lowerTail, logp); }
+
+         return utils.adjustLower(
+            (lowerTail ? x - a : b - x) / (b - a), true, logp
+         );
+      };
+      </returnProbFunction>
+}
+</punif>
+
+<roundCeil>
+function roundCeil(num, precision) {
+    return Math.ceil(num * Math.pow(10, precision)) / Math.pow(10, precision);
+}
+</roundCeil>
+
+<flushEvents>
+function flushEvents() {
+  var tmp = PENDING_QUEUE;
+  PENDING_QUEUE = [];
+  for (var i = 0; i < tmp.length; i++) {
+    clientObj.send('log', tmp[i].item, tmp[i].fn);
+  }
+}
+</flushEvents>
+
+<formatProp>
+function formatProp(obj) {
+		var out      = {};
+
+		<setupProps>
+		var props    = _.get(obj, 'propSet');
+		var moRef    = _.has(obj, 'obj') ? util.moRef(obj.obj) : util.moRef(obj);
+		out.id       = moRef.id;
+		out.type     = moRef.type;
+		</setupProps>
+		
+		<mapProps>
+		if (Array.isArray(props)) {
+			_.forEach(props, function(prop) {
+				out[prop.name] = formatValue(prop.val);
+			});
+		}
+		else if (_.has(props, 'name')) {
+			out[props.name] = formatValue(props.val);
+		}
+		</mapProps>
+
+		return out;
+}
+</formatProp>
+
+<parseVariableDeclarations>
+function parseVariableDeclarations(string) {
+  
+  <validateString>
+  if (!string) {
+    return [];
+  }
+  </validateString>
+
+  var out = [],
+      <setupAST>
+      ast = gonzales.parse(string, {
+        syntax: syntax
+      }),
+      </setupAST>
+
+      <setupVisitor>
+      visitor = {
+        test: function(name, nodes) {
+          if (name !== 'declaration') {
+            return false;
+          }
+
+          if (
+              nodes.content[0] &&
+              nodes.content[0].content &&
+              nodes.content[0].content[0] &&
+              nodes.content[0].content[0].type &&
+              nodes.content[0].content[0].type === 'variable'
+            ) {
+            return true;
+          }
+        },
+        process: function(nodes) {
+          var varName = nodes.content[0].content[0].content[0].content;
+
+          
+          var content = nodes.content.filter(function(item) {
+            return (item.type !== 'space');
+          });
+
+          if (content[2] && content[2].type && content[2].type === 'value') {
+            out.push({
+              name: varName,
+              value: content[2].toString(syntax),
+              line: content[2].start.line
+            });
+          }
+        }
+      };
+      </setupVisitor>
+
+  <traverseAST>
+  traverser.traverse(ast, visitor);
+  </traverseAST>
+
+  return out;
+}
+</parseVariableDeclarations>
+
+<generateHash>
+function() {
+  
+  <prepareFactors>
+  var factors = {
+    creationDate: (new Date()).getTime(),
+    random: Math.random() * (Math.random() * 1000),
+    nodeVersion: process.version
+  };
+  var basestring = '';
+  _.each(factors, function (val) {
+    basestring += val;
+  });
+  </prepareFactors>
+
+  <generateMD5Hash>
+  var hash =  crypto.
+        createHash('md5').
+        update(basestring).
+        digest('hex');
+  </generateMD5Hash>
+
+  return hash;
+}
+</generateHash>
+
+<DataTypeValidator>
+function DataTypeValidator(type) {
+    DataTypeValidator.super_.call(this);
+    
+    <defineProperty>
+    Object.defineProperty(this, 'dataType', {
+        get: function() {
+            if (typeof type === 'string') {
+                return this.getContext().getConfiguration().getStrategy(DataConfigurationStrategy).dataTypes[type];
+            }
+            else {
+                return type;
+            }
+        }
+    });
+    </defineProperty>
+}
+</DataTypeValidator>
+
+<handRank>
+function handRank(val) {
+  if (val > 6185) return HIGH_CARD        
+  if (val > 3325) return ONE_PAIR         
+  if (val > 2467) return TWO_PAIR         
+  if (val > 1609) return THREE_OF_A_KIND  
+  if (val > 1599) return STRAIGHT         
+  if (val > 322)  return FLUSH            
+  if (val > 166)  return FULL_HOUSE       
+  if (val > 10)   return FOUR_OF_A_KIND   
+  return STRAIGHT_FLUSH                   
+}
+</handRank>
+```

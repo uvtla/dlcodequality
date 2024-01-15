@@ -1,0 +1,177 @@
+<setupConnection>
+function setupConnection( options ) {
+  var db
+
+  
+  if ( !options.connect.useMongoClient ) {
+    options.connect.useMongoClient = true
+  }
+
+  
+  mongoose.Promise = global.Promise
+  mongoose.set( 'debug', options.debug === true )
+
+  db = mongoose.connection
+
+  if ( options.debug === true ) {
+    db.on( 'connected', eventLogger( 'connected', db ) )
+    db.on( 'connecting', eventLogger( 'connecting', db ) )
+    db.on( 'disconnected', eventLogger( 'disconnected', db ) )
+    db.on( 'open', eventLogger( 'open', db ) )
+    db.on( 'reconnected', eventLogger( 'reconnected', db ) )
+  }
+
+  db.on( 'error', eventLogger( 'error', db ) )
+  db.on( 'error', attachErrorToDb( db ) )
+
+  db.uri = getUri( options.uri )
+
+  <handleProcessTermination>
+  process.on( 'SIGINT',
+    function () {
+      mongoose.connection.close(
+        function () {
+          console.log( 'mongoose default connection disconnected through app termination' )
+          process.exit( 0 )
+        }
+      );
+    }
+  </handleProcessTermination>
+
+  return db
+}
+</setupConnection>
+
+<publicToAddress>
+function publicToAddress(publicKey) {
+  if (!Buffer.isBuffer(publicKey)) { throw new Error('[ethjs-account] public key must be a buffer object in order to get public key address'); }
+
+  return getAddress(sha3(publicKey, true).slice(12).toString('hex'));
+}
+</publicToAddress>
+
+<typeVarNames>
+function typeVarNames(t) {
+  return Z.concat (
+    t.type === VARIABLE ? [t.name] : [],
+    Z.chain (function(k) { return typeVarNames (t.types[k]); }, t.keys)
+  );
+}
+</typeVarNames>
+
+<loadTranslation>
+function loadTranslation(localeFilePath) {
+  if(typeof localeFilePath == "undefined"){
+    messages = defaultMessages;
+    return null;
+  }
+  let fp = path.join(__dirname, localeFilePath);
+  messages = require('jsonfile').readFileSync("." + fp);
+  return messages;
+}
+</loadTranslation>
+
+<anonymousCommandExecution>
+function(){
+  var args = Array.prototype.slice.apply(arguments);
+  this.commands.execute.apply(this.commands, args);
+}
+</anonymousCommandExecution>
+
+<addRelationshipsToJDL>
+function addRelationshipsToJDL() {
+  for (let i = 0, entityNames = Object.keys(configuration.entities); i < entityNames.length; i++) {
+    dealWithRelationships(configuration.entities[entityNames[i]].relationships, entityNames[i]);
+  }
+}
+</addRelationshipsToJDL>
+
+<parseCacheEntryFlags>
+function parseCacheEntryFlags (bits) {
+  return {
+    assumeValid: Boolean(bits & 0b1000000000000000),
+    extended: Boolean(bits & 0b0100000000000000),
+    stage: (bits & 0b0011000000000000) >> 12,
+    nameLength: bits & 0b0000111111111111
+  }
+}
+</parseCacheEntryFlags>
+
+<resolveForFallbackLanguage>
+function (translationId, interpolateParams, Interpolator, sanitizeStrategy) {
+      
+  return resolveForFallbackLanguageInstant((startFallbackIteration > 0 ? startFallbackIteration : fallbackIndex), translationId, interpolateParams, Interpolator, sanitizeStrategy);
+}
+</resolveForFallbackLanguage>
+
+<emberComponentSendAction>
+function () {
+  var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+  <determineActionAndTarget>
+  var action = opts.action || _emberMetalProperty_get.get(this, 'action');
+  var target = opts.target || _emberMetalProperty_get.get(this, 'targetObject');
+  </determineActionAndTarget>
+  
+  <establishActionContext>
+  var actionContext = opts.actionContext;
+  if (typeof actionContext === 'undefined') {
+    actionContext = _emberMetalProperty_get.get(this, 'actionContextObject') || this;
+  }
+  </establishActionContext>
+  
+  <executeAction>
+  if (target && action) {
+    var ret;
+
+    if (target.send) {
+      ret = target.send.apply(target, args(actionContext, action));
+    } else {
+      _emberMetalDebug.assert('The action \'' + action + '\' did not exist on ' + target, typeof target[action] === 'function');
+      ret = target[action].apply(target, args(actionContext));
+    }
+
+    if (ret !== false) {
+      ret = true;
+    }
+
+    return ret;
+  } else {
+    return false;
+  }
+  </executeAction>
+}
+</emberComponentSendAction>
+
+<enhanceLoggingCapabilities>
+function (obj, tag) {
+  tag = _.isArray(tag) ? tag.join(',') : tag;
+  tag = !_.isEmpty(tag) ? tag.toLowerCase() : 'default';
+
+  obj.trace = function (message, data) {
+    _logEvent("trace", message, tag, data);
+  };
+
+  obj.debug = function (message, data) {
+    _logEvent("debug", message, tag, data);
+  };
+
+  obj.info = function (message, data) {
+    _logEvent("info", message, tag, data);
+  };
+
+  obj.warn = function (message, data) {
+    _logEvent("warn", message, tag, data);
+  };
+
+  obj.error = function (message, data) {
+    _logEvent("error", message, tag, data);
+  };
+
+  obj.fatal = function (message, data) {
+    _logEvent("fatal", message, tag, data);
+  };
+
+  return obj;
+}
+</enhanceLoggingCapabilities>

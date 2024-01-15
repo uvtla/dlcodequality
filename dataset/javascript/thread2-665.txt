@@ -1,0 +1,201 @@
+```javascript
+function without(remove) {
+  <inputValidation>
+  if (typeof remove === "undefined" && arguments.length === 0) {
+    return this;
+  }
+
+  if (typeof remove !== "function") {
+    var keysToRemoveArray = (Array.isArray(remove)) ?
+       remove.slice() : Array.prototype.slice.call(arguments);
+
+    keysToRemoveArray.forEach(function(el, idx, arr) {
+      if(typeof(el) === "number") {
+        arr[idx] = el.toString();
+      }
+    });
+
+    remove = function(val, key) {
+      return keysToRemoveArray.indexOf(key) !== -1;
+    };
+  }
+  </inputValidation>
+
+  <resultGeneration>
+  var result = instantiateEmptyObject(this);
+
+  for (var key in this) {
+    if (this.hasOwnProperty(key) && remove(this[key], key) === false) {
+      result[key] = this[key];
+    }
+  }
+
+  return makeImmutableObject(result);
+  </resultGeneration>
+}
+```
+
+```javascript
+function adaptSurfaceComponentClass({ Surface }) {
+  const methodNamesByClassId = new Map();
+
+  let nextClassId = 1;
+
+  <componentClassDefinition>
+  class Component {
+      constructor(props) {
+          // Component construction and method binding code would be placed here...
+      }
+
+      
+      // Lifecycle methods and other component methods would be placed here...
+  }
+  </componentClassDefinition>
+
+  <utilityFunctions>
+  function determineComponentMeta(componentClass) {
+      // Code to determine components' meta-data...
+  }
+
+  function buildInitFunction(componentClass) {
+      // Code to build initialization function for a component...
+  }
+  </utilityFunctions>
+
+  return Component;
+}
+```
+
+```javascript
+function getOrderIndependentHash(object, orderIndependent, pathCache, valueCache) {
+  <hashCalculation>
+  orderIndependent = getFunctionOption(orderIndependent);
+  pathCache = pathCache || [];
+  valueCache = valueCache || [];
+
+  // Code to calculate hash of the object...
+  </hashCalculation>
+}
+```
+
+```javascript
+function(apiClient) {
+  this.apiClient = apiClient || ApiClient.instance;
+
+  <findOrganization>
+  this.findOrganization = function(organizationId) {
+    // Code to find an organization...
+  }
+  </findOrganization>
+
+  <listOrganizations>
+  this.listOrganizations = function(opts) {
+    // Code to list organizations...
+  }
+  </listOrganizations>
+}
+```
+
+```javascript
+function () {
+  var _this = this;
+
+  <attachEvents>
+  domUtils.on($G('imageList'), 'scroll', function(e){
+    // Scroll event code...
+  });
+
+  domUtils.on(this.container, 'click', function (e) {
+    // Click event code...
+  });
+  </attachEvents>
+}
+```
+
+```javascript
+function(googleIdToken) {
+  var inMemoryPersistence = firebase.auth.Auth.Persistence.NONE;
+  var expectedDisplayName = 'Test User';
+  var oauthCredential = firebase.auth.GoogleAuthProvider.credential(googleIdToken);
+  var provider = new firebase.auth.GoogleAuthProvider();
+  var OPERATION_NOT_SUPPORTED_CODE = 'auth/operation-not-supported-in-this-environment';
+  var email = 'user' + Math.floor(Math.random() * 10000000000).toString() + '@example.com';
+  var pass = 'password';
+
+  <authenticationSequence>
+  return firebase.auth().setPersistence(inMemoryPersistence)
+    // Subsequent authentication-related methods calls...
+  </authenticationSequence>
+}
+```
+
+```javascript
+function (name, data, options) {
+  var _listeners = this.__handlers__[name],
+      _listener,
+      _result = null;
+
+  <eventHandling>
+  if (_listeners) {
+    for (var i = 0, length = _listeners.length; i < length; i++) {
+      _listener = _listeners[i];
+      if (_listener && _listener.handler) {
+        // Call the event handlers...
+      }
+    }
+  }
+  </eventHandling>
+
+  return this;
+}
+```
+
+```javascript
+function readablizeBytes(bytes) {
+  const time = Date.now();
+
+  <sizeConversion>
+  if (bytes === 0) { return '0 bytes'; }
+  const s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+  const e = Math.floor(Math.log(bytes) / Math.log(1024));
+  const result = (bytes / Math.pow(1024, e)).toFixed(2) + ' ' + s[e];
+  </sizeConversion>
+
+  console.info('readablizeBytes', Date.now() - time);
+  return result;
+}
+```
+
+```javascript
+function asyncDifference() {
+  <asynchronousComputation>
+  return asyncArray(when.apply(null, argsToArray(arguments)).chain(function (result) {
+    // Code to calculate asynchronous array difference...
+  }));
+  </asynchronousComputation>
+}
+```
+
+```javascript
+function (name, data) {
+  switch (name) {
+    <pageStatusHandling>
+    case 'pageavailable':
+      // Handle 'pageavailable' case...
+      break;
+    case 'textenabledchange':
+      // Handle 'textenabledchange' case...
+      break;
+    </pageStatusHandling>
+
+    <visibilityHandling>
+    case 'pagefocus':
+    case 'zoom':
+      // Handle 'pagefocus' and 'zoom' cases...
+      break;
+    </visibilityHandling>
+  }
+}
+```
+
+In the given examples, I've tried to illustrate how each function could be violating the Single Responsibility Principle by outlining multiple concerns within the tagged sections. In cases where functions seem to handle multiple concerns, splitting them into smaller, single-responsibility functions would make the code easier to maintain and understand.

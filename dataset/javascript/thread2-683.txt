@@ -1,0 +1,278 @@
+```javascript
+<MobileServiceSyncContext>
+function MobileServiceSyncContext(client) {
+    <ValidateClient>
+    Validate.notNull(client, 'client');
+    </ValidateClient>
+
+    var store,
+        operationTableManager,
+        pullManager,
+        pushManager,
+        purgeManager,
+        isInitialized = false,
+        syncTaskRunner = taskRunner(), 
+        storeTaskRunner = taskRunner();
+
+    <Initialize>
+    this.initialize = function (localStore) {
+        ...
+    };
+    </Initialize>
+
+    <Insert>
+    this.insert = function (tableName, instance) { 
+        ...
+    };
+    </Insert>
+
+    <Update>
+    this.update = function (tableName, instance) { 
+        ...
+    };
+    </Update>
+
+    <Lookup>
+    this.lookup = function (tableName, id, suppressRecordNotFoundError) {
+        ...
+    };
+    </Lookup>
+
+    <Read>
+    this.read = function (query) {
+        ...
+    };
+    </Read>
+
+    <Delete>
+    this.del = function (tableName, instance) {
+        ...
+    };
+    </Delete>
+
+    <Pull>
+    this.pull = function (query, queryId, settings) {
+        ...
+    };
+    </Pull>
+
+    <Push>
+    this.push = function () {
+        ...
+    };
+    </Push>
+
+    <Purge>
+    this.purge = function (query, forcePurge) {
+        ...
+    };
+    </Purge>
+
+    <PushHandler>
+    this.pushHandler = undefined;
+    </PushHandler>
+
+    <GetOperationTableManager>
+    this._getOperationTableManager = function () {
+        return operationTableManager;
+    };
+    </GetOperationTableManager>
+    
+    <GetPurgeManager>
+    this._getPurgeManager = function() {
+        return purgeManager;
+    };
+    </GetPurgeManager>
+
+    <UpsertWithLogging>
+    function upsertWithLogging(tableName, instance, action, shouldOverwrite) {
+        ...
+    }
+    </UpsertWithLogging>
+
+    <ValidateInitialization>
+    function validateInitialization() {
+        ...
+    }
+    </ValidateInitialization>
+}
+</MobileServiceSyncContext>
+
+<AnonymousFunctionUndefined>
+function () {
+    var hash = me.utils.getUriFragment();
+
+    <ConfigureDebug>
+    me.debug.renderHitBox   = ...
+    </ConfigureDebug>
+
+    <PatchGameUpdate>
+    me.plugin.patch(me.game, "update", function (dt) {
+        ...
+    });
+    </PatchGameUpdate>
+
+    <PatchGameDraw>
+    me.plugin.patch(me.game, "draw", function () {
+        ...
+    });
+    </PatchGameDraw>
+
+    <PatchSpriteDraw>
+    me.plugin.patch(me.Sprite, "draw", function (renderer) {
+        ...
+    });
+    </PatchSpriteDraw>
+
+    <PatchBitmapTextDraw>
+    me.plugin.patch(me.BitmapText, "draw", function (renderer) {
+        ...
+    });
+    </PatchBitmapTextDraw>
+
+    <PatchTextDraw>
+    me.plugin.patch(me.Text, "draw", function (renderer, text, x, y) {
+        ...
+    });
+    </PatchTextDraw>
+
+    <PatchTextDrawStroke>
+    me.plugin.patch(me.Text, "drawStroke", function (renderer, text, x, y) {
+        ...
+    });
+    </PatchTextDrawStroke>
+
+    <PatchEntityPostDraw>
+    me.plugin.patch(me.Entity, "postDraw", function (renderer) {
+        ...
+    });
+    </PatchEntityPostDraw>
+
+    <PatchContainerDraw>
+    me.plugin.patch(me.Container, "draw", function (renderer, rect) {
+        ...
+    });
+    </PatchContainerDraw>
+}
+</AnonymousFunctionUndefined>
+
+<StartAutoHide>
+function startAutoHide() {
+    <AutoHideImplementation>
+    var autoHideTimer, cancelAutoHide = angular.noop;
+    ...
+    </AutoHideImplementation>
+
+    <SetupCancelAutoHide>
+    options.cancelAutoHide = function() {
+        ...
+    };
+    </SetupCancelAutoHide>
+}
+</StartAutoHide>
+
+<ResolveValues>
+function resolveValues(values) {
+    <ValueTransformation>
+    if (Array.isArray(values)) {
+        ...
+    }
+    return values.split(' ')
+        ...
+    </ValueTransformation>
+}
+</ResolveValues>
+
+<AnonymousFunctionUndefinedSRP>
+function() {
+    var self = this;
+    <UpdateHttpServerListeners>
+    _.each(['request', 'upgrade'], function(event) {
+      ...
+    });
+    </UpdateHttpServerListeners>
+}
+</AnonymousFunctionUndefinedSRP>
+
+<AnonymousFunctionElementNode>
+function() {
+    var element = this.element,
+        node = this.node;
+    <HideElementNode>
+    if (!element && !node) {
+        ...
+    }
+    ...
+    </HideElementNode>
+}
+</AnonymousFunctionElementNode>
+
+<GetOptionsInstanceDefaults>
+function () {
+    <ReadFileSync>
+    var fileContent = self._readFileSync();
+    </ReadFileSync>
+
+    <GetInstanceDefaults>
+    return defaults((fileContent.instances || {})[this._id], self._options.instanceDefaults);
+    </GetInstanceDefaults>
+}
+</GetOptionsInstanceDefaults>
+
+<GetListingWatcher>
+function getListingWatcher(subreddit, options) {
+    <BuildStartPageUrl>
+    options.listing = options.listing || 'hot'
+    ...
+    </BuildStartPageUrl>
+
+    <LogStartPage>
+    console.log(start_page)
+    </LogStartPage>
+
+    <CreateRedditListingWatcher>
+    return new RedditListingWatcher(start_page, 'item', options)
+    </CreateRedditListingWatcher>
+}
+</GetListingWatcher>
+
+<CreateAxis>
+function(axis){
+    <DetermineAxisType>
+    var _self = this,
+      type = axis.type,
+      C,
+      name;
+    ...
+    </DetermineAxisType>
+
+    <ConfigureAxis>
+    axis.plotRange = _self.get('plotRange');
+    axis.autoPaint = false;
+    </ConfigureAxis>
+
+    <CreateAxisObject>
+    type = type || 'number';
+    name = Util.ucfirst(type);
+    C = Axis[name];
+    if(C){
+      return  _self.get('parent').addGroup(C,axis);
+    }
+    </CreateAxisObject>
+
+    <ReturnNullForInvalidAxis>
+    return null;
+    </ReturnNullForInvalidAxis>
+}
+</CreateAxis>
+
+<OnClick>
+function (domEvent) {
+    <ExecuteOnClickCallback>
+    if (!!this._cfg.onclick) {
+        ...
+    }
+    </ExecuteOnClickCallback>
+}
+</OnClick>
+```

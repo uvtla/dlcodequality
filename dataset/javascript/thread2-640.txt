@@ -1,0 +1,331 @@
+<stripExtension>
+function stripExtension(url) {
+  var lastDotPos = url.lastIndexOf('.');
+  return (lastDotPos <= 0)? url:
+    url.substring (0, lastDotPos - 1);
+}
+</stripExtension>
+
+<Client>
+function Client(options) {
+    <checkOptionsType>
+    if (typeof options === 'object') </checkOptionsType> {
+      <checkOptionsKeys>
+      if (options.AccessKeyId && options.AccessKeySecret) </checkOptionsKeys> {
+        <assignOptions>
+        _.assign(this.options, options);
+        </assignOptions>
+      } else {
+        <throwAccessKeysError>
+        throw new Error('请设置AccessKeyId和AccessKeySecret');
+        </throwAccessKeysError>
+      }
+    } else {
+      <throwTypeError>
+      throw new Error('实例化参数类型不正确');
+      </throwTypeError>
+    }
+  }
+</Client>
+
+<anonymousFunction>
+function() {
+          <setupContext>
+          var ctx = u.context(SMALL);
+          </setupContext>
+
+          <logDebug>
+          logger.debugf('Invoke iterator.close(msgId=%d,iteratorId=%s) on %s', ctx.id, iterId, conn.toString());
+          </logDebug>
+
+          <returnFuturePinned>
+          return futurePinned(
+              ctx, 0x35, p.encodeIterId(iterId), p.complete(p.hasSuccess), conn);
+          </returnFuturePinned>
+        }
+</anonymousFunction>
+
+<Wysiwyg>
+function Wysiwyg( element, userOptions ) {
+        <initialize>
+        this.selectedRange = null;
+        this.editor = $( element );
+        var editor = $( element );
+        </initialize>
+
+        <defineDefaults>
+        var defaults = {
+            // definition...
+        };
+        </defineDefaults>
+
+        <extendOptions>
+        var options = $.extend( true, {}, defaults, userOptions );
+        </extendOptions>
+
+        <setToolbarSelector>
+        var toolbarBtnSelector = "a[data-" + options.commandRole + "],button[data-" + options.commandRole + "],input[type=button][data-" + options.commandRole + "]";
+        </setToolbarSelector>
+
+        <bindHotkeys>
+        this.bindHotkeys( editor, options, toolbarBtnSelector );
+        </bindHotkeys>
+
+        <initDragDrop>
+        if ( options.dragAndDropImages ) {
+            this.initFileDrops( editor, options, toolbarBtnSelector );
+        }
+        </initDragDrop>
+
+        <bindToolbar>
+        this.bindToolbar( editor, $( options.toolbarSelector ), options, toolbarBtnSelector );
+        </bindToolbar>
+
+        <configureEditor>
+        editor.attr( "contenteditable", true )
+            .on( "mouseup keyup mouseout", function() {
+                this.saveSelection();
+                this.updateToolbar( editor, toolbarBtnSelector, options );
+            }.bind( this ) );
+        </configureEditor>
+
+        <handleTouchEnd>
+        $( window ).bind( "touchend", function( e ) {
+            // ...
+        } );
+        </handleTouchEnd>
+     }
+</Wysiwyg>
+
+<APIRequest>
+function APIRequest(method, url) {
+	<initialization>
+    var data, callback, opts, req, headers = messageHeaders(this);
+	callback = ( typeof(arguments[2]) === 'function' ? arguments[2] : (data = arguments[2], arguments[3]) );
+    </initialization>
+
+    <handleNode>
+	if (isNode) {
+		// ... node-specific logic ...
+	}
+    </handleNode>
+
+    <handleBrowser>
+	req = new XMLHttpRequest();
+	// ... XMLHttpRequest-specific logic ...
+	if (data) return req.send( data.result ? data.result : JSON.stringify(data) );
+	req.send(null);
+    </handleBrowser>
+}
+</APIRequest>
+
+<nanquantiles>
+function nanquantiles( arr, num, opts ) {
+	<variableDeclarations>
+	var sorted,
+		// ...
+		i;
+    </variableDeclarations>
+
+    <inputValidation>
+    // ... throw error conditions ...
+	</inputValidation>
+
+	<filterNonNumbers>
+	d = [];
+	for ( i = 0; i < arr.length; i++ ) {
+		// ... filtering logic ...
+	}
+    </filterNonNumbers>
+
+    <sortCheck>
+	if ( !sorted ) {
+		d.sort( ascending );
+	}
+	</sortCheck>
+
+	<calculateQuantiles>
+	qValues = new Array( num+1 );
+	// ...
+	</calculateQuantiles> 
+
+	return qValues;
+}
+</nanquantiles>
+
+<Cache>
+function Cache(opts) {
+    <initializeProperties>
+    this.assoc = opts.assoc;
+    this.size = opts.size;
+    if (opts.serialize !== undefined)
+        this.serialize = opts.serialize;
+    var algo = opts.algorithm || opts.evict || 'lru';
+    this.algorithm = typeof algo == 'string'
+                      ? algorithms[algo]
+                      : algo;
+
+    this.sets = new Array(this.size);
+    this.stat = {
+        hits: 0,
+        misses: 0
+    };
+    </initializeProperties>
+}
+</Cache>
+
+<children>
+function children(selector) {
+  <initializeArray>
+  var arr = [], slice = this.slice, nodes, matches;
+  </initializeArray>
+  
+  <loopEachElement>
+  this.each(function(el) {
+    <collectChildNodes>
+    nodes = slice.call(el.childNodes);
+    </collectChildNodes>
+    
+    <filterElementsByType>
+    nodes = nodes.filter(function(n) {
+      if(n instanceof Element) { return n;}
+    })
+    </filterElementsByType>
+    
+    <applySelector>
+    if(selector) {
+      matches = slice.call(el.querySelectorAll(selector));
+      for(var i = 0;i < nodes.length;i++) {
+        if(~matches.indexOf(nodes[i])) {
+          arr.push(nodes[i]);
+        }
+      }
+    } else {
+      arr = arr.concat(nodes);
+    }
+    </applySelector>
+  });
+  </loopEachElement>
+
+  <returnWrappedArray>
+  return this.air(arr);
+  </returnWrappedArray>
+}
+</children>
+
+<unexpectedStyleEntries>
+function(style)
+	{
+		<declareResultArray>
+		var result = [];
+		</declareResultArray>
+		
+		<processStyle>
+		if (style != null)
+		{
+			var pairs = style.split(';');
+			
+			for (var i = 0; i < pairs.length; i++)
+			{
+				if (pairs[i].indexOf('=') < 0)
+				{
+					result.push(pairs[i]);
+				}
+			}
+		}
+		</processStyle>
+
+		<returnResult>
+		return result;
+		</returnResult>
+	}
+</unexpectedStyleEntries>
+
+<LSTM>
+function LSTM(linalg, params) {
+  <declareDependencies>
+  const Vector = linalg.Vector;
+  </declareDependencies>
+
+  <defineStateFunctions>
+  function makeState() {
+    return new Vector(params.nNodes * params.nLayers * 2);
+  }
+
+  function resetState(state) {
+    linalg.zero(state, state);
+    return state;
+  }
+
+  function copyState(state) {
+    return new Vector(state);
+  }
+  </defineStateFunctions>
+
+  <defineForwardFunction>
+  function forward(inState, byte, outState) {
+    var input = byteToVector(byte);
+    for (var n = 0; n < params.nLayers; n++) {
+      input = forwardLayer(
+          // ...
+      );
+    }
+    return outState;
+  }
+  </defineForwardFunction>
+
+  <definePredictFunction>
+  function predict(state) {
+    var topH = indexState(state, 2 * params.nLayers - 1);
+    var probs = params.affines[2 * params.nLayers](topH);
+    linalg.exp(probs, probs);
+    normalize(probs, probs);
+    return probs;
+  }
+  </definePredictFunction>
+
+  <defineForwardLayerFunction>
+  function forwardLayer(prevC, prevH, x, i2h, h2h, nextC, nextH) {
+    // ...
+    return nextH;
+  }
+  </defineForwardLayerFunction>
+
+  <utilityFunctions>
+  function indexState(state, n) {
+    return state.subarray(n * params.nNodes, (n + 1) * params.nNodes);
+  }
+
+  function normalize(inVec, outVec) {
+    var sum = inVec.reduce((x, y) => x + y);
+    return linalg.scalarMult(inVec, 1 / sum, outVec);
+  }
+
+  function byteToIndex(byte) {
+    return params.vocab[byte];
+  }
+
+  function indexToByte(index) {
+    return params.ivocab[index];
+  }
+
+  function byteToVector(byte) {
+    var vec = new Vector(params.affines[0].inLength);
+    vec[byteToIndex(byte)] = 1.;
+    return vec;
+  }
+  </utilityFunctions>
+
+  <returnAPI>
+  return {
+    makeState: makeState,
+    copyState: copyState,
+    resetState: resetState,
+    forward: forward,
+    predict: predict,
+    indexToByte: indexToByte,
+    byteToIndex: byteToIndex,
+  };
+  </returnAPI>
+}
+</LSTM>

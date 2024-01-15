@@ -1,0 +1,187 @@
+```javascript
+<buildGrammar>
+function buildGrammar(match, namespace, optOhmGrammarForTesting) {
+  var builder = new Builder();
+  var decl;
+  var currentRuleName;
+  var currentRuleFormals;
+  var overriding = false;
+  var metaGrammar = optOhmGrammarForTesting || ohmGrammar;
+  
+  <semanticOperations>
+  var helpers = metaGrammar.createSemantics().addOperation('visit', {
+    // ... semantic operation methods ...
+  });
+  </semanticOperations>
+  
+  return helpers(match).visit();
+}
+</buildGrammar>
+
+<structureEquals>
+function structureEquals(structure1, structure2, keys1, keys2, getter, traversedValues) {
+  // ... function body performing deep equality check ...
+  return true
+}
+</structureEquals>
+
+<dummyMarkdown>
+function dummyMarkdown() {
+    var codeBlock = /^```/;
+    var quoteBlock = /^>/;
+    var listBlock = /^\* /;
+
+    var commentInline = '<!--.*-->';
+    var codeInline = '`.+`';
+
+    <split>
+    function split(content) {
+        // ... function to split markdown content ...
+    }
+    </split>
+
+    return function (input) {
+        // ... function to process markdown input ...
+    };
+}
+</dummyMarkdown>
+
+<escapeValue>
+function escapeValue(str) {
+  // ... function body to escape values in a string ...
+  return out;
+}
+</escapeValue>
+
+<wrrRoute>
+function wrrRoute(client, serverType, msg, cb) {
+    // ... function body implementing weighted round-robin routing ...
+}
+</wrrRoute>
+
+<simplifyObjectAccess>
+function(type, obj) {
+     <getCommand>
+     switch (type) {
+       case 'greet':
+         var name = _.get(obj, 'profile.displayName') || _.get(obj, 'username', '') || obj;
+
+         return _.get(name, 'length') ? name : 'Hey';
+         break;
+     }
+     </getCommand>
+
+     return obj; 
+}
+</simplifyObjectAccess>
+
+<sortObject>
+function sortObject(originalSrc, options, done) {
+  var callback
+
+  <determineCallback>
+  if (options === undefined) {
+    
+  } else if (typeof options === "function") {
+    callback = options
+  } else {
+    callback = done
+  }
+  </determineCallback>
+
+  if (callback) {
+    <processAsynchronously>
+    process.nextTick(function() {
+      done(work(originalSrc))
+    })
+    </processAsynchronously>
+    return
+  }
+
+  <work>
+  function work(obj) {
+    // ... function body doing the sorting work synchronously ...
+    return out
+  }
+  </work>
+
+  return work(originalSrc)
+}
+</sortObject>
+
+<tailLines>
+function(maxLines) {
+    var cbs = [];
+    var lines = [];
+    var current = null;
+    var closed = false
+    var max = maxLines - 1;
+
+    <emitFunction>
+    function emit(line) {
+      // ... short function to emit a line to all callbacks ...
+    }
+    </emitFunction>
+
+    return {
+      // ... various related methods handling lines ...
+    };
+}
+</tailLines>
+
+<restrictPointsToArc>
+function restrictPointsToArc(intersections, center, radiusX, radiusY, startRadians, endRadians) {
+    // ... function body to restrict points to a certain arc ...
+    return result;
+}
+</restrictPointsToArc>
+
+<loopgen>
+function loopgen(dom, sel, loop, fns) {
+    var already = false, ls, sorter, filter, prop;
+    <loopPropertyExtraction>
+    for (prop in loop) {
+      if (loop.hasOwnProperty(prop)) {
+        // ... extracting properties from loop ...
+      }
+    }
+    </loopPropertyExtraction>
+    
+    <directiveSelection>
+    if (!ls) {
+      error('Error in the selector: ' + sel + '\nA directive action must be a string, a function or a loop(<-)');
+    }
+    var dsel = loop[ls];
+    </directiveSelection>
+
+    <loopPreparation>
+    if (typeof(dsel) === 'string' || typeof(dsel) === 'function') {
+      loop = {};
+      loop[ls] = {root: dsel};
+      return loopgen(dom, sel, loop, fns);
+    }
+    var spec = parseloopspec(ls),
+      itersel = dataselectfn(spec.sel),
+      target = gettarget(dom, sel, true),
+      nodes = target.nodes;
+    </loopPreparation>
+
+    for (i = 0; i < nodes.length; i++) {
+      <nodeProcessing>
+      var node = nodes[i],
+        inner = compiler(node, dsel);
+      fns[fns.length] = wrapquote(target.quotefn, loopfn(spec.name, itersel, inner, sorter, filter));
+      target.nodes = [node];
+      setsig(target, fns.length - 1);
+      </nodeProcessing>
+    }
+}
+</loopgen>
+```
+
+Annotation Key Points:
+
+- SRP compliance is denoted with outer tags such as `<buildGrammar>`, `<structureEquals>`, etc., showcasing the overarching cohesive responsibility of each function.
+- Within functions, where there is a mixture of multiple distinct responsibilities, nested tags are used, such as `<semanticOperations>`, `<split>`, `<emitFunction>`, and `<loopPropertyExtraction>`, to indicate these different cohesive blocks of code. 
+- SRP violations are not explicitly marked; instead, we highlight where the function contains separate responsibilities to imply that those areas might present a potential violation of the SRP, depending on the context and granularity considered.
+- Simple returns, variable assignments, or one-line statements are not considered separate responsibilities.

@@ -1,0 +1,174 @@
+Here are the annotated functions for SRP compliance:
+
+1. This function is SRP compliant as it is focused on assembling a URL from parts with an optional port insertion.
+```javascript
+function assembleUrl (parts, insertPort = false) {
+  let result;
+  if (insertPort) {
+    result = `${parts.protocol}://...`;
+  } else {
+    result = `${parts.protocol}://...`;
+  }
+  if (parts.path) {
+    result = `${result}/${parts.path}`;
+  }
+  return result;
+}
+```
+
+2. This function appears to violate SRP as it contains multiple responsibilities such as rule processing, node comparison, and list manipulation.
+```javascript
+function processRule(node, item, list) {
+    <comparisonOperations>
+    var selectors = node.prelude.children;
+    var declarations = node.block.children;
+    var nodeCompareMarker = selectors.first().compareMarker;
+    var skippedCompareMarkers = {};
+    </comparisonOperations>
+
+    <listIteration>
+    list.nextUntil(item.next, function(next, nextItem) {
+        <typeRuleCheck>
+        if (next.type !== 'Rule') {
+            return utils.unsafeToSkipNode.call(selectors, next);
+        }
+        </typeRuleCheck>
+
+        <pseudoSignatureCheck>
+        if (node.pseudoSignature !== next.pseudoSignature) {
+            return true;
+        }
+        </pseudoSignatureCheck>
+
+        ...
+    });
+    </listIteration>
+}
+```
+
+3. This function is SRP compliant as it defines a reducer for a particular branch name with a focus on state management.
+```javascript
+function createReducer(branchName) {
+    ...
+}
+```
+
+4. This function violates SRP as it deals with light calculation, color overlay, and color manipulation for tiles.
+```javascript
+function(x, y, tileData){
+    <lightCalculation>
+    var light = this.ambientLight;
+    var lighting = this.get(x, y);
+    </lightCalculation>
+
+    <colorOverlay>
+    var overlay = function(c1, c2){
+        ...
+    };
+    if(lighting){
+        light = ROT.Color.add(this.ambientLight, lighting);
+    }
+    </colorOverlay>
+
+    <tileDataColorManipulation>
+    if(tileData.color){
+        ...
+    }
+    if(tileData.bgColor){
+        ...
+    }
+    </tileDataColorManipulation>
+
+    return tileData;
+}
+```
+
+5. This function violates SRP as it handles logging, error checking, file creation, and stats retrieval.
+```javascript
+function handleStatsError(err){
+    <errorLogging>
+    console.log('^^^^ ERROR:handleStatsError ^^^^');
+    </errorLogging>
+
+    <fileCheck>
+    if(err.cause.code === FILE_NOT_FOUND) {
+        ...
+        
+        <fileCreation>
+        return BB.bind(this)
+            .then(this.createEmptyFile)
+            .then(this.getFileStats)
+            ...
+        </fileCreation>
+
+    } else {
+        ...
+    }
+    </fileCheck>
+}
+```
+
+6. This function is SRP compliant as it is simply a utility to check if the argument is an Array.
+```javascript
+function(module, exports, __webpack_require__) {
+	module.exports = Array.isArray || function isArray(arg){
+	  return cof(arg) == 'Array';
+	};
+}
+```
+
+7. This function is SRP compliant as it converts profiling nodes into a specific format.
+```javascript
+function convertProfNode (node) {
+    ...
+}
+```
+
+8. This function appears to be SRP compliant as it dispatches actions related to fetching and receiving activities for a specific hub.
+```javascript
+function fetchActivitiesForHubWithUuid (hubUuid) {
+  ...
+}
+```
+
+9. This function is SRP compliant as it deals with notifying listeners when a module is defined.
+```javascript
+function modFireDefined( id ) {
+    ...
+}
+```
+
+10. This function violates SRP as it is handling selection of configurations, reading and writing to files, modifying various settings, and copying default icons.
+```javascript
+function select(name, outfilename) {
+    <configurationSelection>
+    if (!name) {
+        ...
+    } else {
+        cfg.configs.forEach(function(config) {
+            ...
+
+            <settingModification>
+            for (var setting in config.settings) {
+                ...
+            }
+            </settingModification>
+
+            <copyDefaultIcon>
+            if (fs.existsSync("./app/themes/" + name + "/assets/iphone/DefaultIcon.png")) {
+                ...
+            } else if (fs.existsSync("./app/themes/" + name + "/DefaultIcon.png")) {
+                ...
+            }
+            </copyDefaultIcon>
+
+            <writeOutput>
+            console.log(chalk.green('\n' + outfilename + ' updated\n'));
+            tiapp.write(outfilename);
+            </writeOutput>
+
+        });
+    }
+    </configurationSelection>
+}
+```

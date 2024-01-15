@@ -1,0 +1,226 @@
+```javascript
+<storeXMLModifications>
+function _storeXMLModifications() {
+  if (bHasLocalStorage) {
+    localStorage.setItem("sap-ui-support.aSupportXMLModifications/" + document.location.href, JSON.stringify(aSupportXMLModifications));
+  }
+}
+</storeXMLModifications>
+
+<getFirstAnchor>
+function getFirstAnchor(list) {
+  var result = null;
+  forEach(list, function(element) {
+    if (!result && lowercase(element.nodeName) === 'a') result = element;
+  });
+  return result;
+}
+</getFirstAnchor>
+
+<isTaskListItemToken>
+function isTaskListItemToken(tokens, index) {
+  return tokens[index].type === 'inline'
+      && tokens[index - 1].type === 'paragraph_open'
+      && tokens[index - 2].type === 'list_item_open'
+      && (tokens[index].content.indexOf('[ ]') === 0
+          || tokens[index].content.indexOf('[x]') === 0
+          || tokens[index].content.indexOf('[X]') === 0);
+}
+</isTaskListItemToken>
+
+<submitPayment>
+function submitPayment(account, payment, clientResourceID, secret,
+  urlBase, options, callback) {
+
+  <formatTransactionResponse>
+  function formatTransactionResponse(message, meta) {
+    if (meta.state === 'validated') {
+      var txJSON = message.tx_json;
+      txJSON.meta = message.metadata;
+      txJSON.validated = message.validated;
+      txJSON.ledger_index = txJSON.inLedger = message.ledger_index;
+      return formatPaymentHelper(payment.source_account, txJSON);
+    }
+
+    return {
+      client_resource_id: clientResourceID,
+      status_url: urlBase + '/v1/accounts/' + payment.source_account
+        + '/payments/' + clientResourceID
+    };
+  }
+  </formatTransactionResponse>
+
+  <prepareTransaction>
+  function prepareTransaction(_transaction, remote) {
+    validate.client_resource_id(clientResourceID);
+
+    _transaction.lastLedger(Number(options.last_ledger_sequence ||
+      (remote.getLedgerSequence() + transactions.DEFAULT_LEDGER_BUFFER)));
+
+    if (Number(options.max_fee) >= 0) {
+      _transaction.maxFee(Number(xrpToDrops(options.max_fee)));
+    }
+
+    if (Number(options.fixed_fee) >= 0) {
+      _transaction.setFixedFee(Number(xrpToDrops(options.fixed_fee)));
+    }
+
+    _transaction.clientID(clientResourceID);
+    return _transaction;
+  }
+  </prepareTransaction>
+
+  var isSubmitMode = options.submit !== false;
+  var _options = _.assign({}, options, {
+    clientResourceId: clientResourceID,
+    blockDuplicates: isSubmitMode,
+    saveTransaction: isSubmitMode
+  });
+
+  var initialTx = createPaymentTransaction(account, payment);
+  var transaction = isSubmitMode ? prepareTransaction(
+    initialTx, this.remote) : initialTx;
+  var converter = isSubmitMode ? formatTransactionResponse :
+    _.partial(TxToRestConverter.parsePaymentFromTx, account);
+  transact(transaction, this, secret, _options, converter, callback);
+}
+</submitPayment>
+
+<getNormalizedLiteral>
+function getNormalizedLiteral(node) {
+  if (node.type === "Literal") {
+    return node;
+  }
+
+  if (looksLikeLiteral(node)) {
+    return {
+      type: "Literal",
+      value: -node.argument.value,
+      raw: "-" + node.argument.value
+    };
+  }
+
+  return null;
+}
+</getNormalizedLiteral>
+
+<create>
+function _create (elements, selector) {
+  return selector == null ? new Rye(elements) : new Rye(elements).filter(selector)
+}
+</create>
+
+<checkSourceInfo>
+function checkSourceInfo () {
+  return new Promise((resolve, reject) => {
+    <compareToOldInfo>
+    let ok = pjson.name === oldInfo.packageName
+    ok = ok && readSync('android/app/src/main/AndroidManifest.xml').includes(`package="${oldInfo.packageID}"`)
+    if (!ok) {
+      reject(new Error('The App name is already modified.'))
+      return
+    }
+    </compareToOldInfo>
+
+    <outputNewProjectParameters>
+    console.log()
+    console.log('---------------------------------------------------------')
+    console.log('New project parameters:')
+    console.log('---------------------------------------------------------')
+    console.log('App display name :', newInfo.appName)
+    console.log('Project name     :', newInfo.projectName)
+    console.log('Package name     :', newInfo.packageName)
+    console.log('Package id       :', newInfo.packageID)
+    console.log('---------------------------------------------------------')
+    </outputNewProjectParameters>
+
+    <getUserConfirmation>
+    let r = null
+    try {
+      r = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      })
+      r.question('Is this correct?', (answer) => {
+        r.close()
+        resolve(answer)
+      })
+    } catch (e) {
+      if (r) {
+        r.close()
+      }
+      reject(e)
+    }
+    </getUserConfirmation>
+  })
+}
+</checkSourceInfo>
+
+<destroyOverlay>
+function () {
+
+  if (this.iframe) {
+    this.iframe.parentNode.removeChild(this.iframe);
+  }
+
+  this.iframe = null;
+
+  Overlay.windowResizeEvent.unsubscribe(this.doCenterOnDOMEvent, this);
+  Overlay.windowScrollEvent.unsubscribe(this.doCenterOnDOMEvent, this);
+
+  Module.textResizeEvent.unsubscribe(this._autoFillOnHeightChange);
+
+  if (this._contextTriggers) {
+    this._processTriggers(this._contextTriggers, _UNSUBSCRIBE, this._alignOnTrigger);
+  }
+
+  Overlay.superclass.destroy.call(this);
+}
+</destroyOverlay>
+
+<formatEntityReferences>
+function(oEntity) {
+  if (oEntity.references && Array.isArray(oEntity.references)) {
+    oEntity.references = oEntity.references.map(sReference => {
+      return `<li>${sReference}</li>`;
+    });
+    if (!oEntity.description) {
+      oEntity.description = '';
+    } else {
+      oEntity.description += '<br><br>';
+    }
+    oEntity.description += `References: <ul>${oEntity.references.join("")}</ul>`;
+  }
+}
+</formatEntityReferences>
+
+<ImageLoader>
+function ImageLoader (loadItem, preferXHR) {
+  this.AbstractLoader_constructor(loadItem, preferXHR, createjs.AbstractLoader.IMAGE);
+  
+  this.resultFormatter = this._formatResult;
+  
+  this._tagSrcAttribute = "src";
+  
+  <processLoadItem>
+  if (createjs.RequestUtils.isImageTag(loadItem)) {
+    this._tag = loadItem;
+  } else if (createjs.RequestUtils.isImageTag(loadItem.src)) {
+    this._tag = loadItem.src;
+  } else if (createjs.RequestUtils.isImageTag(loadItem.tag)) {
+    this._tag = loadItem.tag;
+  }
+  </processLoadItem>
+
+  <initializeImageLoader>
+  if (this._tag != null) {
+    this._preferXHR = false;
+  } else {
+    this._tag = document.createElement("img");
+  }
+
+  this.on("initialize", this._updateXHR, this);
+  </initializeImageLoader>
+}
+</ImageLoader>
+```

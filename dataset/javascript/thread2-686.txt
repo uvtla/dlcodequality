@@ -1,0 +1,206 @@
+<initChart>
+function (init) {
+		var series = this;
+
+		if (!init) {
+			<updateGraphics>
+			each(series.points, function (point) {
+				var graphic = point.graphic;
+
+				if (graphic) {
+					<setInitialRotation>
+					graphic.attr({
+						rotation: series.yAxis.startAngleRad * 180 / Math.PI
+					});
+					</setInitialRotation>
+
+					<animateRotation>
+					graphic.animate({
+						rotation: point.shapeArgs.rotation
+					}, series.options.animation);
+					</animateRotation>
+				}
+			});
+			</updateGraphics>
+
+			<disableAnimation>
+			series.animate = null;
+			</disableAnimation>
+		}
+	}
+</initChart>
+
+<addWire>
+function(event, args) {
+      var wire = args[0];
+      
+	  <checkAndAddWire>
+      if( WireIt.indexOf(wire, this.wires) == -1 ) {
+         this.wires.push(wire);
+         
+		 <setUpMouseEvents>
+         if(this.enableMouseEvents) {
+            YAHOO.util.Event.addListener(wire.element, "mousemove", this.onWireMouseMove, this, true);
+            YAHOO.util.Event.addListener(wire.element, "click", this.onWireClick, this, true);
+         }
+		 </setUpMouseEvents>
+         
+		 <fireEvents>
+         this.eventAddWire.fire(wire);
+		 this.eventChanged.fire(this);
+		 </fireEvents>
+	 }
+	  </checkAndAddWire>
+   }
+</addWire>
+
+<createForm>
+function(spec) {
+	var method = spec.method,
+		endpoint = spec.endpoint,
+		params = spec.params,
+		paramsInBody = spec.paramsInBody,
+		targetName = spec.targetName,
+		form = qq.toElement("<form method='" + method + "' enctype='multipart/form-data'></form>"),
+		url = endpoint;
+
+	<attachParams>
+	if (paramsInBody) {
+		qq.obj2Inputs(params, form);
+	}
+	else {
+		url = qq.obj2url(params, endpoint);
+	}
+	</attachParams>
+
+	<updateFormAttributes>
+	form.setAttribute("action", url);
+	form.setAttribute("target", targetName);
+	form.style.display = "none";
+	document.body.appendChild(form);
+	</updateFormAttributes>
+
+	return form;
+}
+</createForm>
+
+<createTableKeyMulti>
+function createTableKeyMulti (spec) {
+	<validateInput>
+	assert.equal(typeof spec, 'object', 'spec must be object')
+	assert.ok(Array.isArray(spec.columns), 'index columns must be array')
+	</validateInput>
+
+	<generateKeyString>
+	return 'KEY ('+_.map(spec.columns, quoteName).join(', ')+')'
+	</generateKeyString>
+}
+</createTableKeyMulti>
+
+<calculateSliceNumber>
+function(referencePoint, otherPoint) {
+	<adjustPoint>
+	if (this.yDown) {
+		if (otherPoint.y > referencePoint.y) {
+			otherPoint = {
+				x: otherPoint.x,
+				y: referencePoint.y - (otherPoint.y - referencePoint.y)
+			}
+		} else if (otherPoint.y < referencePoint.y) {
+			otherPoint = {
+				x: otherPoint.x,
+				y: referencePoint.y + (referencePoint.y - otherPoint.y)
+			}
+		}
+	}
+	</adjustPoint>
+
+	<findSlice>
+	var delta = vec2d(otherPoint).minus(vec2d(referencePoint))
+	var weird = radiansToWeird(delta.angle())
+	var compass = weirdToCompass(weird)
+
+	for (var i = 0; i < this.slices.length; i++) {
+		if (this.slices[i].contains(compass)) {
+			return this.slices[i].number
+		}
+	}
+	</findSlice>
+}
+</calculateSliceNumber>
+
+<blurFocusElement>
+function(){
+	<getFocusElement>
+	var focusElement = this.tmpl ? this.tmpl.focus || this.element : null;
+	</getFocusElement>
+
+	<attemptBlur>
+	if (focusElement)
+		try {
+			focusElement.blur();
+		} catch(e) {}
+	</attemptBlur>
+}
+</blurFocusElement>
+
+<validateUuids>
+function (uuids) {
+	<checkUuidValidity>
+	var guid = uuids[0]
+	var sharedKey = uuids[1]
+
+	if (!guid || !sharedKey || guid.length !== 36 || sharedKey.length !== 36) {
+		throw 'Error generating wallet identifier'
+	}
+	</checkUuidValidity>
+
+	<returnIdentifiers>
+	return { guid: guid, sharedKey: sharedKey }
+	</returnIdentifiers>
+}
+</validateUuids>
+
+<sendMessageWithName>
+function(conversationId, name, text, callback) {
+	<sendNamedMessage>
+	send(null, conversationId, utils.messageText('name', name, text), callback);
+	</sendNamedMessage>
+}
+</sendMessageWithName>
+
+<BayesClassifierConstructor>
+function BayesClassifier() {
+  
+	<instanceCheck>
+	if (!(this instanceof BayesClassifier)) {
+		return new BayesClassifier();
+	}
+	</instanceCheck>
+
+	<initializeProperties>
+	this.stemmer = stemmer;
+	this.docs = [];
+	this.lastAdded = 0;
+	this.features = {};
+	this.classFeatures = {};
+	this.classTotals = {};
+	this.totalExamples = 1;
+	this.smoothing = 1;
+	</initializeProperties>
+}
+</BayesClassifierConstructor>
+
+<scrollToY>
+function(y, animate) {
+	<setDefaultAnimation>
+	if (animate === undefined) {
+		animate = true;
+	}
+	</setDefaultAnimation>
+
+	<performScroll>
+	this.scroller.scrollTo(0, y, animate, 1);
+	</performScroll>
+}
+</scrollToY>

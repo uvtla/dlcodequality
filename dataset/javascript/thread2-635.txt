@@ -1,0 +1,231 @@
+```javascript
+<findType>
+function findType(type) {
+  <definePrototypeCheck>
+  let name = '';
+  const defaultTypes = [
+    'string',
+    'number',
+    'boolean',
+    'symbol',
+    'array',
+    'object',
+  ];
+
+  try {
+    name = type.prototype.constructor.name.toLowerCase();
+  } catch (err) {}
+  </definePrototypeCheck>
+
+  <typeLookupAndValidation>
+  if (defaultTypes.includes(name)) {
+    return types[name]();
+  }
+
+  return value => {
+    if (!(value instanceof type)) {
+      throw new Error(`is not instance of ${type.prototype.constructor.name}`);
+    }
+
+    return true;
+  }
+  </typeLookupAndValidation>
+}
+</findType>
+
+<useNative>
+function useNative() {
+  const elem = document.createElement('div');
+  elem.setAttribute('data-a-b', 'c');
+
+  return Boolean(elem.dataset && elem.dataset.aB === 'c');
+}
+</useNative>
+
+<decorateClassDoc>
+function decorateClassDoc(classDoc) {
+  <resolveClassElements>
+  classDoc.methods = resolveMethods(classDoc);
+  classDoc.properties = resolveProperties(classDoc);
+  </resolveClassElements>
+
+  <decorateClassElements>
+  classDoc.methods.forEach(doc => decorateMethodDoc(doc));
+  classDoc.properties.forEach(doc => decoratePropertyDoc(doc));
+  </decorateClassElements>
+
+  <classifyDocType>
+  if (isDirective(classDoc)) {
+    classDoc.isDirective = true;
+    classDoc.directiveExportAs = getDirectiveExportAs(classDoc);
+  } else if (isService(classDoc)) {
+    classDoc.isService = true;
+  } else if (isNgModule(classDoc)) {
+    classDoc.isNgModule = true;
+  }
+  </classifyDocType>
+}
+</decorateClassDoc>
+
+<mousedown_callback>
+function mousedown_callback(e) {
+  <checkEventAndSetOrigin>
+  if (e.type == 'mousedown' && e.originalEvent.button != 0) return;
+  oX = e.pageX || e.originalEvent.touches[0].pageX;
+  oY = e.pageY || e.originalEvent.touches[0].pageY;
+  </checkEventAndSetOrigin>
+
+  <bindingDocEvents>
+  bindDoc();
+  </bindingDocEvents>
+
+  <configureTimeout>
+  timeout = setTimeout(function () {
+    unbindDoc();
+
+    triggerCustomEvent(thisObject, 'taphold', $.Event('taphold', {
+      target: e.target,
+      pageX: oX,
+      pageY: oY,
+    }));
+  }, duration);
+  </configureTimeout>
+
+  e.stopPropagation();
+}
+</mousedown_callback>
+
+<selectionGet>
+function selectionGet() {
+  <getSelectionMethod>
+  if (window.getSelection) return window.getSelection();
+  else if (document.selection && document.selection.createRange && document.selection.type != "None")
+    return document.selection.createRange();
+  </getSelectionMethod>
+}
+</selectionGet>
+
+<demo>
+function demo() {
+  <examples>
+  w(__('Hello!'));
+
+  w(__('Hello!# This is comment.'));
+
+  w(__('Hello!#another_hello'));
+
+  w(__('Hello!#another_hello2 Please translate this another way.'));
+
+  w(__('There is ## in this phrase but it is not comment.'));
+
+  w(__('Hello?'));
+
+  w(__('This is %% percent symbol.'));
+
+  w(__('My %(0)s is faster then your %(1)s!', 'SSD', 'HDD'));
+
+  w(__('My %(0)s is faster then your %(1)s!', ['Kawasaki', 'Segway']));
+
+  w(__('My %(0)s is faster then your %(1)s!', { 0: 'Core i7', 1: '486DX' }));
+
+  w(__('Let\'s count in English: %s, %s, %(3)s and %s.', 'one', 'two', 'four', 'three'));
+
+  w(__(['Inbox: %n unreaded message.', 'Inbox: %n unreaded messages.'], 1));
+  w(__(['Inbox: %n unreaded message.', 'Inbox: %n unreaded messages.'], 12));
+  w(__(['Inbox: %n unreaded message.', 'Inbox: %n unreaded messages.'], 22));
+
+  w(__([
+    '%n developer from our team uses %(0)s with %(1)s.# Comment 1',
+    '%n developers from our team uses %(0)s with %(1)s.# Comment 2'
+  ], 1, 'C', 'vim'));
+  w(__([
+    '%n developer from our team uses %(0)s with %(1)s.# Comment 3',
+    '%n developers from our team uses %(0)s with %(1)s.# Comment 4'
+  ], 3, ['Python', 'PyCharm']));
+  w(__([
+    '%n developer from our team uses %(0)s with %(1)s.# Multiline\ncomment',
+    '%n developers from our team uses %(0)s with %(1)s.# Another\nmultiline\ncomment'
+  ], 7, { 0: 'Node.js', 1: 'Sublime Text 2' }));
+
+  w(__());
+  </examples>
+}
+</demo>
+
+<onAuthorizedAccess>
+function onAuthorizedAccess() {
+  <executeAuthorizedCallback>
+  if (angular.isFunction(permission.onAuthorized)) {
+    permission.onAuthorized()($element);
+  } else {
+    var onAuthorizedMethodName = $permission.defaultOnAuthorizedMethod;
+    PermPermissionStrategies[onAuthorizedMethodName]($element);
+  }
+  </executeAuthorizedCallback>
+}
+</onAuthorizedAccess>
+
+<DistanceInput>
+function DistanceInput() {
+  <initializeProxies>
+  this.proxyA = new DistanceProxy();
+  this.proxyB = new DistanceProxy();
+  </initializeProxies>
+
+  <initializeOtherProperties>
+  this.transformA = null;
+  this.transformB = null;
+  this.useRadii = false;
+  </initializeOtherProperties>
+}
+</DistanceInput>
+
+<_n>
+function _n(type, name, children) {
+  <createFauxVnode>
+  return (0, _fauxVnode.default)(function (parent, ref) {
+    <checkParentContext>
+    const parentIsCx = parent.__vnode_context;
+    </checkParentContext>
+
+    <initializeNode>
+    var node = parent.vnode(parent.create(type, name), parentIsCx ? null : parent, parentIsCx ? 0 : parent.depth + 1, 0, type);
+    </initializeNode>
+
+    <pipeChildrenThroughObservers>
+    return children.pipe(
+      (0, _operators.concatMap)(c => (0, _just.default)((0, _vnode.isVNode)(c) ? typeof c.node == 'function' ? c.node(node) : c : _v((0, _util.isString)(c) ? 3 : 12, c).node(node))),
+      (0, _operators.reduce)((node, c) => node.modify(c, ref), node)
+    );
+    </pipeChildrenThroughObservers>
+  }, type, name, null, true);
+}
+</_n>
+
+<rotatePaths>
+function rotatePaths(paths, angle) {
+  <earlyReturnForNoRotation>
+  if (!angle) {
+    return paths;
+  }
+  </earlyReturnForNoRotation>
+
+  <computeBoundingBox>
+  var bound = computeBoundingBox.computePath.apply(null, paths);
+  </computeBoundingBox>
+
+  <calculateCenterOfRotation>
+  var cx = bound.x + bound.width / 2;
+  var cy = bound.y + bound.height / 2;
+  </calculateCenterOfRotation>
+
+  <performRotation>
+  paths.forEach(function (p) {
+    pathRotate(p, angle, cx, cy);
+  });
+  </performRotation>
+
+  return paths;
+}
+</rotatePaths>
+```

@@ -1,0 +1,366 @@
+```javascript
+<_convertPlainTextToDocument>
+function _convertPlainTextToDocument (tx, args) {
+  let lines = args.text.split(/\s*\n\s*\n/)
+  let pasteDoc = tx.getDocument().newInstance()
+  let defaultTextType = pasteDoc.getSchema().getDefaultTextType()
+  <createContainer>
+  let container = pasteDoc.create({
+    type: '@container',
+    id: SNIPPET_ID,
+    nodes: []
+  })
+  </createContainer>
+  let node
+  if (lines.length === 1) {
+    <createSingleLineNode>
+    node = pasteDoc.create({
+      id: TEXT_SNIPPET_ID,
+      type: defaultTextType,
+      content: lines[0]
+    })
+    container.append(node.id)
+    </createSingleLineNode>
+  } else {
+    for (let i = 0; i < lines.length; i++) {
+      <createMultipleLineNodes>
+      node = pasteDoc.create({
+        id: uuid(defaultTextType),
+        type: defaultTextType,
+        content: lines[i]
+      })
+      container.append(node.id)
+      </createMultipleLineNodes>
+    }
+  }
+  return pasteDoc
+}
+</_convertPlainTextToDocument>
+
+<performRequest>
+function performRequest(uri, transactionReq, options, callback) {
+  if (typeof options === 'function') { [options, callback] = [{}, options]; }
+  <setupRequest>
+  const logger = options.logger || defaultLogger;
+  const request = options.request || defaultRequest;
+
+  const httpOptions = Object.assign({}, options.http || {});
+  httpOptions.proxy = false;
+  httpOptions.followRedirect = false;
+  httpOptions.encoding = null;
+  httpOptions.method = transactionReq.method;
+  httpOptions.uri = uri;
+  </setupRequest>
+
+  try {
+    <prepareHttpRequest>
+    httpOptions.body = getBodyAsBuffer(transactionReq.body, transactionReq.bodyEncoding);
+    httpOptions.headers = normalizeContentLengthHeader(transactionReq.headers, httpOptions.body);
+    </prepareHttpRequest>
+
+    <logAndExecuteRequest>
+    const protocol = httpOptions.uri.split(':')[0].toUpperCase();
+    logger.debug(`Performing ${protocol} request to the server under test: `
+      + `${httpOptions.method} ${httpOptions.uri}`);
+
+    request(httpOptions, (error, response, responseBody) => {
+      logger.debug(`Handling ${protocol} response from the server under test`);
+      if (error) {
+        callback(error);
+      } else {
+        callback(null, createTransactionResponse(response, responseBody));
+      }
+    });
+    </logAndExecuteRequest>
+  } catch (error) {
+    <handleRequestError>
+    process.nextTick(() => callback(error));
+    </handleRequestError>
+  }
+}
+</performRequest>
+
+<MongoErrorAdapter>
+function(error) {
+  if (error instanceof Error) return error;
+
+  <createMongoError>
+  var msg = error.err || error.errmsg || error.errMessage || error;
+  var e = MongoError.create({ message: msg, driver: true });
+  </createMongoError>
+
+  <copyErrorProperties>
+  var keys = typeof error === 'object' ? Object.keys(error) : [];
+  for (var i = 0; i < keys.length; i++) {
+    try {
+      e[keys[i]] = error[keys[i]];
+    } catch (err) {
+      
+    }
+  }
+  </copyErrorProperties>
+
+  return e;
+}
+</MongoErrorAdapter>
+
+<multMod_>
+function multMod_(x, y, n) {
+  var i;
+  <initializeBuffer>
+  if (s0.length!=2*x.length)
+    s0=new Array(2*x.length);
+  copyInt_(s0, 0);
+  </initializeBuffer>
+  <performMultiplication>
+  for (i=0; i<y.length; i++)
+    if (y[i])
+      linCombShift_(s0, x, y[i], i);   
+  </performMultiplication>
+  <modulusOperation>
+  mod_(s0, n);
+  </modulusOperation>
+  <copyResult>
+  copy_(x, s0);
+  </copyResult>
+}
+</multMod_>
+
+<isGitHooks>
+function isGitHooks () {
+  return co(function * () {
+    <getPPID>
+    const ppid = yield getPPID()
+    </getPPID>
+
+    <debugPPID>
+    debug(`ppid: ${ppid}`)
+    </debugPPID>
+
+    <checkHuskyRun>
+    return isRunByHusky(ppid)
+    </checkHuskyRun>
+  }).catch( function (err) {
+    <handleError>
+    debug('error: %o', err)
+    </handleError>
+    return false
+  })
+}
+</isGitHooks>
+
+<fileSystem>
+function fileSystem(context, settings, next) {
+  var input = context.files
+
+  <checkForFiles>
+  if (input.length === 0) {
+    next()
+  } else {
+    </checkForFiles>
+    
+    <findFiles>
+    find(
+      input,
+      {
+        cwd: settings.cwd,
+        extensions: settings.extensions,
+        silentlyIgnore: settings.silentlyIgnore,
+        ignore: new Ignore({
+          cwd: settings.cwd,
+          detectIgnore: settings.detectIgnore,
+          ignoreName: settings.ignoreName,
+          ignorePath: settings.ignorePath
+        })
+      },
+      onfound
+    )
+    </findFiles>
+  }
+
+  function onfound(error, result) {
+    var output = result.files
+
+    <sortFiles>
+    output.sort(sortAlphabetically)
+    </sortFiles>
+
+    <markFiles>
+    output.forEach(markAsGiven)
+    </markFiles>
+
+    <updateContext>
+    context.files = output
+    </updateContext>
+
+    <checkForOutputSetting>
+    if (settings.out === null || settings.out === undefined) {
+      settings.out = result.oneFileMode
+    }
+    </checkForOutputSetting>
+
+    <callNext>
+    next(error)
+    </callNext>
+  }
+
+  function markAsGiven(file) {
+    file.data.unifiedEngineGiven = true
+  }
+
+  function sortAlphabetically(left, right) {
+    return left.path < right.path ? -1 : 1
+  }
+}
+</fileSystem>
+
+<getLocation>
+function getLocation(url){
+  var m = url.toLowerCase().match(reURI);
+  <parseURL>
+  var proto = m[2], domain = m[3], port = m[4] || "";
+  if ((proto == "http:" && port == ":80") || (proto == "https:" && port == ":443")) {
+    port = "";
+  }
+  </parseURL>
+  <constructLocation>
+  return proto + "//" + domain + port;
+  </constructLocation>
+}
+</getLocation>
+
+<manageSubscription>
+function(client, subscriptions, backlog, channel, callback, done_callback) {
+  <attemptToAddToBacklog>
+  if ( addToBacklog(client, backlog, unsubscribeBrowser, [client, subscriptions, backlog, channel, callback, done_callback]) ) return;
+  </attemptToAddToBacklog>
+  <checkSubscriptionExistence>
+  if (subscriptions[channel]===undefined)
+    return;
+  </checkSubscriptionExistence>
+  <removeCallbackFromChannel>
+  subscriptions[channel].splice(subscriptions[channel].indexOf(callback), 1);
+  </removeCallbackFromChannel>
+  <deleteSubscriptionIfEmptyAndUnsubscribe>
+  if (subscriptions[channel].length===0) {
+    delete subscriptions[channel];
+    client.unsubscribe(channel, {onSuccess : function() {
+      <doneCallback>
+      if (done_callback!==undefined) done_callback();
+      </doneCallback>
+    }});
+  }
+  </deleteSubscriptionIfEmptyAndUnsubscribe>
+}
+</manageSubscription>
+
+<parseXML>
+function (str) {
+    var xmlDoc;
+    var DOMParser = Aria.$global.DOMParser;
+    <parseUsingDOMParser>
+    if (DOMParser) {
+        var parser = new DOMParser();
+        xmlDoc = parser.parseFromString(str, "text/xml");
+    } else { 
+    </parseUsingDOMParser>
+    <parseUsingActiveX>
+        var ActiveXObject = Aria.$global.ActiveXObject;
+        xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+        xmlDoc.async = "false";
+        xmlDoc.loadXML(str);
+    </parseUsingActiveX>
+    }
+
+    <checkNodesAndParse>
+    if (xmlDoc.hasChildNodes()) {
+        return this.__parseXmlNode(xmlDoc);
+    } else {
+        return null;
+    }
+    </checkNodesAndParse>
+}
+</parseXML>
+
+<getModPackages>
+function (mods) {
+            var i, l = mods.length,
+                tmpMods, mod, packageInfo, type,
+                tag, charset, packageBase,
+                packageName, group, modUrl;
+            <initializeGroupsAndNormals>
+            var groups = {
+                
+            };
+            var normals = {
+                
+            };
+            </initializeGroupsAndNormals>
+            <processMods>
+            for (i = 0; i < l; ++i) {
+                mod = mods[i];
+                type = mod.getType();
+                modUrl = mod.getUrl();
+                packageInfo = mod.getPackage();
+
+                if (packageInfo) {
+                    packageBase = packageInfo.getBase();
+                    packageName = packageInfo.name;
+                    charset = packageInfo.getCharset();
+                    tag = packageInfo.getTag();
+                    group = packageInfo.getGroup();
+                } else {
+                    packageBase = mod.name;
+                }
+
+                if (packageInfo && packageInfo.isCombine() && group) {
+                    var typeGroups = groups[type] || (groups[type] = {});
+                    group = group + '-' + charset;
+                    var typeGroup = typeGroups[group] || (typeGroups[group] = {});
+                    <combineMods>
+                    var find = 0;
+                    Utils.each(typeGroup, function (tmpMods, prefix) {
+                        if (Utils.isSameOriginAs(prefix, packageBase)) {
+                            var newPrefix = getCommonPathPrefix(prefix, packageBase);
+                            tmpMods.push(mod);
+                            if (tag && tag !== tmpMods.tag) {
+                                tmpMods.tag = getHash(tmpMods.tag + tag);
+                            }
+                            delete typeGroup[prefix];
+                            typeGroup[newPrefix] = tmpMods;
+                            find = 1;
+                        }
+                    });
+                    if (!find) {
+                        tmpMods = typeGroup[packageBase] = [mod];
+                        tmpMods.charset = charset;
+                        tmpMods.tag = tag || '';
+                    }
+                    </combineMods>
+                } else {
+                    <handleNonCombinedMods>
+                    var normalTypes = normals[type] || (normals[type] = {});
+                    if (!(tmpMods = normalTypes[packageBase])) {
+                        tmpMods = normalTypes[packageBase] = [];
+                        tmpMods.charset = charset;
+                        tmpMods.tag = tag || '';
+                    } else {
+                        if (tag && tag !== tmpMods.tag) {
+                            tmpMods.tag = getHash(tmpMods.tag + tag);
+                        }
+                    }
+                    tmpMods.push(mod);
+                    </handleNonCombinedMods>
+                }
+            }
+            </processMods>
+
+            <returnCompiledGroups>
+            return {
+                groups: groups,
+                normals: normals
+            };
+            </returnCompiledGroups>
+}
+</getModPackages>
+```

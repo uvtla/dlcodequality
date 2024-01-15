@@ -1,0 +1,216 @@
+<start>
+function start() {
+    <initializeFingers>
+    if (fingers.length === 0) fingers.push(new Finger(), new Finger()); 
+    </initializeFingers>
+
+    <setupEventListeners>
+    document.addEventListener('mousedown', phantomTouchStart, true);
+    document.addEventListener('mousemove', phantomTouchMove, true);
+    document.addEventListener('mouseup', phantomTouchEnd, true);
+    document.addEventListener('click', phantomClick, true);
+    document.documentElement.classList.add('_phantom-limb');
+    </setupEventListeners>
+}
+</start>
+
+<getDependency>
+function getDependency(dependency) {
+    <resolveDependency>
+    if (dependency) {
+        return angular.isString(dependency) ? $injector.get(dependency) : dependency;
+    }
+    return undefined;
+    </resolveDependency>
+}
+</getDependency>
+
+<textStream>
+function textStream() {
+    <generateStart>
+    var start = randomInt(0, config.size - bufferSize)
+    </generateStart>
+    
+    <createReadStream>
+    return fs.createReadStream(dictPath, {
+        encoding: config.encoding,
+        start: start,
+        end: start + bufferSize
+    })
+    </createReadStream>
+}
+</textStream>
+
+<pollUntilDone>
+function pollUntilDone(id, done) {
+    <checkDropletStatus>
+    client.droplets.get(id, function(err, droplet) {
+        if (!err && droplet.locked === false) {
+            done.call();
+        } else if (!err && droplet.locked === true) {
+            setTimeout(function() {
+                pollUntilDone(id, done);
+            }, (10 * 1000));
+        } else {
+            pollUntilDone(id, done);
+        }
+    });
+    </checkDropletStatus>
+}
+</pollUntilDone>
+
+<function>
+function(options, filename){	    
+    <validateArguments>
+    Joi.assert(filename, Joi.string())
+    </validateArguments>
+    
+    <streamFileDownload>
+    return new Promise(function(resolve, reject){
+        try{	            
+            var writestream = fs.createWriteStream(filename);
+            request(options).pipe(writestream);
+
+            writestream.on('finish', function(err){                 
+                if(err){
+                    reject({
+                        "path" : filename,
+                        "status" : false,
+                        "error": err
+                    });
+                }else{
+                    resolve({
+                        "path" : filename,
+                        "status" : true
+                    });
+                }
+            });
+        }catch(e){
+            reject(e);
+        }
+    });
+    </streamFileDownload>
+}
+</function>
+
+<updateBidQueue>
+function updateBidQueue(auctionInstance, bidResponse, afterBidAdded) {
+    <retrieveBidAddToQueue>
+    let bidListIter = bidCacheRegistry.getBids(bidResponse);
+
+    if (bidListIter) {
+        let bidListArr = from(bidListIter);
+        let callDispatcher = bidCacheRegistry.getQueueDispatcher(bidResponse);
+        let killQueue = !!(auctionInstance.getAuctionStatus() !== AUCTION_IN_PROGRESS);
+        callDispatcher(auctionInstance, bidListArr, afterBidAdded, killQueue);
+    </retrieveBidAddToQueue>
+    
+    <logWarningForUnknownAuction>
+    else {
+        utils.logWarn('Attempted to cache a bid from an unknown auction. Bid:', bidResponse);
+    }
+    </logWarningForUnknownAuction>
+}
+</updateBidQueue>
+
+<parseQueryString>
+function parseQueryString(query, options) {
+    <parseAndValidateQuery>
+    const result = {};
+    let parsedQueryString = qs.parse(query);
+
+    for (const key in parsedQueryString) {
+        const value = parsedQueryString[key];
+        if (value === '' || value == null) {
+            throw new MongoParseError('Incomplete key value pair for option');
+        }
+        
+        const normalizedKey = key.toLowerCase();
+        const parsedValue = parseQueryStringItemValue(normalizedKey, value);
+        applyConnectionStringOption(result, normalizedKey, parsedValue, options);
+    }
+    </parseAndValidateQuery>
+
+    <handleConflictingOptions>
+    if (result.wtimeout && result.wtimeoutms) {
+        delete result.wtimeout;
+        console.warn('Unsupported option `wtimeout` specified');
+    }
+    </handleConflictingOptions>
+
+    <returnResult>
+    return Object.keys(result).length ? result : null;
+    </returnResult>
+}
+</parseQueryString>
+
+<id>
+function(id) {
+    <initializeWidget>
+    this._el = Dom.get(id);
+    this.id = Dom.generateId(this._el,"yui-tv-auto-id-");
+    </initializeWidget>
+
+    <createEvents>
+    this.createEvent("animStart", this);
+    this.createEvent("animComplete", this);
+    this.createEvent("collapse", this);
+    this.createEvent("collapseComplete", this);
+    this.createEvent("expand", this);
+    this.createEvent("expandComplete", this);
+    this.createEvent("enterKeyPressed", this);
+    this.createEvent("clickEvent", this);
+    this.createEvent('focusChanged',this);
+    this.createEvent("dblClickEvent", {
+        scope:this,
+        onSubscribeCallback: function() {
+            self._hasDblClickSubscriber = true;
+        }
+    });
+    this.createEvent("labelClick", this);
+    this.createEvent("highlightEvent",this);
+    </createEvents>
+    
+    <treeInitialization>
+    this._nodes = [];
+    TV.trees[this.id] = this;
+    this.root = new Widget.RootNode(this);
+    </treeInitialization>
+    
+    <optionalLoggerAndEditorInitialization>
+    var LW = Widget.LogWriter;
+	if (this._initEditor) {
+		this._initEditor();
+	}
+    </optionalLoggerAndEditorInitialization>
+}
+</id>
+
+<suspendXPCService>
+function (xpcKey) {
+    <interactWithXPCService>
+    if ($bc_.pN) {
+      try {
+        $bc_.pN.app.suspendXPCService(xpcKey)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    </interactWithXPCService>
+}
+</suspendXPCService>
+
+<pxBounds_maxBounds_zoom>
+function (pxBounds, maxBounds, zoom) {
+    <calculateOffsets>
+    var nwOffset = this.project(maxBounds.getNorthWest(), zoom).subtract(pxBounds.min),
+        seOffset = this.project(maxBounds.getSouthEast(), zoom).subtract(pxBounds.max),
+        dx = this._rebound(nwOffset.x, -seOffset.x),
+        dy = this._rebound(nwOffset.y, -seOffset.y);
+        </calculateOffsets>
+    
+    <returnPoint>
+    return new L.Point(dx, dy);
+    </returnPoint>
+}
+</pxBounds_maxBounds_zoom>

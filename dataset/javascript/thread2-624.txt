@@ -1,0 +1,267 @@
+<Browser>
+function Browser() {
+      var _this;
+
+      var ua = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var flags = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var cssFlagsPrefix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'browser';
+
+      _classCallCheck(this, Browser);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Browser).call(this, ua, flags, cssFlagsPrefix));
+
+      _this._createTestElements();
+
+      _this.setVersion();
+
+      return _this;
+    }
+</Browser>
+
+<SliderStepFunction>
+function (right) {
+            var p = this.coords.p_pointer;
+            <SliderStepCalculation>
+            var p_step = (this.options.max - this.options.min) / 100;
+            p_step = this.options.step / p_step;
+            </SliderStepCalculation>
+            if (right) {
+                p += p_step;
+            } else {
+                p -= p_step;
+            }
+            <PointerPositionCalculation>
+            this.coords.x_pointer = this.toFixed(this.coords.w_rs / 100 * p);
+            this.is_key = true;
+            this.calc();
+            </PointerPositionCalculation>
+        }
+</SliderStepFunction>
+
+<ArrayUniquifier>
+function(a) {
+		if (!Array.isArray(a)) { return []; }
+		return a.filter(function(item, index) {
+			return a.indexOf(item) === index;
+		});
+	}
+</ArrayUniquifier>
+
+<CloseFunction>
+function close (vexOrId) {
+    <CloseParameterParsing>
+    var id
+    if (vexOrId.id) {
+      id = vexOrId.id
+    } else if (typeof vexOrId === 'string') {
+      id = vexOrId
+    } else {
+      throw new TypeError('close requires a vex object or id string')
+    }
+    </CloseParameterParsing>
+    <CloseCheckAndAction>
+    if (!vexes[id]) {
+      return false
+    }
+    return vexes[id].close()
+    </CloseCheckAndAction>
+  }
+</CloseFunction>
+
+<CheckPointerRules>
+function checkPointerRules(meta, core, node, callback) {
+        var result = {
+                hasViolation: false,
+                messages: []
+            };
+        <GatherPointerInformation>
+        var metaPointers = filterPointerRules(meta).pointers,
+            checkPromises = [],
+            pointerNames = core.getPointerNames(node);
+        </GatherPointerInformation>
+
+        checkPromises = pointerNames.map(function (pointerName) {
+            <ProcessPointers>
+            var metaPointer = metaPointers[pointerName],
+                pointerPath,
+                pointerPaths = [];
+            </ProcessPointers>
+
+            <HandleIllegalPointer>
+            if (!metaPointer) {
+                if (pointerName === 'base') {
+                    return {hasViolation: false};
+                } else {
+                    return Q({
+                        hasViolation: true,
+                        messages: ['Illegal pointer "' + pointerName + '".']
+                    });
+                }
+            }
+            </HandleIllegalPointer>
+            else {
+                <LoadNodesAndCheck>
+                pointerPath = core.getPointerPath(node, pointerName);
+                if (pointerPath !== null) {
+                    pointerPaths.push(pointerPath);
+                }
+                return loadNodes(core, node, pointerPaths)
+                    .then(function (nodes) {
+                        return checkNodeTypesAndCardinality(core, node, nodes, metaPointer,
+                            '"' + pointerName + '" target', true);
+                    });
+                </LoadNodesAndCheck>
+            }
+        });
+
+        <AggregateResults>
+        return Q.all(checkPromises)
+            .then(function (results) {
+                results.forEach(function (res) {
+                    if (res.hasViolation) {
+                        result.hasViolation = true;
+                        result.messages = result.messages.concat(res.messages);
+                    }
+                });
+
+                return result;
+            })
+            </AggregateResults>
+            .nodeify(callback);
+    }
+</CheckPointerRules>
+
+<ExplorerFlatModel>
+function ExplorerFlatModel(rootPath, fetchItems, root) {
+		this.rootPath = rootPath;
+		this.fetchItems = fetchItems;
+		this.root = root;
+	}
+</ExplorerFlatModel>
+
+<RpnToTreeFunction>
+function rpnToTree(values) {
+    <TreeInitialization>
+    let ii, len, op, stack, slice, count;
+    stack = [];
+    </TreeInitialization>
+
+    <ProcessRpnValues>
+    for (ii = 0, len = values.length; ii < len; ii++) {
+        op = values[ii];
+        </ProcessRpnValues>
+
+        <ParenthesisHandling>
+        if (op === LEFT_PAREN) {
+            slice = findMatchingRightParam(values, ii);
+            if (!slice || slice.length === 0) {
+                throw new Error('mismatch parentheses');
+            }
+            ii += slice.length + 1;
+            slice = rpnToTree(slice);
+            stack.push(slice);
+        }
+        </ParenthesisHandling>
+        else {
+            <TreeConstruction>
+            if (Array.isArray(op)) {
+                stack.push(op);
+            } else {
+                count = argCount(op);
+                slice = stack.splice(stack.length - count, count);
+                if (Array.isArray(slice) && slice.length === 1) {
+                    slice = arrayFlatten(slice, true);
+                }
+                if (slice[0] === VALUE) {
+                    slice = [slice];
+                }
+                stack.push([op].concat(slice));
+            }
+            </TreeConstruction>
+        }
+    }
+
+    <TreeReturn>
+    return stack;
+    </TreeReturn>
+}
+</RpnToTreeFunction>
+
+<InheritAttrs>
+function( applyTo, applyFrom ) {
+            <ApplyAttributes>
+            for ( var attr in applyFrom ) {
+                if ( applyFrom.hasOwnProperty( attr ) ) {
+                    if ( ( applyTo[attr] instanceof Object && applyFrom[attr] instanceof Object ) && ( typeof applyFrom[attr] !== 'function' ) ) {
+                        this.inheritAttrs( applyTo[attr], applyFrom[attr] );
+                    }
+                    else {
+                        applyTo[attr] = applyFrom[attr];
+                    }
+                }
+            }
+            </ApplyAttributes>
+            return applyTo;
+        }
+</InheritAttrs>
+
+<VsHashFunction>
+function vsHash(text) {
+    <HashInitialization>
+    let codes = [];
+    let pos = 0;
+    let partPos = 0;
+    </HashInitialization>
+
+    <CharacterProcessing>
+    for (let i = 0; i < text.length; i++) {
+        if (!codes[pos]) codes[pos]=[];
+        let code = decodeCharCode2Int36(text.charCodeAt(i));
+        if (code !== null) {
+            codes[pos][partPos] = code;
+            partPos += 1;
+        }
+        if (partPos === LEN) {
+            partPos = 0;
+            pos += 1;
+        }
+    }
+    </CharacterProcessing>
+
+    <PaddingAndReduction>
+    if (partPos) {
+        for (let i = 0; i < LEN - partPos; i++) {
+            codes[pos].push(0);
+        }
+    }
+    return [codes.reduce((result, code) => {
+        result = result ^ code.reduce((r, v, i) => {
+            return r + v * Math.pow(36, i);
+        }, 0);
+        return result;
+    }, 0)];
+    </PaddingAndReduction>
+}
+</VsHashFunction>
+
+<CreateSubscriptionProgram>
+function (fn) {
+  <ContainerAssignment>
+  var container = this;
+  </ContainerAssignment>
+  <ProgramFunctionDefinition>
+  var program = function () {
+    <SubscriptionCreation>
+    var subscriber = new Subscription(fn, null, container);
+    </SubscriptionCreation>
+    return subscriber.execute.apply(subscriber, arguments);
+  };
+  </ProgramFunctionDefinition>
+
+  <ExtendProgram>
+  Utils.extend(program, fn);
+  </ExtendProgram>
+
+  return program;
+}
+</CreateSubscriptionProgram>

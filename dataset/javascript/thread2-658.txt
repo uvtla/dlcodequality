@@ -1,0 +1,321 @@
+<shiftLinesLeft>
+function shiftLinesLeft(text) {
+    
+    <determineLinebreakAndSplit>
+    let linebreak = determineLinebreaks(text);
+    if (linebreak === "") return text;
+
+    let lines = [];
+    lines = text.split(linebreak);
+    </determineLinebreakAndSplit>
+
+    
+    <findCommonPrefix>
+    let commonPrefix = null;
+
+    for (let i = 0; i < lines.length; i++) {
+        if (!lines[i].length) continue;
+
+        let whitespace = lines[i].match(/^\s*/);
+        if (whitespace) whitespace = whitespace[0];
+        else whitespace = "";
+
+        if (commonPrefix === null || commonPrefix.startsWith(whitespace)) commonPrefix = whitespace;
+    }
+    </findCommonPrefix>
+
+    
+    <shiftLinesAndReassembleText>
+    text = "";
+    let shift = commonPrefix.length;
+
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].length) {
+            lines[i] = lines[i].slice(shift, lines[i].length);
+        }
+
+        text += lines[i] + linebreak;
+    }
+    </shiftLinesAndReassembleText>
+
+    return text;
+}
+</shiftLinesLeft>
+
+<sanitizeValue>
+function (value) {
+		if (value === null || value === undefined) {
+			return '';
+		}
+		switch (typeof value) {
+			<handleObject>
+			case 'object' :
+				if (value instanceof Blob) {
+					return value;
+				} else {
+					return JSON.stringify(value);
+				}
+			</handleObject>
+			<handleString>
+			case 'string':
+				return value;
+			</handleString>
+			<handleDefault>
+			default :
+				return value;
+			</handleDefault>
+		}
+	}
+</sanitizeValue>
+
+<toggleSortOrder>
+function (sortName, sortKeyGetter) {
+    this.$assert(326, sortName != null && sortKeyGetter != null);
+    if (this.sortOrder != this.SORT_INITIAL && this.sortName == sortName) {
+        <updateExistingSortOrder>
+        if (this.sortOrder == this.SORT_ASCENDING) {
+            this.sortOrder = this.SORT_DESCENDING;
+        } else {
+            this.$assert(330, this.sortOrder == this.SORT_DESCENDING);
+            this.sortOrder = this.SORT_ASCENDING;
+        }
+        </updateExistingSortOrder>
+    } else {
+        <initializeSortOrder>
+        this.sortName = sortName;
+        this.sortKeyGetter = this.$normCallback(sortKeyGetter);
+        this.sortOrder = this.SORT_ASCENDING;
+        </initializeSortOrder>
+    }
+}
+</toggleSortOrder>
+
+<parseOptions>
+function parseOptions (options) {
+  return {
+    <parseNormalOptions>
+    [ELEMENT_TYPE.NORMAL]: (options && options.html && options.html.normal) || 'always',
+    </parseNormalOptions>
+    <parseVoidOptions>
+    [ELEMENT_TYPE.VOID]: (options && options.html && options.html.void) || 'never',
+    </parseVoidOptions>
+    <parseComponentOptions>
+    [ELEMENT_TYPE.COMPONENT]: (options && options.html && options.html.component) || 'always',
+    </parseComponentOptions>
+    <parseSvgOptions>
+    [ELEMENT_TYPE.SVG]: (options && options.svg) || 'always',
+    </parseSvgOptions>
+    <parseMathOptions>
+    [ELEMENT_TYPE.MATH]: (options && options.math) || 'always'
+    </parseMathOptions>
+  }
+}
+</parseOptions>
+
+<refresh>
+function refresh () {
+      <abortPreviousStream>
+      if (aborter) {
+        aborter.abort()
+      }
+      </abortPreviousStream>
+
+      <initializeStreamAbortion>
+      aborter = pullAbortable()
+      </initializeStreamAbortion>
+
+      <resetUIComponents>
+      updates.set(0)
+      content.set(h('section.content'))
+      </resetUIComponents>
+
+      <initializeScroller>
+      var scroller = Scroller(container, content(), renderMsg, err => {
+        if (err) console.log(err)
+        done.set(true)
+      })
+      </initializeScroller>
+
+      <executeDataStream>
+      pull(
+        getStream(query, false),
+        pull.through(() => count.set(count() + 1)),
+        aborter,
+        pull.filter(msg => msg.value),
+        scroller
+      )
+      </executeDataStream>
+
+      <setLoadingState>
+      loading.set(computed([done, scroller.queue], (done, queue) => {
+        return !done
+      }))
+      </setLoadingState>
+    }
+</refresh>
+
+<resizeAndProcessImage>
+function (imagen, width, height, quality, type, ratio, centerCrop, resizeIf) {
+    <initializePromisesAndElements>
+    var deferred = $q.defer();
+    var canvasElement = document.createElement('canvas');
+    var imageElement = document.createElement('img');
+    imageElement.setAttribute('style', 'visibility:hidden;position:fixed;z-index:-100000');
+    document.body.appendChild(imageElement);
+    </initializePromisesAndElements>
+
+    <loadAndResizeImage>
+    imageElement.onload = function () {
+      try {
+        var imgWidth = imageElement.width, imgHeight = imageElement.height;
+        imageElement.parentNode.removeChild(imageElement);
+        if (resizeIf != null && resizeIf(imgWidth, imgHeight) === false) {
+            deferred.reject('resizeIf');
+            return;
+        }
+        <calculateDimensions>
+        if (ratio) {
+            var ratioFloat = upload.ratioToFloat(ratio);
+            var imgRatio = imgWidth / imgHeight;
+            if (imgRatio < ratioFloat) {
+                width = imgWidth;
+                height = width / ratioFloat;
+            } else {
+                height = imgHeight;
+                width = height * ratioFloat;
+            }
+        }
+        if (!width) {
+            width = imgWidth;
+        }
+        if (!height) {
+            height = imgHeight;
+        }
+        </calculateDimensions>
+        var dimensions = calculateAspectRatioFit(imgWidth, imgHeight, width, height, centerCrop);
+        canvasElement.width = Math.min(dimensions.width, width);
+        canvasElement.height = Math.min(dimensions.height, height);
+        var context = canvasElement.getContext('2d');
+        context.drawImage(imageElement,
+            Math.min(0, -dimensions.marginX / 2), Math.min(0, -dimensions.marginY / 2),
+            dimensions.width, dimensions.height);
+        deferred.resolve(canvasElement.toDataURL(type || 'image/WebP', quality || 0.934));
+      } catch (e) {
+        deferred.reject(e);
+      }
+    };
+    </loadAndResizeImage>
+
+    <handleImageError>
+    imageElement.onerror = function () {
+      imageElement.parentNode.removeChild(imageElement);
+      deferred.reject();
+    };
+    </handleImageError>
+
+    <setSourceAndReturnPromise>
+    imageElement.src = imagen;
+    return deferred.promise;
+    </setSourceAndReturnPromise>
+  }
+</resizeAndProcessImage>
+
+<drawPacman>
+function(node,x,y,size,color,context) {
+    <drawPacmanBody>
+    context.fillStyle = 'yellow';
+    context.beginPath();
+    context.arc(x,y,size,1.25*Math.PI,0,false);
+    context.arc(x,y,size,0,0.75*Math.PI,false);
+    context.lineTo(x,y);
+    context.closePath();
+    context.fill();
+    </drawPacmanBody>
+
+    <drawPacmanEye>
+    context.fillStyle = 'white';
+    context.strokeStyle = 'black';
+    context.beginPath();
+    context.arc(x+size/3,y-size/3,size/4,0,2*Math.PI,false);
+    context.closePath();
+    context.fill();
+    context.stroke();
+    </drawPacmanEye>
+
+    <drawPacmanPupil>
+    context.fillStyle = 'black';
+    context.beginPath();
+    context.arc(x+4*size/9,y-size/3,size/8,0,2*Math.PI,false);
+    context.closePath();
+    context.fill();
+    </drawPacmanPupil>
+  }
+</drawPacman>
+
+<precendence>
+function precendence(operator) {
+    <getExistingPrecendence>
+    let result;
+    result = precendenceValues[operator];
+    if (result !== undefined) {
+        return result;
+    }
+    </getExistingPrecendence>
+
+    <calculatePrecendenceValue>
+    switch (operator) {
+        case AND:
+        case ALL:
+        case ANY:
+        case NOT:
+        case OR:
+            return 1;
+        case VALUE:
+            return 2;
+        case EQUALS:
+        default:
+            return -1;
+    }
+    </calculatePrecendenceValue>
+}
+</precendence>
+
+<destroyDocument>
+function destroyDocument(params) {
+  <getCollection>
+  var collection = collections[params.collection]
+  if (collection === undefined) {
+    return false
+  }
+  </getCollection>
+
+  <deleteDocument>
+  var doc = collection[params.id]
+  delete collection[params.id]
+  </deleteDocument>
+
+  <emitEvent>
+  eventEmitter.emit('documentDestroyed', params.collection, doc)
+  </emitEvent>
+
+  return true
+}
+</destroyDocument>
+
+<getEnrichedConfig>
+function getEnrichedConfig(rule, config) {
+	if (!config) { return rule; }
+
+	<modifyInclude>
+	if (config.include) {
+		rule.include = config.include;
+	}
+	</modifyInclude>
+	<modifyExclude>
+	if (config.exclude) {
+		rule.exclude = config.exclude;
+	}
+	</modifyExclude>
+	return rule;
+}
+</getEnrichedConfig>

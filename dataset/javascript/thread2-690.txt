@@ -1,0 +1,209 @@
+```javascript
+<collect>
+function collect() {
+  <initializeVariables>
+  let arrOfJsFiles = [];
+  let all = {nameToContent: {}, contentToName: {}};
+  </initializeVariables>
+  <collectFiles>
+  let files = getFiles();
+  </collectFiles>
+  <processFiles>
+  for (let file of files) {
+    <filterJsFiles>
+    if (file.endsWith('.js')) {
+      arrOfJsFiles.push(file);
+    }
+    </filterJsFiles>
+    <processFilesToMappings>
+    if (file.endsWith('.jsx') || file.endsWith('.html') || file.endsWith('.htm') || file.endsWith('.js')) {
+      all.nameToContent[file] = fs.readFileSync(file, 'utf-8');
+      all.contentToName[all.nameToContent[file]] = file;
+    }
+    </processFilesToMappings>
+  }
+  </processFiles>
+  return all;
+}
+</collect>
+
+<loadVideoInSync>
+function loadVideoInSync(url, syncElement, cb) {
+  <setupVideoElement>
+  cb = once(cb);
+  var element = document.createElement('video');
+  element.crossOrigin = 'anonymous';
+  element.autoplay = true;
+  element.loop = true;
+  element.playsInline = true;
+  element.webkitPlaysInline = true;
+
+  element.onerror = function (e) {
+    cb(e.target.error);
+  };
+  </setupVideoElement>
+
+  <prepareSync>
+  var syncTime = 5000;
+  </prepareSync>
+
+  <setSourceAndWait>
+  element.src = url;
+  
+  waitForReadyState(element, element.HAVE_CURRENT_DATA, 0.2, function () {
+    if (syncElement) {
+      <adjustCurrentTime>
+      if (syncElement.paused) {
+        element.currentTime = syncElement.currentTime;
+      } else {
+        element.currentTime = syncElement.currentTime + syncTime / 1000;
+      }
+      </adjustCurrentTime>
+    }
+
+    waitForReadyState(element, element.HAVE_ENOUGH_DATA, 0.2, function () {
+      <handlePlayback>
+      if (!syncElement) {
+        cb(null, element);
+      } else if (syncElement.paused) {
+        cb(null, element);
+      } else {
+        if (element.currentTime <= syncElement.currentTime) {
+          element.play();
+          cb(null, element);
+        } else {
+          setTimeout(function () {
+            element.play();
+            cb(null, element);
+          }, (element.currentTime - syncElement.currentTime) * 1000);
+        }
+      }
+      </handlePlayback>
+    });
+  });
+  </setSourceAndWait>
+}
+</loadVideoInSync>
+
+<checkGitRepoExistence>
+function checkGitRepoExistence() {
+    <executeGitCommand>
+    return new Promise(function (resolve, reject) {
+        var checkRepoCommand = childProcess.exec('git branch');
+        checkRepoCommand.stderr.on('data', function (err) {
+            reject(err);
+        });
+        checkRepoCommand.on('close', function (code) {
+            if (code === 0) {
+                resolve();
+            }
+        });
+    });
+    </executeGitCommand>
+}
+</checkGitRepoExistence>
+
+<arrayContainsArray>
+function arrayContainsArray(superset, subset, some) {
+  <checkInputTypes>
+  if (Array.isArray(superset) !== true) {
+    throw new Error(`[ethjs-util] method arrayContainsArray requires input 'superset' to be an array got type '${typeof superset}'`);
+  }
+  if (Array.isArray(subset) !== true) {
+    throw new Error(`[ethjs-util] method arrayContainsArray requires input 'subset' to be an array got type '${typeof subset}'`);
+  }
+  </checkInputTypes>
+  <determineContainment>
+  return subset[Boolean(some) && 'some' || 'every'](value => (superset.indexOf(value) >= 0));
+  </determineContainment>
+}
+</arrayContainsArray>
+
+<insertCharacterInText>
+function insertCharacterInText(text, index, character) {
+  <evaluateAndInsert>
+  if (text && text.length > index) {
+    return text.substr(0, index) + character + text.substr(index + character.length);
+  } else {
+    return text;
+  }
+  </evaluateAndInsert>
+}
+</insertCharacterInText>
+
+<createRule>
+function createRule(name, validator) {
+  <createAndSetupRule>
+  var async = this.isAsync(name);
+  var rule = new Rule(name, rules[name], async);
+  rule.setValidator(validator);
+  </createAndSetupRule>
+  return rule;
+}
+</createRule>
+
+<updateJumpOver>
+function updateJumpOver() {
+  <performUpdates>
+  var updateList = this._jumpOverUpdateList;
+  for (var i = 0; i < updateList.length; i++) {
+      updateList[i].update();
+  }
+  </performUpdates>
+}
+</updateJumpOver>
+
+<adminRequest>
+function adminRequest(params, cb) {
+  <parameterSetup>
+  params = params || {};
+  var mbaasConf = params[constants.MBAAS_CONF_KEY];
+  params[constants.MBAAS_CONF_KEY] = undefined;
+  log.logger.debug({params: params}, "FH-MBAAS-CLIENT: adminRequest ");
+  var fullParams = _.extend(_.clone(params), mbaasConf);
+  </parameterSetup>
+
+  <loggingAndValidation>
+  log.logger.info({
+    env: params.environment,
+    domain: fullParams.domain,
+    mbaasUrl: fullParams.__mbaasUrl
+  }, "FH-MBAAS-CLIENT.adminRequest - calling mbaas:");
+  var invalidParamError = validateAdminParams(fullParams);
+
+  if (invalidParamError) {
+    return cb(invalidParamError);
+  }
+  fullParams.data = fullParams.data || {};
+  fullParams.data.notStats = params.notStats;
+  fullParams = _buildAdminMbaasParams(fullParams);
+  log.logger.debug({fullParams: fullParams}, "FH-MBAAS-CLIENT: adminRequest ");
+  </loggingAndValidation>
+
+  <makingRequest>
+  return doFHMbaaSRequest(fullParams, cb);
+  </makingRequest>
+}
+</adminRequest>
+
+<isParametersTable>
+function isParametersTable($table) {
+  <checkTableIdentity>
+  const hasParametersHeaders = $table.find('thead').text().replace(/\s/g, '') === 'NameTypeDescription';
+  const isResponseBodyTable = /Response/.test($table.prevAll('h3').text());
+  </checkTableIdentity>
+  return hasParametersHeaders && !isResponseBodyTable;
+}
+</isParametersTable>
+
+<executeRelationshipModelChange>
+function executeRelationshipModelChange(options) {
+  <enqueueChangeEvent>
+  var dit = this;
+  Backbone.Relational.eventQueue.add(function () {
+    Backbone.Model.prototype.change.apply(dit, arguments);
+  });
+  </enqueueChangeEvent>
+}
+</executeRelationshipModelChange>
+```

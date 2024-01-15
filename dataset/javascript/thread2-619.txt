@@ -1,0 +1,208 @@
+```javascript
+<eventToPromise>
+function eventToPromise(emitter, event, opts) {
+  var cancel
+  <createPromise>
+  var promise = new Promise(function (resolve, reject) {
+    var addEvent = makeEventAdder(emitter, opts && opts.array)
+    cancel = function () {
+      cancel = noop
+      addEvent.cleanUp()
+    }
+
+    addEvent(event, resolve)
+
+    if (!opts || !opts.ignoreErrors) {
+      addEvent((opts && opts.error) || 'error', reject)
+    }
+  })</createPromise>
+  promise.cancel = function () { return cancel() }
+
+  return promise
+}
+</eventToPromise>
+
+<drawCircle>
+function (x0, y0, radius, color, c) {
+    _c = c || _c
+    if (color) {
+        _c.fillStyle = color
+    }
+    <calculateScaledDimensions>
+    x0 *= _scale
+    y0 *= _scale
+    radius *= _scale</calculateScaledDimensions>
+    let x = radius
+    let y = 0
+    let decisionOver2 = 1 - x   
+    <drawCircleAlgorithm>
+    while (x >= y) {
+        box(-x + x0, y + y0, x * 2, 1)
+        box(-y + x0, x + y0, y * 2, 1)
+        box(-x + x0, -y + y0, x * 2, 1)
+        box(-y + x0, -x + y0, y * 2, 1)
+        y++
+        if (decisionOver2 <= 0) {
+            decisionOver2 += 2 * y + 1 
+        } else {
+            x--
+            decisionOver2 += 2 * (y - x) + 1 
+        }
+    }</drawCircleAlgorithm>
+}
+</drawCircle>
+
+<LineDashedMaterial>
+function LineDashedMaterial(parameters) {
+    <extendMaterial>
+    LineBasicMaterial.call(this);</extendMaterial>
+
+    this.type = 'LineDashedMaterial';
+
+    <initializeProperties>
+    this.scale = 1;
+    this.dashSize = 3;
+    this.gapSize = 1;</initializeProperties>
+
+    <setMaterialValues>
+    this.setValues(parameters);</setMaterialValues>
+}
+</LineDashedMaterial>
+
+<formatMessage>
+function formatMessage(message) {
+  <messageTransformation>
+  return message
+    .replace('Module build failed: SyntaxError:', friendlySyntaxErrorLabel)
+    .replace(/Module not found: Error: Cannot resolve 'file' or 'directory'/, 'Module not found:')
+    .replace(/^\s*at\s.*:\d+:\d+[\s\)]*\n/gm, '') 
+    .replace('./~/css-loader!./~/postcss-loader!', '');
+  </messageTransformation>
+}
+</formatMessage>
+
+<setupHelper>
+function (helperName, paramSize, params, useRegister) {
+    <prepareOptions>
+    var options = this.objectLiteral(this.setupOptions(helperName, paramSize, params));</prepareOptions>
+
+    <useRegisterOption>
+    if (useRegister) {
+        this.useRegister('options');
+        params.push('options');
+        return 'options=' + options;
+    } else {
+        params.push(options);
+        return '';
+    }</useRegisterOption>
+}
+</setupHelper>
+
+<compileProgram>
+async function compileProgram(dirPath, command) {
+  <validateInput>
+  await validateDirPathForCLI(dirPath);</validateInput>
+  <pickCommandParameters>
+  const params = pick(command, [
+    'fontName',
+    // ...other properties
+    'experimentalDisableStyles'
+  ]);</pickCommandParameters>
+
+  <attemptCompilation>
+  try {
+    return collecticonsCompile({
+      dirPath,
+      ...params
+    });
+  } catch (error) {
+    <handleCompilationErrors>
+    if (!error.userError) throw error;
+    
+    <interpretErrorCodes>
+    const code = error.code;
+    if (code === 'PLC_CLASS_EXC') {
+      error.details = ['Error: --no-sass-placeholder and --no-css-class are mutually exclusive'];
+    } else if (code === 'FONT_TYPE') {
+      error.details = ['Error: invalid font type value passed to --font-types'];
+    } else if (code === 'CLASS_CSS_FORMAT') {
+      error.details = ['Error: "--no-css-class" and "--style-formats css" are not compatible'];
+    } else if (code === 'STYLE_TYPE') {
+      error.details = ['Error: invalid style format value passed to --style-format'];
+    }</interpretErrorCodes>
+    throw error;</handleCompilationErrors>
+  }</attemptCompilation>
+}
+</compileProgram>
+
+<asyncMessageHandler>
+function (msg) {
+    var ack;
+    <acknowledgmentSetup>
+    if (msg.type === asyncMessageType.MESSAGE_ACK_NEEDED || msg.type === asyncMessageType.MESSAGE_SENDER_ACK_NEEDED) {
+      ack = function () {
+        pushSendData({
+          type: asyncMessageType.ACK,
+          content: {
+            messageId: msg.id
+          }
+        });
+      }
+    }</acknowledgmentSetup>
+
+    <messageTypeHandling>
+    switch (msg.type) {
+      // case statements
+    }</messageTypeHandling>
+}
+</asyncMessageHandler>
+
+<writeblobs>
+function writeblobs(data, cb) {
+    <setupAsyncBuilder>
+    var ab = asyncbuilder(cb);</setupAsyncBuilder>
+    <createQueue>
+    var reqQ = new Queue({ concurrency: 5 });</createQueue>
+
+    <processData>
+    u.each(data, function (file) {
+        var append = ab.asyncAppend();
+        var blob = {
+            encoding: file.buffer ? 'base64' : 'utf-8',
+            content: file.buffer ? file.buffer.toString('base64') : (file.text || '')
+        };
+
+        reqQ.push(function (reqDone) {
+            post(self.endpoint + '/git/blobs', blob, function (err, ghblob) {
+                if (ghblob) { file.sha = ghblob.sha; }
+                append(err, file);
+                reqDone();
+            });
+        });
+
+    });</processData>
+    <finalizeAsync>
+    ab.complete();</finalizeAsync>
+}
+</writeblobs>
+
+<buildLinkNeighbourRegex>
+function buildLinkNeighbourRegex(string, isTrail) {
+    <prepareRegexString>
+	var regexResult = string.match(stripRegex);
+    // ...processing and catching exceptions
+    }</prepareRegexString>
+    // ... more code (omitted for brevity)
+}
+</buildLinkNeighbourRegex>
+
+<extendStateData>
+function (state) {
+  <mergeParentStateData>
+  if (state.parent && state.parent.data) {
+    state.data = state.self.data = extend({}, state.parent.data, state.data);
+  }</mergeParentStateData>
+  return state.data;
+}
+</extendStateData>
+```

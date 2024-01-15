@@ -1,0 +1,173 @@
+```javascript
+<calculateDragDistance>
+function overDragThreshold(pos2, mouseDownEvent) {
+  var pos1 = eventToPosition(mouseDownEvent); // Convert mouseDownEvent to position object
+  var dx = Math.abs(pos1.x - pos2.x); // Calculate delta X
+  var dy = Math.abs(pos1.y - pos2.y); // Calculate delta Y
+  return Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD; // Check if the distance exceeds threshold
+}
+</calculateDragDistance>
+
+<sendMessageToPool>
+function (name, data, response) {
+  log('ws', 'send', name, data); // Log the message being sent
+  
+  pool[name].response = response; // Store the response callback in the pool
+  
+  pool[name].socket.send(data); // Send the data through the socket
+  pool[name].count++; // Increment the send count for the pool
+}
+</sendMessageToPool>
+
+<getRemoteMethodInputStructure>
+function getRemoteMethodInput(method, isConnection = false) {
+    const acceptingParams = {};
+  
+    <buildAcceptingParameters>
+    method.accepts.forEach((param) => {
+        let paramType = '';
+        if (typeof param.type === 'object') {
+            paramType = 'JSON';
+        } else if (!SCALARS[param.type.toLowerCase()]) {
+            paramType = `${param.type}Input`;
+        } else {
+            paramType = _.upperFirst(param.type);
+        }
+        if (param.arg) {
+            acceptingParams[param.arg] = {
+                type: getType(exchangeTypes[paramType] || paramType)
+            };
+        }
+    });
+    </buildAcceptingParameters>
+
+    <returnValueTypeAdjustment>
+    return (isConnection) ? Object.assign({}, acceptingParams, connectionArgs) : acceptingParams;
+    </returnValueTypeAdjustment>
+}
+</getRemoteMethodInputStructure>
+
+<setGregorianCalendarFields>
+function (field, v) {
+  var len = arguments.length;
+  <validateAndSetField>
+  if (len === 2) {
+      this.fields[field] = v;
+  } else if (len < MILLISECONDS + 1) {
+      for (var i = 0; i < len; i++) {
+          this.fields[YEAR + i] = arguments[i];
+      }
+  } else {
+      throw new Error('illegal arguments for KISSY GregorianCalendar set');
+  }
+  </validateAndSetField>
+  <resetCalendarTime>
+  this.time = undefined;
+  </resetCalendarTime>
+}
+</setGregorianCalendarFields>
+
+<generateUniqueIdForTinymce>
+function() {
+  var UITinymceService = function() {
+    var ID_ATTR = 'ui-tinymce';
+
+    var uniqueId = 0;
+
+    <getUniqueId>
+    var getUniqueId = function() {
+      uniqueId++; // Increment unique identifier
+      return ID_ATTR + '-' + uniqueId; // Generate unique ID
+    };
+    </getUniqueId>
+
+    return {
+      getUniqueId: getUniqueId
+    };
+  };
+
+  return new UITinymceService(); // Instantiate the unique ID service
+}
+</generateUniqueIdForTinymce>
+
+<registerMathJaxExplorerHook>
+function(jax) {
+  <removePreviousExplorerHook>
+  Explorer.RemoveHook();
+  </removePreviousExplorerHook>
+  
+  <registerNewExplorerHook>
+  Explorer.hook = MathJax.Hub.Register.MessageHook(
+      'End Math', function(message) {
+        var newid = message[1].id + '-Frame';
+        var math = document.getElementById(newid);
+        if (jax && newid === Explorer.expanded) {
+          Explorer.ActivateWalker(math, jax); // Activate the Explorer walker
+          math.focus(); // Set focus on the math element
+          Explorer.expanded = false; // Reset expansion flag
+        }
+      });
+  </registerNewExplorerHook>
+}
+</registerMathJaxExplorerHook>
+
+<releaseResources>
+function() {
+  <releaseCallbackQueue>
+  CallbackQueue.release(this.reactMountReady); // Release the mount ready callback queue
+  this.reactMountReady = null;
+  </releaseCallbackQueue>
+
+  <releasePutListenerQueue>
+  ReactPutListenerQueue.release(this.putListenerQueue); // Release the put listener queue
+  this.putListenerQueue = null;
+  </releasePutListenerQueue>
+}
+</releaseResources>
+
+<getUserFormattedData>
+function getUFData(userName, identity, options, callback) {
+  var url = 'http://example.com'; // Placeholder URL
+  
+  <initializePageObject>
+  cache = options.cache;
+  page =  new Page(url, identity, null, options);
+  </initializePageObject>
+  
+  <fetchAndFormatData>
+  page.fetchUrl(function(){
+    if(page.profile.hCards.length > 0){
+      page.profile.hCards[0].source = 'microformat'; // Annotate microformat source
+      callback(null, page.profile.hCards[0]); // Callback with profile data
+    }else{
+      callback(null, {}); // Callback with empty data
+    }
+  })
+  </fetchAndFormatData>
+}
+</getUserFormattedData>
+
+<findIndexOfCharacterSkippingSpaces>
+function nearestCharAfter(char, str, index) {
+  let i = index + 1;
+  while (i < str.length) {
+    if (str.charAt(i) === char) return i;
+    if (!/\s/.test(str.charAt(i))) return -1;
+    i += 1;
+  }
+  return -1;
+}
+</findIndexOfCharacterSkippingSpaces>
+
+<expandCodeAtCursor>
+function expandCurrent() {
+  var editor = EditorManager.getFocusedEditor(); // Get the currently focused editor
+  if (editor) {
+      <unfoldCodeAtCursor>
+      var cursor = editor.getCursorPos(), cm = editor._codeMirror;
+      cm.unfoldCode(cursor.line); // Unfold code at the cursor's line
+      </unfoldCodeAtCursor>
+  }
+}
+</expandCodeAtCursor>
+```

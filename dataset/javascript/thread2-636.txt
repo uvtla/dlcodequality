@@ -1,0 +1,224 @@
+Here are the annotations for SRP compliance or violations:
+
+1.
+```javascript
+function () {
+  this.$Element.initWidget.call(this);
+  this.setOptions();
+  
+  var newIndex = this.getSelectedIndexFromBindings();
+  if (newIndex != null) {
+    this._domElt.selectedIndex = newIndex;
+  }
+  this.initDisabledWidgetAttribute();
+  
+  this.__updateDataModel();
+}
+```
+This function displays initial setup steps for a widget, which include initialization and configuration responsibilities. However, these steps contribute to the single high-level purpose of setting up the widget, so they collectively could be considered a single responsibility.
+
+2.
+```javascript
+function (listItemContainers, node) {
+  var isOrdered = node.nodeName === 'OL';
+  var startIndex = parseInt(node.getAttribute('start'), 10) || 1; 
+  var blocks = (listItemContainers || []).map((listItemContainer, listItemIndex) => {
+    var listItemElems = unwrap(listItemContainer);
+    var firstListItemElem = listItemElems[0];
+    if (firstListItemElem && isTextBlock(firstListItemElem)) {
+      let firstListItemPrefix = isOrdered ? `${startIndex + listItemIndex}. ` : `- `;
+      firstListItemElem.text = firstListItemPrefix + firstListItemElem.text;
+    }
+    return listItemElems;
+  }).reduce((prevBlocks, listItemBlocks) => {
+    return prevBlocks.concat(listItemBlocks);
+  }, []);
+  return wrap(blocks);
+}
+```
+This function mainly deals with preparing and formatting a list of items, and it seems to serve a single purpose of transforming list item elements.
+
+3.
+```javascript
+function typeOf(item) {
+  var ret, modulePath;
+  
+  if (typeof EmberObject === "undefined") {
+    modulePath = 'ember-runtime/system/object';
+    if (Ember.__loader.registry[modulePath]) {
+      EmberObject = Ember.__loader.require(modulePath)['default'];
+    }
+  }
+  <typeDetermination>
+  ret = (item === null || item === undefined) ? String(item) : TYPE_MAP[toString.call(item)] || 'object';
+  if (ret === 'function') {
+    if (EmberObject && EmberObject.detect(item)) ret = 'class';
+  } else if (ret === 'object') {
+    if (item instanceof Error) ret = 'error';
+    else if (EmberObject && item instanceof EmberObject) ret = 'instance';
+    else if (item instanceof Date) ret = 'date';
+  }
+  </typeDetermination>
+
+  return ret;
+}
+```
+The main block of this function is responsible for determining the type of an item, and despite the dynamic loading of modules, it serves a single responsibility for type determination.
+
+4.
+```javascript
+function eventEmitter(ctor) {
+  for (var prop in EventEmitter.prototype) {
+    if (EventEmitter.prototype.hasOwnProperty(prop)) {
+      ctor.prototype[prop] = EventEmitter.prototype[prop];
+    }
+  }
+}
+```
+This function extends a constructor with properties from `EventEmitter.prototype` in a loop, fulfilling the single responsibility of applying the `EventEmitter` prototype to a given constructor.
+
+5.
+```javascript
+function link(href, title, text) {
+  <matchAndRender>
+  var reLabelFirst = /^(.*?)\s*\?([^?\s]*)\?(\*?)(X?)(H?)$/;
+  var reLabelAfter = /^\?([^?\s]*)\?(\*?)(X?)(H?)\s*(.*)$/;
+
+  var m = text.match(reLabelFirst);
+  if (m) return renderInput(m[1], m[2], m[3], m[4], m[5], href, title, true);
+
+  m = text.match(reLabelAfter);
+  if (m) return renderInput(m[5], m[1], m[2], m[3], m[4], href, title, false);
+  </matchAndRender>
+
+  return fallback.link.call(this, href, title, text);
+}
+```
+The majority of this function is concerned with matching and rendering inputs based on text, which is a single responsibility. The fallback case at the end is also part of handling the link rendering.
+
+6.
+```javascript
+function moduleActivator(defers, meaniosingleton, loadedmodule) {
+  if (loadedmodule) {
+    meaniosingleton.app.useStatic('/' + loadedmodule.name, loadedmodule.source + '/public');
+    var defer = Q.defer();
+    defers.push(defer);
+    loadedmodule.activate();
+    meaniosingleton.resolve(loadedmodule.name, defer.resolve.bind(defer));
+  }
+}
+```
+The function activates a module and performs setup steps related to the module. It can be considered SRP-compliant since all the operations collectively serve the purpose of activating the module.
+
+7.
+```javascript
+function sequenceMessages(batch, context) {
+  const states = batch.states;
+  const messages = batch.messages;
+
+  if (messages.length < 2 || !context.streamProcessing.sequencingRequired) {
+    return messages;
+  }
+
+  <messagePreparation>
+  prepareMessagesForSequencing(messages, states, context);
+  </messagePreparation>
+
+  const firstMessagesToProcess = [];
+  
+  <sequencingLogic>
+  const sequencingPerKey = context.streamProcessing.sequencingPerKey;
+  const comparator = sequencingPerKey ?
+    (m1, m2) => compareSameKeyMessages(m1, m2, states, context) :
+    (m1, m2) => compareAnyKeyMessages(m1, m2, states, context);
+
+  const messagesByKeyString = sequencingPerKey ?
+    groupBy(messages, msg => {
+      const msgState = states.get(msg);
+      const keys = msgState.keys;
+      return keys && keys.length > 0 ? msgState.key : '?';
+    }) : {'*': messages};
+
+  const keyStrings = Object.getOwnPropertyNames(messagesByKeyString);
+
+  for (let i = 0; i < keyStrings.length; ++i) {
+    const keyString = keyStrings[i];
+    const msgs = messagesByKeyString[keyString];
+    if (context.traceEnabled && msgs.length > 1) context.trace(`BEFORE sorting (${keyString}): ${stringify(msgs.map(m => states.get(m).seqNo))}`);
+    msgs.sort(comparator);
+    if (context.traceEnabled) context.trace(` AFTER sorting (${keyString}): ${stringify(msgs.map(m => states.get(m).seqNo))}`);
+
+    let prevMessage = undefined;
+    let prevMessageState = undefined;
+    firstMessagesToProcess.push(msgs[0]);
+
+    for (let m = 0; m < msgs.length; ++m) {
+      const nextMessage = msgs[m];
+      const nextMessageState = states.get(nextMessage);
+      setPrevMessage(nextMessageState, prevMessage);
+      if (prevMessageState) {
+        setNextMessage(prevMessageState, nextMessage);
+      }
+      prevMessage = nextMessage;
+      prevMessageState = nextMessageState;
+    }
+    if (prevMessageState) {
+      setNextMessage(prevMessageState, undefined);
+    }
+  }
+  </sequencingLogic>
+
+  <debugLogic>
+  if (context.debugEnabled) {
+    const firstMessagesDetails = firstMessagesToProcess.map(m => `(${getMessageStateKeySeqNoId(states.get(m))})`).join(", ");
+    context.debug(`Finished sequencing messages - found ${firstMessagesToProcess.length} first message${firstMessagesToProcess.length !== 1 ? 's' : ''} to process out of ${messages.length} message${messages.length !== 1 ? 's' : ''} - first [${firstMessagesDetails}]`);
+  }
+  </debugLogic>
+
+  return firstMessagesToProcess;
+}
+```
+This function has several distinct blocks: one for initial decision-making, one for preparing messages for sequencing, one containing the core sequencing logic, and one for optional debugging. Each block could be considered a distinct responsibility, but if viewed at a high level, these blocks together serve the single purpose of sequencing messages, so it could be argued that they're SRP-compliant in that context.
+
+8.
+```javascript
+function(coverage){
+  var report = {};
+  for (var prop in coverage){
+    if (coverage.hasOwnProperty(prop)){
+      report[prop] = coverage[prop].lines;
+    }
+  }
+  return YUITest.Util.JSON.stringify(report);
+}
+```
+The function is responsible for constructing and serializing a coverage report from a coverage object. The loop constructs the report, and the return statement serializes it. Since these two steps are closely related and collectively serve the purpose of report generation, it can be considered SRP-compliant.
+
+9.
+```javascript
+function EzMap(arr) {
+  this._keys   = []
+  this._values = []
+  if (isArray(arr) && arr.length)
+    this._initial(arr)
+}
+```
+The `EzMap` constructor initializes data structures and potentially populates them with an initial array. This can be seen as a single responsibility - initializing the `EzMap` instance.
+
+10.
+```javascript
+function getColor (obj) {
+  var color = this.theme.types.color
+  if (obj.isEnumType && !this.theme.enums.hide) {
+    color = this.theme.enums.color
+  } else if (obj.isInputType && !this.theme.inputs.hide) {
+    color = this.theme.inputs.color
+  } else if (obj.isInterfaceType && !this.theme.interfaces.hide) {
+    color = this.theme.interfaces.color
+  } else if (obj.isUnionType && !this.theme.unions.hide) {
+    color = this.theme.unions.color
+  }
+  return color
+}
+```
+This function determines the color of an object based on various conditions related to the object's type. Despite the multiple conditions, they all serve a single purpose of determining the appropriate color, which is SRP-compliant.

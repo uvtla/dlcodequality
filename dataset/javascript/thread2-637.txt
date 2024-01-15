@@ -1,0 +1,406 @@
+<patchList>
+function(patchList) {
+    var dfd, i, p2, key, patch, node,
+        patchCount = patchList.length,
+        deferredList = [];
+
+    for(i=0; i<patchCount; i++){
+        p2 = patchList[i];
+        _assert(p2.length === 2, "patchList must be an array of length-2-arrays");
+        key = p2[0];
+        patch = p2[1];
+        node = (key === null) ? this.rootNode : this.getNodeByKey(key);
+        if(node){
+            dfd = new $.Deferred();
+            deferredList.push(dfd);
+            node.applyPatch(patch).always(_makeResolveFunc(dfd, node));
+        }else{
+            this.warn("could not find node with key '" + key + "'");
+        }
+    }
+    
+    return $.when.apply($, deferredList).promise();
+}
+</patchList>
+
+<solveCurveX>
+function solveCurveX(x) {
+    var t2 = x,
+        derivative,
+        x2;
+
+    
+    
+    
+    for (var i = 0; i < 8; i++) {
+        
+        x2 = sampleCurveX(t2) - x;
+        if (Math.abs(x2) < ZERO_LIMIT) {
+            return t2;
+        }
+        derivative = sampleCurveDerivativeX(t2);
+        
+        if (Math.abs(derivative) < ZERO_LIMIT) {
+            break;
+        }
+        t2 -= x2 / derivative;
+    }
+
+    
+    
+    
+    var t1 = 1,
+        t0 = 0;
+    t2 = x;
+    while (t1 > t0) {
+        x2 = sampleCurveX(t2) - x;
+        if (Math.abs(x2) < ZERO_LIMIT) {
+            return t2;
+        }
+        if (x2 > 0) {
+            t1 = t2;
+        } else {
+            t0 = t2;
+        }
+        t2 = (t1 + t0) / 2;
+    }
+
+    
+    return t2;
+}
+</solveCurveX>
+
+<function>
+function()
+{
+  
+  var buffer = chunks.slice(start, start + prefetchSize + 1);
+
+  
+  var nextChunk = buffer[0];
+
+  
+  if (!nextChunk)
+  {
+    self.asyncClose();
+  }
+  else
+  {
+    
+    
+    var chunk, index, length;
+    for (index = 0, length = buffer.length; index < length; index++)
+    {
+      chunk = buffer[index];
+      if (!chunk.isLoading())
+      {
+        chunk.load();
+      }
+    }
+
+    
+    nextChunk.on('loadcomplete', onLoadComplete);
+  }
+}
+</function>
+
+<Modal>
+function Modal(el, options) {
+    _classCallCheck(this, Modal);
+
+    var _this13 = _possibleConstructorReturn(this, (Modal.__proto__ || Object.getPrototypeOf(Modal)).call(this, Modal, el, options));
+
+    _this13.el.M_Modal = _this13;
+
+    
+    _this13.options = $.extend({}, Modal.defaults, options);
+
+    
+    _this13.isOpen = false;
+
+    _this13.id = _this13.$el.attr('id');
+    _this13._openingTrigger = undefined;
+    _this13.$overlay = $('<div class="modal-overlay"></div>');
+    _this13.el.tabIndex = 0;
+    _this13._nthModalOpened = 0;
+
+    Modal._count++;
+    _this13._setupEventHandlers();
+    return _this13;
+}
+</Modal>
+
+<buildAndRun>
+function buildAndRun(args) {
+  
+
+<changeDirectory>
+  process.chdir(path.join(args.root, 'android'));
+</changeDirectory>
+  
+  
+
+  <adbDevices>
+  try {
+      adb.getDevices().map((device) => tryRunAdbReverse(device));
+  </adbDevices>
+
+  
+  <gradleBuild>
+  <setupGradleCommand>
+  const cmd = process.platform.startsWith('win')
+    ? 'gradlew.bat'
+    : './gradlew';
+
+  const gradleArgs = [];
+  if (args.variant) {
+    gradleArgs.push('install' +
+      args.variant[0].toUpperCase() + args.variant.slice(1)
+    );
+  } else if (args.flavor) {
+    console.warn(chalk.yellow(
+      '--flavor has been deprecated. Use --variant instead'
+    ));
+    gradleArgs.push('install' +
+      args.flavor[0].toUpperCase() + args.flavor.slice(1)
+    );
+  } else {
+    gradleArgs.push('installDebug');
+  }
+
+  if (args.installDebug) {
+    gradleArgs.push(args.installDebug);
+  }
+  </setupGradleCommand>
+
+  <executeGradleBuild>
+  console.log(chalk.bold(
+    `Building and installing the app on the device (cd android && ${cmd} ${gradleArgs.join(' ')}...`
+  ));
+
+  child_process.execFileSync(cmd, gradleArgs, {
+    stdio: [process.stdin, process.stdout, process.stderr],
+  });
+  </executeGradleBuild>
+  
+  <catchGradleBuildError>
+  } catch (e) {
+  console.log(chalk.red(
+    'Could not install the app on the device, read the error above for details.\n' +
+    'Make sure you have an Android emulator running or a device connected and have\n' +
+    'set up your Android development environment:\n' +
+    'https:
+  ));
+  return Promise.reject();
+}
+</catchGradleBuildError>
+
+<startAppOnDevice>
+  try {
+    <readPackageName>
+    const packageName = fs.readFileSync(
+      'app/src/main/AndroidManifest.xml',
+      'utf8'
+    ).match(/package="(.+?)"/)[1];
+    </readPackageName>
+
+    <defineAdb>
+    const adbPath = getAdbPath();
+    </defineAdb>
+
+    <getDevicesAndStartApp>
+    const devices = adb.getDevices();
+
+    if (devices && devices.length > 0) {
+      devices.forEach((device) => {
+
+        const adbArgs = ['-s', device, 'shell', 'am', 'start', '-n', packageName + '/.MainActivity'];
+
+        console.log(chalk.bold(
+          `Starting the app on ${device} (${adbPath} ${adbArgs.join(' ')})...`
+        ));
+
+        child_process.spawnSync(adbPath, adbArgs, {stdio: 'inherit'});
+      });
+    } else {
+      
+      const fallbackAdbArgs = [
+        'shell', 'am', 'start', '-n', packageName + '/.MainActivity'
+      ];
+      console.log(chalk.bold(
+        `Starting the app (${adbPath} ${fallbackAdbArgs.join(' ')}...`
+      ));
+      child_process.spawnSync(adbPath, fallbackAdbArgs, {stdio: 'inherit'});
+    }
+    </getDevicesAndStartApp>
+    <catchStartAppError>
+    
+    </catchStartAppError>
+  } catch (e) {
+  console.log(chalk.red(
+    'adb invocation failed. Do you have adb in your PATH?'
+  ));
+  return Promise.reject();
+  }
+</startAppOnDevice>
+  
+}
+</buildAndRun>
+
+<function>
+function() {
+<calculatePasswordStrength>
+  	     var strength = inputEx.PasswordField.getPasswordStrength(this.getValue());
+</calculatePasswordStrength>
+        <displayStrengthIndicator>
+        for(var i = 0 ; i < 4 ; i++) {
+           var on = (strength >= i*25) && (strength>0);
+           YAHOO.util.Dom.setStyle(this.strengthBlocks[i],"background-color", on ? "#4AE817" : "#FFFFFF");
+		  }
+        </displayStrengthIndicator>
+     }
+</function>
+
+<function>
+function(key, fn) {
+<makeFilepath>
+    var filepath = this._makeFilepath(key);
+</makeFilepath>
+
+<checkExistsAndDelete>
+    fs.exists(filepath, function(exists) {
+      if (!exists) {
+        return fn();
+      }
+
+      fs.unlink(filepath, fn);
+    });
+</checkExistsAndDelete>
+  }
+</function>
+
+<findMatchingSimulator>
+function findMatchingSimulator(simulators, simulatorName) {
+  if (!simulators.devices) {
+    return null;
+  }
+  const devices = simulators.devices;
+  var match;
+  
+  <loopThroughDevices>
+  for (let version in devices) {
+    
+    if (version.indexOf('iOS') !== 0) {
+      continue;
+    }
+    for (let i in devices[version]) {
+      let simulator = devices[version][i];
+      
+      <matchRunningSimulator>
+      if (simulator.availability !== '(available)') {
+        continue;
+      }
+      
+      if (simulator.state === 'Booted') {
+        if (simulatorName !== null) {
+          console.warn("We couldn't boot your defined simulator due to an already booted simulator. We are limited to one simulator launched at a time.");
+        }
+        return {
+          udid: simulator.udid,
+          name: simulator.name,
+          version
+        };
+      }
+      </matchRunningSimulator>
+
+      <matchByName>
+      if (simulator.name === simulatorName) {
+        return {
+          udid: simulator.udid,
+          name: simulator.name,
+          version
+        };
+      }
+      </matchByName>
+
+      <matchFirstAvailable>
+      if (simulatorName === null && !match) {
+        match = {
+          udid: simulator.udid,
+          name: simulator.name,
+          version
+        };
+      }
+      </matchFirstAvailable>
+    }
+  }
+  </loopThroughDevices>
+
+  <returnMatch>
+  if (match) {
+    return match;
+  }
+  </returnMatch>
+  return null;
+}
+</findMatchingSimulator>
+
+<function>
+function(obj) {
+<findClosestPoint>
+                if (obj.start && obj.end) {
+                  
+                  var P = obj.pointClosestTo(this);
+                  return (P === null) ? null : this.pointClosestTo(P);
+                }
+</findClosestPoint>
+                <findLineIntersection>
+                else if (obj.direction) {
+                  
+                  if (this.intersects(obj)) { return this.intersectionWith(obj); }
+                  if (this.isParallelTo(obj)) { return null; }
+                  var D = this.direction.elements, E = obj.direction.elements;
+                  var D1 = D[0], D2 = D[1], D3 = D[2], E1 = E[0], E2 = E[1], E3 = E[2];
+                  
+                  
+                  var x = (D3 * E1 - D1 * E3), y = (D1 * E2 - D2 * E1), z = (D2 * E3 - D3 * E2);
+                  var N = [x * E3 - y * E2, y * E1 - z * E3, z * E2 - x * E1];
+                  var P = plane.create(obj.anchor, N);
+                  return P.intersectionWith(this);
+                }
+                </findLineIntersection>
+                <findClosestVector>
+                else {
+                  
+                  var P = obj.elements || obj;
+                  if (this.contains(P)) { return vector.create(P); }
+                  var A = this.anchor.elements, D = this.direction.elements;
+                  var D1 = D[0], D2 = D[1], D3 = D[2], A1 = A[0], A2 = A[1], A3 = A[2];
+                  var x = D1 * (P[1]-A2) - D2 * (P[0]-A1), y = D2 * ((P[2] || 0) - A3) - D3 * (P[1]-A2),
+                      z = D3 * (P[0]-A1) - D1 * ((P[2] || 0) - A3);
+                  var V = vector.create([D2 * x - D3 * z, D3 * y - D1 * x, D1 * z - D2 * y]);
+                  var k = this.distanceFrom(P) / V.modulus();
+                  return vector.create([
+                    P[0] + V.elements[0] * k,
+                    P[1] + V.elements[1] * k,
+                    (P[2] || 0) + V.elements[2] * k
+                  ]);
+                }
+                </findClosestVector>
+              }
+</function>
+
+<SwiperSlide>
+function SwiperSlide() {
+    return {
+        restrict: 'E',
+        require: '^ksSwiperContainer',
+        transclude: true,
+        scope: {
+          sliderCls: '@',
+        },
+        template: '<div class="swiper-slide {{sliderCls}}" ng-transclude></div>',
+        replace: true
+    };
+}
+</SwiperSlide>

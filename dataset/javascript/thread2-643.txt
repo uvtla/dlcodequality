@@ -1,0 +1,185 @@
+```javascript
+<toggleWindow>
+function togglify(win, opts) {
+    <setDefaultOptions>
+    opts = oassign({
+        animation: 'hide'
+    }, opts);
+    </setDefaultOptions>
+
+    <initializeToggleAction>
+    win._toggleAction = new ToggleAnimation(win, opts.animation);
+    </initializeToggleAction>
+
+    <defineToggleMethod>
+    win.toggle = function () {
+        if (this.isVisible() && this.isFocused()) {
+            this._toggleAction.hide();
+        } else if (this.isVisible() && !this.isFocused()) {
+            this._toggleAction.focus();
+        } else if (this.isMinimized() || !this.isVisible()) {
+            this._toggleAction.restore();
+        }
+    };
+    </defineToggleMethod>
+
+    <setupBlurEventHandler>
+    win.on('blur', function () {
+        if (win.isVisible()) {
+            this._toggleAction.blur();
+        }
+    });
+    </setupBlurEventHandler>
+
+    return win;
+}
+</toggleWindow>
+
+<clearBucketRegionCache>
+function(buckets) {
+    var bucketRegionCache = this.bucketRegionCache;
+    if (!buckets) {
+        buckets = Object.keys(bucketRegionCache);
+    } else if (typeof buckets === 'string') {
+        buckets = [buckets];
+    }
+    for (var i = 0; i < buckets.length; i++) {
+        delete bucketRegionCache[buckets[i]];
+    }
+    return bucketRegionCache;
+}
+</clearBucketRegionCache>
+
+<prepareData>
+function prepare(data, consumerkey) {
+    var prop;
+    data = data || {};
+
+    for (prop in data) {
+        if (data.hasOwnProperty(prop)) {
+            if (_.isDate(data[prop])) {
+                data[prop] = helpers.toYYYYMMDD(data[prop]);
+            }
+        }
+    }
+
+    data.oauth_consumer_key = consumerkey;
+
+    return data;
+}
+</prepareData>
+
+<loadFactories>
+function loadFactories(opts) {
+    this.flapjackFactory = new FlapjackFactory(this);
+
+    return [
+        new InternalObjFactory(this),
+        new AdapterFactory(this),
+        new ServiceFactory(this),
+        new ModelFactory(this),
+        new UipartFactory(this),
+        this.flapjackFactory,
+        new ModulePluginFactory(this, opts.modulePlugins),
+        new DefaultFactory(this)
+    ];
+}
+</loadFactories>
+
+<initializeLine>
+function Line(properties) {
+    if (properties)
+        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+}
+</initializeLine>
+
+<checkEventValidity>
+function isEventValid (comp, type) {
+    if (appearEvts.indexOf(type) <= -1) {
+        return true
+    }
+    if (comp._appear === undefined && type === 'disappear') {
+        return false
+    }
+    let res
+    if (comp._appear === undefined && type === 'appear') {
+        res = true
+    }
+    else {
+        res = (type !== comp._appear)
+    }
+    res && (comp._appear = type)
+    return res
+}
+</checkEventValidity>
+
+<applyThemeToElement>
+function (scope, el) {
+    if (el === undefined) { el = scope; scope = undefined; }
+    if (scope === undefined) { scope = $rootScope; }
+    applyTheme.inherit(el, el);
+}
+</applyThemeToElement>
+
+<validateWebSocketConfig>
+function validateConfig(config) {
+    var result = {}
+
+    if (config.httpServer == null) throw Error("httpServer config property is null")
+    result.httpServer = config.httpServer
+
+    result.onRequest = config.onRequest || default_onRequest
+    if (!_.isFunction(result.onRequest)) throw Error("onRequest config property is not a function")
+
+    result.verbose = !!config.verbose
+
+    return result
+    <defaultOnRequestFunction>
+    function default_onRequest(request) {
+        if (-1 == request.requestedProtocols.indexOf(exports.wsProtocol)) {
+            return request.reject()
+        }
+
+        request.accept(exports.wsProtocol, request.origin)
+    }
+    </defaultOnRequestFunction>
+}
+</validateWebSocketConfig>
+
+<countByObjectProperty>
+function countBy (obj, iterate, context) {
+    var result = groupBy(obj, iterate, context || this)
+    objectEach(result, function (item, key) {
+        result[key] = item.length
+    })
+    return result
+}
+</countByObjectProperty>
+
+<setAttributeValues>
+function setAttributeValues(dom) {
+    let elems = dom.find(
+        `input[type=text], input[type=search], input[type=tel], input[type=url], input[type=email],
+         input[type=password], input[type=number], input[type=checkbox], input[type=radio]`
+    );
+
+    percyJQuery(elems).each(function() {
+        let elem = percyJQuery(this);
+        switch(elem.attr('type')) {
+            case 'checkbox':
+            case 'radio':
+                if (elem.is(':checked')) {
+                    elem.attr('checked', '');
+                }
+                break;
+            default:
+                elem.attr('value', elem.val());
+        }
+    });
+
+    return dom;
+}
+</setAttributeValues>
+```

@@ -1,0 +1,213 @@
+```javascript
+<businessRuleApplication>
+function (changed, previous, events, command, callback) {
+
+    var self = this;
+    var callbacked = false;
+
+    <handleErrorDeclaration>
+    function handleError (err) {
+      debug(err);
+
+      if (_.isString(err)) {
+        if (_.isEmpty(err)) {
+          err = self.description;
+        }
+        err = new BusinessRuleError(err);
+      } else if (err instanceof BusinessRuleError) {
+        
+      } else {
+        err = new BusinessRuleError(err.message || self.description);
+      }
+
+      callbacked = true;
+      callback(err);
+    }
+    </handleErrorDeclaration>
+
+    try {
+      if (this.businessRuleFn.length === 5) {
+        this.businessRuleFn(changed, previous, events, command, function (err) {
+          if (err) {
+            return handleError(err);
+          }
+          callbacked = true;
+          callback(null);
+        });
+      } else {
+        var err = this.businessRuleFn(changed, previous, events, command);
+        if (err) {
+          return handleError(err);
+        }
+        callbacked = true;
+        callback(null);
+      }
+    } catch (err) {
+      if (!callbacked) {
+        return handleError(err);
+      }
+      throw err;
+    }
+  }
+</businessRuleApplication>
+
+<renderFunction>
+function() {
+      var _vm = this;
+      var _h = _vm.$createElement;
+      var _c = _vm._self._c || _h;
+      return _c(
+        "div",
+        {
+          staticClass: "btn-toolbar",
+          attrs: { "aria-role": _vm.ariaRole, "aria-label": _vm.ariaLabel }
+        },
+        [_vm._t("default")],
+        2
+      )
+    }
+</renderFunction>
+
+<writeApiResponse>
+function(req, res) {
+		return api.writeResponse(200, res, null, {
+			CanAddUsers: canAddUsers(options), 
+			ForceEmail: Boolean(options.configParams.get("orion.auth.user.creation.force.email")), 
+			RegistrationURI:options.configParams.get("orion.auth.registration.uri") || undefined});
+	}
+</writeApiResponse>
+
+<initializeBlockInput>
+function() {
+    this.setHelpUrl(Blockly.Msg.COLOUR_RGB_HELPURL);
+    this.setColour(Blockly.Blocks.colour.HUE);
+    this.appendValueInput('RED')
+        .setCheck('Number')
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField(Blockly.Msg.COLOUR_RGB_TITLE)
+        .appendField(Blockly.Msg.COLOUR_RGB_RED);
+    this.appendValueInput('GREEN')
+        .setCheck('Number')
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField(Blockly.Msg.COLOUR_RGB_GREEN);
+    this.appendValueInput('BLUE')
+        .setCheck('Number')
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField(Blockly.Msg.COLOUR_RGB_BLUE);
+    this.setOutput(true, 'Colour');
+    this.setTooltip(Blockly.Msg.COLOUR_RGB_TOOLTIP);
+  }
+</initializeBlockInput>
+
+<linkParentAndPrototype>
+function linkParent(original, branch, parentPayload, nextPayload)
+{  
+  var normalized = normalize(branch);
+
+  var result = original(branch, parentPayload, nextPayload);
+  
+  if (normalized)
+  {
+    result.__proto__[normalized] = parentPayload;
+  }
+  
+  if (parentPayload.user)
+  {
+    result.__proto__['user'] = parentPayload.user;
+  }
+
+  return result;
+}
+</linkParentAndPrototype>
+
+<jobFileCreation>
+function makeJobFile(config) {
+  var job = {"espruino":{}};
+  
+  <collectArguments>
+  for (var key in args) {
+    switch (key) {
+      case 'job': 
+      case 'espruinoPrefix':
+      case 'espruinoPostfix':
+        break;
+      default: job[key] = args[key];  
+    }
+  }
+  </collectArguments>
+
+  <mergeConfigurations>
+  for (var k in config) { if (typeof config[k]!=='function') job.espruino[k] = config[k]; };
+  </mergeConfigurations>
+  
+  var jobFile = isNextValidJS(args.file) ? args.file.slice(0,args.file.lastIndexOf('.'))+'.json' : "job.json";
+
+  <fileHandling>
+  if (!fs.existsSync(jobFile)) {
+    log("Creating job file "+JSON.stringify(jobFile));
+    fs.writeFileSync(jobFile,JSON.stringify(job,null,2),{encoding:"utf8"});
+  } else
+    log("WARNING: File "+JSON.stringify(jobFile)+" already exists - not overwriting.");
+  </fileHandling>
+}
+</jobFileCreation>
+
+<FormatQRYFunction>
+function FormatQRY(query) { 
+						var R = '', Q = query; switch(true) {
+							case THS.QisFunction: return CleanQRY(Q.toString());
+							case THS.QisArray: return Q.join("\n").replace("\t","");
+							default: return R;
+						};
+					}
+</FormatQRYFunction>
+
+<addRecordStore>
+function (cfg) {
+            this.log("addRecordStore");
+            var lrs;
+            if (cfg instanceof TinCan.LRS) {
+                lrs = cfg;
+            }
+            else {
+                lrs = new TinCan.LRS (cfg);
+            }
+            this.recordStores.push(lrs);
+        }
+</addRecordStore>
+
+<addAjvKeywordsImplementation>
+function addAjvKeywords() {
+  <addIndividualKeywords>
+  addAjvKeyword.call(this, 'validateAsync');
+  addAjvKeyword.call(this, 'itemsSerial', 'array');
+  this._evalKeywords.objectToAsync = util.objectToPromise;
+  this._evalKeywords.valueToAsync = util.toPromise;
+  addAjvKeyword.call(this, 'objectToAsync', 'object', true);
+  addAjvKeyword.call(this, 'valueToAsync', undefined, true);
+  </addIndividualKeywords>
+  this.ajv.addKeyword('resolvePendingRefs', {
+    validate: evaluationKeywords.resolvePendingRefs,
+    schema: false
+  });
+  this.ajv.addKeyword('expandJsMacro', {
+    compile: compileExpandJsMacro
+  });
+}
+</addAjvKeywordsImplementation>
+
+<validateRouteConfig>
+function (config) {
+        if (typeof config !== 'object') {
+            throw new Error('Invalid Route Config');
+        }
+        if (typeof config.route !== 'string') {
+            var name_1 = config.name || '(no name)';
+            throw new Error('Invalid Route Config for "' + name_1 + '": You must specify a "route:" pattern.');
+        }
+        if (!('redirect' in config || config.moduleId || config.navigationStrategy || config.viewPorts)) {
+            throw new Error('Invalid Route Config for "' + config.route + '": You must specify a "moduleId:", "redirect:", "navigationStrategy:", or "viewPorts:".');
+        }
+    }
+</validateRouteConfig>
+```

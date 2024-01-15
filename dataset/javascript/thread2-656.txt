@@ -1,0 +1,316 @@
+```javascript
+<get>
+function get(nucleus, keyOrList, func) {
+	<valueDetermination>
+    var isList = isArray(keyOrList), keys = isList ? keyOrList : [keyOrList],
+    	key, values = [], props = nucleus.props, missing = {},
+    	result = { values: values };
+    for (var i = keys.length; --i >= 0;) {
+        key = keys[i];
+        if (!hasOwn.call(props, key)) {
+            result.missing = missing;
+            missing[key] = true;
+        }
+        values.unshift(props[key]);
+    }
+    </valueDetermination>
+	return func ? func.apply({}, values) : result;
+}
+</get>
+
+<calculateLabelIndex>
+function () {
+	<findLabelIndex>
+    var cfg = this._cfg, showLabel = (!cfg.hideLabel && !!cfg.label), idx;
+    if (showLabel) {
+        idx = ((cfg.labelPos === "right" && !this._fullWidth) || cfg.labelPos === "bottom") ? 0 : 1;
+    } else {
+        idx = 0;
+    }
+	</findLabelIndex>
+	<getDomElement>
+    var dom = this.getDom();
+    if (this._isIE7OrLess) {
+        dom = dom ? dom.firstChild : null;
+    }
+    return ariaUtilsDom.getDomElementChild(dom, idx);
+	</getDomElement>
+}
+</calculateLabelIndex>
+
+<processRows>
+function(rows){
+	<checkEmptyRows>
+	if (rows.length === 0)
+		return onDone();
+	</checkEmptyRows>
+	<handleConnection>
+	db.takeConnectionFromPool(function (conn) {
+		<processEachRow>
+		async.eachSeries(
+			rows,
+			function (row, cb) {
+				breadcrumbs.add("--------------- archiving uncovered unit " + row.unit);
+				storage.readJoint(conn, row.unit, {
+					ifNotFound: function () {
+						throw Error("nonserial unit not found?");
+					},
+					ifFound: function (objJoint) {
+						mutex.lock(["write"], function(unlock){
+							var arrQueries = [];
+							conn.addQuery(arrQueries, "BEGIN");
+							archiving.generateQueriesToArchiveJoint(conn, objJoint, 'uncovered', arrQueries, function(){
+								conn.addQuery(arrQueries, "COMMIT");
+								async.series(arrQueries, function(){
+									breadcrumbs.add("------- done archiving "+row.unit);
+									var parent_units = storage.assocUnstableUnits[row.unit].parent_units;
+									storage.forgetUnit(row.unit);
+									parent_units.forEach(function(parent_unit){
+										if (!storage.assocUnstableUnits[parent_unit]) 
+											return;
+										var bHasChildren = false;
+										for (var unit in storage.assocUnstableUnits){
+											var o = storage.assocUnstableUnits[unit];
+											if (o.parent_units.indexOf(parent_unit) >= 0)
+												bHasChildren = true;
+										}
+										if (!bHasChildren)
+											storage.assocUnstableUnits[parent_unit].is_free = 1;
+									});
+									unlock();
+									cb();
+								});
+							});
+						});
+					}
+				});
+			},
+			function () {
+				<updateUnitsAndRelease>
+				conn.query(
+					"UPDATE units SET is_free=1 WHERE is_free=0 AND is_stable=0 \n\
+					AND (SELECT 1 FROM parenthoods WHERE parent_unit=unit LIMIT 1) IS NULL",
+					function () {
+						conn.release();
+						if (rows.length > 0)
+							return purgeUncoveredNonserialJoints(false, onDone); 
+						onDone();
+					}
+				);
+				</updateUnitsAndRelease>
+			}
+		);
+		</processEachRow>
+	});
+	</handleConnection>
+}
+</processRows>
+
+<generateStackedTotals>
+function() {
+      <initializeValues>
+      this.totals = [];
+      this.maxTotal = 0;
+      this.bounds.reset();
+
+      if (this.series_.length === 0)
+        return;
+
+      var firstSeries = this.series_[0];
+      var lastSeries = this.series_[this.series_.length - 1];
+
+      this.bounds.addValue(firstSeries.getTimestamp(0));
+      this.bounds.addValue(lastSeries.getTimestamp(lastSeries.length - 1));
+
+      var numSeries = this.numSeries;
+      this.maxTotal = -Infinity;
+	</initializeValues>
+      
+	  <calculateTotals>
+      for (var i = 0; i < firstSeries.length; ++i) {
+        var total = 0;
+        this.series_.forEach(function(series) {
+          total += series.getSample(i).value;
+          this.totals.push(total);
+        }.bind(this));
+
+        this.maxTotal = Math.max(total, this.maxTotal);
+      }
+      </calculateTotals>
+}
+</generateStackedTotals>
+
+<handleODataExpression>
+function (oPathValue, oParameters) {
+	<processODataFunction>
+	var oFunction = Basics.descend(oPathValue, "$Function", "string");
+
+	switch (oFunction.value) {
+		case "odata.concat": 
+			return Expression.concat(oParameters);
+		case "odata.fillUriTemplate": 
+			return Expression.fillUriTemplate(oParameters);
+		case "odata.uriEncode": 
+			return Expression.uriEncode(oParameters);
+		default:
+			return asyncError(oFunction, "unknown function: " + oFunction.value);
+	}
+	</processODataFunction>
+}
+</handleODataExpression>
+
+<resolveType>
+function(context, arg) {
+	<setType>
+	var type = null;
+	switch (gui.Type.of(arg)) {
+		case "function":
+			type = arg; 
+			break;
+		case "string":
+			type = gui.Object.lookup(arg, context);
+			break;
+		case "object":
+			console.error(this + ": expected edb.Type constructor (not an object)");
+			break;
+	}
+	if (!type) {
+		throw new TypeError("The type \"" + arg + "\" does not exist");
+	}
+	return type;
+	</setType>
+}
+</resolveType>
+
+<createCombination>
+function createCombination(array, combinationLength) {
+    <validateInput>
+    array = (0, _array.excludeTheSame)(array);
+    if (!(0, _is.isNumber)(combinationLength)) {
+        throw new Error('combinationLength should be number');
+    }
+    if (combinationLength < 1 || combinationLength > array.length) {
+        throw new Error('combinationLength should be in the correct range');
+    }
+	</validateInput>
+	
+    return __createCombination(array, combinationLength);
+}
+</createCombination>
+
+<createElement>
+function Element(doc, name, content) {
+    <validateArguments>
+    if (!doc) {
+        throw new Error('document argument required');
+    } else if (!(doc instanceof bindings.Document)) {
+        throw new Error('document argument must be an instance of Document');
+    } else if (!name) {
+        throw an Error('name argument required');
+    }
+	</validateArguments>
+
+    return new bindings.Element(doc, name, content);
+}
+</createElement>
+
+<connectInternal>
+function(monitorJSON, callback) {
+	<setupProbe>
+    var t = this,
+        probeKey = t.buildProbeKey(monitorJSON),
+        probeClass = monitorJSON.probeClass,
+        initParams = monitorJSON.initParams,
+        probeImpl = null;
+	</setupProbe>
+	
+    var whenDone = function(error) {
+		<classCleanup>
+        setTimeout(function() {
+            if (error) {
+                if (probeImpl) {
+                    delete t.runningProbesByKey[probeKey];
+                    delete t.runningProbesById[probeImpl.id];
+                    try {
+                        probeImpl.release();
+                    } catch (e){}
+                }
+                log.error('connectInternal', {error: error, probeKey: probeKey});
+                return callback(error);
+            }
+		</classCleanup>
+		
+		<finalizeConnection>
+            probeImpl.refCount++;
+            log.info('connectInternal', {probeKey: probeKey, probeId: probeImpl.id});
+            callback(null, probeImpl);
+		</finalizeConnection>
+        }, 0);
+    };
+
+	<createOrReuseProbe>
+    probeImpl = t.runningProbesByKey[probeKey];
+    if (!probeImpl) {
+        var ProbeClass = Probe.classes[probeClass];
+        if (!ProbeClass) {
+            return whenDone({msg:'Probe not available: ' + probeClass});
+        }
+        var initOptions = {asyncInit: false, callback: whenDone};
+        try {
+            var paramCopy = Monitor.deepCopy(initParams);
+            probeImpl = new ProbeClass(paramCopy, initOptions);
+            probeImpl.set({id: Monitor.generateUniqueId()});
+            probeImpl.refCount = 0;
+            probeImpl.probeKey = probeKey;
+            t.runningProbesByKey[probeKey] = probeImpl;
+            t.runningProbesById[probeImpl.id] = probeImpl;
+        } catch (e) {
+            var error = {msg: 'Error instantiating probe ' + probeClass, error: e.message};
+            log.error('connect', error);
+            return whenDone(error);
+        }
+
+        if (initOptions.asyncInit) {
+            return;
+        }
+    }
+	</createOrReuseProbe>
+	
+    whenDone();
+}
+</connectInternal>
+
+<manipulatePage>
+function manipulatePage(page) {
+    <validatePage>
+    if (DEBUG && !page.phantom) inspectArgs("manipulatePage: ", page);
+    if (timer !== undefined) {
+        clearTimeout(timer);
+    }
+	</validatePage>
+	
+	<injectJavaScript>
+    if (option["javascript-file"]) {
+        page.injectJs(option["javascript-file"]);
+    }
+	</injectJavaScript>
+	
+	<evaluateScript>
+    if (option["inject-script"]) {
+        var injectScript = option["inject-script"];
+        injectScript = (typeof injectScript === "function") ?
+            injectScript.toString() : `function() { ${injectScript} }`;
+        page.evaluateJavaScript(injectScript);
+    }
+	</evaluateScript>
+	
+	<handleCaptureDelay>
+    if (option.waitcapturedelay) {
+        setTimeout(function () { return page }, +option.waitcapturedelay);
+    } else {
+        return page;
+    }
+	</handleCaptureDelay>
+}
+</manipulatePage>
+```

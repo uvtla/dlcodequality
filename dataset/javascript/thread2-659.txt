@@ -1,0 +1,254 @@
+```javascript
+<extractBlobData>
+function extractBlobData(blob) {
+  <handleUnsupportedBlobData>
+  switch (true) {
+    case blob.lzma_data !== null:
+      throw new Error('unsupported osmpbf blob data type: lzma_data')
+    case blob.OBSOLETE_bzip2_data !== null:
+      throw new Error('unsupported osmpbf blob data type: OBSOLETE_bzip2_data')
+    case blob.raw === null && blob.zlib_data === null:
+      throw new Error('unsupported osmpbf blob data type: <empty blob>')
+  </handleUnsupportedBlobData>
+
+  <decodeBlobData>
+  switch (true) {
+    case blob.raw !== null:
+      return blob.raw
+    case blob.zlib_data !== null:
+      var blobData = new Buffer(blob.raw_size)
+      inflate(blob.zlib_data.slice(2), blobData)
+      return blobData
+  }
+  </decodeBlobData>
+}
+</extractBlobData>
+
+<_ioStart>
+function _ioStart(id, c) {
+  <triggerEvents>
+  var a = c.arguments;
+  
+  if (a) {
+      Y.fire(E_START, id, a);
+  }
+  else {
+      Y.fire(E_START, id);
+  }
+  
+  if (c.on && c.on.start) {
+      _tE('start', c).fire(id);
+  }
+  </triggerEvents>
+}
+</_ioStart>
+
+<AnimatedColorSetter>
+function(element, transition_value) {
+  <calculateCurrentValue>
+  var current_value = [
+    Math.floor(this.from[0] + this.delta[0] * transition_value),
+    Math.floor(this.from[1] + this.delta[1] * transition_value),
+    Math.floor(this.from[2] + this.delta[2] * transition_value)
+  ];
+  </calculateCurrentValue>
+
+  <setStyle>
+  Firestorm.Element.setStyle(
+    element,
+    this.property_name,
+    'rgb(' + current_value.join(',') + ')'
+  );
+  </setStyle>
+}
+</AnimatedColorSetter>
+
+<arrayJoin>
+function arrayJoin(results, args) {
+  <preparation>
+  var srcDataArray = results,
+      joinCollection = args.joinCollection,
+      joinQuery = args.joinQuery,
+      joinType = args.joinType || 'left',
+      rightKeys = args.rightKeys || [args.rightKey],
+      newKey = args.newKey,
+      callback = args.callback,
+
+      length,
+      i,
+
+      subqueries,
+      keyHashBin = {},
+      accessors = [],
+      joinLookups = [],
+      inQueries = [],
+      leftKeys = args.leftKeys || [args.leftKey];
+
+  rightKeys.forEach(function () {
+      inQueries.push([]);
+  });
+
+  leftKeys.forEach(function (key) {
+      accessors.push(getKeyValueAccessorFromKey(key));
+  });
+
+  length = results.length;
+  </preparation>
+
+  <buildHashTable>
+  for (i = 0; i < length; i += 1) {
+      buildHashTableIndices(keyHashBin, results[i], i, accessors, rightKeys, inQueries, joinLookups, {});
+  }
+
+  buildQueriesFromHashBin(keyHashBin, rightKeys, 0, [], joinLookups, inQueries);
+  </buildHashTable>
+
+  <runJoining>
+  if (!Array.isArray(srcDataArray)) {
+      srcDataArray = [srcDataArray];
+  }
+
+  subqueries = getSubqueries(inQueries, joinLookups, joinQuery, args.pageSize || 25, rightKeys);
+  runSubqueries(subqueries, function (items) {
+      var un;
+      performJoining(srcDataArray, items, {
+          rightKeyPropertyPaths: rightKeys,
+          newKey: newKey,
+          keyHashBin: keyHashBin
+      });
+
+      if (joinType === "inner") {
+          removeNonMatchesLeft(srcDataArray, newKey);
+      }
+
+      if (joinStack.length > 0) {
+          arrayJoin(srcDataArray, joinStack.shift());
+      } else {
+          callIfFunction(finalCallback, [un, srcDataArray]);
+      }
+      callIfFunction(callback, [un, srcDataArray]);
+  }, joinCollection);
+  </runJoining>
+}
+</arrayJoin>
+
+<resolveServer>
+function resolveServer(path, options) {
+  <constructServerUrl>
+  if (options === void 0) { options = {}; }
+  var serverUrl = options.serverUrl || init.initOptions.serverUrl;
+  if (path) {
+      if (serverUrl) {
+          path = url.resolve(serverUrl, path);
+      }
+  }
+  else {
+      path = serverUrl;
+  }
+  </constructServerUrl>
+  <finalizePath>
+  return url.resolve(path, '/');
+  </finalizePath>
+}
+</resolveServer>
+
+<bind>
+function bind(func, obj) {
+  <createBoundFunction>
+  var slice = Array.prototype.slice;
+  var args = slice.call(arguments, 2);
+  return function () {
+      return func.apply(obj, args.concat(slice.call(arguments)));
+  };
+  </createBoundFunction>
+}
+</bind>
+
+<f_urun_bilgisi>
+function f_urun_bilgisi(_urun, _optsUrun) {
+  <checkForUrun>
+  if (!_urun) {
+      return null;
+  }
+  </checkForUrun>
+
+  <createProductObject>
+  var 
+  olusan_urun = schema.f_create_default_object(schema.SCHEMA.URUN);
+  
+  olusan_urun = _.extend(olusan_urun, _urun);
+  </createProductObject>
+
+  <retrieveRelatedData>
+  return result.dbQ.Q.all([
+      _optsUrun.bUreticiKurum ? f_urun_ureticisi(_urun.Id) : {Id: 0},
+      _optsUrun.bArrAnahtarKelimeler ? f_urun_anahtar_tumu(_urun.Id, _tahta_id) : [{Id: 0}]
+  ]).then(function (_ress) {
+      olusan_urun.Uretici = _ress[0];
+      olusan_urun.AnahtarKelimeler = _ress[1];
+      return olusan_urun;
+  });
+  </retrieveRelatedData>
+}
+</f_urun_bilgisi>
+
+<parse>
+function parse(template, block, data, callback) {
+  <handleArguments>
+  if (!callback && typeof block === 'object' && typeof data === 'function') {
+    callback = data;
+    data = block;
+    block = null;
+  }
+  if (typeof callback !== 'function') {
+    throw TypeError('Invalid Arguments: callback must be a function');
+  }
+  if (!template) {
+    callback('');
+    return;
+  }
+  </handleArguments>
+
+  <renderTemplate>
+  render(template, data, block).then(
+    output => setTimeout(callback, 0, output),
+    err => console.error(err), 
+  );
+  </renderTemplate>
+}
+</parse>
+
+<applyBindings>
+function(bindingString, data, children, callback, done) {
+  <prepareContainer>
+  container = document.createElement("div");
+  container.setAttribute("data-bind", bindingString);
+  container.innerHTML = children || "";
+
+  sandbox.appendChild(container);
+  </prepareContainer>
+
+  <applyKnockoutBindings>
+  ko.cleanNode(sandbox);
+  ko.applyBindings(data, sandbox);
+  </applyKnockoutBindings>
+
+  <postBindingCallback>
+  setTimeout(callback, 50);
+  </postBindingCallback>
+}
+</applyBindings>
+
+<writeFile>
+function (filepath, content) {
+  <writeContentToFile>
+  try {
+      grunt.file.write(filepath, content);
+      grunt.log.writeln('File "' + filepath + '" wrapped and saved.');
+  } catch (err) {
+      grunt.fail.fatal(err);
+  }
+  </writeContentToFile>
+}
+</writeFile>
+```

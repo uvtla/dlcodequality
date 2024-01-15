@@ -1,0 +1,184 @@
+```javascript
+<compileSurfaceProcedure>
+function compileSurfaceProcedure(vertexFunc, faceFunc, phaseFunc, scalarArgs, order, typesig) {
+  <initializeVariables>
+  var arrayArgs = typesig.length
+  var dimension = order.length
+  if(dimension < 2) {
+    throw new Error("ndarray-extract-contour: Dimension must be at least 2")
+  }
+  var funcName = "extractContour" + order.join("_")
+  var code = []
+  var vars = []
+  var args = []
+  </initializeVariables>
+
+  <prepareArguments>
+  for(var i=0; i<arrayArgs; ++i) {
+    args.push(array(i))  
+  }
+  for(var i=0; i<scalarArgs; ++i) {
+    args.push(scalar(i))
+  }
+  </prepareArguments>
+
+  <createVariables>
+  for(var i=0; i<dimension; ++i) {
+    vars.push(shape(i) + "=" + array(0) + ".shape[" + i + "]|0")
+  }
+  for(var i=0; i<arrayArgs; ++i) {
+    vars.push(data(i) + "=" + array(i) + ".data",
+              offset(i) + "=" + array(i) + ".offset|0")
+    for(var j=0; j<dimension; ++j) {
+      vars.push(stride(i,j) + "=" + array(i) + ".stride[" + j + "]|0")
+    }
+  }
+  </createVariables>
+
+  <initializeRemainingVariables>
+  // ... rest of variable initialization code ...
+  </initializeRemainingVariables>
+
+  <defineUtilityFunctions>
+  function forLoopBegin(i, start) { /* ... */ }
+  function forLoopEnd(i) { /* ... */ }
+  function fillEmptySlice(k) { /* ... */ }
+  function processGridCell(mask) { /* ... */ }
+  function flip() { /* ... */ }
+  function createLoop(i, mask) { /* ... */ }
+  </defineUtilityFunctions>
+
+  <executeMainLogic>
+  createLoop(dimension-1, 0)
+  </executeMainLogic>
+
+  <cleanUp>
+  code.push("freeUint32(", VERTEX_IDS, ");freeUint32(", PHASES, ");")
+  </cleanUp>
+
+  <finalizeProcedure>
+  var procedureCode = [
+    "'use strict';",
+    "function ", funcName, "(", args.join(), "){",
+      "var ", vars.join(), ";",
+      code.join(""),
+    "}",
+    "return ", funcName ].join("")
+  var proc = new Function(
+    "vertex", 
+    "face", 
+    "phase", 
+    "mallocUint32", 
+    "freeUint32",
+    procedureCode)
+  </finalizeProcedure>
+
+  <returnCompiledFunction>
+  return proc(
+    vertexFunc, 
+    faceFunc, 
+    phaseFunc, 
+    pool.mallocUint32, 
+    pool.freeUint32)
+  </returnCompiledFunction>
+}
+</compileSurfaceProcedure>
+
+<merge>
+function merge () {
+  <mergeLogic>
+  var args = [].slice.call(arguments)
+  args.unshift({})
+  return mergeExt.apply(null, args)
+  </mergeLogic>
+}
+</merge>
+
+<HttpError>
+function HttpError(message, status, cause) {
+    <createHttpError>
+    this.status = status || StatusCode.UNKNOWN;
+    HttpError.super_.call(this, errors.ErrorCode.HTTP + this.status, message || StatusLine[this.status] || StatusLine[StatusCode.UNKNOWN], cause);
+    </createHttpError>
+}
+</HttpError>
+
+<i18nExpMapping>
+function i18nExpMapping(translation, placeholders) {
+    <parseAndReplacePlaceholders>
+    var staticText = translation.split(i18nTagRegex);
+    for (var i = 1; i < staticText.length; i += 2) {
+        staticText[i] = placeholders[staticText[i]];
+    }
+    return staticText;
+    </parseAndReplacePlaceholders>
+}
+</i18nExpMapping>
+
+<print>
+function print(str, indent, inline) {
+    <printStringWithIndent>
+    var lines = str.split("\n");
+    for (var i = 0; i < lines.length; i++) {
+        // ... code to process and print lines with indent ...
+    }
+    </printStringWithIndent>
+}
+</print>
+
+<deleteWallPost>
+function deleteWallPost (jar, group, post) {
+  <sendDeleteRequest>
+  post.view.__EVENTTARGET = '...';
+  return http({
+    url: '...',
+    options: {
+      form: post.view,
+      method: 'POST',
+      jar: jar,
+      resolveWithFullResponse: true
+    }
+  })
+  .then(function (res) { /* ... */ });
+  </sendDeleteRequest>
+}
+</deleteWallPost>
+
+<createNamespacedEvents>
+function(eventHash) {
+  <namespaceEvents>
+  // ... code to namespace given events ...
+  </namespaceEvents>
+}
+</createNamespacedEvents>
+
+<resizeGrid>
+function(rows, columns) {
+  <reduceGridToRows>
+  // ... code to remove excess rows ...
+  </reduceGridToRows>
+
+  <reduceRowsToColumns>
+  // ... code to remove excess columns from rows ...
+  </reduceRowsToColumns>
+}
+</resizeGrid>
+
+<trackedFunctionGetter>
+function(trackedFunctions, getTrackableFunction) {
+  <trackFunctions>
+  // ... code to retrieve a tracked set of functions ...
+  </trackFunctions>
+}
+</trackedFunctionGetter>
+
+<calculateInnerHeight>
+function () {
+    <computeInnerHeight>
+    // ... code to calculate inner height based on different conditions ...
+    </computeInnerHeight>
+}
+</calculateInnerHeight>
+```
+
+Each function has been enclosed within tags to denote the main responsibility it should address. Within those tags, minor responsibilities have been further wrapped in nested tags if applicable. This structure provides clarity about the SRP compliance of each function.

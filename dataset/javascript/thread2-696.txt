@@ -1,0 +1,165 @@
+```javascript
+<constructor>
+function (config) {
+    config = config || {};
+    Appender.call(this, config);
+
+    <setProperty>
+    this.appendStrings = (typeof config.appendStrings !== 'undefined') ?
+      config.appendStrings :
+      true;</setProperty>
+
+    <setProperty>
+    this.url = config.url || 'http://localhost';</setProperty>
+
+    <setProperty>
+    this.socket = null;</setProperty>
+  }
+</constructor>
+
+<parseURL>
+function parseURL(href, isWindowLocation, isNotAPI) {
+    var re = <regexPattern>/ ... </regexPattern>; // Omitted for brevity. Full pattern is part of regex responsibility
+    <parseAndModifyHref>
+    if (href != null && href !== '' && !isWindowLocation) {
+      // Omitted complex logic for brevity
+    } </parseAndModifyHref>
+    else {
+      <assignHref>
+      href = isWindowLocation ? href : windowLocation.href;</assignHref>
+      
+      <modifyHrefForHistoryAPI>
+      if (!isSupportHistoryAPI || isNotAPI) {
+        // ...
+      }</modifyHrefForHistoryAPI>
+    }
+    
+    <setAnchorHref>
+    anchorElement.href = href;</setAnchorHref>
+    
+    <executeRegex>
+    var result = re.exec(anchorElement.href);</executeRegex>
+    
+    <extractURLComponents>
+    // Component extraction logic omitted for brevity
+    </extractURLComponents>
+    
+    <returnURLObject>
+    return {
+      // URL object properties omitted for brevity
+    };</returnURLObject>
+  }
+</parseURL>
+
+<functionToPopulateObject>
+function(object){
+        if (!object) object = {};
+        var i, n = this.numHierarchies;
+        for (i = 0; i < n; i++) object[this._hierarchyOrder[i]] = this._member(i);
+        return object;
+    }
+</functionToPopulateObject>
+
+<getCommonAncestor>
+function(controlRange) {
+      <getControlElement>
+      if (controlRange && this.doc.selection && this.doc.selection.type === "Control") {
+        // ...
+      }</getControlElement>
+
+      <getSelectionOrCommonAncestor>
+      selection = this.getSelection(this.doc);
+      // ...
+      </getSelectionOrCommonAncestor>
+    }
+</getCommonAncestor>
+
+<arrayEach>
+function arrayEach(iterator, array) {
+  for (var i = 0; i < array.length; i += 1) {
+    
+    <iteratorExecution>
+    if (iterator(array[i], i, array) === false) {
+      break;
+    }</iteratorExecution>
+  }
+}
+</arrayEach>
+
+<updateModelAndView>
+function(model, attributes, opt) {
+
+        <handleOptions>
+        opt || (opt = {});</handleOptions>
+
+        <updateVariousComponents>
+        // ...
+        this.updateDefaultConnectionPath();
+        // Other update calls omitted for brevity
+        </updateVariousComponents>
+
+        <resetAndUpdateOptions>
+        this.options.perpendicular = null;
+        </resetAndUpdateOptions>
+        
+        <updateFlag>
+        this.updatePostponed = false;</updateFlag>
+
+        <returnSelf>return this;</returnSelf>
+    }
+</updateModelAndView>
+
+<loadJSONConfigFile>
+function loadJSONConfigFile(filePath) {
+    try {
+        <parseConfigFile>
+        return JSON.parse(stripComments(readFile(filePath)));</parseConfigFile>
+    }
+    catch (e) {
+        <handleError>
+        e.message = `Cannot read config file: ${filePath}\nError: ${e.message}`;
+        throw e;</handleError>
+    }
+}
+</loadJSONConfigFile>
+
+<hasEmphasis>
+function hasEmphasis(mark, state) {
+  // Omitted logic related to emphasis determination for brevity
+}
+</hasEmphasis>
+
+<getOperatingSystem>
+function () {
+  <cacheOS>
+  if (this._cache.os === undefined) {
+      this._cache.os = impl.detectOS(this.ua);
+  }</cacheOS>
+  <returnOS>return this._cache.os;</returnOS>
+}
+</getOperatingSystem>
+
+<BloomFilterConstructor>
+function BloomFilter(m, k) {
+    <initializeVariables>
+    var a;
+    if (typeof m !== "number") a = m, m = a.length * 32;
+    var n = Math.ceil(m / 32),
+        i = -1;
+    this.m = m = n * 32;
+    this.k = k;</initializeVariables>
+
+    <handleTypedArrays>
+    if (typedArrays) {
+      // ...
+    }</handleTypedArrays>
+    else {
+      <initializeBuckets>
+      var buckets = this.buckets = [];
+      if (a) while (++i < n) buckets[i] = a[i];
+      else while (++i < n) buckets[i] = 0;
+      this._locations = [];</initializeBuckets>
+    }
+  }
+</BloomFilterConstructor>
+```

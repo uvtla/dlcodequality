@@ -1,0 +1,296 @@
+Here are the SRP annotations for the given functions:
+
+Function 1:
+```javascript
+<compareNodes>
+function(newnode, oldnode) {
+		var res = true,
+			prev = null;
+		var oldorder = <computeOldOrder>this._assistant.order(oldnode.childNodes);</computeOldOrder>
+		return Array.every(newnode.childNodes, function(node, index) {
+			if (node.nodeType === Node.ELEMENT_NODE) {
+				var id = <computeId>this._assistant.id(node);</computeId>
+				if (oldorder.has(id) && oldorder.has(prev)) {
+					res = oldorder.get(id) > oldorder.get(prev);
+				}
+				prev = id;
+			}
+			return res;
+		}, this);
+	}
+</compareNodes>
+```
+Function 2:
+```javascript
+<dataTypeAndValidatorCreation>
+function(set) {
+        var dtype, valids, typeClass, self = this;
+        
+        if (utils.isString(set)) {
+            typeClass = <getTypeClass>this.dataTypes.get(set);</getTypeClass>
+            if (typeClass) { dtype = new typeClass(); }
+        }
+        else if (set) {
+            utils.each(set, function(key, val) {
+                if (!utils.hasOwn(set, key)) {
+                    return;
+                }
+                if (key.toLowerCase() === 'type') {
+                    typeClass = <getTypeClass>self.dataTypes.get(val);</getTypeClass>
+                    if (typeClass) { dtype = new typeClass(); }
+                } else {
+                    typeClass = <getValidator>self.validators.get(key);</getValidator>
+                    if (typeClass) {
+                        if (!valids) { valids = []; }
+                        valids.push(new typeClass(set[key]));
+                    }
+                }
+            });
+        }
+        return new modellingMetas(dtype, valids);
+    }
+</dataTypeAndValidatorCreation>
+```
+Function 3:
+```javascript
+<throttlingFunction>
+function throttled(fn, millis) {
+        var nextInvokeTime = 0;
+        var lastAnswer = null;
+        return function () {
+            var now = Date.now();
+            if (nextInvokeTime < now) {
+                nextInvokeTime = now + millis;
+                lastAnswer = fn();
+            }
+            else {
+                
+            }
+            return lastAnswer;
+        };
+    }
+</throttlingFunction>
+```
+Function 4:
+```javascript
+<computeBounds>
+function calculateBoundsFromNestedArrays (array) {
+    var x1 = null, x2 = null, y1 = null, y2 = null;
+
+    for (var i = 0; i < array.length; i++) {
+      var inner = array[i];
+
+      for (var j = 0; j < inner.length; j++) {
+        <processLonLat>var lonlat = inner[j];
+
+        var lon = lonlat[0];
+        var lat = lonlat[1];
+
+        if (x1 === null) {
+          x1 = lon;
+        } else if (lon < x1) {
+          x1 = lon;
+        }
+
+        if (x2 === null) {
+          x2 = lon;
+        } else if (lon > x2) {
+          x2 = lon;
+        }
+
+        if (y1 === null) {
+          y1 = lat;
+        } else if (lat < y1) {
+          y1 = lat;
+        }
+
+        if (y2 === null) {
+          y2 = lat;
+        } else if (lat > y2) {
+          y2 = lat;
+        }</processLonLat>
+      }
+    }
+
+    return [x1, y1, x2, y2 ];
+  }
+</computeBounds>
+```
+Function 5:
+```javascript
+<RouterInitialization>
+function Router(options) {
+    options = options || {};
+    <validateRouterOptions>
+    if (!options.routeNameFormat || typeof options.routeNameFormat !== 'string') {
+        options.routeNameFormat = '{method}{Name}_{version}';
+    }</validateRouterOptions>
+    
+    <RouterInstantiation>RouterI.call(this, options);
+
+    if (typeof this.options.url !== 'string') {
+        throw new TypeError('`url` option must be a string');
+    }
+
+    var basePath = this.App.config.get('basePath');
+    basePath = (basePath && basePath + '/') || '';
+    this.options.url = <normalizeUrl>this.$normalizeUrl(basePath + this.options.url);</normalizeUrl></RouterInstantiation>
+
+    
+    <RoutePrototypeInitialization>
+    this.Route = function RouterRoute() {
+        Route.apply(this, arguments);
+    };
+    this.Route.prototype = Object.create(Route.prototype);
+    this.Route.prototype.constructor = this.Route;
+    this.Route.prototype.Router = this;
+    </RoutePrototypeInitialization>
+}
+</RouterInitialization>
+```
+Function 6:
+```javascript
+<patchRequests>
+function() {
+			global.requestSSLInitializing = false;
+			global.requestSSLInitialized = true;
+			global.requestSSLHooks = null;
+			
+			request.Request.prototype.init = patchedInit;
+			debug('init done');
+			return patchedInit.apply(self,args);
+		}
+</patchRequests>
+```
+Function 7:
+```javascript
+<shiftStringCodes>
+function(str, n) {
+    var result = '';
+    n = n || 0;
+    stringCodes(str, function(c) {
+      result += chr(c + n);
+    });
+    return result;
+  }
+</shiftStringCodes>
+```
+Function 8:
+```javascript
+<validateStringFormat>
+function validateFormat(attr, conf, err) {
+    if (nullCheck.call(this, attr, conf, err)) return;
+    <performValidation>
+    if (typeof this[attr] === 'string') {
+        if (!this[attr].match(conf['with'])) {
+            err();
+        }
+    } else {
+        err();
+    }
+    </performValidation>
+}
+</validateStringFormat>
+```
+Function 9:
+```javascript
+<translateGraphic>
+function (x, y) {
+            if (this.settings.subPixel === false) {
+                this.backBufferContext2D.translate(~~x, ~~y);
+            } else {
+                this.backBufferContext2D.translate(x, y);
+            }
+        }
+</translateGraphic>
+```
+Function 10:
+```javascript
+<loadTemplatePartials>
+function loadPartials(template, templatePath) {
+    var templateDir = path.dirname(templatePath)
+    var partialRegexp = <compilePartialRegex>new RegExp(
+      escapeRegex(mustache.tags[0]) +
+        '>\\s*(\\S+)\\s*' +
+        escapeRegex(mustache.tags[1]),
+      'g'
+    )</compilePartialRegex>
+
+    var partialMatch
+    while ((partialMatch = partialRegexp.exec(template))) {
+      <handlePartialLoading>
+      var partialName = partialMatch[1]
+
+      if (!partials[partialName]) {
+        try {
+          var partialPath = null
+          var partial = null
+
+          <loadSpecificPartial>
+          
+          
+          
+          
+          if (path.extname(partialName) !== '') {
+            partialPath = path.resolve(templateDir, partialName)
+            partial = fs.readFileSync(partialPath, 'utf8')
+          } else {
+            
+            
+            
+            
+            partialPath = path.resolve(templateDir, partialName)
+
+            if (fs.existsSync(partialPath)) {
+              partial = fs.readFileSync(partialPath, 'utf8')
+            } else {
+              
+              
+              
+              
+              
+              if (typeof options.extension === 'string') {
+                partialPath = path.resolve(
+                  templateDir,
+                  partialName + options.extension
+                )
+
+                if (fs.existsSync(partialPath)) {
+                  partial = fs.readFileSync(partialPath, 'utf8')
+                }
+              }
+
+              
+              
+              
+              if (partial === null) {
+                partialPath = path.resolve(
+                  templateDir,
+                  partialName + '.mustache'
+                )
+
+                partial = fs.readFileSync(partialPath, 'utf8')
+              }
+            }
+          }</loadSpecificPartial>
+
+          partials[partialName] = partial
+          <recursePartials>loadPartials.call(this, partial, partialPath)</recursePartials>
+        } catch (ex) {
+          this.emit(
+            'error',
+            new PluginError(
+              'gulp-mustache',
+              
+              
+              
+              
+              'Unable to load partial file: ' + ex.message
+            )
+          )
+        }
+      }</handlePartialLoading>
+    }
+  }
+</loadTemplatePartials>
+```

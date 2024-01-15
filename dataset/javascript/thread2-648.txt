@@ -1,0 +1,447 @@
+```javascript
+<textureSamplerParameter>
+function(textureWrap) {
+    var gl = this.gl;
+    gl.samplerParameteri(this.id, gl.TEXTURE_WRAP_S, textureWrap);
+    gl.samplerParameteri(this.id, gl.TEXTURE_WRAP_T, textureWrap);
+}
+</textureSamplerParameter>
+
+<findAllMatchingSelectorsInText>
+function _findAllMatchingSelectorsInText(text, selector, mode) {
+    <extractAllSelectors>
+    var allSelectors = extractAllSelectors(text, mode);
+    </extractAllSelectors>
+    var result = [];
+
+    <prepareSelectorMatch>
+    var classOrIdSelector = selector[0] === "." || selector[0] === "#";
+
+    if (selector[0] === ".") {
+        selector = "\\" + selector;
+    }
+
+    if (!classOrIdSelector) {
+        selector = "(^|[\\s>+~])" + selector;
+    }
+
+    var re = new RegExp(selector + "(\\[[^\\]]*\\]|:{1,2}[\\w-()]+|\\.[\\w-]+|#[\\w-]+)*\\s*$", classOrIdSelector ? "" : "i");
+    </prepareSelectorMatch>
+
+    <searchMatchingSelectors>
+    allSelectors.forEach(function (entry) {
+        var actualSelector = entry.selector;
+        if (entry.selector.indexOf("&") !== -1 && entry.parentSelectors) {
+            var selectorArray = entry.parentSelectors.split(" / ");
+            selectorArray.push(entry.selector);
+            actualSelector = _getSelectorInFinalCSSForm(selectorArray);
+        }
+        if (actualSelector.search(re) !== -1) {
+            result.push(entry);
+        } else if (!classOrIdSelector) {
+            if (/\*\s*$/.test(actualSelector)) {
+                result.push(entry);
+            }
+        }
+    });
+    </searchMatchingSelectors>
+
+    return result;
+}
+</findAllMatchingSelectorsInText>
+
+<ENV_node>
+function ENV_node() {
+    <setupEnvironment>
+    var Module = module.constructor;
+    var parent = module.parent;
+    var req = util.bind(parent, parent && parent.require || require);
+    var fs = req('fs');
+    var path = req('path');
+    var vm = req('vm');
+    this.requireCache = require.cache;
+    this.main = require.main;
+    this.name = 'node';
+    this.global = global;
+    this.isWindowsNode = (process.platform === 'win32');
+    var _cwd = process.cwd();
+    this.setCwd = function (cwd) { _cwd = path.resolve(_cwd, cwd); };
+    this.getCwd = function () { return _cwd; };
+    this.pathSep = path.sep;
+    </setupEnvironment>
+
+    <logging>
+    this.log = function() {
+        var msg;
+        try {
+            msg = Array.prototype.map.call(arguments, function(a) {
+                if ((a instanceof Error) && a.message) {
+                    return 'Error:' + a.message + '\nStack:' + a.stack + '\nArguments:' + a.arguments;
+                }
+                return (typeof a == 'string' ? a : JSON.stringify(a));
+            }).join(' ') + '\n';
+        } catch(e) {
+            msg = Array.prototype.join.call(arguments, ' ') + '\n';
+        }
+        process.stderr.write(msg);
+        return msg;
+    };
+    </logging>
+
+    <getPath>
+    this.getPath = function() {
+        return __dirname;
+    };
+    </getPath>
+
+    <evaluateCode>
+    this.eval = function (code, path) {
+        return vm.runInThisContext(code, path, true);
+    };
+    </evaluateCode>
+
+    <fetchFileContents>
+    this.fetch = function (p) {
+        <resolveFilePath>
+        p = util.resolve(this.getCwd(), p);
+        var filename, lowercaseFilename, files;
+        try {
+            var dirname = path.dirname(p);
+            filename = path.basename(p);
+            lowercaseFilename = filename.toLowerCase();
+            files = fs.readdirSync(dirname);
+        } catch (e) {
+            return false;
+        }
+        </resolveFilePath>
+
+        <validateFileCase>
+        for (var i = 0, testName; testName = files[i]; ++i) {
+            if (testName.toLowerCase() == lowercaseFilename && testName != filename) {
+                throw "Invalid case when importing [" + p + "].  You probably meant" + testName;
+            }
+        }
+        </validateFileCase>
+
+        <readFileContents>
+        try {
+            return fs.readFileSync(p, 'utf8');
+        } catch(e) {
+            return false;
+        }
+        </readFileContents>
+    };
+    </fetchFileContents>
+
+    <loadExternalModule>
+    var stackRe = /\((?!module.js)(?:file:\/\/)?(.*?)(:\d+)(:\d+)\)/g;
+    this.loadModule = function (baseLoader, fromDir, fromFile, item, opts) {
+        <initialFileResolution>
+        if (fromFile == INITIAL_FILE && !opts.initialImport) {
+            var stack = new Error().stack;
+            var match;
+            stackRe.lastIndex = 0;
+            do {
+                match = stackRe.exec(stack);
+            } while (match && /jsio\.js$/.test(match[1]));
+
+            if (match) {
+                fromDir = path.dirname(match[1]);
+                fromFile = path.basename(match[1]);
+            }
+        }
+        </initialFileResolution>
+
+        <attemptBaseLoader>
+        try {
+            return baseLoader(null, fromDir, fromFile, item, opts);
+        } catch(e) {
+            if (e.code == MODULE_NOT_FOUND) {
+                var require = req;
+                var module;
+                var filename = path.join(fromDir, fromFile);
+                module = this.requireCache[filename];
+                if (!module) {
+                    module = new Module(filename);
+                    module.filename = filename;
+                    module.paths = Module._nodeModulePaths(path.dirname(filename));
+                }
+                var request = item.original || item.from;
+                try {
+                    return {
+                        exports: module ? module.require(request) : require(request),
+                        path: item.from
+                    };
+                } catch (e2) {
+                    if (e2.code == MODULE_NOT_FOUND) {
+                        throw e;
+                    }
+                    throw e2;
+                }
+            } else {
+                throw e;
+            }
+        }
+        </attemptBaseLoader>
+    };
+    </loadExternalModule>
+}
+</ENV_node>
+
+<configureRequestOptions>
+function(options) {
+    <initializeDefaultOptions>
+    options = options || {};
+    if (!options.url && !options.path) {
+        options.path = '';
+    }
+    </initializeDefaultOptions>
+
+    <prepareRequestOptions>
+    var requestOptions = {
+        method: options.method || 'GET',
+        url: options.url || this.urlRoot + options.path,
+        qs: options.qs || {},
+        headers: options.headers || {},
+    };
+    </prepareRequestOptions>
+
+    <setRequestBody>
+    if (options.body) {
+        requestOptions.body = options.body;
+        requestOptions.json = _.isBoolean(options.json) ? options.json : true;
+    } else if (options.form) {
+        requestOptions.form = options.form;
+        requestOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8';
+    } else if (_.isBoolean(options.json) || _.isObject(options.json)) {
+        requestOptions.json = options.json;
+    }
+    </setRequestBody>
+
+    <addAuthenticationInfo>
+    if (options.auth) {
+        requestOptions.auth = options.auth;
+    }
+
+    var accessToken = options.access_token || this.get('access_token');
+    if (accessToken) {
+        _.defaults(requestOptions.headers, {
+            Authorization: ['Bearer', accessToken].join(' ')
+        });
+    }
+
+    var oauthToken = options.oauth_token || this.get('oauth_token');
+    if (oauthToken) {
+        _.defaults(requestOptions.headers, {
+            Authorization: ['OAuth', oauthToken].join(' ')
+        });
+    }
+
+    var authorizationToken = options.authorization_token || this.get('authorization_token');
+    if (authorizationToken) {
+        _.defaults(requestOptions.headers, {
+            Authorization: authorizationToken
+        });
+    }
+    </addAuthenticationInfo>
+
+    return requestOptions;
+}
+</configureRequestOptions>
+
+<setSliderValue>
+function (max, skipAnim, force, silent) {
+    var maxs = this.maxSlider,
+        self = this;
+
+    <prepareUpdateCallback>
+    this.activeSlider = maxs;
+    this._oneTimeCallback(maxs, 'slideEnd', function () {
+        self.updateValue(silent);
+        setTimeout(function () { self._cleanEvent(maxs, 'slideEnd'); }, 0);
+    });
+    </prepareUpdateCallback>
+
+    <setSliderValue>
+    maxs.setValue(max, skipAnim, force);
+    </setSliderValue>
+}
+</setSliderValue>
+
+<ModuleConstructor>
+function (el, userConfig) {
+    <initModule>
+    this.initEvents();
+    this.beforeInitEvent.fire(Module);
+    </initModule>
+
+    <configureModule>
+    this.cfg = new Config(this);
+    if (this.isSecure) {
+        this.imageRoot = Module.IMG_ROOT_SSL;
+    }
+    </configureModule>
+
+    <prepareElementAndId>
+    if (typeof el == "string") {
+        elId = el;
+        el = document.getElementById(el);
+        if (!el) {
+            el = (createModuleTemplate()).cloneNode(false);
+            el.id = elId;
+        }
+    }
+    this.id = Dom.generateId(el);
+    this.element = el;
+    </prepareElementAndId>
+
+    <searchChildElements>
+    child = this.element.firstChild;
+    if (child) {
+        var fndHd = false, fndBd = false, fndFt = false;
+        do {
+            if (1 == child.nodeType) {
+                if (!fndHd && Dom.hasClass(child, Module.CSS_HEADER)) {
+                    this.header = child;
+                    fndHd = true;
+                } else if (!fndBd && Dom.hasClass(child, Module.CSS_BODY)) {
+                    this.body = child;
+                    fndBd = true;
+                } else if (!fndFt && Dom.hasClass(child, Module.CSS_FOOTER)) {
+                    this.footer = child;
+                    fndFt = true;
+                }
+            }
+        } while ((child = child.nextSibling));
+    }
+    </searchChildElements>
+
+    <applyUserConfigAndFinalize>
+    this.initDefaultConfig();
+    if (userConfig) {
+        this.cfg.applyConfig(userConfig, true);
+    }
+    if (!Config.alreadySubscribed(this.renderEvent, this.cfg.fireQueue, this.cfg)) {
+        this.renderEvent.subscribe(this.cfg.fireQueue, this.cfg, true);
+    }
+    this.initEvent.fire(Module);
+    </applyUserConfigAndFinalize>
+}
+</ModuleConstructor>
+
+<listDevices>
+async function listDevices(showAll) {
+    <retrieveDevices>
+    const ports = (await _serialport.list()) || [];
+    </retrieveDevices>
+
+    <filterKnownDevices>
+    if (showAll) {
+        return ports;
+    } else {
+        return ports.filter(function (item) {
+            return knownVendorIDs.includes(item.vendorId && item.vendorId.toUpperCase());
+        });
+    }
+    </filterKnownDevices>
+}
+</listDevices>
+
+<updateClock>
+function(time, doNotAddPlayClass) {
+    var t = this;
+
+    <updateInternalTime>
+    if (!doNotAddPlayClass) {
+        if (!t.factory.countdown) {
+            t.factory.time.time++;
+        } else {
+            if (t.factory.time.time <= 0) {
+                t.factory.stop();
+            }
+            t.factory.time.time--;
+        }
+    }
+    </updateInternalTime>
+
+    <setDigits>
+    var offset = t.factory.lists.length - time.length;
+    if (offset < 0) {
+        offset = 0;
+    }
+
+    var totalNew = 0;
+    var reFlip = false;
+
+    $.each(time, function (i, digit) {
+        i += offset;
+
+        var list = t.factory.lists[i];
+
+        if (list) {
+            var currentDigit = list.digit;
+            list.select(digit);
+
+            if (digit != currentDigit && !doNotAddPlayClass) {
+                list.play();
+            }
+        } else {
+            t.addDigit(digit);
+            reFlip = true;
+        }
+    });
+
+    for (var x = 0; x < time.length; x++) {
+        if (x >= offset && t.factory.lists[x].digit != time[x]) {
+            t.factory.lists[x].select(time[x]);
+        }
+    }
+    </setDigits>
+}
+</updateClock>
+
+<globalConfigurationFunction>
+function(options) {
+    <configureLogLevel>
+    var logTag = options.logLevel;
+    if (Util.exists(logTag)) {
+        Errors.checkArgumentValid(LoggerCore.isValidLogTag(logTag),
+            ErrorCodes.ERR_GLOGAL_CONFIGURE_INVALID_LOG_LEVEL);
+        Logger.getInstance().configure({ level: LoggerCore.logTagToLevel(logTag) });
+    }
+    </configureLogLevel>
+
+    <configureInsecureConnect>
+    var insecureConnect = options.insecureConnect;
+    if (Util.exists(insecureConnect)) {
+        Errors.checkArgumentValid(Util.isBoolean(insecureConnect),
+            ErrorCodes.ERR_GLOBAL_CONFIGURE_INVALID_INSECURE_CONNECT);
+        GlobalConfig.setInsecureConnect(insecureConnect);
+    }
+    </configureInsecureConnect>
+}
+</globalConfigurationFunction>
+
+<replaceAllFunction>
+function replaceAll(str = '', pattern, replacement) {
+    <verifyArguments>
+    if (arguments.length < 2) {
+        return str;
+    }
+    </verifyArguments>
+
+    <performReplacement>
+    let rs = str;
+    if (lodash.isPlainObject(pattern)) {
+        for (let key in pattern) {
+            rs = rs.replace(new RegExp('{' + key + '}', "gm"), pattern[key])
+        }
+    } else {
+        rs = rs.replace(new RegExp(pattern, "gm"), replacement)
+    }
+    </performReplacement>
+
+    return rs;
+}
+</replaceAllFunction>
+```

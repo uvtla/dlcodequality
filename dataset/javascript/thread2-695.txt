@@ -1,0 +1,220 @@
+<function>
+function(el) {
+    if (!el) {
+      return false;
+    }
+    var styles = _getComputedStyle(el, null);
+    if (!styles) {
+      return false;
+    }
+    var hasCssHeight = _parseFloat(styles.height) > 0;
+    var hasCssWidth = _parseFloat(styles.width) > 0;
+    var hasCssTop = _parseFloat(styles.top) >= 0;
+    var hasCssLeft = _parseFloat(styles.left) >= 0;
+    var cssKnows = hasCssHeight && hasCssWidth && hasCssTop && hasCssLeft;
+    var rect = cssKnows ? null : _getElementPosition(el);
+    var isVisible = styles.display !== "none" && styles.visibility !== "collapse" && (cssKnows || !!rect && (hasCssHeight || rect.height > 0) && (hasCssWidth || rect.width > 0) && (hasCssTop || rect.top >= 0) && (hasCssLeft || rect.left >= 0));
+    return isVisible;
+  }
+</function>
+
+<executeCommand>
+function executeCommand(parameters) {
+    const configFilePath = path.join(process.cwd(), plugin.config.policiesPath);
+    return mkdirpAsync(configFilePath)
+    .then(() => {
+      <createPolicyDocument>
+      const document = {
+        Version: '2012-10-17',
+        Statement: [{
+          Effect: 'Deny',
+          Action: ['*'],
+          Resource: ['*']
+        }]
+      };
+      </createPolicyDocument>
+
+      <writePolicyToFile>
+      return fs.writeFileAsync(configFilePath + path.sep + parameters.identifier + '.json', JSON.stringify(document, null, 2));
+      </writePolicyToFile>
+    })
+    .then(() => {
+      <logPolicyCreation>
+      const msg = '\n  The IAM policy ' + icli.format.info(parameters.identifier)
+                + ' has been created in ' + icli.format.info(configFilePath + path.sep + parameters.identifier + '.json') + '\n\n';
+      icli.print(msg);
+      </logPolicyCreation>
+    });
+  }
+</executeCommand>
+
+<addEvent>
+function addEvent(el,name,func){
+		if(name.match(" ")){
+			var a = name.split(' ');
+			for(var i=0;i<a.length;i++){
+				addEvent( el, a[i], func);
+			}
+		}
+		if(el.addEventListener){
+			el.removeEventListener(name, func, false);
+			el.addEventListener(name, func, false);
+		}
+		else {
+			el.detachEvent('on'+name, func);
+			el.attachEvent('on'+name, func);
+		}
+	}
+</addEvent>
+
+<function>
+function (layer) {
+		if (!this.hasLayer(layer)) {
+			return this;
+		}
+		if (layer in this._layers) {
+			layer = this._layers[layer];
+		}
+
+		layer.removeEventParent(this);
+
+		var id = L.stamp(layer);
+
+		if (this._map && this._layers[id]) {
+			<removeLayerFromMap>
+			this._map._originalRemoveLayer(this._layers[id]);
+			</removeLayerFromMap>
+		}
+
+		<deleteLayerEntry>
+		delete this._layers[id];
+		</deleteLayerEntry>
+
+		return this.fire('layerremove', {layer: layer});
+	}
+</function>
+
+<RAgent_onEvent>
+function RAgent_onEvent(message) {
+  DEBUG("RAgent.onEvent(" + message.name + ")");
+  var name = message.name;
+  var body = message.body;
+  var agent;
+
+  if (message.from == "server") {
+    <handleAgentEvents>
+    if ((name == "agentCreated") || (name == "agentDestroyed")) {
+      agent = this._session._ragents.get(body.id);
+      if (null == agent) {
+        agent = new RAgent(this._session, body);
+        this._session._ragents.set(body.id, agent);
+      }
+
+      this.emit(name, agent.info);
+    }
+    else {
+      this.emit(name, body);
+    }
+    </handleAgentEvents>
+  }
+  else {
+    <emitEvent>
+    this.emit(name, body);
+    </emitEvent>
+  }
+}
+</RAgent_onEvent>
+
+<ekurtosis>
+function ekurtosis( arr, path, sep ) {
+	var len = arr.length,
+		opts = {},
+		dget,
+		dset,
+		v, i;
+	if ( arguments.length > 2 ) {
+		opts.sep = sep;
+	}
+	if ( len ) {
+		dget = deepGet( path, opts );
+		dset = deepSet( path, opts );
+		for ( i = 0; i < len; i++ ) {
+			v = dget( arr[ i ] );
+			if ( typeof v === 'number' ) {
+				dset( arr[i], EKURTOSIS ( v ) );
+			} else {
+				dset( arr[i], NaN );
+			}
+		}
+	}
+	return arr;
+}
+</ekurtosis>
+
+<function>
+function(func, context, oldObserved, onchanged) {
+            
+            var info = can.__read(func, context),
+                
+                newObserveSet = info.observed;
+            
+            bindNewSet(oldObserved, newObserveSet, onchanged);
+            unbindOldSet(oldObserved, onchanged);
+
+            return info;
+        }
+</function>
+
+<keywords>
+function keywords (opts) {
+    if (!R.is(Array, opts.keywords)) {
+      return Promise.reject(Error('an array of seed keywords is required for this strategy'));
+    }
+    return getAppsFromKeywords(opts.keywords);
+  }
+</keywords>
+
+<_parsePhonetics>
+function _parsePhonetics ($containor) {
+  const phonetics = []
+
+  $containor.find('.pronounce').each((index, item) => {
+    <extractPhonetics>
+    const html = $(item).html()
+    const content = removeTagsAndSpaces($(item).html())
+
+    debug(`phonetics parse html: ${html}`)
+    debug(`phonetics parse content: ${content}`)
+    </extractPhonetics>
+
+    if (!content) {
+      return
+    }
+
+    <createPhoneticObject>
+    const data = content.split(' ')
+    let phonetic;
+
+    if (data.length > 1) {
+      phonetic = new Phonetic(...data)
+    } else {
+      phonetic = new Phonetic('', ...data)
+    }
+
+    debug('phonetics object: %O', phonetic)
+    </createPhoneticObject>
+
+    phonetics.push(phonetic)
+  })
+
+  return phonetics
+}
+</_parsePhonetics>
+
+<function>
+function(key) {
+			Y.log("Fetching item at  " + key);
+			var item = this._getItem(key);
+			return YL.isValue(item) ? this._getValue(item) : null; 
+		}
+</function>

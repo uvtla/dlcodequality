@@ -1,0 +1,285 @@
+<initializeSet>
+function (items) {
+        this.items = [];
+	this.bindings = {};
+        this.length = 0;
+        this.type = "set";
+        if (items) {
+            for (var i = 0, ii = items.length; i < ii; i++) {
+                if (items[i]) {
+                    this[this.items.length] = this.items[this.items.length] = items[i];
+                    this.length++;
+                }
+            }
+        }
+    }
+</initializeSet>
+
+<applyFunctionToLisWithSelector>
+function (list, func, args, selector) {
+				for (var i = 0, j = list.length; i < j; i++) {
+					list[i][func].apply(list[i], args);
+				}
+				return selector(list);
+			}
+</applyFunctionToLisWithSelector>
+
+<setModelAttributes>
+function(key, value, options) {
+      var attrs, attr, val;
+
+      <normalizeAttributes>
+      if (_.isObject(key) || key == null) {
+        attrs = key;
+        options = value;
+      } else {
+        attrs = {};
+        attrs[key] = value;
+      }
+      </normalizeAttributes>
+
+      <defaultOptions>
+      
+      options || (options = {});
+      </defaultOptions>
+      <guardClauses>
+      if (!attrs) return this;
+      if (attrs instanceof Model) attrs = attrs.attributes;
+      if (options.unset) for (attr in attrs) attrs[attr] = void 0;
+      </guardClauses>
+
+      <validateAttributes>
+      if (!this._validate(attrs, options)) return false;
+      </validateAttributes>
+
+      <updateId>
+      if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
+      </updateId>
+
+      <trackChanges>
+      var changes = options.changes = {};
+      var now = this.attributes;
+      var escaped = this._escapedAttributes;
+      var prev = this._previousAttributes || {};
+      </trackChanges>
+
+      <applyChangesAndHandleUpdates>
+      for (attr in attrs) {
+        val = attrs[attr];
+
+        
+        if (!_.isEqual(now[attr], val) || (options.unset && _.has(now, attr))) {
+          delete escaped[attr];
+          (options.silent ? this._silent : changes)[attr] = true;
+        }
+
+        
+        options.unset ? delete now[attr] : now[attr] = val;
+
+        
+        
+        if (!_.isEqual(prev[attr], val) || (_.has(now, attr) != _.has(prev, attr))) {
+          this.changed[attr] = val;
+          if (!options.silent) this._pending[attr] = true;
+        } else {
+          delete this.changed[attr];
+          delete this._pending[attr];
+        }
+      }
+      </applyChangesAndHandleUpdates>
+
+      <triggerChangeIfNotSilent>
+      if (!options.silent) this.change(options);
+      </triggerChangeIfNotSilent>
+      return this;
+    }
+</setModelAttributes>
+
+<markInstance>
+function mark (instance) {
+  <registerInstance>
+  if (!instanceMap.has(instance.__VUE_DEVTOOLS_UID__)) {
+    instanceMap.set(instance.__VUE_DEVTOOLS_UID__, instance)
+    </registerInstance>
+    <registerBeforeDestroyHook>
+    instance.$on('hook:beforeDestroy', function () {
+      instanceMap.delete(instance.__VUE_DEVTOOLS_UID__)
+    })
+    </registerBeforeDestroyHook>
+  }
+}
+</markInstance>
+
+<decomposeFloatingPointValue>
+function frexp( x ) {
+	<handleSpecialCases>
+	var exp;
+	var w;
+	if (
+		x === 0 ||    
+		x !== x ||
+		x === pinf ||
+		x === ninf
+	) {
+		return [ x, 0 ];
+	}
+	</handleSpecialCases>
+	
+	<normalizeAndExtractBase>
+	x = normalize( x );
+	</normalizeAndExtractBase>
+
+	<calculateExponent>
+	exp = floatExp( x[0] ) + x[ 1 ] + 1;
+	</calculateExponent>
+
+	<extractAndManipulateSignificand>
+	w = toWord( x[ 0 ] );
+
+	
+	w &= CLEAR_EXP_MASK;
+
+	
+	w |= SET_EXP_MASK;
+	</extractAndManipulateSignificand>
+
+	<returnDecomposedValue>
+	return [ fromWord(w), exp ];
+	</returnDecomposedValue>
+}
+</decomposeFloatingPointValue>
+
+<createPlatformApplication>
+function(name, platform, attributes) {
+        <buildParams>
+        var params = {
+            Name: name,
+            Platform: platform,
+            Attributes: attributes
+        };
+        </buildParams>
+
+        <APICall>
+        return this.svc.createPlatformApplication(params);
+        </APICall>
+    }
+</createPlatformApplication>
+
+<executeAction>
+function execute(_ref7) {
+      <extractParameters>
+      var actionName = _ref7.actionName;
+      var isPaused = _ref7.isPaused;
+      </extractParameters>
+
+      <determineNextAction>
+      var nextActionName = getNextActionName(actionName);
+      var wasPaused = stores.redux.isPaused;
+      </determineNextAction>
+
+      <scheduleNextAction>
+      var timeoutID = nextActionName && !isPaused ? schedule(nextActionName) : null;
+      </scheduleNextAction>
+
+      <handlePauseOrResumeDetection>
+      if (isPaused && !wasPaused) {
+        log.info('pausing activity detection');
+        detection.stop();
+      }
+      if (!isPaused && wasPaused) {
+        log.info('unpausing activity detection');
+        detection.start();
+      }
+      </handlePauseOrResumeDetection>
+
+      <updateState>
+      setState(actionName, { actionName: actionName,
+        isIdle: typeof nextActionName === 'undefined',
+        isPaused: isPaused,
+        timeoutID: timeoutID
+      });
+      </updateState>
+
+      <dispatchAction>
+      getAction(actionName)(dispatch, getState, _getChildContext(context));
+      </dispatchAction>
+    }
+</executeAction>
+
+<promiseForCustomElementCreation>
+function renderNode(rootNode) {
+    let createdPromises = [];
+
+    <retrieveDocument>
+    var document = getDocument(rootNode);
+    </retrieveDocument>
+
+    <applyCustomElementPrototype>
+    recurseTree(rootNode, (foundNode) => {
+        if (foundNode.tagName) {
+            let nodeType = foundNode.tagName.toLowerCase();
+            let customElement = registeredElements[nodeType];
+            if (customElement) {
+                
+                Object.setPrototypeOf(foundNode, customElement);
+                if (customElement.createdCallback) {
+                    <handleCreatedCallback>
+                    createdPromises.push(new Promise((resolve) => {
+                        resolve(customElement.createdCallback.call(foundNode, document));
+                    }));
+                    </handleCreatedCallback>
+                }
+            }
+        }
+    });
+    </applyCustomElementPrototype>
+
+    <resolvePromisesAndReturnNode>
+    return Promise.all(createdPromises).then(() => rootNode);
+    </resolvePromisesAndReturnNode>
+}
+</promiseForCustomElementCreation>
+
+<createNodeByPath>
+function create_node_by_path(context, path, len, tracker) {
+    <initializeRootNode>
+	let node = context.state.rootNode;
+    </initializeRootNode>
+    <traverseAndCreate>
+	for (let i = 0; i < len; i++) {
+		const k = path[i];
+		if (k == "_") continue;
+		if (k == "#") {
+			node = context.state.rootNode;
+			continue;
+		}
+		if (node_type(node[k]) != NodeTypes.NODE) {
+			<commitNodeProperty>
+			commit_node_prop(context, node, k, create_node(), tracker);
+			</commitNodeProperty>
+		}
+		node = node[k];
+	}
+    </traverseAndCreate>
+	return node;
+}
+</createNodeByPath>
+
+<combineDatabaseReducers>
+function combineReducers (reducers) {
+  <createDatabaseReducers>
+  const databaseReducers = Object.keys(reducers)
+    .map((collectionName) => {
+      const reducer = reducers[ collectionName ]
+      return createDatabaseReducer(reducer, collectionName)
+    })
+  </createDatabaseReducers>
+
+  <applyReducersToDatabase>
+  return (database, event) => {
+    const changesets = databaseReducers.map((reducer) => reducer(database, event))
+    return combineChangesets(changesets)
+  }
+  </applyReducersToDatabase>
+}
+</combineDatabaseReducers>

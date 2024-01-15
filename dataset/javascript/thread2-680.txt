@@ -1,0 +1,189 @@
+1)
+
+<calculateDifferences>
+function(items) {
+  var hasRelativePositioning = hasNumberProperty(items, 'relativePosition');
+
+  for(var i = 0; i < items.length; i++) {
+      if(i == items.length - 1)
+          items[i].diffWithNextRelativePos = undefined;
+      else
+          items[i].diffWithNextRelativePos = items[i + 1].relativePosition - items[i].relativePosition;
+  }
+}
+</calculateDifferences>
+
+2)
+
+<performFFT2D>
+function fft2DArray(data, nRows, nCols) {
+    var iRow, iCol;
+    var ftCols = (nCols / 2 + 1);
+    var ftRows = nRows * 2;
+    var tempTransform = new Array(ftRows * ftCols);
+    FFT.init(nCols);
+    
+    var tmpRows = {re: new Array(nCols), im: new Array(nCols)};
+    for (iRow = 0; iRow < nRows / 2; iRow++) {
+        <processRow>
+        // Code to process each row
+        </processRow>
+    }
+    
+    <cleanUpRowVars>
+    row1 = null;
+    row2 = null;
+    </cleanUpRowVars>
+    
+    var finalTransform = new Array(ftRows * ftCols);
+
+    FFT.init(nRows);
+    for (iCol = ftCols - 1; iCol >= 0; iCol--) {
+        <processColumn>
+        // Code to process each column
+        </processColumn>
+    }
+    return finalTransform;
+}
+</performFFT2D>
+
+3)
+
+<extractCertificate>
+function (host, port, cb) {
+    var err,
+        data = {};
+
+    var openssl = spawn('openssl', ['s_client', '-connect', host + ':' + port, '-servername', host]);
+
+    <setupExitHandler>
+    openssl.on('exit', function() {
+        clearTimeout(timeoutTimer);
+    });
+    </setupExitHandler>
+
+    <handleStderrData>
+    openssl.stderr.on('data', function (out) {
+        // Code to handle stderr data
+    });
+    </handleStderrData>
+
+    <handleStdoutData>
+    openssl.stdout.on('data', function (out) {
+        // Code to handle stdout data
+    });
+    </handleStdoutData>
+
+    <endInput>
+    openssl.stdin.end();
+    </endInput>
+
+    <setupTimeoutTimer>
+    var timeoutTimer = setTimeout(function() {
+        openssl.kill();
+        // Code to handle timeout
+    }, 5000);
+    </setupTimeoutTimer>
+}
+</extractCertificate>
+
+4)
+
+<compileSingleAsset>
+function (assetFilePath, cb) {
+    if (this.verbose) {
+        console.log('compileSingleAsset: compiling ' + assetFilePath);
+    }
+    var self = this;
+  
+    assetFilePath = path.resolve(assetFilePath);
+
+    <determineBaseDirectory>
+    // Code to determine the base directory
+    </determineBaseDirectory>
+
+    <processAsset>
+    if (!baseDir) {
+        cb(new Error('Asset must be in one of the asset paths'));
+    } else {
+        // ...
+        async.waterfall([
+            //...
+        ], cb);
+    }
+    </processAsset>
+}
+</compileSingleAsset>
+
+5)
+
+<createDelimiterRegex>
+function createDelimiterRegex(options) {
+    // Code to create delimiter regex
+}
+</createDelimiterRegex>
+
+6)
+
+<initializeEventStore>
+function (eventStore) {
+    if (!eventStore || !_.isObject(eventStore)) {
+        var err = new Error('Please pass a valid eventStore!');
+        debug(err);
+        throw err;
+    }
+    this.eventStore = eventStore;
+}
+</initializeEventStore>
+
+7)
+
+<configureBatchProcessing>
+function(batchSizeOrIteratee, iteratee) {
+    // Code to configure batch processing
+}
+</configureBatchProcessing>
+
+8)
+
+<initializeChart>
+function($super, container) {
+    $super(container);
+
+    <setupChartProperties>
+    // Code to setup chart properties
+    </setupChartProperties>
+}
+</initializeChart>
+
+9)
+
+<validateNode>
+function validate(options, context, reportContext, node) {
+    <performValidations>
+    // Code to perform validations on node
+    </performValidations>
+    
+    <validateChildrenNodes>
+    if (node.children) {
+        node.children.forEach(validate.bind(this, options, context, reportContext))
+    }
+    </validateChildrenNodes>
+}
+</validateNode>
+
+10)
+
+<initializeAudio>
+function(_key){
+  var _cch = _pcache[_key];
+  if (!_cch) return;
+  _cch.audio = _h.__getAudioInst({
+      url:_cch.url,
+      onerror:_doErrorAction._$bind(null,_key),
+      ontimeupdate:_doTimeUpdateCallback._$bind(null,_key),
+      onstatechange:_doStateChangeAction._$bind(null,_key)
+  });
+  _cch.audio._$play();
+}
+</initializeAudio>

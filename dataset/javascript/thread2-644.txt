@@ -1,0 +1,181 @@
+```javascript
+<verifySignature>
+async function verify(oid, hash_algo, { R, S }, m, publicKey, hashed) {
+  const signature = util.concatUint8Array([R, S]);
+  return nacl.sign.detached.verify(hashed, signature, publicKey.subarray(1));
+}
+</verifySignature>
+
+<CordovaAudioSoundInstanceConstructor>
+function CordovaAudioSoundInstance(src, startTime, duration, playbackResource) {
+    this.AbstractSoundInstance_constructor(src, startTime, duration, playbackResource);	
+    this.playWhenScreenLocked = null;	
+    this._playStartTime = null;	
+    this._audioSpriteTimeout = null;	
+    this._audioSprite = false;	
+    this._audioSpriteEndHandler = createjs.proxy(this._handleAudioSpriteComplete, this);
+    this._mediaPlayFinishedHandler = createjs.proxy(this._handleSoundComplete, this);
+    this._mediaErrorHandler = createjs.proxy(this._handleMediaError, this);
+    this._mediaProgressHandler = createjs.proxy(this._handleMediaProgress, this);
+    this._playbackResource = new Media(src, this._mediaPlayFinishedHandler, this._mediaErrorHandler, this._mediaProgressHandler);
+    if (duration) {
+        this._audioSprite = true;
+    } else {
+        this._setDurationFromSource();
+    }
+}
+</CordovaAudioSoundInstanceConstructor>
+
+<addToAttributeList>
+function addToAttributeList(sAttribute, sValue, bPrepend) {
+    var sAttributes = this.attr(sAttribute);
+    if (!sAttributes) {
+        return this.attr(sAttribute, sValue);
+    }
+    var aAttributes = sAttributes.split(" ");
+    if (aAttributes.indexOf(sValue) == -1) {
+        bPrepend ? aAttributes.unshift(sValue) : aAttributes.push(sValue);
+        this.attr(sAttribute, aAttributes.join(" "));
+    }
+    return this;
+}
+</addToAttributeList>
+
+<createElement>
+function createElement (
+  context,
+  tag,
+  data,
+  children,
+  normalizationType,
+  alwaysNormalize
+) {
+  if (Array.isArray(data) || isPrimitive(data)) {
+    normalizationType = children;
+    children = data;
+    data = undefined;
+  }
+  if (alwaysNormalize) { normalizationType = ALWAYS_NORMALIZE; }
+  return _createElement(context, tag, data, children, normalizationType);
+}
+</createElement>
+
+<instantiateModel>
+function(mod, data) {
+  if (!Model || !Model[mod]) {
+    debug("can't find model : " + mod);
+    return;
+  }
+  return (new Model[mod](data));
+}
+</instantiateModel>
+
+<reverseArrayLike>
+function reverse() {
+    var upperIndex,
+        value,
+        index = -1,
+        object = Object(this),
+        length = object.length >>> 0,
+        middle = floor(length / 2);
+    if (length > 1) {
+      while (++index < middle) {
+        upperIndex = length - index - 1;
+        value = upperIndex in object ? object[upperIndex] : uid;
+        if (index in object) {
+          object[upperIndex] = object[index];
+        } else {
+          delete object[upperIndex];
+        }
+        if (value != uid) {
+          object[index] = value;
+        } else {
+          delete object[index];
+        }
+      }
+    }
+    return object;
+}
+</reverseArrayLike>
+
+<mainfunction>
+function main(args) {
+    
+    const logger = logger_1.getLogger(args.verbose);
+    
+    const barrelName = barrelName_1.getBarrelName(args.name, logger);
+    
+    const rootPath = rootPath_1.resolveRootPath(args.directory);
+    
+    const baseUrl = baseUrl_1.getCombinedBaseUrl(rootPath, args.baseUrl);
+    
+    const rootTree = fileTree_1.buildTree(rootPath, barrelName, logger);
+    
+    const destinations = destinations_1.getDestinations(rootTree, args.location, barrelName, logger);
+    
+    purge_1.purge(rootTree, args.delete !== undefined && args.delete, barrelName, logger);
+    
+    const quoteCharacter = quoteCharacter_1.getQuoteCharacter(args.singleQuotes);
+    
+    const semicolonCharacter = noSemicolon_1.getSemicolonCharacter(args.noSemicolon);
+    
+    builder_1.buildBarrels(destinations, quoteCharacter, semicolonCharacter, barrelName, logger, baseUrl, args.structure, !!args.local, [].concat(args.include || []), [].concat(args.exclude || []));
+}
+</mainfunction>
+
+<broadcastToSubscriptions>
+function broadcast (subscriptions, type) {
+  return value => {
+    subscriptions.forEach(s => {
+      if (typeof s.emit[type] === 'function') {
+        s.emit[type](value)
+      }
+    })
+  }
+}
+</broadcastToSubscriptions>
+
+<removeFilterFromConfig>
+function removeFilter (config, filter) {
+  if (filter) {
+    if (config.filters.ignore[ filter ]) {
+      delete config.filters.ignore[ filter ]
+    } else {
+      delete config.filters.should[ filter ]
+    }
+  }
+}
+</removeFilterFromConfig>
+
+<delExpiredKeys>
+function delExpiredKeys(num, threshold) {
+  <removeExpiredKeysFunction>
+  function removeExpiredKeys(count) {
+    if(!this._ekeys.length) return 0;
+    var num = num || 100
+      , threshold = threshold || 25
+      , count = count || 0
+      , i
+      , key
+      , ind;
+    for(i = 0; i < num; i++) {
+      ind = Math.floor(Math.random() * this._ekeys.length);
+      key = this._ekeys[ind];
+      if(this._expires[key] <= Date.now()) {
+        this.emit('expired', key);
+        this.delKey(key);
+        count++;
+      }
+    }
+    if(count >= threshold) {
+      setImmediate(removeExpiredKeys);
+    }
+    return count;
+  }
+  </removeExpiredKeysFunction>
+
+  removeExpiredKeys = removeExpiredKeys.bind(this);
+  return removeExpiredKeys();
+}
+</delExpiredKeys>
+```

@@ -1,0 +1,260 @@
+<function>
+function(value) {
+    <updateValues>
+    this.lastValue = this.currentValue;
+    this.currentValue = value;
+    this.setter.call(this.target, this.target, value, this);
+    </updateValues>
+}
+</function>
+
+<function>
+function(object, property, options) {
+
+    <initializeOptionsController>
+    OptionController.superclass.call(this, object, property);
+
+    var _this = this;
+    
+    this.__select = document.createElement('select');
+    </initializeOptionsController>
+
+    <populateSelectOptions>
+    if (common.isArray(options)) {
+      var map = {};
+      common.each(options, function(element) {
+        map[element] = element;
+      });
+      options = map;
+    }
+
+    common.each(options, function(value, key) {
+
+      var opt = document.createElement('option');
+      opt.innerHTML = key;
+      opt.setAttribute('value', value);
+      _this.__select.appendChild(opt);
+
+    });
+    </populateSelectOptions>
+
+    <bindChangeEventListenerAndUpdateDisplay>
+    this.updateDisplay();
+
+    dom.bind(this.__select, 'change', function() {
+      var desiredValue = this.options[this.selectedIndex].value;
+      _this.setValue(desiredValue);
+    });
+
+    this.domElement.appendChild(this.__select);
+    </bindChangeEventListenerAndUpdateDisplay>
+}
+</function>
+
+<updateBoundsPos>
+function updateBoundsPos(newX, newY) {
+    <calculateNewBoundsPosition>
+    var bounds = this.getBounds();
+    bounds.pos.set(newX - this.anchorPoint.x * bounds.width, newY - this.anchorPoint.y * bounds.height); 
+
+    if (this.ancestor instanceof me.Container && !this.floating) {
+      bounds.pos.add(this.ancestor._absPos);
+    }
+    </calculateNewBoundsPosition>
+
+    return bounds;
+}
+</updateBoundsPos>
+
+<setMapAttributeValue>
+function(attr, value, keepKey) {
+                    
+    var parts = can.Map.helpers.attrParts(attr, keepKey),
+                        
+    prop = parts.shift(),
+                        
+    current = this._init ? undefined : this.__get(prop);
+
+    if (parts.length && Map.helpers.isObservable(current)) {
+        
+        current._set(parts, value);
+    } else if (!parts.length) {
+        
+        if (this.__convert) {
+            
+            value = this.__convert(prop, value);
+        }
+        <setTypeAndSetAttributeValue>
+        this.__set(prop, this.__type(value, prop), current);
+        </setTypeAndSetAttributeValue>
+    } else {
+        throw "can.Map: Object does not exist";
+    }
+}
+</setMapAttributeValue>
+
+<renderVectorPath>
+function(node, geometry) {
+    <setNodeDimensions>
+    this.setNodeDimension(node, geometry);
+    </setNodeDimensions>
+
+    <assemblePath>
+    var resolution = this.getResolution();
+    
+    var path = [];
+    var j, jj, points, area, first, second, i, ii, comp, pathComp, x, y;
+    for (j=0, jj=geometry.components.length; j<jj; j++) {
+        path.push("m");
+        points = geometry.components[j].components;
+        
+        area = (j === 0);
+        first = null;
+        second = null;
+        for (i=0, ii=points.length; i<ii; i++) {
+            comp = points[i];
+            x = ((comp.x - this.featureDx) / resolution - this.offset.x) | 0;
+            y = (comp.y / resolution - this.offset.y) | 0;
+            pathComp = " " + x + "," + y;
+            path.push(pathComp);
+            if (i==0) {
+                path.push(" l");
+            }
+            if (!area) {
+                if (!first) {
+                    first = pathComp;
+                } else if (first != pathComp) {
+                    if (!second) {
+                        second = pathComp;
+                    } else if (second != pathComp) {
+                        area = true;
+                    }
+                }
+            }
+        }
+        path.push(area ? " x " : " ");
+    }
+    path.push("e");
+    node.path = path.join("");
+    </assemblePath>
+    return node;
+}
+</renderVectorPath>
+
+<handleDotClick>
+function handleDotClick(originalEvent, target) {
+    if (this.isMoving) {
+        return;
+    }
+    
+    <updateCarouselState>
+    const { state: { config, itemsPerSlide } } = this;
+    const slide = parseInt(target.getAttribute('data-slide'), 10);
+    config.preserveItems = true;
+    this.setState('index', slide * itemsPerSlide);
+    emitAndFire(this, 'carousel-slide', { slide: slide + 1, originalEvent });
+    </updateCarouselState>
+}
+</handleDotClick>
+
+<validateVarName>
+function validateVarName(regex, name, strict) {
+
+    if (strict) {
+        <checkStrictReservedNames>
+        if (name === 'eval') { return false; }
+        if (name === 'arguments') { return false; }
+        </checkStrictReservedNames>
+    }
+
+    <performRegexValidation>
+    var result = regex.test(name);
+    result = result && validateCommonReservedWords(name);
+    return result;
+    </performRegexValidation>
+}
+</validateVarName>
+
+<getExtensionException>
+function(exceptionName)
+{
+    var app = this;
+    var exception = {};
+
+    <fetchOrCreateException>
+    try
+    {
+        if(app.exceptions.hasOwnProperty(exceptionName)){
+            exception = app.exceptions[exceptionName];
+        }else{                
+            throw "not found";
+        }
+    }
+    catch(e)
+    {
+        var objFilePath = path.join(app._path,"exceptions",exceptionName);
+        if(fs.existsSync(objFilePath+".js"))
+        {
+            var exceptionConfig = require(objFilePath);
+            if(typeof app.exceptions != "object") app.exceptions={};
+            app.exceptions[exceptionName]= exceptionConfig;                    
+            exception = exceptionConfig;
+        }
+    }
+    </fetchOrCreateException>
+
+    return exception;
+}
+</getExtensionException>
+
+<SimpleCache>
+function SimpleCache(options) {
+    var self = this;
+
+    options = options || {};
+
+    this.expireAfterSeconds = parseFloat(options.expireAfterSeconds || 0);
+    this._keyValueStore = {};
+
+    <configureExpirationCleanup>
+    if (this.expireAfterSeconds > 0) {
+        setInterval(function () {
+            Object.keys(self._keyValueStore).forEach(function (key) {
+                self.get(key).catch(function () {});
+            });
+
+            if (options.logger) {
+                options.logger.info('SimpleCache periodic cleanup after %s seconds', self.expireAfterSeconds);
+            }
+        }, this.expireAfterSeconds * 1000);
+    }
+    </configureExpirationCleanup>
+}
+</SimpleCache>
+
+<setOnCommandHandle>
+function (fn) {
+    if (!fn || !_.isFunction(fn)) {
+        <validateFunction>
+        var err = new Error('Please pass a valid function!');
+        debug(err);
+        throw err;
+        </validateFunction>
+    }
+
+    <wrapSingleArgumentFunction>
+    if (fn.length === 1) {
+      fn = _.wrap(fn, function(func, cmd, callback) {
+        func(cmd);
+        callback(null);
+      });
+    }
+    </wrapSingleArgumentFunction>
+
+    <assignOnCommandHandle>
+    this.onCommandHandle = fn;
+    </assignOnCommandHandle>
+
+    return this;
+}
+</setOnCommandHandle>

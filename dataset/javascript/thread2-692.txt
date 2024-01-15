@@ -1,0 +1,266 @@
+```javascript
+<getAllOpenFiles>
+function getAllOpenFiles() {
+    var result = getWorkingSet(ALL_PANES);
+    _.forEach(_panes, function (pane) {
+        var file = pane.getCurrentlyViewedFile();
+        if (file) {
+            result = _.union(result, [file]);
+        }
+    });
+    return result;
+}
+</getAllOpenFiles>
+
+<LinkReference>
+function LinkReference(properties) {
+    if (properties)
+        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+}
+</LinkReference>
+
+<add>
+function add (action, meta) {
+    <validateAction>
+    if (typeof action.type === 'undefined') {
+        throw new Error('Expected "type" in action')
+    }
+    </validateAction>
+
+    <setupMeta>
+    if (!meta) meta = { }
+
+    var newId = false
+    if (typeof meta.id === 'undefined') {
+        newId = true
+        meta.id = this.generateId()
+    }
+
+    if (typeof meta.time === 'undefined') {
+        meta.time = parseInt(meta.id)
+    }
+
+    if (typeof meta.reasons === 'undefined') {
+        meta.reasons = []
+    } else if (!Array.isArray(meta.reasons)) {
+        meta.reasons = [meta.reasons]
+    }
+    </setupMeta>
+
+    <validateReasons>
+    meta.reasons.forEach(function (reason) {
+        if (typeof reason !== 'string') {
+            throw new Error('Expected "reasons" to be strings')
+        }
+    })
+    </validateReasons>
+
+    <processAddition>
+    var log = this
+    this.emitter.emit('preadd', action, meta)
+
+    if (meta.keepLast) {
+        this.removeReason(meta.keepLast, { olderThan: meta })
+        meta.reasons.push(meta.keepLast)
+    }
+    </processAddition>
+
+    <handleNewId>
+    if (meta.reasons.length === 0 && newId) {
+        this.emitter.emit('add', action, meta)
+        this.emitter.emit('clean', action, meta)
+        return Promise.resolve(meta)
+    } else if (meta.reasons.length === 0) {
+        return this.store.byId(meta.id).then(function (result) {
+            if (result[0]) {
+                return false
+            } else {
+                log.emitter.emit('add', action, meta)
+                log.emitter.emit('clean', action, meta)
+                return meta
+            }
+        })
+    } else {
+        return this.store.add(action, meta).then(function (addedMeta) {
+            if (addedMeta === false) {
+                return false
+            } else {
+                log.emitter.emit('add', action, addedMeta)
+                return addedMeta
+            }
+        })
+    }
+    </handleNewId>
+}
+</add>
+
+<exclude>
+function exclude(object, props) {
+    const newObject = {};
+
+    Object.keys(object).forEach(function(prop) {
+        if (props.indexOf(prop) === -1) {
+            newObject[prop] = object[prop];
+        }
+    });
+
+    return newObject;
+}
+</exclude>
+
+<onDialogDelete>
+function onDialogDelete() {
+    <confirmDeletion>
+    if (confirm('Are you sure you want remove the dialog?')) {
+    </confirmDeletion>
+        <deleteDialog>
+        QB.chat.dialog.delete(currentDialog._id, function(err, res) {
+            if (err) {
+                console.error(err);
+            } else {
+                console.info('Dialog removed');
+            
+                $('#'+currentDialog._id).remove();
+                delete dialogs[currentDialog._id];
+
+                if(Object.keys(dialogs).length > 0){
+                    triggerDialog(dialogs[Object.keys(dialogs)[0]]._id);
+                } else {
+                    $('#messages-list').empty();
+                }
+            }
+        });
+        </deleteDialog>
+
+        <hideModal>
+        $("#update_dialog").modal("hide");
+        $('#update_dialog .progress').show();
+        </hideModal>
+    }
+}
+</onDialogDelete>
+
+<getPeriodo>
+function getPeriodo (periodo) {
+    <validatePeriodo>
+    assert.ok(typeof periodo === 'number' || periodo instanceof Date, '[senadores-viajes]: El periodo ingresado debe ser un número o una fecha.')
+
+    if (typeof periodo === 'number') {
+        assert.ok(periodo <= new Date().getFullYear(), '[senadores-viajes]: No se puede consultar por un periodo en el futuro')
+        
+        if (periodo < 2009) {
+            console.warn('[senadores-viajes]: Sólo se tiene información de viajes nacionales posteriores al año 2008, y para viajes internacionales posteriores al 2005')
+        }
+        return periodo
+    }
+    if (periodo instanceof Date) {
+        assert.ok(periodo.getFullYear() <= new Date().getFullYear(), '[senadores-viajes]: No se puede consultar por un periodo en el futuro')
+        return periodo.getFullYear()
+    }
+    </validatePeriodo>
+}
+</getPeriodo>
+
+<registerReactor>
+function registerReactor(forms) {
+    <validateFormsLength>
+    if (forms.length != 5)  {
+        forms.error('#react expects: before/after, fnname, (observed cells), reactorcode');
+    }
+    </validateFormsLength>
+
+    <parseForms>
+    var when = sl.valueOf(forms[1]);
+    var cmds = forms[2];
+    var observed = forms[3];
+    var reactorcode = this.transpileExpression(forms[4]);
+    debug('registering code to be run ' + when + ' one of "' + cmds + ' invoked on "' + observed + '"');
+    </parseForms>
+
+    <checkObservedCells>
+    var source = sl.lexerOf(forms);
+    observed.forEach(function(cell) {
+        var arg = sl.valueOf(cell);
+        if(source.cells.indexOf(arg) === -1) {
+            console.log('warning: reactor function observes "' + arg +
+                            '" but "' + arg + '" is not a cell');
+        }
+    });
+    </checkObservedCells>
+
+    <setupReactorBinding>
+    cmds.forEach(function(cmdAtom) {
+        var cmdName = sl.valueOf(cmdAtom);
+        if(!source.bindingCode[when][cmdName]) {
+            source.bindingCode[when][cmdName] = [];
+        }
+        source.bindingCode[when][cmdName].push({of: observed, insert: reactorcode});
+    });
+    </setupReactorBinding>
+
+    <finalizeReactor>
+    this.noSemiColon = true;
+    return sl.generated();
+    </finalizeReactor>
+}
+</registerReactor>
+
+<formatTime>
+function formatTime(lang, input) {
+    <format>
+    var result = input;
+    var matches;
+    var localeTimeString;
+
+    while ((matches = TIME_REGEX.exec(input)) != null) {
+
+        var date = new Date(Date.parse(matches[1]));
+        localeTimeString = date.toLocaleTimeString(lang,
+            {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+
+        result = result.replace(matches[0], localeTimeString);
+    };
+    return result;
+    </format>
+}
+</formatTime>
+
+<loadData>
+function loadData (settings = {}, json = data) {
+    <initializeDataSet>
+    const dataSet = new DataSet(json, settings)
+    dataSet.processData()
+    return dataSet
+    </initializeDataSet>
+}
+</loadData>
+
+<expandOrCollapsePlugins>
+function (selector) {
+    return function () {
+        return this.then(function () {
+            <handleVisibility>
+            
+            if (this.visible(selector + ' .cms-dragbar-expand-all')) {
+                this.click(selector + ' .cms-dragbar-expand-all');
+            } else if (this.visible(selector + ' .cms-dragbar-collapse-all')) {
+                
+                this.click(selector + ' .cms-dragbar-collapse-all');
+                this.wait(100);
+                this.click(selector + ' .cms-dragbar-expand-all');
+            } else {
+                throw new Error('Given placeholder has no plugins');
+            }
+            </handleVisibility>
+        });
+    };
+}
+</expandOrCollapsePlugins>
+```
+
+These annotations identify separate responsibilities in the functions provided. If one function carries out multiple distinctive tasks, they are enclosed in separate tags within the main function's tag to indicate non-compliance with SRP.

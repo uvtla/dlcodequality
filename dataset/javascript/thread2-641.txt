@@ -1,0 +1,287 @@
+```javascript
+<commitInternally>
+function commitInternally( targetFields ) {
+  <initializeDialog>
+  var dialog = this.getDialog(),
+      element = dialog._element && dialog._element.clone() || new CKEDITOR.dom.element( 'div', editor.document );
+  </initializeDialog>
+
+  <commitElement>
+  this.commit( element, true );
+  </commitElement>
+
+  <setupFields>
+  targetFields = [].concat( targetFields );
+  var length = targetFields.length,
+      field;
+  for ( var i = 0; i < length; i++ ) {
+    field = dialog.getContentElement.apply( dialog, targetFields[ i ].split( ':' ) );
+    field && field.setup && field.setup( element, true );
+  }
+  </setupFields>
+}
+</commitInternally>
+
+<removeElementByIndex>
+function (index) {
+  <validateIndex>
+  validateListIndex(this, index);
+  </validateIndex>
+
+  <removeElement>
+  var i = index,
+      len = --this.length;
+
+  for (; i < len; i++) {
+      this[i] = this[i + 1];
+  }
+
+  delete this[len];
+  </removeElement>
+}
+</removeElementByIndex>
+
+<reportSyntaxIssue>
+function report(node) {
+  <identifyParentheses>
+  const leftParenToken = sourceCode.getTokenBefore(node);
+  const rightParenToken = sourceCode.getTokenAfter(node);
+  </identifyParentheses>
+
+  <checkAndIgnoreTokens>
+  if (!isParenthesisedTwice(node)) {
+      if (tokensToIgnore.has(sourceCode.getFirstToken(node))) {
+          return;
+      }
+
+      if (isIIFE(node) && !isParenthesised(node.callee)) {
+          return;
+      }
+  }
+  </checkAndIgnoreTokens>
+
+  <reportIssue>
+  context.report({
+      node,
+      loc: leftParenToken.loc.start,
+      messageId: "unexpected",
+      fix(fixer) {
+          const parenthesizedSource = sourceCode.text.slice(leftParenToken.range[1], rightParenToken.range[0]);
+
+          return fixer.replaceTextRange([
+              leftParenToken.range[0],
+              rightParenToken.range[1]
+          ], (requiresLeadingSpace(node) ? " " : "") + parenthesizedSource + (requiresTrailingSpace(node) ? " " : ""));
+      }
+  });
+  </reportIssue>
+}
+</reportSyntaxIssue>
+
+<printResult>
+function printResult(result, isDeploy, isCompressed, prefix, fn) {
+  <prepareStatistics>
+  const relpath = truncate(path.relative(process.cwd(), result.filepath));
+  </prepareStatistics>
+
+  <gzipAndPrint>
+  if ((result.type == 'js' || result.type == 'css') && isDeploy) {
+    zlib.gzip(result.content, (err, buffer) => {
+      if (err) return fn(err);
+
+      <calculateFileSizes>
+      const stat = fs.statSync(result.filepath);
+      const bytes = stat.size;
+      const over = bytes > recommendedFileSizeLimit;
+      </calculateFileSizes>
+
+      <printCompressedSize>
+      const overZipped = buffer.length > recommendedFileSizeLimit;
+
+      print(chalk.green(`${chalk.green(prefix)} built and compressed ${strong(relpath)}`), 1);
+      print(`[compressed size: ${chalk[over ? 'red' : 'green'](prettyBytes(bytes))}]`, 2 + prefix.length);
+      print(`[gzipped size: ${chalk[overZipped ? 'red' : 'green'](prettyBytes(buffer.length))}]`, 2 + prefix.length);
+      </printCompressedSize>
+
+      <warnIfOverLimit>
+      if (over || overZipped) {
+        warn(
+          `the output file exceeds the recommended ${strong(prettyBytes(recommendedFileSizeLimit))} size`,
+          2 + prefix.length
+        );
+        print(
+          'Consider splitting into smaller bundles to help improve browser startup execution time',
+          2 + prefix.length
+        );
+      }
+      </warnIfOverLimit>
+
+      fn();
+    });
+  }
+  </gzipAndPrint>
+
+  <printNonCompressedResult>
+  else {
+    print(chalk.green(`${chalk.green(prefix)} built${isCompressed ? ' and compressed' : ''} ${strong(relpath)}`), 1);
+    fn();
+  }
+  </printNonCompressedResult>
+}
+</printResult>
+
+<configMissingError>
+function configMissingError(configName) {
+  <generateError>
+  const error = new Error(`Failed to load config "${configName}" to extend from.`);
+
+  error.messageTemplate = "extend-config-missing";
+  error.messageData = {
+      configName
+  };
+  </generateError>
+  return error;
+}
+</configMissingError>
+
+<thunkify>
+function thunkify(input, ctx, key) {
+  <thunkCreation>
+  return function() {        
+      ctx = ctx || this;
+      
+      <collectArguments>
+      var args = [];
+      for (var i = 0; i < arguments.length; ++i) {
+          args.push(arguments[i]);
+      }
+      </collectArguments>
+
+      <delayedExecution>
+      return function(done) {
+          <ensureSingleCall>
+          var called;
+          args.push(function() {
+              if (!called) {
+                  called = true;
+                  done.apply(null, arguments);
+              }
+          });
+          </ensureSingleCall>
+
+          <applyFunction>
+          try {
+              input.apply(ctx, args);
+          } catch (err) {
+              done(err);
+          }
+          </applyFunction>
+      };
+      </delayedExecution>
+  };
+  </thunkCreation>
+}
+</thunkify>
+
+<fileCopy>
+function(checks, callback) {
+  <checkSourceFile>
+  fs.lstat(options.source, function(err, stats) {
+    
+    <fileTypeActions>
+    if (stats.isFile()) {
+      copyFile(options, callback);
+    } else if (stats.isDirectory()) {
+      copyDir(options, callback);
+    } else if (stats.isSymbolicLink()) {
+      copySymlink(options, callback);
+    } else {
+      callback(new Error('Unsupported file type !'));
+    }
+    </fileTypeActions>
+  });
+  </checkSourceFile>
+}
+</fileCopy>
+
+<onExit>
+function onExit () {
+  <exitCheckAndErrorHandling>
+  if (!responded) {
+    errState = true;
+    responded = true;
+    error = new Error('Error spawning drone');
+    error.blame = {
+      type: 'user',
+      message: 'Script prematurely exited'
+    }
+    error.stdout = stdout.join('\n');
+    error.stderr = stderr.join('\n');
+    callback(error);
+    
+    <cleanupListenersAndTimeout>
+    drone.removeListener('error', onError);
+    drone.removeListener('message', onCarapacePort);
+    clearTimeout(timeout);
+    </cleanupListenersAndTimeout>
+  }
+  </exitCheckAndErrorHandling>
+}
+</onExit>
+
+<resolveCategory>
+function resolveCategory(categoryParam: number | string, defaultCategory: number): number {
+  <categoryResolution>
+  if (typeof categoryParam === 'number') {
+    return categoryParam;
+  }
+
+  if (typeof categoryParam === 'string') {
+    if (categoryParam in primaryCategoryNumbers) {
+      return primaryCategoryNumbers[categoryParam];
+    }
+  }
+  </categoryResolution>
+
+  return defaultCategory;
+}
+</resolveCategory>
+
+<patchType>
+function patchType (content, type, peerPaths) {
+  <normalizePaths>
+  let normalizedPaths = peerPaths.map(path => slash(normalize(path)));
+  </normalizePaths>
+
+  <injectDependencies>
+  switch (type) {
+    case 'script':
+      <scriptInjection>
+      let scriptImports = normalizedPaths.map(path => `import '${path}'\n`);
+      content = content.replace(RE_SCRIPT, match => {
+        return `${match}\n${scriptImports.join('')}`;
+      });
+      </scriptInjection>
+      break;
+    case 'style':
+      <styleInjection>
+      let styleImports = normalizedPaths.map(path => {
+        let langStr = '';
+        let ext = getExtname(path);
+        if (ext !== 'css') {
+          langStr = `lang="${ext}" `;
+        }
+        return `<style ${langStr}src="${path}"></style>\n`;
+      });
+      content += styleImports.join('');
+      </styleInjection>
+      break;
+    default:
+      break;
+  }
+  </injectDependencies>
+
+  return content;
+}
+</patchType>
+```

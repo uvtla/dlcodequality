@@ -1,0 +1,230 @@
+```javascript
+<isKeyComparator>
+function isKeyComparator(arg) {
+  let result = __getParameterCount(arg) === 2;
+  const first = self.first();
+  try {
+    const key = keySelector(first);
+    result = result && arg(key, key) && !arg(key, {});
+  }
+  catch (err) {
+    result = false;
+  }
+  return result;
+}
+</isKeyComparator>
+
+<log>
+function log(value, title, configs) {
+  var isFmt;
+  function getIsFmt(configs) { /* Helper function, not a separate responsibility */
+    return has(configs, 'isFmt', 'bol') ? configs.isFmt : true;
+  };
+  function getTitle(configs) { /* Helper function, not a separate responsibility */
+    return get(configs, 'title', 'str') || 'funclib(' + version + ')';
+  };
+  /* The block of code below collectively adjusts and formats the title and configuration, unified under the responsibility of configuring and formatting the log message */
+  if (typeVal(title, 'str')) {
+    if (isBol(configs)) {
+      isFmt = configs, configs = {};
+    } else {
+      isFmt = getIsFmt(configs);
+    }
+  }
+  else if (isBol(title)) {
+    isFmt = title, title = getTitle(configs);
+  }
+  else if (isObj(title)) {
+    configs = title, isFmt = getIsFmt(configs), title = getTitle(configs);
+  }
+  else {
+    isFmt = true;
+    title = 'funclib(' + version + ')';
+  }
+  value = pretty(value);
+  var isShowTime = has(configs, 'isShowTime') ? !!configs.isShowTime : true;
+  var _time = fmtDate('hh:mm:ss', new Date());
+  var time = isShowTime ? '[' + _time + '] ' : '';
+  title = title.replace(/\n/mg, '');
+  var originTtLength = (time + title + '[] ').length;
+  if (!isFmt) {
+    title = '( ' + title + ' )';
+  }
+  if (time) {
+    time = '[' + chalk(_time, 'grey') + '] ';
+  }
+  var valuec = get(configs, 'color');
+  var titlec = get(configs, 'ttColor');
+  value = chalk(value, has(colorList, valuec) ? valuec : 'cyan');
+  title = chalk(title, has(colorList, titlec) ? titlec : 'default');
+  title = time + title;
+  var width = get(configs, 'width', 'num');
+  if (!width || width < 30 || width > 100) width = 66;
+  if (originTtLength > width) {
+    var colorEnd = '\x1B[0m';
+    var fixLength = title.length - originTtLength - colorEnd.length;
+    title = cutString(title, width + fixLength - 3) + colorEnd;
+  }
+  else if (isFmt) {
+    title = array((width - originTtLength) / 2, ' ').join('') + title;
+  }
+  var isSplit = has(configs, 'isSplit', 'bol') ? configs.isSplit : true;
+  if (!isFmt) {
+    var logMsg = title + ':\n' + value;
+    console.log(isSplit ? '\n' + logMsg + '\n' : logMsg);
+  }
+  else {
+    var sgLine_1 = '', dbLine_1 = '';
+    for(var i = 0; i < width; i ++ ) { sgLine_1 += '-', dbLine_1 += '='; };
+    if (get(configs, 'pre', 'bol')) {
+      console.log('\n' + dbLine_1);
+      console.log(title);
+      console.log(sgLine_1);
+    }
+    else if (get(configs, '/end', 'bol')) {
+      console.log(dbLine_1 + '\n');
+    }
+    else {
+      console.log(isSplit ? '\n' + dbLine_1 : dbLine_1);
+      console.log(title);
+      console.log(sgLine_1);
+      console.log(value);
+      console.log(isSplit ? dbLine_1 + '\n' : dbLine_1);
+    }
+  }
+}
+</log>
+
+<initExpress>
+function initExpress (config) {
+  config.express.disable('x-powered-by')
+  config.express.enable('strict routing')
+  config.express.enable('case sensitive routing')
+  
+  <setupAssets>
+  _.each(_.reverse(config.dir.assets), dir => {
+    config.express.use('/assets', express.static(dir))
+  })
+  </setupAssets>
+  
+  <setupMiddlewares>
+  config.express.use(requestIdMiddleware)
+  config.express.use(bodyParser.json())
+  config.express.use(bodyParser.urlencoded({ extended: true }))
+  config.express.use(cookieParser())
+  </setupMiddlewares>
+  
+  <setupLogging>
+  if (config.log) {
+    config.express.use(morgan(isProd ? 'combined' : 'dev'))
+  }
+  </setupLogging>
+  
+  <setupCustomUse>
+  _.each(config.use, use => {
+    if (_.isArray(use)) config.express.use.apply(config.express, use)
+    else config.express.use(use)
+  })
+  </setupCustomUse>
+}
+</initExpress>
+
+<writeSymbol>
+function writeSymbol(symbol) { /* Extensive and highly descriptive function performing XML writing, violates SRP by handling various object members and child objects */
+  // ... omitted for brevity
+}
+</writeSymbol>
+
+<getConfigProperty>
+function (key) {
+  var property = this.config[key.toLowerCase()];
+  if (property && property.event) {
+    return property.value;
+  } else {
+    return undefined;
+  }
+}
+</getConfigProperty>
+
+<validateNode>
+function (value, node) {
+  var valid = (typeof value === "object" && value instanceof Array);
+  if (valid) {
+    var pos = 0;
+    for (i = 0; i < node.elements.length; i++) {
+      el = node.elements[i];
+      var found = 0;
+      while (found < el.arity[1] && pos < value.length) {
+        if (!this.exec_spec(value[pos], el.element)) break;
+        found++;
+        pos++;
+      }
+      if (found < el.arity[0]) {
+        valid = false;
+        break;
+      }
+    }
+    if (pos < value.length) valid = false;
+  }
+  return valid;
+}
+</validateNode>
+
+<destructSpirit>
+function(spirit) {
+  spirit.$debug(false);
+  spirit.life.destructed = true;
+  spirit.life.dispatch(gui.LIFE_DESTRUCT);
+  spirit.ondestruct();
+}
+</destructSpirit>
+
+<setupXmlStream>
+function setup(encoding) {
+  var stream = fs.createReadStream(path.join(__dirname, 'encoding.xml'));
+  var xml = new XmlStream(stream, encoding);
+  xml.on('endElement: node', function (node) {
+    console.log(node);
+  });
+  xml.on('error', function (message) {
+    console.log('Parsing as ' + (encoding || 'auto') + ' failed: ' + message);
+  });
+  return xml;
+}
+</setupXmlStream>
+
+<createTodoElement>
+function(id, title, isCompleted) {
+  var todoTemplateEl = moduleEl.querySelector('.todo-template-container li'),
+      newTodoEl = todoTemplateEl.cloneNode(true);
+  
+  newTodoEl.querySelector('label').textContent = title;
+  newTodoEl.setAttribute('data-todo-id', id);
+  if (isCompleted) {
+    newTodoEl.classList.add('completed');
+    newTodoEl.querySelector('input[type="checkbox"]').checked = true;
+  }
+
+  return newTodoEl;
+}
+</createTodoElement>
+
+<inspectNode>
+function inspectNode(node) {
+  if (!node) {
+    return "[No node]";
+  }
+  if (crashyTextNodes && isBrokenNode(node)) {
+    return "[Broken node]";
+  }
+  if (isCharacterDataNode(node)) {
+    return '"' + node.data + '"';
+  }
+  if (node.nodeType == 1) {
+    var idAttr = node.id ? ' id="' + node.id + '"' : "";
+    return "<" + node.nodeName + idAttr + ">[index:" + getNodeIndex(node) + ",length:" + node.childNodes.length + "][" + (node.innerHTML || "[innerHTML not supported]").slice(0, 25) + "]";
+  }
+  return node.nodeName;
+}
+</inspectNode>
+```

@@ -1,0 +1,266 @@
+```javascript
+<createAlertifyDialog>
+function (item) {
+    var html = "",
+        type = item.type,
+        message = item.message,
+        css = item.cssClass || "";
+
+    html += "<div class=\"alertify-dialog\">";
+
+    if (_alertify.buttonFocus === "none") html += "<a href=\"#\" id=\"alertify-noneFocus\" class=\"alertify-hidden\"></a>";
+
+    if (type === "prompt") html += "<form id=\"alertify-form\">";
+
+    html += "<article class=\"alertify-inner\">";
+    html += dialogs.message.replace("{{message}}", message);
+
+    if (type === "prompt") html += dialogs.input;
+
+    html += dialogs.buttons.holder;
+    html += "</article>";
+
+    if (type === "prompt") html += "</form>";
+
+    html += "<a id=\"alertify-resetFocus\" class=\"alertify-resetFocus\" href=\"#\">Reset Focus</a>";
+    html += "</div>";
+
+    <templateReplacement>
+    switch (type) {
+    case "confirm":
+        html = html.replace("{{buttons}}", this.appendButtons(dialogs.buttons.cancel, dialogs.buttons.ok));
+        html = html.replace("{{ok}}", this.labels.ok).replace("{{cancel}}", this.labels.cancel);
+        break;
+    case "prompt":
+        html = html.replace("{{buttons}}", this.appendButtons(dialogs.buttons.cancel, dialogs.buttons.submit));
+        html = html.replace("{{ok}}", this.labels.ok).replace("{{cancel}}", this.labels.cancel);
+        break;
+    case "alert":
+        html = html.replace("{{buttons}}", dialogs.buttons.ok);
+        html = html.replace("{{ok}}", this.labels.ok);
+        break;
+    default:
+        break;
+    }
+    </templateReplacement>
+
+    elDialog.className = "alertify alertify-" + type + " " + css;
+    elCover.className = "alertify-cover";
+    return html;
+}
+</createAlertifyDialog>
+
+<generateMarkdownFromPath>
+function flux(path) {
+    return function (done) {
+        fs.createReadStream(resolve(__dirname, path))
+            .pipe(docflux())
+            .pipe(docflux.markdown({depth: DEPTH, indent: INDENT}))
+            .pipe(concat(function (data) {
+                done(null, data.toString())
+            }))
+    }
+}
+</generateMarkdownFromPath>
+
+<resolveDocumentAndPresentModal>
+function presentModal(modal) {
+    let doc = modal; 
+
+    <determineModalType>
+    if (_.isString(modal)) { 
+        doc = Parser.dom(modal);
+    } else if (_.isPlainObject(modal)) { 
+        doc = Page.makeDom(modal);
+    }
+    </determineModalType>
+
+    navigationDocument.presentModal(doc);
+    modalDoc = doc;
+    return doc;
+}
+</resolveDocumentAndPresentModal>
+
+<parseContinuationToken>
+function (token) {
+    if (token === undefined || token === null) {
+        return {
+            nextPartitionKey: undefined,
+            nextRowKey: undefined,
+        };
+    }
+
+    <validateTokenFormat>
+    assert(typeof token === 'string', 'Continuation token must be a string if ' +
+        'not undefined');
+
+    token = token.split('~');
+    assert(token.length === 2, 'Expected an encoded continuation token with ' +
+        'a single tilde as separator');
+    </validateTokenFormat>
+
+    return {
+        nextPartitionKey: decodeURIComponent(token[0]),
+        nextRowKey: decodeURIComponent(token[1]),
+    };
+}
+</parseContinuationToken>
+
+<toSourceConversion>
+function toSource(func) {
+    if (func != null) {
+        try {
+            return funcToString$2.call(func);
+        } catch (e) {}
+        try {
+            return (func + '');
+        } catch (e) {}
+    }
+    return '';
+}
+</toSourceConversion>
+
+<sendHTTPRequest>
+function request(method, params, callback) {
+
+    <configureHeadersAndOptions>
+    var headers = {
+        Accept: 'application/vnd.layer+json; version=' + this.version,
+        Authorization: 'Bearer ' + this.token
+    };
+
+    if (method === 'patch') headers['Content-Type'] = 'application/vnd.layer-patch+json';
+    else headers['Content-Type'] = 'application/json';
+
+    if (params.dedupe) headers['If-None-Match'] = params.dedupe;
+
+    var options = {
+        host: API.host,
+        port: API.port,
+        path: API.prefix + this.appId + params.path,
+        method: method.toUpperCase(),
+        headers: headers
+    }
+
+    if (this.agent) options.agent = this.agent;
+    </configureHeadersAndOptions>
+
+    var req = https.request(options);
+
+    req.setTimeout(this.timeout, timeout.bind(this, req, callback));
+    req.on('error', error.bind(this, req, callback));
+    req.on('response', response.bind(this, callback));
+
+    <writeRequestData>
+    req.on('socket', function (socket) {
+        var write = function () {
+            if (params.body) req.write(JSON.stringify(params.body));
+            req.end();
+        }
+
+        if (socket.authorized) write();
+        else socket.on('secureConnect', function () { write(); })
+    });
+    </writeRequestData>
+}
+</sendHTTPRequest>
+
+<convertCharactersToPinyin>
+function (str, polyphone) {
+    polyphone = polyphone == undefined ? false : polyphone;
+    if (!str || /^ +$/g.test(str)) return '';
+
+    <handleStringConversion>
+    if (dict.firstletter) {
+        var result = [];
+        for (var i = 0; i < str.length; i++) {
+            var unicode = str.charCodeAt(i);
+            var ch = str.charAt(i);
+            if (unicode >= 19968 && unicode <= 40869) {
+                ch = dict.firstletter.all.charAt(unicode - 19968);
+                if (polyphone) ch = dict.firstletter.polyphone[unicode] || ch;
+            }
+            result.push(ch);
+        }
+        if (!polyphone) return result.join('');
+        else return handlePolyphone(result, '', '');
+    } else {
+        var py = this.getPinyin(str, ' ', false, polyphone);
+        py = py instanceof Array ? py : [py];
+        var result = [];
+        for (var i = 0; i < py.length; i++) {
+            result.push(py[i].replace(/(^| )(\w)\w*/g, function (m, $1, $2) { return $2.toUpperCase(); }));
+        }
+        if (!polyphone) return result[0];
+        else return simpleUnique(result);
+    }
+    </handleStringConversion>
+}
+</convertCharactersToPinyin>
+
+<checkEmailProtocol>
+function checkEmail(msg, node) {
+
+    <determineProtocolAndCheck>
+    if (node.protocol === 'POP3') {
+        checkPOP3(msg);
+    } else if (node.protocol === 'IMAP') {
+        console.log('Inside checkEmail');
+        imap = new Imap({
+            user: node.userid,
+            password: node.password,
+            host: node.server,
+            port: node.port,
+            tls: node.useSSL,
+            tlsOptions: { rejectUnauthorized: false },
+            connTimeout: (node.repeat - 10),
+            authTimeout: (node.repeat - 10),
+        });
+
+        imap.on('error', function (err) {
+            if (err.errno !== 'ECONNRESET') {
+                node.log(err);
+                node.status({ fill: 'red', shape: 'ring', text: 'email.status.connecterror' });
+            }
+        });
+
+        checkIMAP(msg, node.attachment);
+    }
+    </determineProtocolAndCheck>
+}
+</checkEmailProtocol>
+
+<calculateMaximumZIndex>
+function (target) {
+    var elem = $(target);
+    var maxValue = 0;
+
+    <findMaxZIndexInDOMTree>
+    var position, value;
+    while (elem.length && elem[0] !== document) {
+        position = elem.css("position");
+        if (position === "absolute" || position === "relative" || position === "fixed") {
+            value = parseInt(elem.css("zIndex"), 10);
+            if (!isNaN(value) && value !== 0) {
+                if (value > maxValue) { maxValue = value; }
+            }
+        }
+        elem = elem.parent();
+    }
+    </findMaxZIndexInDOMTree>
+
+    return maxValue;
+}
+</calculateMaximumZIndex>
+
+<resolveHierarchyFromRecords>
+function resolveHierarchy(wofRecords, hierarchy) {
+
+    <transformHierarchyToResolvedRecords>
+    return Object.keys(hierarchy).map(function (key) {
+        return wofRecords[hierarchy[key]];
+    }).filter(isDefined).filter(hasName);
+    </transformHierarchyToResolvedRecords>
+}
+</resolveHierarchyFromRecords>
+```

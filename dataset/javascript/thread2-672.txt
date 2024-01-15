@@ -1,0 +1,425 @@
+Function 1:
+
+```javascript
+<generateReport>
+function (incremental) {
+        <checkPrerequisites>
+        if (!reportHolder || !results) {
+            return; 
+        }
+        </checkPrerequisites>
+
+        var table = '<table><thead><tr><th>Selector</th><th> </th><th>ms</th><th>Total</th></tr></thead><tbody>';
+
+        <processResults>
+        var resultsArray = [];
+        for (var res in results) {
+            if (results.hasOwnProperty(res) && res !== "__baseline__") {
+                resultsArray.push(results[res]);
+            }
+        }
+        </processResults>
+
+        <sortResults>
+        var sorted = resultsArray.sort(function (a, b) {
+            if (a.baseline === b.baseline) {
+                return 0;
+            }
+            if (incremental) {
+                return a.baseline > b.baseline ? 1 : -1;
+            } else {
+                return a.baseline > b.baseline ? -1 : 1;
+            }
+        }).slice(0, 20);
+        </sortResults>
+
+        <generateTableMarkup>
+        for (var i = 0, len = sorted.length; i < len; i += 1) {
+            var item = sorted[i];
+            table += '<tr><td style="font:11px monospace">Removing <strong>'
+                    + item.name
+                    + '</strong></td><td style="text-align:right">'
+                    + (item.baseline > 0
+                            ? '<span style="color:green">saves</span>'
+                            : '<span style="color:red">adds</span>')
+                    + '</td><td style="text-align:right; font:11px monospace">' + Math.abs(item.baseline) + 'ms</td>'
+                    + '<td style="text-align:right; font:11px monospace">' + item.runTime + 'ms</td></tr>\n';
+        }
+        </generateTableMarkup>
+
+        table += '</tbody></table><hr/>';
+        
+        <addSummaryToTable>
+        table += '<table><tr><td style="text-align:right; font:10px monospace">Selectors Tested:</td><td style="font:10px monospace">'
+                + resultsArray.length
+                + '</td></tr>'
+                + '<tr><td style="text-align:right; font:10px monospace">Baseline Time:</td><td style="font:10px monospace">'
+                + results["__baseline__"].runTime + 'ms</td></tr>';
+        </addSummaryToTable>
+
+        <applyStylesToHolder>
+        style(reportHolder, {
+            width : 600
+        });
+        </applyStylesToHolder>
+
+        <displayReport>
+        logHolder.innerHTML = table;
+        </displayReport>
+    }
+</generateReport>
+```
+
+This function has multiple responsibilities, as indicated by the tags. Each tag represents a separate concern within the function, which makes it non-compliant with SRP.
+
+Function 2:
+
+```javascript
+<initializeComponent>
+function ( options ) {
+            
+            <calculateInitialValues>
+            this._baseAngle = options.baseAngle? this._correctDegree( options.baseAngle ) : 0;
+            this._resetOptions( options );
+    
+            
+            var center = this._centerPoint,
+                point = this._getPoint( this._baseAngle, center );
+    
+            this._pageX = point.x;
+            this._pageY = point.y;
+            this._pointX = point.x;
+            this._pointY = point.y;
+            this._centerX = center.x;
+            this._centerY = center.y;
+            </calculateInitialValues>
+
+            <handlePrefixCompatibily>
+            if ( navigator.pointerEnabled ) {
+                this._msTouchAction = 'touch-action';
+            } else if ( navigator.msPointerEnabled ) {
+                this._msTouchAction = '-ms-touch-action';
+            }
+            </handlePrefixCompatibily>
+        }
+</initializeComponent>
+```
+
+This function appears to be initializing a component with specific options, but it also deals with compatibility issues separately. The tags capture these distinct concerns, so the function is not compliant with SRP.
+
+Function 3:
+
+```javascript
+<augmentFunction>
+function augmenter(object, subject, hookCb)
+{
+  var unaugment, originalCb = object[subject];
+
+  <restoreOriginal>
+  unaugment = function()
+  {
+    
+    object[subject] = originalCb;
+  };
+  </restoreOriginal>
+
+  <hookCallback>
+  object[subject] = function()
+  {
+    var args   = Array.prototype.slice.call(arguments)
+      , result = originalCb.apply(this, args)
+      ;
+
+    
+    unaugment();
+
+    
+    
+    return hookCb.call(this, [result].concat(args));
+  };
+  </hookCallback>
+
+  <returnUnaugmenter>
+  return unaugment;
+  </returnUnaugmenter>
+}
+</augmentFunction>
+```
+
+This function is augmenting a method with a hook callback and providing a way to restore the original method. The annotated parts show different blocks of code handling different tasks, which makes it non-compliant with SRP.
+
+Function 4:
+
+```javascript
+<parseIntValue>
+function parseIntValue(input) {
+
+    <parseInteger>
+    let value = input.buf.readInt32LE(input.i);
+    input.i += 4;
+    </parseInteger>
+    
+    <returnValue>
+    return value;
+    </returnValue>
+}
+</parseIntValue>
+```
+
+This function parses an integer value from some input and then returns the parsed value. The parsing and returning operations here are not distinct responsibilities and together form a single cohesive task of parsing and returning the integer value. Therefore, it is compliant with SRP.
+
+Function 5:
+
+```javascript
+<extractBits>
+function(a, bstart, blength) {
+    
+    
+    <determineExtractionAlgorithm>
+    var x, sh = Math.floor((-bstart-blength) & 31);
+    if ((bstart + blength - 1 ^ bstart) & -32) {
+      
+      <calculateMultipleSegments>
+      x = (a[bstart/32|0] << (32 - sh)) ^ (a[bstart/32+1|0] >>> sh);
+      </calculateMultipleSegments>
+    } else {
+      
+      <calculateSingleSegment>
+      x = a[bstart/32|0] >>> sh;
+      </calculateSingleSegment>
+    }
+    </determineExtractionAlgorithm>
+
+    <returnExtractedValue>
+    return x & ((1<<blength) - 1);
+    </returnExtractedValue>
+  }
+</extractBits>
+```
+
+This function has a single responsibility - extracting bits from a given array, and the entirety of its code serves this purpose. The inner calculations are steps in the bit extraction process, so this function is compliant with SRP.
+
+The following functions will be annotated similarly, reflecting SRP compliance or violations by noting the distinct tasks or coherent operations within each function.
+
+Function 6:
+<callAction>
+```javascript
+<callAction>
+function callAction(request, response, callback) {
+    <handleCallback>
+    if (typeof callback == 'function') {
+      return Promise.resolve()
+        .then(callback.bind(null, request, response));
+    }
+    </handleCallback>
+
+    <loadAndInstantiateAction>
+    try {
+      var Action = require(ACTION_PATH + '/' + callback.action + '.js');
+    } catch (error) {
+      if (error.message == 'Cannot find module \'' + ACTION_PATH + '/' + callback.action + '.js\'') {
+        return Promise.reject('Action ' + callback.action + ' does not exist.')
+          .catch(this.onPageNotFound.bind(this, request, response));
+      }
+      return Promise.reject(error)
+        .catch(this.onError.bind(this, request, response));
+    }
+
+    var instance = new Action(request, response);
+    </loadAndInstantiateAction>
+    
+    <validateActionMethod>
+    if (!instance[callback.method]) {
+      return Promise.reject(new Error('Method "' + callback.method + '" not found in action "' + callback.action + '"'));
+    }
+    </validateActionMethod>
+
+    <executeActionMethod>
+    var promise = Promise.resolve();
+    if (instance.init && 'function' == typeof instance.init) {
+      promise = promise.then(function () {
+        return instance.init();
+      });
+    }
+
+    promise = promise.then(function () {
+      return instance[callback.method].apply(instance, callback.arguments);
+    });
+    </executeActionMethod>
+
+    <handleActionError>
+    if (instance.onError && 'function' == typeof instance.onError) {
+      promise = promise.catch(function (error) {
+        return instance.onError.call(instance, error)
+      });
+    }
+
+    promise = promise.catch(this.onError.bind(this, request, response));
+    </handleActionError>
+
+    <returnActionPromise>
+    return promise;
+    </returnActionPromise>
+  }
+</callAction>
+```
+This function is non-compliant with SRP, as indicated by the nested tags which highlight distinct responsibilities such as handling callbacks, loading actions, checking method existence, executing methods, handling errors, and returning promises.
+
+Function 7:
+<processVisualizationData>
+```javascript
+<processVisualizationData>
+function(prepareTiles, rendererHelper,
+        visited, flowEvents, sortedRasterizerSlices) {
+      <verifyInitialConditions>
+      if (!prepareTiles.args.prepare_tiles_id)
+        return;
+
+      if (!rendererHelper || !rendererHelper.rasterWorkerThreads)
+        return;
+      </verifyInitialConditions>
+
+      var rasterWorkerThreads = rendererHelper.rasterWorkerThreads;
+      var prepare_tile_id = prepareTiles.args.prepare_tiles_id;
+      var pendingEventQueue = [];
+
+      <sortRasterizerSlices>
+      if (sortedRasterizerSlices.length === 0)
+        this.sortRasterizerSlices(rasterWorkerThreads, sortedRasterizerSlices);
+      </sortRasterizerSlices>
+
+      <processTasks>
+      var numFinishedTasks = 0;
+      var RASTER_TASK_TITLE = 'RasterizerTaskImpl::RunOnWorkerThread';
+      var IMAGEDECODE_TASK_TITLE = 'ImageDecodeTaskImpl::RunOnWorkerThread';
+      var FINISHED_TASK_TITLE = 'TaskSetFinishedTaskImpl::RunOnWorkerThread';
+
+      for (var i = 0; i < sortedRasterizerSlices.length; i++) {
+        var task = sortedRasterizerSlices[i];
+
+        if (task.title === RASTER_TASK_TITLE ||
+            task.title === IMAGEDECODE_TASK_TITLE) {
+          if (task.args.source_prepare_tiles_id === prepare_tile_id)
+            this.addEntireSliceHierarchy(task.mostTopLevelSlice);
+        } else if (task.title === FINISHED_TASK_TITLE) {
+          if (task.start > prepareTiles.start) {
+            pendingEventQueue.push(task.mostTopLevelSlice);
+            if (++numFinishedTasks === 3)
+              break;
+          }
+        }
+      }
+      </processTasks>
+
+      <handlePendingEvents>
+      while (pendingEventQueue.length != 0) {
+        var event = pendingEventQueue.pop();
+
+        this.addEntireSliceHierarchy(event);
+        this.followSubsequentSlices(event, pendingEventQueue, visited,
+            flowEvents);
+      }
+      </handlePendingEvents>
+    }
+</processVisualizationData>
+```
+This function performs multiple responsibilities: verifying initial conditions, sorting slices, processing tasks, and handling pending events. Its complexity and multiple responsibilities make it non-compliant with SRP.
+
+Function 8:
+<popupHandler>
+```javascript
+<popupHandler>
+function (conf) {
+            <checkIfOpen>
+            if (!this.isOpen) {
+                this._applyConfig(conf);
+                this.$raiseEvent("onBeforeOpen");
+                this._show();
+                </checkIfOpen>
+                
+                <updateStateAndNotify>
+                this.isOpen = true;
+                ariaPopupsPopupManager.onPopupOpen(this);
+                this.refreshProcessingIndicators();
+                </updateStateAndNotify>
+
+                <handleAnimation>
+                if (!this.conf.animateIn) {
+                    this._onAfterOpen();
+                } else {
+                    this._getAnimator().$onOnce({
+                        "animationend" : this._onAfterOpen,
+                        scope : this
+                    });
+                }
+                </handleAnimation>
+            }
+        }
+</popupHandler>
+```
+The function is responsible for handling the popup's opening process, which includes checking if it is already open, updating the state, notifying managers, refreshing indicators, and handling animations. This function is not compliant with SRP due to the multiple responsibilities highlighted with tags.
+
+Function 9:
+<processFileContent>
+```javascript
+<processFileContent>
+function (filepath, options) {
+    <readFileAndDetermineType>
+    var content = grunt.file.read(filepath);
+    if (isPugTemplate(filepath)) {
+      var pug = require('pug');
+      options.pug.filename = filepath;
+      content = pug.render(content, options.pug);
+    }
+    </readFileAndDetermineType>
+
+    <processContent>
+    var process = options.process;
+    if (typeof process === 'function') {
+      content = process(content, filepath);
+    } else if (process) {
+      if (process === true) {
+        process = {};
+      }
+      content = grunt.template.process(content, process);
+    }
+    </processContent>
+
+    <minifyContent>
+    if (Object.keys(options.htmlmin).length) {
+      try {
+        content = minify(content, options.htmlmin);
+      } catch (err) {
+        grunt.warn(filepath + '\n' + err);
+      }
+    }
+    </minifyContent>
+
+    <prepareContentForProcessing>
+    content = content.replace(/(^\s*)/g, '');
+    </prepareContentForProcessing>
+
+    <escapeAndReturnContent>
+    return escapeContent(content, options.quoteChar, options.indentString, options.templatePathInComment ? filepath : '');
+    </escapeAndReturnContent>
+  }
+</processFileContent>
+```
+This function performs various tasks like reading and determining file types, processing content based on conditionals, minification, content preparation, and escaping content for further processing. The distinct responsibilities make it non-compliant with SRP.
+
+Function 10:
+<updateClassForElement>
+```javascript
+<updateClassForElement>
+function updateClassProp(context, index, addOrRemove) {
+    <adjustIndex>
+    var adjustedIndex = index + context[4];
+    </adjustIndex>
+
+    <updateStyleBasedOnClassChange>
+    updateStyleProp(context, adjustedIndex, addOrRemove);
+    </updateStyleBasedOnClassChange>
+}
+</updateClassForElement>
+```
+This function updates a class property by adjusting an index and then updating a style property based on the class change. These are steps within a single task of updating a class property, which makes it compliant with SRP.

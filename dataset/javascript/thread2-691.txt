@@ -1,0 +1,274 @@
+```javascript
+<updateSizeReading>
+function updateSizeReading(size,unit,target) {
+    var emSize, pxSize;
+
+    <convertSizes>
+    if(unit==='em') { 
+      emSize = size;
+      pxSize = Math.floor(size*$bodySize);
+    } else { 
+      pxSize = size;
+      emSize = size/$bodySize;
+    }
+    </convertSizes>
+
+    <updateDOMElements>
+    if (target === 'updatePxInput') {
+      $sizePx.val(pxSize);
+    } else if (target === 'updateEmInput') {
+      $sizeEms.val(emSize.toFixed(2));
+    } else {
+      $sizeEms.val(emSize.toFixed(2));
+      $sizePx.val(pxSize);
+    }
+    </updateDOMElements>
+}
+</updateSizeReading>
+
+<returnDSInvalidError>
+function (errors) {
+    <normalizeErrors>
+    if (typeof errors === 'string' || errors instanceof Error) {
+      errors = {'*': '' + errors};
+    }
+    else if (errors == null) {
+      errors = {'*': 'Unknown error'};
+    }
+    </normalizeErrors>
+
+    <createErrorInstance>
+    return new DS.InvalidError(errors);
+    </createErrorInstance>
+}
+</returnDSInvalidError>
+
+<applyLinkScanner>
+function(text, parent) {
+    var result = parent || document.createElement('div'); 
+    var linkScanners = this._registry.getServiceReferences("orion.core.linkScanner");
+
+    <scanAndReplaceLinks>
+    if (linkScanners.length > 0) {
+        var linkScanner = linkScanners[0];
+        var pattern = new RegExp(linkScanner.getProperty("pattern"), "i"); 
+        var words= linkScanner.getProperty("words"); 
+        var anchor = linkScanner.getProperty("anchor"); 
+        var index = text.search(pattern);
+        while (index >= 0) {
+            text = this._replaceLink(text, result, pattern, words, anchor);
+            index = text.search(pattern);
+        }
+    }
+    </scanAndReplaceLinks>
+
+    <appendTextToResult>
+    if (text.length > 0) {
+        result.appendChild(document.createTextNode(text));
+    }
+    </appendTextToResult>
+    
+    return result;
+}
+</applyLinkScanner>
+
+<_doSplit>
+function _doSplit(orientation) {
+    <setupSplitOrientation>
+    if (orientation === _orientation) {
+        return;
+    }
+    </setupSplitOrientation>
+
+    <updateSplitUI>
+    firstPane = _panes[FIRST_PANE];
+    Resizer.removeSizable(firstPane.$el);
+    if (_orientation) {
+        _$el.removeClass("split-" + _orientation.toLowerCase());
+    }
+    _$el.addClass("split-" + orientation.toLowerCase());
+    </updateSplitUI>
+
+    <createSecondPane>
+    _orientation = orientation;
+    newPane = _createPaneIfNecessary(SECOND_PANE);
+    _makeFirstPaneResizable();
+    _initialLayout();
+    </createSecondPane>
+
+    <notifyLayoutChange>
+    exports.trigger("paneLayoutChange", _orientation);
+    </notifyLayoutChange>
+
+    <updateActivePane>
+    if (newPane && getCurrentlyViewedFile(firstPane.id)) {
+        setActivePaneId(newPane.id);
+    }
+    </updateActivePane>
+}
+</_doSplit>
+
+<delayPromise>
+function(delay) {
+    <setupTimer>
+    var timer,
+        promise = this.then(function(val) {
+            var defer = new Deferred();
+            timer = setTimeout(
+                function() {
+                    defer.resolve(val);
+                },
+                delay);
+
+            return defer.promise();
+        });
+    </setupTimer>
+
+    <clearTimer>
+    promise.always(function() {
+        clearTimeout(timer);
+    });
+    </clearTimer>
+
+    return promise;
+}
+</delayPromise>
+
+<handleTextInput>
+function (value) {
+    <assignValueIfNull>
+    if (value == null) {
+        value = this._getText();
+    }
+    </assignValueIfNull>
+
+    <updateTextInput>
+    if (!value && !this._isPassword) {
+        this.getTextInputField().value = "";
+        this.setHelpText(true);
+    } else if (value) {
+        this.setHelpText(false);
+        this.getTextInputField().value = value;
+    }
+    </updateTextInput>
+}
+</handleTextInput>
+
+<runScriptViaChildProcessSpawn>
+function runScriptViaChildProcessSpawn(script, context) {
+    <initializeCommandAndArgs>
+    var opts = context.opts;
+    var command = script.fullPath;
+    var args = [opts.projectRoot];
+    </initializeCommandAndArgs>
+
+    <handleWindowsInterpreterSelection>
+    if (fs.statSync(script.fullPath).isDirectory()) {
+        events.emit('verbose', 'Skipped directory "' + script.fullPath + '" within hook directory');
+        return Q();
+    }
+    if (isWindows) {
+        var interpreter = extractSheBangInterpreter(script.fullPath);
+        if (interpreter) {
+            args.unshift(command);
+            command = interpreter;
+        }
+    }
+    </handleWindowsInterpreterSelection>
+
+    <configureExecOptions>
+    var execOpts = {cwd: opts.projectRoot, printCommand: true, stdio: 'inherit'};
+    execOpts.env = {};
+    execOpts.env.CORDOVA_VERSION = require('../../package').version;
+    execOpts.env.CORDOVA_PLATFORMS = opts.platforms ? opts.platforms.join() : '';
+    execOpts.env.CORDOVA_PLUGINS = opts.plugins ? opts.plugins.join() : '';
+    execOpts.env.CORDOVA_HOOK = script.fullPath;
+    execOpts.env.CORDOVA_CMDLINE = process.argv.join(' ');
+    </configureExecOptions>
+
+    <executeSpawn>
+    return superspawn.spawn(command, args, execOpts)
+    </executeSpawn>
+
+    <handleExecutionError>
+    .catch(function(err) {
+        if (!isWindows && err.code == 'EACCES') {
+            events.emit('verbose', 'Skipped non-executable file: ' + script.fullPath);
+        } else {
+            throw new Error('Hook failed with error code ' + err.code + ': ' + script.fullPath);
+        }
+    });
+    </handleExecutionError>
+}
+</runScriptViaChildProcessSpawn>
+
+<_showHints>
+function _showHints() {
+    <retrieveHints>
+    var hints = this._targetElement.querySelectorAll('.introjs-hint');
+    </retrieveHints>
+
+    <decideToShowHintOrPopulate>
+    if (hints && hints.length > 0) {
+        for (var i = 0; i < hints.length; i++) {
+            _showHint.call(this, hints[i].getAttribute('data-step'));
+        }
+    } else {
+        _populateHints.call(this, this._targetElement);
+    }
+    </decideToShowHintOrPopulate>
+}
+</_showHints>
+
+<listS3Objects>
+function(params, cb) {
+    var listData =  [];
+
+    <queryS3>
+    S3Handler.s3.listObjects(params, function(err, data) {
+        if (err) {
+          if (CONSOLE_MESSAGES) console.log(new Date().toISOString(),"S3.listObjects Error:", err);
+          cb(err, null);
+        } else {
+          var contents = data.Contents;
+          listData = listData.concat(contents);
+
+          <handleTruncatedList>
+          if (data.IsTruncated) {
+            params.Marker = contents[contents.length-1].Key;
+            s3ListObjects(params, cb);
+          } else {
+            cb(null, listData);
+          }
+          </handleTruncatedList>
+        }
+    });
+    </queryS3>
+}
+</listS3Objects>
+
+<generateIndex>
+function generateIndex(base, files) {
+    <prepareDocument>
+    var document = base.copy();
+    var head = document.find().only().elem('head').toValue();
+    </prepareDocument>
+
+    <setTitle>
+    head.find()
+        .only().elem('title').toValue()
+        .setContent('Mocha Tests - all');
+    </setTitle>
+
+    <addScriptTags>
+    Object.keys(files).forEach(function (relative) {
+      head.append('<script src="/test' + relative + '"></script>');
+    });
+    </addScriptTags>
+
+    <returnDocumentContent>
+    return document.content;
+    </returnDocumentContent>
+}
+</generateIndex>
+```

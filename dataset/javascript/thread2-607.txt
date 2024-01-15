@@ -1,0 +1,316 @@
+```javascript
+<replaceFieldNames>
+function replaceFieldNames(sql, identifiers, model) {
+    <databaseInteraction>
+    const {queryInterface} = model.sequelize;
+    _.forIn(identifiers, (fieldName, identifier) => {
+        
+        fieldName = (model.rawAttributes || model.attributes)[fieldName].field;
+
+        
+        sql = sql.replace(
+            new RegExp(`\\*${identifier}(?![a-zA-Z0-9_])`, 'g'),
+            queryInterface.quoteIdentifier(fieldName)
+        );
+    });
+    </databaseInteraction>
+    return sql;
+}
+</replaceFieldNames>
+
+<toggleElementClass>
+function(element, name) {
+    <elementClassToggling>
+    if(OpenLayers.Element.hasClass(element, name)) {
+        OpenLayers.Element.removeClass(element, name);
+    } else {
+        OpenLayers.Element.addClass(element, name);
+    }
+    </elementClassToggling>
+    return element;
+}
+</toggleElementClass>
+
+<ReactReconcileTransaction>
+function(module, exports, __webpack_require__) {
+    <importModules>
+    'use strict';
+    var _assign = __webpack_require__(5);
+    var CallbackQueue = __webpack_require__(55);
+    var PooledClass = __webpack_require__(48);
+    var ReactBrowserEventEmitter = __webpack_require__(98);
+    var ReactInputSelection = __webpack_require__(139);
+    var ReactInstrumentation = __webpack_require__(60);
+    var Transaction = __webpack_require__(61);
+    var ReactUpdateQueue = __webpack_require__(128);
+    </importModules>
+
+    <defineTransactionWrappers>
+    var TRANSACTION_WRAPPERS = [SELECTION_RESTORATION, EVENT_SUPPRESSION, ON_DOM_READY_QUEUEING];
+    </defineTransactionWrappers>
+
+    if (false) {
+      TRANSACTION_WRAPPERS.push({
+        initialize: ReactInstrumentation.debugTool.onBeginFlush,
+        close: ReactInstrumentation.debugTool.onEndFlush
+      });
+    }
+
+    <ReactReconcileTransactionDefinition>
+    function ReactReconcileTransaction(useCreateElement) {
+      this.reinitializeTransaction();
+      
+      this.renderToStaticMarkup = false;
+      this.reactMountReady = CallbackQueue.getPooled(null);
+      this.useCreateElement = useCreateElement;
+    }
+    </ReactReconcileTransactionDefinition>
+
+    <MixinDefinition>
+    var Mixin = {
+      getTransactionWrappers: function () {
+        return TRANSACTION_WRAPPERS;
+      },
+
+      getReactMountReady: function () {
+        return this.reactMountReady;
+      },
+
+      getUpdateQueue: function () {
+        return ReactUpdateQueue;
+      },
+
+      checkpoint: function () {
+        return this.reactMountReady.checkpoint();
+      },
+
+      rollback: function (checkpoint) {
+        this.reactMountReady.rollback(checkpoint);
+      },
+
+      destructor: function () {
+        CallbackQueue.release(this.reactMountReady);
+        this.reactMountReady = null;
+      }
+    };
+    </MixinDefinition>
+
+    <assignMixinAndPooling>
+    _assign(ReactReconcileTransaction.prototype, Transaction, Mixin);
+    PooledClass.addPoolingTo(ReactReconcileTransaction);
+    </assignMixinAndPooling>
+
+    module.exports = ReactReconcileTransaction;
+}
+</ReactReconcileTransaction>
+
+<flattenArray>
+function flattenArray(input, ans = {}) {
+    <checkInput>
+    if (!input || !Array.isArray(input)) return input || {}
+    </checkInput>
+    <recursionFlattening>
+    for (let k in input) {
+        if (Array.isArray(input[k])) {
+            ans = flattenArray(input[k], ans)
+        } else {
+            ans = Object.assign({}, ans, input[k])
+        }
+    }
+    </recursionFlattening>
+    return ans
+}
+</flattenArray>
+
+<setVertexProperties>
+function () {
+    var vertex = this.get('vertex');
+    this._super();
+    
+    <propertySetting>
+    this.setProperties({
+      id: vertex.get('vertexName') + this.get('name'),
+      depth: vertex.get('depth') + 1
+    });
+    </propertySetting>
+}
+</setVertexProperties>
+
+<checkFlashPluginAndSetup>
+function (reqId, callback) {
+    <pluginDetection>
+    var navigator = Aria.$global.navigator;
+    if (navigator.plugins && navigator.plugins.length > 0) {
+        var mime = navigator.mimeTypes, type = "application/x-shockwave-flash";
+        if (!mime || !mime[type] || !mime[type].enabledPlugin) {
+            return this.$logError(this.IO_MISSING_FLASH_PLUGIN);
+        }
+    } else if (navigator.appVersion.indexOf("Mac") == -1 && Aria.$frameworkWindow.execScript) {
+        try {
+            var ActiveXObject = Aria.$global.ActiveXObject;
+            var obj = new ActiveXObject("ShockwaveFlash.ShockwaveFlash");
+            if (obj.activeXError) {
+                throw "ActiveXError";
+            }
+        } catch (er) {
+            return this.$logError(this.IO_MISSING_FLASH_PLUGIN);
+        }
+    }
+    </pluginDetection>
+
+    <setupPendingRequestAndTransport>
+    this._pending[reqId] = ariaCoreTimer.addCallback({
+        fn : this._swfTimeout,
+        scope : this,
+        args : {
+            reqId : reqId,
+            cb : callback
+        },
+        delay : this.swfTimeout
+    });
+
+    if (!this._transport) {
+        var swfUri = ariaCoreDownloadMgr.resolveURL('aria/resources/handlers/IO.swf');
+        var obj = [
+                '<object id="xATIOSwf" type="application/x-shockwave-flash" data="',
+                swfUri,
+                '" width="1" height="1">',
+                '<param name="movie" value="' + swfUri + '" />',
+                '<param name="allowScriptAccess" value="always" />',
+                '<param name="FlashVars" value="readyCallback=' + this.$classpath + '.onXdrReady&handler='
+                        + this.$classpath + '.handleXdrResponse" />', '</object>'].join("");
+
+        var document = Aria.$frameworkWindow.document;
+        var container = document.createElement('div');
+        container.style.cssText = "position:fixed;top:-12000px;left:-12000px";
+        document.body.appendChild(container);
+        container.innerHTML = obj;
+
+        this._transport = document.getElementById("xATIOSwf");
+        this._transportContainer = container;
+    }
+    </setupPendingRequestAndTransport>
+}
+</checkFlashPluginAndSetup>
+
+<checkHeadingsRedefined>
+function(parser, reporter){
+    var rule = this;
+
+    <headingsInitialization>
+    var headings =  {
+            h1: 0,
+            h2: 0,
+            h3: 0,
+            h4: 0,
+            h5: 0,
+            h6: 0
+        };
+    </headingsInitialization>
+
+    <parserListener>
+    parser.addListener("startrule", function(event){
+        var selectors = event.selectors,
+            selector,
+            part,
+            i;
+
+        for (i=0; i < selectors.length; i++){
+            selector = selectors[i];
+            part = selector.parts[selector.parts.length-1];
+
+            if (part.elementName && /(h[1-6])/.test(part.elementName.toString())){
+                headings[RegExp.$1]++;
+                if (headings[RegExp.$1] > 1) {
+                    reporter.warn("Heading (" + part.elementName + ") has already been defined.", part.line, part.col, rule);
+                }
+            }
+        }
+    });
+    </parserListener>
+}
+</checkHeadingsRedefined>
+
+<handleFileDrop>
+function(e) {
+    <toggleActiveState>
+    toggleActive(e, false);
+    </toggleActiveState>
+
+    <loadDroppedFile>
+    if (e.dataTransfer.files.length) {
+        wavesurfer.loadBlob(e.dataTransfer.files[0]);
+    } else {
+        wavesurfer.fireEvent('error', 'Not a file');
+    }
+    </loadDroppedFile>
+}
+</handleFileDrop>
+
+<adjustVirtualScroll>
+function(e) {
+  if (this.isVirtual) {
+    <calculateVirtualParameters>
+    var itemHeight = this.itemHeight;
+    var totalItems = this.listEl.children.length;
+    var scrollHeight = e.target.scrollHeight;
+    var viewportHeight = this.el.parentNode.offsetHeight;
+    var scrollTop = e.scrollTop;
+    </calculateVirtualParameters>
+
+    <computeWatermarks>
+    var highWater = Math.max(0, e.scrollTop + this.virtualRemoveThreshold);
+    var lowWater = Math.min(scrollHeight, Math.abs(e.scrollTop) + viewportHeight + this.virtualAddThreshold);
+    </computeWatermarks>
+
+    <determineRenderRange>
+    var itemsPerViewport = Math.floor((lowWater - highWater) / itemHeight);
+    var first = parseInt(Math.abs(highWater / itemHeight), 10);
+    var last = parseInt(Math.abs(lowWater / itemHeight), 10);
+    </determineRenderRange>
+
+    <identifyItemsForRemoval>
+    this._virtualItemsToRemove = Array.prototype.slice.call(this.listEl.children, 0, first);
+    </identifyItemsForRemoval>
+
+    <sliceVisibleItems>
+    var nodes = Array.prototype.slice.call(this.listEl.children, first, first + itemsPerViewport);
+    </sliceVisibleItems>
+
+    <triggerViewportRender>
+    this.renderViewport && this.renderViewport(highWater, lowWater, first, last);
+    </triggerViewportRender>
+  }
+}
+</adjustVirtualScroll>
+
+<Bitid>
+function Bitid(params) {
+  <parameterInitialization>
+  params = params || {};
+  var self = this;
+
+  this._nonce = params.nonce;
+  this.callback = url.parse(params.callback, true);
+  this.signature = params.signature;
+  this.address = params.address;
+  this.unsecure = params.unsecure;
+  this._uri = !params.uri ? buildURI() : url.parse(params.uri, true);
+  </parameterInitialization>
+
+  <buildURI>
+  function buildURI() {
+    var uri = self.callback;
+    uri.protocol = SCHEME;
+    var params = {};
+    params[PARAM_NONCE] = self._nonce;
+    if(self.unsecure) params[PARAM_UNSECURE] = 1;
+    uri.query = params;
+    uri.href = url.format(uri);
+
+    return uri;
+  }
+  </buildURI>
+}
+</Bitid>
+```
