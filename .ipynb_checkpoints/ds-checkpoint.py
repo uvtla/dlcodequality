@@ -14,23 +14,25 @@ def read_jsonl_files(file_paths, suff):
 
 
 
+
 class SQLiteCodeDataset(Dataset):
-    def __init__(self, db_path, tokenizer, max_len, get_x, get_y):
+    def __init__(self, db_path, tokenizer, max_len, get_x, get_y, source = 'data'):
         self.conn = sqlite3.connect(db_path)
         self.tokenizer = tokenizer
         self.max_len = max_len
         self.get_x = get_x
         self.get_y = get_y
+        self.source = source
 
     def __len__(self):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM data")
+        cursor.execute(f"SELECT COUNT(*) FROM {self.source}")
         length, = cursor.fetchone()
         return length
 
     def __getitem__(self, idx):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM data LIMIT 1 OFFSET ?", (idx,))
+        cursor.execute(f"SELECT * FROM {self.source} LIMIT 1 OFFSET ?", (idx,))
         item = cursor.fetchone()
         cursor.close()
 

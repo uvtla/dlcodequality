@@ -1,0 +1,231 @@
+<morganMongoMiddleware>
+function morganMongoMiddleware(options = {}, connectionOptions = {}, schemaOptions = {}, morganOptions = {}) {
+    <initializeMorganMongo>
+    const morganMongo = new MorganMongo(options, connectionOptions, schemaOptions);
+    </initializeMorganMongo>
+    return morgan((tokens, req, res) => {
+        try {
+            <prepareAndPersistLog>
+            const logEntry = morganMongo.prepareLogEntry(tokens, req, res);
+            morganMongo.persistLogEntry(logEntry);
+            </prepareAndPersistLog>
+        }
+        catch (e) {
+            <handleLoggingError>
+            console.log(e);
+            </handleLoggingError>
+        }
+        return '';
+    }, morganOptions);
+}
+</morganMongoMiddleware>
+
+<updateSensitiveDataInfosOfIgnoredFilesIn>
+function updateSensitiveDataInfosOfIgnoredFilesIn(response, options) {
+    <fetchIgnoredData>
+    const ignoredData = getIgnoredSensitiveData(options);
+    </fetchIgnoredData>
+    <duplicateResponse>
+    const updatedResponse = JSON.parse(JSON.stringify(response, null, 2));
+    </duplicateResponse>
+    <markFilesAsNonSensitive>
+    const files = updatedResponse.files || [];
+    files.forEach((file) => {
+        if (
+            file &&
+            file.isSensitiveData &&
+            isIgnoredData(file.path, ignoredData)
+        ) {
+            file.isSensitiveData = false;
+            return;
+        }
+    });
+    </markFilesAsNonSensitive>
+    return updatedResponse;
+}
+</updateSensitiveDataInfosOfIgnoredFilesIn>
+
+<BackboneViewRemove>
+function () {
+    var self = this;
+
+    <removeComponents>
+    self.components.selector.remove();
+    self.components.editor.remove();
+    self.components.saver.remove();
+    </removeComponents>
+
+    <callParentRemove>
+    return Backbone.View.prototype.remove.apply(self, arguments);
+    </callParentRemove>
+}
+</BackboneViewRemove>
+
+<compare>
+function compare(pathData,opts={}) {
+    <convertPathToPolygons>
+	var polys = svgPathToPolygons(pathData,opts);
+    </convertPathToPolygons>
+    <calculateBoundingBox>
+	var minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+	polys.forEach(poly => {
+		poly.forEach(pt => {
+			if (pt[0]<minX) minX=pt[0];
+			if (pt[1]<minY) minY=pt[1];
+			if (pt[0]>maxX) maxX=pt[0];
+			if (pt[1]>maxY) maxY=pt[1];
+		});
+	});
+	let dx=maxX-minX, dy=maxY-minY;
+    </calculateBoundingBox>
+    <logSVGRepresentation>
+	console.log(`
+<svg xmlns="http://www.w3.org/2000/svg">
+<style>path,polygon,polyline { fill-opacity:0.2; stroke:black }</style>
+<path d="${pathData}"/>
+<g transform="translate(${dx},0)">
+${polys.map(poly => `  <${poly.closed ? 'polygon' : 'polyline'} points="${poly.join(' ')}"/>`).join("\n")}
+</g>
+</svg>
+	`.trim());
+    </logSVGRepresentation>
+}
+</compare>
+
+<getClass>
+function getClass() {
+  <initializeClassNode>
+  const type = NodeType.ClassType;
+  const token = tokens[pos];
+  const line = token.ln;
+  const column = token.col;
+  </initializeClassNode>
+  
+  <advancePosition>
+  pos++;
+  </advancePosition>
+
+  <collectContent>
+  const content = [getIdent()];
+  </collectContent>
+
+  <createNewNode>
+  return newNode(type, content, line, column);
+  </createNewNode>
+}
+</getClass>
+
+<PageConstructor>
+function Page(page) {
+  <copyPageProperties>
+  if (!page) page = {};
+  for (var key in page) this[key] = page[key];
+  </copyPageProperties>
+  <initIdx>
+  if (!this.hasOwnProperty('idx')) this.idx = 0;
+  </initIdx>
+  <initTotal>
+  if (!this.hasOwnProperty('total')) this.total = 1;
+  </initTotal>
+  <initCurrent>
+  if (!this.hasOwnProperty('current')) {
+    this.current = this.total;
+  }
+  </initCurrent>
+}
+</PageConstructor>
+
+<isArrowKey>
+function isArrowKey(oEvent) {
+			var sKey = oEvent.key; 
+
+			<checkForArrowKeys>
+			return (sKey === 'ArrowLeft') ||
+				(sKey === 'ArrowUp') ||
+				(sKey === 'ArrowRight') ||
+				(sKey === 'ArrowDown') ||
+				(sKey === 'Left') || 
+				(sKey === 'Up') || 
+				(sKey === 'Right') || 
+				(sKey === 'Down'); 
+			</checkForArrowKeys>
+		}
+</isArrowKey>
+
+<mxConstraintHandler>
+function mxConstraintHandler(graph)
+{
+	this.graph = graph;
+	
+	<initResetHandler>
+	this.resetHandler = mxUtils.bind(this, function(sender, evt)
+	{
+		if (this.currentFocus != null && this.graph.view.getState(this.currentFocus.cell) == null)
+		{
+			this.reset();
+		}
+		else
+		{
+			this.redraw();
+		}
+	});
+	</initResetHandler>
+
+	<registerListeners>
+	this.graph.model.addListener(mxEvent.CHANGE, this.resetHandler);
+	this.graph.view.addListener(mxEvent.SCALE_AND_TRANSLATE, this.resetHandler);
+	this.graph.view.addListener(mxEvent.TRANSLATE, this.resetHandler);
+	this.graph.view.addListener(mxEvent.SCALE, this.resetHandler);
+	this.graph.addListener(mxEvent.ROOT, this.resetHandler);
+	</registerListeners>
+}
+</mxConstraintHandler>
+
+<showLoading>
+function showLoading() {
+    var n = 0;
+    <showLoadingElement>
+    o('#loading').show();
+    </showLoadingElement>
+    <startLoadingTimer>
+    showLoading.timer = setInterval(function () {
+        loading.update(++n).draw(loading.ctx);
+    }, 50);
+    </startLoadingTimer>
+}
+</showLoading>
+
+<copyDirectory>
+function (src, dst, callback) {
+    
+    <listSourceDirectory>
+    var paths = fs.readdirSync(src);
+    </listSourceDirectory>
+    paths.forEach(function (path) {
+        <ensureDestinationExists>
+        if (fs.existsSync(dst) == false) mkdir(dst);
+        </ensureDestinationExists>
+        var _src = src + '/' + path,
+            _dst = dst + '/' + path;
+        
+        <statSourcePath>
+        var st = fs.statSync(_src);
+        </statSourcePath>
+        
+        if (st.isFile()) {
+            <copyFile>
+            fs.writeFileSync(_dst, fs.readFileSync(_src));
+            </copyFile>
+        }
+        else if (st.isDirectory()) {
+            <recursiveDirectoryCopy>
+            exists(_src, _dst, copy);
+            </recursiveDirectoryCopy>
+        }
+    });
+    <invokeCallback>
+    if (callback)
+        callback();
+    </invokeCallback>
+}
+</copyDirectory>
