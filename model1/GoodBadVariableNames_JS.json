@@ -1,0 +1,1298 @@
+[
+  {
+    "bad": "let ymdstr = new Date().toISOString().slice(0, 10);",
+    "good": "let currentDate = new Date().toISOString().slice(0, 10);"
+  },
+  {
+    "bad": "let t = setTimeout(func, 3000);",
+    "good": "let timeoutId = setTimeout(func, 3000);"
+  },
+  {
+    "bad": "let a = document.getElementById('header');",
+    "good": "let headerElement = document.getElementById('header');"
+  },
+  {
+    "bad": "let s = 'Hello, World!'.split(' ');",
+    "good": "let words = 'Hello, World!'.split(' ');"
+  },
+  { "bad": "let x = evt.pageX;", "good": "let mousePageX = evt.pageX;" },
+  {
+    "bad": "let arr = [1, 2, 3].map(n => n * 2);",
+    "good": "let doubledNumbers = [1, 2, 3].map(n => n * 2);"
+  },
+  {
+    "bad": "let el = document.querySelector('.active');",
+    "good": "let activeElement = document.querySelector('.active');"
+  },
+  {
+    "bad": "let op = getUserOptions();",
+    "good": "let userOptions = getUserOptions();"
+  },
+  {
+    "bad": "let r = Math.random();",
+    "good": "let randomNumber = Math.random();"
+  },
+  {
+    "bad": "let v = isValid(form);",
+    "good": "let isFormValid = isValid(form);"
+  },
+  {
+    "bad": "let f = fetch('/api/data');",
+    "good": "let fetchDataPromise = fetch('/api/data');"
+  },
+  {
+    "bad": "let db = connectToDatabase();",
+    "good": "let databaseConnection = connectToDatabase();"
+  },
+  {
+    "bad": "let json = JSON.stringify(obj);",
+    "good": "let jsonString = JSON.stringify(obj);"
+  },
+  {
+    "bad": "let tmr = setInterval(update, 1000);",
+    "good": "let updateIntervalId = setInterval(update, 1000);"
+  },
+  { "bad": "let l = list.length;", "good": "let listLength = list.length;" },
+  { "bad": "let u = getUser();", "good": "let currentUser = getUser();" },
+  {
+    "bad": "let k = Object.keys(obj);",
+    "good": "let objectKeys = Object.keys(obj);"
+  },
+  {
+    "bad": "let id = evt.target.id;",
+    "good": "let targetElementId = evt.target.id;"
+  },
+  {
+    "bad": "let msg = 'Error occurred';",
+    "good": "let errorMessage = 'Error occurred';"
+  },
+  { "bad": "let val = input.value;", "good": "let inputValue = input.value;" },
+  { "bad": "let d = new Date();", "good": "let currentDate = new Date();" },
+  { "bad": "let nm = 'John Doe';", "good": "let userName = 'John Doe';" },
+  { "bad": "let flg = true;", "good": "let isUserAuthenticated = true;" },
+  {
+    "bad": "let p = document.createElement('p');",
+    "good": "let paragraphElement = document.createElement('p');"
+  },
+  {
+    "bad": "let q = queryDatabase(query);",
+    "good": "let queryResult = queryDatabase(query);"
+  },
+  {
+    "bad": "let btn = document.getElementById('submit');",
+    "good": "let submitButton = document.getElementById('submit');"
+  },
+  {
+    "bad": "let ttl = document.title;",
+    "good": "let pageTitle = document.title;"
+  },
+  {
+    "bad": "let m = messages.length;",
+    "good": "let messageCount = messages.length;"
+  },
+  {
+    "bad": "let r = Math.round(value);",
+    "good": "let roundedValue = Math.round(value);"
+  },
+  {
+    "bad": "let h = document.head;",
+    "good": "let headElement = document.head;"
+  },
+  {
+    "bad": "let i = items.indexOf(item);",
+    "good": "let itemIndex = items.indexOf(item);"
+  },
+  { "bad": "let e = event.keyCode;", "good": "let keyCode = event.keyCode;" },
+  {
+    "bad": "let x = window.innerWidth;",
+    "good": "let windowWidth = window.innerWidth;"
+  },
+  {
+    "bad": "let y = window.innerHeight;",
+    "good": "let windowHeight = window.innerHeight;"
+  },
+  {
+    "bad": "let cb = document.getElementById('checkbox');",
+    "good": "let checkboxElement = document.getElementById('checkbox');"
+  },
+  {
+    "bad": "let u = url.split('/');",
+    "good": "let urlSegments = url.split('/');"
+  },
+  { "bad": "let s = getScore();", "good": "let currentScore = getScore();" },
+  { "bad": "let z = zoomLevel;", "good": "let currentZoomLevel = zoomLevel;" },
+  {
+    "bad": "let bg = document.body;",
+    "good": "let bodyElement = document.body;"
+  },
+  {
+    "bad": "let op = options.selected;",
+    "good": "let selectedOption = options.selected;"
+  },
+  { "bad": "var n = getName();", "good": "var userName = getName();" },
+  {
+    "bad": "let c = getCustomer();",
+    "good": "let customer = getCustomer();"
+  },
+  {
+    "bad": "const d = data;",
+    "good": "const userData = data;"
+  },
+  {
+    "bad": "var l = window.location;",
+    "good": "var currentUrl = window.location;"
+  },
+  {
+    "bad": "let t = true;",
+    "good": "let isActive = true;"
+  },
+  {
+    "bad": "const e = email.split('@');",
+    "good": "const emailParts = email.split('@');"
+  },
+  {
+    "bad": "let p = getProducts();",
+    "good": "let productList = getProducts();"
+  },
+  {
+    "bad": "var i = 0;",
+    "good": "var index = 0;"
+  },
+  {
+    "bad": "const u = new URL(url);",
+    "good": "const parsedUrl = new URL(url);"
+  },
+  {
+    "bad": "let h = document.getElementById('header');",
+    "good": "let headerElement = document.getElementById('header');"
+  },
+  {
+    "bad": "var s = getSettings();",
+    "good": "var appSettings = getSettings();"
+  },
+  {
+    "bad": "let a = array.length;",
+    "good": "let arrayLength = array.length;"
+  },
+  {
+    "bad": "const f = fetch(url);",
+    "good": "const fetchPromise = fetch(url);"
+  },
+  {
+    "bad": "var b = document.body;",
+    "good": "var bodyElement = document.body;"
+  },
+  {
+    "bad": "let m = getMessages();",
+    "good": "let messages = getMessages();"
+  },
+  {
+    "bad": "const o = getOrder();",
+    "good": "const orderDetails = getOrder();"
+  },
+  {
+    "bad": "var r = Math.random();",
+    "good": "var randomNumber = Math.random();"
+  },
+  {
+    "bad": "let j = JSON.stringify(object);",
+    "good": "let jsonString = JSON.stringify(object);"
+  },
+  {
+    "bad": "const x = getX();",
+    "good": "const xAxisValue = getX();"
+  },
+  {
+    "bad": "let z = zipCode.trim();",
+    "good": "let trimmedZipCode = zipCode.trim();"
+  },
+  {
+    "bad": "var v = validate(input);",
+    "good": "var isValidInput = validate(input);"
+  },
+  {
+    "bad": "const k = getKey();",
+    "good": "const apiKey = getKey();"
+  },
+  {
+    "bad": "let d = document.getElementById('div');",
+    "good": "let divElement = document.getElementById('div');"
+  },
+  {
+    "bad": "var q = queryDatabase();",
+    "good": "var queryResult = queryDatabase();"
+  },
+  {
+    "bad": "const w = getWidth();",
+    "good": "const elementWidth = getWidth();"
+  },
+  {
+    "bad": "let x = e.clientX",
+    "good": "let mouseXPosition = e.clientX;"
+  },
+  {
+    "bad": "var cb = () => {}",
+    "good": "var onFormSubmit = () => {};"
+  },
+  {
+    "bad": "const arr = [1, 2, 3]",
+    "good": "const numberList = [1, 2, 3];"
+  },
+  {
+    "bad": "function p(a, b) {",
+    "good": "function multiplyNumbers(a, b) {}"
+  },
+  {
+    "bad": "let t = setTimeout(fn, 1000)",
+    "good": "let logoutTimer = setTimeout(logoutUser, 1000);"
+  },
+  {
+    "bad": "let r = rect.width * rect.height",
+    "good": "let area = rectangle.width * rectangle.height;"
+  },
+  {
+    "bad": "const f = document.forms[0]",
+    "good": "const loginForm = document.forms[0];"
+  },
+  {
+    "bad": "var s = document.querySelector('.item')",
+    "good": "var selectedItem = document.querySelector('.item');"
+  },
+  {
+    "bad": "let v = velocity * time",
+    "good": "let distanceTravelled = velocity * time;"
+  },
+  {
+    "bad": "const o = obj[key]",
+    "good": "const propertyValue = object[propertyKey];"
+  },
+  {
+    "bad": "let d = new Date().getDay()",
+    "good": "let currentWeekday = new Date().getDay();"
+  },
+  {
+    "bad": "var c = canvas.getContext('2d')",
+    "good": "var canvasContext = canvas.getContext('2d');"
+  },
+  {
+    "bad": "let e = employees.filter(e => e.isActive)",
+    "good": "let activeEmployees = employees.filter(employee => employee.isActive);"
+  },
+  {
+    "bad": "function c(a) { return a * a; ",
+    "good": "function calculateSquare(area) { return area * area; }"
+  },
+  {
+    "bad": "let u = url.split('/')",
+    "good": "let urlSegments = url.split('/');"
+  },
+  {
+    "bad": "let l = listeners.indexOf(fn)",
+    "good": "let listenerIndex = eventListeners.indexOf(callback);"
+  },
+  {
+    "bad": "var db = getData()",
+    "good": "var databaseData = fetchDataFromDatabase();"
+  },
+  {
+    "bad": "const h = req.headers['authorization']",
+    "good": "const authToken = req.headers['authorization'];"
+  },
+  {
+    "bad": "let m = str.match(regex)",
+    "good": "let matches = stringToSearch.match(searchPattern);"
+  },
+  {
+    "bad": "let j = jsonObj['name']",
+    "good": "let userName = userJson['name'];"
+  },
+  {
+    "bad": "let b = buffer.toString()",
+    "good": "let stringFromBuffer = buffer.toString();"
+  },
+  {
+    "bad": "let a = alpha * beta",
+    "good": "let compositeScore = alphaScore * betaScore;"
+  },
+  {
+    "bad": "const s = getSiblings(node)",
+    "good": "const siblingNodes = getSiblingsOfNode(node);"
+  },
+  {
+    "bad": "let w = window.innerWidth",
+    "good": "let viewportWidth = window.innerWidth;"
+  },
+  {
+    "bad": "let n = node.nextSibling",
+    "good": "let nextNode = currentNode.nextSibling;"
+  }
+,
+    {
+            "bad": "var x = 1; if (true) { var x = 2; } console.log(x); ",
+            "good": "let x = 1; if (true) { let x = 2; } console.log(x); "
+        },
+        {
+            "bad": "for (var i = 0; i < 5; i++) { setTimeout(function() { console.log(i); }, 1000); } ",
+            "good": "for (let i = 0; i < 5; i++) { setTimeout(function() { console.log(i); }, 1000); } "
+        },
+        {
+            "bad": "function add(a, a, b) { return a + a + b; } console.log(add(1, 2, 3)); ",
+            "good": "function add(a, b, c) { return a + b + c; } console.log(add(1, 2, 3)); "
+        },
+        {
+            "bad": "var obj = { a: 1, a: 2 }; console.log(obj); // { a: 2 }",
+            "good": "var obj = { a: 1, b: 2 }; console.log(obj); // { a: 1, b: 2 }"
+        },
+        {
+            "bad": "var getName = function() { return this.name; }; var person = { name: 'John' }; console.log(getName()); // undefined",
+            "good": "var person = { name: 'John', getName: function() { return this.name; } }; console.log(person.getName()); // 'John'"
+        },
+        {
+            "bad": "function Person() {} var person = Person(); console.log(person instanceof Person); // false",
+            "good": "function Person() {} var person = new Person(); console.log(person instanceof Person); // true"
+        },
+        {
+            "bad": "var nums = [1, 2, 3]; var doubled = nums.map(function(num) { return num * 2; }); console.log(doubled); // [2, 4, 6]",
+            "good": "var nums = [1, 2, 3]; var doubled = nums.map(num => num * 2); console.log(doubled); // [2, 4, 6]"
+        },
+        {
+            "bad": "var name = 'Alice'; function greet() { console.log('Hello, ' + name); } var name = 'Bob'; greet(); // Hello, Bob",
+            "good": "let name = 'Alice'; function greet() { console.log('Hello, ' + name); } name = 'Bob'; greet(); // Hello, Bob"
+        },
+        {
+            "bad": "var numbers = [1, 2, 3]; var total = 0; for (var number of numbers) { total += number; } console.log(total); // 6",
+            "good": "var numbers = [1, 2, 3]; var total = numbers.reduce((acc, number) => acc + number, 0); console.log(total); // 6"
+        },
+        {
+            "bad": "var serverResponse = null; if (serverResponse) { console.log('Response received'); } else { console.log('No response'); } // No response",
+            "good": "var serverResponse = {}; if (serverResponse) { console.log('Response received'); } else { console.log('No response'); } // Response received"
+        }
+        , {
+    "bad": "Too many contents inside an if block.\nif (something.exists === true) {\n  // 100 lines of code\n}",
+    "good": "Modularize the code inside the if block.\nif (something.exists === true) {\n  doSomething();\n  var hasSuccess = undoSomething();\n  if (hasSuccess) {\n    etc();\n  }\n}"
+}
+,
+{
+    "bad": "Using else statement.\nif (something.exists === true) {\n  something.value = 100;\n} else {\n  something.value = 0;\n}",
+    "good": "Avoid else by writing conditionals again for clarity.\nif (something.exists === true) {\n  something.value = 100;\n}\nif (something.exists !== true) {\n  something.value = 0;\n}"
+}
+,
+{
+    "bad": "Misconception that else if doesn't exist in JavaScript.\nif (something.exists === true) {\n  something.value = 100;\n} else if (anotherThing.exists) {\n  anotherThing.value = 0;\n}",
+    "good": "Correct use of separate if statements.\nif (something.exists === true) {\n  something.value = 100;\n}\nif (anotherThing.exists) {\n  anotherThing.value = 0;\n}"
+}
+,
+{
+    "bad": "Nested callbacks leading to 'callback hell'.\ndb.query('SELECT * FROM users', function(err, users) {\n  users.forEach(function(user) {\n    db.query('SELECT * FROM posts WHERE user_id = ?', user.id, function(err, posts) {\n      // More nested callbacks here\n    });\n  });\n});",
+    "good": "Use Promises or async/await to handle asynchronous operations.\nasync function getUserPosts() {\n  const users = await db.query('SELECT * FROM users');\n  for (const user of users) {\n    const posts = await db.query('SELECT * FROM posts WHERE user_id = ?', user.id);\n    // Process posts\n  }\n}"
+}
+,
+{
+    "bad": "Using global variables.\nvar currentUser;\nfunction setUser(user) {\n  currentUser = user;\n}",
+    "good": "Pass variables as function arguments.\nfunction setUser(currentUser, user) {\n  currentUser = user;\n}"
+}
+,
+{
+    "bad": "Inefficient DOM manipulation.\nfor (let i = 0; i < items.length; i++) {\n  document.getElementById('list').innerHTML += '<li>' + items[i] + '</li>';\n}",
+    "good": "Optimize DOM manipulation.\nconst list = document.getElementById('list');\nconst fragment = document.createDocumentFragment();\nitems.forEach(item => {\n  const li = document.createElement('li');\n  li.textContent = item;\n  fragment.appendChild(li);\n});\nlist.appendChild(fragment);"
+}
+,
+{
+    "bad": "Directly modifying an object's property from outside.\nuser.age = 20;",
+    "good": "Use setter methods to encapsulate property modifications.\nclass User {\n  setAge(age) {\n    this.age = age;\n  }\n}\nconst user = new User();\nuser.setAge(20);"
+}
+,
+{
+    "bad": "Hardcoding values in functions.\nfunction calculateTax(price) {\n  return price * 0.15; // 15% tax rate\n}",
+    "good": "Make functions more flexible by using parameters.\nfunction calculateTax(price, taxRate) {\n  return price * taxRate;\n}"
+}
+,
+{
+    "bad": "Using == for comparison (type coercion).\nif (userInput == '123') {\n  // Code\n}",
+    "good": "Use === to avoid type coercion and ensure value and type comparison.\nif (userInput === '123') {\n  // Code\n}"
+},
+
+{
+    "bad": "Repeating code blocks.\nif (user.role === 'admin') {\n  showAdminPanel();\n} else if (user.role === 'editor') {\n  showEditorPanel();\n  showAdminPanel();\n}",
+    "good": "Refactor common code outside conditional blocks.\nif (user.role === 'editor') {\n  showEditorPanel();\n}\nif (user.role === 'admin' || user.role === 'editor') {\n  showAdminPanel();\n}"
+}
+,
+{
+    "bad": "$.ajax({\n  type: 'POST',\n  url: 'api/users',\n  data: { limit: 10 },,\n  success: function(data){\n    // Process data\n  },,\n  error: function(){\n    // Handle error\n  },\n},);",
+
+    "good": "var apiConfig = {\n  endpoint: 'api/users',\n  defaultLimit: 10\n},;\n$.ajax({\n  type: 'POST',\n  url: apiConfig.endpoint,\n  data: { limit: apiConfig.defaultLimit },,\n  success: function(data){\n    // Process data\n  },,\n  error: function(){\n    // Handle error\n  },\n},);"
+},
+
+{
+    "bad": "function createButton(label, onClick) {\n  var btn = document.createElement('button');\n  btn.innerText = label;\n  btn.addEventListener('click', onClick);\n  document.body.appendChild(btn);\n},",
+
+    "good": "var uiConfig = {\n  buttonParent: document.body\n},;\nfunction createButton(label, onClick) {\n  var btn = document.createElement('button');\n  btn.innerText = label;\n  btn.addEventListener('click', onClick);\n  uiConfig.buttonParent.appendChild(btn);\n},"
+},
+
+{
+    "bad": "function calculateDiscount(price, discount) {\n  return price * (discount / 100);\n},",
+
+    "good": "var pricingConfig = {\n  defaultDiscount: 20\n},;\nfunction calculateDiscount(price, discount) {\n  discount = discount || pricingConfig.defaultDiscount;\n  return price * (discount / 100);\n},"
+},
+
+{
+    "bad": "function connectToDatabase(host, username, password, database) {\n  // Database connection logic\n},",
+
+    "good": "var dbConfig = {\n  host: 'localhost',\n  username: 'root',\n  password: '',\n  database: 'mydb'\n},;\nfunction connectToDatabase() {\n  // Use dbConfig for connection logic\n},"
+},
+
+{
+    "bad": "var animationSpeed = 300;\n// Somewhere in code\n$('#element').fadeIn(animationSpeed);",
+
+    "good": "var animationConfig = {\n  speed: 300\n},;\n// Somewhere in code\n$('#element').fadeIn(animationConfig.speed);"
+},
+
+{
+    "bad": "var serverURL = 'http://api.example.com';\nvar apiKey = 'ABC123';\n// Use serverURL and apiKey in API calls",
+
+    "good": "var apiConfig = {\n  url: 'http://api.example.com',\n  key: 'ABC123'\n},;\n// Use apiConfig.url and apiConfig.key in API calls"
+},
+
+{
+    "bad": "function sendEmail(to, subject, body) {\n  // Email sending logic\n},",
+
+    "good": "var emailConfig = {\n  defaultSubject: 'No Subject',\n  server: 'smtp.example.com'\n},;\nfunction sendEmail(to, subject, body) {\n  subject = subject || emailConfig.defaultSubject;\n  // Email sending logic with emailConfig.server\n},"
+},
+
+{
+    "bad": "var maxItems = 10;\nfunction addItem(item) {\n  if (items.length < maxItems) {\n    items.push(item);\n  },\n},",
+
+    "good": "var listConfig = {\n  maxItems: 10\n},;\nfunction addItem(item) {\n  if (items.length < listConfig.maxItems) {\n    items.push(item);\n  },\n},"
+},
+
+{
+    "bad": "function logMessage(message) {\n  console.log('LOG: ' + message);\n},",
+
+    "good": "var loggingConfig = {\n  prefix: 'LOG: '\n},;\nfunction logMessage(message) {\n  console.log(loggingConfig.prefix + message);\n},"
+},
+
+{
+    "bad": "var defaultColor = 'blue';\nfunction paintBackground(element) {\n  element.style.backgroundColor = defaultColor;\n},",
+
+    "good": "var styleConfig = {\n  backgroundColor: 'blue'\n},;\nfunction paintBackground(element) {\n  element.style.backgroundColor = styleConfig.backgroundColor;\n},"
+} ,
+{
+    "bad": "$('#button1').on('click', function(){\n  $('#panel1').slideDown();\n},);\n$('#button2').on('click', function(){\n  $('#panel2').slideUp();\n},);",
+
+    "good": "var $button1 = $('#button1');\nvar $panel1 = $('#panel1');\n$button1.on('click', function(){\n  $panel1.slideDown();\n},);\nvar $button2 = $('#button2');\nvar $panel2 = $('#panel2');\n$button2.on('click', function(){\n  $panel2.slideUp();\n},);"
+},
+
+{
+    "bad": "$('.close').on('click', function(){\n  $(this).parent().hide();\n},);",
+
+    "good": "var $closeButtons = $('.close');\n$closeButtons.on('click', function(){\n  $(this).parent().hide();\n},);"
+},
+
+{
+    "bad": "$('input[type=submit]').on('click', function(){\n  $(this).css('background-color', 'green');\n},);",
+
+    "good": "var $submitButtons = $('input[type=submit]');\n$submitButtons.on('click', function(){\n  $(this).css('background-color', 'green');\n},);"
+},
+
+{
+    "bad": "$('.toggle').on('click', function(){\n  $('.menu').toggle();\n},);",
+
+    "good": "var $toggleButton = $('.toggle');\nvar $menu = $('.menu');\n$toggleButton.on('click', function(){\n  $menu.toggle();\n},);"
+},
+
+{
+    "bad": "$('#refresh').on('click', function(){\n  $('#dataContainer').load('data.html');\n},);",
+
+    "good": "var $refreshButton = $('#refresh');\nvar $dataContainer = $('#dataContainer');\n$refreshButton.on('click', function(){\n  $dataContainer.load('data.html');\n},);"
+},
+
+{
+    "bad": "$('#expandAll').on('click', function(){\n  $('.details').show();\n},);",
+
+    "good": "var $expandAllButton = $('#expandAll');\nvar $details = $('.details');\n$expandAllButton.on('click', function(){\n  $details.show();\n},);"
+},
+
+{
+    "bad": "$('.tab').on('click', function(){\n  var tabId = $(this).attr('data-tab');\n  $('#' + tabId).addClass('active');\n},);",
+
+    "good": "var $tabs = $('.tab');\n$tabs.on('click', function(){\n  var tabId = $(this).attr('data-tab');\n  $('#' + tabId).addClass('active');\n},);"
+},
+
+{
+    "bad": "$('#search').on('keyup', function(){\n  var query = $(this).val();\n  performSearch(query);\n},);",
+
+    "good": "var $searchInput = $('#search');\n$searchInput.on('keyup', function(){\n  var query = $(this).val();\n  performSearch(query);\n},);"
+},
+
+{
+    "bad": "$('.item').each(function(){\n  $(this).on('click', function(){\n    $(this).addClass('selected');\n  },);\n},);",
+
+    "good": "var $items = $('.item');\n$items.on('click', function(){\n  $(this).addClass('selected');\n},);"
+},
+
+{
+    "bad": "$('#nextPage').on('click', function(){\n  $('#pagination').next().addClass('current');\n},);",
+
+    "good": "var $nextPageButton = $('#nextPage');\nvar $pagination = $('#pagination');\n$nextPageButton.on('click', function(){\n  $pagination.next().addClass('current');\n},);"
+},
+{
+    "bad": "function equalOrGreaterThanFive(num) {\n  return num >= 5;\n},",
+
+    "good": "function isEligibleForDiscount(num) {\n  return num >= 5;\n},"
+},
+
+{
+    "bad": "function lengthGreaterThanTen(str) {\n  return str.length > 10;\n},",
+
+    "good": "function isLongUsername(str) {\n  return str.length > 10;\n},"
+},
+
+{
+    "bad": "function lessThanZero(n) {\n  return n < 0;\n},",
+
+    "good": "function isNegativeNumber(n) {\n  return n < 0;\n},"
+},
+
+{
+    "bad": "function greaterThanZero(n) {\n  return n > 0;\n},",
+
+    "good": "function isPositiveNumber(n) {\n  return n > 0;\n},"
+},
+
+{
+    "bad": "function stringContainsDot(str) {\n  return str.includes('.');\n},",
+
+    "good": "function isValidEmailDomain(str) {\n  return str.includes('.');\n},"
+},
+
+{
+    "bad": "function arrayLengthIsThree(arr) {\n  return arr.length === 3;\n},",
+
+    "good": "function hasThreeItems(arr) {\n  return arr.length === 3;\n},"
+},
+
+{
+    "bad": "function numberIsEven(num) {\n  return num % 2 === 0;\n},",
+
+    "good": "function isEvenNumber(num) {\n  return num % 2 === 0;\n},"
+},
+
+{
+    "bad": "function passwordLengthEight(password) {\n  return password.length >= 8;\n},",
+
+    "good": "function isStrongPassword(password) {\n  return password.length >= 8;\n},"
+},
+
+{
+    "bad": "function startsWithCapital(str) {\n  return str.charAt(0) === str.charAt(0).toUpperCase();\n},",
+
+    "good": "function isProperNoun(str) {\n  return str.charAt(0) === str.charAt(0).toUpperCase();\n},"
+},
+
+{
+    "bad": "function hasNoSpaces(str) {\n  return !str.includes(' ');\n},",
+
+    "good": "function isSingleWord(str) {\n  return !str.includes(' ');\n},"
+
+}
+,
+{
+    "bad": "var numbers = [1, 2, 3, 4, 5];\nfor (var i = 0; i < numbers.length; i++) {\n  console.log(numbers[i]);\n},",
+
+    "good": "var numbers = [1, 2, 3, 4, 5];\nfor (var i = 0, len = numbers.length; i < len; i++) {\n  console.log(numbers[i]);\n},"
+},
+
+{
+    "bad": "var names = ['Alice', 'Bob', 'Charlie'];\nfor (var i = 0; i < names.length; i++) {\n  console.log(names[i]);\n},",
+
+    "good": "var names = ['Alice', 'Bob', 'Charlie'];\nfor (var i = 0, count = names.length; i < count; i++) {\n  console.log(names[i]);\n},"
+},
+
+{
+    "bad": "var items = ['item1', 'item2', 'item3'];\nfor (var i = 0; i < items.length; i++) {\n  processItem(items[i]);\n},",
+
+    "good": "var items = ['item1', 'item2', 'item3'];\nfor (var i = 0, total = items.length; i < total; i++) {\n  processItem(items[i]);\n},"
+},
+
+{
+    "bad": "var scores = [10, 20, 30, 40];\nfor (var i = 0; i < scores.length; i++) {\n  updateScore(scores[i]);\n},",
+
+    "good": "var scores = [10, 20, 30, 40];\nfor (var i = 0, numScores = scores.length; i < numScores; i++) {\n  updateScore(scores[i]);\n},"
+},
+
+{
+    "bad": "var tasks = ['task1', 'task2', 'task3'];\nfor (var i = 0; i < tasks.length; i++) {\n  completeTask(tasks[i]);\n},",
+
+    "good": "var tasks = ['task1', 'task2', 'task3'];\nfor (var i = 0, taskCount = tasks.length; i < taskCount; i++) {\n  completeTask(tasks[i]);\n},"
+},
+
+{
+    "bad": "var fruits = ['apple', 'banana', 'cherry'];\nfor (var i = 0; i < fruits.length; i++) {\n  eatFruit(fruits[i]);\n},",
+
+    "good": "var fruits = ['apple', 'banana', 'cherry'];\nfor (var i = 0, fruitNr = fruits.length; i < fruitNr; i++) {\n  eatFruit(fruits[i]);\n},"
+},
+
+{
+    "bad": "var cars = ['Toyota', 'Honda', 'Ford'];\nfor (var i = 0; i < cars.length; i++) {\n  driveCar(cars[i]);\n},",
+
+    "good": "var cars = ['Toyota', 'Honda', 'Ford'];\nfor (var i = 0, totalCars = cars.length; i < totalCars; i++) {\n  driveCar(cars[i]);\n},"
+},
+
+{
+    "bad": "var books = ['Book1', 'Book2', 'Book3'];\nfor (var i = 0; i < books.length; i++) {\n  readBook(books[i]);\n},",
+
+    "good": "var books = ['Book1', 'Book2', 'Book3'];\nfor (var i = 0, bookCount = books.length; i < bookCount; i++) {\n  readBook(books[i]);\n},"
+},
+
+{
+    "bad": "var students = ['John', 'Jane', 'Joe'];\nfor (var i = 0; i < students.length; i++) {\n  greetStudent(students[i]);\n},",
+
+    "good": "var students = ['John', 'Jane', 'Joe'];\nfor (var i = 0, studentNr = students.length; i < studentNr; i++) {\n  greetStudent(students[i]);\n},"
+},
+
+{
+    "bad": "var countries = ['USA', 'UK', 'Canada'];\nfor (var i = 0; i < countries.length; i++) {\n  visitCountry(countries[i]);\n},",
+
+    "good": "var countries = ['USA', 'UK', 'Canada'];\nfor (var i = 0, countryCount = countries.length; i < countryCount; i++) {\n  visitCountry(countries[i]);\n},"
+},
+{
+    "bad": "$('#link1').on('click', function(){\n  $('#content').load('content1.html', function() { alert('Content loaded!'); },);\n},);\n$('#link2').on('click', function(){\n  $('#content').load('content2.html', function() { alert('Content loaded!'); },);\n},);",
+
+    "good": "function loadContentAndAlert(url) {\n  $('#content').load(url, function() { alert('Content loaded!'); },);\n},\n$('#link1').on('click', function() { loadContentAndAlert('content1.html'); },);\n$('#link2').on('click', function() { loadContentAndAlert('content2.html'); },);"
+},
+
+{
+    "bad": "$('#navHome').on('click', function(){\n  $('#main').load('home.html', function() { $('#loader').hide(); },);\n},);\n$('#navContact').on('click', function(){\n  $('#main').load('contact.html', function() { $('#loader').hide(); },);\n},);",
+
+    "good": "function loadPage(page) {\n  $('#main').load(page, function() { $('#loader').hide(); },);\n},\n$('#navHome').on('click', function() { loadPage('home.html'); },);\n$('#navContact').on('click', function() { loadPage('contact.html'); },);"
+},
+
+{
+    "bad": "$('#showProfile').on('click', function(){\n  $('#userProfile').show();\n  trackEvent('Profile', 'show');\n},);\n$('#hideProfile').on('click', function(){\n  $('#userProfile').hide();\n  trackEvent('Profile', 'hide');\n},);",
+
+    "good": "function toggleProfile(action) {\n  $('#userProfile').toggle();\n  trackEvent('Profile', action);\n},\n$('#showProfile').on('click', function() { toggleProfile('show'); },);\n$('#hideProfile').on('click', function() { toggleProfile('hide'); },);"
+},
+
+{
+    "bad": "$('#expand').on('click', function(){\n  $('.details').slideDown();\n},);\n$('#collapse').on('click', function(){\n  $('.details').slideUp();\n},);",
+
+    "good": "function toggleDetails(action) {\n  action === 'expand' ? $('.details').slideDown() : $('.details').slideUp();\n},\n$('#expand').on('click', function() { toggleDetails('expand'); },);\n$('#collapse').on('click', function() { toggleDetails('collapse'); },);"
+},
+
+{
+    "bad": "$('#start').on('click', function(){\n  $('#animation').fadeIn();\n  logEvent('Animation started');\n},);\n$('#stop').on('click', function(){\n  $('#animation').fadeOut();\n  logEvent('Animation stopped');\n},);",
+
+    "good": "function animateAndLog(action) {\n  action === 'start' ? $('#animation').fadeIn() : $('#animation').fadeOut();\n  logEvent('Animation ' + action);\n},\n$('#start').on('click', function() { animateAndLog('start'); },);\n$('#stop').on('click', function() { animateAndLog('stop'); },);"
+},
+
+{
+    "bad": "$('#openModal').on('click', function(){\n  $('#modal').show();\n  updateStatus('Modal Opened');\n},);\n$('#closeModal').on('click', function(){\n  $('#modal').hide();\n  updateStatus('Modal Closed');\n},);",
+
+    "good": "function toggleModal(action) {\n  action === 'open' ? $('#modal').show() : $('#modal').hide();\n  updateStatus('Modal ' + (action === 'open' ? 'Opened' : 'Closed'));\n},\n$('#openModal').on('click', function() { toggleModal('open'); },);\n$('#closeModal').on('click', function() { toggleModal('close'); },);"
+},
+
+{
+    "bad": "$('#enableFeature').on('click', function(){\n  $('#feature').addClass('active');\n  trackFeatureUsage('Feature Enabled');\n},);\n$('#disableFeature').on('click', function(){\n  $('#feature').removeClass('active');\n  trackFeatureUsage('Feature Disabled');\n},);",
+
+    "good": "function toggleFeature(action) {\n  action === 'enable' ? $('#feature').addClass('active') : $('#feature').removeClass('active');\n  trackFeatureUsage('Feature ' + (action === 'enable' ? 'Enabled' : 'Disabled'));\n},\n$('#enableFeature').on('click', function() { toggleFeature('enable'); },);\n$('#disableFeature').on('click', function() { toggleFeature('disable'); },);"
+},
+
+{
+    "bad": "$('#voteUp').on('click', function(){\n  $('#votes').increment();\n  logVote('Upvote');\n},);\n$('#voteDown').on('click', function(){\n  $('#votes').decrement();\n  logVote('Downvote');\n},);",
+
+    "good": "function registerVote(type) {\n  type === 'up' ? $('#votes').increment() : $('#votes').decrement();\n  logVote(type === 'up' ? 'Upvote' : 'Downvote');\n},\n$('#voteUp').on('click', function() { registerVote('up'); },);\n$('#voteDown').on('click', function() { registerVote('down'); },);"
+},
+
+{
+    "bad": "$('#lightOn').on('click', function(){\n  $('#room').addClass('lit');\n  updateLightStatus('On');\n},);\n$('#lightOff').on('click', function(){\n  $('#room').removeClass('lit');\n  updateLightStatus('Off');\n},);",
+
+    "good": "function toggleLight(state) {\n  state === 'on' ? $('#room').addClass('lit') : $('#room').removeClass('lit');\n  updateLightStatus(state === 'on' ? 'On' : 'Off');\n},\n$('#lightOn').on('click', function() { toggleLight('on'); },);\n$('#lightOff').on('click', function() { toggleLight('off'); },);"
+},
+
+{
+    "bad": "$('#activateSound').on('click', function(){\n  $('#soundSystem').play();\n  monitorSound('Activated');\n},);\n$('#deactivateSound').on('click', function(){\n  $('#soundSystem').stop();\n  monitorSound('Deactivated');\n},);",
+
+    "good": "function controlSound(action) {\n  action === 'activate' ? $('#soundSystem').play() : $('#soundSystem').stop();\n  monitorSound('Sound ' + (action === 'activate' ? 'Activated' : 'Deactivated'));\n},\n$('#activateSound').on('click', function() { controlSound('activate'); },);\n$('#deactivateSound').on('click', function() { controlSound('deactivate'); },);"
+},
+{
+    "bad": "var fruits = new Array();\nfruits[0] = 'apple';\nfruits[1] = 'banana';\nfruits[2] = 'cherry';",
+
+    "good": "var fruits = ['apple', 'banana', 'cherry'];"
+},
+
+{
+    "bad": "if (age) {\n  var isAdult = age;\n}, else {\n  var isAdult = 18;\n},",
+
+    "good": "var isAdult = age || 18;"
+},
+
+{
+    "bad": "var isValid;\nif (inputIsValid) {\n  isValid = true;\n}, else {\n  isValid = false;\n},",
+
+    "good": "var isValid = inputIsValid ? true : false;"
+},
+
+{
+    "bad": "var score;\nif (points > 50) {\n  score = 'high';\n}, else {\n  score = 'low';\n},",
+
+    "good": "var score = (points > 50) ? 'high' : 'low';"
+},
+
+{
+    "bad": "var status;\nif (user.isActive) {\n  status = 'active';\n}, else {\n  status = 'inactive';\n},",
+
+    "good": "var status = user.isActive ? 'active' : 'inactive';"
+},
+
+{
+    "bad": "var size;\nif (window.innerWidth > 768) {\n  size = 'large';\n}, else {\n  size = 'small';\n},",
+
+    "good": "var size = (window.innerWidth > 768) ? 'large' : 'small';"
+},
+
+{
+    "bad": "var mode;\nif (isNightTime) {\n  mode = 'night';\n}, else {\n  mode = 'day';\n},",
+
+    "good": "var mode = isNightTime ? 'night' : 'day';"
+},
+
+{
+    "bad": "var greeting;\nif (time < 12) {\n  greeting = 'Good morning';\n}, else {\n  greeting = 'Good day';\n},",
+
+    "good": "var greeting = (time < 12) ? 'Good morning' : 'Good day';"
+},
+
+{
+    "bad": "var accessLevel;\nif (userRole === 'admin') {\n  accessLevel = 1;\n}, else {\n  accessLevel = 0;\n},",
+
+    "good": "var accessLevel = (userRole === 'admin') ? 1 : 0;"
+},
+
+{
+    "bad": "var response;\nif (serverIsUp) {\n  response = 'Server is running';\n}, else {\n  response = 'Server down';\n},",
+
+    "good": "var response = serverIsUp ? 'Server is running' : 'Server down';"
+},
+{
+    "bad": "$('.notification').css({\n  'background-color': 'green',\n  'font-size': '14px'\n},);",
+
+    "good": "$('.notification').addClass('successNotification');"
+},
+
+{
+    "bad": "$('#header').css({\n  'background': 'blue',\n  'color': 'white'\n},);",
+
+    "good": "$('#header').addClass('blueHeader');"
+},
+
+{
+    "bad": "$('.button').on('click', function() {\n  $(this).css({ 'background-color': 'blue', 'color': 'white' },);\n},);",
+
+    "good": "$('.button').on('click', function() {\n  $(this).addClass('clickedButtonStyle');\n},);"
+},
+
+{
+    "bad": "$('.warning').css({\n  'border': '2px solid yellow',\n  'background-color': 'lightyellow'\n},);",
+
+    "good": "$('.warning').addClass('warningStyle');"
+},
+
+{
+    "bad": "var apiEndpoint = 'http://api.example.com/data';\n$('#dataContainer').load(apiEndpoint, function() {\n  // Callback code\n},);",
+
+    "good": "var API_ENDPOINT = 'http://api.example.com/data';\n$('#dataContainer').load(API_ENDPOINT, function() {\n  // Callback code\n},);"
+},
+
+{
+    "bad": "$('#loginButton').on('click', function() {\n  $('#loginForm').css('display', 'none');\n},);",
+
+    "good": "$('#loginButton').on('click', function() {\n  $('#loginForm').addClass('hidden');\n},);"
+},
+
+{
+    "bad": "$('.menu-item').hover(function() {\n  $(this).css({ 'color': 'blue', 'font-weight': 'bold' },);\n},, function() {\n  $(this).css({ 'color': 'black', 'font-weight': 'normal' },);\n},);",
+
+    "good": "$('.menu-item').hover(function() {\n  $(this).addClass('hoverStyle');\n},, function() {\n  $(this).removeClass('hoverStyle');\n},);"
+},
+
+{
+    "bad": "$('.info').click(function() {\n  $(this).css('border', '1px solid blue');\n},);",
+
+    "good": "$('.info').click(function() {\n  $(this).addClass('infoBorder');\n},);"
+},
+
+{
+    "bad": "var userProfileUrl = 'http://mysite.com/user/profile';\n$('#userProfile').load(userProfileUrl);",
+
+    "good": "const USER_PROFILE_URL = 'http://mysite.com/user/profile';\n$('#userProfile').load(USER_PROFILE_URL);"
+},
+
+{
+    "bad": "$('.logout').click(function() {\n  $(this).css({ 'opacity': '0.5', 'cursor': 'not-allowed' },);\n},);",
+
+    "good": "$('.logout').click(function() {\n  $(this).addClass('disabledButton');\n},);"
+},
+{
+    "bad": "var t; // too short, unclear",
+
+    "good": "var temperature; // clear and descriptive"
+},
+
+{
+    "bad": "var usrInput; // abbreviation, lacks clarity",
+
+    "good": "var userInput; // descriptive and clear"
+},
+
+{
+    "bad": "var yPos; // abbreviation, unclear context",
+
+    "good": "var verticalPosition; // descriptive and clear"
+},
+
+{
+    "bad": "var userDBRecordData; // too long, unwieldy",
+
+    "good": "var userProfile; // concise and descriptive"
+},
+
+{
+    "bad": "var inputDataFieldForLastName; // too long, verbose",
+
+    "good": "var lastNameInput; // concise and descriptive"
+},
+
+{
+    "bad": "var isUserLoggedInStatus; // includes type, verbose",
+
+    "good": "var isLoggedIn; // concise and describes state"
+},
+
+{
+    "bad": "var numberOfItemsInCart; // slightly long",
+
+    "good": "var cartItemCount; // concise and descriptive"
+},
+
+{
+    "bad": "var txtEmailAddress; // includes type (txt), not necessary",
+
+    "good": "var emailAddress; // clear and descriptive"
+},
+
+{
+    "bad": "var flagUserActive; // unclear, uses 'flag'",
+
+    "good": "var isUserActive; // clear boolean naming convention"
+},
+
+{
+    "bad": "var arrProductList; // includes type (arr), not needed",
+
+    "good": "var productList; // clear and descriptive"
+}
+,
+
+  {
+      "bad": "function passwordLengthEight(password) {\n  return password.length >= 8;\n},",
+      "good": "var index = 0;"
+  },
+  {
+      "bad": "var getName = function() { return this.name; }; var person = { name: 'John' }; console.log(getName()); // undefined",
+      "good": "let doubledNumbers = [1, 2, 3].map(n => n * 2);"
+  },
+  {
+      "bad": "$('input[type=submit]').on('click', function(){\n  $(this).css('background-color', 'green');\n},);",
+      "good": "var $toggleButton = $('.toggle');\nvar $menu = $('.menu');\n$toggleButton.on('click', function(){\n  $menu.toggle();\n},);"
+  },
+  {
+      "bad": "let r = Math.random();",
+      "good": "Modularize the code inside the if block.\nif (something.exists === true) {\n  doSomething();\n  var hasSuccess = undoSomething();\n  if (hasSuccess) {\n    etc();\n  }\n}"
+  },
+  {
+      "bad": "Nested callbacks leading to 'callback hell'.\ndb.query('SELECT * FROM users', function(err, users) {\n  users.forEach(function(user) {\n    db.query('SELECT * FROM posts WHERE user_id = ?', user.id, function(err, posts) {\n      // More nested callbacks here\n    });\n  });\n});",
+      "good": "function Person() {} var person = new Person(); console.log(person instanceof Person); // true"
+  },
+  {
+      "bad": "let op = options.selected;",
+      "good": "var status = user.isActive ? 'active' : 'inactive';"
+  },
+  {
+      "bad": "const u = new URL(url);",
+      "good": "function controlSound(action) {\n  action === 'activate' ? $('#soundSystem').play() : $('#soundSystem').stop();\n  monitorSound('Sound ' + (action === 'activate' ? 'Activated' : 'Deactivated'));\n},\n$('#activateSound').on('click', function() { controlSound('activate'); },);\n$('#deactivateSound').on('click', function() { controlSound('deactivate'); },);"
+  },
+  {
+      "bad": "var n = getName();",
+      "good": "function multiplyNumbers(a, b) {}"
+  },
+  {
+      "bad": "var isValid;\nif (inputIsValid) {\n  isValid = true;\n}, else {\n  isValid = false;\n},",
+      "good": "var apiConfig = {\n  endpoint: 'api/users',\n  defaultLimit: 10\n},;\n$.ajax({\n  type: 'POST',\n  url: apiConfig.endpoint,\n  data: { limit: apiConfig.defaultLimit },,\n  success: function(data){\n    // Process data\n  },,\n  error: function(){\n    // Handle error\n  },\n},);"
+  },
+  {
+      "bad": "let e = employees.filter(e => e.isActive)",
+      "good": "Use === to avoid type coercion and ensure value and type comparison.\nif (userInput === '123') {\n  // Code\n}"
+  },
+  {
+      "bad": "let p = getProducts();",
+      "good": "var emailAddress; // clear and descriptive"
+  },
+  {
+      "bad": "var status;\nif (user.isActive) {\n  status = 'active';\n}, else {\n  status = 'inactive';\n},",
+      "good": "var numbers = [1, 2, 3]; var total = numbers.reduce((acc, number) => acc + number, 0); console.log(total); // 6"
+  },
+  {
+      "bad": "let k = Object.keys(obj);",
+      "good": "function isStrongPassword(password) {\n  return password.length >= 8;\n},"
+  },
+  {
+      "bad": "let m = str.match(regex)",
+      "good": "var onFormSubmit = () => {};"
+  },
+  {
+      "bad": "function startsWithCapital(str) {\n  return str.charAt(0) === str.charAt(0).toUpperCase();\n},",
+      "good": "$('#loginButton').on('click', function() {\n  $('#loginForm').addClass('hidden');\n},);"
+  },
+  {
+      "bad": "let h = document.head;",
+      "good": "let paragraphElement = document.createElement('p');"
+  },
+  {
+      "bad": "$('#nextPage').on('click', function(){\n  $('#pagination').next().addClass('current');\n},);",
+      "good": "let errorMessage = 'Error occurred';"
+  },
+  {
+      "bad": "$('.menu-item').hover(function() {\n  $(this).css({ 'color': 'blue', 'font-weight': 'bold' },);\n},, function() {\n  $(this).css({ 'color': 'black', 'font-weight': 'normal' },);\n},);",
+      "good": "function isStrongPassword(password) {\n  return password.length >= 8;\n},"
+  },
+  {
+      "bad": "let bg = document.body;",
+      "good": "const USER_PROFILE_URL = 'http://mysite.com/user/profile';\n$('#userProfile').load(USER_PROFILE_URL);"
+  },
+  {
+      "bad": "$('.toggle').on('click', function(){\n  $('.menu').toggle();\n},);",
+      "good": "let itemIndex = items.indexOf(item);"
+  },
+  {
+      "bad": "let flg = true;",
+      "good": "const orderDetails = getOrder();"
+  },
+  {
+      "bad": "$('#enableFeature').on('click', function(){\n  $('#feature').addClass('active');\n  trackFeatureUsage('Feature Enabled');\n},);\n$('#disableFeature').on('click', function(){\n  $('#feature').removeClass('active');\n  trackFeatureUsage('Feature Disabled');\n},);",
+      "good": "$('.menu-item').hover(function() {\n  $(this).addClass('hoverStyle');\n},, function() {\n  $(this).removeClass('hoverStyle');\n},);"
+  },
+  {
+      "bad": "let z = zoomLevel;",
+      "good": "let listenerIndex = eventListeners.indexOf(callback);"
+  },
+  {
+      "bad": "var defaultColor = 'blue';\nfunction paintBackground(element) {\n  element.style.backgroundColor = defaultColor;\n},",
+      "good": "let updateIntervalId = setInterval(update, 1000);"
+  },
+  {
+      "bad": "var i = 0;",
+      "good": "let queryResult = queryDatabase(query);"
+  },
+  {
+      "bad": "let r = Math.round(value);",
+      "good": "var dbConfig = {\n  host: 'localhost',\n  username: 'root',\n  password: '',\n  database: 'mydb'\n},;\nfunction connectToDatabase() {\n  // Use dbConfig for connection logic\n},"
+  },
+  {
+      "bad": "$('.info').click(function() {\n  $(this).css('border', '1px solid blue');\n},);",
+      "good": "let divElement = document.getElementById('div');"
+  },
+  {
+      "bad": "Using global variables.\nvar currentUser;\nfunction setUser(user) {\n  currentUser = user;\n}",
+      "good": "var queryResult = queryDatabase();"
+  },
+  {
+      "bad": "let b = buffer.toString()",
+      "good": "var pricingConfig = {\n  defaultDiscount: 20\n},;\nfunction calculateDiscount(price, discount) {\n  discount = discount || pricingConfig.defaultDiscount;\n  return price * (discount / 100);\n},"
+  },
+  {
+      "bad": "var v = validate(input);",
+      "good": "function isSingleWord(str) {\n  return !str.includes(' ');\n},"
+  },
+  {
+      "bad": "var names = ['Alice', 'Bob', 'Charlie'];\nfor (var i = 0; i < names.length; i++) {\n  console.log(names[i]);\n},",
+      "good": "let currentWeekday = new Date().getDay();"
+  },
+  {
+      "bad": "let m = str.match(regex)",
+      "good": "let jsonString = JSON.stringify(object);"
+  },
+  {
+      "bad": "var isValid;\nif (inputIsValid) {\n  isValid = true;\n}, else {\n  isValid = false;\n},",
+      "good": "let x = 1; if (true) { let x = 2; } console.log(x); "
+  },
+  {
+      "bad": "$('#start').on('click', function(){\n  $('#animation').fadeIn();\n  logEvent('Animation started');\n},);\n$('#stop').on('click', function(){\n  $('#animation').fadeOut();\n  logEvent('Animation stopped');\n},);",
+      "good": "var items = ['item1', 'item2', 'item3'];\nfor (var i = 0, total = items.length; i < total; i++) {\n  processItem(items[i]);\n},"
+  },
+  {
+      "bad": "var isValid;\nif (inputIsValid) {\n  isValid = true;\n}, else {\n  isValid = false;\n},",
+      "good": "var $items = $('.item');\n$items.on('click', function(){\n  $(this).addClass('selected');\n},);"
+  },
+  {
+      "bad": "let z = zipCode.trim();",
+      "good": "var cars = ['Toyota', 'Honda', 'Ford'];\nfor (var i = 0, totalCars = cars.length; i < totalCars; i++) {\n  driveCar(cars[i]);\n},"
+  },
+  {
+      "bad": "var yPos; // abbreviation, unclear context",
+      "good": "let roundedValue = Math.round(value);"
+  },
+  {
+      "bad": "$('#button1').on('click', function(){\n  $('#panel1').slideDown();\n},);\n$('#button2').on('click', function(){\n  $('#panel2').slideUp();\n},);",
+      "good": "Optimize DOM manipulation.\nconst list = document.getElementById('list');\nconst fragment = document.createDocumentFragment();\nitems.forEach(item => {\n  const li = document.createElement('li');\n  li.textContent = item;\n  fragment.appendChild(li);\n});\nlist.appendChild(fragment);"
+  },
+  {
+      "bad": "let d = document.getElementById('div');",
+      "good": "var queryResult = queryDatabase();"
+  },
+  {
+      "bad": "$('#refresh').on('click', function(){\n  $('#dataContainer').load('data.html');\n},);",
+      "good": "let mouseXPosition = e.clientX;"
+  },
+  {
+      "bad": "Misconception that else if doesn't exist in JavaScript.\nif (something.exists === true) {\n  something.value = 100;\n} else if (anotherThing.exists) {\n  anotherThing.value = 0;\n}",
+      "good": "const fetchPromise = fetch(url);"
+  },
+  {
+      "bad": "function lengthGreaterThanTen(str) {\n  return str.length > 10;\n},",
+      "good": "function hasThreeItems(arr) {\n  return arr.length === 3;\n},"
+  },
+  {
+      "bad": "$('#activateSound').on('click', function(){\n  $('#soundSystem').play();\n  monitorSound('Activated');\n},);\n$('#deactivateSound').on('click', function(){\n  $('#soundSystem').stop();\n  monitorSound('Deactivated');\n},);",
+      "good": "function controlSound(action) {\n  action === 'activate' ? $('#soundSystem').play() : $('#soundSystem').stop();\n  monitorSound('Sound ' + (action === 'activate' ? 'Activated' : 'Deactivated'));\n},\n$('#activateSound').on('click', function() { controlSound('activate'); },);\n$('#deactivateSound').on('click', function() { controlSound('deactivate'); },);"
+  },
+  {
+      "bad": "var apiEndpoint = 'http://api.example.com/data';\n$('#dataContainer').load(apiEndpoint, function() {\n  // Callback code\n},);",
+      "good": "Use setter methods to encapsulate property modifications.\nclass User {\n  setAge(age) {\n    this.age = age;\n  }\n}\nconst user = new User();\nuser.setAge(20);"
+  },
+  {
+      "bad": "let b = buffer.toString()",
+      "good": "function toggleFeature(action) {\n  action === 'enable' ? $('#feature').addClass('active') : $('#feature').removeClass('active');\n  trackFeatureUsage('Feature ' + (action === 'enable' ? 'Enabled' : 'Disabled'));\n},\n$('#enableFeature').on('click', function() { toggleFeature('enable'); },);\n$('#disableFeature').on('click', function() { toggleFeature('disable'); },);"
+  },
+  {
+      "bad": "var flagUserActive; // unclear, uses 'flag'",
+      "good": "let viewportWidth = window.innerWidth;"
+  },
+  {
+      "bad": "var numbers = [1, 2, 3]; var total = 0; for (var number of numbers) { total += number; } console.log(total); // 6",
+      "good": "var accessLevel = (userRole === 'admin') ? 1 : 0;"
+  },
+  {
+      "bad": "$('#header').css({\n  'background': 'blue',\n  'color': 'white'\n},);",
+      "good": "let stringFromBuffer = buffer.toString();"
+  },
+  {
+      "bad": "let q = queryDatabase(query);",
+      "good": "var numbers = [1, 2, 3, 4, 5];\nfor (var i = 0, len = numbers.length; i < len; i++) {\n  console.log(numbers[i]);\n},"
+  },
+  {
+      "bad": "let z = zoomLevel;",
+      "good": "var fruits = ['apple', 'banana', 'cherry'];"
+  },
+  {
+      "bad": "let ymdstr = new Date().toISOString().slice(0, 10);",
+      "good": "let messages = getMessages();"
+  },
+  {
+      "bad": "var b = document.body;",
+      "good": "const elementWidth = getWidth();"
+  },
+  {
+      "bad": "const o = obj[key]",
+      "good": "var names = ['Alice', 'Bob', 'Charlie'];\nfor (var i = 0, count = names.length; i < count; i++) {\n  console.log(names[i]);\n},"
+  },
+  {
+      "bad": "$('.item').each(function(){\n  $(this).on('click', function(){\n    $(this).addClass('selected');\n  },);\n},);",
+      "good": "var onFormSubmit = () => {};"
+  },
+  {
+      "bad": "var status;\nif (user.isActive) {\n  status = 'active';\n}, else {\n  status = 'inactive';\n},",
+      "good": "var $items = $('.item');\n$items.on('click', function(){\n  $(this).addClass('selected');\n},);"
+  },
+  {
+      "bad": "$('.tab').on('click', function(){\n  var tabId = $(this).attr('data-tab');\n  $('#' + tabId).addClass('active');\n},);",
+      "good": "let timeoutId = setTimeout(func, 3000);"
+  },
+  {
+      "bad": "$('#expandAll').on('click', function(){\n  $('.details').show();\n},);",
+      "good": "var emailAddress; // clear and descriptive"
+  },
+  {
+      "bad": "function numberIsEven(num) {\n  return num % 2 === 0;\n},",
+      "good": "var accessLevel = (userRole === 'admin') ? 1 : 0;"
+  },
+  {
+      "bad": "$('.menu-item').hover(function() {\n  $(this).css({ 'color': 'blue', 'font-weight': 'bold' },);\n},, function() {\n  $(this).css({ 'color': 'black', 'font-weight': 'normal' },);\n},);",
+      "good": "let isActive = true;"
+  },
+  {
+      "bad": "var s = getSettings();",
+      "good": "var listConfig = {\n  maxItems: 10\n},;\nfunction addItem(item) {\n  if (items.length < listConfig.maxItems) {\n    items.push(item);\n  },\n},"
+  },
+  {
+      "bad": "var isUserLoggedInStatus; // includes type, verbose",
+      "good": "var lastNameInput; // concise and descriptive"
+  },
+  {
+      "bad": "var maxItems = 10;\nfunction addItem(item) {\n  if (items.length < maxItems) {\n    items.push(item);\n  },\n},",
+      "good": "const userData = data;"
+  },
+  {
+      "bad": "let s = 'Hello, World!'.split(' ');",
+      "good": "function toggleLight(state) {\n  state === 'on' ? $('#room').addClass('lit') : $('#room').removeClass('lit');\n  updateLightStatus(state === 'on' ? 'On' : 'Off');\n},\n$('#lightOn').on('click', function() { toggleLight('on'); },);\n$('#lightOff').on('click', function() { toggleLight('off'); },);"
+  },
+  {
+      "bad": "let flg = true;",
+      "good": "let doubledNumbers = [1, 2, 3].map(n => n * 2);"
+  },
+  {
+      "bad": "var response;\nif (serverIsUp) {\n  response = 'Server is running';\n}, else {\n  response = 'Server down';\n},",
+      "good": "var $submitButtons = $('input[type=submit]');\n$submitButtons.on('click', function(){\n  $(this).css('background-color', 'green');\n},);"
+  },
+  {
+      "bad": "$('#voteUp').on('click', function(){\n  $('#votes').increment();\n  logVote('Upvote');\n},);\n$('#voteDown').on('click', function(){\n  $('#votes').decrement();\n  logVote('Downvote');\n},);",
+      "good": "var index = 0;"
+  },
+  {
+      "bad": "$('.notification').css({\n  'background-color': 'green',\n  'font-size': '14px'\n},);",
+      "good": "let activeElement = document.querySelector('.active');"
+  },
+  {
+      "bad": "$('.item').each(function(){\n  $(this).on('click', function(){\n    $(this).addClass('selected');\n  },);\n},);",
+      "good": "function isValidEmailDomain(str) {\n  return str.includes('.');\n},"
+  },
+  {
+      "bad": "const o = getOrder();",
+      "good": "function toggleModal(action) {\n  action === 'open' ? $('#modal').show() : $('#modal').hide();\n  updateStatus('Modal ' + (action === 'open' ? 'Opened' : 'Closed'));\n},\n$('#openModal').on('click', function() { toggleModal('open'); },);\n$('#closeModal').on('click', function() { toggleModal('close'); },);"
+  },
+  {
+      "bad": "$('#expand').on('click', function(){\n  $('.details').slideDown();\n},);\n$('#collapse').on('click', function(){\n  $('.details').slideUp();\n},);",
+      "good": "var fruits = ['apple', 'banana', 'cherry'];\nfor (var i = 0, fruitNr = fruits.length; i < fruitNr; i++) {\n  eatFruit(fruits[i]);\n},"
+  },
+  {
+      "bad": "$('.warning').css({\n  'border': '2px solid yellow',\n  'background-color': 'lightyellow'\n},);",
+      "good": "var appSettings = getSettings();"
+  },
+  {
+      "bad": "var nums = [1, 2, 3]; var doubled = nums.map(function(num) { return num * 2; }); console.log(doubled); // [2, 4, 6]",
+      "good": "var currentUrl = window.location;"
+  },
+  {
+      "bad": "let msg = 'Error occurred';",
+      "good": "var listConfig = {\n  maxItems: 10\n},;\nfunction addItem(item) {\n  if (items.length < listConfig.maxItems) {\n    items.push(item);\n  },\n},"
+  },
+  {
+      "bad": "var nums = [1, 2, 3]; var doubled = nums.map(function(num) { return num * 2; }); console.log(doubled); // [2, 4, 6]",
+      "good": "var lastNameInput; // concise and descriptive"
+  },
+  {
+      "bad": "let l = list.length;",
+      "good": "let isFormValid = isValid(form);"
+  },
+  {
+      "bad": "var usrInput; // abbreviation, lacks clarity",
+      "good": "var score = (points > 50) ? 'high' : 'low';"
+  },
+  {
+      "bad": "var apiEndpoint = 'http://api.example.com/data';\n$('#dataContainer').load(apiEndpoint, function() {\n  // Callback code\n},);",
+      "good": "let roundedValue = Math.round(value);"
+  },
+  {
+      "bad": "var x = 1; if (true) { var x = 2; } console.log(x); ",
+      "good": "let customer = getCustomer();"
+  },
+  {
+      "bad": "var names = ['Alice', 'Bob', 'Charlie'];\nfor (var i = 0; i < names.length; i++) {\n  console.log(names[i]);\n},",
+      "good": "let jsonString = JSON.stringify(obj);"
+  },
+  {
+      "bad": "Inefficient DOM manipulation.\nfor (let i = 0; i < items.length; i++) {\n  document.getElementById('list').innerHTML += '<li>' + items[i] + '</li>';\n}",
+      "good": "var emailAddress; // clear and descriptive"
+  },
+  {
+      "bad": "let a = alpha * beta",
+      "good": "function isProperNoun(str) {\n  return str.charAt(0) === str.charAt(0).toUpperCase();\n},"
+  },
+  {
+      "bad": "var txtEmailAddress; // includes type (txt), not necessary",
+      "good": "var animationConfig = {\n  speed: 300\n},;\n// Somewhere in code\n$('#element').fadeIn(animationConfig.speed);"
+  },
+  {
+      "bad": "let ymdstr = new Date().toISOString().slice(0, 10);",
+      "good": "function isSingleWord(str) {\n  return !str.includes(' ');\n},"
+  },
+  {
+      "bad": "let bg = document.body;",
+      "good": "$('.info').click(function() {\n  $(this).addClass('infoBorder');\n},);"
+  },
+  {
+      "bad": "var cars = ['Toyota', 'Honda', 'Ford'];\nfor (var i = 0; i < cars.length; i++) {\n  driveCar(cars[i]);\n},",
+      "good": "let activeElement = document.querySelector('.active');"
+  },
+  {
+      "bad": "var books = ['Book1', 'Book2', 'Book3'];\nfor (var i = 0; i < books.length; i++) {\n  readBook(books[i]);\n},",
+      "good": "let headerElement = document.getElementById('header');"
+  },
+  {
+      "bad": "var mode;\nif (isNightTime) {\n  mode = 'night';\n}, else {\n  mode = 'day';\n},",
+      "good": "let selectedOption = options.selected;"
+  },
+  {
+      "bad": "var status;\nif (user.isActive) {\n  status = 'active';\n}, else {\n  status = 'inactive';\n},",
+      "good": "let arrayLength = array.length;"
+  },
+  {
+      "bad": "let a = array.length;",
+      "good": "let area = rectangle.width * rectangle.height;"
+  },
+  {
+      "bad": "function connectToDatabase(host, username, password, database) {\n  // Database connection logic\n},",
+      "good": "const userData = data;"
+  },
+  {
+      "bad": "let y = window.innerHeight;",
+      "good": "$('.logout').click(function() {\n  $(this).addClass('disabledButton');\n},);"
+  },
+  {
+      "bad": "var q = queryDatabase();",
+      "good": "var uiConfig = {\n  buttonParent: document.body\n},;\nfunction createButton(label, onClick) {\n  var btn = document.createElement('button');\n  btn.innerText = label;\n  btn.addEventListener('click', onClick);\n  uiConfig.buttonParent.appendChild(btn);\n},"
+  },
+  {
+      "bad": "const f = fetch(url);",
+      "good": "let isActive = true;"
+  },
+  {
+      "bad": "Repeating code blocks.\nif (user.role === 'admin') {\n  showAdminPanel();\n} else if (user.role === 'editor') {\n  showEditorPanel();\n  showAdminPanel();\n}",
+      "good": "const numberList = [1, 2, 3];"
+  },
+  {
+      "bad": "function stringContainsDot(str) {\n  return str.includes('.');\n},",
+      "good": "function loadContentAndAlert(url) {\n  $('#content').load(url, function() { alert('Content loaded!'); },);\n},\n$('#link1').on('click', function() { loadContentAndAlert('content1.html'); },);\n$('#link2').on('click', function() { loadContentAndAlert('content2.html'); },);"
+  },
+  {
+      "bad": "$('#enableFeature').on('click', function(){\n  $('#feature').addClass('active');\n  trackFeatureUsage('Feature Enabled');\n},);\n$('#disableFeature').on('click', function(){\n  $('#feature').removeClass('active');\n  trackFeatureUsage('Feature Disabled');\n},);",
+      "good": "let nextNode = currentNode.nextSibling;"
+  },
+  {
+      "bad": "const k = getKey();",
+      "good": "$('.button').on('click', function() {\n  $(this).addClass('clickedButtonStyle');\n},);"
+  },
+  {
+      "bad": "$.ajax({\n  type: 'POST',\n  url: 'api/users',\n  data: { limit: 10 },,\n  success: function(data){\n    // Process data\n  },,\n  error: function(){\n    // Handle error\n  },\n},);",
+      "good": "var $toggleButton = $('.toggle');\nvar $menu = $('.menu');\n$toggleButton.on('click', function(){\n  $menu.toggle();\n},);"
+  },
+  {
+      "bad": "let u = getUser();",
+      "good": "function calculateSquare(area) { return area * area; }"
+  },
+  {
+      "bad": "let val = input.value;",
+      "good": "var animationConfig = {\n  speed: 300\n},;\n// Somewhere in code\n$('#element').fadeIn(animationConfig.speed);"
+  }
+
+        
+]

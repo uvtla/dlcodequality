@@ -1,0 +1,402 @@
+[
+    {
+        "bad": "function passwordLengthEight(password) {\n  return password.length >= 8;\n},",
+        "good": "var index = 0;"
+    },
+    {
+        "bad": "var getName = function() { return this.name; }; var person = { name: 'John' }; console.log(getName()); // undefined",
+        "good": "let doubledNumbers = [1, 2, 3].map(n => n * 2);"
+    },
+    {
+        "bad": "$('input[type=submit]').on('click', function(){\n  $(this).css('background-color', 'green');\n},);",
+        "good": "var $toggleButton = $('.toggle');\nvar $menu = $('.menu');\n$toggleButton.on('click', function(){\n  $menu.toggle();\n},);"
+    },
+    {
+        "bad": "let r = Math.random();",
+        "good": "Modularize the code inside the if block.\nif (something.exists === true) {\n  doSomething();\n  var hasSuccess = undoSomething();\n  if (hasSuccess) {\n    etc();\n  }\n}"
+    },
+    {
+        "bad": "Nested callbacks leading to 'callback hell'.\ndb.query('SELECT * FROM users', function(err, users) {\n  users.forEach(function(user) {\n    db.query('SELECT * FROM posts WHERE user_id = ?', user.id, function(err, posts) {\n      // More nested callbacks here\n    });\n  });\n});",
+        "good": "function Person() {} var person = new Person(); console.log(person instanceof Person); // true"
+    },
+    {
+        "bad": "let op = options.selected;",
+        "good": "var status = user.isActive ? 'active' : 'inactive';"
+    },
+    {
+        "bad": "const u = new URL(url);",
+        "good": "function controlSound(action) {\n  action === 'activate' ? $('#soundSystem').play() : $('#soundSystem').stop();\n  monitorSound('Sound ' + (action === 'activate' ? 'Activated' : 'Deactivated'));\n},\n$('#activateSound').on('click', function() { controlSound('activate'); },);\n$('#deactivateSound').on('click', function() { controlSound('deactivate'); },);"
+    },
+    {
+        "bad": "var n = getName();",
+        "good": "function multiplyNumbers(a, b) {}"
+    },
+    {
+        "bad": "var isValid;\nif (inputIsValid) {\n  isValid = true;\n}, else {\n  isValid = false;\n},",
+        "good": "var apiConfig = {\n  endpoint: 'api/users',\n  defaultLimit: 10\n},;\n$.ajax({\n  type: 'POST',\n  url: apiConfig.endpoint,\n  data: { limit: apiConfig.defaultLimit },,\n  success: function(data){\n    // Process data\n  },,\n  error: function(){\n    // Handle error\n  },\n},);"
+    },
+    {
+        "bad": "let e = employees.filter(e => e.isActive)",
+        "good": "Use === to avoid type coercion and ensure value and type comparison.\nif (userInput === '123') {\n  // Code\n}"
+    },
+    {
+        "bad": "let p = getProducts();",
+        "good": "var emailAddress; // clear and descriptive"
+    },
+    {
+        "bad": "var status;\nif (user.isActive) {\n  status = 'active';\n}, else {\n  status = 'inactive';\n},",
+        "good": "var numbers = [1, 2, 3]; var total = numbers.reduce((acc, number) => acc + number, 0); console.log(total); // 6"
+    },
+    {
+        "bad": "let k = Object.keys(obj);",
+        "good": "function isStrongPassword(password) {\n  return password.length >= 8;\n},"
+    },
+    {
+        "bad": "let m = str.match(regex)",
+        "good": "var onFormSubmit = () => {};"
+    },
+    {
+        "bad": "function startsWithCapital(str) {\n  return str.charAt(0) === str.charAt(0).toUpperCase();\n},",
+        "good": "$('#loginButton').on('click', function() {\n  $('#loginForm').addClass('hidden');\n},);"
+    },
+    {
+        "bad": "let h = document.head;",
+        "good": "let paragraphElement = document.createElement('p');"
+    },
+    {
+        "bad": "$('#nextPage').on('click', function(){\n  $('#pagination').next().addClass('current');\n},);",
+        "good": "let errorMessage = 'Error occurred';"
+    },
+    {
+        "bad": "$('.menu-item').hover(function() {\n  $(this).css({ 'color': 'blue', 'font-weight': 'bold' },);\n},, function() {\n  $(this).css({ 'color': 'black', 'font-weight': 'normal' },);\n},);",
+        "good": "function isStrongPassword(password) {\n  return password.length >= 8;\n},"
+    },
+    {
+        "bad": "let bg = document.body;",
+        "good": "const USER_PROFILE_URL = 'http://mysite.com/user/profile';\n$('#userProfile').load(USER_PROFILE_URL);"
+    },
+    {
+        "bad": "$('.toggle').on('click', function(){\n  $('.menu').toggle();\n},);",
+        "good": "let itemIndex = items.indexOf(item);"
+    },
+    {
+        "bad": "let flg = true;",
+        "good": "const orderDetails = getOrder();"
+    },
+    {
+        "bad": "$('#enableFeature').on('click', function(){\n  $('#feature').addClass('active');\n  trackFeatureUsage('Feature Enabled');\n},);\n$('#disableFeature').on('click', function(){\n  $('#feature').removeClass('active');\n  trackFeatureUsage('Feature Disabled');\n},);",
+        "good": "$('.menu-item').hover(function() {\n  $(this).addClass('hoverStyle');\n},, function() {\n  $(this).removeClass('hoverStyle');\n},);"
+    },
+    {
+        "bad": "let z = zoomLevel;",
+        "good": "let listenerIndex = eventListeners.indexOf(callback);"
+    },
+    {
+        "bad": "var defaultColor = 'blue';\nfunction paintBackground(element) {\n  element.style.backgroundColor = defaultColor;\n},",
+        "good": "let updateIntervalId = setInterval(update, 1000);"
+    },
+    {
+        "bad": "var i = 0;",
+        "good": "let queryResult = queryDatabase(query);"
+    },
+    {
+        "bad": "let r = Math.round(value);",
+        "good": "var dbConfig = {\n  host: 'localhost',\n  username: 'root',\n  password: '',\n  database: 'mydb'\n},;\nfunction connectToDatabase() {\n  // Use dbConfig for connection logic\n},"
+    },
+    {
+        "bad": "$('.info').click(function() {\n  $(this).css('border', '1px solid blue');\n},);",
+        "good": "let divElement = document.getElementById('div');"
+    },
+    {
+        "bad": "Using global variables.\nvar currentUser;\nfunction setUser(user) {\n  currentUser = user;\n}",
+        "good": "var queryResult = queryDatabase();"
+    },
+    {
+        "bad": "let b = buffer.toString()",
+        "good": "var pricingConfig = {\n  defaultDiscount: 20\n},;\nfunction calculateDiscount(price, discount) {\n  discount = discount || pricingConfig.defaultDiscount;\n  return price * (discount / 100);\n},"
+    },
+    {
+        "bad": "var v = validate(input);",
+        "good": "function isSingleWord(str) {\n  return !str.includes(' ');\n},"
+    },
+    {
+        "bad": "var names = ['Alice', 'Bob', 'Charlie'];\nfor (var i = 0; i < names.length; i++) {\n  console.log(names[i]);\n},",
+        "good": "let currentWeekday = new Date().getDay();"
+    },
+    {
+        "bad": "let m = str.match(regex)",
+        "good": "let jsonString = JSON.stringify(object);"
+    },
+    {
+        "bad": "var isValid;\nif (inputIsValid) {\n  isValid = true;\n}, else {\n  isValid = false;\n},",
+        "good": "let x = 1; if (true) { let x = 2; } console.log(x); "
+    },
+    {
+        "bad": "$('#start').on('click', function(){\n  $('#animation').fadeIn();\n  logEvent('Animation started');\n},);\n$('#stop').on('click', function(){\n  $('#animation').fadeOut();\n  logEvent('Animation stopped');\n},);",
+        "good": "var items = ['item1', 'item2', 'item3'];\nfor (var i = 0, total = items.length; i < total; i++) {\n  processItem(items[i]);\n},"
+    },
+    {
+        "bad": "var isValid;\nif (inputIsValid) {\n  isValid = true;\n}, else {\n  isValid = false;\n},",
+        "good": "var $items = $('.item');\n$items.on('click', function(){\n  $(this).addClass('selected');\n},);"
+    },
+    {
+        "bad": "let z = zipCode.trim();",
+        "good": "var cars = ['Toyota', 'Honda', 'Ford'];\nfor (var i = 0, totalCars = cars.length; i < totalCars; i++) {\n  driveCar(cars[i]);\n},"
+    },
+    {
+        "bad": "var yPos; // abbreviation, unclear context",
+        "good": "let roundedValue = Math.round(value);"
+    },
+    {
+        "bad": "$('#button1').on('click', function(){\n  $('#panel1').slideDown();\n},);\n$('#button2').on('click', function(){\n  $('#panel2').slideUp();\n},);",
+        "good": "Optimize DOM manipulation.\nconst list = document.getElementById('list');\nconst fragment = document.createDocumentFragment();\nitems.forEach(item => {\n  const li = document.createElement('li');\n  li.textContent = item;\n  fragment.appendChild(li);\n});\nlist.appendChild(fragment);"
+    },
+    {
+        "bad": "let d = document.getElementById('div');",
+        "good": "var queryResult = queryDatabase();"
+    },
+    {
+        "bad": "$('#refresh').on('click', function(){\n  $('#dataContainer').load('data.html');\n},);",
+        "good": "let mouseXPosition = e.clientX;"
+    },
+    {
+        "bad": "Misconception that else if doesn't exist in JavaScript.\nif (something.exists === true) {\n  something.value = 100;\n} else if (anotherThing.exists) {\n  anotherThing.value = 0;\n}",
+        "good": "const fetchPromise = fetch(url);"
+    },
+    {
+        "bad": "function lengthGreaterThanTen(str) {\n  return str.length > 10;\n},",
+        "good": "function hasThreeItems(arr) {\n  return arr.length === 3;\n},"
+    },
+    {
+        "bad": "$('#activateSound').on('click', function(){\n  $('#soundSystem').play();\n  monitorSound('Activated');\n},);\n$('#deactivateSound').on('click', function(){\n  $('#soundSystem').stop();\n  monitorSound('Deactivated');\n},);",
+        "good": "function controlSound(action) {\n  action === 'activate' ? $('#soundSystem').play() : $('#soundSystem').stop();\n  monitorSound('Sound ' + (action === 'activate' ? 'Activated' : 'Deactivated'));\n},\n$('#activateSound').on('click', function() { controlSound('activate'); },);\n$('#deactivateSound').on('click', function() { controlSound('deactivate'); },);"
+    },
+    {
+        "bad": "var apiEndpoint = 'http://api.example.com/data';\n$('#dataContainer').load(apiEndpoint, function() {\n  // Callback code\n},);",
+        "good": "Use setter methods to encapsulate property modifications.\nclass User {\n  setAge(age) {\n    this.age = age;\n  }\n}\nconst user = new User();\nuser.setAge(20);"
+    },
+    {
+        "bad": "let b = buffer.toString()",
+        "good": "function toggleFeature(action) {\n  action === 'enable' ? $('#feature').addClass('active') : $('#feature').removeClass('active');\n  trackFeatureUsage('Feature ' + (action === 'enable' ? 'Enabled' : 'Disabled'));\n},\n$('#enableFeature').on('click', function() { toggleFeature('enable'); },);\n$('#disableFeature').on('click', function() { toggleFeature('disable'); },);"
+    },
+    {
+        "bad": "var flagUserActive; // unclear, uses 'flag'",
+        "good": "let viewportWidth = window.innerWidth;"
+    },
+    {
+        "bad": "var numbers = [1, 2, 3]; var total = 0; for (var number of numbers) { total += number; } console.log(total); // 6",
+        "good": "var accessLevel = (userRole === 'admin') ? 1 : 0;"
+    },
+    {
+        "bad": "$('#header').css({\n  'background': 'blue',\n  'color': 'white'\n},);",
+        "good": "let stringFromBuffer = buffer.toString();"
+    },
+    {
+        "bad": "let q = queryDatabase(query);",
+        "good": "var numbers = [1, 2, 3, 4, 5];\nfor (var i = 0, len = numbers.length; i < len; i++) {\n  console.log(numbers[i]);\n},"
+    },
+    {
+        "bad": "let z = zoomLevel;",
+        "good": "var fruits = ['apple', 'banana', 'cherry'];"
+    },
+    {
+        "bad": "let ymdstr = new Date().toISOString().slice(0, 10);",
+        "good": "let messages = getMessages();"
+    },
+    {
+        "bad": "var b = document.body;",
+        "good": "const elementWidth = getWidth();"
+    },
+    {
+        "bad": "const o = obj[key]",
+        "good": "var names = ['Alice', 'Bob', 'Charlie'];\nfor (var i = 0, count = names.length; i < count; i++) {\n  console.log(names[i]);\n},"
+    },
+    {
+        "bad": "$('.item').each(function(){\n  $(this).on('click', function(){\n    $(this).addClass('selected');\n  },);\n},);",
+        "good": "var onFormSubmit = () => {};"
+    },
+    {
+        "bad": "var status;\nif (user.isActive) {\n  status = 'active';\n}, else {\n  status = 'inactive';\n},",
+        "good": "var $items = $('.item');\n$items.on('click', function(){\n  $(this).addClass('selected');\n},);"
+    },
+    {
+        "bad": "$('.tab').on('click', function(){\n  var tabId = $(this).attr('data-tab');\n  $('#' + tabId).addClass('active');\n},);",
+        "good": "let timeoutId = setTimeout(func, 3000);"
+    },
+    {
+        "bad": "$('#expandAll').on('click', function(){\n  $('.details').show();\n},);",
+        "good": "var emailAddress; // clear and descriptive"
+    },
+    {
+        "bad": "function numberIsEven(num) {\n  return num % 2 === 0;\n},",
+        "good": "var accessLevel = (userRole === 'admin') ? 1 : 0;"
+    },
+    {
+        "bad": "$('.menu-item').hover(function() {\n  $(this).css({ 'color': 'blue', 'font-weight': 'bold' },);\n},, function() {\n  $(this).css({ 'color': 'black', 'font-weight': 'normal' },);\n},);",
+        "good": "let isActive = true;"
+    },
+    {
+        "bad": "var s = getSettings();",
+        "good": "var listConfig = {\n  maxItems: 10\n},;\nfunction addItem(item) {\n  if (items.length < listConfig.maxItems) {\n    items.push(item);\n  },\n},"
+    },
+    {
+        "bad": "var isUserLoggedInStatus; // includes type, verbose",
+        "good": "var lastNameInput; // concise and descriptive"
+    },
+    {
+        "bad": "var maxItems = 10;\nfunction addItem(item) {\n  if (items.length < maxItems) {\n    items.push(item);\n  },\n},",
+        "good": "const userData = data;"
+    },
+    {
+        "bad": "let s = 'Hello, World!'.split(' ');",
+        "good": "function toggleLight(state) {\n  state === 'on' ? $('#room').addClass('lit') : $('#room').removeClass('lit');\n  updateLightStatus(state === 'on' ? 'On' : 'Off');\n},\n$('#lightOn').on('click', function() { toggleLight('on'); },);\n$('#lightOff').on('click', function() { toggleLight('off'); },);"
+    },
+    {
+        "bad": "let flg = true;",
+        "good": "let doubledNumbers = [1, 2, 3].map(n => n * 2);"
+    },
+    {
+        "bad": "var response;\nif (serverIsUp) {\n  response = 'Server is running';\n}, else {\n  response = 'Server down';\n},",
+        "good": "var $submitButtons = $('input[type=submit]');\n$submitButtons.on('click', function(){\n  $(this).css('background-color', 'green');\n},);"
+    },
+    {
+        "bad": "$('#voteUp').on('click', function(){\n  $('#votes').increment();\n  logVote('Upvote');\n},);\n$('#voteDown').on('click', function(){\n  $('#votes').decrement();\n  logVote('Downvote');\n},);",
+        "good": "var index = 0;"
+    },
+    {
+        "bad": "$('.notification').css({\n  'background-color': 'green',\n  'font-size': '14px'\n},);",
+        "good": "let activeElement = document.querySelector('.active');"
+    },
+    {
+        "bad": "$('.item').each(function(){\n  $(this).on('click', function(){\n    $(this).addClass('selected');\n  },);\n},);",
+        "good": "function isValidEmailDomain(str) {\n  return str.includes('.');\n},"
+    },
+    {
+        "bad": "const o = getOrder();",
+        "good": "function toggleModal(action) {\n  action === 'open' ? $('#modal').show() : $('#modal').hide();\n  updateStatus('Modal ' + (action === 'open' ? 'Opened' : 'Closed'));\n},\n$('#openModal').on('click', function() { toggleModal('open'); },);\n$('#closeModal').on('click', function() { toggleModal('close'); },);"
+    },
+    {
+        "bad": "$('#expand').on('click', function(){\n  $('.details').slideDown();\n},);\n$('#collapse').on('click', function(){\n  $('.details').slideUp();\n},);",
+        "good": "var fruits = ['apple', 'banana', 'cherry'];\nfor (var i = 0, fruitNr = fruits.length; i < fruitNr; i++) {\n  eatFruit(fruits[i]);\n},"
+    },
+    {
+        "bad": "$('.warning').css({\n  'border': '2px solid yellow',\n  'background-color': 'lightyellow'\n},);",
+        "good": "var appSettings = getSettings();"
+    },
+    {
+        "bad": "var nums = [1, 2, 3]; var doubled = nums.map(function(num) { return num * 2; }); console.log(doubled); // [2, 4, 6]",
+        "good": "var currentUrl = window.location;"
+    },
+    {
+        "bad": "let msg = 'Error occurred';",
+        "good": "var listConfig = {\n  maxItems: 10\n},;\nfunction addItem(item) {\n  if (items.length < listConfig.maxItems) {\n    items.push(item);\n  },\n},"
+    },
+    {
+        "bad": "var nums = [1, 2, 3]; var doubled = nums.map(function(num) { return num * 2; }); console.log(doubled); // [2, 4, 6]",
+        "good": "var lastNameInput; // concise and descriptive"
+    },
+    {
+        "bad": "let l = list.length;",
+        "good": "let isFormValid = isValid(form);"
+    },
+    {
+        "bad": "var usrInput; // abbreviation, lacks clarity",
+        "good": "var score = (points > 50) ? 'high' : 'low';"
+    },
+    {
+        "bad": "var apiEndpoint = 'http://api.example.com/data';\n$('#dataContainer').load(apiEndpoint, function() {\n  // Callback code\n},);",
+        "good": "let roundedValue = Math.round(value);"
+    },
+    {
+        "bad": "var x = 1; if (true) { var x = 2; } console.log(x); ",
+        "good": "let customer = getCustomer();"
+    },
+    {
+        "bad": "var names = ['Alice', 'Bob', 'Charlie'];\nfor (var i = 0; i < names.length; i++) {\n  console.log(names[i]);\n},",
+        "good": "let jsonString = JSON.stringify(obj);"
+    },
+    {
+        "bad": "Inefficient DOM manipulation.\nfor (let i = 0; i < items.length; i++) {\n  document.getElementById('list').innerHTML += '<li>' + items[i] + '</li>';\n}",
+        "good": "var emailAddress; // clear and descriptive"
+    },
+    {
+        "bad": "let a = alpha * beta",
+        "good": "function isProperNoun(str) {\n  return str.charAt(0) === str.charAt(0).toUpperCase();\n},"
+    },
+    {
+        "bad": "var txtEmailAddress; // includes type (txt), not necessary",
+        "good": "var animationConfig = {\n  speed: 300\n},;\n// Somewhere in code\n$('#element').fadeIn(animationConfig.speed);"
+    },
+    {
+        "bad": "let ymdstr = new Date().toISOString().slice(0, 10);",
+        "good": "function isSingleWord(str) {\n  return !str.includes(' ');\n},"
+    },
+    {
+        "bad": "let bg = document.body;",
+        "good": "$('.info').click(function() {\n  $(this).addClass('infoBorder');\n},);"
+    },
+    {
+        "bad": "var cars = ['Toyota', 'Honda', 'Ford'];\nfor (var i = 0; i < cars.length; i++) {\n  driveCar(cars[i]);\n},",
+        "good": "let activeElement = document.querySelector('.active');"
+    },
+    {
+        "bad": "var books = ['Book1', 'Book2', 'Book3'];\nfor (var i = 0; i < books.length; i++) {\n  readBook(books[i]);\n},",
+        "good": "let headerElement = document.getElementById('header');"
+    },
+    {
+        "bad": "var mode;\nif (isNightTime) {\n  mode = 'night';\n}, else {\n  mode = 'day';\n},",
+        "good": "let selectedOption = options.selected;"
+    },
+    {
+        "bad": "var status;\nif (user.isActive) {\n  status = 'active';\n}, else {\n  status = 'inactive';\n},",
+        "good": "let arrayLength = array.length;"
+    },
+    {
+        "bad": "let a = array.length;",
+        "good": "let area = rectangle.width * rectangle.height;"
+    },
+    {
+        "bad": "function connectToDatabase(host, username, password, database) {\n  // Database connection logic\n},",
+        "good": "const userData = data;"
+    },
+    {
+        "bad": "let y = window.innerHeight;",
+        "good": "$('.logout').click(function() {\n  $(this).addClass('disabledButton');\n},);"
+    },
+    {
+        "bad": "var q = queryDatabase();",
+        "good": "var uiConfig = {\n  buttonParent: document.body\n},;\nfunction createButton(label, onClick) {\n  var btn = document.createElement('button');\n  btn.innerText = label;\n  btn.addEventListener('click', onClick);\n  uiConfig.buttonParent.appendChild(btn);\n},"
+    },
+    {
+        "bad": "const f = fetch(url);",
+        "good": "let isActive = true;"
+    },
+    {
+        "bad": "Repeating code blocks.\nif (user.role === 'admin') {\n  showAdminPanel();\n} else if (user.role === 'editor') {\n  showEditorPanel();\n  showAdminPanel();\n}",
+        "good": "const numberList = [1, 2, 3];"
+    },
+    {
+        "bad": "function stringContainsDot(str) {\n  return str.includes('.');\n},",
+        "good": "function loadContentAndAlert(url) {\n  $('#content').load(url, function() { alert('Content loaded!'); },);\n},\n$('#link1').on('click', function() { loadContentAndAlert('content1.html'); },);\n$('#link2').on('click', function() { loadContentAndAlert('content2.html'); },);"
+    },
+    {
+        "bad": "$('#enableFeature').on('click', function(){\n  $('#feature').addClass('active');\n  trackFeatureUsage('Feature Enabled');\n},);\n$('#disableFeature').on('click', function(){\n  $('#feature').removeClass('active');\n  trackFeatureUsage('Feature Disabled');\n},);",
+        "good": "let nextNode = currentNode.nextSibling;"
+    },
+    {
+        "bad": "const k = getKey();",
+        "good": "$('.button').on('click', function() {\n  $(this).addClass('clickedButtonStyle');\n},);"
+    },
+    {
+        "bad": "$.ajax({\n  type: 'POST',\n  url: 'api/users',\n  data: { limit: 10 },,\n  success: function(data){\n    // Process data\n  },,\n  error: function(){\n    // Handle error\n  },\n},);",
+        "good": "var $toggleButton = $('.toggle');\nvar $menu = $('.menu');\n$toggleButton.on('click', function(){\n  $menu.toggle();\n},);"
+    },
+    {
+        "bad": "let u = getUser();",
+        "good": "function calculateSquare(area) { return area * area; }"
+    },
+    {
+        "bad": "let val = input.value;",
+        "good": "var animationConfig = {\n  speed: 300\n},;\n// Somewhere in code\n$('#element').fadeIn(animationConfig.speed);"
+    }
+]
